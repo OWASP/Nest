@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "OWASP Nest"
+version = "0.1.0"
+description = "Streamlines OWASP entities management"
+authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
