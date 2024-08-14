@@ -1,1 +1,3 @@
+.ruff_cache
+.venv
 *.code-workspace
