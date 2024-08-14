@@ -13,6 +13,14 @@ django = "^5.1"
 pre-commit = "^3.8.0"
 ruff = "^0.5.7"
 
+[tool.ruff]
+line-length = 99
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = ["ANN"]
+select = ["ALL"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
