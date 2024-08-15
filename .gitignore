@@ -1,3 +1,10 @@
+__pycache__
+.bash_history
+.cache
+.env
+.local
+.python_history
 .ruff_cache
 .venv
 *.code-workspace
+/data

@@ -5,9 +5,13 @@ description = "Streamlines OWASP entities management"
 authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
 readme = "README.md"
 
+packages = [{ include = "apps"}]
+
 [tool.poetry.dependencies]
 python = "^3.12"
 django = "^5.1"
+django-configurations = "^2.5.1"
+psycopg2 = "^2.9.9"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"
@@ -18,7 +22,7 @@ line-length = 99
 target-version = "py312"
 
 [tool.ruff.lint]
-ignore = ["ANN"]
+ignore = ["ANN", "PLC0414", "RUF012"]
 select = ["ALL"]
 
 [build-system]
