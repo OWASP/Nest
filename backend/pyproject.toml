@@ -12,18 +12,32 @@ python = "^3.12"
 django = "^5.1"
 django-configurations = "^2.5.1"
 psycopg2 = "^2.9.9"
+pygithub = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"
 ruff = "^0.5.7"
+isort = "^5.13.2"
+
+[tool.isort]
+known_third_party = ["django"]
+known_first_party = ["apps"]
 
 [tool.ruff]
 line-length = 99
 target-version = "py312"
 
 [tool.ruff.lint]
-ignore = ["ANN", "PLC0414", "RUF012"]
+ignore = ["ANN", "COM812", "DJ012", "PLC0414", "RUF012"]
 select = ["ALL"]
+
+[tool.ruff.per-file-ignores]
+"**/__init__.py" = ["D104"]
+"**/admin.py" = ["D100", "D101", "D104"]
+"**/apps.py" = ["D100", "D101", "D104"]
+"**/management/commands/*.py" = ["D101", "D102", "T201"]
+"**/migrations/*.py" = ["D100", "D101", "D104"]
+"**/models.py" = ["D106"]
 
 [build-system]
 requires = ["poetry-core"]

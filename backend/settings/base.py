@@ -12,14 +12,27 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
-    INSTALLED_APPS = [
+    DJANGO_APPS = (
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.messages",
         "django.contrib.staticfiles",
-    ]
+    )
+
+    LOCAL_APPS = (
+        "apps.event",
+        "apps.chapter",
+        "apps.committee",
+        "apps.common",
+        "apps.person",
+        "apps.project",
+        "apps.repository",
+    )
+
+    INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
+
     MIDDLEWARE = [
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",

@@ -6,5 +6,6 @@ __pycache__
 .python_history
 .ruff_cache
 .venv
+.vscode
 *.code-workspace
 /data
