@@ -21,5 +21,5 @@ run-backend-command:
 shell:
 	@CMD="/bin/bash" $(MAKE) run-backend-command
 
-update-entities:
-	CMD="poetry run python manage.py update_entities" $(MAKE) run-backend-command
+sync-github:
+	CMD="poetry run python manage.py sync_github" $(MAKE) run-backend-command
