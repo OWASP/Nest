@@ -1,4 +1,4 @@
-"""Repository app models."""
+"""Github app Repository model."""
 
 from django.db import models
 
@@ -10,19 +10,10 @@ class Repository(TimestampedModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["key", "platform", "owner_login"], name="unique_key_platform_owner"
-            ),
+            models.UniqueConstraint(fields=["key", "owner"], name="unique_key_owner"),
         ]
-        db_table = "repositories"
+        db_table = "github_repositories"
         verbose_name_plural = "Repositories"
-
-    class OwnerType(models.TextChoices):
-        ORGANIZATION = "organization", "Organization"
-        USER = "user", "User"
-
-    class Platforms(models.TextChoices):
-        GITHUB = "github", "GitHub"
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100)
@@ -30,7 +21,7 @@ class Repository(TimestampedModel):
 
     default_branch = models.CharField(verbose_name="Default branch", max_length=100, default="")
     homepage = models.CharField(verbose_name="Homepage", max_length=100, default="")
-    language = models.CharField(verbose_name="Language", max_length=50, default="")
+    languages = models.JSONField(verbose_name="Languages", default=dict)
     license = models.CharField(verbose_name="License", max_length=100, default="")
     size = models.PositiveIntegerField(verbose_name="Size in KB", default=0)
     topics = models.JSONField(verbose_name="Topics", default=list)
@@ -49,18 +40,27 @@ class Repository(TimestampedModel):
     open_issues_count = models.PositiveIntegerField(verbose_name="Open issues count", default=0)
     stars_count = models.PositiveIntegerField(verbose_name="Stars count", default=0)
     subscribers_count = models.PositiveIntegerField(verbose_name="Subscribers count", default=0)
+    watchers_count = models.PositiveIntegerField(verbose_name="Watchers count", default=0)
 
-    platform = models.CharField(
-        verbose_name="Platform", max_length=10, choices=Platforms.choices, default=Platforms.GITHUB
-    )
     pushed_at = models.DateTimeField(verbose_name="Pushed at")
 
     original_created_at = models.DateTimeField(verbose_name="Original created_at")
     original_updated_at = models.DateTimeField(verbose_name="Original updated_at")
 
-    owner_login = models.CharField(verbose_name="Owner login", max_length=100, default="")
-    owner_type = models.CharField(
-        verbose_name="Owner type", max_length=20, choices=OwnerType.choices, default=OwnerType.USER
+    # FKs.
+    organization = models.ForeignKey(
+        "github.Organization",
+        verbose_name="Organization",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    owner = models.ForeignKey(
+        "github.User",
+        verbose_name="Owner",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     def __str__(self):
@@ -72,7 +72,7 @@ class Repository(TimestampedModel):
         """Get OWASP URL for the repository."""
         return f"https://owasp.org/{self.key}"
 
-    def from_github(self, gh_repository):
+    def from_github(self, gh_repository, languages=None, organization=None, user=None):
         """Update instance based on GitHub repository data."""
         field_mapping = {
             "default_branch": "default_branch",
@@ -97,6 +97,7 @@ class Repository(TimestampedModel):
             "stars_count": "stargazers_count",
             "subscribers_count": "subscribers_count",
             "topics": "topics",
+            "watchers_count": "watchers_count",
         }
 
         # Direct fields.
@@ -105,13 +106,17 @@ class Repository(TimestampedModel):
             if value is not None:
                 setattr(self, model_field, value)
 
+        # Languages.
+        total_size = sum(languages.values())
+        self.languages = {
+            language: round(size * 100.0 / total_size, 1) for language, size in languages.items()
+        }
+
         # License.
         self.license = gh_repository.license.name
 
-        # Ownership.
-        if gh_repository.organization:
-            self.owner_type = self.OwnerType.ORGANIZATION
-            self.owner_login = gh_repository.organization.login
-        else:
-            self.owner_type = self.OwnerType.USER
-            self.owner_login = gh_repository.owner.login
+        # Organization.
+        self.organization = organization
+
+        # Owner.
+        self.owner = user

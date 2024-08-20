@@ -5,7 +5,7 @@ description = "Streamlines OWASP entities management"
 authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
 readme = "README.md"
 
-packages = [{ include = "apps"}]
+packages = [{ include = "apps" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -28,7 +28,7 @@ line-length = 99
 target-version = "py312"
 
 [tool.ruff.lint]
-ignore = ["ANN", "COM812", "DJ012", "PLC0414", "RUF012"]
+ignore = ["ANN", "C901", "COM812", "DJ012", "PLC0414", "PLR0915", "RUF012"]
 select = ["ALL"]
 
 [tool.ruff.per-file-ignores]

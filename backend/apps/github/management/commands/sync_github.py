@@ -5,7 +5,7 @@ import os
 from django.core.management.base import BaseCommand
 from github import Github
 
-from apps.github.models import Repository
+from apps.github.models import Organization, Repository, User
 from apps.owasp.models import Project
 
 BATCH_SIZE = 1000
@@ -24,22 +24,63 @@ class Command(BaseCommand):
         create_repositories = []
         update_projects = []
         update_repositories = []
+
+        updated_organizations = set()
+        updated_users = set()
         for gh_repository in owasp_org.get_repos(
             type="public",
             sort="created",
-            direction="desc",
+            direction="asc",
         )[:5]:
+            # GitHub repository organization.
+            gh_organization = gh_repository.organization
+            if gh_organization is not None:
+                try:
+                    organization = Organization.objects.get(login=gh_organization.login)
+                except Organization.DoesNotExist:
+                    organization = Organization(login=gh_organization.login)
+
+                if organization.login not in updated_organizations:
+                    updated_organizations.add(organization.login)
+                    organization.from_github(gh_organization)
+                    organization.save()
+
+            # GitHub repository owner.
+            gh_user = gh_repository.owner
+            if gh_user is not None:
+                try:
+                    user = User.objects.get(login=gh_user.login)
+                except User.DoesNotExist:
+                    user = User(login=gh_organization.login)
+
+                if user.login not in updated_users:
+                    updated_users.add(user.login)
+                    user.from_github(gh_user)
+                    user.save()
+
             key = gh_repository.name.lower()
+            languages = gh_repository.get_languages()
+            # GitHub repository.
             try:
-                repository = Repository.objects.get(key=key, platform=Repository.Platforms.GITHUB)
-                repository.from_github(gh_repository)
+                repository = Repository.objects.get(key=key)
+                repository.from_github(
+                    gh_repository,
+                    languages=languages,
+                    organization=organization,
+                    user=user,
+                )
                 update_repositories.append(repository)
             except Repository.DoesNotExist:
-                repository = Repository(key=key, platform=Repository.Platforms.GITHUB)
-                repository.from_github(gh_repository)
+                repository = Repository(key=key)
+                repository.from_github(
+                    gh_repository,
+                    languages=languages,
+                    organization=organization,
+                    user=user,
+                )
                 create_repositories.append(repository)
 
-            # Update projects.
+            # OWASP project.
             if key.startswith("www-project-"):
                 try:
                     project = Project.objects.get(key=key)

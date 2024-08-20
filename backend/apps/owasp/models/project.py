@@ -17,26 +17,39 @@ class Project(TimestampedModel):
         verbose_name_plural = "Projects"
 
     class ProjectLevel(models.TextChoices):
-        UNKNOWN = "unknown", "Unknown"
+        OTHER = "other", "Other"
         INCUBATOR = "incubator", "Incubator"
         LAB = "lab", "Lab"
         PRODUCTION = "production", "Production"
         FLAGSHIP = "flagship", "Flagship"
 
     class ProjectType(models.TextChoices):
+        # These projects provide tools, libraries, and frameworks that can be leveraged by
+        # developers to enhance the security of their applications.
         CODE = "code", "Code"
+
+        # These projects seek to communicate information or raise awareness about a topic in
+        # application security. Note that documentation projects should focus on an online-first
+        # deliverable, where appropriate, but can take any media form.
         DOCUMENTATION = "documentation", "Documentation"
-        UNKNOWN = "unknown", "Unknown"
+
+        # Some projects fall outside the above categories. Most are created to offer OWASP
+        # operational support.
+        OTHER = "other", "Other"
+
+        # These are typically software or utilities that help developers and security
+        # professionals test, secure, or monitor applications.
+        TOOL = "tool", "Tool"
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     description = models.CharField(verbose_name="Description", max_length=500, default="")
 
     level = models.CharField(
-        verbose_name="Level", max_length=20, choices=ProjectLevel, default=ProjectLevel.UNKNOWN
+        verbose_name="Level", max_length=20, choices=ProjectLevel, default=ProjectLevel.OTHER
     )
     type = models.CharField(
-        verbose_name="Type", max_length=20, choices=ProjectType, default=ProjectType.UNKNOWN
+        verbose_name="Type", max_length=20, choices=ProjectType, default=ProjectType.OTHER
     )
 
     tags = models.JSONField(verbose_name="Tags", default=list)
@@ -85,7 +98,7 @@ class Project(TimestampedModel):
                 3.5: self.ProjectLevel.PRODUCTION,
                 4: self.ProjectLevel.FLAGSHIP,
             }
-            self.level = level_mapping.get(project_level, self.ProjectLevel.UNKNOWN)
+            self.level = level_mapping.get(project_level, self.ProjectLevel.OTHER)
 
         # Type.
         project_type = project_metadata.get("type")
