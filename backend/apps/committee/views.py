@@ -1,1 +1,0 @@
-"""Committee app views."""

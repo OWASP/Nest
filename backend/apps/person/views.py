@@ -1,1 +1,0 @@
-"""Person app views."""

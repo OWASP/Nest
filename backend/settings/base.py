@@ -22,13 +22,9 @@ class Base(Configuration):
     )
 
     LOCAL_APPS = (
-        "apps.event",
-        "apps.chapter",
-        "apps.committee",
         "apps.common",
-        "apps.person",
-        "apps.project",
-        "apps.repository",
+        "apps.github",
+        "apps.owasp",
     )
 
     INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
