@@ -1,12 +1,12 @@
-"""Github app User model."""
+"""Github app user model."""
 
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.github.models.common import GenericUserModel
+from apps.github.models import GenericUserModel, NodeModel
 
 
-class User(GenericUserModel, TimestampedModel):
+class User(NodeModel, GenericUserModel, TimestampedModel):
     """User model."""
 
     class Meta:
@@ -32,7 +32,7 @@ class User(GenericUserModel, TimestampedModel):
         }
 
         # Direct fields.
-        for model_field, response_field in field_mapping.items():
-            value = getattr(gh_user, response_field)
+        for model_field, gh_field in field_mapping.items():
+            value = getattr(gh_user, gh_field)
             if value is not None:
                 setattr(self, model_field, value)

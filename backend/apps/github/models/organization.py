@@ -1,12 +1,12 @@
-"""Github app Organization model."""
+"""Github app organization model."""
 
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.github.models.common import GenericUserModel
+from apps.github.models import GenericUserModel, NodeModel
 
 
-class Organization(GenericUserModel, TimestampedModel):
+class Organization(NodeModel, GenericUserModel, TimestampedModel):
     """Organization model."""
 
     class Meta:
@@ -28,7 +28,7 @@ class Organization(GenericUserModel, TimestampedModel):
         }
 
         # Direct fields.
-        for model_field, response_field in field_mapping.items():
-            value = getattr(gh_organization, response_field)
+        for model_field, gh_field in field_mapping.items():
+            value = getattr(gh_organization, gh_field)
             if value is not None:
                 setattr(self, model_field, value)

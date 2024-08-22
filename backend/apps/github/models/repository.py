@@ -1,11 +1,16 @@
-"""Github app Repository model."""
+"""Github app repository model."""
 
+from base64 import b64decode
+
+import yaml
 from django.db import models
+from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
+from apps.github.models import NodeModel
 
 
-class Repository(TimestampedModel):
+class Repository(NodeModel, TimestampedModel):
     """Repository model."""
 
     class Meta:
@@ -30,6 +35,16 @@ class Repository(TimestampedModel):
     is_fork = models.BooleanField(verbose_name="Is fork", default=False)
     is_template = models.BooleanField(verbose_name="Is template", default=False)
 
+    is_owasp_site_repository = models.BooleanField(
+        verbose_name="Is OWASP site repository", default=False
+    )
+
+    is_funding_policy_compliant = models.BooleanField(
+        verbose_name="Is funding policy compliant", default=True
+    )
+    has_funding_yml = models.BooleanField(verbose_name="Has FUNDING.yml", default=False)
+    funding_yml = models.JSONField(verbose_name="FUNDING.yml data", default=dict)
+
     has_downloads = models.BooleanField(verbose_name="Has downloads", default=False)
     has_issues = models.BooleanField(verbose_name="Has issues", default=False)
     has_pages = models.BooleanField(verbose_name="Has pages", default=False)
@@ -42,10 +57,9 @@ class Repository(TimestampedModel):
     subscribers_count = models.PositiveIntegerField(verbose_name="Subscribers count", default=0)
     watchers_count = models.PositiveIntegerField(verbose_name="Watchers count", default=0)
 
+    created_at = models.DateTimeField(verbose_name="Created_at")
+    updated_at = models.DateTimeField(verbose_name="Updated_at")
     pushed_at = models.DateTimeField(verbose_name="Pushed at")
-
-    original_created_at = models.DateTimeField(verbose_name="Original created_at")
-    original_updated_at = models.DateTimeField(verbose_name="Original updated_at")
 
     # FKs.
     organization = models.ForeignKey(
@@ -66,6 +80,10 @@ class Repository(TimestampedModel):
     def __str__(self):
         """Repository human readable representation."""
         return f"{self.name}"
+
+    def latest_release(self):
+        """Repository latest release."""
+        return self.release_set.order_by("-created_at").first()
 
     @property
     def owasp_url(self):
@@ -90,8 +108,8 @@ class Repository(TimestampedModel):
             "language": "language",
             "name": "full_name",
             "open_issues_count": "open_issues_count",
-            "original_created_at": "created_at",
-            "original_updated_at": "updated_at",
+            "created_at": "created_at",
+            "updated_at": "updated_at",
             "pushed_at": "pushed_at",
             "size": "size",
             "stars_count": "stargazers_count",
@@ -101,10 +119,21 @@ class Repository(TimestampedModel):
         }
 
         # Direct fields.
-        for model_field, response_field in field_mapping.items():
-            value = getattr(gh_repository, response_field)
+        for model_field, gh_field in field_mapping.items():
+            value = getattr(gh_repository, gh_field)
             if value is not None:
                 setattr(self, model_field, value)
+
+        # Key and OWASP www- repository flag.
+        self.key = self.name.lower()
+        self.is_owasp_site_repository = self.key.startswith(
+            (
+                "www-chapter-",
+                "www-committee-",
+                "www-event",
+                "www-project-",
+            )
+        )
 
         # Languages.
         total_size = sum(languages.values())
@@ -113,10 +142,44 @@ class Repository(TimestampedModel):
         }
 
         # License.
-        self.license = gh_repository.license.name
+        self.license = gh_repository.license.name if gh_repository.license else ""
 
-        # Organization.
+        # Fetch project metadata from funding.yml file.
+        try:
+            funding_yml = gh_repository.get_contents(".github/FUNDING.yml")
+            yaml_content = b64decode(funding_yml.content).decode()
+            self.funding_yml = yaml.safe_load(yaml_content)
+            self.has_funding_yml = True
+
+            # Set funding policy compliance flag.
+            is_funding_policy_compliant = True
+            for platform, targets in self.funding_yml.items():
+                for target in targets if isinstance(targets, list) else [targets]:
+                    match platform:
+                        case "custom":
+                            is_funding_policy_compliant = target.lower().startswith(
+                                (
+                                    "http://owasp.org/donate",
+                                    "http://www.owasp.org/donate",
+                                    "https://owasp.org/donate",
+                                    "https://www.owasp.org/donate",
+                                )
+                            )
+                        case "github":
+                            is_funding_policy_compliant = target.lower() == "owasp"
+                        case "_":
+                            is_funding_policy_compliant = False
+
+                    if not is_funding_policy_compliant:
+                        break
+
+                if not is_funding_policy_compliant:
+                    break
+            self.is_funding_policy_compliant = is_funding_policy_compliant
+        except GithubException:
+            self.has_funding_yml = False
+            self.is_funding_policy_compliant = True
+
+        # FKs.
         self.organization = organization
-
-        # Owner.
         self.owner = user

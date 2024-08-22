@@ -27,8 +27,8 @@ class GenericUserModel(models.Model):
         verbose_name="Public repositories count", default=0
     )
 
-    original_created_at = models.DateTimeField(verbose_name="Original created_at")
-    original_updated_at = models.DateTimeField(verbose_name="Original updated_at")
+    created_at = models.DateTimeField(verbose_name="Created at")
+    updated_at = models.DateTimeField(verbose_name="Updated at")
 
     def from_github(self, data):
         """Update instance based on GitHub data."""
@@ -42,14 +42,23 @@ class GenericUserModel(models.Model):
             "location": "location",
             "login": "login",
             "name": "name",
-            "original_created_at": "created_at",
-            "original_updated_at": "updated_at",
+            "created_at": "created_at",
+            "updated_at": "updated_at",
             "public_gists_count": "public_gists",
             "public_repositories_count": "public_repos",
         }
 
         # Direct fields.
-        for model_field, response_field in field_mapping.items():
-            value = getattr(data, response_field)
+        for model_field, gh_field in field_mapping.items():
+            value = getattr(data, gh_field)
             if value is not None:
                 setattr(self, model_field, value)
+
+
+class NodeModel(models.Model):
+    """Node model."""
+
+    class Meta:
+        abstract = True
+
+    node_id = models.CharField(verbose_name="Node ID", unique=True)
