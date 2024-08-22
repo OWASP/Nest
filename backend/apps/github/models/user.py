@@ -19,7 +19,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
 
     def __str__(self):
         """User human readable representation."""
-        return f"{self.name}"
+        return f"{self.name or self.login}"
 
     def from_github(self, gh_user):
         """Update instance based on GitHub user data."""

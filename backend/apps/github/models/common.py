@@ -10,7 +10,7 @@ class GenericUserModel(models.Model):
         abstract = True
 
     name = models.CharField(verbose_name="Name", max_length=200)
-    login = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    login = models.CharField(verbose_name="Login", max_length=100, unique=True)
     email = models.EmailField(verbose_name="Email", max_length=100, default="")
 
     avatar_url = models.URLField(verbose_name="Avatar URL", max_length=200, default="")

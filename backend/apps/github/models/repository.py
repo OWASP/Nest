@@ -8,6 +8,7 @@ from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
 from apps.github.models import NodeModel
+from apps.github.utils import get_is_owasp_site_repository
 
 
 class Repository(NodeModel, TimestampedModel):
@@ -126,20 +127,15 @@ class Repository(NodeModel, TimestampedModel):
 
         # Key and OWASP www- repository flag.
         self.key = self.name.lower()
-        self.is_owasp_site_repository = self.key.startswith(
-            (
-                "www-chapter-",
-                "www-committee-",
-                "www-event",
-                "www-project-",
-            )
-        )
+        self.is_owasp_site_repository = get_is_owasp_site_repository(self.key)
 
         # Languages.
-        total_size = sum(languages.values())
-        self.languages = {
-            language: round(size * 100.0 / total_size, 1) for language, size in languages.items()
-        }
+        if languages is not None:
+            total_size = sum(languages.values())
+            self.languages = {
+                language: round(size * 100.0 / total_size, 1)
+                for language, size in languages.items()
+            }
 
         # License.
         self.license = gh_repository.license.name if gh_repository.license else ""
