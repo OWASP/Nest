@@ -1,16 +1,12 @@
 """OWASP app project models."""
 
-import re
-from base64 import b64decode
-
-import yaml
 from django.db import models
-from github.GithubException import UnknownObjectException
 
 from apps.common.models import TimestampedModel
+from apps.owasp.models.common import MarkdownMetadata
 
 
-class Project(TimestampedModel):
+class Project(MarkdownMetadata, TimestampedModel):
     """Project model."""
 
     class Meta:
@@ -49,9 +45,12 @@ class Project(TimestampedModel):
     level = models.CharField(
         verbose_name="Level", max_length=20, choices=ProjectLevel, default=ProjectLevel.OTHER
     )
+    level_raw = models.CharField(verbose_name="Level raw", max_length=50, default="")
+
     type = models.CharField(
         verbose_name="Type", max_length=20, choices=ProjectType, default=ProjectType.OTHER
     )
+    type_raw = models.CharField(verbose_name="Type raw", max_length=50, default="")
 
     tags = models.JSONField(verbose_name="Tags", default=list)
 
@@ -60,47 +59,41 @@ class Project(TimestampedModel):
     )
 
     def __str__(self):
-        """Repository human readable representation."""
-        return f"{self.name}"
+        """Project human readable representation."""
+        return f"{self.name or self.key}"
 
     def from_github(self, gh_repository, repository):
         """Update instance based on GitHub repository data."""
-        # Fetch project metadata from index.md file.
-        try:
-            index_md = gh_repository.get_contents("index.md")
-            md_content = b64decode(index_md.content).decode()
-            yaml_content = re.search(r"^---\n(.*?)\n---", md_content, re.DOTALL)
-            project_metadata = yaml.safe_load(yaml_content.group(1)) if yaml_content else {}
+        field_mapping = {
+            "description": "pitch",
+            "name": "title",
+            "tags": "tags",
+        }
+        project_metadata = MarkdownMetadata.from_github(
+            self, field_mapping, gh_repository, repository
+        )
 
-            field_mapping = {
-                "name": "title",
-                "description": "pitch",
-                "tags": "tags",
+        # Level.
+        project_level = project_metadata.get("level")
+        if project_level:
+            level_mapping = {
+                2: self.ProjectLevel.INCUBATOR,
+                3: self.ProjectLevel.LAB,
+                3.5: self.ProjectLevel.PRODUCTION,
+                4: self.ProjectLevel.FLAGSHIP,
             }
+            self.level = level_mapping.get(project_level) or self.ProjectLevel.OTHER
+            self.level_raw = project_level
 
-            # Direct fields.
-            for model_field, gh_field in field_mapping.items():
-                value = project_metadata.get(gh_field)
-                if value is not None:
-                    setattr(self, model_field, value)
-
-            # Level.
-            project_level = project_metadata.get("level")
-            if project_level:
-                level_mapping = {
-                    2: self.ProjectLevel.INCUBATOR,
-                    3: self.ProjectLevel.LAB,
-                    3.5: self.ProjectLevel.PRODUCTION,
-                    4: self.ProjectLevel.FLAGSHIP,
-                }
-                self.level = level_mapping.get(project_level, self.ProjectLevel.OTHER)
-
-            # Type.
-            project_type = project_metadata.get("type")
-            if project_type in {self.ProjectType.CODE, self.ProjectType.DOCUMENTATION}:
-                self.type = project_type
-        except UnknownObjectException:
-            pass
+        # Type.
+        project_type = project_metadata.get("type")
+        if project_type:
+            self.type = (
+                project_type
+                if project_type in self.ProjectType.choices
+                else self.ProjectType.OTHER
+            )
+            self.type_raw = project_type
 
         # FKs.
         self.owasp_repository = repository

@@ -13,7 +13,7 @@ class Release(NodeModel, TimestampedModel):
         db_table = "github_releases"
         verbose_name_plural = "Releases"
 
-    name = models.CharField(verbose_name="Name", max_length=100)
+    name = models.CharField(verbose_name="Name", max_length=200)
     tag_name = models.CharField(verbose_name="Tag name", max_length=100)
     description = models.TextField(verbose_name="Description", default="")
 

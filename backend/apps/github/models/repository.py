@@ -23,7 +23,7 @@ class Repository(NodeModel, TimestampedModel):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100)
-    description = models.CharField(verbose_name="Description", max_length=500, default="")
+    description = models.CharField(verbose_name="Description", max_length=1000, default="")
 
     default_branch = models.CharField(verbose_name="Default branch", max_length=100, default="")
     homepage = models.CharField(verbose_name="Homepage", max_length=100, default="")
@@ -35,6 +35,7 @@ class Repository(NodeModel, TimestampedModel):
     is_archived = models.BooleanField(verbose_name="Is archived", default=False)
     is_fork = models.BooleanField(verbose_name="Is fork", default=False)
     is_template = models.BooleanField(verbose_name="Is template", default=False)
+    is_empty = models.BooleanField(verbose_name="Is empty", default=False)
 
     is_owasp_site_repository = models.BooleanField(
         verbose_name="Is OWASP site repository", default=False
@@ -58,8 +59,8 @@ class Repository(NodeModel, TimestampedModel):
     subscribers_count = models.PositiveIntegerField(verbose_name="Subscribers count", default=0)
     watchers_count = models.PositiveIntegerField(verbose_name="Watchers count", default=0)
 
-    created_at = models.DateTimeField(verbose_name="Created_at")
-    updated_at = models.DateTimeField(verbose_name="Updated_at")
+    created_at = models.DateTimeField(verbose_name="Created at")
+    updated_at = models.DateTimeField(verbose_name="Updated at")
     pushed_at = models.DateTimeField(verbose_name="Pushed at")
 
     # FKs.
@@ -153,14 +154,7 @@ class Repository(NodeModel, TimestampedModel):
                 for target in targets if isinstance(targets, list) else [targets]:
                     match platform:
                         case "custom":
-                            is_funding_policy_compliant = target.lower().startswith(
-                                (
-                                    "http://owasp.org/donate",
-                                    "http://www.owasp.org/donate",
-                                    "https://owasp.org/donate",
-                                    "https://www.owasp.org/donate",
-                                )
-                            )
+                            is_funding_policy_compliant = "//owasp.org" in target.lower()
                         case "github":
                             is_funding_policy_compliant = target.lower() == "owasp"
                         case "_":
