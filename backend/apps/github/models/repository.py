@@ -53,6 +53,7 @@ class Repository(NodeModel, TimestampedModel):
     has_projects = models.BooleanField(verbose_name="Has projects", default=False)
     has_wiki = models.BooleanField(verbose_name="Has wiki", default=False)
 
+    commits_count = models.PositiveIntegerField(verbose_name="Commits count", default=0)
     forks_count = models.PositiveIntegerField(verbose_name="Forks count", default=0)
     open_issues_count = models.PositiveIntegerField(verbose_name="Open issues count", default=0)
     stars_count = models.PositiveIntegerField(verbose_name="Stars count", default=0)
@@ -92,7 +93,14 @@ class Repository(NodeModel, TimestampedModel):
         """Get OWASP URL for the repository."""
         return f"https://owasp.org/{self.key}"
 
-    def from_github(self, gh_repository, languages=None, organization=None, user=None):
+    def from_github(
+        self,
+        gh_repository,
+        commits=None,
+        languages=None,
+        organization=None,
+        user=None,
+    ):
         """Update instance based on GitHub repository data."""
         field_mapping = {
             "default_branch": "default_branch",
@@ -129,6 +137,14 @@ class Repository(NodeModel, TimestampedModel):
         # Key and OWASP www- repository flag.
         self.key = self.name.lower()
         self.is_owasp_site_repository = get_is_owasp_site_repository(self.key)
+
+        # Commits.
+        if commits is not None:
+            try:
+                self.commits_count = commits.totalCount
+            except GithubException as e:
+                if e.data["status"] == "409" and "Git Repository is empty" in e.data["message"]:
+                    self.is_empty = True
 
         # Languages.
         if languages is not None:

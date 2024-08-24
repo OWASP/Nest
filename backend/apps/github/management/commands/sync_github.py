@@ -99,10 +99,11 @@ class Command(BaseCommand):
         updated_organizations = set()
         updated_users = set()
         for idx, gh_repository in enumerate(
-            owasp_org.get_repos(type="public", sort="created", direction="desc")[1195:]
+            owasp_org.get_repos(type="public", sort="created", direction="desc")
         ):
-            # The full sync takes 5 API calls per repository:
+            # The full sync takes 7 API calls per repository:
             #  - get repository
+            #  - get repository commits
             #  - get repository languages
             #  - get repository releases
             #  - fetch repository index.md file
@@ -140,12 +141,14 @@ class Command(BaseCommand):
                     owasp_user.save()
 
             # GitHub repository.
+            commits = gh_repository.get_commits()
             languages = None if is_owasp_site_repository else gh_repository.get_languages()
             repository_node_id = get_node_id(gh_repository)
             try:
                 repository = Repository.objects.get(node_id=repository_node_id)
                 repository.from_github(
                     gh_repository,
+                    commits=commits,
                     languages=languages,
                     organization=organization,
                     user=owasp_user,
@@ -155,6 +158,7 @@ class Command(BaseCommand):
                 repository = Repository(node_id=repository_node_id)
                 repository.from_github(
                     gh_repository,
+                    commits=commits,
                     languages=languages,
                     organization=organization,
                     user=owasp_user,

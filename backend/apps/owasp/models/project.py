@@ -89,9 +89,7 @@ class Project(MarkdownMetadata, TimestampedModel):
         project_type = project_metadata.get("type")
         if project_type:
             self.type = (
-                project_type
-                if project_type in self.ProjectType.choices
-                else self.ProjectType.OTHER
+                project_type if project_type in self.ProjectType.values else self.ProjectType.OTHER
             )
             self.type_raw = project_type
 

@@ -10,6 +10,7 @@ class RepositoryAdmin(admin.ModelAdmin):
         "name",
         "stars_count",
         "forks_count",
+        "commits_count",
         "created_at",
         "updated_at",
     )

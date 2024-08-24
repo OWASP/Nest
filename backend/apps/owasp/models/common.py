@@ -29,7 +29,7 @@ class MarkdownMetadata:
             # Direct fields.
             for model_field, gh_field in field_mapping.items():
                 value = project_metadata.get(gh_field)
-                if value is not None:
+                if value:
                     setattr(self, model_field, value)
         except yaml.scanner.ScannerError:
             logger.exception("Unable to parse metadata", extra={"repository": gh_repository.name})
