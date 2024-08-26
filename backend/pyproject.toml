@@ -11,8 +11,10 @@ packages = [{ include = "apps" }]
 python = "^3.12"
 django = "^5.1"
 django-configurations = "^2.5.1"
+lxml = "^5.3.0"
 psycopg2 = "^2.9.9"
 pygithub = "^2.3.0"
+requests = "^2.32.3"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"
@@ -22,6 +24,8 @@ isort = "^5.13.2"
 [tool.isort]
 known_third_party = ["django"]
 known_first_party = ["apps"]
+multi_line_output = 3
+profile = "black"
 
 [tool.ruff]
 line-length = 99
@@ -39,6 +43,7 @@ ignore = [
     "PD",
     "PLC0414",
     "PLR0912",
+    "PLR0913",
     "PLR0915",
     "RUF012",
     "TD003",

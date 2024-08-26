@@ -3,10 +3,10 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.owasp.models.common import MarkdownMetadata
+from apps.owasp.models.common import OwaspEntity
 
 
-class Project(MarkdownMetadata, TimestampedModel):
+class Project(OwaspEntity, TimestampedModel):
     """Project model."""
 
     class Meta:
@@ -42,6 +42,8 @@ class Project(MarkdownMetadata, TimestampedModel):
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     description = models.CharField(verbose_name="Description", max_length=500, default="")
 
+    is_active = models.BooleanField(verbose_name="Is active", default=True)
+
     level = models.CharField(
         verbose_name="Level", max_length=20, choices=ProjectLevel, default=ProjectLevel.OTHER
     )
@@ -50,17 +52,38 @@ class Project(MarkdownMetadata, TimestampedModel):
     type = models.CharField(
         verbose_name="Type", max_length=20, choices=ProjectType, default=ProjectType.OTHER
     )
-    type_raw = models.CharField(verbose_name="Type raw", max_length=50, default="")
+    type_raw = models.CharField(verbose_name="Type raw", max_length=100, default="")
 
     tags = models.JSONField(verbose_name="Tags", default=list)
 
+    leaders_raw = models.JSONField(
+        verbose_name="Project leaders list", default=list, blank=True, null=True
+    )
+    repositories_raw = models.JSONField(
+        verbose_name="Project repositories list", default=list, blank=True, null=True
+    )
+
+    # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository", on_delete=models.SET_NULL, blank=True, null=True
+    )
+
+    # M2Ms.
+    repositories = models.ManyToManyField(
+        "github.Repository",
+        verbose_name="Repositories",
+        related_name="+",
+        blank=True,
     )
 
     def __str__(self):
         """Project human readable representation."""
         return f"{self.name or self.key}"
+
+    def deactivate(self):
+        """Deactivate project."""
+        self.is_active = False
+        self.save(update_fields=("is_active",))
 
     def from_github(self, gh_repository, repository):
         """Update instance based on GitHub repository data."""
@@ -69,9 +92,7 @@ class Project(MarkdownMetadata, TimestampedModel):
             "name": "title",
             "tags": "tags",
         }
-        project_metadata = MarkdownMetadata.from_github(
-            self, field_mapping, gh_repository, repository
-        )
+        project_metadata = OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
 
         # Level.
         project_level = project_metadata.get("level")

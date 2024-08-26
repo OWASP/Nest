@@ -7,8 +7,8 @@ from django.db import models
 from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
-from apps.github.models import NodeModel
-from apps.github.utils import get_is_owasp_site_repository
+from apps.github.models.common import NodeModel
+from apps.github.utils import check_owasp_site_repository
 
 
 class Repository(NodeModel, TimestampedModel):
@@ -16,7 +16,7 @@ class Repository(NodeModel, TimestampedModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["key", "owner"], name="unique_key_owner"),
+            models.UniqueConstraint(fields=("key", "owner"), name="unique_key_owner"),
         ]
         db_table = "github_repositories"
         verbose_name_plural = "Repositories"
@@ -37,6 +37,7 @@ class Repository(NodeModel, TimestampedModel):
     is_template = models.BooleanField(verbose_name="Is template", default=False)
     is_empty = models.BooleanField(verbose_name="Is empty", default=False)
 
+    is_owasp_repository = models.BooleanField(verbose_name="Is OWASP repository", default=False)
     is_owasp_site_repository = models.BooleanField(
         verbose_name="Is OWASP site repository", default=False
     )
@@ -46,6 +47,7 @@ class Repository(NodeModel, TimestampedModel):
     )
     has_funding_yml = models.BooleanField(verbose_name="Has FUNDING.yml", default=False)
     funding_yml = models.JSONField(verbose_name="FUNDING.yml data", default=dict)
+    pages_status = models.CharField(verbose_name="Pages status", max_length=20, default="")
 
     has_downloads = models.BooleanField(verbose_name="Has downloads", default=False)
     has_issues = models.BooleanField(verbose_name="Has issues", default=False)
@@ -54,6 +56,7 @@ class Repository(NodeModel, TimestampedModel):
     has_wiki = models.BooleanField(verbose_name="Has wiki", default=False)
 
     commits_count = models.PositiveIntegerField(verbose_name="Commits count", default=0)
+    contributors_count = models.PositiveIntegerField(verbose_name="Contributors count", default=0)
     forks_count = models.PositiveIntegerField(verbose_name="Forks count", default=0)
     open_issues_count = models.PositiveIntegerField(verbose_name="Open issues count", default=0)
     stars_count = models.PositiveIntegerField(verbose_name="Stars count", default=0)
@@ -82,27 +85,29 @@ class Repository(NodeModel, TimestampedModel):
 
     def __str__(self):
         """Repository human readable representation."""
-        return f"{self.name}"
+        return f"{self.owner.login}/{self.name}"
+
+    @property
+    def title(self):
+        """Repository title."""
+        return f"{self.owner.login}/{self.name.login}"
 
     def latest_release(self):
         """Repository latest release."""
         return self.release_set.order_by("-created_at").first()
 
-    @property
-    def owasp_url(self):
-        """Get OWASP URL for the repository."""
-        return f"https://owasp.org/{self.key}"
-
     def from_github(
         self,
         gh_repository,
         commits=None,
+        contributors=None,
         languages=None,
         organization=None,
         user=None,
     ):
         """Update instance based on GitHub repository data."""
         field_mapping = {
+            "created_at": "created_at",
             "default_branch": "default_branch",
             "description": "description",
             "forks_count": "forks_count",
@@ -115,16 +120,14 @@ class Repository(NodeModel, TimestampedModel):
             "is_archived": "archived",
             "is_fork": "fork",
             "is_template": "is_template",
-            "language": "language",
-            "name": "full_name",
+            "name": "name",
             "open_issues_count": "open_issues_count",
-            "created_at": "created_at",
-            "updated_at": "updated_at",
             "pushed_at": "pushed_at",
             "size": "size",
             "stars_count": "stargazers_count",
             "subscribers_count": "subscribers_count",
             "topics": "topics",
+            "updated_at": "updated_at",
             "watchers_count": "watchers_count",
         }
 
@@ -134,9 +137,12 @@ class Repository(NodeModel, TimestampedModel):
             if value is not None:
                 setattr(self, model_field, value)
 
-        # Key and OWASP www- repository flag.
+        # Key and OWASP repository flags.
         self.key = self.name.lower()
-        self.is_owasp_site_repository = get_is_owasp_site_repository(self.key)
+        self.is_owasp_repository = (
+            organization is not None and organization.login.lower() == "owasp"
+        )
+        self.is_owasp_site_repository = check_owasp_site_repository(self.key)
 
         # Commits.
         if commits is not None:
@@ -145,6 +151,10 @@ class Repository(NodeModel, TimestampedModel):
             except GithubException as e:
                 if e.data["status"] == "409" and "Git Repository is empty" in e.data["message"]:
                     self.is_empty = True
+
+        # Contributors.
+        if contributors is not None:
+            self.contributors_count = contributors.totalCount
 
         # Languages.
         if languages is not None:
@@ -168,11 +178,13 @@ class Repository(NodeModel, TimestampedModel):
             is_funding_policy_compliant = True
             for platform, targets in self.funding_yml.items():
                 for target in targets if isinstance(targets, list) else [targets]:
+                    if not target:
+                        continue
                     match platform:
-                        case "custom":
-                            is_funding_policy_compliant = "//owasp.org" in target.lower()
                         case "github":
                             is_funding_policy_compliant = target.lower() == "owasp"
+                        case "custom":
+                            is_funding_policy_compliant = "//owasp.org" in target.lower()
                         case "_":
                             is_funding_policy_compliant = False
 

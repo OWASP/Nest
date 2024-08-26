@@ -1,19 +1,19 @@
 build:
-	docker compose build
-	CMD="poetry install" $(MAKE) run-backend-command
-	CMD="poetry run python manage.py migrate" $(MAKE) run-backend-command
+	@docker compose build
+	@CMD="poetry install" $(MAKE) run-backend-command
+	@CMD="poetry run python manage.py migrate" $(MAKE) run-backend-command
 
 migrate:
 	@CMD="poetry run python manage.py migrate" $(MAKE) run-backend-command
 
 migrations:
-	CMD="poetry run python manage.py makemigrations" $(MAKE) run-backend-command
+	@CMD="poetry run python manage.py makemigrations" $(MAKE) run-backend-command
 
 run:
-	docker compose up
+	@docker compose up
 
 pre-commit:
-	pre-commit run -a
+	@pre-commit run -a
 
 run-backend-command:
 	@docker compose run --rm backend $(CMD)
@@ -21,5 +21,11 @@ run-backend-command:
 shell:
 	@CMD="/bin/bash" $(MAKE) run-backend-command
 
-sync-github:
-	CMD="poetry run python manage.py sync_github" $(MAKE) run-backend-command
+github-sync-owasp-organization:
+	@CMD="poetry run python manage.py github_sync_owasp_organization" $(MAKE) run-backend-command
+
+github-sync-related-repositories:
+	@CMD="poetry run python manage.py github_sync_related_repositories" $(MAKE) run-backend-command
+
+owasp-scrape-site-data:
+	@CMD="poetry run python manage.py owasp_scrape_site_data" $(MAKE) run-backend-command

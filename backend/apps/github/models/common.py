@@ -30,6 +30,10 @@ class GenericUserModel(models.Model):
     created_at = models.DateTimeField(verbose_name="Created at")
     updated_at = models.DateTimeField(verbose_name="Updated at")
 
+    def title(self):
+        """User title."""
+        return f"{self.name or self.login}"
+
     def from_github(self, data):
         """Update instance based on GitHub data."""
         field_mapping = {

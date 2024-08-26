@@ -53,6 +53,6 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Chapters",
                 "db_table": "owasp_chapters",
             },
-            bases=(apps.owasp.models.common.MarkdownMetadata, models.Model),
+            bases=(apps.owasp.models.common.OwaspEntity, models.Model),
         ),
     ]

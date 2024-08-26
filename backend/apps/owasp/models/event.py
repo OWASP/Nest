@@ -3,10 +3,10 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.owasp.models.common import MarkdownMetadata
+from apps.owasp.models.common import OwaspEntity
 
 
-class Event(MarkdownMetadata, TimestampedModel):
+class Event(OwaspEntity, TimestampedModel):
     """Event model."""
 
     class Meta:
@@ -40,7 +40,7 @@ class Event(MarkdownMetadata, TimestampedModel):
             "name": "title",
             "tags": "tags",
         }
-        MarkdownMetadata.from_github(self, field_mapping, gh_repository, repository)
+        OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
 
         # FKs.
         self.owasp_repository = repository

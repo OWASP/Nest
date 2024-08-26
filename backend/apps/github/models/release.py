@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.github.models import NodeModel
+from apps.github.models.common import NodeModel
 
 
 class Release(NodeModel, TimestampedModel):
@@ -20,36 +20,30 @@ class Release(NodeModel, TimestampedModel):
     is_draft = models.BooleanField(verbose_name="Is draft", default=False)
     is_pre_release = models.BooleanField(verbose_name="Is pre-release", default=False)
 
+    sequence_id = models.PositiveBigIntegerField(verbose_name="Release internal ID", default=0)
     created_at = models.DateTimeField(verbose_name="Created at")
     published_at = models.DateTimeField(verbose_name="Published at")
 
     # FKs.
-    author = models.ForeignKey(
-        "github.User",
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-    )
+    author = models.ForeignKey("github.User", on_delete=models.SET_NULL, blank=True, null=True)
     repository = models.ForeignKey(
-        "github.Repository",
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
+        "github.Repository", on_delete=models.SET_NULL, blank=True, null=True
     )
 
     def __str__(self):
         """User human readable representation."""
-        return f"{self.repository.name} {self.name} by {self.author}"
+        return f"{self.name} by {self.author}"
 
     def from_github(self, gh_release, author=None, repository=None):
         """Update instance based on GitHub release data."""
         field_mapping = {
+            "created_at": "created_at",
             "description": "body",
             "is_draft": "draft",
             "is_pre_release": "prerelease",
             "name": "title",
-            "created_at": "created_at",
             "published_at": "published_at",
+            "sequence_id": "id",
             "tag_name": "tag_name",
         }
 

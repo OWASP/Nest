@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.github.models import GenericUserModel, NodeModel
+from apps.github.models.common import GenericUserModel, NodeModel
 
 
 class Organization(NodeModel, GenericUserModel, TimestampedModel):

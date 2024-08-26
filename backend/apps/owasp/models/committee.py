@@ -3,10 +3,10 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.owasp.models.common import MarkdownMetadata
+from apps.owasp.models.common import OwaspEntity
 
 
-class Committee(MarkdownMetadata, TimestampedModel):
+class Committee(OwaspEntity, TimestampedModel):
     """Committee model."""
 
     class Meta:
@@ -34,7 +34,7 @@ class Committee(MarkdownMetadata, TimestampedModel):
             "name": "title",
             "tags": "tags",
         }
-        MarkdownMetadata.from_github(self, field_mapping, gh_repository, repository)
+        OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
 
         # FKs.
         self.owasp_repository = repository

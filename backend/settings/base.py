@@ -110,3 +110,6 @@ class Base(Configuration):
 
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = values.SecretValue()
+
+    # https://docs.djangoproject.com/en/5.1/ref/settings/#data-upload-max-number-fields
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
