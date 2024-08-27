@@ -29,3 +29,6 @@ github-sync-related-repositories:
 
 owasp-scrape-site-data:
 	@CMD="poetry run python manage.py owasp_scrape_site_data" $(MAKE) run-backend-command
+
+owasp-update-projects:
+	@CMD="poetry run python manage.py owasp_update_projects" $(MAKE) run-backend-command

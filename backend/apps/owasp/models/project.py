@@ -63,6 +63,25 @@ class Project(OwaspEntity, TimestampedModel):
         verbose_name="Project repositories list", default=list, blank=True, null=True
     )
 
+    # These are synthetic fields generated based on related repositories data.
+    commits_count = models.PositiveIntegerField(verbose_name="Commits", default=0)
+    contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
+    forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
+    open_issues_count = models.PositiveIntegerField(verbose_name="Open issues", default=0)
+    releases_count = models.PositiveIntegerField(verbose_name="Releases", default=0)
+    stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)
+    subscribers_count = models.PositiveIntegerField(verbose_name="Subscribers", default=0)
+    watchers_count = models.PositiveIntegerField(verbose_name="Watchers", default=0)
+
+    languages = models.JSONField(verbose_name="Languages", default=list, blank=True, null=True)
+    licenses = models.JSONField(verbose_name="Licenses", default=list, blank=True, null=True)
+    topics = models.JSONField(verbose_name="Topics", default=list, blank=True, null=True)
+
+    created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
+    released_at = models.DateTimeField(verbose_name="Released at", blank=True, null=True)
+    pushed_at = models.DateTimeField(verbose_name="Pushed at", blank=True, null=True)
+    updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
+
     # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository", on_delete=models.SET_NULL, blank=True, null=True

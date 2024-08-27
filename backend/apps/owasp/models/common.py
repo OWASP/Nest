@@ -7,7 +7,7 @@ from base64 import b64decode
 import yaml
 from github.GithubException import GithubException, UnknownObjectException
 
-from apps.github.utils import GITHUB_REPOSITORY_RE
+from apps.github.constants import GITHUB_ORGANIZATION_RE, GITHUB_REPOSITORY_RE
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +30,8 @@ class OwaspEntity:
 
     def check_owasp_entity_repository(self, url):
         """Check OWASP entity repository."""
-        return GITHUB_REPOSITORY_RE.match(url) and url not in {
-            self.github_url,
-            self.owasp_url,
-        }
+        match = GITHUB_REPOSITORY_RE.match(url) or GITHUB_ORGANIZATION_RE.match(url)
+        return match and url not in {self.github_url, self.owasp_url}
 
     def from_github(self, field_mapping, gh_repository, repository):
         """Update instance based on GitHub repository data."""

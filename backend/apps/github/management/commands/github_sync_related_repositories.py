@@ -38,11 +38,9 @@ class Command(BaseCommand):
             )
             projects.clear()
 
-        active_projects = Project.objects.filter(
-            is_active=True,
-            owasp_repository__is_archived=False,
-            owasp_repository__is_empty=False,
-        ).order_by("owasp_repository__created_at")[:51]
+        active_projects = Project.objects.filter(is_active=True).order_by(
+            "owasp_repository__created_at"
+        )
 
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
@@ -53,7 +51,6 @@ class Command(BaseCommand):
 
             repository_urls = project.repositories_raw.copy()
             for repository_url in repository_urls:
-                print(repository_url)
                 repository_path = get_repository_path(repository_url)
                 if not repository_path:
                     logger.info("Couldn't get repository path for %s", repository_url)

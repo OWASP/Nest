@@ -55,13 +55,13 @@ class Repository(NodeModel, TimestampedModel):
     has_projects = models.BooleanField(verbose_name="Has projects", default=False)
     has_wiki = models.BooleanField(verbose_name="Has wiki", default=False)
 
-    commits_count = models.PositiveIntegerField(verbose_name="Commits count", default=0)
-    contributors_count = models.PositiveIntegerField(verbose_name="Contributors count", default=0)
-    forks_count = models.PositiveIntegerField(verbose_name="Forks count", default=0)
-    open_issues_count = models.PositiveIntegerField(verbose_name="Open issues count", default=0)
-    stars_count = models.PositiveIntegerField(verbose_name="Stars count", default=0)
-    subscribers_count = models.PositiveIntegerField(verbose_name="Subscribers count", default=0)
-    watchers_count = models.PositiveIntegerField(verbose_name="Watchers count", default=0)
+    commits_count = models.PositiveIntegerField(verbose_name="Commits", default=0)
+    contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
+    forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
+    open_issues_count = models.PositiveIntegerField(verbose_name="Open issues", default=0)
+    stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)
+    subscribers_count = models.PositiveIntegerField(verbose_name="Subscribers", default=0)
+    watchers_count = models.PositiveIntegerField(verbose_name="Watchers", default=0)
 
     created_at = models.DateTimeField(verbose_name="Created at")
     updated_at = models.DateTimeField(verbose_name="Updated at")
@@ -88,13 +88,9 @@ class Repository(NodeModel, TimestampedModel):
         return f"{self.owner.login}/{self.name}"
 
     @property
-    def title(self):
-        """Repository title."""
-        return f"{self.owner.login}/{self.name.login}"
-
     def latest_release(self):
         """Repository latest release."""
-        return self.release_set.order_by("-created_at").first()
+        return self.releases.order_by("-created_at").first()
 
     def from_github(
         self,

@@ -1,8 +1,6 @@
 """GitHub app utils."""
 
-import re
-
-GITHUB_REPOSITORY_RE = re.compile("^https://github.com/([^/]+)/([^/]+)/?$")
+from apps.github.constants import GITHUB_REPOSITORY_RE
 
 
 def check_owasp_site_repository(key):

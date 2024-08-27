@@ -27,7 +27,11 @@ class Release(NodeModel, TimestampedModel):
     # FKs.
     author = models.ForeignKey("github.User", on_delete=models.SET_NULL, blank=True, null=True)
     repository = models.ForeignKey(
-        "github.Repository", on_delete=models.SET_NULL, blank=True, null=True
+        "github.Repository",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="releases",
     )
 
     def __str__(self):
