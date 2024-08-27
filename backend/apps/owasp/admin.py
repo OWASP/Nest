@@ -45,12 +45,16 @@ class ProjectAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "is_active",
+        "has_active_repositories",
         "level",
         "type",
     )
     search_fields = (
         "name",
         "description",
+        "leaders_raw",
+        "languages",
+        "topics",
     )
 
     def custom_field_name(self, obj):

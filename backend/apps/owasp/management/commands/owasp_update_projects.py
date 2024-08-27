@@ -83,6 +83,10 @@ class Command(BaseCommand):
             project.licenses = sorted(licenses)
             project.topics = sorted(topics)
 
+            project.has_active_repositories = project.repositories.filter(
+                is_archived=False, is_empty=False
+            ).exists()
+
             projects.append(project)
 
         Project.objects.bulk_update(

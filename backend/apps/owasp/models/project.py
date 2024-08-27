@@ -43,6 +43,9 @@ class Project(OwaspEntity, TimestampedModel):
     description = models.CharField(verbose_name="Description", max_length=500, default="")
 
     is_active = models.BooleanField(verbose_name="Is active", default=True)
+    has_active_repositories = models.BooleanField(
+        verbose_name="Has active repositories", default=True
+    )
 
     level = models.CharField(
         verbose_name="Level", max_length=20, choices=ProjectLevel, default=ProjectLevel.OTHER
