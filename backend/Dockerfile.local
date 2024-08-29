@@ -7,7 +7,7 @@ RUN groupadd owasp && \
     python -m pip install --no-cache-dir poetry && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
 
