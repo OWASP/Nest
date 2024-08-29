@@ -81,6 +81,7 @@ jobs:
     environment: staging
     name: Deploy Nest Staging
     env:
+      STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'
       STAGING_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_staging_private_key'
     runs-on: ubuntu-latest
     needs:
