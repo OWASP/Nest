@@ -41,7 +41,60 @@ jobs:
         with:
           languages: python
 
-      - name: Perform CodeQL Analysis
+      - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:python'
+
+  build-docker-images:
+    environment: staging
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs:
+      - pre-commit
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile.staging
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:latest
+
+  deploy:
+    environment: staging
+    name: Deploy Nest Staging
+    env:
+      STAGING_SSH_PRIVATE_KEY_PATH: ~/.ssh/nest_staging_private_key
+    runs-on: ubuntu-latest
+    needs:
+      - build-docker-images
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > "${{ env.STAGING_SSH_PRIVATE_KEY_PATH}}"
+          chmod 400 "${{ env.STAGING_SSH_PRIVATE_KEY_PATH}}"
+
+      - name: Run Nest deploy
+        working-directory: .github/deploy
+        run: ansible-playbook -i inventory.yaml staging.yaml

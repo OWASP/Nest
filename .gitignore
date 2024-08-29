@@ -8,4 +8,4 @@ __pycache__
 .venv
 .vscode
 *.code-workspace
-/data
+/volumes

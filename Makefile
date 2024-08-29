@@ -3,6 +3,9 @@ build:
 	@CMD="poetry install" $(MAKE) run-backend-command
 	@CMD="poetry run python manage.py migrate" $(MAKE) run-backend-command
 
+collect-static:
+	@CMD="poetry run python manage.py collectstatic --noinput" $(MAKE) run-backend-command
+
 migrate:
 	@CMD="poetry run python manage.py migrate" $(MAKE) run-backend-command
 

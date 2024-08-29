@@ -14,7 +14,7 @@ from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 10
+BATCH_SIZE = 100
 
 
 class Command(BaseCommand):

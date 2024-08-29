@@ -1,0 +1,58 @@
+services:
+  backend:
+    container_name: nest-backend
+    image: docker.io/arkid15r/owasp-nest-backend:latest
+    command: >
+      bash -c '
+        poetry install --no-root &&
+        poetry run python manage.py migrate &&
+        poetry run python manage.py collectstatic --noinput &&
+        poetry run gunicorn wsgi:application --bind 0.0.0.0:8000
+      '
+    env_file: ./.env/backend.staging
+    depends_on:
+      - db
+    ports:
+      - '8000:8000'
+    restart: on-failure:3
+    networks:
+      - nest
+
+  certbot:
+    container_name: nest-certbot
+    image: certbot/certbot
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
+
+  db:
+    container_name: nest-db
+    image: postgres:16.4
+    env_file: ./.env/db.staging
+    ports:
+      - '127.0.0.1:5432:5432'
+    restart: unless-stopped
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
+    networks:
+      - nest
+
+  nginx:
+    container_name: nest-nginx
+    image: nginx:latest
+    ports:
+      - '443:443'
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+    networks:
+      - nest
+
+networks:
+  nest:
+
+volumes:
+  letsencrypt:

@@ -21,13 +21,15 @@ class Base(Configuration):
         "django.contrib.staticfiles",
     )
 
+    THIRD_PARTY_APPS = ("storages",)
+
     LOCAL_APPS = (
         "apps.common",
         "apps.github",
         "apps.owasp",
     )
 
-    INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
+    INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
     MIDDLEWARE = [
         "django.middleware.security.SecurityMiddleware",
@@ -57,7 +59,7 @@ class Base(Configuration):
         },
     ]
 
-    WSGI_APPLICATION = "settings.wsgi.application"
+    WSGI_APPLICATION = "wsgi.application"
 
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -113,3 +115,5 @@ class Base(Configuration):
 
     # https://docs.djangoproject.com/en/5.1/ref/settings/#data-upload-max-number-fields
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
+
+    STATIC_ROOT = BASE_DIR / "staticfiles"

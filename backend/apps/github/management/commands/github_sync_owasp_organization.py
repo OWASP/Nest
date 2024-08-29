@@ -10,7 +10,7 @@ from apps.github.models import Organization, Release, Repository, fetch_reposito
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models import Chapter, Committee, Event, Project
 
-BATCH_SIZE = 10
+BATCH_SIZE = 100
 
 
 class Command(BaseCommand):
@@ -75,11 +75,10 @@ class Command(BaseCommand):
                 (p for p in projects if p.id),
                 fields=[field.name for field in Project._meta.fields if not field.primary_key],  # noqa: SLF001
             )
-            print("Saved to DB.")
 
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
         gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
-        remote_repositories_count = gh_owasp_organization.public_repos
+        remote_owasp_repositories_count = gh_owasp_organization.public_repos
 
         owasp_organization = None
         owasp_user = None
@@ -147,13 +146,17 @@ class Command(BaseCommand):
         # Save remaining data.
         save_data()
 
-        # Check repo counts.
-        local_repositories_count = Repository.objects.count()
-        result = "==" if remote_repositories_count == local_repositories_count else "!="
+        # Check repository counts.
+        local_owasp_repositories_count = Repository.objects.filter(
+            is_owasp_repository=True
+        ).count()
+        result = (
+            "==" if remote_owasp_repositories_count == local_owasp_repositories_count else "!="
+        )
         print(
             "\n"
             f"OWASP GitHub repositories count {result} synced repositories count: "
-            f"{remote_repositories_count} {result} {local_repositories_count}"
+            f"{remote_owasp_repositories_count} {result} {local_owasp_repositories_count}"
         )
 
         gh.close()

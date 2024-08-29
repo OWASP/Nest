@@ -1,0 +1,26 @@
+- name: Deploy Nest to Staging
+  hosts: nest_staging
+  tasks:
+    - name: Copy Nginx configuration file
+      ansible.builtin.copy:
+        src: '{{ playbook_dir }}/../../nginx/nginx.conf'
+        dest: ~/nginx/nginx.conf
+        mode: '0644'
+
+    - name: Copy docker-compose.yml
+      ansible.builtin.copy:
+        src: '{{ playbook_dir }}/../../docker-compose-staging.yaml'
+        dest: ~/docker-compose.yaml
+        mode: '0644'
+
+    - name: Stop Services
+      shell:
+        cmd: 'docker-compose rm --stop --force'
+
+    - name: Update Images
+      shell:
+        cmd: 'docker-compose pull'
+
+    - name: Start Services
+      shell:
+        cmd: 'docker-compose up -d'

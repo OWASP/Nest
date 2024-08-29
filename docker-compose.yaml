@@ -1,8 +1,9 @@
 services:
   backend:
+    container_name: nest-backend
     command: >
       bash -c
-        'poetry install &&
+        'poetry install --no-root &&
          poetry run python manage.py migrate &&
          poetry run python manage.py runserver 0.0.0.0:8000'
     build:
@@ -10,15 +11,16 @@ services:
       dockerfile: Dockerfile.local
     depends_on:
       - db
-    env_file: ./.env/backend
+    env_file: ./.env/backend.local
+    ports:
+      - '8000:8000'
     volumes:
       - ./backend:/home/owasp
       - ./.env/backend:/home/owasp/.env
-    ports:
-      - '8000:8000'
 
   db:
-    env_file: ./.env/db
+    container_name: nest-db
     image: postgres:16.4
+    env_file: ./.env/db.local
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - ./volumes/db:/var/lib/postgresql/data
