@@ -16,7 +16,6 @@ services:
       - '8000:8000'
     volumes:
       - ./backend:/home/owasp
-      - ./.env/backend:/home/owasp/.env
 
   db:
     container_name: nest-db

@@ -10,6 +10,7 @@ packages = [{ include = "apps" }]
 [tool.poetry.dependencies]
 django = "^5.1"
 django-configurations = "^2.5.1"
+django-storages = {extras = ["s3"], version = "^1.14.4"}
 gunicorn = "^23.0.0"
 lxml = "^5.3.0"
 psycopg2 = "^2.9.9"
@@ -17,7 +18,6 @@ pygithub = "^2.3.0"
 python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-django-storages = {extras = ["s3"], version = "^1.14.4"}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"

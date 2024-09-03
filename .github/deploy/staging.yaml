@@ -3,7 +3,7 @@
   tasks:
     - name: Copy Nginx configuration file
       ansible.builtin.copy:
-        src: '{{ playbook_dir }}/../../nginx/nginx.conf'
+        src: '{{ playbook_dir }}/../../nginx/staging.conf'
         dest: ~/nginx/nginx.conf
         mode: '0644'
 
