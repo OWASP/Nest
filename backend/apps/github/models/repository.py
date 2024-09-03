@@ -8,7 +8,10 @@ from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
 from apps.github.models.common import NodeModel
-from apps.github.utils import check_owasp_site_repository
+from apps.github.utils import (
+    check_funding_policy_compliance,
+    check_owasp_site_repository,
+)
 
 
 class Repository(NodeModel, TimestampedModel):
@@ -176,13 +179,7 @@ class Repository(NodeModel, TimestampedModel):
                 for target in targets if isinstance(targets, list) else [targets]:
                     if not target:
                         continue
-                    match platform:
-                        case "github":
-                            is_funding_policy_compliant = target.lower() == "owasp"
-                        case "custom":
-                            is_funding_policy_compliant = "//owasp.org" in target.lower()
-                        case "_":
-                            is_funding_policy_compliant = False
+                    is_funding_policy_compliant = check_funding_policy_compliance(platform, target)
 
                     if not is_funding_policy_compliant:
                         break

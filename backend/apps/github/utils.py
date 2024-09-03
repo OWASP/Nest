@@ -1,5 +1,7 @@
 """GitHub app utils."""
 
+from urllib.parse import urlparse
+
 from apps.github.constants import GITHUB_REPOSITORY_RE
 
 
@@ -13,6 +15,16 @@ def check_owasp_site_repository(key):
             "www-project-",
         )
     )
+
+
+def check_funding_policy_compliance(platform, target):
+    """Check OWASP funding policy compliance."""
+    if platform == "github":
+        return target.lower() == "owasp"
+    if platform == "custom":
+        return urlparse(target).netloc.lower() == "owasp.org"
+
+    return False
 
 
 def get_node_id(node):
