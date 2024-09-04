@@ -10,6 +10,9 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.repository }}-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   pre-commit:
     name: Run pre-commit
