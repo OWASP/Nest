@@ -1,6 +1,6 @@
 build:
 	@docker compose build
-	@CMD="poetry install" $(MAKE) run-backend-command
+	@CMD="poetry install --no-root" $(MAKE) run-backend-command
 	@CMD="poetry run python manage.py migrate" $(MAKE) run-backend-command
 
 collect-static:

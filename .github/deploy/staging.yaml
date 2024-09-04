@@ -21,12 +21,12 @@
 
     - name: Stop Services
       shell:
-        cmd: 'docker-compose rm --stop --force'
+        cmd: 'docker compose rm --stop --force'
 
     - name: Update Images
       shell:
-        cmd: 'docker-compose pull'
+        cmd: 'docker compose pull'
 
     - name: Start Services
       shell:
-        cmd: 'docker-compose up -d'
+        cmd: 'docker compose up -d'
