@@ -8,13 +8,13 @@ from django.core.management.base import BaseCommand
 from github.GithubException import UnknownObjectException
 
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
-from apps.github.models import Release, fetch_repository_data
+from apps.github.models import Issue, Release, sync_repository
 from apps.github.utils import get_repository_path
 from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 100
+BATCH_SIZE = 10
 
 
 class Command(BaseCommand):
@@ -23,27 +23,14 @@ class Command(BaseCommand):
     def handle(self, *args, **_options):
         def save_data():
             """Save data to DB."""
-            # Releases.
-            Release.objects.bulk_create(r for r in releases if not r.id)
-            Release.objects.bulk_update(
-                (r for r in releases if r.id),
-                fields=[field.name for field in Release._meta.fields if not field.primary_key],  # noqa: SLF001
-            )
-            releases.clear()
+            Issue.bulk_save(issues)
+            Release.bulk_save(releases)
+            Project.bulk_save(projects)
 
-            # Projects.
-            Project.objects.bulk_update(
-                (p for p in projects),
-                fields=[field.name for field in Project._meta.fields if not field.primary_key],  # noqa: SLF001
-            )
-            projects.clear()
-
-        active_projects = Project.objects.filter(is_active=True).order_by(
-            "owasp_repository__created_at"
-        )
-
+        active_projects = Project.objects.filter(is_active=True).order_by("created_at")
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
+        issues = []
         projects = []
         releases = []
         for idx, project in enumerate(active_projects):
@@ -64,10 +51,10 @@ class Command(BaseCommand):
                         project.save(update_fields=("repositories_raw",))
                         continue
 
-                organization, repository, new_releases = fetch_repository_data(gh_repository)
+                organization, repository, new_releases = sync_repository(gh_repository)
                 if organization is not None:
                     organization.save()
-                repository.save()
+
                 project.repositories.add(repository)
                 releases.extend(new_releases)
 

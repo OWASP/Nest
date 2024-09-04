@@ -1,14 +1,18 @@
 """Github app."""
 
+from django.conf import settings
+
+from apps.github.models.issue import Issue
+from apps.github.models.label import Label
 from apps.github.models.organization import Organization
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
-from apps.github.utils import check_owasp_site_repository, get_node_id
+from apps.github.utils import check_owasp_site_repository
 
 
-def fetch_repository_data(gh_repository, organization=None, user=None):
-    """Fetch GitHub repository data."""
+def sync_repository(gh_repository, organization=None, user=None):
+    """Sync GitHub repository data."""
     entity_key = gh_repository.name.lower()
     is_owasp_site_repository = check_owasp_site_repository(entity_key)
 
@@ -16,36 +20,18 @@ def fetch_repository_data(gh_repository, organization=None, user=None):
     if organization is None:
         gh_organization = gh_repository.organization
         if gh_organization is not None:
-            organization_node_id = get_node_id(gh_organization)
-            try:
-                organization = Organization.objects.get(node_id=organization_node_id)
-            except Organization.DoesNotExist:
-                organization = Organization(node_id=organization_node_id)
-            organization.from_github(gh_organization)
+            organization = Organization.update_data(gh_organization, save=False)
 
     # GitHub repository owner.
     if user is None:
-        gh_user = gh_repository.owner
-        # if gh_user is not None:
-        user_node_id = get_node_id(gh_user)
-        try:
-            user = User.objects.get(node_id=user_node_id)
-        except User.DoesNotExist:
-            user = User(node_id=user_node_id)
-        user.from_github(gh_user)
-        user.save()
+        user = User.update_data(gh_repository.owner)
 
     # GitHub repository.
     commits = gh_repository.get_commits()
     contributors = gh_repository.get_contributors()
     languages = None if is_owasp_site_repository else gh_repository.get_languages()
 
-    repository_node_id = get_node_id(gh_repository)
-    try:
-        repository = Repository.objects.get(node_id=repository_node_id)
-    except Repository.DoesNotExist:
-        repository = Repository(node_id=repository_node_id)
-    repository.from_github(
+    repository = Repository.update_data(
         gh_repository,
         commits=commits,
         contributors=contributors,
@@ -53,6 +39,44 @@ def fetch_repository_data(gh_repository, organization=None, user=None):
         organization=organization,
         user=user,
     )
+
+    # GitHub repository issues.
+    if not repository.is_archived:
+        # Sync open issues for the first run.
+        kwargs = {
+            "direction": "asc",
+            "sort": "created",
+            "state": "open",
+        }
+        latest_issue = Issue.objects.filter(repository=repository).order_by("-updated_at").first()
+        if latest_issue:
+            # Sync open/closed issues for subsequent runs.
+            kwargs.update(
+                {
+                    "since": latest_issue.updated_at,
+                    "state": "all",
+                }
+            )
+        for gh_issue in gh_repository.get_issues(**kwargs):
+            # Skip pull requests.
+            if gh_issue.pull_request:
+                continue
+
+            # GitHub issue author.
+            if gh_issue.user is not None:
+                author = User.update_data(gh_issue.user)
+
+            issue = Issue.update_data(gh_issue, author=author, repository=repository)
+
+            # Assignees.
+            issue.assignees.clear()
+            for gh_issue_assignee in gh_issue.assignees:
+                issue.assignees.add(User.update_data(gh_issue_assignee))
+
+            # Labels.
+            issue.labels.clear()
+            for gh_issue_label in gh_issue.labels:
+                issue.labels.add(Label.update_data(gh_issue_label))
 
     # GitHub repository releases.
     releases = []
@@ -63,32 +87,15 @@ def fetch_repository_data(gh_repository, organization=None, user=None):
             else ()
         )
         for gh_release in gh_repository.get_releases():
-            release_node_id = get_node_id(gh_release)
+            release_node_id = Release.get_node_id(gh_release)
             if release_node_id in existing_release_node_ids:
                 break
 
             # GitHub release author.
-            gh_user = gh_release.author
-            if gh_user is not None:
-                author_node_id = get_node_id(gh_user)
-                try:
-                    author = User.objects.get(node_id=author_node_id)
-                except User.DoesNotExist:
-                    author = User(node_id=author_node_id)
-                author.from_github(gh_user)
-                author.save()
-
-                # if author_node_id not in updated_users:
-                #     updated_users.add(author_node_id)
-                #     author.from_github(gh_user)
-                #     author.save()
+            if gh_release.author is not None:
+                author = User.update_data(gh_release.author)
 
             # GitHub release.
-            try:
-                release = Release.objects.get(node_id=release_node_id)
-            except Release.DoesNotExist:
-                release = Release(node_id=release_node_id)
-            release.from_github(gh_release, author=author, repository=repository)
-            releases.append(release)
+            releases.append(Release.update_data(gh_release, author=author, repository=repository))
 
     return organization, repository, releases

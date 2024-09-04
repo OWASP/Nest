@@ -7,10 +7,23 @@ readme = "README.md"
 
 packages = [{ include = "apps" }]
 
+[tool.coverage.run]
+branch = true
+omit = [
+    "__init__.py",
+    "**/admin.py",
+    "**/apps.py",
+    "**/migrations/*",
+    "manage.py",
+    "settings/*",
+    "tests/*",
+    "wsgi.py",
+]
+
 [tool.poetry.dependencies]
 django = "^5.1"
 django-configurations = "^2.5.1"
-django-storages = {extras = ["s3"], version = "^1.14.4"}
+django-storages = { extras = ["s3"], version = "^1.14.4" }
 gunicorn = "^23.0.0"
 lxml = "^5.3.0"
 psycopg2 = "^2.9.9"
@@ -39,7 +52,14 @@ multi_line_output = 3
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = ["--numprocesses=auto"]
+addopts = [
+    "--cov-config=pyproject.toml",
+    "--cov-report=term-missing",
+    "--cov=.",
+    "--dist=loadscope",
+    "--no-cov-on-fail",
+    "--numprocesses=auto",
+]
 log_level = "INFO"
 python_files = ["*_tests.py"]
 
@@ -55,6 +75,7 @@ ignore = [
     "COM812",
     "DJ012",
     "ERA001",
+    "FBT002",
     "FIX002",
     "PD",
     "PLC0414",
@@ -75,6 +96,7 @@ select = ["ALL"]
 "**/models.py" = ["D106"]
 "**/models/*.py" = ["D106"]
 "tests/**" = ["D100", "D103", "S101"]
+
 
 [build-system]
 requires = ["poetry-core"]

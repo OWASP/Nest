@@ -2,11 +2,11 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
 
 
-class Release(NodeModel, TimestampedModel):
+class Release(BulkSaveModel, NodeModel, TimestampedModel):
     """Release model."""
 
     class Meta:
@@ -20,7 +20,7 @@ class Release(NodeModel, TimestampedModel):
     is_draft = models.BooleanField(verbose_name="Is draft", default=False)
     is_pre_release = models.BooleanField(verbose_name="Is pre-release", default=False)
 
-    sequence_id = models.PositiveBigIntegerField(verbose_name="Release internal ID", default=0)
+    sequence_id = models.PositiveBigIntegerField(verbose_name="Release ID", default=0)
     created_at = models.DateTimeField(verbose_name="Created at")
     published_at = models.DateTimeField(verbose_name="Published at")
 
@@ -62,3 +62,24 @@ class Release(NodeModel, TimestampedModel):
 
         # Repository.
         self.repository = repository
+
+    @staticmethod
+    def bulk_save(releases):
+        """Bulk save releases."""
+        BulkSaveModel.bulk_save(Release, releases)
+        releases.clear()
+
+    @staticmethod
+    def update_data(gh_release, author=None, repository=None, save=True):
+        """Update release data."""
+        release_node_id = Release.get_node_id(gh_release)
+        try:
+            release = Release.objects.get(node_id=release_node_id)
+        except Release.DoesNotExist:
+            release = Release(node_id=release_node_id)
+
+        release.from_github(gh_release, author=author, repository=repository)
+        if save:
+            release.save()
+
+        return release

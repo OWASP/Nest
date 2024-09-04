@@ -36,3 +36,18 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
             value = getattr(gh_user, gh_field)
             if value is not None:
                 setattr(self, model_field, value)
+
+    @staticmethod
+    def update_data(gh_user, save=True):
+        """Update GitHub user data."""
+        user_node_id = User.get_node_id(gh_user)
+        try:
+            user = User.objects.get(node_id=user_node_id)
+        except User.DoesNotExist:
+            user = User(node_id=user_node_id)
+
+        user.from_github(gh_user)
+        if save:
+            user.save()
+
+        return user

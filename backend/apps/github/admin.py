@@ -3,7 +3,36 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from apps.github.models import Organization, Release, Repository, User
+from apps.github.models import Issue, Label, Organization, Release, Repository, User
+
+
+class LabelAdmin(admin.ModelAdmin):
+    search_fields = ("name", "description")
+
+
+class IssueAdmin(admin.ModelAdmin):
+    autocomplete_fields = (
+        "repository",
+        "author",
+        "assignees",
+        "labels",
+    )
+    list_display = (
+        "repository",
+        "title",
+        "custom_field_github_url",
+    )
+    list_filter = (
+        "state",
+        "is_locked",
+    )
+    search_fields = ("title", "description")
+
+    def custom_field_github_url(self, obj):
+        """Issue GitHub URL."""
+        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
+
+    custom_field_github_url.short_description = "GitHub 🔗"
 
 
 class RepositoryAdmin(admin.ModelAdmin):
@@ -69,6 +98,8 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
+admin.site.register(Issue, IssueAdmin)
+admin.site.register(Label, LabelAdmin)
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Release, ReleaseAdmin)
 admin.site.register(Repository, RepositoryAdmin)

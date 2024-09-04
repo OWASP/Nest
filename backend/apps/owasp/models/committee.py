@@ -2,11 +2,11 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.models.common import OwaspEntity
 
 
-class Committee(OwaspEntity, TimestampedModel):
+class Committee(BulkSaveModel, OwaspEntity, TimestampedModel):
     """Committee model."""
 
     class Meta:
@@ -38,3 +38,24 @@ class Committee(OwaspEntity, TimestampedModel):
 
         # FKs.
         self.owasp_repository = repository
+
+    @staticmethod
+    def bulk_save(committees):
+        """Bulk save committees."""
+        BulkSaveModel.bulk_save(Committee, committees)
+        committees.clear()
+
+    @staticmethod
+    def update_data(gh_repository, repository, save=True):
+        """Update committee data."""
+        key = gh_repository.name.lower()
+        try:
+            committee = Committee.objects.get(key=key)
+        except Committee.DoesNotExist:
+            committee = Committee(key=key)
+
+        committee.from_github(gh_repository, repository)
+        if save:
+            committee.save()
+
+        return committee

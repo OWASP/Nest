@@ -2,11 +2,11 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.models.common import OwaspEntity
 
 
-class Project(OwaspEntity, TimestampedModel):
+class Project(BulkSaveModel, OwaspEntity, TimestampedModel):
     """Project model."""
 
     class Meta:
@@ -138,3 +138,24 @@ class Project(OwaspEntity, TimestampedModel):
 
         # FKs.
         self.owasp_repository = repository
+
+    @staticmethod
+    def bulk_save(projects):
+        """Bulk save projects."""
+        BulkSaveModel.bulk_save(Project, projects)
+        projects.clear()
+
+    @staticmethod
+    def update_data(gh_repository, repository, save=True):
+        """Update project data."""
+        key = gh_repository.name.lower()
+        try:
+            project = Project.objects.get(key=key)
+        except Project.DoesNotExist:
+            project = Project(key=key)
+
+        project.from_github(gh_repository, repository)
+        if save:
+            project.save()
+
+        return project

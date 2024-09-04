@@ -2,11 +2,11 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import GenericUserModel, NodeModel
 
 
-class Organization(NodeModel, GenericUserModel, TimestampedModel):
+class Organization(BulkSaveModel, NodeModel, GenericUserModel, TimestampedModel):
     """Organization model."""
 
     class Meta:
@@ -32,3 +32,24 @@ class Organization(NodeModel, GenericUserModel, TimestampedModel):
             value = getattr(gh_organization, gh_field)
             if value is not None:
                 setattr(self, model_field, value)
+
+    @staticmethod
+    def bulk_save(organizations):
+        """Bulk save organizations."""
+        BulkSaveModel.bulk_save(Organization, organizations)
+        organizations.clear()
+
+    @staticmethod
+    def update_data(gh_organization, save=True):
+        """Update organization data."""
+        organization_node_id = Organization.get_node_id(gh_organization)
+        try:
+            organization = Organization.objects.get(node_id=organization_node_id)
+        except Organization.DoesNotExist:
+            organization = Organization(node_id=organization_node_id)
+
+        organization.from_github(gh_organization)
+        if save:
+            organization.save()
+
+        return organization

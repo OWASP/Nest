@@ -2,11 +2,11 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.models.common import OwaspEntity
 
 
-class Chapter(OwaspEntity, TimestampedModel):
+class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
     """Chapter model."""
 
     class Meta:
@@ -49,3 +49,24 @@ class Chapter(OwaspEntity, TimestampedModel):
 
         # FKs.
         self.owasp_repository = repository
+
+    @staticmethod
+    def bulk_save(chapters):
+        """Bulk save chapters."""
+        BulkSaveModel.bulk_save(Chapter, chapters)
+        chapters.clear()
+
+    @staticmethod
+    def update_data(gh_repository, repository, save=True):
+        """Update chapter data."""
+        key = gh_repository.name.lower()
+        try:
+            chapter = Chapter.objects.get(key=key)
+        except Chapter.DoesNotExist:
+            chapter = Chapter(key=key)
+
+        chapter.from_github(gh_repository, repository)
+        if save:
+            chapter.save()
+
+        return chapter

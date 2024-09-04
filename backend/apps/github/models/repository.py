@@ -194,3 +194,33 @@ class Repository(NodeModel, TimestampedModel):
         # FKs.
         self.organization = organization
         self.owner = user
+
+    @staticmethod
+    def update_data(
+        gh_repository,
+        commits=None,
+        contributors=None,
+        languages=None,
+        organization=None,
+        user=None,
+        save=True,
+    ):
+        """Update repository data."""
+        repository_node_id = Repository.get_node_id(gh_repository)
+        try:
+            repository = Repository.objects.get(node_id=repository_node_id)
+        except Repository.DoesNotExist:
+            repository = Repository(node_id=repository_node_id)
+
+        repository.from_github(
+            gh_repository,
+            commits=commits,
+            contributors=contributors,
+            languages=languages,
+            organization=organization,
+            user=user,
+        )
+        if save:
+            repository.save()
+
+        return repository

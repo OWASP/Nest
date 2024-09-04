@@ -66,3 +66,8 @@ class NodeModel(models.Model):
         abstract = True
 
     node_id = models.CharField(verbose_name="Node ID", unique=True)
+
+    @staticmethod
+    def get_node_id(node):
+        """Extract node_id."""
+        return node.raw_data["node_id"]

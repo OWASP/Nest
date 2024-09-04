@@ -1,6 +1,7 @@
 __pycache__
 .bash_history
 .cache
+.coverage
 .env
 .local
 .python_history

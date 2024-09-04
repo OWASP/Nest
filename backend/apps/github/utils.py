@@ -27,11 +27,6 @@ def check_funding_policy_compliance(platform, target):
     return False
 
 
-def get_node_id(node):
-    """Extract node_id."""
-    return node.raw_data["node_id"]
-
-
 def get_repository_path(url):
     """Parse repository URL to owner and repository name."""
     match = GITHUB_REPOSITORY_RE.search(url.split("#")[0])

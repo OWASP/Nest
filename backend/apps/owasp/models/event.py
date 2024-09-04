@@ -2,11 +2,11 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.models.common import OwaspEntity
 
 
-class Event(OwaspEntity, TimestampedModel):
+class Event(BulkSaveModel, OwaspEntity, TimestampedModel):
     """Event model."""
 
     class Meta:
@@ -44,3 +44,24 @@ class Event(OwaspEntity, TimestampedModel):
 
         # FKs.
         self.owasp_repository = repository
+
+    @staticmethod
+    def bulk_save(events):
+        """Bulk save events."""
+        BulkSaveModel.bulk_save(Event, events)
+        events.clear()
+
+    @staticmethod
+    def update_data(gh_repository, repository, save=True):
+        """Update event data."""
+        key = gh_repository.name.lower()
+        try:
+            event = Event.objects.get(key=key)
+        except Event.DoesNotExist:
+            event = Event(key=key)
+
+        event.from_github(gh_repository, repository)
+        if save:
+            event.save()
+
+        return event

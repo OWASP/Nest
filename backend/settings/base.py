@@ -1,5 +1,6 @@
 """OWASP Nest base configuration."""
 
+import os
 from pathlib import Path
 
 from configurations import Configuration, values
@@ -12,6 +13,8 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
+    ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION")
+
     DJANGO_APPS = (
         "django.contrib.admin",
         "django.contrib.auth",
