@@ -1,6 +1,8 @@
 """Github app."""
 
-from django.conf import settings
+import logging
+
+from github.GithubException import UnknownObjectException
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
@@ -9,6 +11,8 @@ from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
+
+logger = logging.getLogger(__name__)
 
 
 def sync_repository(gh_repository, organization=None, user=None):
@@ -76,7 +80,10 @@ def sync_repository(gh_repository, organization=None, user=None):
             # Labels.
             issue.labels.clear()
             for gh_issue_label in gh_issue.labels:
-                issue.labels.add(Label.update_data(gh_issue_label))
+                try:
+                    issue.labels.add(Label.update_data(gh_issue_label))
+                except UnknownObjectException:
+                    logger.info("Couldn't get GitHub issue label %s", issue.url)
 
     # GitHub repository releases.
     releases = []

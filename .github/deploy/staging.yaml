@@ -13,6 +13,12 @@
         dest: ~/docker-compose.yaml
         mode: '0644'
 
+    - name: Copy Makefile
+      ansible.builtin.copy:
+        src: '{{ playbook_dir }}/../../Makefile'
+        dest: ~/Makefile
+        mode: '0644'
+
     - name: Stop Services
       shell:
         cmd: 'docker-compose rm --stop --force'
