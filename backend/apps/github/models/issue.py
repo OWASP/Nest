@@ -17,7 +17,7 @@ class Issue(BulkSaveModel, NodeModel, TimestampedModel):
         OPEN = "open", "Open"
         CLOSED = "closed", "Closed"
 
-    title = models.CharField(verbose_name="Title", max_length=200)
+    title = models.CharField(verbose_name="Title", max_length=300)
     body = models.TextField(verbose_name="Body", default="")
     state = models.CharField(
         verbose_name="State", max_length=20, choices=State, default=State.OPEN

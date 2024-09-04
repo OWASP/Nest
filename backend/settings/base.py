@@ -24,7 +24,10 @@ class Base(Configuration):
         "django.contrib.staticfiles",
     )
 
-    THIRD_PARTY_APPS = ("storages",)
+    THIRD_PARTY_APPS = (
+        "rest_framework",
+        "storages",
+    )
 
     LOCAL_APPS = (
         "apps.common",
@@ -43,6 +46,16 @@ class Base(Configuration):
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
     ]
+
+    REST_FRAMEWORK = {
+        # Use Django's standard `django.contrib.auth` permissions,
+        # or allow read-only access for unauthenticated users.
+        "DEFAULT_PERMISSION_CLASSES": [
+            "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
+        ],
+        "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+        "PAGE_SIZE": 100,
+    }
 
     ROOT_URLCONF = "settings.urls"
 

@@ -31,6 +31,9 @@ pygithub = "^2.3.0"
 python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
+djangorestframework = "^3.15.2"
+markdown = "^3.7"
+django-filter = "^24.3"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"
@@ -46,7 +49,7 @@ pytest-xdist = "^3.0"
 pytest-mock = "^3.0"
 
 [tool.isort]
-known_third_party = ["django"]
+known_third_party = ["django", "rest_framework"]
 known_first_party = ["apps"]
 multi_line_output = 3
 profile = "black"
@@ -94,6 +97,7 @@ select = ["ALL"]
 "**/management/commands/*.py" = ["D101", "D102", "T201"]
 "**/migrations/*.py" = ["D100", "D101", "D104"]
 "**/models.py" = ["D106"]
+"**/api/*.py" = ["D106"]
 "**/models/*.py" = ["D106"]
 "tests/**" = ["D100", "D103", "S101"]
 
