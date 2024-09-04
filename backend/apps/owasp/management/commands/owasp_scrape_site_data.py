@@ -20,15 +20,20 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Updates OWASP entities based on their owasp.org data."
 
-    def handle(self, *args, **_options):
+    def add_arguments(self, parser):
+        parser.add_argument("--offset", default=0, required=False, type=int)
+
+    def handle(self, *args, **options):
         active_projects = Project.objects.filter(is_active=True).order_by(
             "owasp_repository__created_at"
         )
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
         projects = []
-        for idx, project in enumerate(active_projects):
-            print(f"{idx + 1:<3}", project.owasp_url)
+
+        offset = options["offset"]
+        for idx, project in enumerate(active_projects[offset:]):
+            print(f"{idx + offset + 1:<4}", project.owasp_url)
 
             page_response = requests.get(project.owasp_url, timeout=10)
             if page_response.status_code == requests.codes.not_found:

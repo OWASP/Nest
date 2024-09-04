@@ -16,7 +16,10 @@ BATCH_SIZE = 10
 class Command(BaseCommand):
     help = "Updates OWASP entities based on their GitHub data."
 
-    def handle(self, *_args, **_options):
+    def add_arguments(self, parser):
+        parser.add_argument("--offset", default=0, required=False, type=int)
+
+    def handle(self, *_args, **options):
         def save_data():
             """Save data to DB."""
             Organization.bulk_save(organizations)
@@ -42,10 +45,16 @@ class Command(BaseCommand):
         organizations = []
         projects = []
         releases = []
+
+        offset = options["offset"]
         for idx, gh_repository in enumerate(
-            gh_owasp_organization.get_repos(type="public", sort="created", direction="asc")
+            gh_owasp_organization.get_repos(
+                type="public",
+                sort="created",
+                direction="asc",
+            )[offset:]
         ):
-            print(f"{idx + 1:<3} {gh_repository.name}")
+            print(f"{idx + offset + 1:<4} {gh_repository.name}")
 
             owasp_organization, repository, new_releases = sync_repository(
                 gh_repository, organization=owasp_organization, user=owasp_user

@@ -11,10 +11,15 @@ LANGUAGE_PERCENTAGE_THRESHOLD = 10
 class Command(BaseCommand):
     help = "Update OWASP projects."
 
-    def handle(self, *args, **_options):
+    def add_arguments(self, parser):
+        parser.add_argument("--offset", default=0, required=False, type=int)
+
+    def handle(self, *args, **options):
         projects = []
-        for idx, project in enumerate(Project.objects.order_by("id")):
-            print(f"{idx + 1:<3}", project)
+
+        offset = options["offset"]
+        for idx, project in enumerate(Project.objects.order_by("id")[offset:]):
+            print(f"{idx + offset + 1:<4}", project)
 
             # Deactivate project with archived repositories.
             if project.owasp_repository.is_archived:

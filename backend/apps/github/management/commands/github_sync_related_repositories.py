@@ -20,7 +20,10 @@ BATCH_SIZE = 10
 class Command(BaseCommand):
     help = "Updates OWASP entities based on their owasp.org data."
 
-    def handle(self, *args, **_options):
+    def add_arguments(self, parser):
+        parser.add_argument("--offset", default=0, required=False, type=int)
+
+    def handle(self, *args, **options):
         def save_data():
             """Save data to DB."""
             Issue.bulk_save(issues)
@@ -33,8 +36,10 @@ class Command(BaseCommand):
         issues = []
         projects = []
         releases = []
-        for idx, project in enumerate(active_projects):
-            print(f"{idx + 1:<3}", project.owasp_url)
+
+        offset = options["offset"]
+        for idx, project in enumerate(active_projects[offset:]):
+            print(f"{idx + offset + 1:<4}", project.owasp_url)
 
             repository_urls = project.repositories_raw.copy()
             for repository_url in repository_urls:
