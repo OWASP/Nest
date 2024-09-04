@@ -7,17 +7,18 @@ RUN groupadd owasp && \
     python -m pip install --no-cache-dir poetry && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /home/owasp
 
 COPY apps apps
-COPY manage.py .
-COPY poetry.lock .
-COPY pyproject.toml .
 COPY settings settings
 COPY templates templates
-COPY wsgi.py wsgi.py
+COPY manage.py poetry.lock pyproject.toml wsgi.py ./
+
+RUN poetry install --no-root --without dev --without test
 
 EXPOSE 8000
 
