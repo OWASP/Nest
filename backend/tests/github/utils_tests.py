@@ -17,8 +17,6 @@ from apps.github.utils import check_funding_policy_compliance
         ("custom", "https://my-site.com/donate", False),
         ("custom", "https://my-site.com/owasp/donate", False),
         ("patreon", "username", False),
-        
-
     ],
 )
 def test_check_funding_policy_compliance(platform, target, as_expected):
