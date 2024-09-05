@@ -63,7 +63,10 @@ addopts = [
     "--no-cov-on-fail",
     "--numprocesses=auto",
 ]
-filterwarnings = ["ignore::DeprecationWarning:xdist"]
+filterwarnings = [
+    "ignore::DeprecationWarning:pytest_cov",
+    "ignore::DeprecationWarning:xdist",
+]
 log_level = "INFO"
 python_files = ["*_tests.py"]
 

@@ -19,6 +19,9 @@ def check_owasp_site_repository(key):
 
 def check_funding_policy_compliance(platform, target):
     """Check OWASP funding policy compliance."""
+    if not target:
+        return True
+
     if platform == "github":
         return target.lower() == "owasp"
     if platform == "custom":
