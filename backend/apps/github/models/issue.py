@@ -23,7 +23,7 @@ class Issue(BulkSaveModel, NodeModel, TimestampedModel):
         verbose_name="State", max_length=20, choices=State, default=State.OPEN
     )
     state_reason = models.CharField(verbose_name="State reason", max_length=200, default="")
-    url = models.URLField(verbose_name="URL", max_length=200, default="")
+    url = models.URLField(verbose_name="URL", max_length=500, default="")
     number = models.PositiveBigIntegerField(verbose_name="Number", default=0)
     sequence_id = models.PositiveBigIntegerField(verbose_name="Issue ID", default=0)
 
