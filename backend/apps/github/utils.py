@@ -22,7 +22,9 @@ def check_funding_policy_compliance(platform, target):
     if platform == "github":
         return target.lower() == "owasp"
     if platform == "custom":
-        return urlparse(target).netloc.lower() == "owasp.org"
+        location = urlparse(target).netloc.lower()
+        owasp_org = "owasp.org"
+        return location == owasp_org or location.endswith(f".{owasp_org}")
 
     return False
 
