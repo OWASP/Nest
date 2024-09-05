@@ -63,12 +63,13 @@ addopts = [
     "--no-cov-on-fail",
     "--numprocesses=auto",
 ]
+filterwarnings = ["ignore::DeprecationWarning:xdist"]
 log_level = "INFO"
 python_files = ["*_tests.py"]
 
+
 [tool.ruff]
 line-length = 99
-target-version = "py312"
 
 [tool.ruff.lint]
 ignore = [
@@ -81,6 +82,7 @@ ignore = [
     "FBT002",
     "FIX002",
     "PD",
+    "PERF203",
     "PLC0414",
     "PLR0912",
     "PLR0913",
