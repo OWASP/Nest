@@ -4,20 +4,22 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
+from apps.github.models.mixins import IssueIndexMixin
 
 
-class Issue(BulkSaveModel, NodeModel, TimestampedModel):
+class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     """Issue model."""
 
     class Meta:
         db_table = "github_issues"
+        ordering = ("-updated_at", "-state")
         verbose_name_plural = "Issues"
 
     class State(models.TextChoices):
         OPEN = "open", "Open"
         CLOSED = "closed", "Closed"
 
-    title = models.CharField(verbose_name="Title", max_length=300)
+    title = models.CharField(verbose_name="Title", max_length=500)
     body = models.TextField(verbose_name="Body", default="")
     state = models.CharField(
         verbose_name="State", max_length=20, choices=State, default=State.OPEN
@@ -34,7 +36,7 @@ class Issue(BulkSaveModel, NodeModel, TimestampedModel):
 
     closed_at = models.DateTimeField(verbose_name="Closed at", blank=True, null=True)
     created_at = models.DateTimeField(verbose_name="Created at")
-    updated_at = models.DateTimeField(verbose_name="Updated at")
+    updated_at = models.DateTimeField(verbose_name="Updated at", db_index=True)
 
     # FKs.
     author = models.ForeignKey(
@@ -47,7 +49,7 @@ class Issue(BulkSaveModel, NodeModel, TimestampedModel):
     )
     repository = models.ForeignKey(
         "github.Repository",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="issues",
@@ -71,7 +73,24 @@ class Issue(BulkSaveModel, NodeModel, TimestampedModel):
         """Issue human readable representation."""
         return f"{self.title} by {self.author}"
 
-    def from_github(self, gh_issue, author=None, assignee=None, repository=None):
+    @property
+    def is_indexable(self):
+        """Issues to index."""
+        return (
+            self.state == self.State.OPEN and not self.is_locked and self.repository.is_indexable
+        )
+
+    @property
+    def project(self):
+        """Return project."""
+        return self.repository.project_set.first()
+
+    @property
+    def repository_id(self):
+        """Return repository ID."""
+        return self.repository.id
+
+    def from_github(self, gh_issue, author=None, repository=None):
         """Update instance based on GitHub issue data."""
         field_mapping = {
             "body": "body",

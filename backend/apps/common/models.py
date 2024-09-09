@@ -14,9 +14,10 @@ class BulkSaveModel(models.Model):
         """Bulk save objects."""
         model.objects.bulk_create(o for o in objects if not o.id)
         model.objects.bulk_update(
-            [o for o in objects if o.id],
+            (o for o in objects if o.id),
             fields=[field.name for field in model._meta.fields if not field.primary_key],  # noqa: SLF001
         )
+        objects.clear()
 
 
 class TimestampedModel(models.Model):

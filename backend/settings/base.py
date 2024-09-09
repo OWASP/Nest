@@ -11,9 +11,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 class Base(Configuration):
     """Base configuration."""
 
+    ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION", "Local")
+    if ENVIRONMENT == "Test":
+        from dotenv import load_dotenv
+
+        load_dotenv(BASE_DIR.parent / ".env/backend.test")
+
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
-    ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION")
 
     DJANGO_APPS = (
         "django.contrib.admin",
@@ -25,6 +30,7 @@ class Base(Configuration):
     )
 
     THIRD_PARTY_APPS = (
+        "algoliasearch_django",
         "rest_framework",
         "storages",
     )
@@ -76,6 +82,12 @@ class Base(Configuration):
     ]
 
     WSGI_APPLICATION = "wsgi.application"
+
+    ALGOLIA = {
+        "API_KEY": values.SecretValue(environ_name="ALGOLIA_API_KEY"),
+        "APPLICATION_ID": values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID"),
+        "INDEX_PREFIX": ENVIRONMENT.lower(),
+    }
 
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

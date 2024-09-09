@@ -2,6 +2,7 @@
 
 import re
 
+GITHUB_GHOST_USER_LOGIN = "ghost"
 GITHUB_ITEMS_PER_PAGE = 100
-GITHUB_ORGANIZATION_RE = re.compile("^https://github.com/([^/]+)/?$")
-GITHUB_REPOSITORY_RE = re.compile("^https://github.com/([^/]+)/([^/]+)/?$")
+GITHUB_REPOSITORY_RE = re.compile("^https://github.com/([^/]+)/([^/]+)(/.*)?$")
+GITHUB_USER_RE = re.compile("^https://github.com/([^/]+)/?$")

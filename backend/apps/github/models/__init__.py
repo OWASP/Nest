@@ -24,7 +24,7 @@ def sync_repository(gh_repository, organization=None, user=None):
     if organization is None:
         gh_organization = gh_repository.organization
         if gh_organization is not None:
-            organization = Organization.update_data(gh_organization, save=False)
+            organization = Organization.update_data(gh_organization)
 
     # GitHub repository owner.
     if user is None:

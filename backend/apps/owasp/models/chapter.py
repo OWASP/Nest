@@ -54,7 +54,6 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
     def bulk_save(chapters):
         """Bulk save chapters."""
         BulkSaveModel.bulk_save(Chapter, chapters)
-        chapters.clear()
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):

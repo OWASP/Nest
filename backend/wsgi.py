@@ -2,8 +2,8 @@
 
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
-os.environ.setdefault("DJANGO_CONFIGURATION", "Staging")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.local")
+os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
 
 from configurations.wsgi import get_wsgi_application
 

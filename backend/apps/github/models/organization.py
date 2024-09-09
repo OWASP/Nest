@@ -4,9 +4,16 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import GenericUserModel, NodeModel
+from apps.github.models.mixins import OrganizationIndexMixin
 
 
-class Organization(BulkSaveModel, NodeModel, GenericUserModel, TimestampedModel):
+class Organization(
+    BulkSaveModel,
+    NodeModel,
+    GenericUserModel,
+    OrganizationIndexMixin,
+    TimestampedModel,
+):
     """Organization model."""
 
     class Meta:

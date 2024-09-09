@@ -4,9 +4,10 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.models.common import OwaspEntity
+from apps.owasp.models.mixins import ProjectIndexMixin
 
 
-class Project(BulkSaveModel, OwaspEntity, TimestampedModel):
+class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
     """Project model."""
 
     class Meta:
@@ -57,13 +58,16 @@ class Project(BulkSaveModel, OwaspEntity, TimestampedModel):
     )
     type_raw = models.CharField(verbose_name="Type raw", max_length=100, default="")
 
-    tags = models.JSONField(verbose_name="Tags", default=list)
+    tags = models.JSONField(verbose_name="OWASP metadata tags", default=list)
 
     leaders_raw = models.JSONField(
         verbose_name="Project leaders list", default=list, blank=True, null=True
     )
-    repositories_raw = models.JSONField(
-        verbose_name="Project repositories list", default=list, blank=True, null=True
+    related_urls = models.JSONField(
+        verbose_name="Project related URLs", default=list, blank=True, null=True
+    )
+    invalid_urls = models.JSONField(
+        verbose_name="Invalid project related URLs", default=list, blank=True, null=True
     )
 
     # These are synthetic fields generated based on related repositories data.
@@ -87,20 +91,38 @@ class Project(BulkSaveModel, OwaspEntity, TimestampedModel):
 
     # FKs.
     owasp_repository = models.ForeignKey(
-        "github.Repository", on_delete=models.SET_NULL, blank=True, null=True
+        "github.Repository",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="+",
     )
 
     # M2Ms.
+    organizations = models.ManyToManyField(
+        "github.Organization",
+        verbose_name="Organizations",
+        blank=True,
+    )
+    owners = models.ManyToManyField(
+        "github.User",
+        verbose_name="Owners",
+        blank=True,
+    )
     repositories = models.ManyToManyField(
         "github.Repository",
         verbose_name="Repositories",
-        related_name="+",
         blank=True,
     )
 
     def __str__(self):
         """Project human readable representation."""
         return f"{self.name or self.key}"
+
+    @property
+    def is_indexable(self):
+        """Projects to index."""
+        return self.is_active and self.has_active_repositories
 
     def deactivate(self):
         """Deactivate project."""
@@ -115,6 +137,13 @@ class Project(BulkSaveModel, OwaspEntity, TimestampedModel):
             "tags": "tags",
         }
         project_metadata = OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
+
+        # Normalize tags.
+        self.tags = (
+            [tag.strip(", ") for tag in self.tags.split("," if "," in self.tags else " ")]
+            if isinstance(self.tags, str)
+            else self.tags
+        )
 
         # Level.
         project_level = project_metadata.get("level")
@@ -143,7 +172,6 @@ class Project(BulkSaveModel, OwaspEntity, TimestampedModel):
     def bulk_save(projects):
         """Bulk save projects."""
         BulkSaveModel.bulk_save(Project, projects)
-        projects.clear()
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):

@@ -1,4 +1,4 @@
-"""OWASP app views."""
+"""OWASP app homepage view."""
 
 import requests
 from django.http import HttpResponseRedirect

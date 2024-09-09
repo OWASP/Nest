@@ -43,7 +43,6 @@ class Committee(BulkSaveModel, OwaspEntity, TimestampedModel):
     def bulk_save(committees):
         """Bulk save committees."""
         BulkSaveModel.bulk_save(Committee, committees)
-        committees.clear()
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):

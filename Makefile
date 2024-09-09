@@ -12,11 +12,17 @@ github-sync-owasp-organization:
 github-sync-related-repositories:
 	@CMD="poetry run python manage.py github_sync_related_repositories" $(MAKE) run-backend-command
 
+index:
+	@CMD="poetry run python manage.py algolia_reindex" $(MAKE) run-backend-command
+
 migrate:
 	@CMD="poetry run python manage.py migrate" $(MAKE) run-backend-command
 
 migrations:
 	@CMD="poetry run python manage.py makemigrations" $(MAKE) run-backend-command
+
+migrations-merge:
+	@CMD="poetry run python manage.py makemigrations --merge" $(MAKE) run-backend-command
 
 owasp-scrape-site-data:
 	@CMD="poetry run python manage.py owasp_scrape_site_data" $(MAKE) run-backend-command
@@ -26,6 +32,9 @@ owasp-update-projects:
 
 pre-commit:
 	@pre-commit run -a
+
+purge-data:
+	@CMD="poetry run python manage.py purge_data" $(MAKE) run-backend-command
 
 run:
 	@docker compose up
@@ -44,3 +53,7 @@ sync:
 
 test:
 	@cd backend && poetry run pytest; cd ..
+
+update:
+	@$(MAKE) sync
+	@$(MAKE) index

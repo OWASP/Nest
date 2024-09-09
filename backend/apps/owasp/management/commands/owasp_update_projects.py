@@ -4,9 +4,6 @@ from django.core.management.base import BaseCommand
 
 from apps.owasp.models import Project
 
-IGNORED_LANGUAGES = {"css", "html"}
-LANGUAGE_PERCENTAGE_THRESHOLD = 10
-
 
 class Command(BaseCommand):
     help = "Update OWASP projects."
@@ -14,12 +11,14 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *args, **options):
-        projects = []
+    def handle(self, *_args, **options):
+        all_projects = Project.objects.order_by("id")
 
         offset = options["offset"]
-        for idx, project in enumerate(Project.objects.order_by("id")[offset:]):
-            print(f"{idx + offset + 1:<4}", project)
+        projects = []
+        for idx, project in enumerate(all_projects[offset:]):
+            prefix = f"{idx + offset + 1} of {all_projects.count() - offset}"
+            print(f"{prefix:<10} {project}")
 
             # Deactivate project with archived repositories.
             if project.owasp_repository.is_archived:
@@ -42,7 +41,15 @@ class Command(BaseCommand):
             languages = set()
             licenses = set()
             topics = set()
+
+            project.organizations.clear()
+            project.owners.clear()
             for repository in project.repositories.all():
+                # Update organizations/owners.
+                if repository.organization:
+                    project.organizations.add(repository.organization)
+                project.owners.add(repository.owner)
+
                 # Pushed at.
                 pushed_at.append(repository.pushed_at)
 
@@ -60,11 +67,7 @@ class Command(BaseCommand):
                 subscribers_count.append(repository.subscribers_count)
                 watchers_count.append(repository.watchers_count)
 
-                languages.update(
-                    k
-                    for k, v in repository.languages.items()
-                    if v >= LANGUAGE_PERCENTAGE_THRESHOLD and k.lower() not in IGNORED_LANGUAGES
-                )
+                languages.update(repository.used_languages)
                 if repository.license:
                     licenses.add(repository.license)
                 if repository.topics:
@@ -94,7 +97,5 @@ class Command(BaseCommand):
 
             projects.append(project)
 
-        Project.objects.bulk_update(
-            projects,
-            fields=[field.name for field in Project._meta.fields if not field.primary_key],  # noqa: SLF001
-        )
+        # Bulk save data.
+        Project.bulk_save(projects)

@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 from github.GithubException import UnknownObjectException
 from lxml import etree, html
 
-from apps.github.constants import GITHUB_ITEMS_PER_PAGE, GITHUB_ORGANIZATION_RE
+from apps.github.constants import GITHUB_ITEMS_PER_PAGE, GITHUB_USER_RE
 from apps.github.utils import normalize_url
 from apps.owasp.models import Project
 
@@ -29,11 +29,11 @@ class Command(BaseCommand):
         )
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
-        projects = []
-
         offset = options["offset"]
+        projects = []
         for idx, project in enumerate(active_projects[offset:]):
-            print(f"{idx + offset + 1:<4}", project.owasp_url)
+            prefix = f"{idx + offset + 1} of {active_projects.count() - offset}"
+            print(f"{prefix:<10} {project.owasp_url}")
 
             page_response = requests.get(project.owasp_url, timeout=10)
             if page_response.status_code == requests.codes.not_found:
@@ -49,18 +49,20 @@ class Command(BaseCommand):
             # Get GitHub URLs.
             scraped_urls = sorted(
                 {
-                    normalize_url(url)
+                    normalize_url(repository_url)
                     for url in set(
                         page_tree.xpath(
                             "//div[@class='sidebar']//a[contains(@href, 'github.com')]/@href"
                         )
                     )
-                    if project.check_owasp_entity_repository(url)
+                    if (repository_url := project.get_related_url(url))
                 }
             )
-            # Check for redirects.
-            repositories_urls = set()
+
+            invalid_urls = set()
+            related_urls = set()
             for scraped_url in scraped_urls:
+                # Check for redirects.
                 github_response = requests.get(scraped_url, allow_redirects=False, timeout=10)
                 github_url = None
                 if github_response.status_code == requests.codes.ok:
@@ -75,26 +77,30 @@ class Command(BaseCommand):
                     github_url = github_response.headers["Location"]
 
                 if not github_url:
+                    invalid_urls.add(scraped_url)
                     logger.warning("Couldn't verify URL %s", scraped_url)
                     continue
 
-                github_url = normalize_url(github_url)
-                if GITHUB_ORGANIZATION_RE.match(github_url):
-                    try:
-                        gh_organization = gh.get_organization(github_url.split("/")[-1])
-                        repositories_urls.update(
-                            f"https://github.com/{gh_repository.full_name.lower()}"
-                            for gh_repository in gh_organization.get_repos()
-                        )
-                    except UnknownObjectException:
-                        logger.info(
-                            "Couldn't get GitHub organization repositories for %s", github_url
-                        )
+                github_url = project.get_related_url(normalize_url(github_url))
+                if github_url:
+                    if GITHUB_USER_RE.match(github_url):
+                        try:
+                            gh_organization = gh.get_organization(github_url.split("/")[-1])
+                            related_urls.update(
+                                f"https://github.com/{gh_repository.full_name.lower()}"
+                                for gh_repository in gh_organization.get_repos()
+                            )
+                        except UnknownObjectException:
+                            logger.info(
+                                "Couldn't get GitHub organization repositories for %s", github_url
+                            )
+                    else:
+                        related_urls.add(github_url)
                 else:
-                    repositories_urls.add(github_url)
+                    logger.info("Skipped related URL %s", github_url)
 
-            if repositories_urls:
-                project.repositories_raw = sorted(repositories_urls)
+            project.invalid_urls = sorted(invalid_urls)
+            project.related_urls = sorted(related_urls)
 
             # Get leaders.
             leaders_header = page_tree.xpath("//div[@class='sidebar']//*[@id='leaders']")
@@ -105,12 +111,9 @@ class Command(BaseCommand):
                     if leaders:
                         project.leaders_raw = leaders
 
-            if leaders or repositories_urls:
-                projects.append(project)
+            projects.append(project)
 
             time.sleep(0.5)
 
-        Project.objects.bulk_update(
-            projects,
-            fields=[field.name for field in Project._meta.fields if not field.primary_key],  # noqa: SLF001
-        )
+        # Bulk save data.
+        Project.bulk_save(projects)

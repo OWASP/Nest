@@ -56,7 +56,9 @@ class RepositoryAdmin(admin.ModelAdmin):
         "is_owasp_site_repository",
         "has_funding_yml",
         "is_funding_policy_compliant",
+        "is_template",
         "is_fork",
+        "organization",
     )
     ordering = ("-created_at",)
     search_fields = ("name",)

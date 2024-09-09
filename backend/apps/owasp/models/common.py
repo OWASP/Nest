@@ -7,7 +7,7 @@ from base64 import b64decode
 import yaml
 from github.GithubException import GithubException, UnknownObjectException
 
-from apps.github.constants import GITHUB_ORGANIZATION_RE, GITHUB_REPOSITORY_RE
+from apps.github.constants import GITHUB_REPOSITORY_RE, GITHUB_USER_RE
 
 logger = logging.getLogger(__name__)
 
@@ -27,11 +27,6 @@ class OwaspEntity:
     def owasp_url(self):
         """Get OWASP URL."""
         return f"https://owasp.org/{self.key}"
-
-    def check_owasp_entity_repository(self, url):
-        """Check OWASP entity repository."""
-        match = GITHUB_REPOSITORY_RE.match(url) or GITHUB_ORGANIZATION_RE.match(url)
-        return match and url not in {self.github_url, self.owasp_url}
 
     def from_github(self, field_mapping, gh_repository, repository):
         """Update instance based on GitHub repository data."""
@@ -57,3 +52,16 @@ class OwaspEntity:
             pass
 
         return project_metadata
+
+    def get_related_url(self, url):
+        """Get OWASP entity related URL."""
+        if url in {self.github_url, self.owasp_url}:
+            return None
+
+        if match := GITHUB_REPOSITORY_RE.match(url):
+            return f"https://github.com/{match.group(1)}/{match.group(2)}".lower()
+
+        if match := GITHUB_USER_RE.match(url):
+            return f"https://github.com/{match.group(1)}".lower()
+
+        return None

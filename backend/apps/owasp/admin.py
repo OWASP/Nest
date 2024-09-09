@@ -31,7 +31,12 @@ class EventAdmin(admin.ModelAdmin):
 
 
 class ProjectAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("owasp_repository", "repositories")
+    autocomplete_fields = (
+        "owasp_repository",
+        "organizations",
+        "owners",
+        "repositories",
+    )
     list_display = (
         "custom_field_name",
         "created_at",

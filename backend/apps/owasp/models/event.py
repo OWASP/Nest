@@ -49,7 +49,6 @@ class Event(BulkSaveModel, OwaspEntity, TimestampedModel):
     def bulk_save(events):
         """Bulk save events."""
         BulkSaveModel.bulk_save(Event, events)
-        events.clear()
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):

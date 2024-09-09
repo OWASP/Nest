@@ -8,13 +8,17 @@ from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
 from apps.github.models.common import NodeModel
+from apps.github.models.mixins import RepositoryIndexMixin
 from apps.github.utils import (
     check_funding_policy_compliance,
     check_owasp_site_repository,
 )
 
+IGNORED_LANGUAGES = {"css", "html"}
+LANGUAGE_PERCENTAGE_THRESHOLD = 1
 
-class Repository(NodeModel, TimestampedModel):
+
+class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     """Repository model."""
 
     class Meta:
@@ -91,9 +95,28 @@ class Repository(NodeModel, TimestampedModel):
         return f"{self.owner.login}/{self.name}"
 
     @property
+    def is_indexable(self):
+        """Repositories to index."""
+        return (
+            not self.is_archived
+            and not self.is_empty
+            and not self.is_template
+            and self.project_set.exists()
+        )
+
+    @property
     def latest_release(self):
         """Repository latest release."""
         return self.releases.order_by("-created_at").first()
+
+    @property
+    def top_languages(self):
+        """Return a list of top used languages."""
+        return sorted(
+            k
+            for k, v in sorted(self.languages.items(), key=lambda pair: pair[1], reverse=True)
+            if v >= LANGUAGE_PERCENTAGE_THRESHOLD and k.lower() not in IGNORED_LANGUAGES
+        )
 
     def from_github(
         self,

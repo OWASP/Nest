@@ -14,8 +14,6 @@ from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 10
-
 
 class Command(BaseCommand):
     help = "Updates OWASP entities based on their owasp.org data."
@@ -24,12 +22,6 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options):
-        def save_data():
-            """Save data to DB."""
-            Issue.bulk_save(issues)
-            Release.bulk_save(releases)
-            Project.bulk_save(projects)
-
         active_projects = Project.objects.filter(is_active=True).order_by("created_at")
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
@@ -39,9 +31,10 @@ class Command(BaseCommand):
 
         offset = options["offset"]
         for idx, project in enumerate(active_projects[offset:]):
-            print(f"{idx + offset + 1:<4}", project.owasp_url)
+            prefix = f"{idx + offset + 1} of {active_projects.count() - offset}"
+            print(f"{prefix:<12} {project.owasp_url}")
 
-            repository_urls = project.repositories_raw.copy()
+            repository_urls = project.related_urls.copy()
             for repository_url in repository_urls:
                 repository_path = get_repository_path(repository_url)
                 if not repository_path:
@@ -52,8 +45,9 @@ class Command(BaseCommand):
                     gh_repository = gh.get_repo(repository_path)
                 except UnknownObjectException as e:
                     if e.data["status"] == "404" and "Not Found" in e.data["message"]:
-                        project.repositories_raw.remove(repository_url)
-                        project.save(update_fields=("repositories_raw",))
+                        project.invalid_urls.add(repository_url)
+                        project.related_urls.remove(repository_url)
+                        project.save(update_fields=("invalid_urls", "related_urls"))
                         continue
 
                 organization, repository, new_releases = sync_repository(gh_repository)
@@ -65,8 +59,7 @@ class Command(BaseCommand):
 
             projects.append(project)
 
-            if idx % BATCH_SIZE == 0:
-                save_data()
-
-        # Save remaining data.
-        save_data()
+        # Bulk save data.
+        Issue.bulk_save(issues)
+        Release.bulk_save(releases)
+        Project.bulk_save(projects)

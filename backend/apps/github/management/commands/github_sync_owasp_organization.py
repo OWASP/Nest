@@ -6,11 +6,9 @@ import github
 from django.core.management.base import BaseCommand
 
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
-from apps.github.models import Issue, Organization, Release, Repository, sync_repository
+from apps.github.models import Release, Repository, sync_repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models import Chapter, Committee, Event, Project
-
-BATCH_SIZE = 10
 
 
 class Command(BaseCommand):
@@ -20,17 +18,6 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *_args, **options):
-        def save_data():
-            """Save data to DB."""
-            Organization.bulk_save(organizations)
-            Issue.bulk_save(issues)
-            Release.bulk_save(releases)
-
-            Chapter.bulk_save(chapters)
-            Committee.bulk_save(committees)
-            Event.bulk_save(events)
-            Project.bulk_save(projects)
-
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
         gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
         remote_owasp_repositories_count = gh_owasp_organization.public_repos
@@ -41,27 +28,23 @@ class Command(BaseCommand):
         chapters = []
         committees = []
         events = []
-        issues = []
-        organizations = []
         projects = []
         releases = []
 
         offset = options["offset"]
-        for idx, gh_repository in enumerate(
-            gh_owasp_organization.get_repos(
-                type="public",
-                sort="created",
-                direction="asc",
-            )[offset:]
-        ):
-            print(f"{idx + offset + 1:<4} {gh_repository.name}")
+        gh_repositories = gh_owasp_organization.get_repos(
+            type="public",
+            sort="created",
+            direction="desc",
+        )
+        total_count = gh_repositories.totalCount - offset
+        for idx, gh_repository in enumerate(gh_repositories[offset:]):
+            prefix = f"{idx + offset + 1} of {total_count}"
+            print(f"{prefix:<12} {gh_repository.name}")
 
             owasp_organization, repository, new_releases = sync_repository(
                 gh_repository, organization=owasp_organization, user=owasp_user
             )
-            if not owasp_organization.id:
-                owasp_organization.save()
-
             releases.extend(new_releases)
 
             entity_key = gh_repository.name.lower()
@@ -81,11 +64,13 @@ class Command(BaseCommand):
             elif entity_key.startswith("www-committee-"):
                 committees.append(Committee.update_data(gh_repository, repository, save=False))
 
-            if idx % BATCH_SIZE == 0:
-                save_data()
+        # Bulk save data.
+        Release.bulk_save(releases)
 
-        # Save remaining data.
-        save_data()
+        Chapter.bulk_save(chapters)
+        Committee.bulk_save(committees)
+        Event.bulk_save(events)
+        Project.bulk_save(projects)
 
         # Check repository counts.
         local_owasp_repositories_count = Repository.objects.filter(

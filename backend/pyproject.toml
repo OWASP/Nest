@@ -21,19 +21,20 @@ omit = [
 ]
 
 [tool.poetry.dependencies]
+algoliasearch-django = "^3.0.0"
 django = "^5.1"
 django-configurations = "^2.5.1"
+django-filter = "^24.3"
 django-storages = { extras = ["s3"], version = "^1.14.4" }
+djangorestframework = "^3.15.2"
 gunicorn = "^23.0.0"
 lxml = "^5.3.0"
+markdown = "^3.7"
 psycopg2 = "^2.9.9"
 pygithub = "^2.3.0"
 python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-djangorestframework = "^3.15.2"
-markdown = "^3.7"
-django-filter = "^24.3"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"
@@ -47,6 +48,7 @@ pytest-django = "^4.5"
 pytest-cov = "^4.0"
 pytest-xdist = "^3.0"
 pytest-mock = "^3.0"
+python-dotenv = "^1.0.1"
 
 [tool.isort]
 known_third_party = ["django", "rest_framework"]
@@ -55,6 +57,8 @@ multi_line_output = 3
 profile = "black"
 
 [tool.pytest.ini_options]
+DJANGO_CONFIGURATION = "Test"
+DJANGO_SETTINGS_MODULE = "settings.test"
 addopts = [
     "--cov-config=pyproject.toml",
     "--cov-report=term-missing",
@@ -66,6 +70,7 @@ addopts = [
 filterwarnings = [
     "ignore::DeprecationWarning:pytest_cov",
     "ignore::DeprecationWarning:xdist",
+    "ignore::django.conf.RemovedInDjango60Warning:django",
 ]
 log_level = "INFO"
 python_files = ["*_tests.py"]
@@ -104,7 +109,7 @@ select = ["ALL"]
 "**/models.py" = ["D106"]
 "**/api/*.py" = ["D106"]
 "**/models/*.py" = ["D106"]
-"tests/**" = ["D100", "D103", "S101"]
+"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "S101"]
 
 
 [build-system]
