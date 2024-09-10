@@ -12,6 +12,11 @@ class ProjectIndexMixin:
         return join_values(fields=(o.company for o in self.organizations.all()))
 
     @property
+    def idx_created_at(self):
+        """Return created at for indexing."""
+        return self.created_at
+
+    @property
     def idx_contributors_count(self):
         """Return contributors count for indexing."""
         return self.contributors_count
