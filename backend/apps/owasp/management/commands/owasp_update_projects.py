@@ -67,7 +67,7 @@ class Command(BaseCommand):
                 subscribers_count.append(repository.subscribers_count)
                 watchers_count.append(repository.watchers_count)
 
-                languages.update(repository.used_languages)
+                languages.update(repository.top_languages)
                 if repository.license:
                     licenses.add(repository.license)
                 if repository.topics:

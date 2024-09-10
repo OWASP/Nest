@@ -41,8 +41,6 @@ class IssueIndex(AlgoliaIndex):
 
     settings = {
         "minProximity": 3,
-        "attributeForDistinct": "idx_project_name",
-        "distinct": True,
         "indexLanguages": ["en"],
         "customRanking": [
             "desc(idx_created_at)",

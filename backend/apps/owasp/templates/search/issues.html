@@ -1,1 +1,78 @@
-{% extends "base.html" %}
+{% load static %}
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<script src="{% static 'js/htmx.min.js' %}"></script>
+<script src="{% static 'js/markdown-it.min.js' %}"></script>
+
+<h3>
+  Find a Project
+</h3>
+<input
+  autocomplete="off"
+  class="form-control"
+  id="query"
+  name="q"
+  placeholder="Type To Search..."
+  type="search"
+  hx-get="{% url 'api-projects-contribute' %}"
+  hx-indicator=".htmx-indicator"
+  hx-swap="none"
+  hx-target="#search-results"
+  hx-trigger="input changed delay:1000ms, search"
+/>
+<span class="htmx-indicator"> Searching... </span>
+
+<script>
+  document
+    .getElementById('query')
+    .addEventListener('htmx:afterRequest', function (event) {
+      var jsonResponse = event.detail.xhr.response;
+      var hits = JSON.parse(jsonResponse);
+
+      const resultsContainer = document.getElementById('search-results');
+      resultsContainer.innerHTML = '';
+      const md = window.markdownit();
+
+      hits.forEach((hit) => {
+        const highlightedTitle = hit._highlightResult.idx_title.value;
+        const languages = hit.idx_repository_languages;
+        const projectName = hit.idx_project_name;
+        const createdAt = new Date(hit.idx_created_at * 1000);
+
+        const languageIcons = {
+          Python: 'fab fa-python',
+          JavaScript: 'fab fa-js',
+          Java: 'fab fa-java',
+          PHP: 'fab fa-php',
+        };
+
+        const container = document.createElement('div');
+        languages.forEach((language) => {
+          const iconClass = languageIcons[language];
+          if (iconClass) {
+            const languageSpan = document.createElement('span');
+            languageSpan.innerHTML = `<i class="${iconClass}"></i>`;
+            container.appendChild(languageSpan);
+          }
+        });
+
+        const url = hit.idx_url;
+
+        const resultItem = document.createElement('div');
+        resultItem.innerHTML = `
+          <h2><a href="${url}" target="_blank">${highlightedTitle}</a></h2>
+          <p>Project: ${projectName}. Created at: ${createdAt}</p>
+          <p>${container.innerHTML}</p>
+          <p></p>
+        `;
+
+        resultsContainer.appendChild(resultItem);
+      });
+    });
+</script>
+
+<div id="search-results"></div>
