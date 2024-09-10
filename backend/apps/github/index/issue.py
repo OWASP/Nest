@@ -1,4 +1,4 @@
-"""GitHub app index."""
+"""GitHub issue index."""
 
 from datetime import timedelta as td
 
@@ -40,7 +40,7 @@ class IssueIndex(AlgoliaIndex):
     )
 
     settings = {
-        "minProximity": 3,
+        "minProximity": 4,
         "indexLanguages": ["en"],
         "customRanking": [
             "desc(idx_created_at)",
@@ -52,7 +52,6 @@ class IssueIndex(AlgoliaIndex):
         ],
         "ranking": [
             "typo",
-            "geo",
             "words",
             "filters",
             "proximity",
@@ -61,8 +60,8 @@ class IssueIndex(AlgoliaIndex):
             "custom",
         ],
         "searchableAttributes": [
-            "unordered(idx_labels, idx_repository_languages)",
             "unordered(idx_title, idx_project_name, idx_repository_name)",
+            "unordered(idx_labels, idx_repository_languages)",
             "unordered(idx_project_description, idx_repository_description)",
             "unordered(idx_project_tags, idx_repository_topics)",
             "unordered(idx_author_login, idx_author_name)",
@@ -74,7 +73,6 @@ class IssueIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        # We index all unassigned issues and issues with no activity within 60 days.
         return (
             Issue.objects.select_related(
                 "repository",
@@ -84,8 +82,9 @@ class IssueIndex(AlgoliaIndex):
                 "labels",
                 "repository__project_set",
             )
+            # We index all unassigned issues and assigned issues with no activity within 90 days.
             .filter(
                 Q(assignees__isnull=True)
-                | Q(assignees__isnull=False, updated_at__lte=timezone.now() - td(days=60))
+                | Q(assignees__isnull=False, updated_at__lte=timezone.now() - td(days=90))
             )
         )

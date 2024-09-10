@@ -1,4 +1,4 @@
-"""OWASP app search views."""
+"""OWASP app issue search API."""
 
 from algoliasearch_django import raw_search
 from django.http import JsonResponse
@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from apps.github.models import Issue
 
 
-def search_project(request):
-    """Search project view."""
+def project_issues(request):
+    """Search project issues view."""
     issues_params = {
         "attributesToRetrieve": [
             "idx_created_at",
@@ -16,9 +16,10 @@ def search_project(request):
             "idx_title",
             "idx_url",
         ],
-        "hitsPerPage": 100,
+        "hitsPerPage": 25,
     }
 
-    issues = raw_search(Issue, request.GET.get("q", ""), issues_params)["hits"]
-
-    return JsonResponse(issues, safe=False)
+    return JsonResponse(
+        raw_search(Issue, request.GET.get("q", ""), issues_params)["hits"],
+        safe=False,
+    )

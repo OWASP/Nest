@@ -15,6 +15,7 @@ WORKDIR /home/owasp
 
 COPY apps apps
 COPY settings settings
+COPY static static
 COPY templates templates
 COPY manage.py poetry.lock pyproject.toml wsgi.py ./
 

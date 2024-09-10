@@ -1,4 +1,4 @@
-"""OWASP app models mixins."""
+"""OWASP app project mixins."""
 
 from apps.common.utils import join_values
 
@@ -18,7 +18,7 @@ class ProjectIndexMixin:
 
     @property
     def idx_description(self):
-        """Return description count for indexing."""
+        """Return description for indexing."""
         return self.description
 
     @property
@@ -67,6 +67,16 @@ class ProjectIndexMixin:
         return self.topics
 
     @property
+    def idx_type(self):
+        """Return type for indexing."""
+        return self.type
+
+    @property
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return self.updated_at
+
+    @property
+    def idx_url(self):
+        """Return URL for indexing."""
+        return self.owasp_url

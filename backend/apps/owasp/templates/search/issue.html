@@ -6,10 +6,9 @@
 </head>
 
 <script src="{% static 'js/htmx.min.js' %}"></script>
-<script src="{% static 'js/markdown-it.min.js' %}"></script>
 
 <h3>
-  Find a Project
+  Find an issue to work on
 </h3>
 <input
   autocomplete="off"
@@ -18,11 +17,11 @@
   name="q"
   placeholder="Type To Search..."
   type="search"
-  hx-get="{% url 'api-projects-contribute' %}"
+  hx-get="{% url 'search-project-issues' %}"
   hx-indicator=".htmx-indicator"
   hx-swap="none"
   hx-target="#search-results"
-  hx-trigger="input changed delay:1000ms, search"
+  hx-trigger="load input changed delay:1000ms, search"
 />
 <span class="htmx-indicator"> Searching... </span>
 
@@ -35,7 +34,6 @@
 
       const resultsContainer = document.getElementById('search-results');
       resultsContainer.innerHTML = '';
-      const md = window.markdownit();
 
       hits.forEach((hit) => {
         const highlightedTitle = hit._highlightResult.idx_title.value;
