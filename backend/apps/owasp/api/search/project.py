@@ -14,7 +14,9 @@ def projects(request):
             "idx_topics",
             "idx_url",
         ],
+        "typoTolerance": "min",
         "hitsPerPage": 25,
+        "minProximity": 4,
     }
 
     return JsonResponse(

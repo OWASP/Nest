@@ -32,7 +32,6 @@ class ProjectIndex(AlgoliaIndex):
     )
 
     settings = {
-        "minProximity": 4,
         "indexLanguages": ["en"],
         "customRanking": [
             "desc(idx_level)",
