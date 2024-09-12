@@ -27,12 +27,13 @@ class Command(BaseCommand):
         active_projects = Project.objects.filter(is_active=True).order_by(
             "owasp_repository__created_at"
         )
+        active_projects_count = active_projects.count()
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
         offset = options["offset"]
         projects = []
         for idx, project in enumerate(active_projects[offset:]):
-            prefix = f"{idx + offset + 1} of {active_projects.count() - offset}"
+            prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
             print(f"{prefix:<10} {project.owasp_url}")
 
             page_response = requests.get(project.owasp_url, timeout=10)

@@ -1,14 +1,18 @@
 """A command to update OWASP entities from GitHub data."""
 
+import logging
 import os
 
 import github
 from django.core.management.base import BaseCommand
+from github.GithubException import BadCredentialsException
 
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.models import Release, Repository, sync_repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models import Chapter, Committee, Event, Project
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -18,8 +22,15 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *_args, **options):
-        gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
-        gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
+        try:
+            gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
+            gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
+        except BadCredentialsException:
+            logger.warning(
+                "Invalid GitHub token. Please create and update .env file with a valid token."
+            )
+            return
+
         remote_owasp_repositories_count = gh_owasp_organization.public_repos
 
         owasp_organization = None
@@ -37,9 +48,9 @@ class Command(BaseCommand):
             sort="created",
             direction="desc",
         )
-        total_count = gh_repositories.totalCount - offset
+        gh_repositories_count = gh_repositories.totalCount - offset
         for idx, gh_repository in enumerate(gh_repositories[offset:]):
-            prefix = f"{idx + offset + 1} of {total_count}"
+            prefix = f"{idx + offset + 1} of {gh_repositories_count}"
             print(f"{prefix:<12} {gh_repository.name}")
 
             owasp_organization, repository, new_releases = sync_repository(

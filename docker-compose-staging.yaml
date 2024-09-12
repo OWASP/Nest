@@ -1,21 +1,23 @@
 services:
   backend:
     container_name: nest-backend
-    image: docker.io/arkid15r/owasp-nest-backend:latest
-    command: >
+    image: arkid15r/owasp-nest-backend:latest
+    command: |
       bash -c '
         poetry run python manage.py migrate &&
         poetry run python manage.py collectstatic --noinput &&
         poetry run gunicorn wsgi:application --bind 0.0.0.0:8000
       '
-    env_file: ./.env/backend.staging
+    env_file: .env/backend
     depends_on:
-      - db
-    ports:
-      - '8000:8000'
-    restart: on-failure:3
+      db:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
-      - nest
+      - nest_app_network
+      - nest_db_network
+    volumes:
+      - ./data:/home/owasp/data
 
   certbot:
     container_name: nest-certbot
@@ -28,14 +30,25 @@ services:
   db:
     container_name: nest-db
     image: postgres:16.4
-    env_file: ./.env/db.staging
-    ports:
-      - '127.0.0.1:5432:5432'
+    env_file: .env/db
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'pg_isready',
+          '-U',
+          'nest_user_staging',
+          '-d',
+          'nest_db_staging',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     volumes:
       - ./volumes/db:/var/lib/postgresql/data
     networks:
-      - nest
+      - nest_db_network
 
   nginx:
     container_name: nest-nginx
@@ -48,10 +61,8 @@ services:
     depends_on:
       - backend
     networks:
-      - nest
+      - nest_app_network
 
 networks:
-  nest:
-
-volumes:
-  letsencrypt:
+  nest_app_network:
+  nest_db_network:

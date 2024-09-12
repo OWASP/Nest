@@ -23,6 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         active_projects = Project.objects.filter(is_active=True).order_by("created_at")
+        active_projects_count = active_projects.count()
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
         issues = []
@@ -31,8 +32,8 @@ class Command(BaseCommand):
 
         offset = options["offset"]
         for idx, project in enumerate(active_projects[offset:]):
-            prefix = f"{idx + offset + 1} of {active_projects.count() - offset}"
-            print(f"{prefix:<12} {project.owasp_url}")
+            prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
+            print(f"{prefix:<10} {project.owasp_url}")
 
             repository_urls = project.related_urls.copy()
             for repository_url in repository_urls:

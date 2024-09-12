@@ -3,6 +3,7 @@ services:
     container_name: nest-backend
     command: >
       bash -c '
+        poetry install --no-root &&
         poetry run python manage.py migrate &&
         poetry run python manage.py runserver 0.0.0.0:8000
       '
@@ -10,16 +11,39 @@ services:
       context: ./backend
       dockerfile: Dockerfile.local
     depends_on:
-      - db
-    env_file: ./.env/backend.local
+      db:
+        condition: service_healthy
+    env_file: backend/.env/local
+    environment:
+      DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
+      DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
+      DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
+      DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
+      DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
     ports:
-      - '8000:8000'
+      - '127.0.0.1:8000:8000'
     volumes:
       - ./backend:/home/owasp
 
   db:
     container_name: nest-db
     image: postgres:16.4
-    env_file: ./.env/db.local
+    environment:
+      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_dev}
+      POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
+      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_dev}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'pg_isready',
+          '-U',
+          '${DJANGO_DB_USER:-nest_user_dev}',
+          '-d',
+          '${DJANGO_DB_NAME:-nest_db_dev}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./volumes/db:/var/lib/postgresql/data

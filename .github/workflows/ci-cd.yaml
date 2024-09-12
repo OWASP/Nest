@@ -30,6 +30,7 @@ jobs:
           cache: poetry
           cache-dependency-path: backend/poetry.lock
           python-version: '3.12'
+
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
@@ -73,21 +74,18 @@ jobs:
           cache-dependency-path: backend/poetry.lock
           python-version: '3.12'
 
-      - name: Install dependencies
-        run: |
-          cd backend
-          poetry install --no-root --with test
-
       - name: Run tests
         run: |
           make test
 
   build-docker-images:
-    environment: staging
     name: Build Docker Images
-    runs-on: ubuntu-latest
+    environment: staging
+    if: |
+      github.ref == 'refs/heads/main'
     needs:
       - run-tests
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -113,16 +111,18 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:latest
 
-  deploy:
-    environment: staging
+  deploy-staging:
     name: Deploy Nest Staging
     env:
       ANSIBLE_HOST_KEY_CHECKING: False
       STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'
       STAGING_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_staging_private_key'
-    runs-on: ubuntu-latest
+    environment: staging
+    if: |
+      github.ref == 'refs/heads/main'
     needs:
       - build-docker-images
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -134,5 +134,5 @@ jobs:
           chmod 400 ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
 
       - name: Run Nest deploy
-        working-directory: .github/deploy
-        run: ansible-playbook -i inventory.yaml staging.yaml
+        working-directory: .github/ansible
+        run: ansible-playbook -i inventory.yaml staging/deploy.yaml -e "github_workspace=$GITHUB_WORKSPACE"

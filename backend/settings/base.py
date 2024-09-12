@@ -15,7 +15,7 @@ class Base(Configuration):
     if ENVIRONMENT == "Test":
         from dotenv import load_dotenv
 
-        load_dotenv(BASE_DIR.parent / ".env/backend.test")
+        load_dotenv(BASE_DIR / ".env/template")
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False

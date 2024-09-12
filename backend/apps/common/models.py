@@ -2,6 +2,8 @@
 
 from django.db import models
 
+BATCH_SIZE = 1000
+
 
 class BulkSaveModel(models.Model):
     """Base model for bulk save action."""
@@ -12,10 +14,11 @@ class BulkSaveModel(models.Model):
     @staticmethod
     def bulk_save(model, objects):
         """Bulk save objects."""
-        model.objects.bulk_create(o for o in objects if not o.id)
+        model.objects.bulk_create((o for o in objects if not o.id), BATCH_SIZE)
         model.objects.bulk_update(
             (o for o in objects if o.id),
             fields=[field.name for field in model._meta.fields if not field.primary_key],  # noqa: SLF001
+            batch_size=BATCH_SIZE,
         )
         objects.clear()
 
