@@ -23,13 +23,13 @@ class Command(BaseCommand):
 
         issues = []
         offset = options["offset"]
-        for idx, issue in enumerate(open_issues[offset:][:10]):
+        for idx, issue in enumerate(open_issues[offset:]):
             prefix = f"{idx + offset + 1} of {open_issues_count - offset}"
             print(f"{prefix:<10} {issue.title}")
 
             open_ai.set_prompt(
                 (
-                    "Summarize the following GitHub issue using imperative mood. "
+                    "Summarize the following GitHub issue using imperative mood."
                     "Add a good amount of technical details."
                     "Include possible first steps of tackling the problem."
                 )
