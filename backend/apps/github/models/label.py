@@ -44,7 +44,6 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
     def bulk_save(labels):
         """Bulk save labels."""
         BulkSaveModel.bulk_save(Label, labels)
-        labels.clear()
 
     @staticmethod
     def update_data(gh_label, save=True):

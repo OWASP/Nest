@@ -41,8 +41,8 @@ class Command(BaseCommand):
                 )
             )
 
-            issue.summary = open_ai.set_input(f"{issue.title}\r\n{issue.body}").complete()
+            issue.summary = open_ai.set_input(f"{issue.title}\r\n{issue.body}").complete() or ""
             issues.append(issue)
 
         # Bulk save data.
-        Issue.bulk_save(issues)
+        Issue.bulk_save(issues, fields=("summary",))

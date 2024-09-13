@@ -126,10 +126,9 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         self.repository = repository
 
     @staticmethod
-    def bulk_save(issues):
+    def bulk_save(issues, fields=None):
         """Bulk save issues."""
-        BulkSaveModel.bulk_save(Issue, issues)
-        issues.clear()
+        BulkSaveModel.bulk_save(Issue, issues, fields=fields)
 
     @staticmethod
     def update_data(gh_issue, author=None, repository=None, save=True):

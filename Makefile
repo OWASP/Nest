@@ -37,11 +37,11 @@ migrate:
 migrations:
 	@CMD="poetry run python manage.py makemigrations" $(MAKE) exec-backend-command
 
+owasp-aggregate-projects-data:
+	@CMD="poetry run python manage.py owasp_aggregate_projects_data" $(MAKE) exec-backend-command
+
 owasp-scrape-site-data:
 	@CMD="poetry run python manage.py owasp_scrape_site_data" $(MAKE) exec-backend-command
-
-owasp-update-projects:
-	@CMD="poetry run python manage.py owasp_update_projects" $(MAKE) exec-backend-command
 
 pre-commit:
 	@pre-commit run -a
@@ -63,8 +63,8 @@ sync: \
 	github-sync-owasp-organization \
 	owasp-scrape-site-data \
 	github-sync-related-repositories \
-	github_summarize_issues \
-	owasp-update-projects
+	github-summarize-issues \
+	owasp-aggregate-projects-data
 
 test:
 	@docker build -f backend/Dockerfile.test backend -t nest-backend-test 2>/dev/null

@@ -67,7 +67,6 @@ class Release(BulkSaveModel, NodeModel, TimestampedModel):
     def bulk_save(releases):
         """Bulk save releases."""
         BulkSaveModel.bulk_save(Release, releases)
-        releases.clear()
 
     @staticmethod
     def update_data(gh_release, author=None, repository=None, save=True):

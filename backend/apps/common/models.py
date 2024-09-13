@@ -12,12 +12,12 @@ class BulkSaveModel(models.Model):
         abstract = True
 
     @staticmethod
-    def bulk_save(model, objects):
+    def bulk_save(model, objects, fields=None):
         """Bulk save objects."""
         model.objects.bulk_create((o for o in objects if not o.id), BATCH_SIZE)
         model.objects.bulk_update(
             (o for o in objects if o.id),
-            fields=[field.name for field in model._meta.fields if not field.primary_key],  # noqa: SLF001
+            fields=fields or [field.name for field in model._meta.fields if not field.primary_key],  # noqa: SLF001
             batch_size=BATCH_SIZE,
         )
         objects.clear()

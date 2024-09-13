@@ -44,7 +44,6 @@ class Organization(
     def bulk_save(organizations):
         """Bulk save organizations."""
         BulkSaveModel.bulk_save(Organization, organizations)
-        organizations.clear()
 
     @staticmethod
     def update_data(gh_organization, save=True):
