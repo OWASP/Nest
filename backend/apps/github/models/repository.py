@@ -110,6 +110,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.releases.order_by("-created_at").first()
 
     @property
+    def project(self):
+        """Return project."""
+        return self.project_set.first()
+
+    @property
     def top_languages(self):
         """Return a list of top used languages."""
         return sorted(

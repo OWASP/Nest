@@ -26,7 +26,7 @@ class IssueAdmin(admin.ModelAdmin):
         "state",
         "is_locked",
     )
-    search_fields = ("title", "description")
+    search_fields = ("title", "body", "summary")
 
     def custom_field_github_url(self, obj):
         """Issue GitHub URL."""

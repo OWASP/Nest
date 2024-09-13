@@ -148,3 +148,5 @@ class Base(Configuration):
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
+
+    OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")

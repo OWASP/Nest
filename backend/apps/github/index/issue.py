@@ -19,7 +19,6 @@ class IssueIndex(AlgoliaIndex):
     fields = (
         "idx_author_login",
         "idx_author_name",
-        "idx_body",
         "idx_comments_count",
         "idx_created_at",
         "idx_labels",
@@ -34,6 +33,7 @@ class IssueIndex(AlgoliaIndex):
         "idx_repository_name",
         "idx_repository_stars_count",
         "idx_repository_topics",
+        "idx_summary",
         "idx_title",
         "idx_updated_at",
         "idx_url",
@@ -65,7 +65,7 @@ class IssueIndex(AlgoliaIndex):
             "unordered(idx_project_description, idx_repository_description)",
             "unordered(idx_project_tags, idx_repository_topics)",
             "unordered(idx_author_login, idx_author_name)",
-            "unordered(idx_body)",
+            "unordered(idx_summary)",
         ],
     }
 

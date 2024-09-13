@@ -4,11 +4,15 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
+from apps.github.models.managers.issue import OpenIssueManager
 from apps.github.models.mixins import IssueIndexMixin
 
 
 class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     """Issue model."""
+
+    objects = models.Manager()
+    open_issues = OpenIssueManager()
 
     class Meta:
         db_table = "github_issues"
@@ -21,6 +25,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
     title = models.CharField(verbose_name="Title", max_length=500)
     body = models.TextField(verbose_name="Body", default="")
+    summary = models.TextField(verbose_name="Summary", max_length=3000, default="")
     state = models.CharField(
         verbose_name="State", max_length=20, choices=State, default=State.OPEN
     )
@@ -83,7 +88,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     @property
     def project(self):
         """Return project."""
-        return self.repository.project_set.first()
+        return self.repository.project
 
     @property
     def repository_id(self):

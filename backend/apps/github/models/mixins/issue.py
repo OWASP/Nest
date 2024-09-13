@@ -25,13 +25,6 @@ class IssueIndexMixin:
         )
 
     @property
-    def idx_body(self):
-        """Return body for indexing."""
-        # TODO(arkid15r): reduce noise by adding only up to 100 most popular words.
-        # Skip exceptions, logs, short words, etc.
-        return self.body[:4500] if self.body else None
-
-    @property
     def idx_comments_count(self):
         """Return comments count at for indexing."""
         return self.comments_count
@@ -100,6 +93,11 @@ class IssueIndexMixin:
     def idx_repository_stars_count(self):
         """Return repository stars count for indexing."""
         return self.repository.idx_stars_count
+
+    @property
+    def idx_summary(self):
+        """Return summary for indexing."""
+        return self.summary if self.summary else None
 
     @property
     def idx_title(self):
