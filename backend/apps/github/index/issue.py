@@ -40,6 +40,7 @@ class IssueIndex(AlgoliaIndex):
     )
 
     settings = {
+        "attributeForDistinct": "idx_project_name",
         "minProximity": 4,
         "indexLanguages": ["en"],
         "customRanking": [

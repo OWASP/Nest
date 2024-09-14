@@ -2,7 +2,7 @@
 
 from rest_framework import serializers, viewsets
 
-from apps.github.models import Release
+from apps.github.models.release import Release
 
 
 # Serializers define the API representation.

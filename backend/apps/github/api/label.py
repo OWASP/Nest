@@ -2,7 +2,7 @@
 
 from rest_framework import serializers, viewsets
 
-from apps.github.models import Label
+from apps.github.models.label import Label
 
 
 # Serializers define the API representation.

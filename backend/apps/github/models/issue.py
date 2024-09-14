@@ -1,5 +1,7 @@
 """Github app issue model."""
 
+from functools import lru_cache
+
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -25,17 +27,25 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
     title = models.CharField(verbose_name="Title", max_length=500)
     body = models.TextField(verbose_name="Body", default="")
-    summary = models.TextField(verbose_name="Summary", max_length=3000, default="")
+
+    summary = models.TextField(
+        verbose_name="Summary", default="", blank=True
+    )  # AI generated summary
+    hint = models.TextField(verbose_name="Hint", default="", blank=True)  # AI generated hint
     state = models.CharField(
         verbose_name="State", max_length=20, choices=State, default=State.OPEN
     )
-    state_reason = models.CharField(verbose_name="State reason", max_length=200, default="")
+    state_reason = models.CharField(
+        verbose_name="State reason", max_length=200, default="", blank=True
+    )
     url = models.URLField(verbose_name="URL", max_length=500, default="")
     number = models.PositiveBigIntegerField(verbose_name="Number", default=0)
     sequence_id = models.PositiveBigIntegerField(verbose_name="Issue ID", default=0)
 
     is_locked = models.BooleanField(verbose_name="Is locked", default=False)
-    lock_reason = models.CharField(verbose_name="Lock reason", max_length=200, default="")
+    lock_reason = models.CharField(
+        verbose_name="Lock reason", max_length=200, default="", blank=True
+    )
 
     comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
 
@@ -129,6 +139,12 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     def bulk_save(issues, fields=None):
         """Bulk save issues."""
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def open_issues_count():
+        """Return open issues count."""
+        return Issue.open_issues.count()
 
     @staticmethod
     def update_data(gh_issue, author=None, repository=None, save=True):

@@ -7,10 +7,15 @@ import github
 from django.core.management.base import BaseCommand
 from github.GithubException import BadCredentialsException
 
+from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
-from apps.github.models import Release, Repository, sync_repository
+from apps.github.models.release import Release
+from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
-from apps.owasp.models import Chapter, Committee, Event, Project
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.committee import Committee
+from apps.owasp.models.event import Event
+from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
 

@@ -1,1 +1,1 @@
-"""Common management module."""
+"""OWASP management module."""

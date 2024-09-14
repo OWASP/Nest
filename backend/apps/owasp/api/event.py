@@ -2,7 +2,7 @@
 
 from rest_framework import serializers, viewsets
 
-from apps.owasp.models import Event
+from apps.owasp.models.event import Event
 
 
 # Serializers define the API representation.

@@ -2,7 +2,7 @@
 
 from rest_framework import serializers, viewsets
 
-from apps.owasp.models import Chapter
+from apps.owasp.models.chapter import Chapter
 
 
 # Serializers define the API representation.

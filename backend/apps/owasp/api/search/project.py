@@ -3,7 +3,7 @@
 from algoliasearch_django import raw_search
 from django.http import JsonResponse
 
-from apps.owasp.models import Project
+from apps.owasp.models.project import Project
 
 
 def projects(request):

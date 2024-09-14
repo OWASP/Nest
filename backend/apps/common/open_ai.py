@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class OpenAi:
     """Open AI communication class."""
 
-    def __init__(self, model="gpt-4o-mini", max_tokens=1000, temperature=0.7, prompt=None):
+    def __init__(self, model="gpt-4o-mini", max_tokens=1000, temperature=0.7):
         """OpenAi constructor."""
         self.client = openai.OpenAI(
             api_key=settings.OPEN_AI_SECRET_KEY,
@@ -22,18 +22,21 @@ class OpenAi:
         self.model = model
         self.temperature = temperature
 
-        if prompt:
-            self.set_prompt(prompt)
+    def set_input(self, content):
+        """Set system role content."""
+        self.input = content
+
+        return self
+
+    def set_max_tokens(self, max_tokens):
+        """Set max tokens."""
+        self.max_tokens = max_tokens
+
+        return self
 
     def set_prompt(self, content):
         """Set system role content."""
         self.prompt = content
-
-        return self
-
-    def set_input(self, content):
-        """Set system role content."""
-        self.input = content
 
         return self
 

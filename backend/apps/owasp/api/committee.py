@@ -2,7 +2,7 @@
 
 from rest_framework import serializers, viewsets
 
-from apps.owasp.models import Committee
+from apps.owasp.models.committee import Committee
 
 
 # Serializers define the API representation.

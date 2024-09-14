@@ -2,14 +2,12 @@
 
 from rest_framework import routers
 
-from apps.github.api import (
-    IssueViewSet,
-    LabelViewSet,
-    OrganizationViewSet,
-    ReleaseViewSet,
-    RepositoryViewSet,
-    UserViewSet,
-)
+from apps.github.api.issue import IssueViewSet
+from apps.github.api.label import LabelViewSet
+from apps.github.api.organization import OrganizationViewSet
+from apps.github.api.release import ReleaseViewSet
+from apps.github.api.repository import RepositoryViewSet
+from apps.github.api.user import UserViewSet
 
 router = routers.SimpleRouter()
 

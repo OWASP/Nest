@@ -3,23 +3,29 @@
 from algoliasearch_django import raw_search
 from django.http import JsonResponse
 
-from apps.github.models import Issue
+from apps.github.models.issue import Issue
 
 
-def project_issues(request):
-    """Search project issues view."""
-    issues_params = {
+def get_issues(query, distinct=False, limit=25):
+    """Return issues relevant to a search query."""
+    params = {
         "attributesToRetrieve": [
             "idx_created_at",
             "idx_project_name",
             "idx_repository_languages",
+            "idx_summary",
             "idx_title",
             "idx_url",
         ],
-        "hitsPerPage": 25,
+        "hitsPerPage": limit,
     }
 
-    return JsonResponse(
-        raw_search(Issue, request.GET.get("q", ""), issues_params)["hits"],
-        safe=False,
-    )
+    if distinct:
+        params["distinct"] = 1
+
+    return raw_search(Issue, query, params)["hits"]
+
+
+def project_issues(request):
+    """Search project issues view."""
+    return JsonResponse(get_issues(request.GET.get("q", "")), safe=False)

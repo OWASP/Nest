@@ -3,7 +3,12 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from apps.github.models import Issue, Label, Organization, Release, Repository, User
+from apps.github.models.issue import Issue
+from apps.github.models.label import Label
+from apps.github.models.organization import Organization
+from apps.github.models.release import Release
+from apps.github.models.repository import Repository
+from apps.github.models.user import User
 
 
 class LabelAdmin(admin.ModelAdmin):
@@ -26,7 +31,7 @@ class IssueAdmin(admin.ModelAdmin):
         "state",
         "is_locked",
     )
-    search_fields = ("title", "body", "summary")
+    search_fields = ("title",)
 
     def custom_field_github_url(self, obj):
         """Issue GitHub URL."""

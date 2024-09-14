@@ -1,14 +1,20 @@
 """OWASP app project models."""
 
+from functools import lru_cache
+
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.models.common import OwaspEntity
+from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins import ProjectIndexMixin
 
 
 class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
     """Project model."""
+
+    objects = models.Manager()
+    active_projects = ActiveProjectManager()
 
     class Meta:
         db_table = "owasp_projects"
@@ -182,6 +188,12 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
 
         # FKs.
         self.owasp_repository = repository
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def active_projects_count():
+        """Return active projects count."""
+        return Project.active_projects.count()
 
     @staticmethod
     def bulk_save(projects):

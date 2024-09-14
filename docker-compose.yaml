@@ -1,10 +1,11 @@
 services:
   backend:
     container_name: nest-backend
-    command: >
-      bash -c '
+    command: |
+      /bin/bash -c '
         poetry install --no-root &&
         poetry run python manage.py migrate &&
+        poetry run python manage.py run_slack_bot &
         poetry run python manage.py runserver 0.0.0.0:8000
       '
     build:

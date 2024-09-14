@@ -12,8 +12,8 @@ from django.views.generic import TemplateView
 from rest_framework import routers
 
 from apps.github.api.urls import router as github_router
-from apps.owasp.api.search import project_issues as search_project_issues
-from apps.owasp.api.search import projects as search_projects
+from apps.owasp.api.search.issue import project_issues as search_project_issues
+from apps.owasp.api.search.project import projects as search_projects
 from apps.owasp.api.urls import router as owasp_router
 from apps.owasp.views import home_page
 
@@ -23,8 +23,8 @@ router.registry.extend(owasp_router.registry)
 
 urlpatterns = [
     path("api/v1/", include(router.urls)),
-    path("api/v1/owasp/search/issue", search_project_issues, name="search-project-issues"),
-    path("api/v1/owasp/search/project", search_projects, name="search-projects"),
+    path("api/v1/owasp/search/issue", search_project_issues, name="api-search-project-issues"),
+    path("api/v1/owasp/search/project", search_projects, name="api-search-projects"),
     path(
         "projects/",
         TemplateView.as_view(template_name="search/project.html"),

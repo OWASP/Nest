@@ -12,7 +12,7 @@ from lxml import etree, html
 
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE, GITHUB_USER_RE
 from apps.github.utils import normalize_url
-from apps.owasp.models import Project
+from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
 

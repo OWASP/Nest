@@ -2,7 +2,7 @@
 
 from rest_framework import serializers, viewsets
 
-from apps.owasp.models import Project
+from apps.owasp.models.project import Project
 
 
 # Serializers define the API representation.

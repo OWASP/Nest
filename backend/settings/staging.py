@@ -31,3 +31,5 @@ class Staging(Base):
     }
 
     CSRF_TRUSTED_ORIGINS = ("https://nest.owasp.dev",)
+
+    SITE_URL = "https://nest.owasp.dev"

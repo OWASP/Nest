@@ -2,12 +2,10 @@
 
 from rest_framework import routers
 
-from apps.owasp.api import (
-    ChapterViewSet,
-    CommitteeViewSet,
-    EventViewSet,
-    ProjectViewSet,
-)
+from apps.owasp.api.chapter import ChapterViewSet
+from apps.owasp.api.committee import CommitteeViewSet
+from apps.owasp.api.event import EventViewSet
+from apps.owasp.api.project import ProjectViewSet
 
 router = routers.SimpleRouter()
 

@@ -19,6 +19,7 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
+    SITE_URL = "http://localhost:8000"
 
     DJANGO_APPS = (
         "django.contrib.admin",
@@ -39,6 +40,7 @@ class Base(Configuration):
         "apps.common",
         "apps.github",
         "apps.owasp",
+        "apps.slack",
     )
 
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -150,3 +152,6 @@ class Base(Configuration):
     STATIC_ROOT = BASE_DIR / "staticfiles"
 
     OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
+
+    SLACK_APP_TOKEN = values.SecretValue()
+    SLACK_BOT_TOKEN = values.SecretValue()

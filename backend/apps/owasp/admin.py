@@ -3,7 +3,10 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from apps.owasp.models import Chapter, Committee, Event, Project
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.committee import Committee
+from apps.owasp.models.event import Event
+from apps.owasp.models.project import Project
 
 
 class ChapterAdmin(admin.ModelAdmin):

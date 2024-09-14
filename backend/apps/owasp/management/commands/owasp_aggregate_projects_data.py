@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.owasp.models import Project
+from apps.owasp.models.project import Project
 
 
 class Command(BaseCommand):

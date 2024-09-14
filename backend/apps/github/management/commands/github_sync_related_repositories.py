@@ -7,10 +7,12 @@ import github
 from django.core.management.base import BaseCommand
 from github.GithubException import UnknownObjectException
 
+from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
-from apps.github.models import Issue, Release, sync_repository
+from apps.github.models.issue import Issue
+from apps.github.models.release import Release
 from apps.github.utils import get_repository_path
-from apps.owasp.models import Project
+from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options):
-        active_projects = Project.objects.filter(is_active=True).order_by("created_at")
+        active_projects = Project.active_projects.order_by("created_at")
         active_projects_count = active_projects.count()
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
