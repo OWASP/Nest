@@ -24,9 +24,7 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options):
-        active_projects = Project.objects.filter(is_active=True).order_by(
-            "owasp_repository__created_at"
-        )
+        active_projects = Project.active_projects.order_by("-created_at")
         active_projects_count = active_projects.count()
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 

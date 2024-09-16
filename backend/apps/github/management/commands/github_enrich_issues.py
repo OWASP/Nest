@@ -15,12 +15,25 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--offset", default=0, required=False, type=int)
-        parser.add_argument("--update-hint", default=True, required=False, type=bool)
-        parser.add_argument("--update-summary", default=True, required=False, type=bool)
+        parser.add_argument(
+            "--force-update-hint", default=False, required=False, action="store_true"
+        )
+        parser.add_argument(
+            "--force-update-summary", default=False, required=False, action="store_true"
+        )
+        parser.add_argument("--update-hint", default=True, required=False, action="store_true")
+        parser.add_argument("--update-summary", default=True, required=False, action="store_true")
 
     def handle(self, *args, **options):
         open_ai = OpenAi()
-        open_issues = Issue.open_issues.without_summary.order_by("-created_at")
+
+        force_update_hint = options["force_update_hint"]
+        force_update_summary = options["force_update_summary"]
+        is_force_update = any((force_update_hint, force_update_summary))
+
+        open_issues = (
+            Issue.open_issues if is_force_update else Issue.open_issues.without_summary
+        ).order_by("-created_at")
         open_issues_count = open_issues.count()
 
         update_hint = options["update_hint"]
@@ -68,5 +81,7 @@ class Command(BaseCommand):
 
             issues.append(issue)
 
-        # Bulk save data.
+            if not len(issues) % 1000:
+                Issue.bulk_save(issues, fields=update_fields)
+
         Issue.bulk_save(issues, fields=update_fields)

@@ -12,13 +12,13 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *_args, **options):
-        all_projects = Project.objects.order_by("id")
-        all_projects_count = all_projects.count()
+        active_projects = Project.active_projects.order_by("-created_at")
+        active_projects_count = active_projects.count()
 
         offset = options["offset"]
         projects = []
-        for idx, project in enumerate(all_projects[offset:]):
-            prefix = f"{idx + offset + 1} of {all_projects_count - offset}"
+        for idx, project in enumerate(active_projects[offset:]):
+            prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
             print(f"{prefix:<10} {project}")
 
             # Deactivate project with archived repositories.

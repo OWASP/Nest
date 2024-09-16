@@ -7,3 +7,6 @@ class Local(Base):
     """Local configuration."""
 
     DEBUG = True
+
+    SLACK_COMMANDS_ENABLED = True
+    SLACK_EVENTS_ENABLED = True

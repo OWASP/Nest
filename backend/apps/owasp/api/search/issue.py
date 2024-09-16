@@ -27,5 +27,5 @@ def get_issues(query, distinct=False, limit=25):
 
 
 def project_issues(request):
-    """Search project issues view."""
+    """Search project issues API endpoint."""
     return JsonResponse(get_issues(request.GET.get("q", "")), safe=False)

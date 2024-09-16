@@ -19,6 +19,8 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
+
+    SITE_NAME = "nest.owasp.dev"
     SITE_URL = "http://localhost:8000"
 
     DJANGO_APPS = (
@@ -155,3 +157,6 @@ class Base(Configuration):
 
     SLACK_APP_TOKEN = values.SecretValue()
     SLACK_BOT_TOKEN = values.SecretValue()
+    SLACK_SIGNING_SECRET = values.SecretValue()
+    SLACK_COMMANDS_ENABLED = True
+    SLACK_EVENTS_ENABLED = True

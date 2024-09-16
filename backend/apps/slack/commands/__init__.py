@@ -1,1 +1,1 @@
-from apps.slack.commands.contribute import contribute
+from apps.slack.commands import contribute, projects
