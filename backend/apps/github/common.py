@@ -66,10 +66,11 @@ def sync_repository(gh_repository, organization=None, user=None):
             if gh_issue.pull_request:
                 continue
 
-            # GitHub issue author.
-            if gh_issue.user is not None:
-                author = User.update_data(gh_issue.user)
-
+            author = (
+                User.update_data(gh_issue.user)
+                if gh_issue.user and gh_issue.user.type != "Bot"
+                else None
+            )
             issue = Issue.update_data(gh_issue, author=author, repository=repository)
 
             # Assignees.
