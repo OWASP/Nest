@@ -25,4 +25,4 @@ def get_projects(query, limit=25):
 
 def projects(request):
     """Search projects API endpoint."""
-    return JsonResponse(raw_search(get_projects(request.GET.get("q", "")))["hits"], safe=False)
+    return JsonResponse(get_projects(request.GET.get("q", "")), safe=False)
