@@ -18,8 +18,8 @@ class Command(BaseCommand):
         offset = options["offset"]
         projects = []
         for idx, project in enumerate(active_projects[offset:]):
-            prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
-            print(f"{prefix:<10} {project}")
+            prefix = f"{idx + offset + 1} of {active_projects_count}"
+            print(f"{prefix:<10} {project.owasp_url}")
 
             # Deactivate project with archived repositories.
             if project.owasp_repository.is_archived:

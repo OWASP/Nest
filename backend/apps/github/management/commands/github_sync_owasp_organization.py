@@ -56,14 +56,14 @@ class Command(BaseCommand):
         gh_repositories_count = gh_repositories.totalCount - offset
         for idx, gh_repository in enumerate(gh_repositories[offset:]):
             prefix = f"{idx + offset + 1} of {gh_repositories_count}"
-            print(f"{prefix:<12} {gh_repository.name}")
+            entity_key = gh_repository.name.lower()
+            print(f"{prefix:<12} https://owasp.org/{entity_key}")
 
             owasp_organization, repository, new_releases = sync_repository(
                 gh_repository, organization=owasp_organization, user=owasp_user
             )
             releases.extend(new_releases)
 
-            entity_key = gh_repository.name.lower()
             # OWASP chapters.
             if entity_key.startswith("www-chapter-"):
                 chapters.append(Chapter.update_data(gh_repository, repository, save=False))

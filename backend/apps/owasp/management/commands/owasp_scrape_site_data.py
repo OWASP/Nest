@@ -31,7 +31,7 @@ class Command(BaseCommand):
         offset = options["offset"]
         projects = []
         for idx, project in enumerate(active_projects[offset:]):
-            prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
+            prefix = f"{idx + offset + 1} of {active_projects_count}"
             print(f"{prefix:<10} {project.owasp_url}")
 
             page_response = requests.get(project.owasp_url, timeout=10)

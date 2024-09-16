@@ -99,11 +99,11 @@ def sync_repository(gh_repository, organization=None, user=None):
             if release_node_id in existing_release_node_ids:
                 break
 
-            # GitHub release author.
-            if gh_release.author is not None:
-                author = User.update_data(gh_release.author)
-
-            # GitHub release.
+            author = (
+                User.update_data(gh_release.author)
+                if gh_release.author and gh_release.author.type != "Bot"
+                else None
+            )
             releases.append(Release.update_data(gh_release, author=author, repository=repository))
 
     return organization, repository, releases
