@@ -2,8 +2,8 @@
   hosts: nest_staging
   tasks:
     - name: Update Nest data
-      async: 10800 # 3 hours
-      poll: 60
+      async: 21600 # 6 hours
+      poll: 600 # 10 minutes
       register: update_data
       shell:
         cmd: 'make update'
