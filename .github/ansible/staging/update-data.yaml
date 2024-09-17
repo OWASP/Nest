@@ -8,6 +8,6 @@
       shell:
         cmd: 'make update'
 
-    - name: Show the output
+    - name: Print job output
       debug:
         var: update_data
