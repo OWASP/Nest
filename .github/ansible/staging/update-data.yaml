@@ -1,6 +1,6 @@
 - name: Run Nest Staging Data Update
   hosts: nest_staging
   tasks:
-    - name: Start services
+    - name: Update Nest data
       shell:
         cmd: 'make update-data'
