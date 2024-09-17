@@ -3,4 +3,4 @@
   tasks:
     - name: Update Nest data
       shell:
-        cmd: 'make update-data'
+        cmd: 'make update'
