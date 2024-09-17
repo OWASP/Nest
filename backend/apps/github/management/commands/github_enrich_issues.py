@@ -54,19 +54,20 @@ class Command(BaseCommand):
             if update_summary:
                 open_ai.set_max_tokens(500).set_prompt(
                     (
-                        "Summarize the following GitHub issue."
-                        "Avoid mentioning author's name or issue creation date."
-                        "Avoid using lists for description."
+                        "Summarize the following GitHub issue using simple English."
+                        "Do not mention author's name or issue creation date."
+                        "Do not use lists for description."
                         "Do not use markdown in output."
-                        "Limit summary by 3 sentences."
+                        "Limit the entire summary to 3 sentences."
                     )
                     if issue.project.is_documentation_type
                     else (
-                        "Summarize the following GitHub issue using imperative mood."
+                        "Summarize the following GitHub issue using imperative mood using "
+                        "simple English."
                         "Use a good amount technical details."
-                        "Avoid using lists for description."
+                        "Do not use lists for description."
                         "Do not use mardown in output."
-                        "Limit summary by 3 sentences."
+                        "Limit the entire summary to 3 sentences."
                     )
                 )
                 issue.summary = open_ai.complete() or ""
@@ -74,8 +75,10 @@ class Command(BaseCommand):
             # Generate hint
             if update_hint:
                 open_ai.set_max_tokens(1000).set_prompt(
-                    "Describe possible steps of approaching the problem."
-                    "Limit output by 10 steps."
+                    "Describe possible steps of approaching the problem using simple English."
+                    "Limit the entire guidance to 10 steps top."
+                    "Do not start your response with confirmation phrases like "
+                    "'sure', 'certainly', and so on. Go straight to the details."
                 )
                 issue.hint = open_ai.complete() or ""
 
