@@ -14,6 +14,9 @@ jobs:
     name: Run data update
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Run make update-data
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/update-data.yaml
