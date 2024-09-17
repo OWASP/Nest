@@ -9,7 +9,7 @@
       shell:
         cmd: 'make update'
 
-    - name: Check make update
+    - name: Check job status
       async_status:
         jid: '{{ update_data.ansible_job_id }}'
       delay: 60
