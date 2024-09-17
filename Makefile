@@ -17,15 +17,18 @@ exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
 github-sync-owasp-organization:
+	@echo "Syncing OWASP GitHub organization"
 	@CMD="poetry run python manage.py github_sync_owasp_organization" $(MAKE) exec-backend-command
 
 github-sync-related-repositories:
+	@echo "Syncing OWASP GitHub related repositories"
 	@CMD="poetry run python manage.py github_sync_related_repositories" $(MAKE) exec-backend-command
 
 github-enrich-issues:
 	@CMD="poetry run python manage.py github_enrich_issues" $(MAKE) exec-backend-command
 
 index-data:
+	@echo "Indexing Nest data"
 	@CMD="poetry run python manage.py algolia_reindex" $(MAKE) exec-backend-command
 
 load-data:
@@ -41,9 +44,11 @@ migrations:
 	@CMD="poetry run python manage.py makemigrations" $(MAKE) exec-backend-command
 
 owasp-aggregate-projects-data:
+	@echo "Aggregating OWASP projects data"
 	@CMD="poetry run python manage.py owasp_aggregate_projects_data" $(MAKE) exec-backend-command
 
 owasp-scrape-site-data:
+	@echo "Scraping OWASP site projects data"
 	@CMD="poetry run python manage.py owasp_scrape_site_data" $(MAKE) exec-backend-command
 
 pre-commit:
