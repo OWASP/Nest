@@ -3,6 +3,6 @@
   tasks:
     - name: Update Nest data
       async: 10800 # 3 hours
-      poll: 1800 # 30 minutes
+      poll: 0
       shell:
         cmd: 'make update'
