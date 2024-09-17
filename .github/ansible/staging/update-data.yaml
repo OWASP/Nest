@@ -3,16 +3,11 @@
   tasks:
     - name: Update Nest data
       async: 10800 # 3 hours
-      ignore_errors: true
-      poll: 0
+      poll: 60
       register: update_data
       shell:
         cmd: 'make update'
 
-    - name: Check job status
-      async_status:
-        jid: '{{ update_data.ansible_job_id }}'
-      delay: 60
-      register: job_result
-      retries: 180
-      until: job_result.finished
+    - name: Show the output
+      debug:
+        var: update_data
