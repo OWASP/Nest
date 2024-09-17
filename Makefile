@@ -22,7 +22,7 @@ github-sync-related-repositories:
 github-enrich-issues:
 	@CMD="poetry run python manage.py github_enrich_issues" $(MAKE) exec-backend-command
 
-index:
+index-data:
 	@CMD="poetry run python manage.py algolia_reindex" $(MAKE) exec-backend-command
 
 load-data:
@@ -59,7 +59,7 @@ setup:
 shell:
 	@CMD="/bin/bash" $(MAKE) exec-backend-command
 
-sync: \
+sync-data: \
 	github-sync-owasp-organization \
 	owasp-scrape-site-data \
 	github-sync-related-repositories \
@@ -70,4 +70,4 @@ test:
 	@docker build -f backend/Dockerfile.test backend -t nest-backend-test 2>/dev/null
 	@docker run -e DJANGO_CONFIGURATION=Test nest-backend-test poetry run pytest
 
-update: sync index
+update-data: sync-data index-data

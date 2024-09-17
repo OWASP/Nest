@@ -1,0 +1,18 @@
+name: Update data
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  update-data:
+    name: Run data update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run make update-data
+        working-directory: .github/ansible
+        run: ansible-playbook -i inventory.yaml staging/update-data.yaml
