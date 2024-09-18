@@ -6,4 +6,4 @@
       poll: 0
       register: update_data
       shell: |
-        make update > /tmp/update_data.log 2>&1
+        make update-data > /tmp/update_data.log 2>&1
