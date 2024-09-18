@@ -1,7 +1,6 @@
 """Slack bot contribute command."""
 
 from django.conf import settings
-from django.utils.text import Truncator
 
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
@@ -38,20 +37,17 @@ def handler(ack, say, command):
                 if search_query_escaped
                 else (
                     "\n*Here are top 10 OWASP projects:*\n"
-                    "You can refine the results by using a more specific query, e.g. "
+                    "You can refine the results by using a more specific query, e.g.\n"
                     f"`{COMMAND} application security`"
                 )
             ),
         ]
 
         for idx, project in enumerate(projects):
-            description_truncated = Truncator(project["idx_description"]).chars(
-                TEXT_TRUNCATION_LIMIT, truncate="..."
-            )
             blocks.append(
                 markdown(
                     f"\n*{idx + 1}.* <{project['idx_url']}|*{escape(project['idx_name'])}*>\n"
-                    f"{escape(description_truncated)}\n"
+                    f"{escape(project['idx_summary'])}\n"
                 ),
             )
 

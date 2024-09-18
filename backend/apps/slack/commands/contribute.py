@@ -38,7 +38,7 @@ def handler(ack, say, command):
                 if search_query_escaped
                 else (
                     "\n*Here are top 10 most recent issues:*\n"
-                    "You can refine the results by using a more specific query, e.g. "
+                    "You can refine the results by using a more specific query, e.g.\n"
                     f"`{COMMAND} python good first issue`"
                 )
             ),

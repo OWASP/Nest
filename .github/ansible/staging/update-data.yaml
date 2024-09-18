@@ -1,9 +1,0 @@
-- name: Run Nest Staging Data Update
-  hosts: nest_staging
-  tasks:
-    - name: Update Nest data
-      async: 21600 # 6 hours
-      poll: 0
-      register: update_data
-      shell: |
-        make update-data > /tmp/update_data.log 2>&1
