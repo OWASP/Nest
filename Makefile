@@ -75,7 +75,7 @@ sync-data: \
 	owasp-aggregate-projects-data
 
 test:
-	@docker build -f backend/Dockerfile.test backend -t nest-backend-test 2>/dev/null
+	@docker build -f backend/Dockerfile.test backend -t nest-backend-test
 	@docker run -e DJANGO_CONFIGURATION=Test nest-backend-test poetry run pytest
 
 update-data: sync-data index-data
