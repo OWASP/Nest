@@ -28,16 +28,16 @@ def handler(ack, say, command):
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
     ]
 
-    if issues := get_issues(search_query, distinct=True, limit=10):
+    if issues := get_issues(search_query, limit=10):
         blocks = [
             markdown(
                 (
-                    f"\n*Here are top 10 most relevant issues (1 issue per project) "
+                    f"\n*Here are top 10 most relevant issues "
                     f"that I found for*\n `{COMMAND} {search_query_escaped}`:\n"
                 )
                 if search_query_escaped
                 else (
-                    "\n*Here are top 10 most recent issues (1 issue per project):*\n"
+                    "\n*Here are top 10 most recent issues:*\n"
                     "You can refine the results by using a more specific query, e.g. "
                     f"`{COMMAND} python good first issue`"
                 )

@@ -10,9 +10,15 @@ def get_projects(query, limit=25):
     """Return projects relevant to a search query."""
     params = {
         "attributesToRetrieve": [
-            "idx_description",
+            "idx_contributors_count",
+            "idx_created_at",
+            "idx_forks_count",
+            "idx_level",
             "idx_name",
+            "idx_stars_count",
+            "idx_summary",
             "idx_topics",
+            "idx_type",
             "idx_url",
         ],
         "hitsPerPage": limit,

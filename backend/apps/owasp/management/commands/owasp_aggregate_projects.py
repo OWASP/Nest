@@ -6,7 +6,7 @@ from apps.owasp.models.project import Project
 
 
 class Command(BaseCommand):
-    help = "Update OWASP projects."
+    help = "Aggregate OWASP projects data."
 
     def add_arguments(self, parser):
         parser.add_argument("--offset", default=0, required=False, type=int)

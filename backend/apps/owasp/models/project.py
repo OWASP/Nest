@@ -48,6 +48,9 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     description = models.CharField(verbose_name="Description", max_length=500, default="")
+    summary = models.TextField(
+        verbose_name="Summary", default="", blank=True
+    )  # AI generated summary
 
     is_active = models.BooleanField(verbose_name="Is active", default=True)
     has_active_repositories = models.BooleanField(
@@ -55,12 +58,18 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
     )
 
     level = models.CharField(
-        verbose_name="Level", max_length=20, choices=ProjectLevel, default=ProjectLevel.OTHER
+        verbose_name="Level",
+        max_length=20,
+        choices=ProjectLevel,
+        default=ProjectLevel.OTHER,
     )
     level_raw = models.CharField(verbose_name="Level raw", max_length=50, default="")
 
     type = models.CharField(
-        verbose_name="Type", max_length=20, choices=ProjectType, default=ProjectType.OTHER
+        verbose_name="Type",
+        max_length=20,
+        choices=ProjectType,
+        default=ProjectType.OTHER,
     )
     type_raw = models.CharField(verbose_name="Type raw", max_length=100, default="")
 
@@ -145,6 +154,14 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         """Projects to index."""
         return self.is_active and self.has_active_repositories
 
+    @property
+    def raw_index_md_url(self):
+        """Return project's raw index.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
+        )
+
     def deactivate(self):
         """Deactivate project."""
         self.is_active = False
@@ -196,9 +213,9 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         return Project.active_projects.count()
 
     @staticmethod
-    def bulk_save(projects):
+    def bulk_save(projects, fields=None):
         """Bulk save projects."""
-        BulkSaveModel.bulk_save(Project, projects)
+        BulkSaveModel.bulk_save(Project, projects, fields=fields)
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):

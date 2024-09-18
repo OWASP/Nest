@@ -62,6 +62,11 @@ class ProjectIndexMixin:
         return self.stars_count
 
     @property
+    def idx_summary(self):
+        """Return summary for indexing."""
+        return self.summary
+
+    @property
     def idx_tags(self):
         """Return tags for indexing."""
         return self.tags

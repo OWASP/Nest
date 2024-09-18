@@ -24,6 +24,7 @@ class ProjectIndex(AlgoliaIndex):
         "idx_name",
         "idx_organizations",
         "idx_stars_count",
+        "idx_summary",
         "idx_tags",
         "idx_topics",
         "idx_type",

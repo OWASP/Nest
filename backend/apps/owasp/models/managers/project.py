@@ -9,3 +9,8 @@ class ActiveProjectManager(models.Manager):
     def get_queryset(self):
         """Get queryset."""
         return super().get_queryset().filter(is_active=True)
+
+    @property
+    def without_summary(self):
+        """Return projects without summary."""
+        return self.get_queryset().filter(summary="")

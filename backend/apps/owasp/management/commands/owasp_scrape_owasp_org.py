@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Updates OWASP entities based on their owasp.org data."
+    help = "Scrape owasp.org pages and update the relevant entities."
 
     def add_arguments(self, parser):
         parser.add_argument("--offset", default=0, required=False, type=int)
