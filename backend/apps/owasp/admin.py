@@ -58,10 +58,11 @@ class ProjectAdmin(admin.ModelAdmin):
         "type",
     )
     search_fields = (
-        "name",
         "description",
-        "leaders_raw",
+        "key",
         "languages",
+        "leaders_raw",
+        "name",
         "topics",
     )
 

@@ -17,10 +17,8 @@ def handler(ack, say, command):
     """Slack /contribute command handler."""
     from apps.github.models.issue import Issue
     from apps.owasp.api.search.issue import get_issues
-    from apps.owasp.models.project import Project
 
     ack()
-
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
@@ -30,8 +28,7 @@ def handler(ack, say, command):
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
     ]
 
-    issues = get_issues(search_query, distinct=True, limit=10)
-    if issues:
+    if issues := get_issues(search_query, distinct=True, limit=10):
         blocks = [
             markdown(
                 (
@@ -41,11 +38,12 @@ def handler(ack, say, command):
                 if search_query_escaped
                 else (
                     "\n*Here are top 10 most recent issues (1 issue per project):*\n"
-                    "You can refine the results by using a more specific query, e.g.\n"
+                    "You can refine the results by using a more specific query, e.g. "
                     f"`{COMMAND} python good first issue`"
                 )
             ),
         ]
+
         for idx, issue in enumerate(issues):
             summary_truncated = Truncator(issue["idx_summary"]).chars(
                 TEXT_TRUNCATION_LIMIT, truncate="..."
@@ -60,9 +58,8 @@ def handler(ack, say, command):
 
         blocks.append(
             markdown(
-                f"⚠️ *Extended search over {Issue.open_issues_count()} open issues in "
-                f"{Project.active_projects_count()} OWASP projects is available at "
-                f"<{get_absolute_url('project-issues')}|{settings.SITE_NAME}>*\n"
+                f"⚠️ *Extended search over {Issue.open_issues_count()} open issues "
+                f"is available at <{get_absolute_url('project-issues')}|{settings.SITE_NAME}>*\n"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             ),
         )

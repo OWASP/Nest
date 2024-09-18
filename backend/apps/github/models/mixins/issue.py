@@ -12,16 +12,16 @@ class IssueIndexMixin:
         return (
             self.author.login
             if self.author and self.author.login and self.author.login != GITHUB_GHOST_USER_LOGIN
-            else None
+            else ""
         )
 
     @property
     def idx_author_name(self):
         """Return author name for indexing."""
         return (
-            self.author.name or None
-            if self.author and self.author.login and self.author.login != GITHUB_GHOST_USER_LOGIN
-            else None
+            self.author.name
+            if self.author and self.author.login != GITHUB_GHOST_USER_LOGIN
+            else ""
         )
 
     @property
@@ -42,12 +42,12 @@ class IssueIndexMixin:
     @property
     def idx_project_description(self):
         """Return project description for indexing."""
-        return self.project.idx_description if self.project else None
+        return self.project.idx_description if self.project else ""
 
     @property
     def idx_project_level(self):
         """Return project level for indexing."""
-        return self.project.idx_level if self.project else None
+        return self.project.idx_level if self.project else ""
 
     @property
     def idx_project_tags(self):
@@ -62,7 +62,7 @@ class IssueIndexMixin:
     @property
     def idx_project_name(self):
         """Return project name for indexing."""
-        return self.project.idx_name if self.project else None
+        return self.project.idx_name if self.project else ""
 
     @property
     def idx_repository_contributors_count(self):
@@ -72,7 +72,7 @@ class IssueIndexMixin:
     @property
     def idx_repository_description(self):
         """Return repository description for indexing."""
-        return self.repository.idx_description or None
+        return self.repository.idx_description
 
     @property
     def idx_repository_forks_count(self):
@@ -97,7 +97,7 @@ class IssueIndexMixin:
     @property
     def idx_summary(self):
         """Return summary for indexing."""
-        return self.summary if self.summary else None
+        return self.summary
 
     @property
     def idx_title(self):

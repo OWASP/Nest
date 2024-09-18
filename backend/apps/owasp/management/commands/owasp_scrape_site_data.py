@@ -9,6 +9,8 @@ import requests
 from django.core.management.base import BaseCommand
 from github.GithubException import UnknownObjectException
 from lxml import etree, html
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE, GITHUB_USER_RE
 from apps.github.utils import normalize_url
@@ -28,13 +30,30 @@ class Command(BaseCommand):
         active_projects_count = active_projects.count()
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
+        http_adapter = HTTPAdapter(
+            max_retries=Retry(
+                backoff_factor=1,
+                raise_on_status=False,
+                status_forcelist=[429, 500, 502, 503, 504],
+                total=5,
+            )
+        )
+        session = requests.Session()
+        session.mount("https://", http_adapter)
+        session.mount("http://", http_adapter)
+
         offset = options["offset"]
         projects = []
         for idx, project in enumerate(active_projects[offset:]):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
             print(f"{prefix:<10} {project.owasp_url}")
 
-            page_response = requests.get(project.owasp_url, timeout=10)
+            try:
+                page_response = session.get(project.owasp_url, timeout=(30, 60))
+            except requests.exceptions.RequestException:
+                logger.exception("Request failed", extra={"url": project.owasp_url})
+                continue
+
             if page_response.status_code == requests.codes.not_found:
                 project.deactivate()
                 continue
@@ -61,8 +80,15 @@ class Command(BaseCommand):
             invalid_urls = set()
             related_urls = set()
             for scraped_url in scraped_urls:
-                # Check for redirects.
-                github_response = requests.get(scraped_url, allow_redirects=False, timeout=10)
+                try:
+                    # Check for redirects.
+                    github_response = session.get(
+                        scraped_url, allow_redirects=False, timeout=(30, 60)
+                    )
+                except requests.exceptions.RequestException:
+                    logger.exception("Request failed", extra={"url": scraped_url})
+                    continue
+
                 github_url = None
                 if github_response.status_code == requests.codes.ok:
                     github_url = scraped_url

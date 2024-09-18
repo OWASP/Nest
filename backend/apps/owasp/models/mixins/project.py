@@ -47,14 +47,14 @@ class ProjectIndexMixin:
         return float(self.level_raw) if self.level_raw else None
 
     @property
+    def idx_name(self):
+        """Return name for indexing."""
+        return self.name or " ".join(self.key.replace("www-project-", "").capitalize().split("-"))
+
+    @property
     def idx_organizations(self):
         """Return organizations for indexing."""
         return join_values(fields=(o.name for o in self.organizations.all()))
-
-    @property
-    def idx_name(self):
-        """Return name for indexing."""
-        return self.name
 
     @property
     def idx_stars_count(self):

@@ -19,7 +19,6 @@ def handler(ack, say, command):
     from apps.owasp.models.project import Project
 
     ack()
-
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
@@ -29,8 +28,7 @@ def handler(ack, say, command):
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
     ]
 
-    projects = get_projects(search_query, limit=10)
-    if projects:
+    if projects := get_projects(search_query, limit=10):
         blocks = [
             markdown(
                 (
@@ -40,11 +38,12 @@ def handler(ack, say, command):
                 if search_query_escaped
                 else (
                     "\n*Here are top 10 OWASP projects:*\n"
-                    "You can refine the results by using a more specific query, e.g.\n"
+                    "You can refine the results by using a more specific query, e.g. "
                     f"`{COMMAND} application security`"
                 )
             ),
         ]
+
         for idx, project in enumerate(projects):
             description_truncated = Truncator(project["idx_description"]).chars(
                 TEXT_TRUNCATION_LIMIT, truncate="..."
