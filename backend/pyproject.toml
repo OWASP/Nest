@@ -37,11 +37,13 @@ python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 slack-bolt = "^1.20.1"
+djlint = "^1.35.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"
 ruff = "^0.5.7"
 isort = "^5.13.2"
+djlint = "^1.35.2"
 
 
 [tool.poetry.group.test.dependencies]
@@ -51,6 +53,12 @@ pytest-cov = "^4.0"
 pytest-xdist = "^3.0"
 pytest-mock = "^3.0"
 python-dotenv = "^1.0.1"
+
+[tool.djlint]
+format = true
+format_js = true
+format_css = true
+indent = 4
 
 [tool.isort]
 known_third_party = ["django", "rest_framework"]

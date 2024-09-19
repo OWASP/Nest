@@ -35,6 +35,11 @@ class IssueIndexMixin:
         return self.created_at
 
     @property
+    def idx_hint(self):
+        """Return hint for indexing."""
+        return self.hint if self.hint else None
+
+    @property
     def idx_labels(self):
         """Return labels for indexing."""
         return [label.name for label in self.labels.all()]
@@ -63,6 +68,11 @@ class IssueIndexMixin:
     def idx_project_name(self):
         """Return project name for indexing."""
         return self.project.idx_name if self.project else ""
+
+    @property
+    def idx_project_url(self):
+        """Return project URL for indexing."""
+        return self.project.idx_url if self.project else None
 
     @property
     def idx_repository_contributors_count(self):

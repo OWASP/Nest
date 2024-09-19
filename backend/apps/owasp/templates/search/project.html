@@ -1,58 +1,218 @@
+{% extends "base.html" %}
 {% load static %}
+{% block content %}
+    {{ block.super }}
+    <div id="app">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-lg-6 mx-auto">
+                    <div class="input-group">
+                        <input v-model="search"
+                               type="text"
+                               @input="handleInput"
+                               class="form-control"
+                               placeholder="Search for a project to contribute to...">
+                        <button class="btn btn-outline-secondary"
+                                @click="search = ''"
+                                type="button"
+                                id="button-addon2">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div v-for="(project, i) in projects"
+                 :key="`project-${i}`"
+                 class="card m-4">
+                <div class="card-body px-4">
+                    <div class="row" id="idx_metadata">
+                        <div class="сol-6 position-relative;">
+                            <div class="position-absolute top-0 end-0">
+                                <div class="d-flex flex-row text-muted">
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         title="Project created"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">
+                                            <i class="fa-regular fa-clock"></i>
+                                        </div>
+                                        <div class="px-2">${project.idx_created_at} ago</div>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         v-if="project.idx_forks_count"
+                                         data-bs-placement="top"
+                                         title="Project forks"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">
+                                            <i class="fa-solid fa-code-fork"></i>
+                                        </div>
+                                        <div class="px-2">${project.idx_forks_count}</div>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         v-if="project.idx_stars_count"
+                                         data-bs-placement="top"
+                                         title="Project stars"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">
+                                            <i class="fa-regular fa-star"></i>
+                                        </div>
+                                        <div class="px-2">${project.idx_stars_count}</div>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         v-if="project.idx_contributors_count"
+                                         data-bs-placement="top"
+                                         title="Project contributors"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">
+                                            <i class="fa-regular fa-user"></i>
+                                        </div>
+                                        <div class="px-2">${project.idx_contributors_count}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div id="idx_name" class="d-flex flex-row align-self-center">
+                                <span v-if="levelStyleMap[project.idx_level]" class="fa-stack pr-4">
+                                    <i class="fas fa-circle fa-stack-2x"
+                                       :style="`color: ${levelStyleMap[project.idx_level]['color']}`"></i>
+                                    <i :class="`fas ${levelStyleMap[project.idx_level]['icon']} fa-stack-1x fa-inverse`"></i>
+                                </span>
+                                <h4 class="px-1">
+                                    <a :href="`${project.idx_url}`" target="_blank">${project.idx_name}</a>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="idx_leaders" class="mb-2" v-if="project.idx_leaders.length">
+                        Leader<span v-if="project.idx_leaders.length > 1">s</span>: <span v-for="(leader, i) in project.idx_leaders">
+                        <a v-if="leader.startsWith('@')"
+                           target="_blank"
+                           :href="`https://github.com/${leader.replace(/^@/, '')}`">${leader}</a>
+                        <a v-else href="" class="pe-none text-decoration-none text-reset">${leader}</a>
+                        <span v-if="i < project.idx_leaders.length - 1">,</span></span>
+                    </div>
+                    <div id="idx_summary" class="mb-1">
+                        <div v-html="project.idx_summary_md"></div>
+                    </div>
+                    <div class="row"></div>
+                    <div id="idx_topics">
+                        <div>
+                            <div role="button"
+                                 data-bs-toggle="tooltip"
+                                 data-bs-placement="bottom"
+                                 title="Click to search by"
+                                 @click="clickSearch(topic)"
+                                 class="badge bg-secondary mx-1 mt-2"
+                                 v-for="topic in project.idx_topics">${topic}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const {
+            createApp
+        } = Vue;
+        createApp({
+            delimiters: ['${', '}'],
+            data() {
+                return {
+                    projects: [],
+                    selectedProject: {},
+                    search: '',
+                    isManual: true,
+                    levelStyleMap: {
+                        2: {
+                            color: "#53AAE5",
+                            icon: "fa-egg"
+                        },
+                        3: {
+                            color: "#FFA500",
+                            icon: "fa-flask"
+                        },
+                        3.5: {
+                            color: "#800080",
+                            icon: "fa-city"
+                        },
+                        4: {
+                            color: "#38a047",
+                            icon: "fa-flag"
+                        },
+                    }
+                };
+            },
+            watch: {
+                search() {
+                    if (this.isManual) {
+                        this.handleInput();
+                    } else {
+                        this.getProjects();
+                    }
+                }
+            },
+            methods: {
+                async getProjects() {
+                    const response = await fetch(`/api/v1/owasp/search/project?q=${this.search}`)
+                        .then((res) => res.json())
+                        .then((json) => {
+                            json.forEach(project => {
+                                project.idx_summary_md = marked.parse(project.idx_summary || '');
+                                project.idx_created_at = dayjs.unix(project.idx_created_at || '').fromNow(true);
+                                project.idx_topics = project.idx_topics ? project.idx_topics.sort(() => Math.random() - 0.5).slice(0, 20) : [];
+                            });
+                            this.projects = json;
+                        })
+                        .catch((err) => console.error("There was an error! ", err));
+                },
+                showProjectDetails(project) {
+                    this.selectedProject = project;
+                },
+                handleInput(event) {
+                    clearTimeout(this.timeout);
+                    this.timeout = setTimeout(this.getProjects, 1000);
+                },
+                clickSearch(search) {
+                    this.isManual = false;
+                    this.search = search;
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                }
+            },
+            mounted() {
+                dayjs.extend(dayjs_plugin_relativeTime);
+                this.getProjects();
+                const url = new URL(window.location.href);
+                const params = new URLSearchParams(url.search);
+                const searchQuery = params.get('q');
+                if (searchQuery) {
+                    this.isManual = true;
+                    this.search = searchQuery;
+                }
+            }
+        }).mount('#app');
+    </script>
+    <style scoped lang="scss">
+        .text-3 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-<head>
-  <meta charset="UTF-8" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
-</head>
+        a {
+            color: #1d7bd7;
+            text-decoration: none;
 
-<script src="{% static 'js/htmx.min.js' %}"></script>
-
-<h3>Find a project</h3>
-<input
-  autocomplete="off"
-  class="form-control"
-  id="query"
-  name="q"
-  placeholder="Type To Search..."
-  type="search"
-  hx-get="{% url 'api-search-projects' %}"
-  hx-indicator=".htmx-indicator"
-  hx-swap="none"
-  hx-target="#search-results"
-  hx-trigger="load, input changed delay:1000ms, search"
-/>
-<span class="htmx-indicator"> Searching... </span>
-
-<script>
-  document
-    .getElementById('query')
-    .addEventListener('htmx:afterRequest', function (event) {
-      var jsonResponse = event.detail.xhr.response;
-      var hits = JSON.parse(jsonResponse);
-
-      const resultsContainer = document.getElementById('search-results');
-      resultsContainer.innerHTML = '';
-
-      hits.forEach((hit) => {
-        const highlightedName = hit._highlightResult.idx_name.value;
-        const topics = hit.idx_topics;
-        const createdAt = new Date(hit.idx_created_at * 1000);
-
-        const url = hit.idx_url;
-
-        const resultItem = document.createElement('div');
-        resultItem.innerHTML = `
-          <h2><a href="${url}" target="_blank">${highlightedName}</a></h2>
-          <p>Tags: ${topics}. Created at: ${createdAt}</p>
-          <p></p>
-        `;
-
-        resultsContainer.appendChild(resultItem);
-      });
-    });
-</script>
-
-<div id="search-results"></div>
+            :hover {
+                text-decoration: underline;
+            }
+        }
+    </style>
+{% endblock content %}

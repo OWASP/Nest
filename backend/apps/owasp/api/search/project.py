@@ -13,6 +13,7 @@ def get_projects(query, limit=25):
             "idx_contributors_count",
             "idx_created_at",
             "idx_forks_count",
+            "idx_leaders",
             "idx_level",
             "idx_name",
             "idx_stars_count",
