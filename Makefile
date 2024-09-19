@@ -5,7 +5,7 @@ collect-static:
 	@CMD="poetry run python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
 django-shell:
-	@CMD="poetry run python manage.py shell" $(MAKE) exec-backend-command-it
+	@CMD="poetry run python manage.py shell" $(MAKE) exec-backend-command
 
 dump-data:
 	@CMD="poetry run python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > data/nest.json
@@ -13,12 +13,10 @@ dump-data:
 enrich-data: github-enrich-issues owasp-enrich-projects
 
 exec-backend-command:
-	@docker exec -i nest-backend $(CMD) 2>/dev/null
-
-exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
 github-enrich-issues:
+	@echo "Enriching GitHub issues"
 	@CMD="poetry run python manage.py github_enrich_issues" $(MAKE) exec-backend-command
 
 github-update-owasp-organization:
@@ -50,11 +48,15 @@ owasp-aggregate-projects:
 	@CMD="poetry run python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
 
 owasp-enrich-projects:
+	@echo "Enriching OWASP projects"
 	@CMD="poetry run python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
 
 owasp-scrape-owasp-org:
 	@echo "Scraping OWASP site projects data"
 	@CMD="poetry run python manage.py owasp_scrape_owasp_org" $(MAKE) exec-backend-command
+
+poetry-update:
+	@CMD="poetry update" $(MAKE) exec-backend-command
 
 pre-commit:
 	@pre-commit run -a
@@ -70,7 +72,7 @@ setup:
 	@CMD="poetry run python manage.py createsuperuser" $(MAKE) exec-backend-command
 
 shell:
-	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
+	@CMD="/bin/bash" $(MAKE) exec-backend-command
 
 sync: update-data enrich-data index-data
 

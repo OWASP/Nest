@@ -154,14 +154,6 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         """Projects to index."""
         return self.is_active and self.has_active_repositories
 
-    @property
-    def raw_index_md_url(self):
-        """Return project's raw index.md GitHub URL."""
-        return (
-            "https://raw.githubusercontent.com/OWASP/"
-            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
-        )
-
     def deactivate(self):
         """Deactivate project."""
         self.is_active = False

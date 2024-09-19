@@ -33,7 +33,7 @@ def handler(ack, say, command):
             markdown(
                 (
                     f"\n*Here are top 10 most relevant issues "
-                    f"that I found for*\n `{COMMAND} {search_query_escaped}`:\n"
+                    f"that I found based on *\n `{COMMAND} {search_query_escaped}`:\n"
                 )
                 if search_query_escaped
                 else (
@@ -50,8 +50,8 @@ def handler(ack, say, command):
             )
             blocks.append(
                 markdown(
-                    f"\n*{idx + 1}. {escape(issue['idx_project_name'])}*\n"
-                    f"<{issue['idx_url']}|{escape(issue['idx_title'])}>\n"
+                    f"\n*{idx + 1}.* <{issue['idx_url']}|*{escape(issue['idx_title'])}*>\n"
+                    f"{escape(issue['idx_project_name'])}\n"
                     f"{escape(summary_truncated)}\n"
                 ),
             )

@@ -2,12 +2,12 @@
 
 import logging
 import re
-from base64 import b64decode
 
 import yaml
 from github.GithubException import GithubException, UnknownObjectException
 
 from apps.github.constants import GITHUB_REPOSITORY_RE, GITHUB_USER_RE
+from apps.github.utils import get_repository_file_content
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +28,21 @@ class OwaspEntity:
         """Get OWASP URL."""
         return f"https://owasp.org/{self.key}"
 
+    @property
+    def index_md_raw_url(self):
+        """Return project's raw index.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
+        )
+
     def from_github(self, field_mapping, gh_repository, repository):
         """Update instance based on GitHub repository data."""
         # Fetch project metadata from index.md file.
         project_metadata = {}
         try:
-            index_md = gh_repository.get_contents("index.md")
-            md_content = b64decode(index_md.content).decode()
-            yaml_content = re.search(r"^---\n(.*?)\n---", md_content, re.DOTALL)
+            index_md_content = get_repository_file_content(self.index_md_raw_url)
+            yaml_content = re.search(r"^---\n(.*?)\n---", index_md_content, re.DOTALL)
             project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
 
             # Direct fields.

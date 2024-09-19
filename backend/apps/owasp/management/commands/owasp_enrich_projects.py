@@ -2,10 +2,10 @@
 
 import logging
 
-import requests
 from django.core.management.base import BaseCommand
 
 from apps.common.open_ai import OpenAi
+from apps.github.utils import get_repository_file_content
 from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
             print(f"{prefix:<10} {project.owasp_url}")
 
-            open_ai.set_input(requests.get(project.raw_index_md_url, timeout=30).text)
+            open_ai.set_input(get_repository_file_content(project.index_md_raw_url))
 
             # Generate summary
             if update_summary:

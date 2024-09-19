@@ -2,6 +2,8 @@
 
 from urllib.parse import urlparse
 
+import requests
+
 from apps.github.constants import GITHUB_REPOSITORY_RE
 
 
@@ -30,6 +32,11 @@ def check_funding_policy_compliance(platform, target):
         return location == owasp_org or location.endswith(f".{owasp_org}")
 
     return False
+
+
+def get_repository_file_content(url, timeout=30):
+    """Get repository file content."""
+    return requests.get(url, timeout=timeout).text
 
 
 def get_repository_path(url):
