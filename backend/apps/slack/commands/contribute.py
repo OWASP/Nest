@@ -13,7 +13,7 @@ COMMAND = "/contribute"
 TEXT_TRUNCATION_LIMIT = 260
 
 
-def handler(ack, say, command):
+def handler(ack, command, client):
     """Slack /contribute command handler."""
     from apps.github.models.issue import Issue
     from apps.owasp.api.search.issue import get_issues
@@ -65,7 +65,8 @@ def handler(ack, say, command):
             ),
         )
 
-    say(blocks=blocks)
+    conversation = client.conversations_open(users=command["user_id"])
+    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
 if SlackConfig.app:

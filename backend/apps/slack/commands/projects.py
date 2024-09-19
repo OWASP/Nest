@@ -12,7 +12,7 @@ COMMAND = "/projects"
 TEXT_TRUNCATION_LIMIT = 260
 
 
-def handler(ack, say, command):
+def handler(ack, command, client):
     """Slack /projects command handler."""
     from apps.owasp.api.search.project import get_projects
     from apps.owasp.models.project import Project
@@ -60,7 +60,8 @@ def handler(ack, say, command):
             ),
         )
 
-    say(blocks=blocks)
+    conversation = client.conversations_open(users=command["user_id"])
+    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
 if SlackConfig.app:
