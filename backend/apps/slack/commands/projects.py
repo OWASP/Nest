@@ -54,7 +54,8 @@ def handler(ack, say, command):
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Project.active_projects_count()} OWASP projects "
-                f"is available at <{get_absolute_url('projects')}|{settings.SITE_NAME}>*\n"
+                f"is available at <{get_absolute_url('projects')}"
+                f"?q={search_query}|{settings.SITE_NAME}>*\n"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             ),
         )
