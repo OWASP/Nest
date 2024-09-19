@@ -36,4 +36,4 @@ class Staging(Base):
     SITE_URL = "https://nest.owasp.dev"
 
     SLACK_COMMANDS_ENABLED = True
-    SLACK_EVENTS_ENABLED = False
+    SLACK_EVENTS_ENABLED = True
