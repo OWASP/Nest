@@ -10,11 +10,17 @@ def get_issues(query, distinct=False, limit=25):
     """Return issues relevant to a search query."""
     params = {
         "attributesToRetrieve": [
+            "idx_comments_count",
             "idx_created_at",
+            "idx_hint",
+            "idx_labels",
             "idx_project_name",
+            "idx_project_url",
             "idx_repository_languages",
+            "idx_repository_topics",
             "idx_summary",
             "idx_title",
+            "idx_updated_at",
             "idx_url",
         ],
         "hitsPerPage": limit,

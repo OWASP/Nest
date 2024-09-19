@@ -1,77 +1,240 @@
+{% extends "base.html" %}
 {% load static %}
+{% block content %}
+    {{ block.super }}
+    <div id="app">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-lg-6 mx-auto">
+                    <div class="input-group">
+                        <input v-model="search"
+                               type="text"
+                               @input="handleInput"
+                               class="form-control"
+                               placeholder="Search for a project to contribute to...">
+                        <button class="btn btn-outline-secondary"
+                                @click="search = ''"
+                                type="button"
+                                id="button-addon2">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div v-for="(issue, i) in issues" :key="`issue-${i}`" class="card m-4">
+                <div class="card-body px-4">
+                    <div class="row" id="idx_metadata">
+                        <div class="сol-2 position-relative;">
+                            <div class="position-absolute top-0 end-0">
+                                <div class="d-flex flex-row text-muted">
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         title="Issue created"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">
+                                            <i class="fa-regular fa-clock"></i>
+                                        </div>
+                                        <div class="px-2">${issue.idx_created_at} ago</div>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         title="Issue updated"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px"
+                                         v-if="issue.idx_updated_at !== issue.idx_created_at">
+                                        <div class="px-2">
+                                            <i class="fa-solid fa-arrows-rotate"></i>
+                                        </div>
+                                        <div class="px-2">${issue.idx_updated_at} ago</div>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         title="Number of comments"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 100px"
+                                         v-if="issue.idx_comments_count">
+                                        <div class="px-2">
+                                            <i class="fa-regular fa-comment"></i>
+                                        </div>
+                                        <div class="px-2">${issue.idx_comments_count}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <div id="idx_title">
+                                <h4>
+                                    <a :href="`${issue.idx_url}`" target="_blank">${issue.idx_title}</a>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="idx_project_name">
+                        <h6>
+                            <a :href="`${issue.idx_project_url}`" target="_blank">${issue.idx_project_name}</a>
+                        </h6>
+                    </div>
+                    <div id="idx_summary" class="mb-1">
+                        <div class="text-3" v-html="issue.idx_summary_md"></div>
+                        <button v-if="issue.idx_summary || issue.idx_hint"
+                                type="button"
+                                @click="showIssueDetails(issue)"
+                                data-bs-toggle="modal"
+                                data-bs-target="#detailsModal"
+                                class="mt-3 btn btn-outline-primary btn-sm inline-block float-end"
+                                style="text-decoration: none">Read more</button>
+                    </div>
+                    <div class="row"></div>
+                    <div id="idx_languages">
+                        <div>
+                            <div role="button"
+                                 data-bs-toggle="tooltip"
+                                 data-bs-placement="bottom"
+                                 title="Click to search by"
+                                 @click="clickSearch(lang)"
+                                 class="badge bg-secondary mx-1 mt-2"
+                                 v-for="lang in issue.idx_repository_language">${lang}</div>
+                        </div>
+                        <div id="idx_topics">
+                            <div>
+                                <div role="button"
+                                     data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     title="Click to search by"
+                                     @click="clickSearch(label)"
+                                     class="badge bg-light-gray mx-1 mt-2"
+                                     v-for="label in issue.idx_labels">${label}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade"
+                     id="detailsModal"
+                     tabindex="-1"
+                     aria-labelledby="detailsModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header d-block">
+                                <div class="d-flex">
+                                    <h4 class="modal-title" id="exampleModalLabel">${selectedIssue.idx_title}</h4>
+                                    <button type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <small class="pt-2 text-muted">
+                                    The issue summary and the recommended steps to address it have been generated by AI
+                                </small>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div v-if="selectedIssue.idx_summary" class="mb-3">
+                                    <h5>Issue summary</h5>
+                                    <div v-html="selectedIssue.idx_summary_md"></div>
+                                </div>
+                                <div v-if="selectedIssue.idx_hint">
+                                    <h5>How to tackle it</h5>
+                                    <div v-html="selectedIssue.idx_hint"></div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const {
+            createApp
+        } = Vue;
+        createApp({
+            delimiters: ['${', '}'],
+            data() {
+                return {
+                    issues: [],
+                    selectedIssue: {},
+                    search: '',
+                    isManual: true,
+                };
+            },
+            watch: {
+                search() {
+                    if (this.isManual) {
+                        this.handleInput();
+                    } else {
+                        this.getIssues();
+                    }
+                }
+            },
+            methods: {
+                async getIssues() {
+                    const response = await fetch(`/api/v1/owasp/search/issue?q=${this.search}`)
+                        .then(res => res.json())
+                        .then(json => {
+                            json.forEach(issue => {
+                                issue.idx_hint = marked.parse(issue.idx_hint || '');
+                                issue.idx_title_md = marked.parse(issue.idx_title || '');
+                                issue.idx_summary_md = marked.parse(issue.idx_summary || '');
+                                issue.idx_created_at = dayjs.unix(issue.idx_created_at || '').fromNow(true);
+                                issue.idx_updated_at = dayjs.unix(issue.idx_updated_at || '').fromNow(true);
+                                issue.idx_labels = issue.idx_labels.length ? issue.idx_labels.slice(0, 10) : [];
+                                issue.idx_repository_language = issue.idx_repository_languages.length ? issue.idx_repository_languages.slice(0, 10) : [];
+                            });
+                            this.issues = json;
+                        })
+                        .catch((err) => console.error("There was an error! ", err));
+                },
+                showIssueDetails(issue) {
+                    this.selectedIssue = issue;
+                },
+                handleInput(event) {
+                    clearTimeout(this.timeout);
+                    this.timeout = setTimeout(this.getIssues, 1000);
+                },
+                clickSearch(search) {
+                    this.isManual = false;
+                    this.search = search;
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                }
+            },
+            mounted() {
+                dayjs.extend(dayjs_plugin_relativeTime);
+                this.getIssues();
+                const url = new URL(window.location.href);
+                const params = new URLSearchParams(url.search);
+                const searchQuery = params.get('q');
+                if (searchQuery) {
+                    this.isManual = false;
+                    this.search = searchQuery;
+                }
+            }
+        }).mount('#app');
+    </script>
+    <style scoped lang="scss">
+        .text-3 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-<head>
-  <meta charset="UTF-8" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
-</head>
+        a {
+            color: #1d7bd7;
+            text-decoration: none;
 
-<script src="{% static 'js/htmx.min.js' %}"></script>
+            :hover {
+                text-decoration: underline;
+            }
+        }
 
-<h3>Find an issue to work on</h3>
-<input
-  autocomplete="off"
-  class="form-control"
-  id="query"
-  name="q"
-  placeholder="Type To Search..."
-  type="search"
-  hx-get="{% url 'api-search-project-issues' %}"
-  hx-indicator=".htmx-indicator"
-  hx-swap="none"
-  hx-target="#search-results"
-  hx-trigger="load, input changed delay:1000ms, search"
-/>
-<span class="htmx-indicator"> Searching... </span>
-
-<script>
-  document
-    .getElementById('query')
-    .addEventListener('htmx:afterRequest', function (event) {
-      var jsonResponse = event.detail.xhr.response;
-      var hits = JSON.parse(jsonResponse);
-
-      const resultsContainer = document.getElementById('search-results');
-      resultsContainer.innerHTML = '';
-
-      hits.forEach((hit) => {
-        const highlightedTitle = hit._highlightResult.idx_title.value;
-        const languages = hit.idx_repository_languages;
-        const projectName = hit.idx_project_name;
-        const createdAt = new Date(hit.idx_created_at * 1000);
-
-        const languageIcons = {
-          Python: 'fab fa-python',
-          JavaScript: 'fab fa-js',
-          Java: 'fab fa-java',
-          PHP: 'fab fa-php',
-        };
-
-        const container = document.createElement('div');
-        languages.forEach((language) => {
-          const iconClass = languageIcons[language];
-          if (iconClass) {
-            const languageSpan = document.createElement('span');
-            languageSpan.innerHTML = `<i class="${iconClass}"></i>`;
-            container.appendChild(languageSpan);
-          }
-        });
-
-        const url = hit.idx_url;
-
-        const resultItem = document.createElement('div');
-        resultItem.innerHTML = `
-          <h2><a href="${url}" target="_blank">${highlightedTitle}</a></h2>
-          <p>Project: ${projectName}. Created at: ${createdAt}</p>
-          <p>${container.innerHTML}</p>
-          <p></p>
-        `;
-
-        resultsContainer.appendChild(resultItem);
-      });
-    });
-</script>
-
-<div id="search-results"></div>
+        .bg-light-gray {
+            background-color: #868E96;
+        }
+    </style>
+{% endblock content %}
