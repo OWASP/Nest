@@ -1,7 +1,11 @@
 """Common app utils."""
 
+from datetime import datetime, timezone
+
 from django.conf import settings
+from django.template.defaultfilters import pluralize
 from django.urls import reverse
+from humanize import intword, naturaltime
 
 
 def get_absolute_url(view_name):
@@ -12,3 +16,14 @@ def get_absolute_url(view_name):
 def join_values(fields, delimiter=" "):
     """Join non-empty field values using the delimiter."""
     delimiter.join(field for field in fields if field)
+
+
+def natural_date(value):
+    """Return humanized version of a date."""
+    return naturaltime(datetime.fromtimestamp(value, tz=timezone.utc))
+
+
+def natural_number(value, unit=None):
+    """Return humanized version of a number."""
+    number = intword(value)
+    return f"{number} {unit}{pluralize(value)}" if unit else number

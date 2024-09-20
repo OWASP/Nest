@@ -27,14 +27,14 @@ class Committee(BulkSaveModel, OwaspEntity, TimestampedModel):
         """Committee human readable representation."""
         return f"{self.name}"
 
-    def from_github(self, gh_repository, repository):
+    def from_github(self, repository):
         """Update instance based on GitHub repository data."""
         field_mapping = {
             "description": "pitch",
             "name": "title",
             "tags": "tags",
         }
-        OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
+        OwaspEntity.from_github(self, field_mapping, repository)
 
         # FKs.
         self.owasp_repository = repository
@@ -53,7 +53,7 @@ class Committee(BulkSaveModel, OwaspEntity, TimestampedModel):
         except Committee.DoesNotExist:
             committee = Committee(key=key)
 
-        committee.from_github(gh_repository, repository)
+        committee.from_github(repository)
         if save:
             committee.save()
 

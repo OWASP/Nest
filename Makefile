@@ -5,7 +5,7 @@ collect-static:
 	@CMD="poetry run python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
 django-shell:
-	@CMD="poetry run python manage.py shell" $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py shell" $(MAKE) exec-backend-command-it
 
 dump-data:
 	@CMD="poetry run python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > data/nest.json
@@ -13,6 +13,9 @@ dump-data:
 enrich-data: github-enrich-issues owasp-enrich-projects
 
 exec-backend-command:
+	@docker exec -i nest-backend $(CMD) 2>/dev/null
+
+exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
 github-enrich-issues:
@@ -72,7 +75,7 @@ setup:
 	@CMD="poetry run python manage.py createsuperuser" $(MAKE) exec-backend-command
 
 shell:
-	@CMD="/bin/bash" $(MAKE) exec-backend-command
+	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
 
 sync: update-data enrich-data index-data
 

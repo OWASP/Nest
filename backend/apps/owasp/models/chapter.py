@@ -33,7 +33,7 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
         """Chapter human readable representation."""
         return f"{self.name or self.key}"
 
-    def from_github(self, gh_repository, repository):
+    def from_github(self, repository):
         """Update instance based on GitHub repository data."""
         field_mapping = {
             "country": "country",
@@ -45,7 +45,7 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
             "region": "region",
             "tags": "tags",
         }
-        OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
+        OwaspEntity.from_github(self, field_mapping, repository)
 
         # FKs.
         self.owasp_repository = repository
@@ -64,7 +64,7 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
         except Chapter.DoesNotExist:
             chapter = Chapter(key=key)
 
-        chapter.from_github(gh_repository, repository)
+        chapter.from_github(repository)
         if save:
             chapter.save()
 

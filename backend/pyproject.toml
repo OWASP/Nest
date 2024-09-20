@@ -37,14 +37,12 @@ python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 slack-bolt = "^1.20.1"
-djlint = "^1.35.2"
 
 [tool.poetry.group.dev.dependencies]
+djlint = "^1.35.2"
+isort = "^5.13.2"
 pre-commit = "^3.8.0"
 ruff = "^0.5.7"
-isort = "^5.13.2"
-djlint = "^1.35.2"
-
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.2"

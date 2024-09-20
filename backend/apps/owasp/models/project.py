@@ -159,14 +159,14 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         self.is_active = False
         self.save(update_fields=("is_active",))
 
-    def from_github(self, gh_repository, repository):
+    def from_github(self, repository):
         """Update instance based on GitHub repository data."""
         field_mapping = {
             "description": "pitch",
             "name": "title",
             "tags": "tags",
         }
-        project_metadata = OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
+        project_metadata = OwaspEntity.from_github(self, field_mapping, repository)
 
         # Normalize tags.
         self.tags = (
@@ -218,7 +218,7 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         except Project.DoesNotExist:
             project = Project(key=key)
 
-        project.from_github(gh_repository, repository)
+        project.from_github(repository)
         if save:
             project.save()
 

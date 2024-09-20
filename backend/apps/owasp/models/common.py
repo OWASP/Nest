@@ -4,7 +4,6 @@ import logging
 import re
 
 import yaml
-from github.GithubException import GithubException, UnknownObjectException
 
 from apps.github.constants import GITHUB_REPOSITORY_RE, GITHUB_USER_RE
 from apps.github.utils import get_repository_file_content
@@ -28,37 +27,33 @@ class OwaspEntity:
         """Get OWASP URL."""
         return f"https://owasp.org/{self.key}"
 
-    @property
-    def index_md_raw_url(self):
-        """Return project's raw index.md GitHub URL."""
-        return (
-            "https://raw.githubusercontent.com/OWASP/"
-            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
-        )
-
-    def from_github(self, field_mapping, gh_repository, repository):
+    def from_github(self, field_mapping, repository):
         """Update instance based on GitHub repository data."""
         # Fetch project metadata from index.md file.
         project_metadata = {}
-        try:
-            index_md_content = get_repository_file_content(self.index_md_raw_url)
-            yaml_content = re.search(r"^---\n(.*?)\n---", index_md_content, re.DOTALL)
-            project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+        index_md_content = get_repository_file_content(
+            self.get_index_md_raw_url(repository=repository)
+        )
+        yaml_content = re.search(r"^---\n(.*?)\n---", index_md_content, re.DOTALL)
+        project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
 
-            # Direct fields.
-            for model_field, gh_field in field_mapping.items():
-                value = project_metadata.get(gh_field)
-                if value:
-                    setattr(self, model_field, value)
-        except yaml.scanner.ScannerError:
-            logger.exception("Unable to parse metadata", extra={"repository": gh_repository.name})
-        except GithubException as e:
-            if e.data["status"] == "404" and "This repository is empty" in e.data["message"]:
-                repository.is_empty = True
-        except UnknownObjectException:
-            pass
+        # Direct fields.
+        for model_field, gh_field in field_mapping.items():
+            value = project_metadata.get(gh_field)
+            if value:
+                setattr(self, model_field, value)
 
         return project_metadata
+
+    def get_index_md_raw_url(self, repository=None):
+        """Return project's raw index.md GitHub URL."""
+        owasp_repository = repository or self.owasp_repository
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{owasp_repository.key}/{owasp_repository.default_branch}/index.md"
+            if owasp_repository
+            else None
+        )
 
     def get_related_url(self, url):
         """Get OWASP entity related URL."""

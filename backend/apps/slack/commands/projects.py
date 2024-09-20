@@ -1,9 +1,10 @@
 """Slack bot contribute command."""
 
 from django.conf import settings
+from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
 
-from apps.common.utils import get_absolute_url
+from apps.common.utils import get_absolute_url, natural_date, natural_number
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
@@ -29,7 +30,13 @@ def handler(ack, command, client):
     ]
 
     attributes = [
+        "idx_contributors_count",
+        "idx_created_at",
+        "idx_forks_count",
+        "idx_leaders",
+        "idx_level",
         "idx_name",
+        "idx_stars_count",
         "idx_summary",
         "idx_url",
     ]
@@ -53,11 +60,30 @@ def handler(ack, command, client):
             name_truncated = Truncator(escape(project["idx_name"])).chars(
                 NAME_TRUNCATION_LIMIT, truncate="..."
             )
+            contributors_count = (
+                f", {natural_number(project['idx_contributors_count'], unit='contributor')}"
+                if project["idx_contributors_count"]
+                else ""
+            )
+            forks_count = (
+                f", {natural_number(project['idx_forks_count'], unit='fork')}"
+                if project["idx_forks_count"]
+                else ""
+            )
+            stars_count = (
+                f", {natural_number(project['idx_stars_count'], unit='star')}"
+                if project["idx_stars_count"]
+                else ""
+            )
+            leaders = project["idx_leaders"]
             blocks.append(
                 markdown(
                     f"\n*{idx + 1}.* <{project['idx_url']}|*{name_truncated}*>\n"
+                    f"_Created {natural_date(project['idx_created_at'])}"
+                    f"{stars_count}{forks_count}{contributors_count}_\n"
+                    f"_Leader{pluralize(len(leaders))}: {', '.join(leaders)}_\n"
                     f"{escape(project['idx_summary'])}\n"
-                ),
+                )
             )
 
         blocks.append(

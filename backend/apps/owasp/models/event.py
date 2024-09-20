@@ -32,7 +32,7 @@ class Event(BulkSaveModel, OwaspEntity, TimestampedModel):
         """Event human readable representation."""
         return f"{self.name or self.key}"
 
-    def from_github(self, gh_repository, repository):
+    def from_github(self, repository):
         """Update instance based on GitHub repository data."""
         field_mapping = {
             "description": "pitch",
@@ -40,7 +40,7 @@ class Event(BulkSaveModel, OwaspEntity, TimestampedModel):
             "name": "title",
             "tags": "tags",
         }
-        OwaspEntity.from_github(self, field_mapping, gh_repository, repository)
+        OwaspEntity.from_github(self, field_mapping, repository)
 
         # FKs.
         self.owasp_repository = repository
@@ -59,7 +59,7 @@ class Event(BulkSaveModel, OwaspEntity, TimestampedModel):
         except Event.DoesNotExist:
             event = Event(key=key)
 
-        event.from_github(gh_repository, repository)
+        event.from_github(repository)
         if save:
             event.save()
 
