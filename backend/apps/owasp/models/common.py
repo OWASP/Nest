@@ -29,19 +29,23 @@ class OwaspEntity:
 
     def from_github(self, field_mapping, repository):
         """Update instance based on GitHub repository data."""
-        # Fetch project metadata from index.md file.
         project_metadata = {}
+
         index_md_content = get_repository_file_content(
             self.get_index_md_raw_url(repository=repository)
         )
-        yaml_content = re.search(r"^---\n(.*?)\n---", index_md_content, re.DOTALL)
-        project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+        # Fetch project metadata from index.md file.
+        try:
+            yaml_content = re.search(r"^---\n(.*?)\n---", index_md_content, re.DOTALL)
+            project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
 
-        # Direct fields.
-        for model_field, gh_field in field_mapping.items():
-            value = project_metadata.get(gh_field)
-            if value:
-                setattr(self, model_field, value)
+            # Direct fields.
+            for model_field, gh_field in field_mapping.items():
+                value = project_metadata.get(gh_field)
+                if value:
+                    setattr(self, model_field, value)
+        except (AttributeError, yaml.scanner.ScannerError):
+            logger.exception("Unable to parse metadata", extra={"repository": repository.name})
 
         return project_metadata
 
