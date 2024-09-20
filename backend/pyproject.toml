@@ -28,6 +28,7 @@ django-filter = "^24.3"
 django-storages = { extras = ["s3"], version = "^1.14.4" }
 djangorestframework = "^3.15.2"
 gunicorn = "^23.0.0"
+humanize = "^4.10.0"
 lxml = "^5.3.0"
 markdown = "^3.7"
 openai = "^1.45.0"
