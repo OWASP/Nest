@@ -6,10 +6,12 @@ from django.http import JsonResponse
 from apps.owasp.models.project import Project
 
 
-def get_projects(query, limit=25):
+def get_projects(query, attributes=None, limit=25):
     """Return projects relevant to a search query."""
     params = {
-        "attributesToRetrieve": [
+        "attributesToHighlight": [],
+        "attributesToRetrieve": attributes
+        or [
             "idx_contributors_count",
             "idx_created_at",
             "idx_forks_count",
@@ -23,8 +25,8 @@ def get_projects(query, limit=25):
             "idx_url",
         ],
         "hitsPerPage": limit,
-        "typoTolerance": "min",
         "minProximity": 4,
+        "typoTolerance": "min",
     }
 
     return raw_search(Project, query, params)["hits"]

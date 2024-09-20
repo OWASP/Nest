@@ -10,7 +10,8 @@ from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 COMMAND = "/contribute"
-TEXT_TRUNCATION_LIMIT = 260
+SUMMARY_TRUNCATION_LIMIT = 255
+TITLE_TRUNCATION_LIMIT = 80
 
 
 def handler(ack, command, client):
@@ -28,7 +29,13 @@ def handler(ack, command, client):
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
     ]
 
-    if issues := get_issues(search_query, limit=10):
+    attributes = [
+        "idx_project_name",
+        "idx_summary",
+        "idx_title",
+        "idx_url",
+    ]
+    if issues := get_issues(search_query, attributes=attributes, limit=10):
         blocks = [
             markdown(
                 (
@@ -45,12 +52,15 @@ def handler(ack, command, client):
         ]
 
         for idx, issue in enumerate(issues):
+            title_truncated = Truncator(escape(issue["idx_title"])).chars(
+                TITLE_TRUNCATION_LIMIT, truncate="..."
+            )
             summary_truncated = Truncator(issue["idx_summary"]).chars(
-                TEXT_TRUNCATION_LIMIT, truncate="..."
+                SUMMARY_TRUNCATION_LIMIT, truncate="..."
             )
             blocks.append(
                 markdown(
-                    f"\n*{idx + 1}.* <{issue['idx_url']}|*{escape(issue['idx_title'])}*>\n"
+                    f"\n*{idx + 1}.* <{issue['idx_url']}|*{title_truncated}*>\n"
                     f"{escape(issue['idx_project_name'])}\n"
                     f"{escape(summary_truncated)}\n"
                 ),

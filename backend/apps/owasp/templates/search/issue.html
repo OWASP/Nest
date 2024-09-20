@@ -68,14 +68,18 @@
                         <div class="col-8">
                             <div id="idx_title">
                                 <h4>
-                                    <a :href="`${issue.idx_url}`" target="_blank">${issue.idx_title}</a>
+                                    <a :href="`${issue.idx_url}`"
+                                       target="_blank"
+                                       :title="`${issue.idx_title}`">${issue.idx_title}</a>
                                 </h4>
                             </div>
                         </div>
                     </div>
                     <div id="idx_project_name">
                         <h6>
-                            <a :href="`${issue.idx_project_url}`" target="_blank">${issue.idx_project_name}</a>
+                            <a :href="`${issue.idx_project_url}`"
+                               target="_blank"
+                               :title="`${issue.idx_project_name}`">${issue.idx_project_name}</a>
                         </h6>
                     </div>
                     <div id="idx_summary" class="mb-1">

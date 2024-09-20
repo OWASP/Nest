@@ -1,6 +1,7 @@
 """Slack bot contribute command."""
 
 from django.conf import settings
+from django.utils.text import Truncator
 
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
@@ -9,7 +10,7 @@ from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 COMMAND = "/projects"
-TEXT_TRUNCATION_LIMIT = 260
+NAME_TRUNCATION_LIMIT = 80
 
 
 def handler(ack, command, client):
@@ -27,7 +28,12 @@ def handler(ack, command, client):
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
     ]
 
-    if projects := get_projects(search_query, limit=10):
+    attributes = [
+        "idx_name",
+        "idx_summary",
+        "idx_url",
+    ]
+    if projects := get_projects(search_query, attributes=attributes, limit=10):
         blocks = [
             markdown(
                 (
@@ -44,9 +50,12 @@ def handler(ack, command, client):
         ]
 
         for idx, project in enumerate(projects):
+            name_truncated = Truncator(escape(project["idx_name"])).chars(
+                NAME_TRUNCATION_LIMIT, truncate="..."
+            )
             blocks.append(
                 markdown(
-                    f"\n*{idx + 1}.* <{project['idx_url']}|*{escape(project['idx_name'])}*>\n"
+                    f"\n*{idx + 1}.* <{project['idx_url']}|*{name_truncated}*>\n"
                     f"{escape(project['idx_summary'])}\n"
                 ),
             )

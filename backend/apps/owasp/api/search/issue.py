@@ -6,10 +6,12 @@ from django.http import JsonResponse
 from apps.github.models.issue import Issue
 
 
-def get_issues(query, distinct=False, limit=25):
+def get_issues(query, attributes=None, distinct=False, limit=25):
     """Return issues relevant to a search query."""
     params = {
-        "attributesToRetrieve": [
+        "attributesToHighlight": [],
+        "attributesToRetrieve": attributes
+        or [
             "idx_comments_count",
             "idx_created_at",
             "idx_hint",
@@ -17,7 +19,6 @@ def get_issues(query, distinct=False, limit=25):
             "idx_project_name",
             "idx_project_url",
             "idx_repository_languages",
-            "idx_repository_topics",
             "idx_summary",
             "idx_title",
             "idx_updated_at",

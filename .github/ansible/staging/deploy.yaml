@@ -19,14 +19,10 @@
         dest: ~/Makefile
         mode: '0644'
 
-    - name: Stop Services
-      shell:
-        cmd: 'docker compose rm --stop --force'
-
     - name: Update Docker images
       shell:
-        cmd: 'docker compose pull'
+        cmd: docker compose pull
 
-    - name: Start services
+    - name: Retart services
       shell:
-        cmd: 'docker compose up -d'
+        cmd: docker compose up -d
