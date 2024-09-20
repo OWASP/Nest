@@ -42,7 +42,7 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
             print(f"{prefix:<10} {project.owasp_url}")
 
-            open_ai.set_input(get_repository_file_content(project.index_md_raw_url))
+            open_ai.set_input(get_repository_file_content(project.get_index_md_raw_url()))
 
             # Generate summary
             if update_summary:
