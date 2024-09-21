@@ -32,7 +32,7 @@
                                 <div class="d-flex flex-row text-muted">
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="top"
-                                         title="Issue created"
+                                         title="Creation date"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
                                         <div class="px-2">${issue.idx_created_at} ago</div>
@@ -42,7 +42,7 @@
                                     </div>
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="top"
-                                         title="Issue updated"
+                                         title="Last update date"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px"
                                          v-if="issue.idx_updated_at !== issue.idx_created_at">
@@ -53,7 +53,7 @@
                                     </div>
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="top"
-                                         title="Number of comments"
+                                         title="Comments count"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 100px"
                                          v-if="issue.idx_comments_count">
@@ -97,8 +97,8 @@
                         <div>
                             <div role="button"
                                  data-bs-toggle="tooltip"
-                                 data-bs-placement="bottom"
-                                 title="Click to search by"
+                                 data-bs-placement="top"
+                                 :title="`This repository uses ${language}`"
                                  @click="clickSearch(language)"
                                  class="badge bg-secondary mx-1 mt-2"
                                  v-for="language in issue.idx_repository_languages">${language}</div>
@@ -107,8 +107,8 @@
                             <div>
                                 <div role="button"
                                      data-bs-toggle="tooltip"
-                                     data-bs-placement="bottom"
-                                     title="Click to search by"
+                                     data-bs-placement="top"
+                                     :title='`The issue is labeled as "${label}"`'
                                      @click="clickSearch(label)"
                                      class="badge bg-light-gray mx-1 mt-2"
                                      v-for="label in issue.idx_labels">${label}</div>
@@ -194,6 +194,13 @@
                             this.issues = json;
                         })
                         .catch(err => console.error("There was an error! ", err));
+                    this.reinitializeTooltips();
+                },
+                reinitializeTooltips() {
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.map(function(tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
                 },
                 showIssueDetails(issue) {
                     this.selectedIssue = issue;

@@ -34,7 +34,7 @@
                                 <div class="d-flex flex-row text-muted">
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="top"
-                                         title="Project created"
+                                         title="Creation date"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 125px">
                                         <div class="px-2">${project.created_at} ago</div>
@@ -45,7 +45,7 @@
                                     <div data-bs-toggle="tooltip"
                                          v-if="project.idx_forks_count"
                                          data-bs-placement="top"
-                                         title="Project forks"
+                                         title="GitHub forks count"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
                                         <div class="px-2">${project.idx_forks_count}</div>
@@ -56,7 +56,7 @@
                                     <div data-bs-toggle="tooltip"
                                          v-if="project.idx_stars_count"
                                          data-bs-placement="top"
-                                         title="Project stars"
+                                         title="GitHub stars count"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
                                         <div class="px-2">${project.idx_stars_count}</div>
@@ -67,7 +67,7 @@
                                     <div data-bs-toggle="tooltip"
                                          v-if="project.idx_contributors_count"
                                          data-bs-placement="top"
-                                         title="Project contributors"
+                                         title="GitHub contributors count"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
                                         <div class="px-2">${project.idx_contributors_count}</div>
@@ -109,8 +109,8 @@
                         <div>
                             <div role="button"
                                  data-bs-toggle="tooltip"
-                                 data-bs-placement="bottom"
-                                 title="Click to search by"
+                                 data-bs-placement="top"
+                                 :title='`The project is labeled as "${topic}"`'
                                  @click="clickSearch(topic)"
                                  class="badge bg-secondary mx-1 mt-2"
                                  v-for="topic in project.topics">${topic}</div>
@@ -175,6 +175,13 @@
                             this.projects = json;
                         })
                         .catch(err => console.error("There was an error! ", err));
+                    this.reinitializeTooltips();
+                },
+                reinitializeTooltips() {
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.map(function(tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
                 },
                 showProjectDetails(project) {
                     this.selectedProject = project;
