@@ -37,7 +37,7 @@ class IssueIndexMixin:
     @property
     def idx_hint(self):
         """Return hint for indexing."""
-        return self.hint if self.hint else None
+        return self.hint
 
     @property
     def idx_labels(self):
@@ -51,8 +51,13 @@ class IssueIndexMixin:
 
     @property
     def idx_project_level(self):
-        """Return project level for indexing."""
+        """Return project level or indexing."""
         return self.project.idx_level if self.project else ""
+
+    @property
+    def idx_project_level_raw(self):
+        """Return project raw level for indexing."""
+        return self.project.idx_level_raw if self.project else ""
 
     @property
     def idx_project_tags(self):
@@ -72,7 +77,7 @@ class IssueIndexMixin:
     @property
     def idx_project_url(self):
         """Return project URL for indexing."""
-        return self.project.idx_url if self.project else None
+        return self.project.idx_url if self.project else ""
 
     @property
     def idx_repository_contributors_count(self):
@@ -127,4 +132,4 @@ class IssueIndexMixin:
     @property
     def idx_url(self):
         """Return URL for indexing."""
-        return self.url or None
+        return self.url

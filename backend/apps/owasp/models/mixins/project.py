@@ -43,6 +43,11 @@ class ProjectIndexMixin:
 
     @property
     def idx_level(self):
+        """Return level text value for indexing."""
+        return self.level
+
+    @property
+    def idx_level_raw(self):
         """Return level for indexing."""
         return float(self.level_raw) if self.level_raw else None
 

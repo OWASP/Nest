@@ -35,10 +35,10 @@
                                          title="Issue created"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
+                                        <div class="px-2">${issue.idx_created_at} ago</div>
                                         <div class="px-2">
                                             <i class="fa-regular fa-clock"></i>
                                         </div>
-                                        <div class="px-2">${issue.idx_created_at} ago</div>
                                     </div>
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="top"
@@ -46,10 +46,10 @@
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px"
                                          v-if="issue.idx_updated_at !== issue.idx_created_at">
+                                        <div class="px-2">${issue.idx_updated_at} ago</div>
                                         <div class="px-2">
                                             <i class="fa-solid fa-arrows-rotate"></i>
                                         </div>
-                                        <div class="px-2">${issue.idx_updated_at} ago</div>
                                     </div>
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="top"
@@ -57,10 +57,10 @@
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 100px"
                                          v-if="issue.idx_comments_count">
+                                        <div class="px-2">${issue.idx_comments_count}</div>
                                         <div class="px-2">
                                             <i class="fa-regular fa-comment"></i>
                                         </div>
-                                        <div class="px-2">${issue.idx_comments_count}</div>
                                     </div>
                                 </div>
                             </div>

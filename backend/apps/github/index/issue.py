@@ -1,11 +1,7 @@
 """GitHub issue index."""
 
-from datetime import timedelta as td
-
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
-from django.db.models import Q
-from django.utils import timezone
 
 from apps.github.models.issue import Issue
 
@@ -69,6 +65,7 @@ class IssueIndex(AlgoliaIndex):
             "unordered(idx_project_tags, idx_repository_topics)",
             "unordered(idx_author_login, idx_author_name)",
             "unordered(idx_summary)",
+            "unordered(idx_project_level)",
         ],
     }
 
@@ -76,18 +73,10 @@ class IssueIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        return (
-            Issue.objects.select_related(
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-                "repository__project_set",
-            )
-            # We index all unassigned issues and assigned issues with no activity within 90 days.
-            .filter(
-                Q(assignees__isnull=True)
-                | Q(assignees__isnull=False, updated_at__lte=timezone.now() - td(days=90))
-            )
+        return Issue.open_issues.assignable.select_related(
+            "repository",
+        ).prefetch_related(
+            "assignees",
+            "labels",
+            "repository__project_set",
         )

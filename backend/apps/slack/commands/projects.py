@@ -81,7 +81,8 @@ def handler(ack, command, client):
                     f"\n*{idx + 1}.* <{project['idx_url']}|*{name_truncated}*>\n"
                     f"_Created {natural_date(project['idx_created_at'])}"
                     f"{stars_count}{forks_count}{contributors_count}_\n"
-                    f"_Leader{pluralize(len(leaders))}: {', '.join(leaders)}_\n"
+                    f"_{project['idx_level'].capitalize()} project. "
+                    f"Leader{pluralize(len(leaders))}: {', '.join(leaders)}_\n"
                     f"{escape(project['idx_summary'])}\n"
                 )
             )

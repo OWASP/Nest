@@ -21,6 +21,7 @@ class ProjectIndex(AlgoliaIndex):
         "idx_languages",
         "idx_leaders",
         "idx_level",
+        "idx_level_raw",
         "idx_name",
         "idx_organizations",
         "idx_stars_count",
@@ -35,7 +36,7 @@ class ProjectIndex(AlgoliaIndex):
     settings = {
         "indexLanguages": ["en"],
         "customRanking": [
-            "desc(idx_level)",
+            "desc(idx_level_raw)",
             "desc(idx_stars_count)",
             "desc(idx_contributors_count)",
             "desc(idx_forks_count)",
@@ -56,6 +57,7 @@ class ProjectIndex(AlgoliaIndex):
             "unordered(idx_languages, idx_tags, idx_topics)",
             "unordered(idx_description)",
             "unordered(idx_companies, idx_leaders, idx_organizations)",
+            "unordered(idx_level)",
         ],
     }
 

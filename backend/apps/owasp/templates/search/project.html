@@ -36,11 +36,11 @@
                                          data-bs-placement="top"
                                          title="Project created"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
-                                         style="width: 120px">
+                                         style="width: 125px">
+                                        <div class="px-2">${project.created_at} ago</div>
                                         <div class="px-2">
                                             <i class="fa-regular fa-clock"></i>
                                         </div>
-                                        <div class="px-2">${project.idx_created_at} ago</div>
                                     </div>
                                     <div data-bs-toggle="tooltip"
                                          v-if="project.idx_forks_count"
@@ -48,10 +48,10 @@
                                          title="Project forks"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
+                                        <div class="px-2">${project.idx_forks_count}</div>
                                         <div class="px-2">
                                             <i class="fa-solid fa-code-fork"></i>
                                         </div>
-                                        <div class="px-2">${project.idx_forks_count}</div>
                                     </div>
                                     <div data-bs-toggle="tooltip"
                                          v-if="project.idx_stars_count"
@@ -59,10 +59,10 @@
                                          title="Project stars"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
+                                        <div class="px-2">${project.idx_stars_count}</div>
                                         <div class="px-2">
                                             <i class="fa-regular fa-star"></i>
                                         </div>
-                                        <div class="px-2">${project.idx_stars_count}</div>
                                     </div>
                                     <div data-bs-toggle="tooltip"
                                          v-if="project.idx_contributors_count"
@@ -70,17 +70,19 @@
                                          title="Project contributors"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 120px">
+                                        <div class="px-2">${project.idx_contributors_count}</div>
                                         <div class="px-2">
                                             <i class="fa-regular fa-user"></i>
                                         </div>
-                                        <div class="px-2">${project.idx_contributors_count}</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-6 mb-2">
                             <div id="idx_name" class="d-flex flex-row align-self-center">
-                                <span v-if="levelStyleMap[project.idx_level]" class="fa-stack pr-4">
+                                <span v-if="levelStyleMap[project.idx_level]"
+                                      class="fa-stack pr-4"
+                                      :title="`${project.level} project`">
                                     <i class="fas fa-circle fa-stack-2x"
                                        :style="`color: ${levelStyleMap[project.idx_level]['color']}`"></i>
                                     <i :class="`fas ${levelStyleMap[project.idx_level]['icon']} fa-stack-1x fa-inverse`"></i>
@@ -100,7 +102,7 @@
                         <span v-if="i < project.idx_leaders.length - 1">,</span></span>
                     </div>
                     <div id="idx_summary" class="mb-1">
-                        <div v-html="project.idx_summary_md"></div>
+                        <div v-html="project.summary"></div>
                     </div>
                     <div class="row"></div>
                     <div id="idx_topics">
@@ -111,7 +113,7 @@
                                  title="Click to search by"
                                  @click="clickSearch(topic)"
                                  class="badge bg-secondary mx-1 mt-2"
-                                 v-for="topic in project.idx_topics">${topic}</div>
+                                 v-for="topic in project.topics">${topic}</div>
                         </div>
                     </div>
                 </div>
@@ -131,19 +133,19 @@
                     searchQuery: '',
                     isManualSearch: true,
                     levelStyleMap: {
-                        2: {
+                        "incubator": {
                             color: "#53AAE5",
                             icon: "fa-egg"
                         },
-                        3: {
+                        "lab": {
                             color: "#FFA500",
                             icon: "fa-flask"
                         },
-                        3.5: {
+                        "production": {
                             color: "#800080",
                             icon: "fa-city"
                         },
-                        4: {
+                        "flagship": {
                             color: "#38a047",
                             icon: "fa-flag"
                         },
@@ -165,9 +167,10 @@
                         .then(res => res.json())
                         .then(json => {
                             json.forEach(project => {
-                                project.idx_created_at = dayjs.unix(project.idx_created_at || '').fromNow(true);
-                                project.idx_summary_md = marked.parse(project.idx_summary || '');
-                                project.idx_topics = project.idx_topics ? project.idx_topics.sort(() => Math.random() - 0.5).slice(0, 20) : [];
+                                project.created_at = dayjs.unix(project.idx_created_at || '').fromNow(true);
+                                project.level = project.idx_level.charAt(0).toUpperCase() + project.idx_level.slice(1).toLowerCase();
+                                project.summary = marked.parse(project.idx_summary || '');
+                                project.topics = project.idx_topics ? project.idx_topics.sort(() => Math.random() - 0.5).slice(0, 20) : [];
                             });
                             this.projects = json;
                         })
