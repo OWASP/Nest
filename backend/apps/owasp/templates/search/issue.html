@@ -179,6 +179,8 @@
             },
             methods: {
                 async getIssues() {
+                    this.removeTooltips();
+
                     const response = await fetch(`/api/v1/owasp/search/issue?q=${this.searchQuery}`)
                         .then(res => res.json())
                         .then(json => {
@@ -194,12 +196,22 @@
                             this.issues = json;
                         })
                         .catch(err => console.error("There was an error! ", err));
-                    this.reinitializeTooltips();
+
+                    this.addTooltips();
                 },
-                reinitializeTooltips() {
+                addTooltips() {
                     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                    tooltipTriggerList.map(function(tooltipTriggerEl) {
-                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                        new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+                },
+                removeTooltips() {
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                        const tooltipInstance = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                        if (tooltipInstance) {
+                            tooltipInstance.dispose();
+                        }
                     });
                 },
                 showIssueDetails(issue) {

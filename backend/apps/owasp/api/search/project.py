@@ -13,7 +13,6 @@ def get_projects(query, attributes=None, limit=25):
         "attributesToRetrieve": attributes
         or [
             "idx_contributors_count",
-            "idx_created_at",
             "idx_forks_count",
             "idx_leaders",
             "idx_level",
@@ -22,6 +21,7 @@ def get_projects(query, attributes=None, limit=25):
             "idx_summary",
             "idx_topics",
             "idx_type",
+            "idx_updated_at",
             "idx_url",
         ],
         "hitsPerPage": limit,

@@ -15,7 +15,6 @@ class ProjectIndex(AlgoliaIndex):
     fields = (
         "idx_companies",
         "idx_contributors_count",
-        "idx_created_at",
         "idx_description",
         "idx_forks_count",
         "idx_languages",
@@ -41,7 +40,6 @@ class ProjectIndex(AlgoliaIndex):
             "desc(idx_contributors_count)",
             "desc(idx_forks_count)",
             "desc(idx_updated_at)",
-            "desc(idx_create_at)",
         ],
         "ranking": [
             "typo",

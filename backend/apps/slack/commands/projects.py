@@ -31,13 +31,13 @@ def handler(ack, command, client):
 
     attributes = [
         "idx_contributors_count",
-        "idx_created_at",
         "idx_forks_count",
         "idx_leaders",
         "idx_level",
         "idx_name",
         "idx_stars_count",
         "idx_summary",
+        "idx_updated_at",
         "idx_url",
     ]
     if projects := get_projects(search_query, attributes=attributes, limit=10):
@@ -79,7 +79,7 @@ def handler(ack, command, client):
             blocks.append(
                 markdown(
                     f"\n*{idx + 1}.* <{project['idx_url']}|*{name_truncated}*>\n"
-                    f"_Created {natural_date(project['idx_created_at'])}"
+                    f"_Updated {natural_date(project['idx_updated_at'])}"
                     f"{stars_count}{forks_count}{contributors_count}_\n"
                     f"_{project['idx_level'].capitalize()} project. "
                     f"Leader{pluralize(len(leaders))}: {', '.join(leaders)}_\n"

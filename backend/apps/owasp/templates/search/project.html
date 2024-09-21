@@ -34,12 +34,12 @@
                                 <div class="d-flex flex-row text-muted">
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="top"
-                                         title="Creation date"
+                                         title="Last update date"
                                          class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
                                          style="width: 125px">
-                                        <div class="px-2">${project.created_at} ago</div>
+                                        <div class="px-2">${project.updated_at} ago</div>
                                         <div class="px-2">
-                                            <i class="fa-regular fa-clock"></i>
+                                            <i class="fa-solid fa-arrows-rotate"></i>
                                         </div>
                                     </div>
                                     <div data-bs-toggle="tooltip"
@@ -165,24 +165,36 @@
             },
             methods: {
                 async getProjects() {
+                    this.removeTooltips();
+
                     const response = await fetch(`/api/v1/owasp/search/project?q=${this.searchQuery}`)
                         .then(res => res.json())
                         .then(json => {
                             json.forEach(project => {
-                                project.created_at = dayjs.unix(project.idx_created_at || '').fromNow(true);
                                 project.level = project.idx_level.charAt(0).toUpperCase() + project.idx_level.slice(1).toLowerCase();
                                 project.summary = marked.parse(project.idx_summary || '');
                                 project.topics = project.idx_topics ? project.idx_topics.sort(() => Math.random() - 0.5).slice(0, 20) : [];
+                                project.updated_at = dayjs.unix(project.idx_updated_at || '').fromNow(true);
                             });
                             this.projects = json;
                         })
                         .catch(err => console.error("There was an error! ", err));
-                    this.reinitializeTooltips();
+
+                    this.addTooltips();
                 },
-                reinitializeTooltips() {
+                addTooltips() {
                     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                    tooltipTriggerList.map(function(tooltipTriggerEl) {
-                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                        new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+                },
+                removeTooltips() {
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                        const tooltipInstance = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                        if (tooltipInstance) {
+                            tooltipInstance.dispose();
+                        }
                     });
                 },
                 showProjectDetails(project) {
