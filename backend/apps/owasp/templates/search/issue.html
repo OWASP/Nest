@@ -87,10 +87,13 @@
                         <button v-if="issue.idx_summary || issue.idx_hint"
                                 type="button"
                                 @click="showIssueDetails(issue)"
-                                data-bs-toggle="modal"
-                                data-bs-target="#detailsModal"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
                                 class="mt-3 btn btn-outline-primary btn-sm inline-block float-end"
-                                style="text-decoration: none">Read more</button>
+                                style="text-decoration: none">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            Read more
+                        </button>
                     </div>
                     <div class="row"></div>
                     <div id="idx_languages">
@@ -215,6 +218,8 @@
                     });
                 },
                 showIssueDetails(issue) {
+                    const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+                    detailsModal.show();
                     this.selectedIssue = issue;
                 },
                 handleInput(event) {

@@ -131,6 +131,16 @@
                     </div>
                     <div id="idx_summary" class="mb-1">
                         <div v-html="project.summary"></div>
+                        <button type="button"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                @click="contribute(project.idx_name)"
+                                class="mt-3 btn btn-outline-primary btn-sm inline-block float-end"
+                                style="text-decoration: none"
+                                :title="`Contribute to ${project.idx_name}`">
+                            <i class="fa-solid fa-code"></i>
+                            Contribute
+                        </button>
                     </div>
                     <div class="row"></div>
                     <div id="idx_topics">
@@ -213,6 +223,10 @@
                     tooltipTriggerList.forEach(function(tooltipTriggerEl) {
                         new bootstrap.Tooltip(tooltipTriggerEl);
                     });
+                },
+                contribute(projectName) {
+                    window.open(`/projects/contribute?q=${projectName}`, '_blank');
+
                 },
                 removeTooltips() {
                     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
