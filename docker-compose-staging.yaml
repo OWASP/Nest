@@ -2,12 +2,13 @@ services:
   backend:
     container_name: nest-backend
     image: arkid15r/owasp-nest-backend:latest
-    command: |
+    command: >
       bash -c "
         poetry run python manage.py migrate &&
         poetry run python manage.py collectstatic --noinput &&
-        poetry run python manage.py run_slack_bot &
-        poetry run gunicorn wsgi:application --bind 0.0.0.0:8000
+        poetry run gunicorn wsgi:application --bind 0.0.0.0:8000 &
+        poetry run python manage.py run_slack_bot;
+        wait
       "
     env_file: .env/backend
     depends_on:
