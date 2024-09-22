@@ -1,6 +1,13 @@
 """OWASP app project mixins."""
 
+from django.db.models import Sum
+
 from apps.common.utils import join_values
+from apps.github.constants import OWASP_FOUNDATION_LOGIN
+from apps.github.models.repository_contributor import (
+    TOP_CONTRIBUTORS_LIMIT,
+    RepositoryContributor,
+)
 
 
 class ProjectIndexMixin:
@@ -76,11 +83,20 @@ class ProjectIndexMixin:
         """Return top contributors for indexing."""
         return [
             {
-                "avatar_url": tc.user.avatar_url,
-                "login": tc.user.login,
-                "name": tc.user.name,
+                "avatar_url": tc["user__avatar_url"],
+                "contributions_count": tc["total_contributions"],
+                "login": tc["user__login"],
+                "name": tc["user__name"],
             }
-            for tc in self.top_contributors.order_by("-contributions_count")
+            for tc in RepositoryContributor.objects.filter(repository__in=self.repositories.all())
+            .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
+            .values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+            )
+            .annotate(total_contributions=Sum("contributions_count"))
+            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
         ]
 
     @property

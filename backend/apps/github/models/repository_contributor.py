@@ -5,7 +5,7 @@ from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 
-TOP_CONTRIBUTORS_LIMIT = 20
+TOP_CONTRIBUTORS_LIMIT = 25
 
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
@@ -13,6 +13,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
     class Meta:
         db_table = "github_repository_contributors"
+        unique_together = ("repository", "user")
         verbose_name_plural = "Repository contributors"
 
     contributions_count = models.PositiveIntegerField(verbose_name="Contributions", default=0)

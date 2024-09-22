@@ -114,13 +114,14 @@
                     <div v-if="project.idx_top_contributors.length"
                          id="idx_top_contributors"
                          class="d-flex flex-row">
-                        <span class="pe-1">Top contributors:</span>
                         <div style="padding-left: 3px"
                              v-for="tc in project.idx_top_contributors"
                              :key="`tc-${tc.login}`">
                             <a :href="`https://github.com/${tc.login}`"
                                target="_blank"
-                               :title="tc.name || tc.login">
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="right"
+                               :title="`${tc.contributions_count} contributions by ${tc.name || tc.login}`">
                                 <img style="height: 30px;
                                             width: 30px"
                                      class="grayscale rounded-circle"

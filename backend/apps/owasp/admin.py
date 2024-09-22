@@ -39,7 +39,6 @@ class ProjectAdmin(admin.ModelAdmin):
         "owasp_repository",
         "owners",
         "repositories",
-        "top_contributors",
     )
     list_display = (
         "custom_field_name",

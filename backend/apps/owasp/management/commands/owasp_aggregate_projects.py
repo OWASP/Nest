@@ -2,11 +2,6 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.github.constants import OWASP_FOUNDATION_LOGIN
-from apps.github.models.repository_contributor import (
-    TOP_CONTRIBUTORS_LIMIT,
-    RepositoryContributor,
-)
 from apps.owasp.models.project import Project
 
 
@@ -55,15 +50,6 @@ class Command(BaseCommand):
                 if repository.organization:
                     project.organizations.add(repository.organization)
                 project.owners.add(repository.owner)
-
-                # Top contributors.
-                excluded_contributor_logins = [OWASP_FOUNDATION_LOGIN]
-                project.top_contributors.set(
-                    RepositoryContributor.objects.filter(repository__project=project)
-                    .exclude(user__login__in=excluded_contributor_logins)
-                    .order_by("user", "-contributions_count")
-                    .distinct("user")[:TOP_CONTRIBUTORS_LIMIT]
-                )
 
                 # Pushed at.
                 pushed_at.append(repository.pushed_at)
