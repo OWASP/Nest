@@ -19,6 +19,7 @@ def get_projects(query, attributes=None, limit=25):
             "idx_name",
             "idx_stars_count",
             "idx_summary",
+            "idx_top_contributors",
             "idx_topics",
             "idx_type",
             "idx_updated_at",

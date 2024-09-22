@@ -129,6 +129,11 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         verbose_name="Repositories",
         blank=True,
     )
+    top_contributors = models.ManyToManyField(
+        "github.RepositoryContributor",
+        verbose_name="Top contributors",
+        blank=True,
+    )
 
     def __str__(self):
         """Project human readable representation."""

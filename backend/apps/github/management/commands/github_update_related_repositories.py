@@ -10,7 +10,6 @@ from github.GithubException import UnknownObjectException
 from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.models.issue import Issue
-from apps.github.models.release import Release
 from apps.github.utils import get_repository_path
 from apps.owasp.models.project import Project
 
@@ -30,7 +29,6 @@ class Command(BaseCommand):
 
         issues = []
         projects = []
-        releases = []
 
         offset = options["offset"]
         for idx, project in enumerate(active_projects[offset:]):
@@ -53,16 +51,14 @@ class Command(BaseCommand):
                         project.save(update_fields=("invalid_urls", "related_urls"))
                         continue
 
-                organization, repository, new_releases = sync_repository(gh_repository)
+                organization, repository = sync_repository(gh_repository)
                 if organization is not None:
                     organization.save()
 
                 project.repositories.add(repository)
-                releases.extend(new_releases)
 
             projects.append(project)
 
         # Bulk save data.
         Issue.bulk_save(issues)
-        Release.bulk_save(releases)
         Project.bulk_save(projects)

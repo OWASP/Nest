@@ -9,7 +9,6 @@ from github.GithubException import BadCredentialsException
 
 from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
-from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.chapter import Chapter
@@ -45,7 +44,6 @@ class Command(BaseCommand):
         committees = []
         events = []
         projects = []
-        releases = []
 
         offset = options["offset"]
         gh_repositories = gh_owasp_organization.get_repos(
@@ -59,10 +57,9 @@ class Command(BaseCommand):
             entity_key = gh_repository.name.lower()
             print(f"{prefix:<12} https://owasp.org/{entity_key}")
 
-            owasp_organization, repository, new_releases = sync_repository(
+            owasp_organization, repository = sync_repository(
                 gh_repository, organization=owasp_organization, user=owasp_user
             )
-            releases.extend(new_releases)
 
             # OWASP chapters.
             if entity_key.startswith("www-chapter-"):
@@ -79,9 +76,6 @@ class Command(BaseCommand):
             # OWASP committees.
             elif entity_key.startswith("www-committee-"):
                 committees.append(Committee.update_data(gh_repository, repository, save=False))
-
-        # Bulk save data.
-        Release.bulk_save(releases)
 
         Chapter.bulk_save(chapters)
         Committee.bulk_save(committees)

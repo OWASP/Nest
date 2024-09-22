@@ -8,6 +8,7 @@ from apps.github.models.label import Label
 from apps.github.models.organization import Organization
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
+from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 
 
@@ -82,6 +83,14 @@ class RepositoryAdmin(admin.ModelAdmin):
     custom_field_github_url.short_description = "GitHub 🔗"
 
 
+class RepositoryContributorAdmin(admin.ModelAdmin):
+    autocomplete_fields = (
+        "repository",
+        "user",
+    )
+    search_fields = ("user__name",)
+
+
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = (
         "title",
@@ -110,4 +119,5 @@ admin.site.register(Label, LabelAdmin)
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Release, ReleaseAdmin)
 admin.site.register(Repository, RepositoryAdmin)
+admin.site.register(RepositoryContributor, RepositoryContributorAdmin)
 admin.site.register(User, UserAdmin)

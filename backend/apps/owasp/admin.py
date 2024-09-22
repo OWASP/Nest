@@ -35,10 +35,11 @@ class EventAdmin(admin.ModelAdmin):
 
 class ProjectAdmin(admin.ModelAdmin):
     autocomplete_fields = (
-        "owasp_repository",
         "organizations",
+        "owasp_repository",
         "owners",
         "repositories",
+        "top_contributors",
     )
     list_display = (
         "custom_field_name",
@@ -57,6 +58,7 @@ class ProjectAdmin(admin.ModelAdmin):
         "level",
         "type",
     )
+    ordering = ("-created_at",)
     search_fields = (
         "description",
         "key",

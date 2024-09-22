@@ -72,6 +72,18 @@ class ProjectIndexMixin:
         return self.tags
 
     @property
+    def idx_top_contributors(self):
+        """Return top contributors for indexing."""
+        return [
+            {
+                "avatar_url": tc.user.avatar_url,
+                "login": tc.user.login,
+                "name": tc.user.name,
+            }
+            for tc in self.top_contributors.order_by("-contributions_count")
+        ]
+
+    @property
     def idx_topics(self):
         """Return topics for indexing."""
         return self.topics

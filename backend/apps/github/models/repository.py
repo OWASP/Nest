@@ -7,6 +7,7 @@ from django.db import models
 from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
+from apps.github.constants import OWASP_LOGIN
 from apps.github.models.common import NodeModel
 from apps.github.models.mixins import RepositoryIndexMixin
 from apps.github.utils import (
@@ -167,7 +168,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         # Key and OWASP repository flags.
         self.key = self.name.lower()
         self.is_owasp_repository = (
-            organization is not None and organization.login.lower() == "owasp"
+            organization is not None and organization.login.lower() == OWASP_LOGIN
         )
         self.is_owasp_site_repository = check_owasp_site_repository(self.key)
 
@@ -207,7 +208,10 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
                 for target in targets if isinstance(targets, list) else [targets]:
                     if not target:
                         continue
-                    is_funding_policy_compliant = check_funding_policy_compliance(platform, target)
+                    is_funding_policy_compliant = check_funding_policy_compliance(
+                        platform,
+                        target,
+                    )
 
                     if not is_funding_policy_compliant:
                         break

@@ -14,6 +14,7 @@ class ProjectIndex(AlgoliaIndex):
 
     fields = (
         "idx_companies",
+        "idx_top_contributors",
         "idx_contributors_count",
         "idx_description",
         "idx_forks_count",
@@ -54,7 +55,8 @@ class ProjectIndex(AlgoliaIndex):
             "unordered(idx_name)",
             "unordered(idx_languages, idx_tags, idx_topics)",
             "unordered(idx_description)",
-            "unordered(idx_companies, idx_leaders, idx_organizations)",
+            "unordered(idx_companies, idx_organizations)",
+            "unordered(idx_leaders, idx_top_contributors.login, idx_top_contributors.name)",
             "unordered(idx_level)",
         ],
     }

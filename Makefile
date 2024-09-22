@@ -13,7 +13,7 @@ dump-data:
 enrich-data: github-enrich-issues owasp-enrich-projects
 
 exec-backend-command:
-	@docker exec -i nest-backend $(CMD) 2>/dev/null
+	@docker exec -i nest-backend $(CMD)
 
 exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null

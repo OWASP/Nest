@@ -9,6 +9,7 @@ from apps.github.models.label import Label
 from apps.github.models.organization import Organization
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
+from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
 
@@ -105,5 +106,20 @@ def sync_repository(gh_repository, organization=None, user=None):
                 else None
             )
             releases.append(Release.update_data(gh_release, author=author, repository=repository))
+    Release.bulk_save(releases)
 
-    return organization, repository, releases
+    # GitHub repository contributors.
+    repository_contributors = []
+    for gh_contributor in gh_repository.get_contributors():
+        user = (
+            User.update_data(gh_contributor)
+            if gh_contributor and gh_contributor.type != "Bot"
+            else None
+        )
+        if user:
+            repository_contributors.append(
+                RepositoryContributor.update_data(gh_contributor, repository=repository, user=user)
+            )
+    RepositoryContributor.bulk_save(repository_contributors)
+
+    return organization, repository
