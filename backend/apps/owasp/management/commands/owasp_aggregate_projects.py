@@ -61,8 +61,8 @@ class Command(BaseCommand):
                 project.top_contributors.set(
                     RepositoryContributor.objects.filter(repository__project=project)
                     .exclude(user__login__in=excluded_contributor_logins)
-                    .order_by("-contributions_count")
-                    .distinct()[:TOP_CONTRIBUTORS_LIMIT]
+                    .order_by("user", "-contributions_count")
+                    .distinct("user")[:TOP_CONTRIBUTORS_LIMIT]
                 )
 
                 # Pushed at.

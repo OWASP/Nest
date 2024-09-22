@@ -88,7 +88,7 @@ class RepositoryContributorAdmin(admin.ModelAdmin):
         "repository",
         "user",
     )
-    search_fields = ("user__name",)
+    search_fields = ("user__login", "user__name")
 
 
 class OrganizationAdmin(admin.ModelAdmin):
@@ -111,7 +111,7 @@ class ReleaseAdmin(admin.ModelAdmin):
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ("title", "created_at", "updated_at")
-    search_fields = ("name",)
+    search_fields = ("login", "name")
 
 
 admin.site.register(Issue, IssueAdmin)
