@@ -41,7 +41,7 @@ class ProjectIndexMixin:
     @property
     def idx_leaders(self):
         """Return leaders for indexing."""
-        return self.leaders_raw
+        return [leader for leader in self.leaders_raw if not leader.startswith("@")]
 
     @property
     def idx_level(self):

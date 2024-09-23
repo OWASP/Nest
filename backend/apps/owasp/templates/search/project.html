@@ -100,16 +100,11 @@
                     <div id="idx_leaders"
                          class="mb-2 fw-semibold"
                          v-if="project.idx_leaders.length">
-                        Leader<span v-if="project.idx_leaders.length > 1">s</span>: <span class="pe-1" v-for="(leader, i) in project.idx_leaders">
-                        <a v-if="leader.startsWith('@')"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="right"
-                           target="_blank"
-                           class="leader"
-                           :title="`Open ${leader}'s GitHub profile`"
-                           :href="`https://github.com/${leader.replace(/^@/, '')}`">${leader}</a>
-                        <a v-else href="" class="pe-none text-decoration-none text-reset">${leader}</a>
-                        <span v-if="i < project.idx_leaders.length - 1">,</span></span>
+                        Leader<span v-if="project.idx_leaders.length > 1">s</span>:
+                        <span class="pe-1" v-for="(leader, i) in project.idx_leaders">
+                            <span class="pe-none text-decoration-none text-reset">${leader}</span>
+                            <span v-if="i < project.idx_leaders.length - 1">,</span>
+                        </span>
                     </div>
                     <div v-if="project.idx_top_contributors.length"
                          id="idx_top_contributors"
