@@ -13,6 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: owasp-actions/issue-manager@v0.1.0
+      - uses: owasp-actions/issue-manager@v0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
