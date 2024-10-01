@@ -34,7 +34,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     description = models.CharField(verbose_name="Description", max_length=1000, default="")
 
     default_branch = models.CharField(verbose_name="Default branch", max_length=100, default="")
-    homepage = models.CharField(verbose_name="Homepage", max_length=100, default="")
+    homepage = models.CharField(verbose_name="Homepage", max_length=100, default="", blank=True)
     languages = models.JSONField(verbose_name="Languages", default=dict)
     license = models.CharField(verbose_name="License", max_length=100, default="")
     size = models.PositiveIntegerField(verbose_name="Size in KB", default=0)
@@ -54,8 +54,10 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         verbose_name="Is funding policy compliant", default=True
     )
     has_funding_yml = models.BooleanField(verbose_name="Has FUNDING.yml", default=False)
-    funding_yml = models.JSONField(verbose_name="FUNDING.yml data", default=dict)
-    pages_status = models.CharField(verbose_name="Pages status", max_length=20, default="")
+    funding_yml = models.JSONField(verbose_name="FUNDING.yml data", default=dict, blank=True)
+    pages_status = models.CharField(
+        verbose_name="Pages status", max_length=20, default="", blank=True
+    )
 
     has_downloads = models.BooleanField(verbose_name="Has downloads", default=False)
     has_issues = models.BooleanField(verbose_name="Has issues", default=False)
