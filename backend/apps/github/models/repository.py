@@ -31,14 +31,16 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100)
-    description = models.CharField(verbose_name="Description", max_length=1000, default="")
+    description = models.CharField(
+        verbose_name="Description", max_length=1000, default="", blank=True
+    )
 
     default_branch = models.CharField(verbose_name="Default branch", max_length=100, default="")
     homepage = models.CharField(verbose_name="Homepage", max_length=100, default="", blank=True)
-    languages = models.JSONField(verbose_name="Languages", default=dict)
+    languages = models.JSONField(verbose_name="Languages", default=dict, blank=True)
     license = models.CharField(verbose_name="License", max_length=100, default="")
     size = models.PositiveIntegerField(verbose_name="Size in KB", default=0)
-    topics = models.JSONField(verbose_name="Topics", default=list)
+    topics = models.JSONField(verbose_name="Topics", default=list, blank=True)
 
     is_archived = models.BooleanField(verbose_name="Is archived", default=False)
     is_fork = models.BooleanField(verbose_name="Is fork", default=False)
