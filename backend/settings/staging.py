@@ -1,5 +1,6 @@
 """OWASP Nest staging configuration."""
 
+import sentry_sdk
 from configurations import values
 
 from settings.base import Base
@@ -7,6 +8,12 @@ from settings.base import Base
 
 class Staging(Base):
     """Stagind configuration."""
+
+    sentry_sdk.init(
+        dsn=values.SecretValue(environ_name="SENTRY_DSN"),
+        traces_sample_rate=0.5,
+        profiles_sample_rate=0.5,
+    )
 
     AWS_ACCESS_KEY_ID = values.SecretValue()
     AWS_SECRET_ACCESS_KEY = values.SecretValue()
