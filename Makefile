@@ -10,7 +10,7 @@ django-shell:
 dump-data:
 	@CMD="poetry run python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > data/nest.json
 
-enrich-data: github-enrich-issues owasp-enrich-projects
+enrich-data: github-enrich-issues owasp-enrich-chapters owasp-enrich-projects
 
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
@@ -49,6 +49,10 @@ migrations:
 owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="poetry run python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
+
+owasp-enrich-chapters:
+	@echo "Enriching OWASP chapters"
+	@CMD="poetry run python manage.py owasp_enrich_chapters" $(MAKE) exec-backend-command
 
 owasp-enrich-projects:
 	@echo "Enriching OWASP projects"

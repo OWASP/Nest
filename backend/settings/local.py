@@ -10,3 +10,5 @@ class Local(Base):
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
+
+    APP_NAME = "OWASP Nest Local"

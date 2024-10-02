@@ -13,9 +13,14 @@ def get_absolute_url(view_name):
     return f"{settings.SITE_URL}{reverse(view_name)}"
 
 
+def get_nest_user_agent():
+    """Return Nest user agent."""
+    return settings.APP_NAME.replace(" ", "-").lower()
+
+
 def join_values(fields, delimiter=" "):
     """Join non-empty field values using the delimiter."""
-    delimiter.join(field for field in fields if field)
+    return delimiter.join(field for field in fields if field)
 
 
 def natural_date(value):

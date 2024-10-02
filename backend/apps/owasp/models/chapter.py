@@ -1,13 +1,19 @@
 """OWASP app chapter model."""
 
 from django.db import models
+from geopy.geocoders import Nominatim
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import get_nest_user_agent, join_values
 from apps.owasp.models.common import OwaspEntity
+from apps.owasp.models.managers.chapter import ActiveChaptertManager
 
 
 class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
     """Chapter model."""
+
+    objects = models.Manager()
+    active_chapters = ActiveChaptertManager()
 
     class Meta:
         db_table = "owasp_chapters"
@@ -23,6 +29,9 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
     currency = models.CharField(verbose_name="Currency", max_length=10, default="")
     meetup_group = models.CharField(verbose_name="Meetup group", max_length=100, default="")
 
+    latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
+    longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
+
     tags = models.JSONField(verbose_name="Tags", default=list)
 
     owasp_repository = models.ForeignKey(
@@ -32,6 +41,18 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
     def __str__(self):
         """Chapter human readable representation."""
         return f"{self.name or self.key}"
+
+    @property
+    def geo_string(self):
+        """Return geo string."""
+        return join_values(
+            (
+                self.name.replace("OWASP", "").strip(),
+                self.country,
+                self.postal_code,
+            ),
+            delimiter=", ",
+        )
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
@@ -50,10 +71,25 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
         # FKs.
         self.owasp_repository = repository
 
+    def generate_geo_location(self, geo_locator=None):
+        """Add latitude and longitude data."""
+        geo_locator = geo_locator or Nominatim(user_agent=get_nest_user_agent())
+        location = geo_locator.geocode(self.geo_string)
+        if location:
+            self.latitude = location.latitude
+            self.longitude = location.longitude
+
+    def save(self, *args, **kwargs):
+        """Save chapter."""
+        if not self.latitude or not self.longitude:
+            self.generate_geo_location()
+
+        super().save(*args, **kwargs)
+
     @staticmethod
-    def bulk_save(chapters):
+    def bulk_save(chapters, fields=None):
         """Bulk save chapters."""
-        BulkSaveModel.bulk_save(Chapter, chapters)
+        BulkSaveModel.bulk_save(Chapter, chapters, fields=fields)
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):

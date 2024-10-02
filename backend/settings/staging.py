@@ -37,6 +37,7 @@ class Staging(Base):
         },
     }
 
+    APP_NAME = "OWASP Nest Staging"
     SITE_NAME = "nest.owasp.dev"
     SITE_URL = "https://nest.owasp.dev"
 
