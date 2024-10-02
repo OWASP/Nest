@@ -73,7 +73,7 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
 
     def generate_geo_location(self, geo_locator=None):
         """Add latitude and longitude data."""
-        geo_locator = geo_locator or Nominatim(user_agent=get_nest_user_agent())
+        geo_locator = geo_locator or Nominatim(timeout=3, user_agent=get_nest_user_agent())
         location = geo_locator.geocode(self.geo_string)
         if location:
             self.latitude = location.latitude
