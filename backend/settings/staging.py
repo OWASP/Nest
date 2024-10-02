@@ -37,10 +37,10 @@ class Staging(Base):
         },
     }
 
-    CSRF_TRUSTED_ORIGINS = ("https://nest.owasp.dev",)
-
     SITE_NAME = "nest.owasp.dev"
     SITE_URL = "https://nest.owasp.dev"
+
+    CSRF_TRUSTED_ORIGINS = (SITE_URL,)
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True

@@ -20,7 +20,7 @@ class Base(Configuration):
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
 
-    SITE_NAME = "nest.owasp.dev"
+    SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
     DJANGO_APPS = (
