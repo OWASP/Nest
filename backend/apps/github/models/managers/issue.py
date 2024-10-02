@@ -18,6 +18,9 @@ class OpenIssueManager(models.Manager):
             .select_related(
                 "repository",
             )
+            .prefetch_related(
+                "assignees",
+            )
             .filter(
                 repository__project__isnull=False,
                 state="open",

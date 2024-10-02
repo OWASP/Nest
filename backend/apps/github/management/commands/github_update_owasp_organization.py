@@ -51,7 +51,7 @@ class Command(BaseCommand):
             sort="created",
             direction="desc",
         )
-        gh_repositories_count = gh_repositories.totalCount - offset
+        gh_repositories_count = gh_repositories.totalCount
         for idx, gh_repository in enumerate(gh_repositories[offset:]):
             prefix = f"{idx + offset + 1} of {gh_repositories_count}"
             entity_key = gh_repository.name.lower()

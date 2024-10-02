@@ -67,7 +67,7 @@ class RepositoryAdmin(admin.ModelAdmin):
         "organization",
     )
     ordering = ("-created_at",)
-    search_fields = ("name",)
+    search_fields = ("name", "node_id")
 
     def custom_field_github_url(self, obj):
         """Repository GitHub URL."""

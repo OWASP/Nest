@@ -92,7 +92,10 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     def is_indexable(self):
         """Issues to index."""
         return (
-            self.state == self.State.OPEN and not self.is_locked and self.repository.is_indexable
+            self.state == self.State.OPEN
+            and not self.is_locked
+            and not self.assignees.exists()
+            and self.repository.is_indexable
         )
 
     @property
