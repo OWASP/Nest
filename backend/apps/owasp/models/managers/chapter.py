@@ -1,6 +1,7 @@
 """OWASP app chapter managers."""
 
 from django.db import models
+from django.db.models import Q
 
 
 class ActiveChaptertManager(models.Manager):
@@ -13,4 +14,6 @@ class ActiveChaptertManager(models.Manager):
     @property
     def without_geo_data(self):
         """Return chapters that don't have geo data."""
-        return self.get_queryset().filter(latitude__isnull=True, longitude__isnull=True)
+        return self.get_queryset().filter(
+            Q(latitude__isnull=True) | Q(longitude__isnull=True),
+        )
