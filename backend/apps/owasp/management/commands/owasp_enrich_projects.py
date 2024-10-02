@@ -5,7 +5,6 @@ import logging
 from django.core.management.base import BaseCommand
 
 from apps.common.open_ai import OpenAi
-from apps.github.utils import get_repository_file_content
 from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -42,18 +41,9 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
             print(f"{prefix:<10} {project.owasp_url}")
 
-            open_ai.set_input(get_repository_file_content(project.get_index_md_raw_url()))
-
             # Generate summary
             if update_summary:
-                open_ai.set_max_tokens(500).set_prompt(
-                    "Summarize the following OWASP project description using simple English."
-                    "Make sure to mention project type."
-                    "Do not use lists for description."
-                    "Do not use markdown in output."
-                    "Limit the entire summary to 5 sentences."
-                )
-                project.summary = open_ai.complete() or ""
+                project.generate_summary(open_ai=open_ai)
 
             projects.append(project)
 
