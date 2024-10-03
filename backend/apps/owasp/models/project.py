@@ -10,7 +10,7 @@ from apps.core.models.prompt import Prompt
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.common import OwaspEntity
 from apps.owasp.models.managers.project import ActiveProjectManager
-from apps.owasp.models.mixins import ProjectIndexMixin
+from apps.owasp.models.mixins.project import ProjectIndexMixin
 
 
 class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):

@@ -13,19 +13,28 @@ class ChapterIndex(AlgoliaIndex):
     index_name = "chapters"
 
     fields = (
-        "idx_name",
         "idx_country",
-        "idx_region",
-        "idx_postal_code",
         "idx_meetup_group",
-        "idx_latitude",
-        "idx_longitude",
+        "idx_name",
+        "idx_postal_code",
+        "idx_region",
+        "idx_tags",
     )
 
-    geoloc = "idx_geo_location"
+    geo_field = "idx_geo_location"
 
     settings = {
         "indexLanguages": ["en"],
+        "ranking": [
+            "typo",
+            "geo",
+            "words",
+            "filters",
+            "proximity",
+            "attribute",
+            "exact",
+            "custom",
+        ],
         "searchableAttributes": [
             "unordered(idx_name)",
             "unordered(idx_country, idx_region, idx_postal_code)",

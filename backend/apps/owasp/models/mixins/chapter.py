@@ -11,21 +11,13 @@ class ChapterIndexMixin:
 
     @property
     def idx_geo_location(self):
-        """Return geographic location data for indexing."""
-        return {
-            "lat": self.latitude,
-            "lng": self.longitude,
-        }
+        """Return geographic location for indexing."""
+        return self.latitude, self.longitude
 
     @property
-    def idx_latitude(self):
-        """Return latitude for indexing."""
-        return self.latitude
-
-    @property
-    def idx_longitude(self):
-        """Return longitude for indexing."""
-        return self.longitude
+    def idx_meetup_group(self):
+        """Return meetup group for indexing."""
+        return self.meetup_group
 
     @property
     def idx_name(self):

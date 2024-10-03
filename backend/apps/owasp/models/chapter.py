@@ -2,16 +2,17 @@
 
 from django.db import models
 
-from apps.common.geocoding import get_location
+from apps.common.geocoding import get_location_coordinates
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import OwaspEntity
 from apps.owasp.models.managers.chapter import ActiveChaptertManager
+from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 
 
-class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
+class Chapter(BulkSaveModel, ChapterIndexMixin, OwaspEntity, TimestampedModel):
     """Chapter model."""
 
     objects = models.Manager()
@@ -54,7 +55,12 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
     @property
     def is_indexable(self):
         """Chapters to index."""
-        return not self.owasp_repository.is_empty and not self.owasp_repository.is_archived
+        return (
+            self.latitude is not None
+            and self.longitude is not None
+            and not self.owasp_repository.is_empty
+            and not self.owasp_repository.is_archived
+        )
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
@@ -75,9 +81,9 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
 
     def generate_geo_location(self):
         """Add latitude and longitude data."""
-        location = get_location(self.get_geo_string())
+        location = get_location_coordinates(self.get_geo_string())
         if not location and self.suggested_location:
-            location = get_location(self.get_suggested_location_geo_string())
+            location = get_location_coordinates(self.get_suggested_location_geo_string())
 
         if location:
             self.latitude = location.latitude

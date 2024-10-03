@@ -18,6 +18,12 @@ def get_nest_user_agent():
     return settings.APP_NAME.replace(" ", "-").lower()
 
 
+def get_user_ip(meta):
+    """Return user's IP address."""
+    x_forwarded_for = meta.get("HTTP_X_FORWARDED_FOR")
+    return x_forwarded_for.split(",")[0] if x_forwarded_for else meta.get("REMOTE_ADDR")
+
+
 def join_values(fields, delimiter=" "):
     """Join non-empty field values using the delimiter."""
     return delimiter.join(field for field in fields if field)
