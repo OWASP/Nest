@@ -6,6 +6,7 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
+from apps.core.models.prompt import Prompt
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.common import OwaspEntity
 from apps.owasp.models.managers.project import ActiveProjectManager
@@ -207,13 +208,7 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
 
         open_ai = open_ai or OpenAi()
         open_ai.set_input(get_repository_file_content(self.get_index_md_raw_url()))
-        open_ai.set_max_tokens(max_tokens).set_prompt(
-            "Summarize the following OWASP project description using simple English."
-            "Make sure to mention project type."
-            "Do not use lists for description."
-            "Do not use markdown in output."
-            "Limit the entire summary to 5 sentences."
-        )
+        open_ai.set_max_tokens(max_tokens).set_prompt(Prompt.get_owasp_project_summary())
         self.summary = open_ai.complete() or ""
 
     def save(self, *args, **kwargs):

@@ -40,6 +40,7 @@ class Base(Configuration):
 
     LOCAL_APPS = (
         "apps.common",
+        "apps.core",
         "apps.github",
         "apps.owasp",
         "apps.slack",

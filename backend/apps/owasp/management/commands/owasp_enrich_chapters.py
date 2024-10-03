@@ -1,7 +1,6 @@
 """A command to enrich OWASP chapters with extra data."""
 
 import logging
-import time
 
 from django.core.management.base import BaseCommand
 
@@ -22,17 +21,20 @@ class Command(BaseCommand):
 
         chapters = []
         offset = options["offset"]
+
         for idx, chapter in enumerate(active_chapters[offset:]):
             prefix = f"{idx + offset + 1} of {active_chapters_count}"
             print(f"{prefix:<10} {chapter.owasp_url}")
             try:
-                chapter.generate_geo_location()
+                chapter.generate_suggested_location()
+
+                if not chapter.latitude or not chapter.longitude:
+                    chapter.generate_geo_location()
                 chapters.append(chapter)
             except Exception:
                 logger.exception(
-                    "Could not get geo data for chapter",
+                    "Could not get suggested location for a chapter",
                     extra={"url": chapter.owasp_url},
                 )
-            time.sleep(5)
 
-        Chapter.bulk_save(chapters, fields=("latitude", "longitude"))
+        Chapter.bulk_save(chapters, fields=("latitude", "longitude", "suggested_location"))

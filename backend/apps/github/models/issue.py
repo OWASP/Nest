@@ -6,6 +6,7 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
+from apps.core.models.prompt import Prompt
 from apps.github.models.common import NodeModel
 from apps.github.models.managers.issue import OpenIssueManager
 from apps.github.models.mixins import IssueIndexMixin
@@ -146,12 +147,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
         open_ai = open_ai or OpenAi()
         open_ai.set_input(f"{self.title}\r\n{self.body}")
-        open_ai.set_max_tokens(max_tokens).set_prompt(
-            "Describe possible steps of approaching the problem using simple English."
-            "Limit the entire guidance to 10 steps top."
-            "Do not start your response with confirmation phrases like "
-            "'sure', 'certainly', and so on. Go straight to the details."
-        )
+        open_ai.set_max_tokens(max_tokens).set_prompt(Prompt.get_github_issue_hint())
         self.hint = open_ai.complete() or ""
 
     def generate_summary(self, open_ai=None, max_tokens=500):
@@ -162,22 +158,9 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         open_ai = open_ai or OpenAi()
         open_ai.set_input(f"{self.title}\r\n{self.body}")
         open_ai.set_max_tokens(max_tokens).set_prompt(
-            (
-                "Summarize the following GitHub issue using simple English."
-                "Do not mention author's name or issue creation date."
-                "Do not use lists for description."
-                "Do not use markdown in output."
-                "Limit the entire summary to 3 sentences."
-            )
+            Prompt.get_github_issue_documentation_project_summary()
             if self.project.is_documentation_type
-            else (
-                "Summarize the following GitHub issue using imperative mood using "
-                "simple English."
-                "Use a good amount technical details."
-                "Do not use lists for description."
-                "Do not use mardown in output."
-                "Limit the entire summary to 3 sentences."
-            )
+            else Prompt.get_github_issue_project_summary()
         )
         self.summary = open_ai.complete() or ""
 

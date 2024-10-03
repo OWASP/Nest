@@ -9,7 +9,15 @@ class ActiveChaptertManager(models.Manager):
 
     def get_queryset(self):
         """Get queryset."""
-        return super().get_queryset().all()
+        return (
+            super()
+            .get_queryset()
+            .select_related("owasp_repository")
+            .filter(
+                owasp_repository__is_archived=False,
+                owasp_repository__is_empty=False,
+            )
+        )
 
     @property
     def without_geo_data(self):

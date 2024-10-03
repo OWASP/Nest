@@ -1,10 +1,12 @@
 """OWASP app chapter model."""
 
 from django.db import models
-from geopy.geocoders import Nominatim
 
+from apps.common.geocoding import get_location
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.common.utils import get_nest_user_agent, join_values
+from apps.common.open_ai import OpenAi
+from apps.common.utils import join_values
+from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import OwaspEntity
 from apps.owasp.models.managers.chapter import ActiveChaptertManager
 
@@ -21,16 +23,23 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
-    level = models.CharField(verbose_name="Level", max_length=5, default="")
+    level = models.CharField(verbose_name="Level", max_length=5, default="", blank=True)
 
     country = models.CharField(verbose_name="Country", max_length=50, default="")
     region = models.CharField(verbose_name="Region", max_length=50, default="")
-    postal_code = models.CharField(verbose_name="Postal code", max_length=15, default="")
-    currency = models.CharField(verbose_name="Currency", max_length=10, default="")
-    meetup_group = models.CharField(verbose_name="Meetup group", max_length=100, default="")
+    postal_code = models.CharField(
+        verbose_name="Postal code", max_length=15, default="", blank=True
+    )
+    currency = models.CharField(verbose_name="Currency", max_length=10, default="", blank=True)
+    meetup_group = models.CharField(
+        verbose_name="Meetup group", max_length=100, default="", blank=True
+    )
 
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
+    suggested_location = models.CharField(
+        verbose_name="Suggested location", max_length=100, default="", blank=True
+    )  # AI suggested location.
 
     tags = models.JSONField(verbose_name="Tags", default=list)
 
@@ -43,16 +52,9 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
         return f"{self.name or self.key}"
 
     @property
-    def geo_string(self):
-        """Return geo string."""
-        return join_values(
-            (
-                self.name.replace("OWASP", "").strip(),
-                self.country,
-                self.postal_code,
-            ),
-            delimiter=", ",
-        )
+    def is_indexable(self):
+        """Chapters to index."""
+        return not self.owasp_repository.is_empty and not self.owasp_repository.is_archived
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
@@ -71,16 +73,51 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
         # FKs.
         self.owasp_repository = repository
 
-    def generate_geo_location(self, geo_locator=None):
+    def generate_geo_location(self):
         """Add latitude and longitude data."""
-        geo_locator = geo_locator or Nominatim(timeout=3, user_agent=get_nest_user_agent())
-        location = geo_locator.geocode(self.geo_string)
+        location = get_location(self.get_geo_string())
+        if not location and self.suggested_location:
+            location = get_location(self.get_suggested_location_geo_string())
+
         if location:
             self.latitude = location.latitude
             self.longitude = location.longitude
 
+    def generate_suggested_location(self, open_ai=None, max_tokens=100):
+        """Generate project summary."""
+        if not self.is_indexable:
+            return
+
+        open_ai = open_ai or OpenAi()
+        open_ai.set_input(self.get_geo_string())
+        open_ai.set_max_tokens(max_tokens).set_prompt(
+            Prompt.get_owasp_chapter_suggested_location()
+        )
+        self.suggested_location = open_ai.complete() or ""
+
+    def get_geo_string(self, include_name=True):
+        """Return geo string."""
+        return join_values(
+            (
+                self.name.replace("OWASP", "").strip() if include_name else "",
+                self.country,
+                self.postal_code,
+            ),
+            delimiter=", ",
+        )
+
+    def get_suggested_location_geo_string(self):
+        """Return suggested location geo string."""
+        return join_values(
+            (self.suggested_location, self.country),
+            delimiter=", ",
+        )
+
     def save(self, *args, **kwargs):
         """Save chapter."""
+        if not self.suggested_location:
+            self.generate_suggested_location()
+
         if not self.latitude or not self.longitude:
             self.generate_geo_location()
 
