@@ -1,6 +1,7 @@
 """OWASP app issue search API."""
 
 from algoliasearch_django import raw_search
+from django.core.cache import cache
 from django.http import JsonResponse
 
 from apps.github.models.issue import Issue
@@ -30,7 +31,20 @@ def get_issues(query, attributes=None, distinct=False, limit=25):
     if distinct:
         params["distinct"] = 1
 
-    return raw_search(Issue, query, params)["hits"]
+    issue_cache_key = f"algolia_search_{query}"
+    issue_cache_result = cache.get(issue_cache_key)
+
+    # check if cache exists
+
+    if issue_cache_result:
+        return issue_cache_result
+
+    search_result = raw_search(Issue, query, params)["hits"]
+
+    # save to cache
+
+    cache.set(issue_cache_key, search_result, 86400)
+    return search_result
 
 
 def project_issues(request):

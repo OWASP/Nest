@@ -135,6 +135,12 @@ class Base(Configuration):
 
     USE_TZ = True
 
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
+
     STATICFILES_DIRS = [
         BASE_DIR / "static",
     ]
