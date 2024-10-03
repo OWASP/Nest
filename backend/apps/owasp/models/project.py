@@ -203,7 +203,7 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
 
     def generate_summary(self, open_ai=None, max_tokens=500):
         """Generate project summary."""
-        if not self.is_indexable:
+        if self.id and not self.is_indexable:
             return
 
         open_ai = open_ai or OpenAi()

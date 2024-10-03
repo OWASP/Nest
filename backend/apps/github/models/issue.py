@@ -142,7 +142,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
     def generate_hint(self, open_ai=None, max_tokens=1000):
         """Generate issue hint."""
-        if not self.is_indexable:
+        if self.id and not self.is_indexable:
             return
 
         open_ai = open_ai or OpenAi()
@@ -152,7 +152,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
     def generate_summary(self, open_ai=None, max_tokens=500):
         """Generate issue summary."""
-        if not self.is_indexable:
+        if self.id and not self.is_indexable:
             return
 
         open_ai = open_ai or OpenAi()

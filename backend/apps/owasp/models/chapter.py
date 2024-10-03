@@ -85,7 +85,7 @@ class Chapter(BulkSaveModel, OwaspEntity, TimestampedModel):
 
     def generate_suggested_location(self, open_ai=None, max_tokens=100):
         """Generate project summary."""
-        if not self.is_indexable:
+        if self.id and not self.is_indexable:
             return
 
         open_ai = open_ai or OpenAi()
