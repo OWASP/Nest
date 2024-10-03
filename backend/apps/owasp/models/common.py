@@ -36,7 +36,7 @@ class OwaspEntity:
         )
         # Fetch project metadata from index.md file.
         try:
-            yaml_content = re.search(r"^---\n(.*?)\n---", index_md_content, re.DOTALL)
+            yaml_content = re.search(r"^---\s*(.*?)\s*---", index_md_content, re.DOTALL)
             project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
 
             # Direct fields.

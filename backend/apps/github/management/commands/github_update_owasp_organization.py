@@ -24,6 +24,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--offset", default=0, required=False, type=int)
+        parser.add_argument("--repository", required=False, type=str)
 
     def handle(self, *_args, **options):
         try:
@@ -46,12 +47,19 @@ class Command(BaseCommand):
         projects = []
 
         offset = options["offset"]
-        gh_repositories = gh_owasp_organization.get_repos(
-            type="public",
-            sort="created",
-            direction="desc",
-        )
-        gh_repositories_count = gh_repositories.totalCount
+        repository = options["repository"]
+
+        if repository:
+            gh_repositories = [gh_owasp_organization.get_repo(repository)]
+            gh_repositories_count = 1
+        else:
+            gh_repositories = gh_owasp_organization.get_repos(
+                type="public",
+                sort="created",
+                direction="desc",
+            )
+            gh_repositories_count = gh_repositories.totalCount
+
         for idx, gh_repository in enumerate(gh_repositories[offset:]):
             prefix = f"{idx + offset + 1} of {gh_repositories_count}"
             entity_key = gh_repository.name.lower()

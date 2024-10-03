@@ -19,7 +19,7 @@ class ChapterAdmin(admin.ModelAdmin):
         "country",
         "region",
     )
-    search_fields = ("name",)
+    search_fields = ("name", "key")
 
 
 class CommetteeAdmin(admin.ModelAdmin):
