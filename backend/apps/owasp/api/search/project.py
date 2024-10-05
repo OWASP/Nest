@@ -2,7 +2,8 @@
 
 from algoliasearch_django import raw_search
 from django.http import JsonResponse
-
+from django.core.cache import cache
+from apps.owasp.constants import DAY_IN_SECONDS
 from apps.owasp.models.project import Project
 
 
@@ -30,7 +31,21 @@ def get_projects(query, attributes=None, limit=25):
         "typoTolerance": "min",
     }
 
-    return raw_search(Project, query, params)["hits"]
+    project_cache_key = f"Project:{query}"
+    project_cache_result = cache.get(project_cache_key)
+
+    # check if cache exists
+
+    if project_cache_result is None:
+        search_result = raw_search(Project, query, params)["hits"]
+        # save to cache, empty queries excluded
+        if query != "":
+            cache.set(project_cache_key,search_result,DAY_IN_SECONDS)
+
+    else:
+        search_result=project_cache_result
+    
+    return search_result
 
 
 def projects(request):

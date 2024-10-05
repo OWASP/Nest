@@ -1,3 +1,4 @@
 """OWASP app constants."""
 
 OWASP_ORGANIZATION_NAME = "OWASP"
+DAY_IN_SECONDS = 86400

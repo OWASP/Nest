@@ -2,7 +2,8 @@
 
 from algoliasearch_django import raw_search
 from django.http import JsonResponse
-
+from django.core.cache import cache
+from apps.owasp.constants import DAY_IN_SECONDS
 from apps.github.models.issue import Issue
 
 
@@ -30,7 +31,20 @@ def get_issues(query, attributes=None, distinct=False, limit=25):
     if distinct:
         params["distinct"] = 1
 
-    return raw_search(Issue, query, params)["hits"]
+    issue_cache_key = f"Issue:{query}"
+    issue_cache_result = cache.get(issue_cache_key)
+
+    # check if cache exists
+
+    if issue_cache_result is None:
+        search_result = raw_search(Issue, query, params)["hits"]    
+        # save to cache,  empty queries excluded
+        if query != "":
+            cache.set(issue_cache_key, search_result, DAY_IN_SECONDS)
+    else:
+        search_result = issue_cache_result
+
+    return search_result
 
 
 def project_issues(request):
