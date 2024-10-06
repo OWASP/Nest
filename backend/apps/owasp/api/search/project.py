@@ -50,4 +50,10 @@ def get_projects(query, attributes=None, limit=25):
 
 def projects(request):
     """Search projects API endpoint."""
-    return JsonResponse(get_projects(request.GET.get("q", "")), safe=False)
+    return JsonResponse(
+        {
+            "active_projects_count": Project.active_projects_count(),
+            "projects": get_projects(request.GET.get("q", "")),
+        },
+        safe=False,
+    )

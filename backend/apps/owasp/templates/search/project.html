@@ -14,7 +14,7 @@
                                type="text"
                                @input="handleInput"
                                class="form-control"
-                               placeholder="Search for a project to contribute to...">
+                               :placeholder="searchPlaceholderText">
                         <button class="btn btn-outline-secondary"
                                 @click="searchQuery = ''"
                                 type="button"
@@ -159,12 +159,20 @@
         } = Vue;
         createApp({
             delimiters: ['${', '}'],
+            computed: {
+                searchPlaceholderText() {
+                    return this.activeProjectsCount ?
+                        `Search among ${this.activeProjectsCount} projects to contribute to...` :
+                        'Search...';
+                }
+            },
             data() {
                 return {
                     projects: [],
                     selectedProject: {},
                     searchQuery: '',
                     isManualSearch: true,
+                    activeProjectsCount: 0,
                     levelStyleMap: {
                         "incubator": {
                             color: "#53AAE5",
@@ -201,13 +209,14 @@
                     const response = await fetch(`/api/v1/owasp/search/project?q=${this.searchQuery}`)
                         .then(res => res.json())
                         .then(json => {
-                            json.forEach(project => {
+                            json.projects.forEach(project => {
                                 project.level = project.idx_level.charAt(0).toUpperCase() + project.idx_level.slice(1).toLowerCase();
                                 project.summary = marked.parse(project.idx_summary || '');
                                 project.topics = project.idx_topics ? project.idx_topics.sort(() => Math.random() - 0.5).slice(0, 20) : [];
                                 project.updated_at = dayjs.unix(project.idx_updated_at || '').fromNow(true);
                             });
-                            this.projects = json;
+                            this.projects = json.projects;
+                            this.activeProjectsCount = json.active_projects_count;
                         })
                         .catch(err => console.error("There was an error! ", err));
 
