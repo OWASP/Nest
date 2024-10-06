@@ -95,11 +95,10 @@ class Base(Configuration):
     }
 
     CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "unique-1",
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
     }
-}
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
     DATABASES = {

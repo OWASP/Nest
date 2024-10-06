@@ -1,9 +1,10 @@
 """OWASP app project search API."""
 
 from algoliasearch_django import raw_search
-from django.http import JsonResponse
 from django.core.cache import cache
-from apps.owasp.constants import DAY_IN_SECONDS
+from django.http import JsonResponse
+
+from apps.common.constants import DAY_IN_SECONDS
 from apps.owasp.models.project import Project
 
 
@@ -31,29 +32,23 @@ def get_projects(query, attributes=None, limit=25):
         "typoTolerance": "min",
     }
 
-    project_cache_key = f"Project:{query}"
-    project_cache_result = cache.get(project_cache_key)
-
-    # check if cache exists
-
-    if project_cache_result is None:
-        search_result = raw_search(Project, query, params)["hits"]
-        # save to cache, empty queries excluded
-        if query != "":
-            cache.set(project_cache_key,search_result,DAY_IN_SECONDS)
-
-    else:
-        search_result=project_cache_result
-    
-    return search_result
+    return raw_search(Project, query, params)["hits"]
 
 
 def projects(request):
     """Search projects API endpoint."""
+    query = request.GET.get("q", "")
+    cache_key = f"project:{query}"
+    projects = cache.get(cache_key)
+
+    if projects is None:
+        projects = get_projects(query)
+        cache.set(cache_key, projects, DAY_IN_SECONDS)
+
     return JsonResponse(
         {
             "active_projects_count": Project.active_projects_count(),
-            "projects": get_projects(request.GET.get("q", "")),
+            "projects": projects,
         },
         safe=False,
     )
