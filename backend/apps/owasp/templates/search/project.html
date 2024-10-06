@@ -161,7 +161,9 @@
             delimiters: ['${', '}'],
             computed: {
                 searchPlaceholderText() {
-                    return `Search among ${this.activeProjectsCount} projects to contribute to...`;
+                    return this.activeProjectsCount ?
+                        `Search among ${this.activeProjectsCount} projects to contribute to...` :
+                        'Search...';
                 }
             },
             data() {
