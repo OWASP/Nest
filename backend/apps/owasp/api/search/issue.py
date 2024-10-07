@@ -1,9 +1,13 @@
 """OWASP app issue search API."""
 
 from algoliasearch_django import raw_search
+from django.core.cache import cache
 from django.http import JsonResponse
 
+from apps.common.constants import DAY_IN_SECONDS
 from apps.github.models.issue import Issue
+
+ISSUE_CACHE_PREFIX = "issue:"
 
 
 def get_issues(query, attributes=None, distinct=False, limit=25):
@@ -35,4 +39,12 @@ def get_issues(query, attributes=None, distinct=False, limit=25):
 
 def project_issues(request):
     """Search project issues API endpoint."""
-    return JsonResponse(get_issues(request.GET.get("q", "")), safe=False)
+    query = request.GET.get("q", "")
+    cache_key = f"{ISSUE_CACHE_PREFIX}{query}"
+    issues = cache.get(cache_key)
+
+    if issues is None:
+        issues = get_issues(query)
+        cache.set(cache_key, issues, DAY_IN_SECONDS)
+
+    return JsonResponse(issues, safe=False)

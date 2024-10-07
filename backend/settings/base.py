@@ -94,6 +94,11 @@ class Base(Configuration):
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
 
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
     DATABASES = {
