@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from apps.common.constants import DAY_IN_SECONDS
 from apps.owasp.models.project import Project
 
+PROJECT_CACHE_PREFIX = "project:"
+
 
 def get_projects(query, attributes=None, limit=25):
     """Return projects relevant to a search query."""
@@ -38,7 +40,7 @@ def get_projects(query, attributes=None, limit=25):
 def projects(request):
     """Search projects API endpoint."""
     query = request.GET.get("q", "")
-    cache_key = f"project:{query}"
+    cache_key = f"{PROJECT_CACHE_PREFIX}{query}"
     projects = cache.get(cache_key)
 
     if projects is None:

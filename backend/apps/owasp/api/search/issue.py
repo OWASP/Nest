@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from apps.common.constants import DAY_IN_SECONDS
 from apps.github.models.issue import Issue
 
+ISSUE_CACHE_PREFIX = "issue:"
+
 
 def get_issues(query, attributes=None, distinct=False, limit=25):
     """Return issues relevant to a search query."""
@@ -38,7 +40,7 @@ def get_issues(query, attributes=None, distinct=False, limit=25):
 def project_issues(request):
     """Search project issues API endpoint."""
     query = request.GET.get("q", "")
-    cache_key = f"issue:{query}"
+    cache_key = f"{ISSUE_CACHE_PREFIX}{query}"
     issues = cache.get(cache_key)
 
     if issues is None:

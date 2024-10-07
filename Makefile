@@ -1,6 +1,9 @@
 build:
 	@docker compose build
 
+clear-cache:
+	@CMD="poetry run python manage.py clear_cache" $(MAKE) exec-backend-command
+
 collect-static:
 	@CMD="poetry run python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
@@ -81,7 +84,7 @@ setup:
 shell:
 	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
 
-sync: update-data enrich-data index-data
+sync: update-data enrich-data index-data clear-cache
 
 test:
 	@docker build -f backend/Dockerfile.test backend -t nest-backend-test
