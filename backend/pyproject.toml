@@ -45,7 +45,7 @@ geopy = "^2.4.1"
 djlint = "^1.35.2"
 isort = "^5.13.2"
 pre-commit = "^4.0.0"
-ruff = "^0.6.8"
+ruff = "^0.6.9"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.2"
