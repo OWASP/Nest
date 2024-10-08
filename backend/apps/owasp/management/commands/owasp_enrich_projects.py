@@ -1,4 +1,4 @@
-"""A command to update OWASP entities related repositories data."""
+"""A command to update OWASP projects related repositories data."""
 
 import logging
 

@@ -15,7 +15,9 @@ def get_chapters(query, attributes=None, limit=25, meta=None):
         "attributesToRetrieve": attributes
         or [
             "idx_name",
-            "idx_meetup_group",
+            "idx_related_urls",
+            "idx_suggested_location",
+            "idx_summary",
         ],
         "hitsPerPage": limit,
         "minProximity": 4,

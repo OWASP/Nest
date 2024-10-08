@@ -1,5 +1,7 @@
 """OWASP Nest local configuration."""
 
+from configurations import values
+
 from settings.base import Base
 
 
@@ -12,3 +14,5 @@ class Local(Base):
     SLACK_EVENTS_ENABLED = True
 
     APP_NAME = "OWASP Nest Local"
+
+    LOCAL_EXTERNAL_IP = values.SecretValue(environ_name="LOCAL_EXTERNAL_IP")

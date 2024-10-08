@@ -9,13 +9,39 @@ from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 
 
-class ChapterAdmin(admin.ModelAdmin):
+class GenericEntityAdminMixin:
+    def custom_field_github_urls(self, obj):
+        """Entity GitHub URLs."""
+        urls = [
+            f"<a href='https://github.com/{repository.owner.login}/"
+            f"{repository.key}' target='_blank'>↗️</a>"
+            for repository in (
+                obj.repositories.all() if hasattr(obj, "repositories") else [obj.owasp_repository]
+            )
+        ]
+
+        return mark_safe(" ".join(urls))  # noqa: S308
+
+    def custom_field_owasp_url(self, obj):
+        """Entity OWASP URL."""
+        return mark_safe(  # noqa: S308
+            f"<a href='https://owasp.org/{obj.key}' target='_blank'>↗️</a>"
+        )
+
+    custom_field_github_urls.short_description = "GitHub 🔗"
+    custom_field_owasp_url.short_description = "OWASP 🔗"
+
+
+class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     autocomplete_fields = ("owasp_repository",)
     list_display = (
         "name",
         "region",
+        "custom_field_owasp_url",
+        "custom_field_github_urls",
     )
     list_filter = (
+        "is_active",
         "country",
         "region",
     )
@@ -33,7 +59,7 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     autocomplete_fields = (
         "organizations",
         "owasp_repository",
@@ -49,7 +75,7 @@ class ProjectAdmin(admin.ModelAdmin):
         "commits_count",
         "releases_count",
         "custom_field_owasp_url",
-        "custom_field_github_url",
+        "custom_field_github_urls",
     )
     list_filter = (
         "is_active",
@@ -71,25 +97,7 @@ class ProjectAdmin(admin.ModelAdmin):
         """Project custom name."""
         return f"{obj.name or obj.key}"
 
-    def custom_field_github_url(self, obj):
-        """Project GitHub URL."""
-        urls = [
-            f"<a href='https://github.com/{repository.owner.login}/"
-            f"{repository.key}' target='_blank'>↗️</a>"
-            for repository in obj.repositories.all()
-        ]
-
-        return mark_safe(" ".join(urls))  # noqa: S308
-
-    def custom_field_owasp_url(self, obj):
-        """Project OWASP URL."""
-        return mark_safe(  # noqa: S308
-            f"<a href='https://owasp.org/{obj.key}' target='_blank'>↗️</a>"
-        )
-
     custom_field_name.short_description = "Name"
-    custom_field_github_url.short_description = "GitHub 🔗"
-    custom_field_owasp_url.short_description = "OWASP 🔗"
 
 
 admin.site.register(Chapter, ChapterAdmin)

@@ -8,9 +8,10 @@ from apps.github.models.repository_contributor import (
     TOP_CONTRIBUTORS_LIMIT,
     RepositoryContributor,
 )
+from apps.owasp.models.mixins.common import GenericEntityMixin
 
 
-class ProjectIndexMixin:
+class ProjectIndexMixin(GenericEntityMixin):
     """Project index mixin."""
 
     @property
@@ -24,11 +25,6 @@ class ProjectIndexMixin:
         return self.contributors_count
 
     @property
-    def idx_description(self):
-        """Return description for indexing."""
-        return self.description
-
-    @property
     def idx_forks_count(self):
         """Return forks count for indexing."""
         return self.forks_count
@@ -37,11 +33,6 @@ class ProjectIndexMixin:
     def idx_languages(self):
         """Return languages for indexing."""
         return self.languages
-
-    @property
-    def idx_leaders(self):
-        """Return leaders for indexing."""
-        return [leader for leader in self.leaders_raw if not leader.startswith("@")]
 
     @property
     def idx_level(self):
@@ -69,16 +60,6 @@ class ProjectIndexMixin:
         return self.stars_count
 
     @property
-    def idx_summary(self):
-        """Return summary for indexing."""
-        return self.summary
-
-    @property
-    def idx_tags(self):
-        """Return tags for indexing."""
-        return self.tags
-
-    @property
     def idx_top_contributors(self):
         """Return top contributors for indexing."""
         return [
@@ -100,11 +81,6 @@ class ProjectIndexMixin:
         ]
 
     @property
-    def idx_topics(self):
-        """Return topics for indexing."""
-        return self.topics
-
-    @property
     def idx_type(self):
         """Return type for indexing."""
         return self.type
@@ -113,8 +89,3 @@ class ProjectIndexMixin:
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return self.updated_at
-
-    @property
-    def idx_url(self):
-        """Return URL for indexing."""
-        return self.owasp_url

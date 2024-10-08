@@ -14,10 +14,12 @@ class ChapterIndex(AlgoliaIndex):
 
     fields = (
         "idx_country",
-        "idx_meetup_group",
         "idx_name",
         "idx_postal_code",
         "idx_region",
+        "idx_related_urls",
+        "idx_summary",
+        "idx_suggested_location",
         "idx_tags",
     )
 
@@ -37,7 +39,7 @@ class ChapterIndex(AlgoliaIndex):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_country, idx_region, idx_postal_code)",
+            "unordered(idx_country, idx_region, idx_postal_code, idx_suggested_location)",
             "unordered(idx_tags)",
         ],
     }
@@ -46,6 +48,6 @@ class ChapterIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        return Chapter.objects.prefetch_related(
+        return Chapter.active_chapters.prefetch_related(
             "owasp_repository",
         )

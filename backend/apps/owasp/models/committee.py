@@ -1,27 +1,15 @@
 """OWASP app commettee model."""
 
-from django.db import models
-
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.owasp.models.common import OwaspEntity
+from apps.owasp.models.common import RepositoryBasedEntityModel
 
 
-class Committee(BulkSaveModel, OwaspEntity, TimestampedModel):
+class Committee(BulkSaveModel, RepositoryBasedEntityModel, TimestampedModel):
     """Committee model."""
 
     class Meta:
         db_table = "owasp_committees"
         verbose_name_plural = "Committees"
-
-    name = models.CharField(verbose_name="Name", max_length=100)
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
-    description = models.CharField(verbose_name="Description", max_length=500, default="")
-
-    tags = models.JSONField(verbose_name="Tags", default=list)
-
-    owasp_repository = models.ForeignKey(
-        "github.Repository", on_delete=models.SET_NULL, blank=True, null=True
-    )
 
     def __str__(self):
         """Committee human readable representation."""
@@ -34,7 +22,7 @@ class Committee(BulkSaveModel, OwaspEntity, TimestampedModel):
             "name": "title",
             "tags": "tags",
         }
-        OwaspEntity.from_github(self, field_mapping, repository)
+        RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
 
         # FKs.
         self.owasp_repository = repository
