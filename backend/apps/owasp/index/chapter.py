@@ -14,19 +14,27 @@ class ChapterIndex(AlgoliaIndex):
 
     fields = (
         "idx_country",
+        "idx_created_at",
+        "idx_leaders",
         "idx_name",
         "idx_postal_code",
         "idx_region",
         "idx_related_urls",
-        "idx_summary",
         "idx_suggested_location",
+        "idx_summary",
         "idx_tags",
+        "idx_updated_at",
+        "idx_url",
     )
 
     geo_field = "idx_geo_location"
 
     settings = {
         "indexLanguages": ["en"],
+        "customRanking": [
+            "asc(idx_created_at)",
+            "desc(idx_updated_at)",
+        ],
         "ranking": [
             "typo",
             "geo",
@@ -39,7 +47,8 @@ class ChapterIndex(AlgoliaIndex):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_country, idx_region, idx_postal_code, idx_suggested_location)",
+            "unordered(idx_leaders)",
+            "unordered(idx_suggested_location, idx_country, idx_region, idx_postal_code)",
             "unordered(idx_tags)",
         ],
     }

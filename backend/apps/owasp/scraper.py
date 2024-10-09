@@ -10,6 +10,9 @@ from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
+MAX_RETRIES = 3
+TIMEOUT = 5, 10
+
 
 class OwaspScraper:
     """OWASP scraper."""
@@ -23,7 +26,7 @@ class OwaspScraper:
                 backoff_factor=1,
                 raise_on_status=False,
                 status_forcelist=(429, 500, 502, 503, 504),
-                total=5,
+                total=MAX_RETRIES,
             )
         )
         self.session = requests.Session()
@@ -31,7 +34,7 @@ class OwaspScraper:
         self.session.mount("https://", http_adapter)
 
         try:
-            page_response = self.session.get(url, timeout=(30, 60))
+            page_response = self.session.get(url, timeout=TIMEOUT)
         except requests.exceptions.RequestException:
             logger.exception("Request failed", extra={"url": url})
             return
@@ -45,10 +48,10 @@ class OwaspScraper:
             return
 
     def get_urls(self, domain=None):
-        """Return GitHub URLs."""
+        """Return scraped URLs."""
         return set(
-            self.page_tree.xpath(f"//div[@class='sidebar']//a[contains(@href, {domain})]/@href")
-            if domain
+            self.page_tree.xpath(f"//div[@class='sidebar']//a[contains(@href, '{domain}')]/@href")
+            if domain is not None
             else self.page_tree.xpath("//div[@class='sidebar']//a/@href")
         )
 
@@ -73,7 +76,7 @@ class OwaspScraper:
 
         try:
             # Check for redirects.
-            response = self.session.get(url, allow_redirects=False, timeout=(30, 60))
+            response = self.session.get(url, allow_redirects=False, timeout=TIMEOUT)
         except requests.exceptions.RequestException:
             logger.exception("Request failed", extra={"url": url})
             return None

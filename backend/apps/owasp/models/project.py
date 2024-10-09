@@ -5,9 +5,7 @@ from functools import lru_cache
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
-from apps.github.utils import get_repository_file_content
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
@@ -183,20 +181,10 @@ class Project(
         # FKs.
         self.owasp_repository = repository
 
-    def generate_summary(self, open_ai=None, max_tokens=500):
-        """Generate project summary."""
-        if self.id and not self.is_indexable:
-            return
-
-        open_ai = open_ai or OpenAi()
-        open_ai.set_input(get_repository_file_content(self.get_index_md_raw_url()))
-        open_ai.set_max_tokens(max_tokens).set_prompt(Prompt.get_owasp_project_summary())
-        self.summary = open_ai.complete() or ""
-
     def save(self, *args, **kwargs):
         """Save project."""
         if not self.summary:
-            self.generate_summary()
+            self.generate_summary(prompt=Prompt.get_owasp_project_summary())
 
         super().save(*args, **kwargs)
 

@@ -84,14 +84,18 @@ class Chapter(
         }
         RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
 
+        if repository:
+            self.created_at = repository.created_at
+            self.updated_at = repository.updated_at
+
         # FKs.
         self.owasp_repository = repository
 
     def generate_geo_location(self):
         """Add latitude and longitude data."""
-        location = get_location_coordinates(self.get_geo_string())
-        if not location and self.suggested_location:
-            location = get_location_coordinates(self.get_suggested_location_geo_string())
+        location = get_location_coordinates(self.suggested_location) or get_location_coordinates(
+            self.get_geo_string()
+        )
 
         if location:
             self.latitude = location.latitude
@@ -99,7 +103,7 @@ class Chapter(
 
     def generate_suggested_location(self, open_ai=None, max_tokens=100):
         """Generate project summary."""
-        if not self.id or not self.is_indexable:
+        if not self.is_active:
             return
 
         open_ai = open_ai or OpenAi()
@@ -117,13 +121,6 @@ class Chapter(
                 self.country,
                 self.postal_code,
             ),
-            delimiter=", ",
-        )
-
-    def get_suggested_location_geo_string(self):
-        """Return suggested location geo string."""
-        return join_values(
-            (self.suggested_location, self.country),
             delimiter=", ",
         )
 

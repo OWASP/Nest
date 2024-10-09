@@ -44,6 +44,7 @@ class Command(BaseCommand):
                     repository_url
                     for url in set(scraper.get_urls(domain="github.com"))
                     if (repository_url := normalize_url(project.get_related_url(url)))
+                    and repository_url not in {project.github_url, project.owasp_url}
                 }
             )
 

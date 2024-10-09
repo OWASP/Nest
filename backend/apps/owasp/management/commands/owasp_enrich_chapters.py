@@ -5,6 +5,7 @@ import time
 
 from django.core.management.base import BaseCommand
 
+from apps.core.models.prompt import Prompt
 from apps.owasp.models.chapter import Chapter
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,6 @@ class Command(BaseCommand):
         active_chapters_count = active_chapters.count()
 
         chapters = []
-        fields = []
         offset = options["offset"]
 
         for idx, chapter in enumerate(active_chapters[offset:]):
@@ -30,19 +30,16 @@ class Command(BaseCommand):
 
             # Summary.
             if not chapter.summary:
-                chapter.generate_summary()
-                fields.append("summary")
+                chapter.generate_summary(prompt=Prompt.get_owasp_chapter_summary())
 
             # Suggested location.
             if not chapter.suggested_location:
                 chapter.generate_suggested_location()
-                fields.append("suggested_location")
 
             # Geo location.
             if not chapter.latitude or not chapter.longitude:
                 try:
                     chapter.generate_geo_location()
-                    fields.extend(("latitude", "longitude"))
                     time.sleep(5)
                 except Exception:
                     logger.exception(
@@ -52,4 +49,7 @@ class Command(BaseCommand):
 
             chapters.append(chapter)
 
-        Chapter.bulk_save(chapters, fields=fields)
+        Chapter.bulk_save(
+            chapters,
+            fields=("latitude", "longitude", "suggested_location", "summary"),
+        )

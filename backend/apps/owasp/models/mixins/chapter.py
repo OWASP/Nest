@@ -14,7 +14,7 @@ class ChapterIndexMixin(GenericEntityMixin):
     @property
     def idx_created_at(self):
         """Return created at for indexing."""
-        return self.owasp_repository.created_at
+        return self.created_at or self.owasp_repository.created_at
 
     @property
     def idx_geo_location(self):
@@ -49,9 +49,4 @@ class ChapterIndexMixin(GenericEntityMixin):
     @property
     def idx_updated_at(self):
         """Return updated at for indexing."""
-        return self.owasp_repository.updated_at
-
-    @property
-    def idx_url(self):
-        """Return URL for indexing."""
-        return self.owasp_url
+        return self.updated_at or self.owasp_repository.updated_at

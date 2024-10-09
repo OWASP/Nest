@@ -2,12 +2,12 @@
 
 import logging
 import re
+from urllib.parse import urlparse
 
 import yaml
 from django.db import models
 
 from apps.common.open_ai import OpenAi
-from apps.core.models.prompt import Prompt
 from apps.github.constants import GITHUB_REPOSITORY_RE, GITHUB_USER_RE
 from apps.github.utils import get_repository_file_content
 
@@ -98,14 +98,14 @@ class RepositoryBasedEntityModel(models.Model):
 
         return project_metadata
 
-    def generate_summary(self, open_ai=None, max_tokens=500):
+    def generate_summary(self, prompt, open_ai=None, max_tokens=500):
         """Generate entity summary."""
-        if self.id and not self.is_indexable:
+        if not self.is_active:
             return
 
         open_ai = open_ai or OpenAi()
         open_ai.set_input(get_repository_file_content(self.get_index_md_raw_url()))
-        open_ai.set_max_tokens(max_tokens).set_prompt(Prompt.get_owasp_chapter_summary())
+        open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
     def get_index_md_raw_url(self, repository=None):
@@ -135,13 +135,17 @@ class GenericEntityModel(models.Model):
         verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
     )
 
-    def get_related_url(self, url, excluded_domains=()):
+    def get_related_url(self, url, exclude_domains=(), include_domains=()):
         """Get OWASP entity related URL."""
         if (
             not url
-            or url in {self.github_url, self.owasp_url}
             or url.startswith("/cdn-cgi/l/email-protection")
-            or any(excluded_domain in url for excluded_domain in excluded_domains)
+            or any(urlparse(url).netloc == domain for domain in exclude_domains)
+        ):
+            return None
+
+        if include_domains and not any(
+            urlparse(url).netloc == domain for domain in include_domains
         ):
             return None
 

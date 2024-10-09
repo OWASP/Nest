@@ -40,11 +40,11 @@ class Command(BaseCommand):
                     if (
                         repository_url := normalize_url(
                             chapter.get_related_url(
-                                url,
-                                excluded_domains=("github.com", "owasp.org"),
+                                url, exclude_domains=("github.com", "owasp.org")
                             )
                         )
                     )
+                    and repository_url not in {chapter.github_url, chapter.owasp_url}
                 }
             )
 
