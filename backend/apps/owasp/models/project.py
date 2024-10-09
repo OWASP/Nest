@@ -5,15 +5,19 @@ from functools import lru_cache
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
-from apps.github.utils import get_repository_file_content
-from apps.owasp.models.common import OwaspEntity
+from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 
 
-class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
+class Project(
+    BulkSaveModel,
+    GenericEntityModel,
+    ProjectIndexMixin,
+    RepositoryBasedEntityModel,
+    TimestampedModel,
+):
     """Project model."""
 
     objects = models.Manager()
@@ -48,18 +52,6 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         # professionals test, secure, or monitor applications.
         TOOL = "tool", "Tool"
 
-    name = models.CharField(verbose_name="Name", max_length=100)
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
-    description = models.CharField(verbose_name="Description", max_length=500, default="")
-    summary = models.TextField(
-        verbose_name="Summary", default="", blank=True
-    )  # AI generated summary
-
-    is_active = models.BooleanField(verbose_name="Is active", default=True)
-    has_active_repositories = models.BooleanField(
-        verbose_name="Has active repositories", default=True
-    )
-
     level = models.CharField(
         verbose_name="Level",
         max_length=20,
@@ -75,18 +67,6 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         default=ProjectType.OTHER,
     )
     type_raw = models.CharField(verbose_name="Type raw", max_length=100, default="")
-
-    tags = models.JSONField(verbose_name="OWASP metadata tags", default=list)
-
-    leaders_raw = models.JSONField(
-        verbose_name="Project leaders list", default=list, blank=True, null=True
-    )
-    related_urls = models.JSONField(
-        verbose_name="Project related URLs", default=list, blank=True, null=True
-    )
-    invalid_urls = models.JSONField(
-        verbose_name="Invalid project related URLs", default=list, blank=True, null=True
-    )
 
     # These are synthetic fields generated based on related repositories data.
     commits_count = models.PositiveIntegerField(verbose_name="Commits", default=0)
@@ -169,7 +149,7 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
             "name": "title",
             "tags": "tags",
         }
-        project_metadata = OwaspEntity.from_github(self, field_mapping, repository)
+        project_metadata = RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
 
         # Normalize tags.
         self.tags = (
@@ -201,20 +181,10 @@ class Project(BulkSaveModel, OwaspEntity, ProjectIndexMixin, TimestampedModel):
         # FKs.
         self.owasp_repository = repository
 
-    def generate_summary(self, open_ai=None, max_tokens=500):
-        """Generate project summary."""
-        if self.id and not self.is_indexable:
-            return
-
-        open_ai = open_ai or OpenAi()
-        open_ai.set_input(get_repository_file_content(self.get_index_md_raw_url()))
-        open_ai.set_max_tokens(max_tokens).set_prompt(Prompt.get_owasp_project_summary())
-        self.summary = open_ai.complete() or ""
-
     def save(self, *args, **kwargs):
         """Save project."""
         if not self.summary:
-            self.generate_summary()
+            self.generate_summary(prompt=Prompt.get_owasp_project_summary())
 
         super().save(*args, **kwargs)
 

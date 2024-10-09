@@ -14,8 +14,14 @@ def get_chapters(query, attributes=None, limit=25, meta=None):
         "attributesToHighlight": [],
         "attributesToRetrieve": attributes
         or [
+            "idx_created_at",
+            "idx_leaders",
             "idx_name",
-            "idx_meetup_group",
+            "idx_related_urls",
+            "idx_summary",
+            "idx_tags",
+            "idx_updated_at",
+            "idx_url",
         ],
         "hitsPerPage": limit,
         "minProximity": 4,

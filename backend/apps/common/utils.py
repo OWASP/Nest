@@ -20,6 +20,9 @@ def get_nest_user_agent():
 
 def get_user_ip(meta):
     """Return user's IP address."""
+    if settings.ENVIRONMENT == "Local":
+        return settings.LOCAL_EXTERNAL_IP
+
     x_forwarded_for = meta.get("HTTP_X_FORWARDED_FOR")
     return x_forwarded_for.split(",")[0] if x_forwarded_for else meta.get("REMOTE_ADDR")
 

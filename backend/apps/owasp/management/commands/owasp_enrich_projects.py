@@ -1,10 +1,11 @@
-"""A command to update OWASP entities related repositories data."""
+"""A command to update OWASP projects related repositories data."""
 
 import logging
 
 from django.core.management.base import BaseCommand
 
 from apps.common.open_ai import OpenAi
+from apps.core.models.prompt import Prompt
 from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,9 @@ class Command(BaseCommand):
 
             # Generate summary
             if update_summary:
-                project.generate_summary(open_ai=open_ai)
+                project.generate_summary(
+                    prompt=Prompt.get_owasp_project_summary(), open_ai=open_ai
+                )
 
             projects.append(project)
 

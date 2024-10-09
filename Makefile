@@ -25,13 +25,17 @@ github-enrich-issues:
 	@echo "Enriching GitHub issues"
 	@CMD="poetry run python manage.py github_enrich_issues" $(MAKE) exec-backend-command
 
+github-enrich-chapters:
+	@echo "Enriching OWASP chapters"
+	@CMD="poetry run python manage.py owasp_enrich_chapters" $(MAKE) exec-backend-command
+
 github-update-owasp-organization:
 	@echo "Updating OWASP GitHub organization"
 	@CMD="poetry run python manage.py github_update_owasp_organization" $(MAKE) exec-backend-command
 
-github-update-related-repositories:
-	@echo "Updating related OWASP GitHub repositories"
-	@CMD="poetry run python manage.py github_update_related_repositories" $(MAKE) exec-backend-command
+github-update-project-related-repositories:
+	@echo "Updating OWASP project related GitHub repositories"
+	@CMD="poetry run python manage.py github_update_project_related_repositories" $(MAKE) exec-backend-command
 
 index-data:
 	@echo "Indexing Nest data"
@@ -61,9 +65,13 @@ owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="poetry run python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
 
-owasp-scrape-owasp-org:
+owasp-scrape-chapters:
+	@echo "Scraping OWASP site chapters data"
+	@CMD="poetry run python manage.py owasp_scrape_chapters" $(MAKE) exec-backend-command
+
+owasp-scrape-projects:
 	@echo "Scraping OWASP site projects data"
-	@CMD="poetry run python manage.py owasp_scrape_owasp_org" $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
 
 poetry-update:
 	@CMD="poetry update" $(MAKE) exec-backend-command
@@ -92,6 +100,7 @@ test:
 
 update-data: \
 	github-update-owasp-organization \
-	owasp-scrape-owasp-org \
-	github-update-related-repositories \
+	owasp-scrape-projects \
+	owasp-scrape-chapters\
+	github-update-project-related-repositories \
 	owasp-aggregate-projects

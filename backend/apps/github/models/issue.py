@@ -180,7 +180,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
 
     @staticmethod
-    @lru_cache(maxsize=128)
+    @lru_cache
     def open_issues_count():
         """Return open issues count."""
         return Issue.open_issues.count()

@@ -45,12 +45,19 @@ def get_repository_path(url):
     return "/".join((match.group(1), match.group(2))) if match else None
 
 
-def normalize_url(url):
+def normalize_url(url, check_path=False):
     """Normalize GitHub URL."""
+    parsed_url = urlparse(url)
+    if not parsed_url.netloc or (check_path and not parsed_url.path):
+        return None
+
     http_prefix = "http://"
     https_prefix = "https://"
+    if not parsed_url.scheme:
+        url = f"{https_prefix}{url}"
+
     normalized_url = (
         f"{https_prefix}{url[len(http_prefix):]}" if url.startswith(http_prefix) else url
     )
 
-    return normalized_url.split("#")[0].lower().strip().rstrip("/")
+    return normalized_url.split("#")[0].strip().rstrip("/")

@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Chapters",
                 "db_table": "owasp_chapters",
             },
-            bases=(apps.owasp.models.common.OwaspEntity, models.Model),
+            bases=(apps.owasp.models.common.GenericEntityModel, models.Model),
         ),
         migrations.CreateModel(
             name="Event",
@@ -205,7 +205,7 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Events",
                 "db_table": "owasp_events",
             },
-            bases=(apps.owasp.models.common.OwaspEntity, models.Model),
+            bases=(apps.owasp.models.common.GenericEntityModel, models.Model),
         ),
         migrations.AddField(
             model_name="project",

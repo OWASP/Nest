@@ -7,12 +7,18 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values
 from apps.core.models.prompt import Prompt
-from apps.owasp.models.common import OwaspEntity
+from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
 from apps.owasp.models.managers.chapter import ActiveChaptertManager
 from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 
 
-class Chapter(BulkSaveModel, ChapterIndexMixin, OwaspEntity, TimestampedModel):
+class Chapter(
+    BulkSaveModel,
+    ChapterIndexMixin,
+    GenericEntityModel,
+    RepositoryBasedEntityModel,
+    TimestampedModel,
+):
     """Chapter model."""
 
     objects = models.Manager()
@@ -22,31 +28,32 @@ class Chapter(BulkSaveModel, ChapterIndexMixin, OwaspEntity, TimestampedModel):
         db_table = "owasp_chapters"
         verbose_name_plural = "Chapters"
 
-    name = models.CharField(verbose_name="Name", max_length=100)
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     level = models.CharField(verbose_name="Level", max_length=5, default="", blank=True)
 
     country = models.CharField(verbose_name="Country", max_length=50, default="")
     region = models.CharField(verbose_name="Region", max_length=50, default="")
     postal_code = models.CharField(
-        verbose_name="Postal code", max_length=15, default="", blank=True
+        verbose_name="Postal code",
+        max_length=15,
+        default="",
+        blank=True,
     )
     currency = models.CharField(verbose_name="Currency", max_length=10, default="", blank=True)
     meetup_group = models.CharField(
-        verbose_name="Meetup group", max_length=100, default="", blank=True
+        verbose_name="Meetup group",
+        max_length=100,
+        default="",
+        blank=True,
     )
 
+    suggested_location = models.CharField(
+        verbose_name="Suggested location",
+        max_length=100,
+        default="",
+        blank=True,
+    )  # AI suggested location.
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
-    suggested_location = models.CharField(
-        verbose_name="Suggested location", max_length=100, default="", blank=True
-    )  # AI suggested location.
-
-    tags = models.JSONField(verbose_name="Tags", default=list)
-
-    owasp_repository = models.ForeignKey(
-        "github.Repository", on_delete=models.SET_NULL, blank=True, null=True
-    )
 
     def __str__(self):
         """Chapter human readable representation."""
@@ -56,7 +63,8 @@ class Chapter(BulkSaveModel, ChapterIndexMixin, OwaspEntity, TimestampedModel):
     def is_indexable(self):
         """Chapters to index."""
         return (
-            self.latitude is not None
+            self.is_active
+            and self.latitude is not None
             and self.longitude is not None
             and not self.owasp_repository.is_empty
             and not self.owasp_repository.is_archived
@@ -74,16 +82,20 @@ class Chapter(BulkSaveModel, ChapterIndexMixin, OwaspEntity, TimestampedModel):
             "region": "region",
             "tags": "tags",
         }
-        OwaspEntity.from_github(self, field_mapping, repository)
+        RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
+
+        if repository:
+            self.created_at = repository.created_at
+            self.updated_at = repository.updated_at
 
         # FKs.
         self.owasp_repository = repository
 
     def generate_geo_location(self):
         """Add latitude and longitude data."""
-        location = get_location_coordinates(self.get_geo_string())
-        if not location and self.suggested_location:
-            location = get_location_coordinates(self.get_suggested_location_geo_string())
+        location = get_location_coordinates(self.suggested_location) or get_location_coordinates(
+            self.get_geo_string()
+        )
 
         if location:
             self.latitude = location.latitude
@@ -91,7 +103,7 @@ class Chapter(BulkSaveModel, ChapterIndexMixin, OwaspEntity, TimestampedModel):
 
     def generate_suggested_location(self, open_ai=None, max_tokens=100):
         """Generate project summary."""
-        if self.id and not self.is_indexable:
+        if not self.is_active:
             return
 
         open_ai = open_ai or OpenAi()
@@ -109,13 +121,6 @@ class Chapter(BulkSaveModel, ChapterIndexMixin, OwaspEntity, TimestampedModel):
                 self.country,
                 self.postal_code,
             ),
-            delimiter=", ",
-        )
-
-    def get_suggested_location_geo_string(self):
-        """Return suggested location geo string."""
-        return join_values(
-            (self.suggested_location, self.country),
             delimiter=", ",
         )
 
