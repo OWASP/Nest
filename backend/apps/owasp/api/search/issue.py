@@ -47,4 +47,10 @@ def project_issues(request):
         issues = get_issues(query)
         cache.set(cache_key, issues, DAY_IN_SECONDS)
 
-    return JsonResponse(issues, safe=False)
+    return JsonResponse(
+        {
+            "open_issues_count":Issue.open_issues_count(),
+            "issues": issues,
+        },
+        safe=False
+    )
