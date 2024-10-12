@@ -2,16 +2,6 @@
     background-color: #f4f6fc;
 }
 
-.page-dark {
-    background-color: #000000de;
-}
-
-.page-dark .card {
-    background-color: #00000005;
-    color: white;
-    border-color: white;
-}
-
 .page-dark [data-bs-toggle="tooltip"] {
     color: white;
     border: none !important;
@@ -83,7 +73,7 @@ input:checked + .slider:before {
     width: 90px;
 }
 
-.toggle-btn img {
-    vertical-align: baseline;
-    height: 20px;
+.toggle-btn i {
+    vertical-align: text-top;
+    margin-right: 2px;
 }

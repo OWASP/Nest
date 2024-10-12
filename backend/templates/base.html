@@ -66,12 +66,12 @@
         <script>
             const ThemeToggle = {
                 template: `
-            <img src="/static/img/light-bulb-2-16.png" alt="Light theme" />
+            <i class="fa-regular fa-lightbulb"></i>
                 <label class="switch">
                     <input type="checkbox" v-model="isDarkTheme" @change="toggleTheme">
                     <span class="slider round"></span>
                 </label>
-                <img src="/static/img/moon-4-16.png" alt="Dark theme" />
+                <i class="fa-solid fa-moon"></i>
         `,
                 data() {
                     return {
@@ -91,7 +91,7 @@
                         localStorage.setItem('theme', this.isDarkTheme ? 'dark' : 'light')
                     },
                     applyTheme() {
-                        //document.documentElement.setAttribute('data-bs-theme', this.isDarkTheme ? 'dark' : 'light')
+                        document.documentElement.setAttribute('data-bs-theme', this.isDarkTheme ? 'dark' : 'light')
                         if (this.isDarkTheme) {
                             document.body.classList.remove("page");
                             document.body.classList.add("page-dark");
