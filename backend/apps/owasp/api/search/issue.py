@@ -49,8 +49,8 @@ def project_issues(request):
 
     return JsonResponse(
         {
-            "open_issues_count": Issue.open_issues_count(),
             "issues": issues,
+            "open_issues_count": Issue.open_issues_count(),
         },
         safe=False,
     )

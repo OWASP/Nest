@@ -166,17 +166,17 @@
             computed: {
                 searchPlaceholderText() {
                     return this.openIssuesCount ?
-                        `Search among ${this.openIssuesCount} issues to contribute to...` :
+                        `Search through ${this.openIssuesCount} issues to solve...` :
                         'Search...';
                 }
             },
             data() {
                 return {
-                    issues: [],
-                    selectedIssue: {},
-                    searchQuery: '',
                     isManualSearch: false,
+                    issues: [],
                     openIssuesCount: 0,
+                    searchQuery: '',
+                    selectedIssue: {},
                 };
             },
             watch: {
