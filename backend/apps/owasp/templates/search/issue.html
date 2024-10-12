@@ -14,7 +14,7 @@
                                type="text"
                                @input="handleInput"
                                class="form-control"
-                               placeholder="Search for a project to contribute to...">
+                               :placeholder="searchPlaceholderText">
                         <button class="btn btn-outline-secondary"
                                 @click="searchQuery = ''"
                                 type="button"
@@ -163,12 +163,20 @@
         } = Vue;
         createApp({
             delimiters: ['${', '}'],
+            computed: {
+                searchPlaceholderText() {
+                    return this.openIssuesCount ?
+                        `Search through ${this.openIssuesCount} issues to solve...` :
+                        'Search...';
+                }
+            },
             data() {
                 return {
-                    issues: [],
-                    selectedIssue: {},
-                    searchQuery: '',
                     isManualSearch: false,
+                    issues: [],
+                    openIssuesCount: 0,
+                    searchQuery: '',
+                    selectedIssue: {},
                 };
             },
             watch: {
@@ -187,7 +195,7 @@
                     const response = await fetch(`/api/v1/owasp/search/issue?q=${this.searchQuery}`)
                         .then(res => res.json())
                         .then(json => {
-                            json.forEach(issue => {
+                            json.issues.forEach(issue => {
                                 issue.idx_hint = marked.parse(issue.idx_hint || '');
                                 issue.idx_title_md = marked.parse(issue.idx_title || '');
                                 issue.idx_summary_md = marked.parse(issue.idx_summary || '');
@@ -196,7 +204,8 @@
                                 issue.idx_labels = issue.idx_labels.length ? issue.idx_labels.slice(0, 10) : [];
                                 issue.idx_repository_languages = issue.idx_repository_languages.length ? issue.idx_repository_languages.slice(0, 10) : [];
                             });
-                            this.issues = json;
+                            this.issues = json.issues;
+                            this.openIssuesCount = json.open_issues_count;
                         })
                         .catch(err => console.error("There was an error! ", err));
 
