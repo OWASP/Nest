@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    OWASP projects
+{% endblock title %}
+{% block content %}
+    {{ block.super }}
+    <div id="app">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-lg-6 mx-auto">
+                    <div class="input-group">
+                        <input v-model="searchQuery"
+                               type="text"
+                               @input="handleInput"
+                               class="form-control"
+                               :placeholder="searchPlaceholderText">
+                        <button class="btn btn-outline-secondary"
+                                @click="searchQuery = ''"
+                                type="button"
+                                id="button-addon2">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div v-for="(project, i) in projects"
+                 :key="`project-${i}`"
+                 class="card m-4">
+                <div class="card-body px-4">
+                    <div class="row" id="idx_metadata">
+                        <div class="сol-6 position-relative;">
+                            <div class="position-absolute top-0 end-0">
+                                <div class="d-flex flex-row text-muted">
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         title="Last update date"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 125px">
+                                        <div class="px-2">${project.updated_at} ago</div>
+                                        <div class="px-2">
+                                            <i class="fa-solid fa-arrows-rotate"></i>
+                                        </div>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         v-if="project.idx_forks_count"
+                                         data-bs-placement="top"
+                                         title="GitHub forks count"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">${project.idx_forks_count}</div>
+                                        <div class="px-2">
+                                            <i class="fa-solid fa-code-fork"></i>
+                                        </div>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         v-if="project.idx_stars_count"
+                                         data-bs-placement="top"
+                                         title="GitHub stars count"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">${project.idx_stars_count}</div>
+                                        <div class="px-2">
+                                            <i class="fa-regular fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <div v-if="project.idx_contributors_count"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         title="GitHub contributors count"
+                                         class="d-flex flex-column align-items-center justify-content-center border border-light pt-2"
+                                         style="width: 120px">
+                                        <div class="px-2">${project.idx_contributors_count}</div>
+                                        <div class="px-2">
+                                            <i class="fa-regular fa-user"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div id="idx_name" class="d-flex flex-row align-self-center">
+                                <span v-if="levelStyleMap[project.idx_level]"
+                                      class="fa-stack"
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="top"
+                                      :title="`${project.level} project`">
+                                    <i class="fas fa-circle fa-stack-2x"
+                                       :style="`color: ${levelStyleMap[project.idx_level]['color']}`"></i>
+                                    <i :class="`fas ${levelStyleMap[project.idx_level]['icon']} fa-stack-1x fa-inverse`"></i>
+                                </span>
+                                <h4 class="px-1">
+                                    <a :href="`${project.idx_url}`"
+                                       target="_blank"
+                                       :title="`${project.idx_name}`">${project.idx_name}</a>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="idx_leaders"
+                         class="mb-2 fw-semibold"
+                         v-if="project.idx_leaders.length">
+                        Leader<span v-if="project.idx_leaders.length > 1">s</span>:
+                        <span class="pe-1" v-for="(leader, i) in project.idx_leaders">
+                            <span class="pe-none text-decoration-none text-reset">${leader}</span>
+                            <span v-if="i < project.idx_leaders.length - 1">,</span>
+                        </span>
+                    </div>
+                    <div v-if="project.idx_top_contributors.length"
+                         id="idx_top_contributors"
+                         class="d-flex flex-row">
+                        <div style="padding-left: 3px"
+                             v-for="tc in project.idx_top_contributors"
+                             :key="`tc-${tc.login}`">
+                            <a :href="`https://github.com/${tc.login}`"
+                               target="_blank"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="right"
+                               :title="`${tc.contributions_count} contributions by ${tc.name || tc.login}`">
+                                <img style="height: 30px;
+                                            width: 30px"
+                                     class="grayscale rounded-circle"
+                                     :src="tc.avatar_url" />
+                            </a>
+                        </div>
+                    </div>
+                    <div id="idx_summary" class="mb-1">
+                        <div v-html="project.summary"></div>
+                        <button type="button"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                @click="contribute(project.idx_name)"
+                                class="mt-3 btn btn-outline-primary btn-sm inline-block float-end"
+                                style="text-decoration: none"
+                                :title="`Contribute to ${project.idx_name}`">
+                            <i class="fa-solid fa-code"></i>
+                            Contribute
+                        </button>
+                    </div>
+                    <div class="row"></div>
+                    <div id="idx_topics">
+                        <div>
+                            <div role="button"
+                                 data-bs-toggle="tooltip"
+                                 data-bs-placement="bottom"
+                                 :title='`The project is labeled as "${topic}"`'
+                                 @click="clickSearch(topic)"
+                                 class="badge bg-secondary mx-1 mt-2"
+                                 v-for="topic in project.topics">${topic}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const {
+            createApp
+        } = Vue;
+        createApp({
+            delimiters: ['${', '}'],
+            computed: {
+                searchPlaceholderText() {
+                    return this.activeProjectsCount ?
+                        `Search through ${this.activeProjectsCount} projects to contribute to...` :
+                        'Search...';
+                }
+            },
+            data() {
+                return {
+                    projects: [],
+                    selectedProject: {},
+                    searchQuery: '',
+                    isManualSearch: true,
+                    activeProjectsCount: 0,
+                    levelStyleMap: {
+                        "incubator": {
+                            color: "#53AAE5",
+                            icon: "fa-egg"
+                        },
+                        "lab": {
+                            color: "#FFA500",
+                            icon: "fa-flask"
+                        },
+                        "production": {
+                            color: "#800080",
+                            icon: "fa-city"
+                        },
+                        "flagship": {
+                            color: "#38a047",
+                            icon: "fa-flag"
+                        },
+                    }
+                };
+            },
+            watch: {
+                searchQuery() {
+                    if (this.isManualSearch) {
+                        this.handleInput();
+                    } else {
+                        this.getProjects();
+                    }
+                }
+            },
+            methods: {
+                async getProjects() {
+                    this.removeTooltips();
+
+                    const response = await fetch(`/api/v1/owasp/search/project?q=${this.searchQuery}`)
+                        .then(res => res.json())
+                        .then(json => {
+                            json.projects.forEach(project => {
+                                project.level = project.idx_level.charAt(0).toUpperCase() + project.idx_level.slice(1).toLowerCase();
+                                project.summary = marked.parse(project.idx_summary || '');
+                                project.topics = project.idx_topics ? project.idx_topics.sort(() => Math.random() - 0.5).slice(0, 20) : [];
+                                project.updated_at = dayjs.unix(project.idx_updated_at || '').fromNow(true);
+                            });
+                            this.projects = json.projects;
+                            this.activeProjectsCount = json.active_projects_count;
+                        })
+                        .catch(err => console.error("There was an error! ", err));
+
+                    this.addTooltips();
+                },
+                addTooltips() {
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                        new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+                },
+                contribute(projectName) {
+                    window.open(`/projects/contribute?q=${projectName}`, '_blank');
+
+                },
+                removeTooltips() {
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                        const tooltipInstance = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                        if (tooltipInstance) {
+                            tooltipInstance.dispose();
+                        }
+                    });
+                },
+                showProjectDetails(project) {
+                    this.selectedProject = project;
+                },
+                handleInput(event) {
+                    this.isManualSearch = true;
+                    clearTimeout(this.timeout);
+                    this.timeout = setTimeout(this.getProjects, 1000);
+                },
+                clickSearch(searchQuery) {
+                    this.isManualSearch = false;
+                    this.searchQuery = searchQuery;
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                }
+            },
+            mounted() {
+                dayjs.extend(dayjs_plugin_relativeTime);
+
+                const url = new URL(window.location.href);
+                const params = new URLSearchParams(url.search);
+                const searchQuery = params.get('q');
+                if (searchQuery) {
+                    this.isManualSearch = true;
+                    this.searchQuery = searchQuery;
+                }
+                this.getProjects();
+            }
+        }).mount('#app');
+    </script>
+    <style lang="scss">
+        .grayscale {
+            filter: grayscale(100%);
+
+            &:hover {
+                filter: grayscale(0);
+            }
+        }
+
+        a.leader {
+            color: black;
+            text-decoration: underlined;
+        }
+
+        .text-3 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        a {
+            color: #1d7bd7;
+            text-decoration: none;
+        }
+    </style>
+{% endblock content %}

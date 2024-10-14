@@ -37,6 +37,11 @@ urlpatterns = [
         TemplateView.as_view(template_name="search/issue.html"),
         name="project-issues",
     ),
+    path(
+        "chapters",
+        TemplateView.as_view(template_name="search/chapters.html"),
+        name="chapters",
+    ),
     path("", home_page),
     path("a/", admin.site.urls),
 ]
