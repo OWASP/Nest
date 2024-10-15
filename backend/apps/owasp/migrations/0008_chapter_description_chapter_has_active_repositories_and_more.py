@@ -23,29 +23,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="chapter",
-            name="invalid_urls",
-            field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Invalid project related URLs"
-            ),
-        ),
-        migrations.AddField(
-            model_name="chapter",
             name="is_active",
             field=models.BooleanField(default=True, verbose_name="Is active"),
-        ),
-        migrations.AddField(
-            model_name="chapter",
-            name="leaders_raw",
-            field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Project leaders list"
-            ),
-        ),
-        migrations.AddField(
-            model_name="chapter",
-            name="related_urls",
-            field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Project related URLs"
-            ),
         ),
         migrations.AddField(
             model_name="chapter",
