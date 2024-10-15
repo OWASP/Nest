@@ -27,7 +27,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         OPEN = "open", "Open"
         CLOSED = "closed", "Closed"
 
-    title = models.CharField(verbose_name="Title", max_length=500)
+    title = models.CharField(verbose_name="Title", max_length=1000)
     body = models.TextField(verbose_name="Body", default="")
 
     summary = models.TextField(

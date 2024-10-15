@@ -87,7 +87,7 @@ run:
 	@docker compose up
 
 setup:
-	@CMD="poetry run python manage.py createsuperuser" $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 shell:
 	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
