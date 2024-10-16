@@ -5,9 +5,13 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - backend/data/**
   push:
     branches:
       - main
+    paths-ignore:
+      - backend/data/**
   workflow_dispatch:
 
 permissions:
