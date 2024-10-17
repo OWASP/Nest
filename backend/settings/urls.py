@@ -38,7 +38,7 @@ urlpatterns = [
         name="project-issues",
     ),
     path(
-        "chapters",
+        "chapters/",
         TemplateView.as_view(template_name="search/chapters.html"),
         name="chapters",
     ),
