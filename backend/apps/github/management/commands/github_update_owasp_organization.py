@@ -24,7 +24,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--offset", default=0, required=False, type=int)
-        parser.add_argument("--repository", required=False, type=str)
+        parser.add_argument(
+            "--repository",
+            required=False,
+            type=str,
+            help="The OWASP organization's repository name (e.g. Nest, www-project-nest')",
+        )
 
     def handle(self, *_args, **options):
         try:
