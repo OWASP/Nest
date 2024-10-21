@@ -19,7 +19,7 @@ def get_chapters(query, attributes=None, limit=25, meta=None):
             "idx_name",
             "idx_related_urls",
             "idx_summary",
-            "idx_tags",
+            "idx_top_contributors",
             "idx_updated_at",
             "idx_url",
         ],

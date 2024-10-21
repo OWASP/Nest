@@ -48,6 +48,24 @@
                             <span v-if="i < chapter.idx_leaders.length - 1">,</span>
                         </span>
                     </div>
+                    <div v-if="chapter.idx_top_contributors.length"
+                         id="idx_top_contributors"
+                         class="d-flex flex-row">
+                        <div style="padding-left: 3px"
+                             v-for="tc in chapter.idx_top_contributors"
+                             :key="`tc-${tc.login}`">
+                            <a :href="`https://github.com/${tc.login}`"
+                               target="_blank"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="right"
+                               :title="`${tc.contributions_count} contributions by ${tc.name || tc.login}`">
+                                <img style="height: 30px;
+                                            width: 30px"
+                                     class="grayscale rounded-circle"
+                                     :src="tc.avatar_url" />
+                            </a>
+                        </div>
+                    </div>
                     <div id="idx_summary" class="mb-1">
                         <div v-html="chapter.idx_summary"></div>
                         <a type="button"
@@ -67,15 +85,6 @@
                                target="_blank"
                                :title="`${related_url.title}`"
                                v-html="related_url.icon"></a>
-                        </div>
-                    </div>
-                    <div id="idx_tags">
-                        <div>
-                            <div role="button"
-                                 data-bs-toggle="tooltip"
-                                 data-bs-placement="bottom"
-                                 class="badge bg-secondary mx-1 mt-2"
-                                 v-for="tag in chapter.tags">${tag}</div>
                         </div>
                     </div>
                 </div>
@@ -117,7 +126,6 @@
                         .then(res => res.json())
                         .then(json => {
                             json.forEach(chapter => {
-                                chapter.tags = chapter.idx_tags.constructor.name == "Array" ? chapter.idx_tags : [chapter.idx_tags];
                                 chapter.related_urls = this.handleRelatedUrls(chapter.idx_related_urls)
                             });
                             this.chapters = json;

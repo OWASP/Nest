@@ -1,13 +1,6 @@
 """OWASP app project mixins."""
 
-from django.db.models import Sum
-
 from apps.common.utils import join_values
-from apps.github.constants import OWASP_FOUNDATION_LOGIN
-from apps.github.models.repository_contributor import (
-    TOP_CONTRIBUTORS_LIMIT,
-    RepositoryContributor,
-)
 from apps.owasp.models.mixins.common import GenericEntityMixin
 
 
@@ -62,23 +55,7 @@ class ProjectIndexMixin(GenericEntityMixin):
     @property
     def idx_top_contributors(self):
         """Return top contributors for indexing."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["total_contributions"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.filter(repository__in=self.repositories.all())
-            .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
-            .values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-            )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
+        return super().get_top_contributors(repositories=self.repositories.all())
 
     @property
     def idx_type(self):
