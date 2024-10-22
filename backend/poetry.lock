@@ -1915,13 +1915,13 @@ files = [
 
 [[package]]
 name = "slack-bolt"
-version = "1.21.0"
+version = "1.21.1"
 description = "The Bolt Framework for Python"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "slack_bolt-1.21.0-py2.py3-none-any.whl", hash = "sha256:12f99fe26f7b1b762955053ebce303d4e2394cee1e3058e35a270185f2a31e40"},
-    {file = "slack_bolt-1.21.0.tar.gz", hash = "sha256:438bee336440e78222064416c75e9353ee57e4c0377f2f41bda2212acad2387a"},
+    {file = "slack_bolt-1.21.1-py2.py3-none-any.whl", hash = "sha256:feb3c97ed7c388318d6e007a9c1b50dd88b0d59e64ff1f8c4e770db30e890ec8"},
+    {file = "slack_bolt-1.21.1.tar.gz", hash = "sha256:f0f1e7223f0e5621a768d1efce470058619b4f4eacbec405625c8c813e489c20"},
 ]
 
 [package.dependencies]
@@ -2128,4 +2128,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "f53ad20598cd46462c985eec84a62a59675181f1493b45224d89098bd054796a"
+content-hash = "ed98da7c9ea461daee631bffeea76399b2da1e03517bad811ae70fd898322d75"
