@@ -38,9 +38,9 @@ class Event(BulkSaveModel, RepositoryBasedEntityModel, TimestampedModel):
         self.owasp_repository = repository
 
     @staticmethod
-    def bulk_save(events):
+    def bulk_save(events, fields=None):
         """Bulk save events."""
-        BulkSaveModel.bulk_save(Event, events)
+        BulkSaveModel.bulk_save(Event, events, fields=fields)
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):

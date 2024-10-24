@@ -71,7 +71,7 @@ class OwaspScraper:
         if not location:
             return None
 
-        if location.endswith(("linkedin.com", "youtube.com")):
+        if location.endswith(("linkedin.com", "slack.com", "youtube.com")):
             return url
 
         try:

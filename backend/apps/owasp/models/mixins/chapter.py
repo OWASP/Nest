@@ -1,4 +1,4 @@
-"""OWASP app project mixins."""
+"""OWASP app chapter mixins."""
 
 from apps.owasp.models.mixins.common import GenericEntityMixin
 

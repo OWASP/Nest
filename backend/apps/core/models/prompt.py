@@ -53,6 +53,11 @@ class Prompt(TimestampedModel):
         return Prompt.objects.get(key="owasp-chapter-summary").text
 
     @staticmethod
+    def get_owasp_committee_summary():
+        """Return OWASP committee summary prompt."""
+        return Prompt.objects.get(key="owasp-committee-summary").text
+
+    @staticmethod
     def get_owasp_project_summary():
         """Return OWASP project summary prompt."""
         return Prompt.objects.get(key="owasp-project-summary").text

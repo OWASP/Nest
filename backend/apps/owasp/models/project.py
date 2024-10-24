@@ -189,7 +189,7 @@ class Project(
         super().save(*args, **kwargs)
 
     @staticmethod
-    @lru_cache(maxsize=128)
+    @lru_cache
     def active_projects_count():
         """Return active projects count."""
         return Project.active_projects.count()
