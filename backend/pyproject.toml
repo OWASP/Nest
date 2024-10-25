@@ -39,7 +39,7 @@ python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 sentry-sdk = {extras = ["django"], version = "^2.17.0"}
-slack-bolt = "^1.21.1"
+slack-bolt = "^1.21.2"
 
 
 [tool.poetry.group.dev.dependencies]
