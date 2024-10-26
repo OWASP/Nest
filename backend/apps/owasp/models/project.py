@@ -87,6 +87,7 @@ class Project(
     pushed_at = models.DateTimeField(verbose_name="Pushed at", blank=True, null=True)
     updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
 
+    sync_issues = models.BooleanField(verbose_name="Sync Issues", default=True)
     # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository",
@@ -135,7 +136,7 @@ class Project(
     @property
     def is_indexable(self):
         """Projects to index."""
-        return self.is_active and self.has_active_repositories
+        return self.is_active and self.has_active_repositories and self.sync_issues
 
     def deactivate(self):
         """Deactivate project."""
