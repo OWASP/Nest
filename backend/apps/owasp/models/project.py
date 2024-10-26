@@ -136,7 +136,7 @@ class Project(
     @property
     def is_indexable(self):
         """Projects to index."""
-        return self.is_active and self.has_active_repositories and self.sync_issues
+        return self.is_active and self.has_active_repositories
 
     def deactivate(self):
         """Deactivate project."""
