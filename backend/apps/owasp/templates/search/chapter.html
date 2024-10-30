@@ -99,7 +99,9 @@
             delimiters: ['${', '}'],
             computed: {
                 searchPlaceholderText() {
-                    return 'Search...';
+                    return this.activeChaptersCount ?
+                        `Search among ${this.activeChaptersCount} chapters to contribute to...` :
+                        'Search...';
                 }
             },
             data() {
@@ -125,10 +127,11 @@
                     const response = await fetch(`/api/v1/owasp/search/chapter?q=${this.searchQuery}`)
                         .then(res => res.json())
                         .then(json => {
-                            json.forEach(chapter => {
+                            json.chapters.forEach(chapter => {
                                 chapter.related_urls = this.handleRelatedUrls(chapter.idx_related_urls)
                             });
-                            this.chapters = json;
+                            this.chapters = json.chapters;
+                            this.activeChaptersCount=json.activeChaptersCount
                         })
                         .catch(err => console.error("There was an error! ", err));
 
