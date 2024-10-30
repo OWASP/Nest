@@ -36,8 +36,13 @@ def get_chapters(query, attributes=None, limit=25, meta=None):
 
 def chapters(request):
     """Search chapters API endpoint."""
-    return JsonResponse({
+    return JsonResponse(
+        {
             "active_chapters_count": Chapter.active_chapters_count(),
-            "chapters": get_chapters(request.GET.get("q", ""))
-        }, meta=request.META, safe=False)
-	
+            "chapters": get_chapters(
+                request.GET.get("q", ""),
+                meta=request.META,
+            ),
+        },
+        safe=False,
+    )

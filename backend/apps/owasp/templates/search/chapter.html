@@ -100,16 +100,17 @@
             computed: {
                 searchPlaceholderText() {
                     return this.activeChaptersCount ?
-                        `Search among ${this.activeChaptersCount} chapters to contribute to...` :
+                        `Search through ${this.activeChaptersCount} chapters around the world...` :
                         'Search...';
                 }
             },
             data() {
                 return {
+                    activeChaptersCount: 0,
                     chapters: [],
-                    selectedChapter: {},
+                    isManualSearch: true,
                     searchQuery: '',
-                    isManualSearch: true
+                    selectedChapter: {}
                 };
             },
             watch: {
@@ -130,8 +131,8 @@
                             json.chapters.forEach(chapter => {
                                 chapter.related_urls = this.handleRelatedUrls(chapter.idx_related_urls)
                             });
+                            this.activeChaptersCount = json.active_chapters_count;
                             this.chapters = json.chapters;
-                            this.activeChaptersCount=json.activeChaptersCount
                         })
                         .catch(err => console.error("There was an error! ", err));
 
