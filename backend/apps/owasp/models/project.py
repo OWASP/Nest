@@ -87,7 +87,8 @@ class Project(
     pushed_at = models.DateTimeField(verbose_name="Pushed at", blank=True, null=True)
     updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
 
-    sync_issues = models.BooleanField(verbose_name="Sync Issues", default=True)
+    track_issues = models.BooleanField(verbose_name="Track issues", default=True)
+
     # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository",

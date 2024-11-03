@@ -46,7 +46,12 @@ def sync_repository(gh_repository, organization=None, user=None):
     )
 
     # GitHub repository issues.
-    if not repository.is_archived and repository.project and repository.sync_issues:
+    if (
+        not repository.is_archived
+        and repository.track_issues
+        and repository.project
+        and repository.project.track_issues
+    ):
         # Sync open issues for the first run.
         kwargs = {
             "direction": "asc",
@@ -86,6 +91,8 @@ def sync_repository(gh_repository, organization=None, user=None):
                     issue.labels.add(Label.update_data(gh_issue_label))
                 except UnknownObjectException:
                     logger.info("Couldn't get GitHub issue label %s", issue.url)
+    else:
+        logger.info("Skipping issues sync for %s", repository.name)
 
     # GitHub repository releases.
     releases = []

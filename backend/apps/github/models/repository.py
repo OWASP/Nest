@@ -66,7 +66,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     has_pages = models.BooleanField(verbose_name="Has pages", default=False)
     has_projects = models.BooleanField(verbose_name="Has projects", default=False)
     has_wiki = models.BooleanField(verbose_name="Has wiki", default=False)
-    sync_issues = models.BooleanField(verbose_name="Sync Issues", default=True)
 
     commits_count = models.PositiveIntegerField(verbose_name="Commits", default=0)
     contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
@@ -79,6 +78,8 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     created_at = models.DateTimeField(verbose_name="Created at")
     updated_at = models.DateTimeField(verbose_name="Updated at")
     pushed_at = models.DateTimeField(verbose_name="Pushed at")
+
+    track_issues = models.BooleanField(verbose_name="Track issues", default=True)
 
     # FKs.
     organization = models.ForeignKey(
@@ -107,7 +108,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             not self.is_archived
             and not self.is_empty
             and not self.is_template
-            and self.sync_issues
             and self.project_set.exists()
         )
 
