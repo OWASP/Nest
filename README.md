@@ -6,9 +6,9 @@
 1. Copy `backend/.env/template` to `backend/.env/local`
 1. Open `backend/.env/local` and change `DJANGO_CONFIGURATION` value to `Local`
 1. Go to <https://www.algolia.com/> and create a free account.
-Create an Algolia app and update `DJANGO_ALGOLIA_API_KEY` and `DJANGO_ALGOLIA_APPLICATION_ID` in your `.env/local` file
-That's all you need in terms of Algolia app configuration. You can ignore their onboarding wizard instructions.
-Just make sure the API key has index write permissions.
+   Create an Algolia app and update `DJANGO_ALGOLIA_API_KEY` and `DJANGO_ALGOLIA_APPLICATION_ID` in your `.env/local` file
+   That's all you need in terms of Algolia app configuration. You can ignore their onboarding wizard instructions.
+   Just make sure the API key has index write permissions.
 1. Run `make run` and leave it running. Wait until [Nest local](http://localhost:8000/api/v1) is responding
 1. In a new terminal session run `make load-data` to populate the database from `data/` fixtures
 1. In the same window run `make index-data`
