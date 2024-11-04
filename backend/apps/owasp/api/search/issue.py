@@ -10,7 +10,7 @@ from apps.github.models.issue import Issue
 ISSUE_CACHE_PREFIX = "issue:"
 
 
-def get_issues(query, attributes=None, distinct=False, limit=25):
+def get_issues(query, attributes=None, distinct=False, limit=25, page=0):
     """Return issues relevant to a search query."""
     params = {
         "attributesToHighlight": [],
@@ -29,6 +29,7 @@ def get_issues(query, attributes=None, distinct=False, limit=25):
             "idx_url",
         ],
         "hitsPerPage": limit,
+        "page": page,
     }
 
     if distinct:
@@ -39,12 +40,13 @@ def get_issues(query, attributes=None, distinct=False, limit=25):
 
 def project_issues(request):
     """Search project issues API endpoint."""
-    query = request.GET.get("q", "")
-    cache_key = f"{ISSUE_CACHE_PREFIX}{query}"
+    query = request.GET.get("q","")
+    page = request.GET.get("page", 0)
+    cache_key = f"{ISSUE_CACHE_PREFIX}{query}_page_{page}"
     issues = cache.get(cache_key)
 
     if issues is None:
-        issues = get_issues(query)
+        issues = get_issues(query, page=page)
         cache.set(cache_key, issues, DAY_IN_SECONDS)
 
     return JsonResponse(
