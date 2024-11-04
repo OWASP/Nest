@@ -46,7 +46,7 @@ slack-bolt = "^1.21.2"
 djlint = "^1.35.3"
 isort = "^5.13.2"
 pre-commit = "^4.0.0"
-ruff = "^0.7.1"
+ruff = "^0.7.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.2"
