@@ -79,6 +79,8 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     updated_at = models.DateTimeField(verbose_name="Updated at")
     pushed_at = models.DateTimeField(verbose_name="Pushed at")
 
+    track_issues = models.BooleanField(verbose_name="Track issues", default=True)
+
     # FKs.
     organization = models.ForeignKey(
         "github.Organization",
