@@ -158,14 +158,18 @@
             <!-- Add Pagination Component -->
             <div class="pagination">
                 <!-- Left Button: Decrement page -->
-                <button class="pagination-button" v-model="page" @click="decrementPage" :disabled="page === 0">Previous</button>
-            
+                <button class="pagination-button"
+                        v-model="page"
+                        @click="decrementPage"
+                        :disabled="page === 0">Previous</button>
                 <!-- Page and Total Pages Display -->
-                <span> ${this.page} / ${this.totalPages}</span>
-            
+                <span>${this.page} / ${this.totalPages}</span>
                 <!-- Right Button: Increment page -->
-                <button class="pagination-button" v-model="page" @click="incrementPage" :disabled="page === totalPages" >Next</button>
-              </div>
+                <button class="pagination-button"
+                        v-model="page"
+                        @click="incrementPage"
+                        :disabled="page === totalPages">Next</button>
+            </div>
         </div>
     </div>
     <script>
@@ -205,7 +209,7 @@
                 async getIssues() {
                     this.removeTooltips();
 
-                    if(this.isManualSearch) {
+                    if (this.isManualSearch) {
                         this.page = 0;
                     }
 
@@ -225,10 +229,10 @@
                             this.openIssuesCount = json.open_issues_count;
                         })
                         .catch(err => console.error("There was an error! ", err));
-                    
-                        this.totalPages = Math.ceil(this.openIssuesCount / 25);
 
-                        this.isManualSearch = false;
+                    this.totalPages = Math.ceil(this.openIssuesCount / 25);
+
+                    this.isManualSearch = false;
 
                     this.addTooltips();
 
@@ -317,6 +321,7 @@
         .bg-light-gray {
             background-color: #868E96;
         }
+
         .pagination {
             display: flex;
             align-items: center;
@@ -324,7 +329,7 @@
             justify-content: space-between;
             margin-bottom: 30px;
         }
-        
+
         .pagination-button {
             background-color: #0095ff;
             border: 1px solid transparent;

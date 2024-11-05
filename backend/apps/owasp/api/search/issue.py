@@ -40,7 +40,7 @@ def get_issues(query, attributes=None, distinct=False, limit=25, page=0):
 
 def project_issues(request):
     """Search project issues API endpoint."""
-    query = request.GET.get("q","")
+    query = request.GET.get("q", "")
     page = request.GET.get("page", 0)
     cache_key = f"{ISSUE_CACHE_PREFIX}{query}_page_{page}"
     issues = cache.get(cache_key)
