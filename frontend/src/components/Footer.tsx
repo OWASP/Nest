@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container px-4 py-4 md:py-8 text-slate-800 dark:text-slate-200">
         <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">About Nest</h3>
+            <h3 className="text-lg font-semibold">About</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100" href="#">
@@ -69,8 +69,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold">Contact</h3>
             <ul className="space-y-2 text-sm">
               <li className="relative flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <MapPin className="h-4 w-4 absolute left-[-20px]" />
-                <span>Global Locations</span>
+                <span>Locations</span>
               </li>
               <li>
                 <a className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100" href="#">
@@ -86,13 +85,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t pt-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <a className="flex items-center gap-2 text-lg font-semibold" href="#">
-                <img src="../public/owasp.png" width={60} height={60} alt="Nest Logo" />
-                Nest
-              </a>
-            </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
             <p className="text-sm text-slate-600 dark:text-slate-400">© 2024 Nest. All rights reserved.</p>
           </div>
         </div>
