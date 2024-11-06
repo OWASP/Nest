@@ -6,6 +6,8 @@ repos:
       - id: check-builtin-literals
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude_types:
+            - svg
       - id: mixed-line-ending
         args:
           - --fix=lf
