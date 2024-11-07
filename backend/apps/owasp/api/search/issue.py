@@ -44,7 +44,7 @@ def project_issues(request):
     issues = cache.get(cache_key)
 
     if issues is None:
-        issues = get_issues(query, distinct=query != "")
+        issues = get_issues(query, distinct=not query)
         cache.set(cache_key, issues, DAY_IN_SECONDS)
 
     return JsonResponse(

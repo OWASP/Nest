@@ -35,7 +35,9 @@ def handler(ack, command, client):
         "idx_title",
         "idx_url",
     ]
-    if issues := get_issues(search_query, attributes=attributes, limit=10):
+    if issues := get_issues(
+        search_query, attributes=attributes, distinct=not search_query, limit=10
+    ):
         blocks = [
             markdown(
                 (
