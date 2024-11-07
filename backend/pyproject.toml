@@ -43,7 +43,7 @@ slack-bolt = "^1.21.2"
 
 
 [tool.poetry.group.dev.dependencies]
-djlint = "^1.36.0"
+djlint = "^1.36.1"
 isort = "^5.13.2"
 pre-commit = "^4.0.0"
 ruff = "^0.7.2"
