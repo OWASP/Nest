@@ -23,7 +23,7 @@ def handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    search_query = command["text"]
+    search_query = command["text"].strip()
     search_query_escaped = escape(command["text"])
     blocks = [
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
