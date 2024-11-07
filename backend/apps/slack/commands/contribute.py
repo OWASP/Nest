@@ -23,7 +23,7 @@ def handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    search_query = command["text"]
+    search_query = command["text"].strip()
     search_query_escaped = escape(command["text"])
     blocks = [
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
@@ -35,7 +35,9 @@ def handler(ack, command, client):
         "idx_title",
         "idx_url",
     ]
-    if issues := get_issues(search_query, attributes=attributes, limit=10):
+    if issues := get_issues(
+        search_query, attributes=attributes, distinct=not search_query, limit=10
+    ):
         blocks = [
             markdown(
                 (
