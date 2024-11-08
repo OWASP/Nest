@@ -14,6 +14,12 @@
         --text: #fff;
         --border: #ffffff26;
     }
+
+    body{
+        background-color: var(--background);
+        color: var(--text);
+        transition: background-color 0.5s, color 0.5s;
+    }
 }
 
 *{

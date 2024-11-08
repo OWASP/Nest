@@ -1,9 +1,11 @@
+import EntityExampleComponent from "./EntityExampleComponent"
+
 function App() {
   return (
     <>
-      <h1 className="text-3xl font-bold underline">Hello from new OWASP Nest frontend!</h1>
+      <EntityExampleComponent />
     </>
-  );
+  )
 }
 
-export default App;
+export default App
