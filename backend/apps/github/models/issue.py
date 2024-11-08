@@ -96,7 +96,6 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         return (
             self.state == self.State.OPEN
             and not self.is_locked
-            and not self.assignees.exists()
             and self.repository.is_indexable
             and self.repository.track_issues
             and self.project.track_issues
@@ -185,7 +184,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     @lru_cache
     def open_issues_count():
         """Return open issues count."""
-        return Issue.open_issues.count()
+        return Issue.open_issues.assignable.count()
 
     @staticmethod
     def update_data(gh_issue, author=None, repository=None, save=True):

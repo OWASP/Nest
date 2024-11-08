@@ -39,12 +39,12 @@ def get_issues(query, attributes=None, distinct=False, limit=25):
 
 def project_issues(request):
     """Search project issues API endpoint."""
-    query = request.GET.get("q", "")
+    query = request.GET.get("q", "").strip()
     cache_key = f"{ISSUE_CACHE_PREFIX}{query}"
     issues = cache.get(cache_key)
 
     if issues is None:
-        issues = get_issues(query)
+        issues = get_issues(query, distinct=not query)
         cache.set(cache_key, issues, DAY_IN_SECONDS)
 
     return JsonResponse(
