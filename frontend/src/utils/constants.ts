@@ -1,14 +1,14 @@
 export interface Link {
     text: string;
     href: string;
-    isSpan?: boolean; 
+    isSpan?: boolean;
   }
-  
+
   export interface Section {
     title: string;
     links: Link[];
   }
-  
+
   export const footerSections: Section[] = [
     {
       title: 'About OWASP',
@@ -43,4 +43,4 @@ export interface Link {
       ],
     },
   ];
-  
+
