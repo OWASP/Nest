@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { IssueType, project } from "./types";
 import { IconType } from "./constants";
-import { Icons, urlMappings } from "../components/data";
+import { IconKeys, Icons, urlMappings } from "../components/data";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -16,7 +16,7 @@ type projectType = project | IssueType;
 
 export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
   const filteredIcons = params.reduce((acc: IconType, key) => {
-    if (Icons[key as keyof typeof Icons] && project[key as keyof typeof project] !== undefined) {
+    if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       if (key === 'idx_updated_at') {
         acc[key] = dayjs.unix(project[key] as number).fromNow();
       } else if(key === 'idx_created_at'){
@@ -39,6 +39,6 @@ export const handleSocialUrls = (related_urls:string[]) => {
 
     return match
         ? { title: match.title, icon: match.icon, url }
-        : { title: 'Social Links', icon: "fa-solid fa-users", url };
+        : { title: 'Social Links', icon: "fa-solid fa-globe", url };
 });
 };

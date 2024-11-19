@@ -7,6 +7,8 @@ import { Icons } from "./data";
 import DisplayIcon from "./DisplayIcon";
 import { Tooltip } from 'react-tooltip'
 import { tooltipStyle } from "../lib/constants";
+import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
+import FontAwesomeIconWrapper from "../lib/FontAwesomeIconWrapper";
 
 const Card = ({
     title,
@@ -32,7 +34,7 @@ const Card = ({
             className={cn("text-xs rounded-full w-8 h-8 flex justify-center items-center shadow ")}
             style={{backgroundColor: level.color}}
           >
-            <i className={cn( level.icon)}></i>
+            <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>}
           <a href="#">
             <h1 className=" text-2xl font-semibold ">
@@ -106,7 +108,8 @@ const Card = ({
                                 rel="noopener noreferrer"
                                 className=" flex justify-center items-center gap-1 "
                             >
-                                {item.icon}
+                                {/* {item.icon} */}
+                                <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
                             </a>
                         ))
                     }

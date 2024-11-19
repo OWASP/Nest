@@ -5,7 +5,8 @@ import ModeToggle from "./components/ModeToggle"
 import { IssuesDataType, project, ProjectDataType, IssueType, ChapterDataType, CommitteeDataType } from "./lib/types"
 import { MockChaptersData, MockContributeData, MockProjectData, MockCommitteeData } from "./components/mockData"
 import { getFilteredIcons, handleSocialUrls } from "./lib/utils"
-import { level } from "./lib/constants"
+import FontAwesomeIconWrapper from "./lib/FontAwesomeIconWrapper"
+import { level } from "./components/data"
 
 
 export default function EntityExampleComponent() {
@@ -22,7 +23,7 @@ export default function EntityExampleComponent() {
         // Simulating network delay
         setTimeout(() => {
           resolve(mockData);
-        }, 500);
+        }, 0);
       });
     }
 
@@ -47,7 +48,7 @@ export default function EntityExampleComponent() {
 
   const SubmitButton = {
     label: "Contribute",
-    icon: <i className="fa-solid fa-code"></i>,
+    icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
     onclick: handleButtonClick,
   }
 
@@ -55,7 +56,7 @@ export default function EntityExampleComponent() {
 
   return (
     <div className=" w-full h-screen flex flex-col justify-normal items-center bg-background text-text p-5 md:p-20 ">
-    <ModeToggle className=" fixed bottom-0 right-0 " />
+    <ModeToggle className=" fixed top-0 right-0 " />
       <div className=" w-full h-full flex flex-col justify-normal items-center gap-4 ">
           {
             projectData && projectData.projects.map((project) => {

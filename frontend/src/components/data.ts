@@ -1,3 +1,10 @@
+import { library} from '@fortawesome/fontawesome-svg-core';
+import { faDiscord, faFacebook, faGoogle, faLinkedin, faMeetup, faSlack, faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { faClock, faComment, faLightbulb, faStar, faUser } from '@fortawesome/free-regular-svg-icons';
+import { faArrowsRotate, faCity, faCode, faCodeFork, faEgg, faFlag, faFlask, faGlobe, faMoon, faRightToBracket, faWandMagicSparkles, faX } from '@fortawesome/free-solid-svg-icons';
+
+library.add(faArrowsRotate, faCodeFork, faStar, faUser, faClock, faComment, faEgg, faFlask, faCity, faFlag, faCode, faMoon, faLightbulb,faWandMagicSparkles, faGlobe,faRightToBracket,faYoutube, faX, faGoogle, faMeetup, faLinkedin, faFacebook, faDiscord, faSlack);
+
 export const Icons = {
   idx_updated_at: {
     label: "Last update date",
@@ -23,7 +30,10 @@ export const Icons = {
     label: "Comments count",
     icon: "fa-regular fa-comment",
   }
-};
+} as const;
+
+export type IconKeys = keyof typeof Icons;
+
 
 export const level = {
   incubator: {
