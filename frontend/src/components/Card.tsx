@@ -84,9 +84,8 @@ const Card = ({
                 <div className=" flex justify-normal items-center gap-2 ">
                     {
                         languages && languages.map((topic) => (
-                            <>
+
                             <TopicBadge key={topic} topic={topic} tooltipLabel={`This repository uses ${topic}`} />
-                            </>
 
                         ))
 

@@ -55,9 +55,9 @@ export default function EntityExampleComponent() {
 
 
   return (
-    <div className=" w-full h-screen flex flex-col justify-normal items-center bg-background text-text p-5 md:p-20 ">
-    <ModeToggle className=" fixed top-0 right-0 " />
-      <div className=" w-full h-full flex flex-col justify-normal items-center gap-4 ">
+    <div className=" w-full min-h-screen flex flex-col justify-normal items-center bg-background text-text p-5 md:p-20 ">
+    {/* <ModeToggle className=" fixed top-0 right-0 " /> */}
+      <div className=" w-full h-fit flex flex-col justify-normal items-center gap-4 ">
           {
             projectData && projectData.projects.map((project) => {
               const params: string[] = ["idx_updated_at", "idx_forks_count", "idx_stars_count", "idx_contributors_count"];
