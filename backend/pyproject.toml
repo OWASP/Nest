@@ -32,13 +32,13 @@ gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 lxml = "^5.3.0"
 markdown = "^3.7"
-openai = "^1.54.5"
+openai = "^1.55.0"
 psycopg = "^3.2.3"
 pygithub = "^2.5.0"
 python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-sentry-sdk = {extras = ["django"], version = "^2.18.0"}
+sentry-sdk = {extras = ["django"], version = "^2.19.0"}
 slack-bolt = "^1.21.2"
 
 

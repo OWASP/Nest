@@ -1,15 +1,17 @@
-import EntityExampleComponent from "./EntityExampleComponent"
+
+import { Routes, Route } from "react-router-dom";
 import Footer from "./components/Footer";
-import ModeToggle from "./components/ModeToggle";
+import Home from "./pages/Home";
 
 function App() {
   return (
-    <div className="w-full h-full flex flex-col justify-between items-start bg-background text-text  ">
-      <ModeToggle className=" fixed top-0 right-0 " />
-      <EntityExampleComponent />
-      <Footer/>
-    </div>
-  )
+    <>
+      <Routes>
+        <Route path="/" element={<Home />}></Route>
+      </Routes>
+      <Footer />
+    </>
+  );
 }
 
 export default App
