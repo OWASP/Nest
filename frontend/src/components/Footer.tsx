@@ -31,7 +31,7 @@ export default function Footer() {
         <div className="border-t pt-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:ml-[52%]">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              © 2024 OWASP Nest. All rights reserved.
+              © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
             </p>
           </div>
         </div>
