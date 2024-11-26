@@ -8,6 +8,7 @@ __pycache__
 .ruff_cache
 .venv
 .vscode
+.idea
 *.code-workspace
 /volumes
 staticfiles
