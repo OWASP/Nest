@@ -4,6 +4,25 @@ export interface Link {
     isSpan?: boolean;
   }
 
+export const headerLinks: Link[] = [
+  {
+      text: 'Contribute',
+      href: '/projects/contribute'
+  },
+  {
+      text: 'Projects',
+      href: '/projects'
+  },
+  {
+      text: 'Chapters',
+      href: '/chapters'
+  },
+  {
+      text: 'Committees',
+      href: '/committees'
+  }
+];
+
   export interface Section {
     title: string;
     links: Link[];
