@@ -77,7 +77,7 @@ services:
     volumes:
       - ./frontend:/app
     environment:
-      NODE_ENV: production
+      NODE_ENV: staging
     ports:
       - '80:80'
 

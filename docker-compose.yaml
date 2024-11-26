@@ -60,4 +60,4 @@ services:
     volumes:
       - ./frontend:/app
     environment:
-      NODE_ENV: development
+      NODE_ENV: local
