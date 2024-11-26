@@ -1,13 +1,16 @@
-FROM node:18
+FROM node:18-slim
 
-WORKDIR /app
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-COPY package*.json ./
-
-RUN npm install
-
-COPY . .
+RUN groupadd owasp && \
+    useradd --create-home --home-dir /home/owasp -g owasp owasp && \
+    apt-get update && apt-get upgrade -y && \
+    apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev", "--", "--host"]
+USER owasp
+
+VOLUME /home/owasp
+
+WORKDIR /home/owasp

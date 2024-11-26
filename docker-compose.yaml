@@ -52,12 +52,17 @@ services:
 
   frontend:
     container_name: nest-frontend
+    command: >
+      bash -c "
+        npm install &&
+        npm run dev
+      "
     build:
       context: ./frontend
       dockerfile: Dockerfile.local
     ports:
       - '127.0.0.1:3000:3000'
     volumes:
-      - ./frontend:/app
+      - ./frontend:/home/owasp
     environment:
       NODE_ENV: local
