@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react"
-import Card from "./components/Card"
+import Card from "./components/EntityComponent/Card"
 import ModeToggle from "./components/ModeToggle"
 import { IssuesDataType, project, ProjectDataType, IssueType, ChapterDataType, CommitteeDataType } from "./lib/types"
-import { MockChaptersData, MockContributeData, MockProjectData, MockCommitteeData } from "./components/mockData"
+import { MockChaptersData, MockContributeData, MockProjectData, MockCommitteeData } from "./components/EntityComponent/mockData"
 import { getFilteredIcons, handleSocialUrls } from "./lib/utils"
 import FontAwesomeIconWrapper from "./lib/FontAwesomeIconWrapper"
-import { level } from "./components/data"
+import { level } from "./components/EntityComponent/data"
 
 
 export default function EntityExampleComponent() {

@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { IssueType, project } from "./types";
 import { IconType } from "./constants";
-import { IconKeys, Icons, urlMappings } from "../components/data";
+import { IconKeys, Icons, urlMappings } from "../components/EntityComponent/data";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 

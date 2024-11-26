@@ -1,14 +1,14 @@
-import { cn } from "../lib/utils";
-import { CardProps } from "../lib/constants";
+import { cn } from "../../lib/utils";
+import { CardProps } from "../../lib/constants";
 import ContributorAvatar from "./ContributorAvatar";
 import TopicBadge from "./TopicBadge";
 import ActionButton from "./ActionButton";
 import { Icons } from "./data";
 import DisplayIcon from "./DisplayIcon";
 import { Tooltip } from 'react-tooltip'
-import { tooltipStyle } from "../lib/constants";
+import { tooltipStyle } from "../../lib/constants";
 import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
-import FontAwesomeIconWrapper from "../lib/FontAwesomeIconWrapper";
+import FontAwesomeIconWrapper from "../../lib/FontAwesomeIconWrapper";
 
 const Card = ({
     title,
