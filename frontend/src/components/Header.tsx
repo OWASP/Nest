@@ -38,7 +38,7 @@ export default function Header() {
                     <div className="flex-1 pl-6 font-medium rounded-lg justify-between">
                         <div className="flex pl-6 justify-start dark:text-slate-300 text-slate-700">
                             {headerLinks.map((link, i) => (
-                                <NavLink key={i} to={link.href} className="py-2 px-3 dark:hover:text-slate-200 hover:text-slate-800" aria-current="page">{link.text}</NavLink>
+                                <NavLink key={i} to={link.href} className="navlink py-2 px-3 dark:hover:text-slate-200 hover:text-slate-800" aria-current="page">{link.text}</NavLink>
                             ))}
                         </div>
                     </div>
