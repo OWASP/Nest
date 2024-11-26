@@ -62,8 +62,24 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
+      - frontend
     networks:
       - nest_app_network
+
+  frontend:
+    container_name: nest-frontend
+    build:
+      context: ./frontend
+      dockerfile: Docker.staging
+    restart: unless-stopped
+    networks:
+      - nest_app_network
+    volumes:
+      - ./frontend:/app
+    environment:
+      NODE_ENV: production
+    ports:
+      - '80:80'
 
 networks:
   nest_app_network:
