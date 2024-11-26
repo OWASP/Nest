@@ -39,18 +39,22 @@ export const level = {
   incubator: {
     color: "#53AAE5",
     icon: " text-white fa-solid fa-egg ",
+    level: "Incubator",
   },
   lab: {
     color: "#FFA500",
     icon: " text-white fa-solid fa-flask",
+    level: "Lab",
   },
   production: {
     color: "#800080",
     icon: " text-white fa-solid fa-city",
+    level: "Production",
   },
   flagship: {
     color: "#38a047",
     icon: " text-white fa-solid fa-flag",
+    level: "Flagship",
   },
 };
 

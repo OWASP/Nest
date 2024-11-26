@@ -8,22 +8,15 @@ import { level } from "../components/EntityComponent/data";
 
 export default function Projects() {
     const [projectData, setProjectData] = useState<ProjectDataType | null>(null);
+    const url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://nest.owasp.dev'
 
-    const handleButtonClick = () => {
-        console.log("Button clicked");
-      }
 
-    const SubmitButton = {
-        label: "Contribute",
-        icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
-        onclick: handleButtonClick,
-    }
 
     useEffect(()=>{
         document.title = "OWASP Projects"
         const fetchApiData = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/v1/owasp/search/project?q=""')
+                const response = await fetch(`${url}/api/v1/owasp/search/project?q=""`)
                 const data = await response.json()
                 console.log(data)
                 setProjectData(data)
@@ -41,6 +34,15 @@ export default function Projects() {
             projectData && projectData.projects.map((project) => {
               const params: string[] = ["idx_updated_at", "idx_forks_count", "idx_stars_count", "idx_contributors_count"];
               const filteredIcons = getFilteredIcons(project, params);
+              const handleButtonClick = () => {
+                window.open(`/projects/contribute?q=${project.idx_name}`, '_blank');
+              }
+
+              const SubmitButton = {
+                label: "Contribute",
+                icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
+                onclick: handleButtonClick,
+              }
               return (
                 <Card
                   key={project.objectID}

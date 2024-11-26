@@ -1,12 +1,15 @@
 import React, { ReactNode } from 'react';
+import { Tooltip } from 'react-tooltip';
+import { tooltipStyle } from '../../lib/constants';
 
 interface ActionButtonProps {
   link?: string;
   onClick?: () => void;
+  tooltipLabel?: string;
   children: ReactNode;
 }
 
-const ActionButton: React.FC<ActionButtonProps> = ({ link, onClick, children }) => {
+const ActionButton: React.FC<ActionButtonProps> = ({ link, onClick, tooltipLabel, children }) => {
   const baseStyles = "flex justify-center items-center gap-2 p-1 px-2 rounded-md bg-transparent hover:bg-[#0D6EFD] text-[#0D6EFD] hover:text-white dark:text-white border border-[#0D6EFD] dark:border-0 ";
 
   return link ? (
@@ -15,15 +18,21 @@ const ActionButton: React.FC<ActionButtonProps> = ({ link, onClick, children }) 
       target="_blank"
       rel="noopener noreferrer"
       className={baseStyles}
+      data-tooltip-id="button-tooltip"
+      data-tooltip-content={tooltipLabel}
     >
       {children}
+      <Tooltip id="button-tooltip" style={tooltipStyle}  />
     </a>
   ) : (
     <button
       onClick={onClick}
       className={baseStyles}
+      data-tooltip-id="button-tooltip"
+      data-tooltip-content={tooltipLabel}
     >
       {children}
+      <Tooltip id="button-tooltip" style={tooltipStyle}  />
     </button>
   );
 };
