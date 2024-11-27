@@ -24,7 +24,6 @@ class Base(Configuration):
     SITE_URL = "http://localhost:8000"
 
     DJANGO_APPS = (
-        "corsheaders",
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -35,6 +34,7 @@ class Base(Configuration):
 
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
+        "corsheaders",
         "rest_framework",
         "storages",
     )
@@ -51,7 +51,6 @@ class Base(Configuration):
 
     MIDDLEWARE = [
         "corsheaders.middleware.CorsMiddleware",
-        "django.middleware.common.CommonMiddleware",
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
@@ -59,11 +58,6 @@ class Base(Configuration):
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    ]
-
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",
-        "http://localhost:8000",
     ]
 
     REST_FRAMEWORK = {
