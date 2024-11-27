@@ -10,7 +10,7 @@ Follow these steps to set up the OWASP Nest application:
      git clone https://github.com/owasp/nest
      ```
 
-2. **Create Environment File**:
+1. **Create Environment File**:
    - Navigate to the `backend` directory and create a local environment file:
      ```bash
      touch backend/.env/local
@@ -20,13 +20,13 @@ Follow these steps to set up the OWASP Nest application:
      cp backend/.env/template backend/.env/local
      ```
 
-3. **Configure Environment Variables**:
+1. **Configure Environment Variables**:
    - Open the `backend/.env/local` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
      ```plaintext
      DJANGO_CONFIGURATION=Local
      ```
 
-4. **Set Up Algolia**:
+1. **Set Up Algolia**:
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
    - After creating an account, create an Algolia app.
    - Update your `.env/local` file with the following keys from your Algolia app:
@@ -36,26 +36,26 @@ Follow these steps to set up the OWASP Nest application:
      ```
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
-5. **Run the Application**:
+1. **Run the Application**:
    - In your terminal, navigate to the project directory and run the following command to start the application:
      ```bash
      make run
      ```
    - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
 
-6. **Load Initial Data**:
+1. **Load Initial Data**:
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
      ```bash
      make load-data
      ```
 
-7. **Index Data**:
+1. **Index Data**:
    - In the same terminal session, run the following command to index the data:
      ```bash
      make index-data
      ```
 
-8. **Verify API Endpoints**:
+1. **Verify API Endpoints**:
    - Check that the data is available via these API endpoints:
      - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
      - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
@@ -70,16 +70,16 @@ If you plan to manage or fetch data, follow these additional steps:
      make setup
      ```
 
-2. **Generate a GitHub Personal Access Token**:
+1. **Generate a GitHub Personal Access Token**:
    - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-3. **Update Environment Variables with GitHub Token**:
+1. **Update Environment Variables with GitHub Token**:
    - Open `backend/.env/local` again and update it with your GitHub token:
      ```plaintext
      GITHUB_TOKEN=<your_github_token>
      ```
 
-4. **Sync Local Database Data**:
+1. **Sync Local Database Data**:
    - Now you should be able to run the following command to sync your local database data with GitHub:
      ```bash
      make sync
@@ -101,16 +101,11 @@ npm install --save-dev eslint prettier husky lint-staged eslint-plugin-react esl
 To set up Husky for pre-commit hooks, run:
 
 ```bash
-npx husky install
-```
-Then create a pre-commit hook:
-
-```bash
-npx husky-init
+npm run prepare 
 ```
 
 ### Pre-commit Hook Script
-Create or update the `.husky/pre-commit` file with the following content:
+Ensure the `.husky/pre-commit` file consists of the following content:
 
 ```bash
 #!/bin/sh
@@ -121,8 +116,8 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 npx lint-staged
 
 # Optional: Run ESLint and Prettier directly for debugging
-eslint 'frontend/**/*.{ts,tsx}' --fix --config eslint.config.js >> .husky/log.txt 2>&1
-prettier --write 'frontend/**/*.{ts,tsx}' >> .husky/log.txt 2>&1
+eslint . --fix --config eslint.config.js
+prettier --write . 
 ```
 
 
@@ -130,23 +125,11 @@ prettier --write 'frontend/**/*.{ts,tsx}' >> .husky/log.txt 2>&1
 You can manually run ESLint and Prettier to check your setup:
    - To lint your code:
 ```bash
-npx eslint 'frontend/**/*.{js,jsx,ts,tsx}' --fix --config eslint.config.js
+npx eslint . --fix --config eslint.config.js
 ```
 
   - To format your code with Prettier:
 ```bash
-npx prettier --write 'frontend/**/*.{js,jsx,ts,tsx}'
+npx prettier --write . 
 ```
 
-
-## Use These Commands to Install and Use Husky
-
-```bash
-npm install husky --save-dev
-npx husky-init
-ls -l .husky/pre-commit
-npx husky add .husky/pre-commit "npx lint-staged"
-npx husky run pre-commit
-git add .
-git commit -m "Test commit"
-```
