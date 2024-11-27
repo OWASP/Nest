@@ -24,6 +24,7 @@ class Base(Configuration):
     SITE_URL = "http://localhost:8000"
 
     DJANGO_APPS = (
+        "corsheaders",
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -58,6 +59,11 @@ class Base(Configuration):
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    ]
+
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://localhost:8000",
     ]
 
     REST_FRAMEWORK = {
