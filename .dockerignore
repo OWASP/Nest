@@ -1,3 +1,9 @@
-.env
+node_modules
 /data
 __pycache__
+build
+.env
+*.log
+*.md
+.git
+.gitignore
