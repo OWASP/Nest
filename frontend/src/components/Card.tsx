@@ -1,14 +1,13 @@
-import { cn } from '../lib/utils'
-import { CardProps } from '../lib/constants'
-import ContributorAvatar from './ContributorAvatar'
-import TopicBadge from './TopicBadge'
-import ActionButton from './ActionButton'
-import { Icons } from './data'
-import DisplayIcon from './DisplayIcon'
+import ContributorAvatar from "./ContributorAvatar";
+import TopicBadge from "./TopicBadge";
+import ActionButton from "./ActionButton";
+import { Icons } from "./data";
+import DisplayIcon from "./DisplayIcon";
 import { Tooltip } from 'react-tooltip'
-import { tooltipStyle } from '../lib/constants'
-import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
+import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
+import { CardProps, tooltipStyle } from "../lib/constants";
+import FontAwesomeIconWrapper from "../lib/FontAwesomeIconWrapper";
+import { cn } from "../lib/utils";
 
 const Card = ({
   title,
@@ -70,57 +69,56 @@ const Card = ({
             <ContributorAvatar key={contributor.login} contributor={contributor} />
           ))}
       </div>
-      {projectName && (
-        <a href={projectLink} target="_blank" rel="noopener noreferrer">
-          {' '}
-          {projectName}
-        </a>
-      )}
-      <p className=" mr-8 text-gray-600 dark:text-gray-200 ">{summary}</p>
-      <div className=" w-full flex md:flex-row flex-col justify-between items-center ">
-        <div className=" flex flex-col justify-normal items-start gap-2 ">
-          <div className=" flex justify-normal items-center gap-2 ">
-            {languages &&
-              languages.map((topic) => (
-                <TopicBadge
-                  key={topic}
-                  topic={topic}
-                  tooltipLabel={`This repository uses ${topic}`}
-                />
-              ))}
-          </div>
-          <div className=" flex justify-normal items-center gap-2 flex-wrap ">
-            {topics &&
-              topics.map((topic) => (
-                <TopicBadge
-                  key={topic}
-                  topic={topic}
-                  tooltipLabel={`This project is labeled as ${topic}`}
-                />
-              ))}
-          </div>
-          <div className=" flex justify-normal items-center gap-2 my-2 ">
-            {social &&
-              social.map((item) => (
-                <a
-                  key={item.title}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className=" flex justify-center items-center gap-1 "
-                >
-                  {/* {item.icon} */}
-                  <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
-                </a>
-              ))}
-          </div>
+       {
+        projectName &&  <a href={projectLink} target="_blank" rel="noopener noreferrer"> {projectName}</a>
+       }
+        <p className=" mr-8 text-gray-600 dark:text-gray-200 ">{summary}</p>
+        <div className=" w-full flex md:flex-row flex-col justify-between items-center ">
+            <div className=" flex flex-col justify-normal items-start gap-2 ">
+
+                <div className=" flex justify-normal items-center gap-2 ">
+                    {
+                        languages && languages.map((topic) => (
+
+                            <TopicBadge key={topic} topic={topic} tooltipLabel={`This repository uses ${topic}`} />
+
+                        ))
+
+                    }
+                </div>
+                <div className=" flex justify-normal items-center gap-2 flex-wrap ">
+                    {
+                        topics && topics.map((topic) => (
+                            <TopicBadge key={topic} topic={topic} tooltipLabel={`This project is labeled as "${topic}"`} />
+                        ))
+                    }
+                </div>
+                <div className=" flex justify-normal items-center gap-2 my-2 ">
+                    {
+                        social && social.map((item) => (
+                            <a key={item.title}
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className=" flex justify-center items-center gap-1 "
+                            >
+                                {/* {item.icon} */}
+                                <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
+                            </a>
+                        ))
+                    }
+                </div>
+            </div>
+            <ActionButton
+                tooltipLabel={`Contribute to ${title}`}
+                link={button.link}
+                onClick={button.onclick}  >
+                {button.icon}
+                {button.label}
+            </ActionButton>
         </div>
-        <ActionButton link={button.link} onClick={button.onclick}>
-          {button.icon}
-          {button.label}
-        </ActionButton>
-      </div>
-      <Tooltip id="level-tooltip" style={tooltipStyle} />
+        <Tooltip id="level-tooltip" style={tooltipStyle}  />
+
     </div>
   )
 }

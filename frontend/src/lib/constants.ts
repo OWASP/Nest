@@ -38,6 +38,5 @@ export interface CardProps {
 }
 
 export const tooltipStyle = {
-  backgroundColor: 'white',
-  color: 'black',
+  borderRadius: "8px",
 }
