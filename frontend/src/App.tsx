@@ -1,8 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
-import Footer from './components/Footer'
-import Header from './components/Header'
-import Home from './pages/Home'
-import Projects from './pages/Projects'
+
+import { Routes, Route } from "react-router-dom";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import { Home, Projects } from "./pages";
 
 function App() {
   return (
@@ -11,10 +11,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />}></Route>
         <Route path="/projects" element={<Projects />}></Route>
+        <Route path="/projects" element={<Projects />}></Route>
       </Routes>
       <Footer />
     </main>
-  )
+  );
 }
 
 export default App
