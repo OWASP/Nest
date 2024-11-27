@@ -1,14 +1,13 @@
-import { cn } from "../lib/utils";
-import { CardProps } from "../lib/constants";
 import ContributorAvatar from "./ContributorAvatar";
 import TopicBadge from "./TopicBadge";
 import ActionButton from "./ActionButton";
 import { Icons } from "./data";
 import DisplayIcon from "./DisplayIcon";
 import { Tooltip } from 'react-tooltip'
-import { tooltipStyle } from "../lib/constants";
 import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
+import { CardProps, tooltipStyle } from "../lib/constants";
 import FontAwesomeIconWrapper from "../lib/FontAwesomeIconWrapper";
+import { cn } from "../lib/utils";
 
 const Card = ({
     title,
@@ -94,7 +93,7 @@ const Card = ({
                 <div className=" flex justify-normal items-center gap-2 flex-wrap ">
                     {
                         topics && topics.map((topic) => (
-                            <TopicBadge key={topic} topic={topic} tooltipLabel={`This project is labeled as ${topic}`} />
+                            <TopicBadge key={topic} topic={topic} tooltipLabel={`This project is labeled as "${topic}"`} />
                         ))
                     }
                 </div>
@@ -114,13 +113,15 @@ const Card = ({
                     }
                 </div>
             </div>
-            <ActionButton link={button.link} onClick={button.onclick}  >
+            <ActionButton
+                tooltipLabel={`Contribute to ${title}`}
+                link={button.link}
+                onClick={button.onclick}  >
                 {button.icon}
                 {button.label}
             </ActionButton>
         </div>
         <Tooltip id="level-tooltip" style={tooltipStyle}  />
-
 
     </div>
   )
