@@ -1,16 +1,27 @@
 FROM node:18-slim
 
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 
 RUN groupadd owasp && \
     useradd --create-home --home-dir /home/owasp -g owasp owasp && \
     apt-get update && apt-get upgrade -y && \
-    apt-get clean -y && rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+    curl \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
 
 EXPOSE 3000
 
+
+WORKDIR /home/owasp
+
+
 USER owasp
+
 
 VOLUME /home/owasp
 
-WORKDIR /home/owasp
+
+CMD ["npm", "install", "&&", "npm", "run", "dev"]
