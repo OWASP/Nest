@@ -3,7 +3,9 @@ __pycache__
 .cache
 .coverage
 .env
+.idea
 .local
+.npm
 .python_history
 .ruff_cache
 .venv
