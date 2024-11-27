@@ -28,7 +28,7 @@ Optional steps (if you're going to manage or fetch data):
 
          ```
          npm install
-         npm run test 
+         npm run test
          ```
 
       2. Debug tests in browser
@@ -38,5 +38,4 @@ Optional steps (if you're going to manage or fetch data):
          ```
          npm install
          npm run watch
-        
 
