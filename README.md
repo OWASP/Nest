@@ -101,7 +101,7 @@ npm install --save-dev eslint prettier husky lint-staged eslint-plugin-react esl
 To set up Husky for pre-commit hooks, run:
 
 ```bash
-npm run prepare 
+npm run prepare
 ```
 
 ### Pre-commit Hook Script
@@ -117,7 +117,7 @@ npx lint-staged
 
 # Optional: Run ESLint and Prettier directly for debugging
 eslint . --fix --config eslint.config.js
-prettier --write . 
+prettier --write .
 ```
 
 
@@ -130,6 +130,5 @@ npx eslint . --fix --config eslint.config.js
 
   - To format your code with Prettier:
 ```bash
-npx prettier --write . 
+npx prettier --write .
 ```
-
