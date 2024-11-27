@@ -38,4 +38,3 @@ Optional steps (if you're going to manage or fetch data):
          ```
          npm install
          npm run watch
-
