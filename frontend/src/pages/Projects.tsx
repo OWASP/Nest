@@ -8,20 +8,17 @@ import { level } from "../components/data";
 
 export default function Projects() {
     const [projectData, setProjectData] = useState<ProjectDataType | null>(null);
-    const url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://nest.owasp.dev'
-
-
 
     useEffect(()=>{
         document.title = "OWASP Projects"
         const fetchApiData = async () => {
             try {
-                const response = await fetch(`${url}/api/v1/owasp/search/project?q=""`)
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/v1/owasp/search/project?q=`)
                 const data = await response.json()
                 console.log(data)
                 setProjectData(data)
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         }
         fetchApiData()
