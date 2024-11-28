@@ -44,7 +44,7 @@ django-cors-headers = "^4.6.0"
 
 
 [tool.poetry.group.dev.dependencies]
-djlint = "^1.36.1"
+djlint = "^1.36.2"
 isort = "^5.13.2"
 pre-commit = "^4.0.0"
 ruff = "^0.8.0"
