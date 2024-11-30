@@ -15,7 +15,6 @@ export default function Projects() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/v1/owasp/search/project?q=`)
                 const data = await response.json()
-                console.log(data)
                 setProjectData(data)
             } catch (error) {
                 console.error(error)
