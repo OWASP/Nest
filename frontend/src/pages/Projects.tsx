@@ -13,7 +13,7 @@ export default function Projects() {
         document.title = "OWASP Projects"
         const fetchApiData = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/v1/owasp/search/project?q=`)
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/project?q=`)
                 const data = await response.json()
                 setProjectData(data)
             } catch (error) {
