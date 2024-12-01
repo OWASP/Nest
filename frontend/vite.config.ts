@@ -4,7 +4,6 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  envDir: "./env",
   server: {
     watch: {
       usePolling: true,
