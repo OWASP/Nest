@@ -59,7 +59,7 @@ const Card = ({
               <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
           )}
-          <a href={url}>
+          <a href={url} target="_blank">
             <h1 className=" text-2xl font-semibold ">{title}</h1>
           </a>
         </div>
