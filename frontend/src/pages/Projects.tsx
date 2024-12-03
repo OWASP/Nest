@@ -43,6 +43,7 @@ export default function Projects() {
                 <Card
                   key={project.objectID}
                   title={project.idx_name}
+                  url={project.idx_url}
                   summary={project.idx_summary}
                   level={level[`${project.idx_level as keyof typeof level}`]}
                   icons={filteredIcons}

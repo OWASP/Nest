@@ -16,25 +16,26 @@ export type topContributorsType = {
 }
 
 export type ButtonType = {
-  label: string
-  icon?: JSX.Element
-  onclick?: () => void
-  link?: string
+  label: string;
+  icon?: JSX.Element;
+  onclick?: () => void;
+  url?: string;
 }
 
 export interface CardProps {
-  title: string
-  summary: string
-  level?: Level
-  icons?: IconType
-  leaders?: string[]
-  topContributors?: topContributorsType[]
-  topics?: string[]
-  button: ButtonType
-  projectName?: string
-  projectLink?: string
-  languages?: string[]
-  social?: { title: string; icon: string; url: string }[]
+  title: string;
+  url: string;
+  summary: string;
+  level?: Level;
+  icons?: IconType;
+  leaders?: string[];
+  topContributors?: topContributorsType[];
+  topics?: string[];
+  button: ButtonType;
+  projectName?: string;
+  projectLink?: string;
+  languages?: string[];
+  social?: { title: string, icon: string, url: string }[];
 }
 
 export const tooltipStyle = {

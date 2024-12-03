@@ -10,37 +10,36 @@ import FontAwesomeIconWrapper from "../lib/FontAwesomeIconWrapper";
 import { cn } from "../lib/utils";
 
 const Card = ({
-  title,
-  summary,
-  level,
-  icons,
-  leaders,
-  topContributors,
-  topics,
-  button,
-  projectName,
-  projectLink,
-  languages,
-  social,
-}: CardProps) => {
+    title,
+    url,
+    summary,
+    level,
+    icons,
+    leaders,
+    topContributors,
+    topics,
+    button,
+    projectName,
+    projectLink,
+    languages,
+    social,
+} : CardProps) => {
   return (
     <div className=" w-full md:max-w-6xl  h-fit flex flex-col justify-normal items-start gap-4 md:gap-2 p-4 px-6 border border-border rounded-md ">
       <div className=" w-full flex justify-between items-center flex-wrap gap-2 ">
         <div className=" flex justify-center items-center gap-2 ">
-          {level && (
-            <span
-              data-tooltip-id="level-tooltip"
-              data-tooltip-content={`${level.level} project`}
-              className={cn(
-                'text-xs rounded-full w-8 h-8 flex justify-center items-center shadow '
-              )}
-              style={{ backgroundColor: level.color }}
-            >
-              <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
-            </span>
-          )}
-          <a href="#">
-            <h1 className=" text-2xl font-semibold ">{title}</h1>
+          { level && <span
+            data-tooltip-id="level-tooltip"
+            data-tooltip-content={`${level.level} project`}
+            className={cn("text-xs rounded-full w-8 h-8 flex justify-center items-center shadow ")}
+            style={{backgroundColor: level.color}}
+          >
+            <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
+            </span>}
+          <a href={url}>
+            <h1 className=" text-2xl font-semibold ">
+              {title}
+            </h1>
           </a>
         </div>
 
@@ -111,7 +110,7 @@ const Card = ({
             </div>
             <ActionButton
                 tooltipLabel={`Contribute to ${title}`}
-                link={button.link}
+                url={button.url}
                 onClick={button.onclick}  >
                 {button.icon}
                 {button.label}
