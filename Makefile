@@ -36,6 +36,7 @@ github-update-project-related-repositories:
 index-data:
 	@echo "Indexing Nest data"
 	@CMD="poetry run python manage.py algolia_reindex" $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 load-data:
 	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
