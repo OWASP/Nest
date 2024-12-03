@@ -19,11 +19,12 @@ export type ButtonType = {
   label: string;
   icon?: JSX.Element;
   onclick?: () => void;
-  link?: string;
+  url?: string;
 }
 
 export interface CardProps {
   title: string;
+  url: string;
   summary: string;
   level?: Level;
   icons?: IconType;

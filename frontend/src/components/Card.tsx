@@ -11,6 +11,7 @@ import { cn } from "../lib/utils";
 
 const Card = ({
     title,
+    url,
     summary,
     level,
     icons,
@@ -35,7 +36,7 @@ const Card = ({
           >
             <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>}
-          <a href="#">
+          <a href={url}>
             <h1 className=" text-2xl font-semibold ">
               {title}
             </h1>
@@ -115,7 +116,7 @@ const Card = ({
             </div>
             <ActionButton
                 tooltipLabel={`Contribute to ${title}`}
-                link={button.link}
+                url={button.url}
                 onClick={button.onclick}  >
                 {button.icon}
                 {button.label}
