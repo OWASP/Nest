@@ -6,10 +6,10 @@
   "scripts": {
     "dev": "vite --host --port 3000",
     "build": "tsc -b && vite build",
-    "lint": "eslint . --config eslint.config.js",
-    "lint:fix": "eslint . --config eslint.config.js --fix",
-    "format": "prettier --write .",
+    "format": "prettier --log-level warn --write .",
     "format:check": "prettier --check .",
+    "lint": "eslint . --config eslint.config.js --fix",
+    "lint:check": "eslint . --config eslint.config.js",
     "preview": "vite preview",
     "prepare": "husky install && npx husky add .husky/pre-commit '#!/bin/sh\n# .husky/pre-commit\n\necho \"Running pre-commit hook...\"\necho \"Running lint-staged...\"\n\nexport NODE_OPTIONS=\"--max-old-space-size=4096\"\nnpx lint-staged\n# Optional: Run ESLint and Prettier directly for debugging\"\neslint . --fix --config eslint.config.js\nprettier --write .'",
     "test": "jest && jest --coverage",

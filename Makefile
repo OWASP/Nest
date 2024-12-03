@@ -1,6 +1,10 @@
 build:
 	@docker compose build
 
+check:
+	@pre-commit run -a
+	cd frontend && npm run lint && npm run format
+
 clear-cache:
 	@CMD="poetry run python manage.py clear_cache" $(MAKE) exec-backend-command
 
@@ -81,9 +85,6 @@ owasp-scrape-projects:
 poetry-update:
 	@CMD="poetry update" $(MAKE) exec-backend-command
 
-pre-commit:
-	@pre-commit run -a
-
 purge-data:
 	@CMD="poetry run python manage.py purge_data" $(MAKE) exec-backend-command
 
@@ -99,9 +100,16 @@ shell:
 
 sync: update-data enrich-data index-data clear-cache
 
-test:
+test: \
+	test-backend \
+	test-frontend
+
+test-backend:
 	@docker build -f backend/Dockerfile.test backend -t nest-backend-test
 	@docker run -e DJANGO_CONFIGURATION=Test nest-backend-test poetry run pytest
+
+test-frontend:
+	@cd frontend && npm run test
 
 update-data: \
 	github-update-owasp-organization \
