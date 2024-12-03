@@ -1,0 +1,20 @@
+[
+  {
+    "type": "oneWaySynonym",
+    "input": "mern",
+    "synonyms": [
+      "express",
+      "javascript",
+      "mongo",
+      "node",
+      "react",
+      "typescript"
+    ]
+  },
+  {
+    "synonyms": ["js", "javascript"]
+  },
+  {
+    "synonyms": ["ts", "typescript"]
+  }
+]
