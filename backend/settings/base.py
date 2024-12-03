@@ -5,11 +5,11 @@ from pathlib import Path
 
 from configurations import Configuration, values
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 class Base(Configuration):
     """Base configuration."""
+
+    BASE_DIR = Path(__file__).resolve().parent.parent
 
     ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION", "Local")
     if ENVIRONMENT == "Test":
@@ -90,9 +90,12 @@ class Base(Configuration):
 
     WSGI_APPLICATION = "wsgi.application"
 
+    ALGOLIA_API_KEY = values.SecretValue(environ_name="ALGOLIA_API_KEY")
+    ALGOLIA_APPLICATION_ID = values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID")
+
     ALGOLIA = {
-        "API_KEY": values.SecretValue(environ_name="ALGOLIA_API_KEY"),
-        "APPLICATION_ID": values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID"),
+        "API_KEY": ALGOLIA_API_KEY,
+        "APPLICATION_ID": ALGOLIA_APPLICATION_ID,
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
 
