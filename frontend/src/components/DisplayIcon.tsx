@@ -3,13 +3,7 @@ import { IconType, tooltipStyle } from '../lib/constants'
 import { IconKeys, Icons } from './data'
 import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 
-export default function DisplayIcon({
-  item,
-  icons,
-}: {
-  item: string;
-  icons: IconType;
-}) {
+export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
   return icons[item] ? (
     <div
       data-tooltip-id={`icon-tooltip-${item}`}
@@ -22,5 +16,5 @@ export default function DisplayIcon({
       </span>
       <Tooltip id={`icon-tooltip-${item}`} style={tooltipStyle} />
     </div>
-  ) : null;
+  ) : null
 }

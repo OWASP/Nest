@@ -1,17 +1,14 @@
-import ContributorAvatar from "./ContributorAvatar";
-import TopicBadge from "./TopicBadge";
-import ActionButton from "./ActionButton";
-import { Icons } from "./data";
-import DisplayIcon from "./DisplayIcon";
-import { Tooltip } from "react-tooltip";
-import {
-  FontAwesomeIcon,
-  FontAwesomeIconProps,
-} from "@fortawesome/react-fontawesome";
-import { CardProps, tooltipStyle } from "../lib/constants";
-import FontAwesomeIconWrapper from "../lib/FontAwesomeIconWrapper";
-import { cn } from "../lib/utils";
-import { useState } from "react";
+import ContributorAvatar from './ContributorAvatar'
+import TopicBadge from './TopicBadge'
+import ActionButton from './ActionButton'
+import { Icons } from './data'
+import DisplayIcon from './DisplayIcon'
+import { Tooltip } from 'react-tooltip'
+import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
+import { CardProps, tooltipStyle } from '../lib/constants'
+import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
+import { cn } from '../lib/utils'
+import { useState } from 'react'
 
 const Card = ({
   title,
@@ -28,23 +25,23 @@ const Card = ({
   languages,
   social,
 }: CardProps) => {
-  const [visibleLanguages, setVisibleLanguages] = useState(18);
-  const [visibleTopics, setVisibleTopics] = useState(18);
+  const [visibleLanguages, setVisibleLanguages] = useState(18)
+  const [visibleTopics, setVisibleTopics] = useState(18)
 
-  const [toggleLanguages, setToggleLanguages] = useState(true);
-  const [toggleTopics, setToggleTopics] = useState(true);
+  const [toggleLanguages, setToggleLanguages] = useState(true)
+  const [toggleTopics, setToggleTopics] = useState(true)
 
   const loadMoreLanguages = () => {
-    if (toggleLanguages) setVisibleLanguages(languages?.length as number);
-    else setVisibleLanguages(18);
-    setToggleLanguages(!toggleLanguages);
-  };
+    if (toggleLanguages) setVisibleLanguages(languages?.length as number)
+    else setVisibleLanguages(18)
+    setToggleLanguages(!toggleLanguages)
+  }
 
   const loadMoreTopics = () => {
-    if (toggleTopics) setVisibleTopics(topics?.length as number);
-    else setVisibleTopics(18);
-    setToggleTopics(!toggleTopics);
-  };
+    if (toggleTopics) setVisibleTopics(topics?.length as number)
+    else setVisibleTopics(18)
+    setToggleTopics(!toggleTopics)
+  }
 
   return (
     <div className=" w-full md:max-w-6xl  h-fit flex flex-col justify-normal items-start gap-4 md:gap-2 p-4 px-6 border border-border rounded-md ">
@@ -55,14 +52,11 @@ const Card = ({
               data-tooltip-id="level-tooltip"
               data-tooltip-content={`${level.level} project`}
               className={cn(
-                "text-xs rounded-full w-8 h-8 flex justify-center items-center shadow ",
+                'text-xs rounded-full w-8 h-8 flex justify-center items-center shadow '
               )}
               style={{ backgroundColor: level.color }}
             >
-              <FontAwesomeIconWrapper
-                icon={level.icon}
-                className="text-white"
-              />
+              <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
           )}
           <a href={url}>
@@ -73,39 +67,31 @@ const Card = ({
         <div className="min-w-[30%] flex justify-end items-center md:gap-8 flex-wrap ">
           {icons &&
             Object.keys(Icons).map((key) =>
-              icons[key] !== undefined ? (
-                <DisplayIcon key={key} item={key} icons={icons} />
-              ) : null,
+              icons[key] !== undefined ? <DisplayIcon key={key} item={key} icons={icons} /> : null
             )}
         </div>
       </div>
       <h2>
         {leaders && (
-          <span className=" font-bold ">
-            {" "}
-            {leaders.length > 1 ? "Leaders: " : "Leader: "}{" "}
-          </span>
+          <span className=" font-bold "> {leaders.length > 1 ? 'Leaders: ' : 'Leader: '} </span>
         )}
         {leaders &&
           leaders.map((leader, index) => (
             <span key={leader} className=" font-semibold ">
-              {" "}
-              {index != leaders.length - 1 ? `${leader},` : `${leader}`}{" "}
+              {' '}
+              {index != leaders.length - 1 ? `${leader},` : `${leader}`}{' '}
             </span>
           ))}
       </h2>
       <div className=" w-full flex justify-normal items-center gap-1 ">
         {topContributors &&
           topContributors.map((contributor) => (
-            <ContributorAvatar
-              key={contributor.login}
-              contributor={contributor}
-            />
+            <ContributorAvatar key={contributor.login} contributor={contributor} />
           ))}
       </div>
       {projectName && (
         <a href={projectLink} target="_blank" rel="noopener noreferrer">
-          {" "}
+          {' '}
           {projectName}
         </a>
       )}
@@ -125,7 +111,7 @@ const Card = ({
                 ))}
             {languages && languages.length > 18 && (
               <button onClick={loadMoreLanguages} className="">
-                {toggleLanguages ? "See More" : "See Less"}
+                {toggleLanguages ? 'Show more' : 'Show less'}
               </button>
             )}
           </div>
@@ -143,7 +129,7 @@ const Card = ({
 
             {topics && topics.length > 18 && (
               <button onClick={loadMoreTopics} className="">
-                {toggleTopics ? "See More" : "See Less"}
+                {toggleTopics ? 'Show more' : 'Show less'}
               </button>
             )}
           </div>
@@ -158,9 +144,7 @@ const Card = ({
                   className=" flex justify-center items-center gap-1 "
                 >
                   {/* {item.icon} */}
-                  <FontAwesomeIcon
-                    icon={item.icon as FontAwesomeIconProps["icon"]}
-                  />
+                  <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
                 </a>
               ))}
           </div>
@@ -176,7 +160,7 @@ const Card = ({
       </div>
       <Tooltip id="level-tooltip" style={tooltipStyle} />
     </div>
-  );
-};
+  )
+}
 
-export default Card;
+export default Card
