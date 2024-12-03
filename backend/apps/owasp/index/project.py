@@ -3,11 +3,12 @@
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
+from apps.common.index import IndexSynonymsMixin
 from apps.owasp.models.project import Project
 
 
 @register(Project)
-class ProjectIndex(AlgoliaIndex):
+class ProjectIndex(AlgoliaIndex, IndexSynonymsMixin):
     """Project index."""
 
     index_name = "projects"
@@ -69,3 +70,8 @@ class ProjectIndex(AlgoliaIndex):
             "organizations",
             "repositories",
         )
+
+    @staticmethod
+    def update_synonyms():
+        """Update synonyms."""
+        ProjectIndex.reindex_synonyms("owasp", "projects")

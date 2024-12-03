@@ -3,11 +3,12 @@
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
+from apps.common.index import IndexSynonymsMixin
 from apps.github.models.issue import Issue
 
 
 @register(Issue)
-class IssueIndex(AlgoliaIndex):
+class IssueIndex(AlgoliaIndex, IndexSynonymsMixin):
     """Issue index."""
 
     index_name = "issues"
@@ -80,3 +81,8 @@ class IssueIndex(AlgoliaIndex):
             "labels",
             "repository__project_set",
         )
+
+    @staticmethod
+    def update_synonyms():
+        """Update synonyms."""
+        IssueIndex.reindex_synonyms("github", "issues")
