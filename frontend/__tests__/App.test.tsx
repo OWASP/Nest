@@ -6,7 +6,10 @@ import App from "../src/App";
 
 test("renders Home page heading and the contribute link", () => {
   render(
-    <BrowserRouter>
+    <BrowserRouter future={{
+      v7_startTransition: true,
+      v7_relativeSplatPath: true
+    }}>
       <App />
     </BrowserRouter>
   );
