@@ -1,12 +1,9 @@
-import {
-  FontAwesomeIcon,
-  FontAwesomeIconProps,
-} from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
 
-type IconProp = FontAwesomeIconProps["icon"];
+type IconProp = FontAwesomeIconProps['icon']
 
-interface MyIconProps extends Omit<FontAwesomeIconProps, "icon"> {
-  icon: string;
+interface MyIconProps extends Omit<FontAwesomeIconProps, 'icon'> {
+  icon: string
 }
 
 const FontAwesomeIconWrapper = ({ icon, ...props }: MyIconProps) => (

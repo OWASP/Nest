@@ -9,35 +9,35 @@ export interface Level {
 }
 
 export type topContributorsType = {
-  avatar_url: string;
-  contributions_count: number;
-  login: string;
-  name: string;
-};
+  avatar_url: string
+  contributions_count: number
+  login: string
+  name: string
+}
 
 export type ButtonType = {
-  label: string;
-  icon?: JSX.Element;
-  onclick?: () => void;
-  url?: string;
-};
+  label: string
+  icon?: JSX.Element
+  onclick?: () => void
+  url?: string
+}
 
 export interface CardProps {
-  title: string;
-  url: string;
-  summary: string;
-  level?: Level;
-  icons?: IconType;
-  leaders?: string[];
-  topContributors?: topContributorsType[];
-  topics?: string[];
-  button: ButtonType;
-  projectName?: string;
-  projectLink?: string;
-  languages?: string[];
-  social?: { title: string; icon: string; url: string }[];
+  title: string
+  url: string
+  summary: string
+  level?: Level
+  icons?: IconType
+  leaders?: string[]
+  topContributors?: topContributorsType[]
+  topics?: string[]
+  button: ButtonType
+  projectName?: string
+  projectLink?: string
+  languages?: string[]
+  social?: { title: string; icon: string; url: string }[]
 }
 
 export const tooltipStyle = {
-  borderRadius: "8px",
-};
+  borderRadius: '8px',
+}

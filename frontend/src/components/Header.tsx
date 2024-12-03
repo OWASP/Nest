@@ -1,32 +1,28 @@
-import { faMoon, faSun } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { headerLinks } from "../utils/constants";
-import { NavLink } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { headerLinks } from '../utils/constants'
+import { NavLink } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 export default function Header() {
   const [dark, setDark] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-  const icon = !dark ? (
-    <FontAwesomeIcon icon={faSun} />
-  ) : (
-    <FontAwesomeIcon icon={faMoon} />
-  );
+    return localStorage.getItem('theme') === 'dark'
+  })
+  const icon = !dark ? <FontAwesomeIcon icon={faSun} /> : <FontAwesomeIcon icon={faMoon} />
 
   useEffect(() => {
     if (dark) {
-      document.body.classList.add("dark");
+      document.body.classList.add('dark')
     } else {
-      document.body.classList.remove("dark");
+      document.body.classList.remove('dark')
     }
-  }, [dark]);
+  }, [dark])
 
   function toggleTheme() {
-    setDark(!dark);
-    const newTheme = !dark ? "dark" : "light";
-    document.body.classList.toggle("dark", !dark);
-    localStorage.setItem("theme", newTheme);
+    setDark(!dark)
+    const newTheme = !dark ? 'dark' : 'light'
+    document.body.classList.toggle('dark', !dark)
+    localStorage.setItem('theme', newTheme)
   }
 
   return (
@@ -38,8 +34,8 @@ export default function Header() {
               <img
                 src={
                   !dark
-                    ? "../public/img/owasp_icon_black_sm.png"
-                    : "../public/img/owasp_icon_white_sm.png"
+                    ? '../public/img/owasp_icon_black_sm.png'
+                    : '../public/img/owasp_icon_white_sm.png'
                 }
                 className="h-16 px-2"
                 alt="OWASP Logo"
@@ -83,5 +79,5 @@ export default function Header() {
         </div>
       </div>
     </div>
-  );
+  )
 }

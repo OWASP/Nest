@@ -31,14 +31,14 @@ const Card = ({
   const [visibleLanguages, setVisibleLanguages] = useState(18);
   const [visibleTopics, setVisibleTopics] = useState(18);
 
-  const [toggleLanguages, setToggleLanguages] = useState(true);
-  const [toggleTopics, setToggleTopics] = useState(true);
+  const [toggleLanguages, setToggleLanguages] = useState(true)
+  const [toggleTopics, setToggleTopics] = useState(true)
 
   const loadMoreLanguages = () => {
-    if (toggleLanguages) setVisibleLanguages(languages?.length as number);
-    else setVisibleLanguages(18);
-    setToggleLanguages(!toggleLanguages);
-  };
+    if (toggleLanguages) setVisibleLanguages(languages?.length as number)
+    else setVisibleLanguages(18)
+    setToggleLanguages(!toggleLanguages)
+  }
 
   const loadMoreTopics = () => {
     if (toggleTopics) setVisibleTopics(topics?.length as number);
@@ -125,7 +125,7 @@ const Card = ({
                 ))}
             {languages && languages.length > 18 && (
               <button onClick={loadMoreLanguages} className="">
-                {toggleLanguages ? "See More" : "See Less"}
+                {toggleLanguages ? 'Show more' : 'Show less'}
               </button>
             )}
           </div>
@@ -143,7 +143,7 @@ const Card = ({
 
             {topics && topics.length > 18 && (
               <button onClick={loadMoreTopics} className="">
-                {toggleTopics ? "See More" : "See Less"}
+                {toggleTopics ? 'Show more' : 'Show less'}
               </button>
             )}
           </div>
@@ -176,7 +176,7 @@ const Card = ({
       </div>
       <Tooltip id="level-tooltip" style={tooltipStyle} />
     </div>
-  );
-};
+  )
+}
 
-export default Card;
+export default Card

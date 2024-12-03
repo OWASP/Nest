@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
-import Card from "./components/Card";
-import ModeToggle from "./components/ModeToggle";
+import { useEffect, useState } from 'react'
+import Card from './components/Card'
+import ModeToggle from './components/ModeToggle'
 import {
   IssuesDataType,
   project,
@@ -9,7 +9,7 @@ import {
   IssueType,
   ChapterDataType,
   CommitteeDataType,
-} from "./lib/types";
+} from './lib/types'
 import {
   MockChaptersData,
   MockContributeData,
@@ -62,7 +62,7 @@ export default function EntityExampleComponent() {
     label: 'Contribute',
     icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
     onclick: handleButtonClick,
-  };
+  }
 
   return (
     <div className=" w-full min-h-screen flex flex-col justify-normal items-center bg-background text-text p-5 md:p-20 ">
@@ -96,9 +96,9 @@ export default function EntityExampleComponent() {
                 languages={project.idx_topics.slice(0, 3)}
                 // social={formattedUrls}
               />
-            );
+            )
           })}
       </div>
     </div>
-  );
+  )
 }
