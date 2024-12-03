@@ -13,3 +13,5 @@ __pycache__
 *.code-workspace
 /volumes
 staticfiles
+.coverage
+./frontend/coverage
