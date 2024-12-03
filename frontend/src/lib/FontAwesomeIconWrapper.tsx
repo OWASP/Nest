@@ -11,6 +11,6 @@ interface MyIconProps extends Omit<FontAwesomeIconProps, "icon"> {
 
 const FontAwesomeIconWrapper = ({ icon, ...props }: MyIconProps) => (
   <FontAwesomeIcon icon={icon as IconProp} {...props} />
-);
+)
 
-export default FontAwesomeIconWrapper;
+export default FontAwesomeIconWrapper

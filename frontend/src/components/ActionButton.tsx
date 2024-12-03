@@ -40,7 +40,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
       {children}
       <Tooltip id="button-tooltip" style={tooltipStyle} />
     </button>
-  );
-};
+  )
+}
 
-export default ActionButton;
+export default ActionButton

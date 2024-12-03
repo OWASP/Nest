@@ -35,9 +35,9 @@ export default function EntityExampleComponent() {
       return new Promise((resolve) => {
         // Simulating network delay
         setTimeout(() => {
-          resolve(mockData);
-        }, 0);
-      });
+          resolve(mockData)
+        }, 0)
+      })
     }
 
     fetchProjectData(MockProjectData)
@@ -59,7 +59,7 @@ export default function EntityExampleComponent() {
   };
 
   const SubmitButton = {
-    label: "Contribute",
+    label: 'Contribute',
     icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
     onclick: handleButtonClick,
   };

@@ -1,11 +1,11 @@
 export type IconType = {
-  [key: string]: string | number;
-};
+  [key: string]: string | number
+}
 
 export interface Level {
-  color: string;
-  icon: string;
-  level?: string;
+  color: string
+  icon: string
+  level?: string
 }
 
 export type topContributorsType = {

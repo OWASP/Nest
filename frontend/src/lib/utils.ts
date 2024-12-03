@@ -6,13 +6,13 @@ import { IconKeys, Icons, urlMappings } from "../components/data";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-dayjs.extend(relativeTime);
+dayjs.extend(relativeTime)
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
-type projectType = project | IssueType;
+type projectType = project | IssueType
 
 export const getFilteredIcons = (
   project: projectType,
@@ -33,11 +33,11 @@ export const getFilteredIcons = (
         acc[key] = project[key as keyof typeof project] as number;
       }
     }
-    return acc;
-  }, {});
+    return acc
+  }, {})
 
-  return filteredIcons;
-};
+  return filteredIcons
+}
 
 export const handleSocialUrls = (related_urls: string[]) => {
   return related_urls.map((url) => {

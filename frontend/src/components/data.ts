@@ -59,20 +59,20 @@ library.add(
 
 export const Icons = {
   idx_updated_at: {
-    label: "Last update date",
-    icon: "fa-solid fa-arrows-rotate",
+    label: 'Last update date',
+    icon: 'fa-solid fa-arrows-rotate',
   },
   idx_forks_count: {
-    label: "GitHub forks count",
-    icon: "fa-solid fa-code-fork",
+    label: 'GitHub forks count',
+    icon: 'fa-solid fa-code-fork',
   },
   idx_stars_count: {
-    label: "GitHub stars count",
-    icon: "fa-regular fa-star",
+    label: 'GitHub stars count',
+    icon: 'fa-regular fa-star',
   },
   idx_contributors_count: {
-    label: "GitHub contributors count",
-    icon: "fa-regular fa-user",
+    label: 'GitHub contributors count',
+    icon: 'fa-regular fa-user',
   },
   idx_created_at: {
     label: "Creation date",
@@ -107,7 +107,7 @@ export const level = {
     icon: " text-white fa-solid fa-flag",
     level: "Flagship",
   },
-};
+}
 
 export const urlMappings = [
   { key: "youtube.com", title: "YouTube", icon: "fa-brands fa-youtube" },

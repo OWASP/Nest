@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 import App from "../src/App";
 
-test("renders Home page heading and the contribute link", () => {
+test('renders Home page heading and the contribute link', () => {
   render(
     <BrowserRouter
       future={{

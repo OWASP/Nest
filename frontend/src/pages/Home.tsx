@@ -2,4 +2,4 @@ const Home = () => {
   return <div>Hello!</div>;
 };
 
-export default Home;
+export default Home
