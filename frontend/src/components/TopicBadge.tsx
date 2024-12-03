@@ -17,7 +17,6 @@ const TopicBadge = ({
       {topic}
 
       <Tooltip id={`lang-tooltip-${topic}`} style={tooltipStyle} />
-      <Tooltip id={`lang-tooltip-${topic}`} style={tooltipStyle} />
     </div>
   );
 };

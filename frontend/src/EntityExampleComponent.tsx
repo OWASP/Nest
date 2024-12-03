@@ -67,7 +67,6 @@ export default function EntityExampleComponent() {
   return (
     <div className=" w-full min-h-screen flex flex-col justify-normal items-center bg-background text-text p-5 md:p-20 ">
       {/* <ModeToggle className=" fixed top-0 right-0 " /> */}
-      {/* <ModeToggle className=" fixed top-0 right-0 " /> */}
       <div className=" w-full h-fit flex flex-col justify-normal items-center gap-4 ">
         {projectData &&
           projectData.projects.map((project) => {
@@ -85,7 +84,7 @@ export default function EntityExampleComponent() {
             return (
               <Card
                 key={project.objectID}
-                url="/projects/contribute"
+                url="#"
                 title={project.idx_name}
                 summary={project.idx_summary}
                 level={level[`${project.idx_level as keyof typeof level}`]}
