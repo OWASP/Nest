@@ -7,12 +7,16 @@
     --background: #f4f6fc;
     --text: #000;
     --border: #0000002d;
+    --rt-color-white: #222; /* customizing tooltip colors*/
+    --rt-color-dark: #fff; /* customizing tooltip colors*/
   }
 
   .dark {
     --background: #212529;
     --text: #fff;
     --border: #ffffff26;
+    --rt-color-white: #222; /* customizing tooltip colors*/
+    --rt-color-dark: #fff; /* customizing tooltip colors*/
   }
 
   body {

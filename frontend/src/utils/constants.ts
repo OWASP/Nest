@@ -40,7 +40,10 @@ export const footerSections: Section[] = [
   {
     title: 'Resources',
     links: [
-      { text: 'Contribute', href: 'https://nest.owasp.dev/projects/contribute/' },
+      {
+        text: 'Contribute',
+        href: 'https://nest.owasp.dev/projects/contribute/',
+      },
       { text: 'Projects', href: 'https://nest.owasp.dev/projects/' },
       { text: 'Chapters', href: 'https://nest.owasp.dev/chapters/' },
     ],

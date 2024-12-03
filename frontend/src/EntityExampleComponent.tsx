@@ -80,6 +80,7 @@ export default function EntityExampleComponent() {
             return (
               <Card
                 key={project.objectID}
+                url="#"
                 title={project.idx_name}
                 summary={project.idx_summary}
                 level={level[`${project.idx_level as keyof typeof level}`]}

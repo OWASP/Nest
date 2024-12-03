@@ -19,11 +19,12 @@ export type ButtonType = {
   label: string
   icon?: JSX.Element
   onclick?: () => void
-  link?: string
+  url?: string
 }
 
 export interface CardProps {
   title: string
+  url: string
   summary: string
   level?: Level
   icons?: IconType
@@ -38,6 +39,5 @@ export interface CardProps {
 }
 
 export const tooltipStyle = {
-  backgroundColor: 'white',
-  color: 'black',
+  borderRadius: '8px',
 }
