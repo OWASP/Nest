@@ -12,7 +12,7 @@
     "format:check": "prettier --check .",
     "preview": "vite preview",
     "prepare": "husky install && npx husky add .husky/pre-commit '#!/bin/sh\n# .husky/pre-commit\n\necho \"Running pre-commit hook...\"\necho \"Running lint-staged...\"\n\nexport NODE_OPTIONS=\"--max-old-space-size=4096\"\nnpx lint-staged\n# Optional: Run ESLint and Prettier directly for debugging\"\neslint . --fix --config eslint.config.js\nprettier --write .'",
-    "test": "jest",
+    "test": "jest && jest --coverage",
     "test:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
     "watch": "jest --watch"
   },
