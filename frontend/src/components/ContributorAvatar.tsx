@@ -1,7 +1,11 @@
-import { Tooltip } from 'react-tooltip'
-import { tooltipStyle, topContributorsType } from '../lib/constants'
+import { Tooltip } from "react-tooltip";
+import { tooltipStyle, topContributorsType } from "../lib/constants";
 
-const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }) => {
+const ContributorAvatar = ({
+  contributor,
+}: {
+  contributor: topContributorsType;
+}) => {
   return (
     <a
       data-tooltip-id={`avatar-tooltip-${contributor.login}`}
@@ -13,9 +17,12 @@ const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }
         className="grayscale rounded-full hover:grayscale-0 w-[30px] h-[30px] "
         src={contributor.avatar_url}
       />
-      <Tooltip id={`avatar-tooltip-${contributor.login}`} style={tooltipStyle} />
+      <Tooltip
+        id={`avatar-tooltip-${contributor.login}`}
+        style={tooltipStyle}
+      />
     </a>
-  )
-}
+  );
+};
 
-export default ContributorAvatar
+export default ContributorAvatar;

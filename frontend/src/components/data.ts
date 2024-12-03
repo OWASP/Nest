@@ -1,4 +1,4 @@
-import { library } from '@fortawesome/fontawesome-svg-core'
+import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faDiscord,
   faFacebook,
@@ -7,14 +7,14 @@ import {
   faMeetup,
   faSlack,
   faYoutube,
-} from '@fortawesome/free-brands-svg-icons'
+} from "@fortawesome/free-brands-svg-icons";
 import {
   faClock,
   faComment,
   faLightbulb,
   faStar,
   faUser,
-} from '@fortawesome/free-regular-svg-icons'
+} from "@fortawesome/free-regular-svg-icons";
 import {
   faArrowsRotate,
   faCity,
@@ -28,7 +28,7 @@ import {
   faRightToBracket,
   faWandMagicSparkles,
   faX,
-} from '@fortawesome/free-solid-svg-icons'
+} from "@fortawesome/free-solid-svg-icons";
 
 library.add(
   faArrowsRotate,
@@ -54,8 +54,8 @@ library.add(
   faLinkedin,
   faFacebook,
   faDiscord,
-  faSlack
-)
+  faSlack,
+);
 
 export const Icons = {
   idx_updated_at: {
@@ -75,16 +75,16 @@ export const Icons = {
     icon: 'fa-regular fa-user',
   },
   idx_created_at: {
-    label: 'Creation date',
-    icon: 'fa-regular fa-clock',
+    label: "Creation date",
+    icon: "fa-regular fa-clock",
   },
   idx_comments_count: {
-    label: 'Comments count',
-    icon: 'fa-regular fa-comment',
+    label: "Comments count",
+    icon: "fa-regular fa-comment",
   },
-} as const
+} as const;
 
-export type IconKeys = keyof typeof Icons
+export type IconKeys = keyof typeof Icons;
 
 export const level = {
   incubator: {
@@ -110,12 +110,16 @@ export const level = {
 }
 
 export const urlMappings = [
-  { key: 'youtube.com', title: 'YouTube', icon: 'fa-brands fa-youtube' },
-  { key: 'x.com', title: 'X (formerly Twitter)', icon: 'fa-brands fa-x-twitter' },
-  { key: 'google.com', title: 'Google', icon: 'fa-brands fa-google' },
-  { key: 'meetup.com', title: 'Meetup', icon: 'fa-brands fa-meetup' },
-  { key: 'linkedin.com', title: 'LinkedIn', icon: 'fa-brands fa-linkedin' },
-  { key: 'facebook.com', title: 'Facebook', icon: 'fa-brands fa-facebook' },
-  { key: 'discord.com', title: 'Discord', icon: 'fa-brands fa-discord' },
-  { key: 'slack.com', title: 'Slack', icon: 'fa-brands fa-slack' },
-]
+  { key: "youtube.com", title: "YouTube", icon: "fa-brands fa-youtube" },
+  {
+    key: "x.com",
+    title: "X (formerly Twitter)",
+    icon: "fa-brands fa-x-twitter",
+  },
+  { key: "google.com", title: "Google", icon: "fa-brands fa-google" },
+  { key: "meetup.com", title: "Meetup", icon: "fa-brands fa-meetup" },
+  { key: "linkedin.com", title: "LinkedIn", icon: "fa-brands fa-linkedin" },
+  { key: "facebook.com", title: "Facebook", icon: "fa-brands fa-facebook" },
+  { key: "discord.com", title: "Discord", icon: "fa-brands fa-discord" },
+  { key: "slack.com", title: "Slack", icon: "fa-brands fa-slack" },
+];
