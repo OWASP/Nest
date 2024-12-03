@@ -13,14 +13,14 @@ export type topContributorsType = {
   contributions_count: number;
   login: string;
   name: string;
-}
+};
 
 export type ButtonType = {
   label: string;
   icon?: JSX.Element;
   onclick?: () => void;
   url?: string;
-}
+};
 
 export interface CardProps {
   title: string;
@@ -35,10 +35,9 @@ export interface CardProps {
   projectName?: string;
   projectLink?: string;
   languages?: string[];
-  social?: { title: string, icon: string, url: string }[];
+  social?: { title: string; icon: string; url: string }[];
 }
-
 
 export const tooltipStyle = {
   borderRadius: "8px",
-}
+};
