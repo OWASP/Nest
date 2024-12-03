@@ -45,6 +45,25 @@ jobs:
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run npm lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Run npm format
+        working-directory: frontend
+        run: npm run format
+
   code-ql:
     name: CodeQL
     needs:
@@ -59,12 +78,16 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: python
+          languages: javascript-typescript, python
+
+      - name: Install dependencies for frontend
+        working-directory: frontend
+        run: npm install
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:python'
+          category: '/language:js/ts, /language:python'
 
   run-tests:
     name: Run tests
@@ -85,9 +108,9 @@ jobs:
           cache-dependency-path: backend/poetry.lock
           python-version: '3.12'
 
-      - name: Run tests
+      - name: Run backend tests
         run: |
-          make test
+          make test-backend
 
   build-docker-images:
     name: Build Docker Images
