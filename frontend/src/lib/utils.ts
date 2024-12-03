@@ -28,8 +28,8 @@ export const getFilteredIcons = (project: projectType, params: string[]): IconTy
     return acc
   }, {})
 
-  return filteredIcons;
-};
+  return filteredIcons
+}
 
 export const handleSocialUrls = (related_urls: string[]) => {
   return related_urls.map((url) => {

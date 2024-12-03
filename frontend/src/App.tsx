@@ -1,7 +1,7 @@
-import { Routes, Route } from "react-router-dom";
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import { Home, Projects } from "./pages";
+import { Routes, Route } from 'react-router-dom'
+import Footer from './components/Footer'
+import Header from './components/Header'
+import { Home, Projects } from './pages'
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
       </Routes>
       <Footer />
     </main>
-  );
+  )
 }
 
 export default App
