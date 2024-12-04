@@ -71,6 +71,11 @@ jobs:
     permissions:
       security-events: write
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language:
+          - javascript-typescript
+          - python
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -78,16 +83,17 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript-typescript, python
+          languages: ${{ matrix.language }}
 
       - name: Install dependencies for frontend
+        if: matrix.language == 'javascript-typescript'
         working-directory: frontend
         run: npm install
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:js/ts, /language:python'
+          category: '/language:${{ matrix.language }}'
 
   run-tests:
     name: Run tests
@@ -118,6 +124,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/main'
     needs:
+      - code-ql
       - run-tests
     runs-on: ubuntu-latest
     steps:
