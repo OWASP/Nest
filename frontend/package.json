@@ -69,6 +69,9 @@
       "pre-commit": "lint-staged"
     }
   },
+  "engines": {
+    "node": "22"
+  },
   "lint-staged": {
     ".ts": [
       "eslint --fix",
