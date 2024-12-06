@@ -43,6 +43,7 @@
     "@typescript-eslint/parser": "^8.16.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "babel-plugin-transform-import-meta": "^2.2.1",
     "eslint": "^9.15.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -62,7 +63,8 @@
     "ts-node": "^10.9.2",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.11.0",
-    "vite": "^6.0.2"
+    "vite": "^6.0.2",
+    "vite-plugin-environment": "^1.1.3"
   },
   "husky": {
     "hooks": {

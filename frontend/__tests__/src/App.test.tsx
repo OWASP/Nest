@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
-import App from '../src/App'
+import App from '../../src/App'
 
 test('renders Home page heading and the contribute link', () => {
   render(
