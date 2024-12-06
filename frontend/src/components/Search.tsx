@@ -46,7 +46,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeholder, searchEndpoint, onSe
   }, [debouncedQuery, searchEndpoint, onSearchResult])
 
   return (
-    <div className="w-full max-w-md mx-auto mt-8">
+    <div className="w-full max-w-md mx-auto my-8">
       <form onSubmit={(e) => e.preventDefault()} className="relative">
         <input
           type="text"
