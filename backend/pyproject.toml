@@ -38,7 +38,7 @@ pygithub = "^2.5.0"
 python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-sentry-sdk = {extras = ["django"], version = "^2.19.0"}
+sentry-sdk = {extras = ["django"], version = "^2.19.2"}
 slack-bolt = "^1.21.3"
 django-cors-headers = "^4.6.0"
 
