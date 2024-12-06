@@ -15,7 +15,7 @@ export default function Projects() {
     document.title = 'OWASP Projects'
     const fetchApiData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_NEST_API_URL}/owasp/search/projects`)
+        const response = await fetch(`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`)
         const data = await response.json()
         setProjectData(data)
       } catch (error) {
@@ -29,7 +29,7 @@ export default function Projects() {
     <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text p-5 md:p-20">
       <SearchBar
         placeholder="Search for OWASP projects..."
-        searchEndpoint="http://localhost:8000/api/v1/owasp/search/committee"
+        searchEndpoint="http://localhost:8000/api/v1/owasp/search/projects"
         onSearchResult={setProjectData}
       />
 
