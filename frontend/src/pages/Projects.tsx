@@ -4,15 +4,18 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { getFilteredIcons } from '../lib/utils'
 import Card from '../components/Card'
 import { level } from '../components/data'
+import SearchBar from '../components/Search'
+
 
 export default function Projects() {
   const [projectData, setProjectData] = useState<ProjectDataType | null>(null)
+
 
   useEffect(() => {
     document.title = 'OWASP Projects'
     const fetchApiData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`)
+        const response = await fetch(`${import.meta.env.VITE_NEST_API_URL}/owasp/search/projects`)
         const data = await response.json()
         setProjectData(data)
       } catch (error) {
@@ -23,8 +26,14 @@ export default function Projects() {
   }, [])
 
   return (
-    <div className=" w-full min-h-screen flex flex-col justify-normal items-center text-text p-5 md:p-20 ">
-      <div className=" w-full h-fit flex flex-col justify-normal items-center gap-4 ">
+    <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text p-5 md:p-20">
+      <SearchBar
+        placeholder="Search for OWASP projects..."
+        searchEndpoint="http://localhost:8000/api/v1/owasp/search/committee"
+        onSearchResult={setProjectData}
+      />
+
+      <div className="w-full h-fit flex flex-col justify-normal items-center gap-4">
         {projectData &&
           projectData.projects.map((project) => {
             const params: string[] = [
