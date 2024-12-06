@@ -29,7 +29,7 @@ export default function Projects() {
     <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text p-5 md:p-20">
       <SearchBar
         placeholder="Search for OWASP projects..."
-        searchEndpoint="http://localhost:8000/api/v1/owasp/search/projects"
+        searchEndpoint="http://localhost:8000/api/v1/owasp/search/project"
         onSearchResult={setProjectData}
       />
 
