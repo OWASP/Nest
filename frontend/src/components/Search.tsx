@@ -16,7 +16,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeholder, searchEndpoint, onSe
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query)
-    }, 1000) 
+    }, 1000)
 
     return () => {
       clearTimeout(timer)
