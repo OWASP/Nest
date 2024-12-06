@@ -26,7 +26,7 @@ export default function Projects() {
   }, [])
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text p-5 md:p-20">
+    <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text px-5 md:px-20">
       <SearchBar
         placeholder="Search for OWASP projects..."
         searchEndpoint="http://localhost:8000/api/v1/owasp/search/project"
