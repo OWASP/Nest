@@ -1,0 +1,21 @@
+#!/bin/sh
+# .husky/pre-commit
+echo "Running pre-commit hook..."
+echo "Running lint-staged..."
+export NODE_OPTIONS="--max-old-space-size=4096"
+npx lint-staged
+
+# Optional: Run ESLint and Prettier directly for debugging
+eslint . --fix --config eslint.config.js
+prettier --write .
+#!/bin/sh
+# .husky/pre-commit
+
+echo "Running pre-commit hook..."
+echo "Running lint-staged..."
+
+export NODE_OPTIONS="--max-old-space-size=4096"
+npx lint-staged
+# Optional: Run ESLint and Prettier directly for debugging"
+eslint . --fix --config eslint.config.js
+prettier --write .
