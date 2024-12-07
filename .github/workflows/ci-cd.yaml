@@ -45,7 +45,7 @@ jobs:
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
-      - name: Set up Node.js
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -56,13 +56,14 @@ jobs:
         working-directory: frontend
         run: npm install
 
+      - name: Run npm format
+        working-directory: frontend
+        run: npm run format
+
       - name: Run npm lint
         working-directory: frontend
         run: npm run lint
 
-      - name: Run npm format
-        working-directory: frontend
-        run: npm run format
 
   code-ql:
     name: CodeQL
@@ -117,6 +118,21 @@ jobs:
       - name: Run backend tests
         run: |
           make test-backend
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run frontend tests
+        run: |
+          make test-frontend
 
   build-docker-images:
     name: Build Docker Images
