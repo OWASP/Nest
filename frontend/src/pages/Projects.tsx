@@ -17,7 +17,7 @@ export default function Projects() {
         const response = await fetch(`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`)
         const data = await response.json()
         setProjectData(data)
-        setDefaultProjects(data.projects)
+        setDefaultProjects(data)
       } catch (error) {
         console.error(error)
       }
@@ -32,6 +32,7 @@ export default function Projects() {
           placeholder="Search for OWASP projects..."
           searchEndpoint={`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`}
           onSearchResult={setProjectData}
+          defaultResults={defaultProjects}
         />
         {projectData &&
           projectData?.projects?.map((project) => {

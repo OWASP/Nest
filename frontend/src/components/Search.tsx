@@ -1,53 +1,61 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useDebounce } from '../lib/hooks'
+
 
 interface SearchBarProps {
   placeholder: string
   searchEndpoint: string
   onSearchResult: (results: any[]) => void
+  defaultResults: any[]
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ placeholder, searchEndpoint, onSearchResult }) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+  placeholder,
+  searchEndpoint,
+  onSearchResult,
+  defaultResults
+}) => {
   const [query, setQuery] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-  const [debouncedQuery, setDebouncedQuery] = useState<string>(query)
+
+  const debouncedQuery = useDebounce(query, 500)
+
+  const performSearch = async (searchQuery: string) => {
+    console.log("searched query",searchQuery)
+    if (!searchQuery.trim()) {
+      console.log("entered",defaultResults)
+      onSearchResult(defaultResults)
+      return;
+    }
+
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await axios.get(searchEndpoint, {
+        params: { q: searchQuery },
+      })
+      console.log(response.data)
+      onSearchResult(response.data)
+    } catch (err) {
+      setError('Failed to fetch search results. Please try again.')
+      onSearchResult(defaultResults)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(query)
-    }, 1000)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [query])
-
-
-  useEffect(() => {
-    if (debouncedQuery) {
-      const fetchResults = async () => {
-        setLoading(true)
-        setError(null)
-        try {
-          const response = await axios.get(searchEndpoint, {
-            params: { q: debouncedQuery },
-          })
-          onSearchResult(response.data)
-        } catch (err) {
-          setError('Failed to fetch search results. Please try again.')
-        } finally {
-          setLoading(false)
-        }
-      }
-
-      fetchResults()
-    }
-  }, [debouncedQuery, searchEndpoint, onSearchResult])
+    performSearch(debouncedQuery)
+  }, [debouncedQuery])
 
   return (
-    <div className="w-full max-w-md mx-auto my-8">
-      <form onSubmit={(e) => e.preventDefault()} className="relative">
+    <div className="w-full max-w-md mx-auto mt-8">
+      <form onSubmit={(e) => {
+        e.preventDefault()
+        performSearch(query)
+      }} className="relative">
         <input
           type="text"
           value={query}
@@ -83,4 +91,4 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeholder, searchEndpoint, onSe
   )
 }
 
-export default SearchBar;
+export default SearchBar
