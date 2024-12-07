@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
-import { TextEncoder } from 'util';
+import '@testing-library/jest-dom'
+import { TextEncoder } from 'util'
 
-global.TextEncoder = TextEncoder;
+global.TextEncoder = TextEncoder

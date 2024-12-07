@@ -15,6 +15,6 @@ export const mockProjectData = {
       idx_contributors_count: 5,
     },
   ],
-};
+}
 
-export default mockProjectData;
+export default mockProjectData
