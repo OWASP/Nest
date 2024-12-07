@@ -14,7 +14,9 @@ django-shell:
 	@CMD="poetry run python manage.py shell" $(MAKE) exec-backend-command-it
 
 dump-data:
-	@CMD="poetry run python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > data/nest.json
+	@echo "Dumping Nest data"
+	@CMD="poetry run python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json
+	@gzip backend/data/nest.json
 
 enrich-data: github-enrich-issues owasp-enrich-chapters owasp-enrich-committees owasp-enrich-projects
 
@@ -36,6 +38,8 @@ index-data:
 	@CMD="poetry run python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 load-data:
+	@echo "Loading Nest data"
+	@gunzip backend/data/nest.json
 	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
 
 merge-migrations:
