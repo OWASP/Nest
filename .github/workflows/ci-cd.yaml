@@ -130,8 +130,8 @@ jobs:
         run: npm install
 
       - name: Run frontend tests
-        working-directory: frontend
-        run: npm run test
+        run: |
+          make test-frontend
 
   build-docker-images:
     name: Build Docker Images
