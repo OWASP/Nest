@@ -4,9 +4,11 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { getFilteredIcons } from '../lib/utils'
 import Card from '../components/Card'
 import { level } from '../components/data'
+import SearchBar from '../components/Search'
 
 export default function Projects() {
   const [projectData, setProjectData] = useState<ProjectDataType | null>(null)
+  const [defaultProjects, setDefaultProjects] = useState<any[]>([])
 
   useEffect(() => {
     document.title = 'OWASP Projects'
@@ -15,6 +17,7 @@ export default function Projects() {
         const response = await fetch(`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`)
         const data = await response.json()
         setProjectData(data)
+        setDefaultProjects(data)
       } catch (error) {
         console.error(error)
       }
@@ -23,10 +26,16 @@ export default function Projects() {
   }, [])
 
   return (
-    <div className=" w-full min-h-screen flex flex-col justify-normal items-center text-text p-5 md:p-20 ">
-      <div className=" w-full h-fit flex flex-col justify-normal items-center gap-4 ">
+    <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text p-5">
+      <div className="w-full h-fit flex flex-col justify-normal items-center gap-4">
+        <SearchBar
+          placeholder="Search for OWASP projects..."
+          searchEndpoint={`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`}
+          onSearchResult={setProjectData}
+          defaultResults={defaultProjects}
+        />
         {projectData &&
-          projectData.projects.map((project) => {
+          projectData?.projects?.map((project) => {
             const params: string[] = [
               'idx_updated_at',
               'idx_forks_count',
@@ -43,6 +52,7 @@ export default function Projects() {
               icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
               onclick: handleButtonClick,
             }
+
             return (
               <Card
                 key={project.objectID}
