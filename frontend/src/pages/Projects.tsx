@@ -4,7 +4,8 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper';
 import { getFilteredIcons } from '../lib/utils';
 import Card from '../components/Card';
 import { level } from '../components/data';
-import { API_URL } from '../utils/credentials.ts'
+import {API_URL} from "../utils/credentials.ts";
+
 
 
 export default function Projects() {

@@ -1,23 +1,35 @@
-import React from 'react'
-import { render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
-import '@testing-library/jest-dom'
-import App from '../../src/App'
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import App from "../../src/App";
+import '@testing-library/jest-dom';
 
-test('renders Home page heading and the contribute link', () => {
-  render(
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true,
-      }}
-    >
-      <App />
-    </BrowserRouter>
-  )
+jest.mock('../../src/pages', () => ({
+    Home: jest.fn(() => <div data-testid="home-page">Home Page</div>),
+    Projects: jest.fn(() => <div data-testid="projects-page">Projects Page</div>),
+}));
 
-  const contributeLinks = screen.getAllByText(/contribute/i)
-  expect(contributeLinks.length).toBeGreaterThan(0)
-  const firstContributeLink = contributeLinks[0]
-  expect(firstContributeLink).toHaveAttribute('href', '/projects/contribute')
-})
+describe('App Component', () => {
+
+    test('renders Home page by default', () => {
+        render(
+            <MemoryRouter initialEntries={['/']}>
+                <App />
+            </MemoryRouter>
+        );
+
+        const homePage = screen.getByTestId('home-page');
+        expect(homePage).toBeInTheDocument();
+    });
+
+    test('renders Projects page when navigating to /projects', () => {
+        render(
+            <MemoryRouter initialEntries={['/projects']}>
+                <App />
+            </MemoryRouter>
+        );
+
+        const projectsPage = screen.getByTestId('projects-page');
+        expect(projectsPage).toBeInTheDocument();
+    });
+});

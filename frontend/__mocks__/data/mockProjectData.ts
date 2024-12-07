@@ -1,4 +1,4 @@
-const mockProjectData = {
+export const mockProjectData = {
   projects: [
     {
       objectID: '1',

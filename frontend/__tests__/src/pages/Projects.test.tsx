@@ -2,16 +2,13 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Projects } from '../../../src/pages'
-import mockProjectData from '../__mocks__/mockProjectData'
+import mockProjectData from '../../../__mocks__/data/mockProjectData'
 
 process.env.VITE_NEST_API_URL = 'https://mock-api.com';
-
 global.fetch = jest.fn();
-
 
 describe('Projects Component', () => {
     beforeEach(() => {
-        // Mock the fetch response
         (fetch as jest.Mock).mockResolvedValueOnce({
             json: async () => mockProjectData,
         });
