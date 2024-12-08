@@ -83,7 +83,7 @@ const Card = ({
           {leaders &&
               leaders.map((leader, index) => (
                   <span key={`${leader}-${index}`} className="text-gray-600 dark:text-gray-300">
-              {index !== leaders.length - 1 ? `${leader},` : `${leader}`}
+              {index !== leaders.length - 1 ? `${leader}, ` : `${leader}`}
             </span>
               ))}
         </h2>
