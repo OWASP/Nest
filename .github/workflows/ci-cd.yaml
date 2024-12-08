@@ -92,7 +92,7 @@ jobs:
         run: |
           node -v
           npm install
-          
+
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
