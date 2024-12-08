@@ -89,7 +89,10 @@ jobs:
       - name: Install dependencies for frontend
         if: matrix.language == 'javascript-typescript'
         working-directory: frontend
-        run: npm install
+        run: |
+          node -v
+          npm install
+          
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
