@@ -16,7 +16,7 @@ export default function DisplayIcon({
     <div
       data-tooltip-id={`icon-tooltip-${item}`}
       data-tooltip-content={`${Icons[item as keyof typeof Icons]?.label}`}
-      className={` flex flex-col justify-center items-center gap-1 px-4 border-r border-l border-b border-border ${idx == 0 ? 'rounded-bl-lg' : ''} ${idx == Object.keys(icons).length - 1 ? 'rounded-br-lg' : ''}`}
+      className={` flex flex-col justify-center items-center gap-1 px-4 border-l border-b border-border ${idx == 0 ? 'rounded-bl-lg' : ''}`}
     >
       <span className=" text-gray-600 dark:text-gray-300 ">{icons[item]}</span>
       <span>

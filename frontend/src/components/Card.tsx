@@ -44,7 +44,7 @@ const Card = ({
   }
 
   return (
-    <div className=" w-full md:max-w-6xl h-fit flex flex-col justify-normal items-start gap-4 md:gap-2 pt-0 px-6 py-6 border border-border rounded-md ">
+    <div className=" w-full md:max-w-6xl h-fit flex flex-col justify-normal items-start gap-4 md:gap-2 pt-0 pl-6 py-6 border border-border rounded-md ">
       <div className=" w-full flex justify-between items-center flex-wrap gap-2 ">
         <div className=" flex justify-center items-center gap-2 mt-4">
           {level && (
@@ -76,20 +76,20 @@ const Card = ({
       <p className=" mr-8 mt-2 text-gray-600 dark:text-gray-300 ">{summary}</p>
       <h2>
         {leaders && (
-          <span className=" font-bold text-gray-600 dark:text-gray-300 ">
+          <span className=" font-semibold text-gray-600 dark:text-gray-300 ">
             {' '}
             {leaders.length > 1 ? 'Leaders: ' : 'Leader: '}{' '}
           </span>
         )}
         {leaders &&
           leaders.map((leader, index) => (
-            <span key={leader} className=" font-semibold text-gray-600 dark:text-gray-300">
+            <span key={leader} className=" text-gray-600 dark:text-gray-300">
               {' '}
               {index != leaders.length - 1 ? `${leader},` : `${leader}`}{' '}
             </span>
           ))}
       </h2>
-      <div className=" w-full flex justify-normal items-center gap-1 ">
+      <div className=" w-full flex justify-normal items-center gap-1 pr-6 ">
         {topContributors &&
           topContributors.map((contributor) => (
             <ContributorAvatar key={contributor.login} contributor={contributor} />
@@ -101,7 +101,7 @@ const Card = ({
           {projectName}
         </a>
       )}
-      <div className=" w-full flex md:flex-row flex-col justify-between items-center ">
+      <div className=" w-full flex md:flex-row flex-col justify-between items-center pr-6">
         <div className=" flex justify-start items-start pt-3 max-w-4xl">
           <div className=" flex justify-normal items-center gap-2 flex-wrap ">
             {languages &&
