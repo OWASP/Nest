@@ -8,12 +8,12 @@ import { API_URL } from '../utils/credentials.ts'
 
 export default function Projects() {
   const [projectData, setProjectData] = useState<ProjectDataType | null>(null)
+
   useEffect(() => {
     document.title = 'OWASP Projects'
     const fetchApiData = async () => {
       try {
         const response = await fetch(`${API_URL}/owasp/search/project`)
-
         const data = await response.json()
         setProjectData(data)
       } catch (error) {
@@ -44,6 +44,7 @@ export default function Projects() {
                   icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
                   onclick: handleButtonClick,
                 }
+
                 return (
                     <Card
                         key={project.objectID || `project-${index}`}
