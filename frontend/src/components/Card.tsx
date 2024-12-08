@@ -11,19 +11,19 @@ import { cn } from '../lib/utils'
 import { useState } from 'react'
 
 const Card = ({
-title,
-url,
-summary,
-level,
-icons,
-leaders,
-topContributors,
-topics,
-button,
-projectName,
-projectLink,
-languages,
-social,
+ title,
+ url,
+ summary,
+ level,
+ icons,
+ leaders,
+ topContributors,
+ topics,
+ button,
+ projectName,
+ projectLink,
+ languages,
+ social,
 }: CardProps) => {
   const [visibleLanguages, setVisibleLanguages] = useState(18)
   const [visibleTopics, setVisibleTopics] = useState(18)
