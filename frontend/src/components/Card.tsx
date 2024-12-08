@@ -11,20 +11,20 @@ import { cn } from '../lib/utils'
 import { useState } from 'react'
 
 const Card = ({
-                title,
-                url,
-                summary,
-                level,
-                icons,
-                leaders,
-                topContributors,
-                topics,
-                button,
-                projectName,
-                projectLink,
-                languages,
-                social,
-              }: CardProps) => {
+title,
+url,
+summary,
+level,
+icons,
+leaders,
+topContributors,
+topics,
+button,
+projectName,
+projectLink,
+languages,
+social,
+}: CardProps) => {
   const [visibleLanguages, setVisibleLanguages] = useState(18)
   const [visibleTopics, setVisibleTopics] = useState(18)
 
@@ -44,18 +44,18 @@ const Card = ({
   }
 
   return (
-      <div className=" w-full md:max-w-6xl  h-fit flex flex-col justify-normal items-start gap-4 md:gap-2 p-4 px-6 border border-border rounded-md ">
-        <div className=" w-full flex justify-between items-center flex-wrap gap-2 ">
-          <div className=" flex justify-center items-center gap-2 ">
-            {level && (
-                <span
-                    data-tooltip-id="level-tooltip"
-                    data-tooltip-content={`${level.level} project`}
-                    className={cn(
-                        'text-xs rounded-full w-8 h-8 flex justify-center items-center shadow '
-                    )}
-                    style={{ backgroundColor: level.color }}
-                >
+  <div className=" w-full md:max-w-6xl  h-fit flex flex-col justify-normal items-start gap-4 md:gap-2 p-4 px-6 border border-border rounded-md ">
+    <div className=" w-full flex justify-between items-center flex-wrap gap-2 ">
+      <div className=" flex justify-center items-center gap-2 ">
+        {level && (
+            <span
+                data-tooltip-id="level-tooltip"
+                data-tooltip-content={`${level.level} project`}
+                className={cn(
+                    'text-xs rounded-full w-8 h-8 flex justify-center items-center shadow '
+                )}
+                style={{ backgroundColor: level.color }}
+            >
               <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
             )}
