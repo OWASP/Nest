@@ -4,5 +4,6 @@
 
 import Home from './Home'
 import Projects from './Projects'
+import Committees from './Committees'
 
-export { Home, Projects }
+export { Home, Projects, Committees }
