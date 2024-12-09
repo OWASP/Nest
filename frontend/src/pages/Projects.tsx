@@ -36,7 +36,7 @@ export default function Projects() {
           defaultResults={defaultProjects}
         />
         {projectData &&
-          projectData?.projects?.map((project) => {
+          projectData?.projects?.map((project,index) => {
             const params: string[] = [
               'idx_updated_at',
               'idx_forks_count',
