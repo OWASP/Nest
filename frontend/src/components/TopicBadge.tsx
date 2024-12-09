@@ -14,7 +14,7 @@ const TopicBadge = ({
     <div
       data-tooltip-id={`lang-tooltip-${topic}`}
       data-tooltip-content={tooltipLabel}
-      className={` p-1 px-2 text-xs font-bold rounded-md bg-[#6C757D] text-white ${type == 'language' ? 'bg-[#868E96]' : 'bg-[#6C757D]'}`}
+      className={`rounded-md bg-[#6C757D] p-1 px-2 text-xs font-bold text-white ${type == 'language' ? 'bg-[#868E96]' : 'bg-[#6C757D]'}`}
     >
       {topic}
 

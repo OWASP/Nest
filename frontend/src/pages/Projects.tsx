@@ -24,8 +24,8 @@ export default function Projects() {
   }, [])
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text p-5 md:p-20">
-      <div className="w-full h-fit flex flex-col justify-normal items-center gap-4">
+    <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text md:p-20">
+      <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
         {projectData &&
           projectData.projects.map((project, index) => {
             const params: string[] = [

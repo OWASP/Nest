@@ -16,9 +16,9 @@ export default function DisplayIcon({
     <div
       data-tooltip-id={`icon-tooltip-${item}`}
       data-tooltip-content={`${Icons[item as keyof typeof Icons]?.label}`}
-      className={` flex flex-col justify-center pb-1 items-center gap-1 px-4 border-l border-b border-border ${idx == 0 ? 'rounded-bl-md' : ''}`}
+      className={`flex flex-col items-center justify-center gap-1 border-b border-l border-border px-4 pb-1 ${idx == 0 ? 'rounded-bl-md' : ''}`}
     >
-      <span className=" text-gray-600 dark:text-gray-300 ">{icons[item]}</span>
+      <span className="text-gray-600 dark:text-gray-300">{icons[item]}</span>
       <span>
         <FontAwesomeIconWrapper
           className="text-gray-600 dark:text-gray-300"

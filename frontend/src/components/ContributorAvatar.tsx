@@ -10,7 +10,7 @@ const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }
       target="_blank"
     >
       <img
-        className="grayscale rounded-full hover:grayscale-0 w-[30px] h-[30px] "
+        className="h-[30px] w-[30px] rounded-full grayscale hover:grayscale-0"
         src={contributor.avatar_url}
       />
       <Tooltip id={`avatar-tooltip-${contributor.login}`} style={tooltipStyle} />

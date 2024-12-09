@@ -44,25 +44,25 @@ const Card = ({
   }
 
   return (
-    <div className="w-full md:max-w-6xl h-fit flex flex-col justify-normal items-start gap-4 md:gap-2 pt-0 pl-6 py-6 border border-border rounded-md">
-      <div className="w-full flex justify-between items-center flex-wrap gap-2">
-        <div className="flex justify-center items-center gap-2 mt-4">
+    <div className="flex h-fit w-full flex-col items-start justify-normal gap-4 rounded-md border border-border py-6 pl-6 pt-0 md:max-w-6xl md:gap-2">
+      <div className="flex w-full flex-wrap items-center justify-between gap-2">
+        <div className="mt-4 flex items-center justify-center gap-2">
           {level && (
             <span
               data-tooltip-id="level-tooltip"
               data-tooltip-content={`${level.level} project`}
-              className={cn('text-xs rounded-full w-8 h-8 flex justify-center items-center shadow')}
+              className={cn('flex h-8 w-8 items-center justify-center rounded-full text-xs shadow')}
               style={{ backgroundColor: level.color }}
             >
               <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
           )}
           <a href={url} target="_blank" rel="noopener noreferrer">
-            <h1 className="text-2xl font-semibold dark:text-sky-600 pl-2">{title}</h1>
+            <h1 className="pl-2 text-2xl font-semibold dark:text-sky-600">{title}</h1>
           </a>
         </div>
 
-        <div className="min-w-[30%] flex justify-end items-center flex-wrap">
+        <div className="flex min-w-[30%] flex-wrap items-center justify-end">
           {icons &&
             Object.keys(Icons).map((key, index) =>
               icons[key] !== undefined ? (
@@ -85,9 +85,9 @@ const Card = ({
             </span>
           ))}
       </h2>
-      <div className="w-full flex justify-between">
-        <div className="flex-auto justify-normal align-content-center">
-          <div className=" w-full flex justify-normal items-center gap-1 pr-6 ">
+      <div className="flex w-full justify-between">
+        <div className="align-content-center flex-auto justify-normal">
+          <div className="flex w-full items-center justify-normal gap-1 pr-6">
             {topContributors &&
               topContributors.map((contributor, index) => (
                 <ContributorAvatar
@@ -102,13 +102,10 @@ const Card = ({
             </a>
           )}
           {(languages || (topics && topics.length > 0) || (social && social.length > 0)) && (
-            <div className=" w-full flex md:flex-row flex-col justify-between items-center pr-6">
-              <div className=" flex justify-start items-start pt-3 max-w-4xl">
+            <div className="flex w-full flex-col items-center justify-between pr-6 md:flex-row">
+              <div className="flex max-w-4xl items-start justify-start pt-3">
                 {languages && (
-                  <div
-                    id="languages"
-                    className=" flex justify-normal items-center gap-2 flex-wrap "
-                  >
+                  <div id="languages" className="flex flex-wrap items-center justify-normal gap-2">
                     {languages &&
                       languages
                         .slice(0, visibleLanguages)
@@ -123,7 +120,7 @@ const Card = ({
                     {languages && languages.length > 18 && (
                       <button
                         onClick={loadMoreLanguages}
-                        className=" text-gray-600 dark:text-gray-300 "
+                        className="text-gray-600 dark:text-gray-300"
                       >
                         {toggleLanguages ? 'Show more' : 'Show less'}
                       </button>
@@ -131,7 +128,7 @@ const Card = ({
                   </div>
                 )}
                 {topics && topics.length > 0 && (
-                  <div id="topics" className=" flex justify-normal items-center gap-2 flex-wrap ">
+                  <div id="topics" className="flex flex-wrap items-center justify-normal gap-2">
                     {topics &&
                       topics
                         .slice(0, visibleTopics)
@@ -145,17 +142,14 @@ const Card = ({
                         ))}
 
                     {topics && topics.length > 18 && (
-                      <button
-                        onClick={loadMoreTopics}
-                        className=" text-gray-600 dark:text-gray-300 "
-                      >
+                      <button onClick={loadMoreTopics} className="text-gray-600 dark:text-gray-300">
                         {toggleTopics ? 'Show more' : 'Show less'}
                       </button>
                     )}
                   </div>
                 )}
                 {social && (
-                  <div id="social" className=" flex justify-normal items-center gap-2 my-2 ">
+                  <div id="social" className="my-2 flex items-center justify-normal gap-2">
                     {social &&
                       social.map((item, index) => (
                         <a
@@ -163,7 +157,7 @@ const Card = ({
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className=" flex justify-center items-center gap-1 "
+                          className="flex items-center justify-center gap-1"
                         >
                           <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
                         </a>
@@ -174,7 +168,7 @@ const Card = ({
             </div>
           )}
         </div>
-        <div className="flex-2 justify-items-center content-end w-36 pr-6">
+        <div className="flex-2 w-36 content-end justify-items-center pr-6">
           <ActionButton
             tooltipLabel={`Contribute to ${title}`}
             url={button.url}

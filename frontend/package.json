@@ -58,6 +58,7 @@
     "open": "^10.1.0",
     "postcss": "^8.4.47",
     "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
     "tailwindcss": "^3.4.14",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
