@@ -85,83 +85,108 @@ const Card = ({
             </span>
           ))}
       </h2>
-      <div className="w-full flex justify-normal items-center gap-1 pr-6">
-        {topContributors &&
-          topContributors.map((contributor, index) => (
-            <ContributorAvatar
-              key={contributor.login || `contributor-${index}`}
-              contributor={contributor}
-            />
-          ))}
-      </div>
-      {projectName && (
-        <a href={projectLink} target="_blank" rel="noopener noreferrer">
-          {projectName}
-        </a>
-      )}
-      <div className=" w-full flex md:flex-row flex-col justify-between items-center pr-6 ">
-        <div className="flex justify-start items-start pt-3 max-w-4xl">
-          <div className="flex justify-normal items-center gap-2 flex-wrap">
-            {languages &&
-              languages
-                .slice(0, visibleLanguages)
-                .map((topic, index) => (
-                  <TopicBadge
-                    key={topic || `language-${index}`}
-                    topic={topic}
-                    tooltipLabel={`This repository uses ${topic}`}
-                    type="language"
-                  />
-                ))}
-            {languages && languages.length > 18 && (
-              <button onClick={loadMoreLanguages} className="text-gray-600 dark:text-gray-300">
-                {toggleLanguages ? 'Show more' : 'Show less'}
-              </button>
-            )}
-          </div>
-          <div className="flex justify-normal items-center gap-2 flex-wrap">
-            {topics &&
-              topics
-                .slice(0, visibleTopics)
-                .map((topic, index) => (
-                  <TopicBadge
-                    key={topic || `topic-${index}`}
-                    topic={topic}
-                    tooltipLabel={`This project is labeled as "${topic}"`}
-                    type="topic"
-                  />
-                ))}
-
-            {topics && topics.length > 18 && (
-              <button onClick={loadMoreTopics} className="text-gray-600 dark:text-gray-300">
-                {toggleTopics ? 'Show more' : 'Show less'}
-              </button>
-            )}
-          </div>
-          <div className="flex justify-normal items-center gap-2 my-2">
-            {social &&
-              social.map((item, index) => (
-                <a
-                  key={item.title || `social-${index}`}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex justify-center items-center gap-1"
-                >
-                  <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
-                </a>
+      <div className="w-full flex justify-between">
+        <div className="flex-auto justify-normal align-content-center">
+          <div className=" w-full flex justify-normal items-center gap-1 pr-6 ">
+            {topContributors &&
+              topContributors.map((contributor, index) => (
+                <ContributorAvatar
+                  key={contributor.login || `contributor-${index}`}
+                  contributor={contributor}
+                />
               ))}
           </div>
+          {projectName && (
+            <a href={projectLink} target="_blank" rel="noopener noreferrer">
+              {' '}
+              {projectName}
+            </a>
+          )}
+          {(languages || (topics && topics.length > 0) || (social && social.length > 0)) && (
+            <div className=" w-full flex md:flex-row flex-col justify-between items-center pr-6">
+              <div className=" flex justify-start items-start pt-3 max-w-4xl">
+                {languages && (
+                  <div
+                    id="languages"
+                    className=" flex justify-normal items-center gap-2 flex-wrap "
+                  >
+                    {languages &&
+                      languages
+                        .slice(0, visibleLanguages)
+                        .map((topic, index) => (
+                          <TopicBadge
+                            key={topic || `language-${index}`}
+                            topic={topic}
+                            tooltipLabel={`This repository uses ${topic}`}
+                            type="language"
+                          />
+                        ))}
+                    {languages && languages.length > 18 && (
+                      <button
+                        onClick={loadMoreLanguages}
+                        className=" text-gray-600 dark:text-gray-300 "
+                      >
+                        {toggleLanguages ? 'Show more' : 'Show less'}
+                      </button>
+                    )}
+                  </div>
+                )}
+                {topics && topics.length > 0 && (
+                  <div id="topics" className=" flex justify-normal items-center gap-2 flex-wrap ">
+                    {topics &&
+                      topics
+                        .slice(0, visibleTopics)
+                        .map((topic, index) => (
+                          <TopicBadge
+                            key={topic || `topic-${index}`}
+                            topic={topic}
+                            tooltipLabel={`This project is labeled as "${topic}"`}
+                            type="topic"
+                          />
+                        ))}
+
+                    {topics && topics.length > 18 && (
+                      <button
+                        onClick={loadMoreTopics}
+                        className=" text-gray-600 dark:text-gray-300 "
+                      >
+                        {toggleTopics ? 'Show more' : 'Show less'}
+                      </button>
+                    )}
+                  </div>
+                )}
+                {social && (
+                  <div id="social" className=" flex justify-normal items-center gap-2 my-2 ">
+                    {social &&
+                      social.map((item, index) => (
+                        <a
+                          key={item.title || `social-${index}`}
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className=" flex justify-center items-center gap-1 "
+                        >
+                          <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
+                        </a>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-        <ActionButton
-          tooltipLabel={`Contribute to ${title}`}
-          url={button.url}
-          onClick={button.onclick}
-        >
-          {button.icon}
-          {button.label}
-        </ActionButton>
+        <div className="flex-2 justify-items-center content-end w-36 pr-6">
+          <ActionButton
+            tooltipLabel={`Contribute to ${title}`}
+            url={button.url}
+            onClick={button.onclick}
+          >
+            {button.icon}
+            {button.label}
+          </ActionButton>
+        </div>
       </div>
+
       <Tooltip id="level-tooltip" style={tooltipStyle} />
     </div>
   )
