@@ -48,6 +48,17 @@ class ProjectIndexMixin(GenericEntityMixin):
         return join_values(fields=(o.name for o in self.organizations.all()))
 
     @property
+    def idx_repository_descriptions(self):
+        """Return repository descriptions for indexing.
+
+        Limit to non-empty descriptions of first 5 most recently updated repositories.
+        """
+        return [
+            repository.description
+            for repository in self.repositories.exclude(description="").order_by("-updated_at")[:5]
+        ]
+
+    @property
     def idx_stars_count(self):
         """Return stars count for indexing."""
         return self.stars_count
