@@ -30,9 +30,6 @@ export default function Committees() {
               const params: string[] = ["idx_updated_at"]
               const filteredIcons = getFilteredIcons(project, params)
               const formattedUrls = handleSocialUrls(project.idx_related_urls)
-              const handleButtonClick = () => {
-                window.open(`/projects/contribute?q=${project.idx_name}`, '_blank')
-              }
 
               const SubmitButton = {
                 label: 'Learn More',
@@ -51,6 +48,7 @@ export default function Committees() {
                   topContributors={project.idx_top_contributors}
                   button={SubmitButton}
                   social={formattedUrls}
+                  tooltipLabel={`Learn more about ${project.idx_name}`}
                 />
               )
             })}
