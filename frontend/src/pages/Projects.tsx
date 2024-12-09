@@ -57,6 +57,7 @@ export default function Projects() {
                 topContributors={project.idx_top_contributors}
                 topics={project.idx_topics}
                 button={SubmitButton}
+                tooltipLabel={`Contribute to ${project.idx_name}`}
               />
             )
           })}
