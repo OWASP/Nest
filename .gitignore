@@ -1,6 +1,8 @@
 __pycache__
+./frontend/coverage
 .bash_history
 .cache
+.coverage
 .coverage
 .env
 .idea
@@ -12,6 +14,5 @@ __pycache__
 .vscode
 *.code-workspace
 /volumes
+backend/data/nest.json
 staticfiles
-.coverage
-./frontend/coverage

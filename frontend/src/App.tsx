@@ -5,7 +5,7 @@ import { Home, Projects } from './pages'
 
 function App() {
   return (
-    <main className=" flex flex-col justify-start w-full min-h-screen m-0 ">
+    <main className="m-0 flex min-h-screen w-full flex-col justify-start">
       <Header />
       <Routes>
         <Route path="/" element={<Home />}></Route>

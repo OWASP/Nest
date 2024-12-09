@@ -11,7 +11,7 @@ interface ActionButtonProps {
 
 const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel, children }) => {
   const baseStyles =
-    'flex justify-center items-center gap-2 p-1 px-2 rounded-md bg-transparent hover:bg-[#0D6EFD] text-[#0D6EFD] hover:text-white dark:text-white border border-[#0D6EFD] dark:border-0 '
+    'flex justify-center self-end items-center gap-2 p-1 px-2 rounded-md bg-transparent hover:bg-[#0D6EFD] text-[#0D6EFD] hover:text-white border border-[#0D6EFD] dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-600'
 
   return url ? (
     <a

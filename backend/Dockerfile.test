@@ -9,6 +9,7 @@ RUN groupadd owasp && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/* && \
     python -m pip install --no-cache-dir poetry
 
+ENV FORCE_COLOR=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp

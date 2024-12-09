@@ -33,8 +33,8 @@ Follow these steps to set up the OWASP Nest application:
      git clone https://github.com/owasp/nest
      ```
 
-1. **Create Environment File**:
-   - Navigate to the `backend` directory and create a local environment file:
+1. **Create Environment Files**:
+   - Create a local environment file in the `backend` directory:
 
      ```bash
      touch backend/.env/local
@@ -44,6 +44,12 @@ Follow these steps to set up the OWASP Nest application:
 
      ```bash
      cp backend/.env/template backend/.env/local
+     ```
+
+   - Create a local environment file in the `frontend` directory:
+
+     ```bash
+     cp frontend/.env.example frontend/.env
      ```
 
 1. **Configure Environment Variables**:
@@ -120,44 +126,3 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
    ```bash
    make sync
    ```
-
-## Frontend Setup
-
-1. **Ensure Node.js Version**:
-    - The project now requires **Node.js 22**. Ensure you have Node.js 22 installed. You can check your version with:
-      ```bash
-      node -v
-      ```
-    - If you need to install Node.js 22, use a version manager like `nvm`:
-      ```bash
-      nvm install 22
-      nvm use 22
-      ```
-
-1. **Install Frontend Dependencies**:
-    - Navigate to the `frontend` directory and install the dependencies:
-
-      ```bash
-      cd frontend
-      npm install
-      ```
-
-1. **Run the Frontend Application**:
-    - Start the Vite development server:
-
-      ```bash
-      npm run dev
-      ```
-
-    - The application will be available at [http://localhost:3000](http://localhost:3000).
-
-## Linting and Formatting Setup
-
-To ensure code quality, we utilize ESLint and Prettier with Husky for pre-commit hooks.
-
-### Installing Dependencies
-
-Make sure you have the necessary dependencies installed:
-
-```bash
-npm install --save-dev eslint prettier husky lint-staged eslint-plugin-react eslint-plugin-react-hooks @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-config-prettier eslint-plugin-prettier

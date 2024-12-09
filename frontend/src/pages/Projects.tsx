@@ -5,6 +5,7 @@ import { getFilteredIcons } from '../lib/utils'
 import Card from '../components/Card'
 import { level } from '../components/data'
 import SearchBar from '../components/Search'
+import { API_URL } from '../utils/credentials.ts'
 
 export default function Projects() {
   const [projectData, setProjectData] = useState<ProjectDataType | null>(null)
@@ -14,7 +15,7 @@ export default function Projects() {
     document.title = 'OWASP Projects'
     const fetchApiData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`)
+        const response = await fetch(`${API_URL}/owasp/search/project`)
         const data = await response.json()
         setProjectData(data)
         setDefaultProjects(data)
@@ -55,7 +56,7 @@ export default function Projects() {
 
             return (
               <Card
-                key={project.objectID}
+                key={project.objectID || `project-${index}`}
                 title={project.idx_name}
                 url={project.idx_url}
                 summary={project.idx_summary}
