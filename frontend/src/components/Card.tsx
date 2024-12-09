@@ -98,7 +98,6 @@ const Card = ({
           </div>
           {projectName && (
             <a href={projectLink} target="_blank" rel="noopener noreferrer">
-              {' '}
               {projectName}
             </a>
           )}
@@ -186,7 +185,6 @@ const Card = ({
           </ActionButton>
         </div>
       </div>
-
       <Tooltip id="level-tooltip" style={tooltipStyle} />
     </div>
   )
