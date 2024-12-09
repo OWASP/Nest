@@ -1,5 +1,8 @@
 exec-frontend-command:
-	@docker exec -i nest-frontend $(CMD)
+	@docker exec -t nest-frontend $(CMD)
+
+exec-frontend-command-it:
+	@docker exec -it nest-frontend $(CMD)
 
 format-frontend-code:
 	@CMD="npm run format" $(MAKE) exec-frontend-command
@@ -7,5 +10,9 @@ format-frontend-code:
 lint-frontend-code:
 	@CMD="npm run lint" $(MAKE) exec-frontend-command
 
+npm-update:
+	@CMD="npm update" $(MAKE) exec-frontend-command-it
+
 test-frontend:
-	@cd frontend && npm run test
+	@docker build -f frontend/Dockerfile.test frontend -t nest-frontend-test
+	@docker run nest-frontend-test npm run test
