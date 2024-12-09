@@ -7,6 +7,28 @@ Follow these steps to set up the OWASP Nest application:
 1. **Clone the Repository**:
    - Clone the repository code from GitHub using the following command:
 
+1. Run `make setup` to create a super user.
+1. Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+1. Open `backend/.env/local` and update `GITHUB_TOKEN` value.
+1. Now you should be able to run `make sync` command that updates your local DB data.
+
+
+  **_Testing_:**
+
+      1. Test using this set of commands:
+
+         ```
+         npm install
+         npm run test
+         ```
+
+      2. Debug tests in browser
+
+         You can see the output of failing tests in broswer by running `jest-preview` package before running your tests
+
+         ```
+         npm install
+         npm run watch
      ```bash
      git clone https://github.com/owasp/nest
      ```
