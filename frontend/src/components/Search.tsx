@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useDebounce } from '../lib/hooks'
+import { ProjectDataType } from '../lib/types'
 
 
 interface SearchBarProps {
   placeholder: string
   searchEndpoint: string
-  onSearchResult: (results: any[]) => void
-  defaultResults: any[]
+  onSearchResult: (results: ProjectDataType | null) => void
+  defaultResults: ProjectDataType | null
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({

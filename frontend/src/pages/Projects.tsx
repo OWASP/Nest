@@ -9,7 +9,7 @@ import { API_URL } from '../utils/credentials.ts'
 
 export default function Projects() {
   const [projectData, setProjectData] = useState<ProjectDataType | null>(null)
-  const [defaultProjects, setDefaultProjects] = useState<any[]>([])
+  const [defaultProjects, setDefaultProjects] = useState<ProjectDataType | null>(null)
 
   useEffect(() => {
     document.title = 'OWASP Projects'
