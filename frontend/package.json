@@ -11,7 +11,7 @@
     "lint": "eslint . --config eslint.config.js --fix",
     "lint:check": "eslint . --config eslint.config.js",
     "preview": "vite preview",
-    "test": "jest && jest --coverage",
+    "test": "jest --coverage",
     "test:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
     "watch": "jest --watch"
   },
