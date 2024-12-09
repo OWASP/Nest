@@ -31,7 +31,7 @@ export default function Projects() {
       <div className="w-full h-fit flex flex-col justify-normal items-center gap-4">
         <SearchBar
           placeholder="Search for OWASP projects..."
-          searchEndpoint={`${import.meta.env.VITE_NEST_API_URL}/owasp/search/project`}
+          searchEndpoint={`${API_URL}/owasp/search/project`}
           onSearchResult={setProjectData}
           defaultResults={defaultProjects}
         />
