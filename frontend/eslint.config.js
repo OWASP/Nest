@@ -1,36 +1,41 @@
 /** @type {import('eslint').Linter.FlatConfig} */
 
 import js from '@eslint/js'
-import globals from 'globals'
-import react from 'eslint-plugin-react'
-import reactHooks from 'eslint-plugin-react-hooks'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
-import prettier from 'eslint-plugin-prettier'
 import prettierConfig from 'eslint-config-prettier'
+import importPlugin from 'eslint-plugin-import'
+import jest from 'eslint-plugin-jest'
+import prettier from 'eslint-plugin-prettier'
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
+import globals from 'globals'
 
 export default [
   {
-    ignores: ['node_modules', 'build', 'dist', '.cache', '**/!(frontend)/**'],
+    ignores: ['node_modules', 'build', 'dist', '.cache'],
   },
   js.configs.recommended,
   {
-    files: ['frontend/**/*.{js,jsx,ts,tsx}'],
+    files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       parser: typescriptParser,
-      ecmaVersion: 2020,
+      ecmaVersion: 2023,
       sourceType: 'module',
       globals: {
         ...globals.browser,
+        ...globals.es2023,
+        ...globals.jest,
         ...globals.node,
-        ...globals.es2020,
       },
     },
     plugins: {
-      react,
-      'react-hooks': reactHooks,
       '@typescript-eslint': typescriptEslint,
+      'react-hooks': reactHooks,
+      import: importPlugin,
+      jest,
       prettier,
+      react,
     },
     settings: {
       react: {
@@ -38,18 +43,28 @@ export default [
       },
     },
     rules: {
-      'prettier/prettier': ['error'],
+      ...jest.configs.recommended.rules,
       ...prettierConfig.rules,
-      'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-unused-expressions': 'error',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'prettier/prettier': ['error'],
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/rules-of-hooks': 'error',
+      'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'jest/no-mocks-import': 'off', // TODO(arkid15r): remove after fixing the issue.
+      'import/order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always',
+        },
+      ],
     },
   },
 ]
