@@ -33,7 +33,7 @@ export default function Committees() {
 
               const SubmitButton = {
                 label: 'Learn More',
-                icon: <FontAwesomeIconWrapper icon="fa-solid fa-code" />,
+                icon: <FontAwesomeIconWrapper icon="fa-solid fa-people-group" />,
                 url: project.idx_url,
               }
 
