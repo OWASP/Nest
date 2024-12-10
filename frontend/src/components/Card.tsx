@@ -25,6 +25,7 @@ const Card = ({
   projectLink,
   languages,
   social,
+  tooltipLabel,
 }: CardProps) => {
   const [visibleLanguages, setVisibleLanguages] = useState(18)
   const [visibleTopics, setVisibleTopics] = useState(18)
@@ -171,7 +172,7 @@ const Card = ({
         </div>
         <div className="flex-2 w-36 content-end justify-items-center pr-6">
           <ActionButton
-            tooltipLabel={`Contribute to ${title}`}
+            tooltipLabel={tooltipLabel}
             url={button.url}
             onClick={button.onclick}
           >
