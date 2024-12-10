@@ -17,7 +17,7 @@ COPY jest.config.ts jest.config.ts
 COPY package-lock.json package-lock.json
 COPY package.json package.json
 COPY public public
-COPY setupTests.ts setupTests.ts
+COPY jest.setup.ts jest.setup.ts
 COPY src src
 COPY tsconfig.json tsconfig.json
 
