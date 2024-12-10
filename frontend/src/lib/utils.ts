@@ -1,10 +1,11 @@
 import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-import { IssueType, project } from './types'
-import { IconType } from './constants'
-import { IconKeys, Icons, urlMappings } from '../components/data'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { twMerge } from 'tailwind-merge'
+
+import { IconType } from './constants'
+import { IssueType, project } from './types'
+import { IconKeys, Icons, urlMappings } from '../components/data'
 
 dayjs.extend(relativeTime)
 
