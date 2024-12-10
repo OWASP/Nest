@@ -9,7 +9,7 @@ export default function Committees() {
     const [committeeData, setCommitteeData] = useState<CommitteeDataType | null>(null)
 
     useEffect(() => {
-      document.title = 'OWASP Projects'
+      document.title = 'OWASP Committees'
       const fetchApiData = async () => {
         try {
           const response = await fetch(`${API_URL}/owasp/search/committee`)
