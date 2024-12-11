@@ -18,6 +18,11 @@ class ProjectIndexMixin(GenericEntityMixin):
         return self.contributors_count
 
     @property
+    def idx_custom_tags(self):
+        """Return custom tags for indexing."""
+        return self.custom_tags
+
+    @property
     def idx_forks_count(self):
         """Return forks count for indexing."""
         return self.forks_count
