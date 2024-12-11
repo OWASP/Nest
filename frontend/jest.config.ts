@@ -1,6 +1,5 @@
 export default {
-  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
-  coverageDirectory: 'coverage',
+  collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
@@ -12,13 +11,23 @@ export default {
     '!src/setupTests.ts',
     '!src/utils/**',
   ],
-  preset: 'ts-jest',
-  testEnvironment: 'jest-environment-jsdom',
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  coverageThreshold: {
+    global: {
+      branches: 75,
+      functions: 75,
+      lines: 75,
+      statements: 75,
+    },
   },
   moduleNameMapper: {
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
   },
+  preset: 'ts-jest',
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
+  testEnvironment: 'jest-environment-jsdom',
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+  },
 }

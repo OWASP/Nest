@@ -8,19 +8,19 @@ import { getFilteredIcons, handleSocialUrls } from '../lib/utils'
 export default function Committees() {
   const [committeeData, setCommitteeData] = useState<CommitteeDataType | null>(null)
 
-  useEffect(() => {
-    document.title = 'OWASP Projects'
-    const fetchApiData = async () => {
-      try {
-        const response = await fetch(`${API_URL}/owasp/search/committee`)
-        const data = await response.json()
-        setCommitteeData(data)
-      } catch (error) {
-        console.error(error)
+    useEffect(() => {
+      document.title = 'OWASP Committees'
+      const fetchApiData = async () => {
+        try {
+          const response = await fetch(`${API_URL}/owasp/search/committee`)
+          const data = await response.json()
+          setCommitteeData(data)
+        } catch (error) {
+          console.error(error)
+        }
       }
-    }
-    fetchApiData()
-  }, [])
+      fetchApiData()
+    }, [])
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text md:p-20">
@@ -31,11 +31,11 @@ export default function Committees() {
             const filteredIcons = getFilteredIcons(project, params)
             const formattedUrls = handleSocialUrls(project.idx_related_urls)
 
-            const SubmitButton = {
-              label: 'Learn More',
-              icon: <FontAwesomeIconWrapper icon="fa-solid fa-code" />,
-              url: project.idx_url,
-            }
+              const SubmitButton = {
+                label: 'Learn More',
+                icon: <FontAwesomeIconWrapper icon="fa-solid fa-people-group" />,
+                url: project.idx_url,
+              }
 
             return (
               <Card
