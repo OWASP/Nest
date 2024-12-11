@@ -170,11 +170,7 @@ const Card = ({
           )}
         </div>
         <div className="flex-2 w-36 content-end justify-items-center pr-6">
-          <ActionButton
-            tooltipLabel={tooltipLabel}
-            url={button.url}
-            onClick={button.onclick}
-          >
+          <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
             {button.icon}
             {button.label}
           </ActionButton>
