@@ -52,7 +52,7 @@
     - name: Copy directory recursively
       copy:
         src: '{{ github_workspace }}/backend/data'
-        dest: ~/data
+        dest: ~/
         mode: '0755'
 
     - name: Prune docker images
