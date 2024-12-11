@@ -51,7 +51,7 @@
 
     - name: Copy directory recursively
       copy:
-        src: '{{ github_workspace }}/data'
+        src: '{{ github_workspace }}/backend/data'
         dest: ~/data
         mode: '0755'
 
