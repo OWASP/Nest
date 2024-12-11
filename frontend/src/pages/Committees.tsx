@@ -26,29 +26,29 @@ export default function Committees() {
     <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text md:p-20">
       <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
         {committeeData &&
-          committeeData.committees.map((project, index) => {
+          committeeData.committees.map((committee, index) => {
             const params: string[] = ['idx_updated_at']
-            const filteredIcons = getFilteredIcons(project, params)
-            const formattedUrls = handleSocialUrls(project.idx_related_urls)
+            const filteredIcons = getFilteredIcons(committee, params)
+            const formattedUrls = handleSocialUrls(committee.idx_related_urls)
 
               const SubmitButton = {
                 label: 'Learn More',
                 icon: <FontAwesomeIconWrapper icon="fa-solid fa-people-group" />,
-                url: project.idx_url,
+                url: committee.idx_url,
               }
 
             return (
               <Card
-                key={project.objectID || `project-${index}`}
-                title={project.idx_name}
-                url={project.idx_url}
-                summary={project.idx_summary}
+                key={committee.objectID || `committee-${index}`}
+                title={committee.idx_name}
+                url={committee.idx_url}
+                summary={committee.idx_summary}
                 icons={filteredIcons}
-                leaders={project.idx_leaders}
-                topContributors={project.idx_top_contributors}
+                leaders={committee.idx_leaders}
+                topContributors={committee.idx_top_contributors}
                 button={SubmitButton}
                 social={formattedUrls}
-                tooltipLabel={`Learn more about ${project.idx_name}`}
+                tooltipLabel={`Learn more about ${committee.idx_name}`}
               />
             )
           })}
