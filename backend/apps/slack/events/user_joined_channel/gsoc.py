@@ -4,12 +4,12 @@ from django.conf import settings
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL, OWASP_GSOC_CHANNEL_ID
 
 
 def gsoc_handler(event, client, ack):
     """Slack #gsoc new user handler."""
-    from apps.slack.common.gsoc import GENERAL_INFORMATION_BLOCKS
+    from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
 
     ack()
     if not settings.SLACK_EVENTS_ENABLED:
@@ -22,11 +22,16 @@ def gsoc_handler(event, client, ack):
         channel=conversation["channel"]["id"],
         blocks=[
             markdown(
-                f"Hello <@{user_id}> and welcome to <#{OWASP_GSOC_CHANNEL_ID}> channel!\n"
+                f"Hello <@{user_id}> and welcome to <#{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
                 "Here's how you can start your journey toward contributing to OWASP projects and "
-                "making the most of GSoC:"
+                "making the most of Google Summer of Code:"
             ),
-            *GENERAL_INFORMATION_BLOCKS,
+            *GSOC_GENERAL_INFORMATION_BLOCKS,
+            markdown(
+                "🎉 We're excited to have you on board, and we can't wait to see the amazing "
+                "contributions you'll make! Happy contributing and good luck with your GSoC "
+                "journey!"
+            ),
             markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
         ],
     )

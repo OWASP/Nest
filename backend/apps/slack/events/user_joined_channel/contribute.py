@@ -8,6 +8,7 @@ from apps.slack.blocks import markdown
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
     NEST_BOT_NAME,
+    NL,
     OWASP_CONTRIBUTE_CHANNEL_ID,
 )
 
@@ -28,7 +29,7 @@ def contribute_handler(event, client, ack):
         channel=conversation["channel"]["id"],
         blocks=[
             markdown(
-                f"Hello <@{user_id}> and welcome to <#{OWASP_CONTRIBUTE_CHANNEL_ID}> channel!\n"
+                f"Hello <@{user_id}> and welcome to <#{OWASP_CONTRIBUTE_CHANNEL_ID}> channel!{NL}"
                 "We're happy to have you here as part of the OWASP community! "
                 "Your eagerness to contribute is what makes our community strong. "
                 f"With *{Project.active_projects_count()} active OWASP projects*, there are "
@@ -43,12 +44,16 @@ def contribute_handler(event, client, ack):
             ),
             markdown(
                 f"{NEST_BOT_NAME} can help you jumpstart your contributions to OWASP projects. "
-                "With `/contribute` command you can easily find options for contributing right "
-                "here in this chat. It's a quick and convenient way to get involved! "
+                "With `/contribute --start` command you can easily find options for contributing "
+                "right here in this chat. It's a quick and convenient way to get involved! "
                 "Alternatively, you can check out "
                 f"<{get_absolute_url('project-issues')}|*{settings.SITE_NAME}*> where you'll find "
                 "a comprehensive list of projects and ways to make a difference. It also offers "
                 "guidance on possible first steps to approach the issues within OWASP projects."
+            ),
+            markdown(
+                "🎉 We're excited to have you on board, and we can't wait to see the amazing "
+                "contributions you'll make! "
             ),
             markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
         ],
