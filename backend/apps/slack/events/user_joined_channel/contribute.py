@@ -44,12 +44,13 @@ def contribute_handler(event, client, ack):
             ),
             markdown(
                 f"{NEST_BOT_NAME} can help you jumpstart your contributions to OWASP projects. "
-                "With `/contribute --start` command you can easily find options for contributing "
-                "right here in this chat. It's a quick and convenient way to get involved! "
+                "You can easily find opportunities for contributing right here in this chat using "
+                "`/contribute --start` command. It's a quick and convenient way to get involved! "
                 "Alternatively, you can check out "
-                f"<{get_absolute_url('project-issues')}|*{settings.SITE_NAME}*> where you'll find "
-                "a comprehensive list of projects and ways to make a difference. It also offers "
-                "guidance on possible first steps to approach the issues within OWASP projects."
+                f"<{get_absolute_url('project-issues')}|*OWASP Nest Issues*> where you'll find "
+                "a comprehensive list of OWASP contribution opportunities and ways to make a "
+                "difference. It also offers guidance on possible first steps to approach the "
+                "issues within OWASP projects."
             ),
             markdown(
                 "🎉 We're excited to have you on board, and we can't wait to see the amazing "
