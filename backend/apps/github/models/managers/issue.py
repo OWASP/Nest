@@ -38,7 +38,7 @@ class OpenIssueManager(models.Manager):
             Q(assignees__isnull=True)
             | Q(
                 assignees__isnull=False,
-                updated_at__lte=timezone.now() - td(days=90),
+                updated_at__lte=timezone.now() - td(days=30),
             )
         )
 
