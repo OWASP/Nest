@@ -22,6 +22,7 @@ class OpenIssueManager(models.Manager):
                 "assignees",
             )
             .filter(
+                created_at__gte=timezone.now() - td(days=90),
                 repository__project__isnull=False,
                 state="open",
             )
