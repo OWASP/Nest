@@ -12,14 +12,13 @@ from apps.slack.constants import (
 )
 
 
-def handler(event, client, ack):
+def contribute_handler(event, client, ack):
     """Slack #contribute new user handler."""
     from apps.github.models.issue import Issue
     from apps.owasp.models.project import Project
 
     ack()
-
-    if not settings.SLACK_EVENTS_ENABLED or event["channel"] != OWASP_CONTRIBUTE_CHANNEL_ID:
+    if not settings.SLACK_EVENTS_ENABLED:
         return
 
     user_id = event["user"]
@@ -57,4 +56,11 @@ def handler(event, client, ack):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.event("member_joined_channel")(handler)
+
+    def check_contribute_handler(event):
+        """Check if the event is a member_joined_channel in #contribute."""
+        return event["channel"] == OWASP_CONTRIBUTE_CHANNEL_ID
+
+    SlackConfig.app.event("member_joined_channel", matchers=[check_contribute_handler])(
+        contribute_handler
+    )
