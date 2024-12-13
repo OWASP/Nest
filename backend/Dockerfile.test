@@ -16,12 +16,13 @@ WORKDIR /home/owasp
 
 USER owasp
 
-COPY .env/template .env/template
+COPY poetry.lock pyproject.toml ./
+RUN poetry install --no-root
+
 COPY apps apps
-COPY manage.py poetry.lock pyproject.toml wsgi.py ./
 COPY settings settings
 COPY static static
 COPY templates templates
 COPY tests tests
-
-RUN poetry install --no-root
+COPY .env/template .env/template
+COPY manage.py wsgi.py ./

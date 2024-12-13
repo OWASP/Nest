@@ -4,6 +4,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN groupadd owasp && \
     useradd --create-home --home-dir /home/owasp -g owasp owasp && \
+    chown -R owasp:owasp /home/owasp && \
     apt-get update && apt-get upgrade -y && \
     apt-get install -y gcc libpq-dev && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/* && \
@@ -14,7 +15,5 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 USER owasp
-
-VOLUME /home/owasp
 
 WORKDIR /home/owasp
