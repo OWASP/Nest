@@ -7,6 +7,7 @@ import {
   faMeetup,
   faSlack,
   faYoutube,
+  faXTwitter,
 } from '@fortawesome/free-brands-svg-icons'
 import {
   faClock,
@@ -56,7 +57,8 @@ library.add(
   faFacebook,
   faDiscord,
   faSlack,
-  faPeopleGroup
+  faPeopleGroup,
+  faXTwitter,
 )
 
 export const Icons = {

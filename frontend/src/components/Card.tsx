@@ -149,7 +149,7 @@ const Card = ({
                     )}
                   </div>
                 )}
-                {social && (
+                {social && social.length > 0 && (
                   <div id="social" className="my-2 flex items-center justify-normal gap-2">
                     {social &&
                       social.map((item, index) => (
