@@ -21,12 +21,10 @@ export default {
       statements: 75,
     },
   },
-  moduleNameMapper: {
-    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
-  },
   preset: 'ts-jest',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',
+  testPathIgnorePatterns: ['<rootDir>/__tests__/src/data/'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
