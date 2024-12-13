@@ -35,13 +35,15 @@ CONTRIBUTE_GENERAL_INFORMATION_BLOCKS = (
         f"  • <#{OWASP_PROJECT_NEST_CHANNEL_ID}> - project Nest.{NL}"
         f"  • <#{OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID}> - project Thread Dragon.{NL}"
         f"{NL}"
-        "Some projects, like BLT, also have their own Slack workspace -- be sure to check "
-        "if the project you're interested in has additional communication channels."
+        "Some projects, like BLT or CycloneDX, also have their own Slack workspaces -- be sure "
+        "to check if the project you're interested in has additional communication channels."
     ),
     markdown(
         f"👥 *Identifying Project Leaders, Contributors, and Ongoing Project Activity*{NLNL}"
         "  • Check the Leaders section on the official <https://owasp.org/projects|OWASP site> "
-        f"or <{projects_url}|OWASP Nest> to identify project leaders.{NLNL}"
+        f"or <{projects_url}|OWASP Nest Projects> page to identify project leaders. Normally, "
+        "a project has at least two leaders. Having multiple project leaders who are not all "
+        "employed by the same company is a good practice.>{NLNL}"
         "  • Review the project's codebase commit history on GitHub to find active contributors "
         f"who can also provide valuable guidance and insights.{NLNL}"
         "  • Review the project's channel history to get understanding of recent and ongoing "
@@ -66,9 +68,8 @@ CONTRIBUTE_GENERAL_INFORMATION_BLOCKS = (
         f"and code standards to ensure your work aligns with the project's expectations.{NLNL}"
         "  • Resolve the issue and submit a pull request when ready. If the issue is not "
         "trivial or takes more time for any other reason, make sure to keep the project leaders "
-        f"updated on your progress.{NLNL}"
-        f"{NL}"
+        f"updated on your progress.{NL}"
         "Remember, communication is key to a smooth contribution process and will help you "
-        "succeed in your Google Summer of Code journey."
+        "succeed in your journey."
     ),
 )
