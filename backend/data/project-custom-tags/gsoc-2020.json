@@ -1,0 +1,17 @@
+{
+  "projects": [
+    "www-project-bug-logging-tool",
+    "www-project-honeypot",
+    "www-project-intelligent-intrusion-detection-system",
+    "www-project-juice-shop",
+    "www-project-nettacker",
+    "www-project-owtf",
+    "www-project-python-honeypot",
+    "www-project-risk-assessment-framework",
+    "www-project-samm",
+    "www-project-securetea",
+    "www-project-security-knowledge-framework",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2020"]
+}

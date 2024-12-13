@@ -1,3 +1,5 @@
+import type { JSX } from 'react'
+
 export type IconType = {
   [key: string]: string | number
 }

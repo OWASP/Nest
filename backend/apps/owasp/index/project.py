@@ -16,6 +16,7 @@ class ProjectIndex(AlgoliaIndex, IndexSynonymsMixin):
     fields = (
         "idx_companies",
         "idx_contributors_count",
+        "idx_custom_tags",
         "idx_description",
         "idx_forks_count",
         "idx_languages",
@@ -56,7 +57,7 @@ class ProjectIndex(AlgoliaIndex, IndexSynonymsMixin):
         "searchableAttributes": [
             "unordered(idx_name)",
             "unordered(idx_repository_descriptions)",
-            "unordered(idx_languages, idx_tags, idx_topics)",
+            "unordered(idx_custom_tags, idx_languages, idx_tags, idx_topics)",
             "unordered(idx_description)",
             "unordered(idx_companies, idx_organizations)",
             "unordered(idx_leaders, idx_top_contributors.login, idx_top_contributors.name)",

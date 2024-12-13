@@ -1,0 +1,18 @@
+{
+  "projects": [
+    "www-project-bug-logging-tool",
+    "www-project-devsecops-maturity-model",
+    "www-project-juice-shop",
+    "www-project-maryam",
+    "www-project-modsecurity-core-rule-set",
+    "www-project-nettacker",
+    "www-project-owtf",
+    "www-project-pygoat",
+    "www-project-risk-assessment-framework",
+    "www-project-securecodebox",
+    "www-project-securetea",
+    "www-project-wrongsecrets",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2023"]
+}
