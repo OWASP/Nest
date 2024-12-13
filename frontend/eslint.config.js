@@ -56,7 +56,6 @@ export default [
       'react-hooks/rules-of-hooks': 'error',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
-      'jest/no-mocks-import': 'off', // TODO(arkid15r): remove after fixing the issue.
       'import/order': [
         'warn',
         {
