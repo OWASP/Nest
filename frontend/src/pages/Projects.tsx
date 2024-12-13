@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ProjectDataType } from '../lib/types'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
-import { getFilteredIcons } from '../lib/utils'
 import Card from '../components/Card'
 import { level } from '../components/data'
 import SearchBar from '../components/Search'
+import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
+import { ProjectDataType } from '../lib/types'
+import { getFilteredIcons } from '../lib/utils'
 import { API_URL } from '../utils/credentials.ts'
 
 export default function Projects() {

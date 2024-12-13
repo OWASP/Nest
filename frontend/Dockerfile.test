@@ -11,16 +11,15 @@ RUN groupadd owasp && \
 
 WORKDIR /home/owasp
 
-COPY __mocks__ __mocks__
-COPY __tests__ __tests__
-COPY jest.config.ts jest.config.ts
-COPY package-lock.json package-lock.json
-COPY package.json package.json
-COPY public public
-COPY setupTests.ts setupTests.ts
-COPY src src
-COPY tsconfig.json tsconfig.json
-
+COPY package.json package-lock.json ./
 RUN npm install
+
+COPY src src
+COPY public public
+COPY jest.setup.ts jest.setup.ts
+COPY jest.config.ts jest.config.ts
+COPY tsconfig.json tsconfig.json
+COPY __tests__ __tests__
+
 
 USER owasp

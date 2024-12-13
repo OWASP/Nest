@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths-ignore:
-      - backend/data/**
+      - backend/data/nest.json.gz
   push:
     branches:
       - main
     paths-ignore:
-      - backend/data/**
+      - backend/data/nest.json.gz
   workflow_dispatch:
 
 permissions:

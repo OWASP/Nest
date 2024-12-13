@@ -22,6 +22,7 @@ class OpenIssueManager(models.Manager):
                 "assignees",
             )
             .filter(
+                created_at__gte=timezone.now() - td(days=90),
                 repository__project__isnull=False,
                 state="open",
             )
@@ -37,7 +38,7 @@ class OpenIssueManager(models.Manager):
             Q(assignees__isnull=True)
             | Q(
                 assignees__isnull=False,
-                updated_at__lte=timezone.now() - td(days=90),
+                updated_at__lte=timezone.now() - td(days=30),
             )
         )
 

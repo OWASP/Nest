@@ -85,6 +85,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
     ordering = ("-created_at",)
     search_fields = (
+        "custom_tags",
         "description",
         "key",
         "languages",

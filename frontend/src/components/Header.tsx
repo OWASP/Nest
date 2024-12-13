@@ -1,8 +1,9 @@
 import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { headerLinks } from '../utils/constants'
-import { NavLink } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { NavLink } from 'react-router-dom'
+
+import { headerLinks } from '../utils/constants'
 
 export default function Header() {
   const [dark, setDark] = useState(() => {
