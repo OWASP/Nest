@@ -25,6 +25,7 @@ const Card = ({
   projectLink,
   languages,
   social,
+  tooltipLabel,
 }: CardProps) => {
   const [visibleLanguages, setVisibleLanguages] = useState(18)
   const [visibleTopics, setVisibleTopics] = useState(18)
@@ -149,8 +150,8 @@ const Card = ({
                     )}
                   </div>
                 )}
-                {social && (
-                  <div id="social" className="my-2 flex items-center justify-normal gap-2">
+                {social && social.length > 0 && (
+                  <div id="social" className="flex items-center justify-normal gap-2">
                     {social &&
                       social.map((item, index) => (
                         <a
@@ -169,12 +170,8 @@ const Card = ({
             </div>
           )}
         </div>
-        <div className="flex-2 w-36 content-end justify-items-center pr-6">
-          <ActionButton
-            tooltipLabel={`Contribute to ${title}`}
-            url={button.url}
-            onClick={button.onclick}
-          >
+        <div className="w-38 content-end justify-items-center pr-6">
+          <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
             {button.icon}
             {button.label}
           </ActionButton>
