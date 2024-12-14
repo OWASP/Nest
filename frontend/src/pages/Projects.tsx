@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import Card from '../components/Card'
 import { level } from '../components/data'
 import SearchBar from '../components/Search'
@@ -27,8 +28,8 @@ export default function Projects() {
   }, [])
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-normal items-center text-text p-5">
-      <div className="w-full h-fit flex flex-col justify-normal items-center gap-4">
+    <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
+      <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
         <SearchBar
           placeholder="Search for OWASP projects..."
           searchEndpoint={`${API_URL}/owasp/search/project`}
@@ -36,7 +37,7 @@ export default function Projects() {
           defaultResults={defaultProjects}
         />
         {projectData &&
-          projectData?.projects?.map((project,index) => {
+          projectData?.projects?.map((project, index) => {
             const params: string[] = [
               'idx_updated_at',
               'idx_forks_count',
