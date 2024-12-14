@@ -151,7 +151,7 @@ const Card = ({
                   </div>
                 )}
                 {social && social.length > 0 && (
-                  <div id="social" className="my-2 flex items-center justify-normal gap-2">
+                  <div id="social" className="flex items-center justify-normal gap-2">
                     {social &&
                       social.map((item, index) => (
                         <a
@@ -170,7 +170,7 @@ const Card = ({
             </div>
           )}
         </div>
-        <div className="flex-2 w-36 content-end justify-items-center pr-6">
+        <div className="w-38 content-end justify-items-center pr-6">
           <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
             {button.icon}
             {button.label}
