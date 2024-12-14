@@ -43,4 +43,5 @@ export interface CardProps {
 
 export const tooltipStyle = {
   borderRadius: '8px',
+  zIndex: 100,
 }
