@@ -39,11 +39,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         })
 
         const defaultresults = response.data
-        onSearchResult(defaultresults) 
+        onSearchResult(defaultresults)
       } catch (err) {
         console.error('Search error:', err)
         setError('Failed to fetch search results. Please try again.')
-        onSearchResult(defaultResults) 
+        onSearchResult(defaultResults)
       } finally {
         setLoading(false)
       }
@@ -52,7 +52,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   )
 
   useEffect(() => {
-    performSearch(debouncedQuery) 
+    performSearch(debouncedQuery)
   }, [debouncedQuery, performSearch])
 
   return (
