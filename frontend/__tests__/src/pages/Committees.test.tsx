@@ -1,34 +1,34 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { Committees } from '../../../src/pages';
-import { mockCommitteeData } from '../../../__mocks__/data/mockCommitteeData';
+import { render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
 
-process.env.VITE_NEST_API_URL = 'https://mock-api.com';
+import '@testing-library/jest-dom'
+import { Committees } from '../../../src/pages'
+import { mockCommitteeData } from '../data/mockCommitteeData'
+process.env.VITE_NEST_API_URL = 'https://mock-api.com'
 
-global.fetch = jest.fn();
+global.fetch = jest.fn()
 
 describe('Committees Component', () => {
   beforeEach(() => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
       json: async () => mockCommitteeData,
-    });
-  });
+    })
+  })
 
   afterEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
   test('renders committee data correctly', async () => {
-    render(<Committees />);
+    render(<Committees />)
 
     await waitFor(() => {
-      expect(screen.getByText('Committee 1')).toBeInTheDocument();
-    });
+      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+    })
 
-    expect(screen.getByText('This is a summary of Committee 1.')).toBeInTheDocument();
+    expect(screen.getByText('This is a summary of Committee 1.')).toBeInTheDocument()
 
-    const viewButton = screen.getByText('Learn More');
-    expect(viewButton).toBeInTheDocument();
-  });
-});
+    const viewButton = screen.getByText('Learn More')
+    expect(viewButton).toBeInTheDocument()
+  })
+})

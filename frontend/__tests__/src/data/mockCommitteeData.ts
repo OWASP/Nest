@@ -16,8 +16,7 @@ export const mockCommitteeData = {
           name: 'Sam Stepanyan',
         },
       ],
-      idx_summary:
-        "This is a summary of Committee 1.",
+      idx_summary: 'This is a summary of Committee 1.',
       idx_updated_at: 1727390473,
       idx_url: 'https://owasp.org/www-committee-chapter',
       objectID: '4',

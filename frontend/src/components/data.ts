@@ -58,7 +58,7 @@ library.add(
   faDiscord,
   faSlack,
   faPeopleGroup,
-  faXTwitter,
+  faXTwitter
 )
 
 export const Icons = {
