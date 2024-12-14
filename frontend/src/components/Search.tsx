@@ -39,14 +39,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         })
 
         const defaultresults = response.data
-        console.log('Search results:', defaultresults)
-
-        onSearchResult(defaultresults) // Call onSearchResult with the search results
+        onSearchResult(defaultresults) 
       } catch (err) {
         console.error('Search error:', err)
         setError('Failed to fetch search results. Please try again.')
-
-        onSearchResult(defaultResults) // Fallback to default results if an error occurs
+        onSearchResult(defaultResults) 
       } finally {
         setLoading(false)
       }
@@ -55,7 +52,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   )
 
   useEffect(() => {
-    performSearch(debouncedQuery) // Perform search based on the debounced query
+    performSearch(debouncedQuery) 
   }, [debouncedQuery, performSearch])
 
   return (
@@ -63,7 +60,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          performSearch(query) // Perform search when the user submits the form
+          performSearch(query)
         }}
         className="relative"
       >
