@@ -7,6 +7,7 @@ import { ProjectDataType } from '../lib/types'
 interface SearchBarProps {
   placeholder: string
   searchEndpoint: string
+  // eslint-disable-next-line no-unused-vars
   onSearchResult: (results: ProjectDataType | null) => void
   defaultResults: ProjectDataType | null
 }
@@ -38,10 +39,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
         })
 
         const defaultresults = response.data
-        onSearchResult(defaultresults)
+        console.log('Search results:', defaultresults)
+
+        onSearchResult(defaultresults) // Call onSearchResult with the search results
       } catch (err) {
+        console.error('Search error:', err)
         setError('Failed to fetch search results. Please try again.')
-        onSearchResult(defaultResults)
+
+        onSearchResult(defaultResults) // Fallback to default results if an error occurs
       } finally {
         setLoading(false)
       }
@@ -50,7 +55,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   )
 
   useEffect(() => {
-    performSearch(debouncedQuery)
+    performSearch(debouncedQuery) // Perform search based on the debounced query
   }, [debouncedQuery, performSearch])
 
   return (
@@ -58,7 +63,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          performSearch(query)
+          performSearch(query) // Perform search when the user submits the form
         }}
         className="relative"
       >
