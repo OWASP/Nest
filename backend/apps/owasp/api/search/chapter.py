@@ -8,7 +8,7 @@ from apps.common.utils import get_user_ip
 from apps.owasp.models.chapter import Chapter
 
 
-def get_chapters(query, attributes=None, limit=25, meta=None, page=0):
+def get_chapters(query, attributes=None, limit=25, meta=None, page=1):
     """Return chapters relevant to a search query."""
     params = {
         "attributesToHighlight": [],
@@ -26,7 +26,7 @@ def get_chapters(query, attributes=None, limit=25, meta=None, page=0):
         "hitsPerPage": limit,
         "minProximity": 4,
         "typoTolerance": "min",
-        "page": page,
+        "page": page - 1,
     }
 
     if coordinates := get_ip_coordinates(get_user_ip(meta)):
@@ -38,7 +38,7 @@ def get_chapters(query, attributes=None, limit=25, meta=None, page=0):
 def chapters(request):
     """Search chapters API endpoint."""
     query = request.GET.get("q", "")
-    page = int(request.GET.get("page", 0))
+    page = int(request.GET.get("page", 1))
     chapters = get_chapters(query=query, page=page, meta=request.META)
     return JsonResponse(
         {

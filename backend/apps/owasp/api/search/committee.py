@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from apps.owasp.models.committee import Committee
 
 
-def get_committees(query, attributes=None, limit=25, page=0):
+def get_committees(query, attributes=None, limit=25, page=1):
     """Return committees relevant to a search query."""
     params = {
         "attributesToHighlight": [],
@@ -24,7 +24,7 @@ def get_committees(query, attributes=None, limit=25, page=0):
         "hitsPerPage": limit,
         "minProximity": 4,
         "typoTolerance": "min",
-        "page": page,
+        "page": page - 1,
     }
 
     return raw_search(Committee, query, params)
@@ -33,7 +33,7 @@ def get_committees(query, attributes=None, limit=25, page=0):
 def committees(request):
     """Search committees API endpoint."""
     query = request.GET.get("q", "")
-    page = int(request.GET.get("page", 0))
+    page = int(request.GET.get("page", 1))
     committees = get_committees(query=query, page=page)
     return JsonResponse(
         {
