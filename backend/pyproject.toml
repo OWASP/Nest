@@ -32,7 +32,7 @@ gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 lxml = "^5.3.0"
 markdown = "^3.7"
-openai = "^1.57.0"
+openai = "^1.57.4"
 psycopg = "^3.2.3"
 pygithub = "^2.5.0"
 python = "^3.12"
@@ -47,7 +47,7 @@ django-cors-headers = "^4.6.0"
 djlint = "^1.36.3"
 isort = "^5.13.2"
 pre-commit = "^4.0.0"
-ruff = "^0.8.2"
+ruff = "^0.8.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
@@ -74,6 +74,7 @@ DJANGO_CONFIGURATION = "Test"
 DJANGO_SETTINGS_MODULE = "settings.test"
 addopts = [
     "--cov-config=pyproject.toml",
+    "--cov-fail-under=30",
     "--cov-report=term-missing",
     "--cov=.",
     "--dist=loadscope",

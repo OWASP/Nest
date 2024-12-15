@@ -1,3 +1,5 @@
+import type { JSX } from 'react'
+
 export type IconType = {
   [key: string]: string | number
 }
@@ -36,8 +38,10 @@ export interface CardProps {
   projectLink?: string
   languages?: string[]
   social?: { title: string; icon: string; url: string }[]
+  tooltipLabel?: string
 }
 
 export const tooltipStyle = {
   borderRadius: '8px',
+  zIndex: 100,
 }

@@ -13,6 +13,9 @@ lint-frontend-code:
 npm-update:
 	@CMD="npm update" $(MAKE) exec-frontend-command-it
 
+shell-frontend:
+	@CMD="/bin/bash" $(MAKE) exec-frontend-command-it
+
 test-frontend:
 	@docker build -f frontend/Dockerfile.test frontend -t nest-frontend-test
 	@docker run nest-frontend-test npm run test

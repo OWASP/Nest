@@ -10,7 +10,7 @@ from apps.owasp.models.project import Project
 PROJECT_CACHE_PREFIX = "project:"
 
 
-def get_projects(query, attributes=None, limit=25):
+def get_projects(query, attributes=None, limit=25, page=1):
     """Return projects relevant to a search query."""
     params = {
         "attributesToHighlight": [],
@@ -31,26 +31,30 @@ def get_projects(query, attributes=None, limit=25):
         ],
         "hitsPerPage": limit,
         "minProximity": 4,
+        "page": page - 1,
         "typoTolerance": "min",
     }
 
-    return raw_search(Project, query, params)["hits"]
+    return raw_search(Project, query, params)
 
 
 def projects(request):
     """Search projects API endpoint."""
+    page = int(request.GET.get("page", 1))
     query = request.GET.get("q", "")
-    cache_key = f"{PROJECT_CACHE_PREFIX}{query}"
+
+    cache_key = f"{PROJECT_CACHE_PREFIX}{query}_page_{page}"
     projects = cache.get(cache_key)
 
     if projects is None:
-        projects = get_projects(query)
+        projects = get_projects(query=query, page=page)
         cache.set(cache_key, projects, DAY_IN_SECONDS)
 
     return JsonResponse(
         {
             "active_projects_count": Project.active_projects_count(),
-            "projects": projects,
+            "projects": projects["hits"],
+            "total_pages": projects["nbPages"],
         },
         safe=False,
     )

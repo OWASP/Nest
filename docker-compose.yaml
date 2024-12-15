@@ -48,7 +48,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - ./volumes/db:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
 
   frontend:
     container_name: nest-frontend
@@ -66,3 +66,6 @@ services:
       - ./frontend:/home/owasp
     environment:
       NODE_ENV: local
+
+volumes:
+  db-data:

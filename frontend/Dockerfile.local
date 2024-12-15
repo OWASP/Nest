@@ -4,13 +4,12 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN groupadd owasp && \
     useradd --create-home --home-dir /home/owasp -g owasp owasp && \
+    chown -R owasp:owasp /home/owasp && \
     apt-get update && apt-get upgrade -y && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 3000
 
 USER owasp
-
-VOLUME /home/owasp
 
 WORKDIR /home/owasp

@@ -1,0 +1,20 @@
+{
+  "projects": [
+    "www-project-bug-logging-tool",
+    "www-project-coraza-web-application-firewall",
+    "www-project-devsecops-maturity-model",
+    "www-project-juice-shop",
+    "www-project-maryam",
+    "www-project-modsecurity-core-rule-set",
+    "www-project-nettacker",
+    "www-project-owtf",
+    "www-project-purpleteam",
+    "www-project-pygoat",
+    "www-project-python-honeypot",
+    "www-project-securetea",
+    "www-project-security-knowledge-framework",
+    "www-project-threat-dragon",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2022"]
+}

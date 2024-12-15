@@ -1,8 +1,9 @@
-import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
+
 import '@testing-library/jest-dom'
 import { Projects } from '../../../src/pages'
-import mockProjectData from '../../../__mocks__/data/mockProjectData'
+import mockProjectData from '../data/mockProjectData'
 
 process.env.VITE_NEST_API_URL = 'https://mock-api.com'
 global.fetch = jest.fn()
