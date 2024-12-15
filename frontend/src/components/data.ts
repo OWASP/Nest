@@ -7,6 +7,7 @@ import {
   faMeetup,
   faSlack,
   faYoutube,
+  faXTwitter,
 } from '@fortawesome/free-brands-svg-icons'
 import {
   faClock,
@@ -28,6 +29,7 @@ import {
   faRightToBracket,
   faWandMagicSparkles,
   faX,
+  faPeopleGroup,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -54,7 +56,9 @@ library.add(
   faLinkedin,
   faFacebook,
   faDiscord,
-  faSlack
+  faSlack,
+  faPeopleGroup,
+  faXTwitter
 )
 
 export const Icons = {
