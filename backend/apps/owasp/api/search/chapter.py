@@ -25,8 +25,8 @@ def get_chapters(query, attributes=None, limit=25, meta=None, page=1):
         ],
         "hitsPerPage": limit,
         "minProximity": 4,
-        "typoTolerance": "min",
         "page": page - 1,
+        "typoTolerance": "min",
     }
 
     if coordinates := get_ip_coordinates(get_user_ip(meta)):
@@ -37,14 +37,15 @@ def get_chapters(query, attributes=None, limit=25, meta=None, page=1):
 
 def chapters(request):
     """Search chapters API endpoint."""
-    query = request.GET.get("q", "")
     page = int(request.GET.get("page", 1))
+    query = request.GET.get("q", "")
+
     chapters = get_chapters(query=query, page=page, meta=request.META)
     return JsonResponse(
         {
             "active_chapters_count": Chapter.active_chapters_count(),
             "chapters": chapters["hits"],
-            "totalPages": chapters["nbPages"],
+            "total_pages": chapters["nbPages"],
         },
         safe=False,
     )

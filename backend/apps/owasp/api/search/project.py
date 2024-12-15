@@ -31,8 +31,8 @@ def get_projects(query, attributes=None, limit=25, page=1):
         ],
         "hitsPerPage": limit,
         "minProximity": 4,
-        "typoTolerance": "min",
         "page": page - 1,
+        "typoTolerance": "min",
     }
 
     return raw_search(Project, query, params)
@@ -40,8 +40,9 @@ def get_projects(query, attributes=None, limit=25, page=1):
 
 def projects(request):
     """Search projects API endpoint."""
-    query = request.GET.get("q", "")
     page = int(request.GET.get("page", 1))
+    query = request.GET.get("q", "")
+
     cache_key = f"{PROJECT_CACHE_PREFIX}{query}_page_{page}"
     projects = cache.get(cache_key)
 
@@ -53,7 +54,7 @@ def projects(request):
         {
             "active_projects_count": Project.active_projects_count(),
             "projects": projects["hits"],
-            "totalPages": projects["nbPages"],
+            "total_pages": projects["nbPages"],
         },
         safe=False,
     )

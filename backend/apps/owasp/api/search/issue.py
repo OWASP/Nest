@@ -40,8 +40,9 @@ def get_issues(query, attributes=None, distinct=False, limit=25, page=1):
 
 def project_issues(request):
     """Search project issues API endpoint."""
-    query = request.GET.get("q", "").strip()
     page = int(request.GET.get("page", 1))
+    query = request.GET.get("q", "").strip()
+
     cache_key = f"{ISSUE_CACHE_PREFIX}{query}_page_{page}"
     issues = cache.get(cache_key)
 
@@ -53,7 +54,7 @@ def project_issues(request):
         {
             "issues": issues["hits"],
             "open_issues_count": Issue.open_issues_count(),
-            "totalPages": issues["nbPages"],
+            "total_pages": issues["nbPages"],
         },
         safe=False,
     )

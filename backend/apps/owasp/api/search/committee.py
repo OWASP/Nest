@@ -23,8 +23,8 @@ def get_committees(query, attributes=None, limit=25, page=1):
         ],
         "hitsPerPage": limit,
         "minProximity": 4,
-        "typoTolerance": "min",
         "page": page - 1,
+        "typoTolerance": "min",
     }
 
     return raw_search(Committee, query, params)
@@ -32,14 +32,15 @@ def get_committees(query, attributes=None, limit=25, page=1):
 
 def committees(request):
     """Search committees API endpoint."""
-    query = request.GET.get("q", "")
     page = int(request.GET.get("page", 1))
+    query = request.GET.get("q", "")
+
     committees = get_committees(query=query, page=page)
     return JsonResponse(
         {
             "active_committees_count": Committee.active_committees_count(),
             "committees": committees["hits"],
-            "totalPages": committees["nbPages"],
+            "total_pages": committees["nbPages"],
         },
         safe=False,
     )
