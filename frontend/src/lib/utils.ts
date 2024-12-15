@@ -4,7 +4,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
 
 import { IconType } from './constants'
-import { IssueType, project } from './types'
+import { CommitteeType, IssueType, project } from './types'
 import { IconKeys, Icons, urlMappings } from '../components/data'
 
 dayjs.extend(relativeTime)
@@ -13,7 +13,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type projectType = project | IssueType
+type projectType = project | IssueType | CommitteeType
 
 export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
   const filteredIcons = params.reduce((acc: IconType, key) => {
