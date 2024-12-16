@@ -45,7 +45,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "babel-plugin-transform-import-meta": "^2.2.1",
-    "eslint": "^9.15.0",
+    "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.9.0",
