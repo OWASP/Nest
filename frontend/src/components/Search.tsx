@@ -2,25 +2,28 @@ import axios from 'axios'
 import React, { useState, useEffect, useCallback } from 'react'
 
 import { useDebounce } from '../lib/hooks'
-import { ProjectDataType } from '../lib/types'
+import { ProjectDataType, CommitteeDataType } from '../lib/types'
 
-interface SearchBarProps {
+interface SearchBarProps<T> {
   placeholder: string
   searchEndpoint: string
   // eslint-disable-next-line no-unused-vars
-  onSearchResult: (results: ProjectDataType | null) => void
-  defaultResults: ProjectDataType | null
+  onSearchResult: (results: T | null) => void
+  defaultResults: T | null
+  currentPage: number
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
+const SearchBar = <T extends ProjectDataType | CommitteeDataType>({
   placeholder,
   searchEndpoint,
   onSearchResult,
   defaultResults,
-}) => {
+  currentPage,
+}: SearchBarProps<T>) => {
   const [query, setQuery] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+  const [totalPages, setTotalPages] = useState<number>(1)
 
   const debouncedQuery = useDebounce(query, 500)
 
@@ -28,6 +31,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     async (searchQuery: string) => {
       if (!searchQuery.trim()) {
         onSearchResult(defaultResults)
+        setTotalPages(1)
         return
       }
 
@@ -35,11 +39,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setError(null)
       try {
         const response = await axios.get(searchEndpoint, {
-          params: { q: searchQuery },
+          params: { q: searchQuery, page: currentPage },
         })
 
-        const defaultresults = response.data
-        onSearchResult(defaultresults)
+        const searchResults = response.data
+        onSearchResult(searchResults)
+        setTotalPages(searchResults.total_pages || 1)
       } catch (err) {
         console.error('Search error:', err)
         setError('Failed to fetch search results. Please try again.')
@@ -48,12 +53,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setLoading(false)
       }
     },
-    [defaultResults, onSearchResult, searchEndpoint]
+    [defaultResults, onSearchResult, searchEndpoint, currentPage]
   )
 
   useEffect(() => {
     performSearch(debouncedQuery)
-  }, [debouncedQuery, performSearch])
+  }, [debouncedQuery, performSearch, currentPage])
 
   return (
     <div className="mx-auto mt-8 w-full max-w-md">
@@ -121,6 +126,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <p className="mt-2 text-sm text-red-600" role="alert">
           {error}
         </p>
+      )}
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center space-x-2">
+          <span className="text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
+        </div>
       )}
     </div>
   )

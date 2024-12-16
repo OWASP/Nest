@@ -1,6 +1,7 @@
 export interface ProjectDataType {
   active_projects_count: number
   projects: project[]
+  total_pages: number
 }
 
 export type project = {
@@ -83,4 +84,5 @@ export interface CommitteeType {
 export interface CommitteeDataType {
   active_committees_count: number
   committees: CommitteeType[]
+  total_pages: number
 }
