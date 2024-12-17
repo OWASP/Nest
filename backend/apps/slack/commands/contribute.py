@@ -44,8 +44,11 @@ def handler(ack, command, client):
             "idx_url",
         ]
         if issues := get_issues(
-            command_text, attributes=attributes, distinct=not command_text, limit=10
-        ):
+            command_text,
+            attributes=attributes,
+            distinct=not command_text,
+            limit=10,
+        )["hits"]:
             blocks = [
                 markdown(
                     (

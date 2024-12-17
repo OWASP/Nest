@@ -40,7 +40,11 @@ def handler(ack, command, client):
         "idx_updated_at",
         "idx_url",
     ]
-    if projects := get_projects(search_query, attributes=attributes, limit=10):
+    if projects := get_projects(
+        search_query,
+        attributes=attributes,
+        limit=10,
+    )["hits"]:
         blocks = [
             markdown(
                 (
