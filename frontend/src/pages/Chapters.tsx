@@ -25,7 +25,7 @@ export default function Chapters() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
-      <div className="-mt-6 flex h-fit w-full flex-col items-center justify-normal gap-4">
+      <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
         {chapterData &&
           chapterData.chapters.map((chapter, index) => {
             const formattedUrls = handleSocialUrls(chapter.idx_related_urls)
