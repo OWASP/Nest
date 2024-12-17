@@ -4,8 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --host --port 3000",
-    "build": "tsc -b && vite build",
+    "dev": "cross-env VITE_APPLICATION_ENV=development vite --host --port 3000",
+    "build": "cross-env VITE_APPLICATION_ENV=production vite build",
     "format": "prettier --log-level warn --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --config eslint.config.js --fix",
