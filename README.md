@@ -132,5 +132,5 @@ If you encounter permission issues while running the `make run` command, follow 
    ```bash
    npm install
    ```
-   
+
 This should resolve any permission-related issues and ensure the frontend dependencies are installed correctly.
