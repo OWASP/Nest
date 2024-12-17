@@ -5,6 +5,7 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { ChapterDataType } from '../lib/types'
 import { handleSocialUrls } from '../lib/utils'
 import { API_URL } from '../utils/credentials'
+import logger from '../utils/logger'
 
 export default function Chapters() {
   const [chapterData, setChapterData] = useState<ChapterDataType | null>(null)
@@ -17,7 +18,7 @@ export default function Chapters() {
         const data = await response.json()
         setChapterData(data)
       } catch (error) {
-        console.error(error)
+        logger.error(error)
       }
     }
     fetchApiData()

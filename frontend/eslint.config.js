@@ -62,6 +62,8 @@ export default [
           'newlines-between': 'always',
         },
       ],
+      'no-console': 'error',
     },
+    ignores: ['src/utils/*'],
   },
 ]

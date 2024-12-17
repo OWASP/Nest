@@ -3,7 +3,10 @@ import { defineConfig } from 'vite'
 import EnvironmentPlugin from 'vite-plugin-environment'
 
 export default defineConfig({
-  plugins: [react(), EnvironmentPlugin(['VITE_NEST_API_URL', 'VITE_APPLICATION_ENV'])],
+  plugins: [
+    react(),
+    EnvironmentPlugin(['VITE_NEST_API_URL', 'VITE_NEST_SENTRY_DSN_URL', 'VITE_NEST_ENV']),
+  ],
   server: {
     watch: {
       usePolling: true,
