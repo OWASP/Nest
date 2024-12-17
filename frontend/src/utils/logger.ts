@@ -7,7 +7,7 @@ import { APPLICATION_ENV } from './credentials'
  * Sentry integration should be implemented here to ensure centralized and scalable error handling.
  */
 
-const logger = {
+export const logger = {
   log: (...args: unknown[]) => {
     if (APPLICATION_ENV === 'development') {
       // Development logging: Output general information to the console.
