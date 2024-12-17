@@ -56,11 +56,26 @@ class ProjectIndexMixin(GenericEntityMixin):
     def idx_repository_descriptions(self):
         """Return repository descriptions for indexing.
 
-        Limit to non-empty descriptions of first 5 most recently updated repositories.
+        Description of the default OWASP project repository + 4 most recently updated repositories.
         """
-        return [
+        return [self.owasp_repository.description] + [
             repository.description
-            for repository in self.repositories.exclude(description="").order_by("-updated_at")[:5]
+            for repository in self.repositories.exclude(id=self.owasp_repository.id)
+            .exclude(description="")
+            .order_by("-updated_at")[:4]
+        ]
+
+    @property
+    def idx_repository_names(self):
+        """Return repository names for indexing.
+
+        Name of the default OWASP project repository + 4 most recently updated repositories.
+        """
+        return [self.owasp_repository.name] + [
+            repository.name
+            for repository in self.repositories.exclude(id=self.owasp_repository.id)
+            .exclude(name="")
+            .order_by("-updated_at")[:4]
         ]
 
     @property

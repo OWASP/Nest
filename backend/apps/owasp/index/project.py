@@ -26,6 +26,7 @@ class ProjectIndex(AlgoliaIndex, IndexSynonymsMixin):
         "idx_name",
         "idx_organizations",
         "idx_repository_descriptions",
+        "idx_repository_names",
         "idx_stars_count",
         "idx_summary",
         "idx_tags",
@@ -56,7 +57,7 @@ class ProjectIndex(AlgoliaIndex, IndexSynonymsMixin):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_repository_descriptions)",
+            "unordered(idx_repository_descriptions, idx_repository_names)",
             "unordered(idx_custom_tags, idx_languages, idx_tags, idx_topics)",
             "unordered(idx_description)",
             "unordered(idx_companies, idx_organizations)",

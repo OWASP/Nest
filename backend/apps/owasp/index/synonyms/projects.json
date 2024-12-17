@@ -1,5 +1,9 @@
 [
   {
     "synonyms": ["penetration testing", "pentest", "pentesting"]
+  },
+  {
+    "synonyms": ["top10", "top 10", "top-10", "top ten", "top-ten"]
   }
+
 ]
