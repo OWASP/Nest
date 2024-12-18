@@ -1205,13 +1205,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.57.4"
+version = "1.58.1"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openai-1.57.4-py3-none-any.whl", hash = "sha256:7def1ab2d52f196357ce31b9cfcf4181529ce00838286426bb35be81c035dafb"},
-    {file = "openai-1.57.4.tar.gz", hash = "sha256:a8f071a3e9198e2818f63aade68e759417b9f62c0971bdb83de82504b70b77f7"},
+    {file = "openai-1.58.1-py3-none-any.whl", hash = "sha256:e2910b1170a6b7f88ef491ac3a42c387f08bd3db533411f7ee391d166571d63c"},
+    {file = "openai-1.58.1.tar.gz", hash = "sha256:f5a035fd01e141fc743f4b0e02c41ca49be8fab0866d3b67f5f29b4f4d3c0973"},
 ]
 
 [package.dependencies]
@@ -1226,6 +1226,7 @@ typing-extensions = ">=4.11,<5"
 
 [package.extras]
 datalib = ["numpy (>=1)", "pandas (>=1.2.3)", "pandas-stubs (>=1.1.0.11)"]
+realtime = ["websockets (>=13,<15)"]
 
 [[package]]
 name = "packaging"
@@ -2157,4 +2158,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "fc35a6d66304e380501148e498795bb110306037bd12a0c7a21fe9e383075bfb"
+content-hash = "675f5a3300eba10ca4c33315489876bd1874f99253956d8ad9982de85d5491a8"
