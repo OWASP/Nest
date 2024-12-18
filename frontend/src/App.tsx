@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 
 import Footer from './components/Footer'
 import Header from './components/Header'
-import { Chapters, Committees, Home, Projects } from './pages'
+import { Home, ProjectsComponent, CommitteesComponent, ChaptersComponent } from './pages'
 
 function App() {
   return (
@@ -10,9 +10,9 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />}></Route>
-        <Route path="/projects" element={<Projects />}></Route>
-        <Route path="/committees" element={<Committees />}></Route>
-        <Route path="/chapters" element={<Chapters />}></Route>
+        <Route path="/projects" element={<ProjectsComponent />}></Route>
+        <Route path="/committees" element={<CommitteesComponent />}></Route>
+        <Route path="/chapters" element={<ChaptersComponent />}></Route>
       </Routes>
       <Footer />
     </main>
