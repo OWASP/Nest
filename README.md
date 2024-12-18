@@ -104,3 +104,39 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
    ```bash
    make sync
    ```
+
+### Troubleshooting Guide for Windows Users
+
+This troubleshooting section is tailored for Windows users.
+
+#### 1. Ensure WSL is Installed
+
+The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system. If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+
+#### 2. Install the `make` Command
+
+When running the `make` command for the first time, you may be prompted to install the `make` tool. Run the following commands in your WSL terminal to install it:
+
+```bash
+sudo apt update
+sudo apt install make
+```
+
+### Resolving Frontend Permission Issues
+
+If you encounter permission issues while running the `make run` command, follow these steps:
+
+1. Open a new terminal.
+2. Navigate to the frontend directory by running:
+
+   ```bash
+   cd frontend
+   ```
+
+3. Install the necessary dependencies by running:
+
+   ```bash
+   npm install
+   ```
+
+This should resolve any permission-related issues and ensure the frontend dependencies are installed correctly.
