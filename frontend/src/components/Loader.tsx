@@ -1,12 +1,11 @@
 import React from 'react'
 
 interface LoaderProps {
-  imageUrl: string // Single prop for both images
+  imageUrl: string
 }
 
 const Loader: React.FC<LoaderProps> = ({ imageUrl }) => {
   const dark = imageUrl.replace('white', 'black')
-  console.log(dark)
   return (
     <div
       className="relative h-16 w-16 animate-spin rounded-full border-4 border-[#98AFC7] dark:border-white"

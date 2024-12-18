@@ -20,7 +20,7 @@ export type project = {
   idx_summary: string
   idx_topics: string[]
   idx_type: string
-  idx_updated_at: number // UNIX timestamp
+  idx_updated_at: number
   idx_url: string
   objectID: string
 }
