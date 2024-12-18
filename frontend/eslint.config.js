@@ -64,6 +64,6 @@ export default [
       ],
       'no-console': 'error',
     },
-    ignores: ['src/utils/*'],
+    ignores: ['src/utils/logger.ts'],
   },
 ]

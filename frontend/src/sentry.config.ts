@@ -9,13 +9,8 @@ Sentry.init({
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
-  beforeSend(event) {
-    if (event.user) {
-      delete event.user.email
-    }
-    return event
-  },
 })
 
 export const logException = (error: Error) => Sentry.captureException(error)
-export const logMessage = (message: string) => Sentry.captureMessage(message)
+export const logCriticalMessage = (message: string) =>
+  Sentry.captureMessage(message, { level: 'warning' })
