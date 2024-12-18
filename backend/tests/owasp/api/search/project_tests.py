@@ -2,22 +2,20 @@ import json
 from unittest.mock import patch
 
 import pytest
+import requests
 from django.http import HttpRequest, JsonResponse
 
-from apps.owasp.api.search.committee import committees, get_committees
-from apps.owasp.models.committee import Committee
+from apps.owasp.api.search.project import get_projects, projects
+from apps.owasp.models.project import Project
 
 # Test data for parametrized tests
-MOCKED_COORDINATES = (37.7749, -122.4194)
-MOCKED_USER_IP = "127.0.0.1"
 MOCKED_HITS = {
     ("hits"): [
-        {"idx_name": "OWASP San Francisco", "idx_url": "https://owasp.sf"},
-        {"idx_name": "OWASP New York", "idx_url": "https://owasp.ny"},
+        {"idx_name": "OWASP Amass", "idx_url": "https://owasp.org/www-project-amass/"},
+        {"idx_name": "OWASP Juice Shop", "idx_url": "https://owasp.org/www-project-juice-shop/"},
     ],
     ("nbPages"): 5,
 }
-STATUS_CODE_200 = 200
 
 
 @pytest.mark.parametrize(
@@ -28,13 +26,13 @@ STATUS_CODE_200 = 200
         ("", 1, MOCKED_HITS),  # Edge case: empty query
     ],
 )
-def test_get_committees(query, page, expected_hits):
+def test_get_projects(query, page, expected_hits):
     # Use context managers for mocking
     with patch(
-        "apps.owasp.api.search.committee.raw_search", return_value=expected_hits
+        "apps.owasp.api.search.project.raw_search", return_value=expected_hits
     ) as mock_raw_search:
         # Call function
-        result = get_committees(query=query, page=page)
+        result = get_projects(query=query, page=page)
 
         # Assertions
         mock_raw_search.assert_called_once()
@@ -48,38 +46,38 @@ def test_get_committees(query, page, expected_hits):
             "security",
             1,
             {
-                "active_committees_count": 10,
-                "committees": MOCKED_HITS["hits"],
+                "active_projects_count": 10,
+                "projects": MOCKED_HITS["hits"],
                 "total_pages": MOCKED_HITS["nbPages"],
             },
         ),
     ],
 )
-def test_committees(query, page, expected_response):
+def test_projects(query, page, expected_response):
     # Create a mock request
     request = HttpRequest()
     request.GET = {"q": query, "page": str(page)}
 
     # Use context managers for mocking
     with (
-        patch.object(Committee, "active_committees_count", return_value=10) as mock_active_count,
+        patch.object(Project, "active_projects_count", return_value=10) as mock_active_count,
         patch(
-            "apps.owasp.api.search.committee.get_committees", return_value=MOCKED_HITS
-        ) as mock_get_committees,
+            "apps.owasp.api.search.project.get_projects", return_value=MOCKED_HITS
+        ) as mock_get_projects,
     ):
         # Call function
-        response = committees(request)
+        response = projects(request)
 
         # Assertions
         assert isinstance(response, JsonResponse)
-        assert response.status_code == STATUS_CODE_200
+        assert response.status_code == requests.codes.ok
 
         # Parse the JSON content instead of using .json()
         response_data = json.loads(response.content)
         assert response_data == expected_response
 
         # Verify mock calls
-        mock_get_committees.assert_called_once_with(
+        mock_get_projects.assert_called_once_with(
             query=query,
             page=page,
         )
