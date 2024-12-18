@@ -11,8 +11,14 @@ from apps.owasp.models.committee import Committee
 # Test data for parametrized tests
 MOCKED_HITS = {
     ("hits"): [
-        {"idx_name": "OWASP Education and Training Committee", "idx_url": "https://owasp.org/www-committee-education-and-training/"},
-        {"idx_name": "OWASP Chapter Committee", "idx_url": "https://owasp.org/www-committee-chapter/"},
+        {
+            "idx_name": "OWASP Education and Training Committee",
+            "idx_url": "https://owasp.org/www-committee-education-and-training/",
+        },
+        {
+            "idx_name": "OWASP Chapter Committee",
+            "idx_url": "https://owasp.org/www-committee-chapter/",
+        },
     ],
     ("nbPages"): 5,
 }

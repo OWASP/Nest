@@ -11,8 +11,18 @@ from apps.owasp.api.search.issue import get_issues, project_issues
 # Test data for parametrized tests
 MOCKED_HITS = {
     ("hits"): [
-        {"idx_project_name": "OWASP CycloneDX","idx_project_url":"https://owasp.org/www-project-cyclonedx/","idx_title": "string contains null byte", "idx_url": "https://github.com/CycloneDX/cyclonedx-cocoapods/issues/85"},
-        {"idx_project_name": "OWASP Nest","idx_project_url":"https://owasp.org/www-project-nest/","idx_name": "Increase slackbot test coverage", "idx_url": "https://github.com/OWASP/Nest/issues/193"},
+        {
+            "idx_project_name": "OWASP CycloneDX",
+            "idx_project_url": "https://owasp.org/www-project-cyclonedx/",
+            "idx_title": "string contains null byte",
+            "idx_url": "https://github.com/CycloneDX/cyclonedx-cocoapods/issues/85",
+        },
+        {
+            "idx_project_name": "OWASP Nest",
+            "idx_project_url": "https://owasp.org/www-project-nest/",
+            "idx_name": "Increase slackbot test coverage",
+            "idx_url": "https://github.com/OWASP/Nest/issues/193",
+        },
     ],
     ("nbPages"): 4,
 }

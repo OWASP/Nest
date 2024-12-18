@@ -19,6 +19,7 @@ MOCKED_HITS = {
     ("nbPages"): 5,
 }
 
+
 @pytest.mark.parametrize(
     ("query", "page", "expected_hits"),
     [
@@ -33,7 +34,7 @@ def test_get_chapters(query, page, expected_hits):
         "apps.owasp.api.search.chapter.raw_search", return_value=expected_hits
     ) as mock_raw_search:
         # Call function
-        result = get_chapters(query=query, meta={"REMOTE_ADDR": MOCKED_USER_IP},page=int(page),)
+        result = get_chapters(query=query, meta={"REMOTE_ADDR": MOCKED_USER_IP}, page=int(page))
 
         # Assertions
         mock_raw_search.assert_called_once()
