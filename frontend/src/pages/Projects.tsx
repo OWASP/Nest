@@ -51,7 +51,7 @@ const ProjectsPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-normal p-4">
+    <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
       <SearchBar onSearch={handleSearch} placeholder="Search for OWASP projects..." />
       {!isLoaded ? (
         <div className="bg-background/50 fixed inset-0 flex items-center justify-center">
