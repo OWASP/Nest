@@ -1,10 +1,10 @@
 import React from 'react'
 
-interface LoaderProps {
+interface LoadingSpinnerProps {
   imageUrl: string
 }
 
-const Loader: React.FC<LoaderProps> = ({ imageUrl }) => {
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ imageUrl }) => {
   const dark = imageUrl.replace('white', 'black')
   return (
     <div
@@ -35,4 +35,4 @@ const Loader: React.FC<LoaderProps> = ({ imageUrl }) => {
   )
 }
 
-export default Loader
+export default LoadingSpinner

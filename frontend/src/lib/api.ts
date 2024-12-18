@@ -8,6 +8,5 @@ export const loadData = async <T>(
   if (!response.ok) {
     throw new Error(`Failed to fetch data: ${response.statusText}`)
   }
-  const data: T = await response.json()
-  return data
+  return await response.json()
 }

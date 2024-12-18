@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import Card from '../components/Card'
-import Loader from '../components/Loader'
+import LoadingSpinner from '../components/Loader'
 import Pagination from '../components/Pagination'
 import SearchBar from '../components/Search'
 import { loadData } from '../lib/api'
@@ -9,7 +9,7 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { CommitteeDataType, CommitteeType } from '../lib/types'
 import { getFilteredIcons, handleSocialUrls } from '../lib/utils'
 
-const CommitteesComponent = () => {
+const CommitteesPage = () => {
   const [Committees, setCommittees] = useState<CommitteeType[]>([])
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -49,15 +49,15 @@ const CommitteesComponent = () => {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text md:p-20">
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar onSearch={handleSearch} placeholder="Search for OWASP committees..." />
       {!isLoaded ? (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center p-5 text-text">
-          <Loader imageUrl="../public/img/owasp_icon_white_sm.png" />
+        <div className="bg-background/50 fixed inset-0 flex items-center justify-center">
+          <LoadingSpinner imageUrl="../public/img/owasp_icon_white_sm.png" />
         </div>
       ) : (
         <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
-          {totalPages <= 0 && (
-            <div className="text bg:text-white m-4 text-xl"> no Pages found </div>
+          {totalPages === 0 && (
+            <div className="text bg:text-white m-4 text-xl"> No committees found </div>
           )}
           {Committees &&
             Committees?.map((committee, index) => {
@@ -97,4 +97,4 @@ const CommitteesComponent = () => {
     </div>
   )
 }
-export default CommitteesComponent
+export default CommitteesPage

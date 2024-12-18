@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 import Card from '../components/Card'
 import { level } from '../components/data'
-import Loader from '../components/Loader'
+import LoadingSpinner from '../components/Loader'
 import Pagination from '../components/Pagination'
 import SearchBar from '../components/Search'
 import { loadData } from '../lib/api'
@@ -10,7 +10,7 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { project, ProjectDataType } from '../lib/types'
 import { getFilteredIcons } from '../lib/utils'
 
-const ProjectsComponent = () => {
+const ProjectsPage = () => {
   const [projects, setProjects] = useState<project[]>([])
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalPages, setTotalPages] = useState<number>(0)
@@ -52,15 +52,15 @@ const ProjectsComponent = () => {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-normal p-4">
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar onSearch={handleSearch} placeholder="Search for OWASP projects..." />
       {!isLoaded ? (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center p-5 text-text">
-          <Loader imageUrl="../public/img/owasp_icon_white_sm.png" />
+        <div className="bg-background/50 fixed inset-0 flex items-center justify-center">
+          <LoadingSpinner imageUrl="../public/img/owasp_icon_white_sm.png" />
         </div>
       ) : (
         <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
-          {totalPages <= 0 && (
-            <div className="text bg:text-white m-4 text-xl"> no Pages found </div>
+          {totalPages === 0 && (
+            <div className="text bg:text-white m-4 text-xl"> No projects found </div>
           )}
           {projects &&
             projects?.map((project, index) => {
@@ -108,4 +108,4 @@ const ProjectsComponent = () => {
   )
 }
 
-export default ProjectsComponent
+export default ProjectsPage
