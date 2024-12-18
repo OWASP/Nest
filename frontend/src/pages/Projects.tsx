@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 import Card from '../components/Card'
 import { level } from '../components/data'
-import LoadingSpinner from '../components/Loader'
+import LoadingSpinner from '../components/LoadingSpinner'
 import Pagination from '../components/Pagination'
 import SearchBar from '../components/Search'
 import { loadData } from '../lib/api'
