@@ -30,5 +30,4 @@ def test_committee_serializer_validation(data, expected):
     serializer = CommitteeSerializer(data=data)
     is_valid = serializer.is_valid()
 
-    # Assert that the result matches the expected outcome
     assert is_valid == expected

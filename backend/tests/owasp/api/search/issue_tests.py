@@ -8,7 +8,6 @@ from django.http import HttpRequest, JsonResponse
 from apps.github.models.issue import Issue
 from apps.owasp.api.search.issue import get_issues, project_issues
 
-# Test data for parametrized tests
 MOCKED_HITS = {
     ("hits"): [
         {
@@ -33,18 +32,15 @@ MOCKED_HITS = {
     [
         ("security", 1, MOCKED_HITS),
         ("web", 2, MOCKED_HITS),
-        ("", 1, MOCKED_HITS),  # Edge case: empty query
+        ("", 1, MOCKED_HITS),
     ],
 )
 def test_get_issues(query, page, expected_hits):
-    # Use context managers for mocking
     with patch(
         "apps.owasp.api.search.issue.raw_search", return_value=expected_hits
     ) as mock_raw_search:
-        # Call function
         result = get_issues(query, page=page, distinct=False)
 
-        # Assertions
         mock_raw_search.assert_called_once()
         assert result == expected_hits
 
@@ -64,28 +60,22 @@ def test_get_issues(query, page, expected_hits):
     ],
 )
 def test_issues(query, page, expected_response):
-    # Create a mock request
     request = HttpRequest()
     request.GET = {"q": query, "page": str(page)}
 
-    # Use context managers for mocking
     with (
         patch.object(Issue, "open_issues_count", return_value=10) as mock_active_count,
         patch(
             "apps.owasp.api.search.issue.get_issues", return_value=MOCKED_HITS
         ) as mock_get_issues,
     ):
-        # Call function
         response = project_issues(request)
 
-        # Assertions
         assert isinstance(response, JsonResponse)
         assert response.status_code == requests.codes.ok
 
-        # Parse the JSON content instead of using .json()
         response_data = json.loads(response.content)
         assert response_data == expected_response
 
-        # Verify mock calls
         mock_get_issues.assert_called_once_with(query, page=page, distinct=False)
         mock_active_count.assert_called_once()

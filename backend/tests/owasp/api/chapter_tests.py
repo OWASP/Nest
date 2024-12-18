@@ -32,5 +32,4 @@ def test_chapter_serializer_validation(data, expected):
     serializer = ChapterSerializer(data=data)
     is_valid = serializer.is_valid()
 
-    # Assert that the result matches the expected outcome
     assert is_valid == expected
