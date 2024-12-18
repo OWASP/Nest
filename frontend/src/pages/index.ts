@@ -2,9 +2,9 @@
  * This file is used to export all the pages in the pages folder.
  */
 
-import Chapters from './Chapters'
-import Committees from './Committees'
+import ChaptersComponent from './Chapters'
+import CommitteesComponent from './Committees'
 import Home from './Home'
-import Projects from './Projects'
+import ProjectsComponent from './Projects'
 
-export { Home, Projects, Committees, Chapters }
+export { Home, ProjectsComponent, CommitteesComponent, ChaptersComponent }
