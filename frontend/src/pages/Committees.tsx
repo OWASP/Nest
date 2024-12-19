@@ -8,6 +8,7 @@ import { loadData } from '../lib/api'
 import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { CommitteeDataType, CommitteeType } from '../lib/types'
 import { getFilteredIcons, handleSocialUrls } from '../lib/utils'
+import { logger } from '../utils/logger'
 
 const CommitteesPage = () => {
   const [Committees, setCommittees] = useState<CommitteeType[]>([])
@@ -28,7 +29,7 @@ const CommitteesPage = () => {
         setCommittees(data.committees)
         setTotalPages(data.total_pages)
       } catch (error) {
-        console.error(error)
+        logger.error(error)
       }
       setIsLoaded(true)
     }

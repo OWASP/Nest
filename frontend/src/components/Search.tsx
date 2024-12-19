@@ -1,6 +1,7 @@
 import { debounce } from 'lodash'
 import { Search, X } from 'lucide-react'
 import React, { useCallback, useRef, useState } from 'react'
+
 interface SearchProps {
   // eslint-disable-next-line no-unused-vars
   onSearch: (query: string) => void

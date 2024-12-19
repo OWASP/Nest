@@ -9,6 +9,7 @@ import { loadData } from '../lib/api'
 import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { project, ProjectDataType } from '../lib/types'
 import { getFilteredIcons } from '../lib/utils'
+import { logger } from '../utils/logger'
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<project[]>([])
@@ -30,7 +31,7 @@ const ProjectsPage = () => {
         setProjects(data.projects)
         setTotalPages(data.total_pages)
       } catch (error) {
-        console.error(error)
+        logger.error(error)
       }
       setIsLoaded(true)
     }

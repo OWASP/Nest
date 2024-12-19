@@ -8,6 +8,7 @@ import { loadData } from '../lib/api'
 import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { ChapterDataType, ChapterType } from '../lib/types'
 import { handleSocialUrls } from '../lib/utils'
+import logger from '../utils/logger'
 
 const ChaptersPage = () => {
   const [chapterData, setChapterData] = useState<ChapterType[]>([])
@@ -29,7 +30,7 @@ const ChaptersPage = () => {
         setChapterData(data.chapters)
         setTotalPages(data.total_pages)
       } catch (error) {
-        console.error(error)
+        logger.error(error)
       }
       setIsLoaded(true)
     }
