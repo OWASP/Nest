@@ -21,6 +21,18 @@ services:
     volumes:
       - ./data:/home/owasp/data
 
+  frontend:
+    container_name: nest-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.staging
+    env_file: ./frontend/.env
+    restart: unless-stopped
+    networks:
+      - nest_app_network
+    expose:
+      - "80"
+
   certbot:
     container_name: nest-certbot
     image: certbot/certbot
@@ -61,10 +73,11 @@ services:
       - '443:443'
     volumes:
       - ./letsencrypt:/etc/letsencrypt
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/staging.conf:/etc/nginx/conf.d/default.conf
       - certbot-webroot:/var/www/certbot
     depends_on:
       - backend
+      - frontend
     networks:
       - nest_app_network
 
