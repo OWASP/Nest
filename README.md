@@ -5,7 +5,7 @@
 Follow these steps to set up the OWASP Nest application:
 
 1. **Fork the Repository**:
-   - Fork https://github.com/OWASP/Nest repository using "Fork" button
+   - Fork <https://github.com/OWASP/Nest> repository using "Fork" button
 
 1. **Clone the Repository**:
    - Clone the repository code from your GitHub account using the following command:
@@ -24,14 +24,21 @@ Follow these steps to set up the OWASP Nest application:
    - Copy the contents from the template file into your new local environment file:
 
      ```bash
-     cp backend/.env/template backend/.env/local
+     cat backend/.env/template > backend/.env/local
      ```
 
    - Create a local environment file in the `frontend` directory:
 
      ```bash
-     cp frontend/.env.example frontend/.env
+     touch frontend/.env
      ```
+
+   - Copy the contents from the template file into your new local environment file:
+
+     ```bash
+     cat frontend/.env.example > frontend/.env
+     ```
+
 
 1. **Configure Environment Variables**:
    - Open the `backend/.env/local` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
@@ -125,8 +132,10 @@ Check `Resources -- WSL integration` in Docker application settings.
 When running the `make` command for the first time, you may be prompted to install the `make` tool. Run the following commands in your WSL terminal to install it:
 
 ```bash
-sudo apt update
-sudo apt install make
+$ sudo apt update
+...
+$ sudo apt install make
+...
 ```
 
 ### Resolving Frontend Permission Issues
