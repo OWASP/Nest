@@ -1,34 +1,59 @@
+import React, { act } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
-
 import '@testing-library/jest-dom'
-import { Projects } from '../../../src/pages'
+import { ProjectsPage } from '../../../src/pages'
+import { loadData } from '../../../src/lib/api'
 import mockProjectData from '../data/mockProjectData'
 
-process.env.VITE_NEST_API_URL = 'https://mock-api.com'
-global.fetch = jest.fn()
+jest.mock('../../../src/lib/api', () => ({
+  loadData: jest.fn(),
+}))
 
-describe('Projects Component', () => {
+jest.mock('../../../src/utils/credentials', () => ({
+  API_URL: 'https://mock-api.com',
+}))
+
+describe('ProjectPage Component', () => {
   beforeEach(() => {
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => mockProjectData,
-    })
+    ;(loadData as jest.Mock).mockResolvedValue(mockProjectData)
   })
 
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  test('renders project data correctly', async () => {
-    render(<Projects />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Project 1')).toBeInTheDocument()
+  it('renders loading spinner initially', () => {
+    act(() => {
+      render(<ProjectsPage />)
     })
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    expect(loadingSpinner.length).toBeGreaterThan(0)
+  })
+
+  it('renders project data correctly', async () => {
+    await act(async () => {
+      render(<ProjectsPage />)
+    })
+
+    expect(screen.getByText('Project 1')).toBeInTheDocument()
 
     expect(screen.getByText('This is a summary of Project 1.')).toBeInTheDocument()
 
-    const contributeButton = screen.getByText('Contribute')
-    expect(contributeButton).toBeInTheDocument()
+    expect(screen.getByText('Leader 1')).toBeInTheDocument()
+
+    const viewButton = screen.getByText('Contribute')
+    expect(viewButton).toBeInTheDocument()
+  })
+
+  it('displays "No projects found" when there are no projects', async () => {
+    ;(loadData as jest.Mock).mockResolvedValue({ ...mockProjectData, projects: [], total_pages: 0 })
+
+    await act(async () => {
+      render(<ProjectsPage />)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('No projects found')).toBeInTheDocument()
+    })
   })
 })
