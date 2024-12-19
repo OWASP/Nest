@@ -1,60 +1,70 @@
 import axios from 'axios'
-import React, { useState, useEffect, useCallback } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { useDebounce } from '../lib/hooks'
-import { ProjectDataType } from '../lib/types'
+import { ChapterDataType, CommitteeDataType, ProjectDataType } from '../lib/types'
 import logger from '../utils/logger'
 
-interface SearchBarProps {
+type SearchResultType = ProjectDataType | CommitteeDataType | ChapterDataType | null
+
+interface SearchBarProps<T extends SearchResultType> {
   placeholder: string
   searchEndpoint: string
-  // eslint-disable-next-line no-unused-vars
-  onSearchResult: (results: ProjectDataType | null) => void
-  defaultResults: ProjectDataType | null
+  onSearchResult: Dispatch<SetStateAction<T>>
+  defaultResults: T
+  initialQuery?: string
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
+const SearchBar = <T extends SearchResultType>({
   placeholder,
   searchEndpoint,
   onSearchResult,
   defaultResults,
-}) => {
-  const [query, setQuery] = useState<string>('')
+  initialQuery = '',
+}: SearchBarProps<T>) => {
+  const [query, setQuery] = useState<string>(initialQuery)
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
+  useEffect(() => {
+    if (initialQuery.trim()) {
+      setQuery(initialQuery)
+    }
+  }, [initialQuery])
+
   const debouncedQuery = useDebounce(query, 500)
 
-  const performSearch = useCallback(
-    async (searchQuery: string) => {
-      if (!searchQuery.trim()) {
-        onSearchResult(defaultResults)
-        return
-      }
+  const performSearch = async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      onSearchResult(defaultResults)
+      return
+    }
 
-      setLoading(true)
-      setError(null)
-      try {
-        const response = await axios.get(searchEndpoint, {
-          params: { q: searchQuery },
-        })
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await axios.get(searchEndpoint, {
+        params: { q: searchQuery },
+      })
 
-        const defaultresults = response.data
-        onSearchResult(defaultresults)
-      } catch (err) {
-        logger.error('Search error:', err)
-        setError('Failed to fetch search results. Please try again.')
-        onSearchResult(defaultResults)
-      } finally {
-        setLoading(false)
-      }
-    },
-    [defaultResults, onSearchResult, searchEndpoint]
-  )
+      const results = response.data.data || response.data
+      onSearchResult(results)
+    } catch (err) {
+      setError('Failed to fetch search results. Please try again.')
+      logger.error(err)
+      onSearchResult(defaultResults)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    performSearch(debouncedQuery)
-  }, [debouncedQuery, performSearch])
+    if (debouncedQuery.trim()) {
+      performSearch(debouncedQuery)
+    } else {
+      onSearchResult(defaultResults)
+    }
+  }, [debouncedQuery])
 
   return (
     <div className="mx-auto mt-8 w-full max-w-md">
@@ -71,7 +81,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
           className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pr-12 text-gray-700 transition-all duration-300 ease-in-out focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={loading}
         />
         <button
           type="submit"
