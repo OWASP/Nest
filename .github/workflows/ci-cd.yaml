@@ -60,9 +60,9 @@ jobs:
         working-directory: frontend
         run: npm run format
 
-      - name: Run npm lint
+      - name: Run npm lint check
         working-directory: frontend
-        run: npm run lint
+        run: npm run lint:check
 
 
   code-ql:

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 
 import { useDebounce } from '../lib/hooks'
 import { ProjectDataType } from '../lib/types'
+import logger from '../utils/logger'
 
 interface SearchBarProps {
   placeholder: string
@@ -41,7 +42,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         const defaultresults = response.data
         onSearchResult(defaultresults)
       } catch (err) {
-        console.error('Search error:', err)
+        logger.error('Search error:', err)
         setError('Failed to fetch search results. Please try again.')
         onSearchResult(defaultResults)
       } finally {

@@ -5,6 +5,7 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { CommitteeDataType } from '../lib/types'
 import { getFilteredIcons, handleSocialUrls } from '../lib/utils'
 import { API_URL } from '../utils/credentials'
+import { logger } from '../utils/logger'
 
 export default function Committees() {
   const [committeeData, setCommitteeData] = useState<CommitteeDataType | null>(null)
@@ -17,7 +18,7 @@ export default function Committees() {
         const data = await response.json()
         setCommitteeData(data)
       } catch (error) {
-        console.error(error)
+        logger.error(error)
       }
     }
     fetchApiData()

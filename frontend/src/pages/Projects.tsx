@@ -7,6 +7,7 @@ import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { ProjectDataType } from '../lib/types'
 import { getFilteredIcons } from '../lib/utils'
 import { API_URL } from '../utils/credentials.ts'
+import { logger } from '../utils/logger'
 
 export default function Projects() {
   const [projectData, setProjectData] = useState<ProjectDataType | null>(null)
@@ -21,7 +22,7 @@ export default function Projects() {
         setProjectData(data)
         setDefaultProjects(data)
       } catch (error) {
-        console.error(error)
+        logger.error(error)
       }
     }
     fetchApiData()

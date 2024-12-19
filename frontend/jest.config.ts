@@ -10,6 +10,8 @@ export default {
     '!src/reportWebVitals.ts',
     '!src/setupTests.ts',
     '!src/utils/**',
+    '!src/ErrorWrapper.tsx',
+    '!src/sentry.config.ts',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
