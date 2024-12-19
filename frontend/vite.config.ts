@@ -5,7 +5,11 @@ import EnvironmentPlugin from 'vite-plugin-environment'
 export default defineConfig({
   plugins: [
     react(),
-    EnvironmentPlugin(['VITE_NEST_API_URL', 'VITE_NEST_SENTRY_DSN_URL', 'VITE_NEST_ENV']),
+    EnvironmentPlugin({
+      VITE_NEST_API_URL: 'http://localhost:8000/api/v1',
+      VITE_NEST_ENV: 'local',
+      VITE_NEST_SENTRY_DSN_URL: null,
+    }),
   ],
   server: {
     watch: {

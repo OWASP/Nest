@@ -60,7 +60,7 @@ const Card = ({
             </span>
           )}
           <a href={url} target="_blank" rel="noopener noreferrer">
-            <h1 className="pl-2 text-2xl font-semibold dark:text-sky-600">{title}</h1>
+            <h1 className="text-2xl font-semibold dark:text-sky-600">{title}</h1>
           </a>
         </div>
 
