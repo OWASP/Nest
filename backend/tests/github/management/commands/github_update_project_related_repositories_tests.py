@@ -1,15 +1,18 @@
-import pytest
 from unittest.mock import MagicMock
-from apps.github.management.commands.github_update_project_related_repositories import Command
+
+import pytest
+
+from apps.github.management.commands.github_update_project_related_repositories import (
+    Command,
+)
 
 
 @pytest.mark.parametrize(
-    "argument_name, expected_properties",
+    ("argument_name", "expected_properties"),
     [
         ("--offset", {"default": 0, "required": False, "type": int}),
     ],
 )
-
 def test_add_arguments(argument_name, expected_properties):
     mock_parser = MagicMock()
     command = Command()

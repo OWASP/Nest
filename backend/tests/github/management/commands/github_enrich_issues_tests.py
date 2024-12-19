@@ -1,9 +1,12 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from apps.github.management.commands.github_enrich_issues import Command
 
+
 @pytest.mark.parametrize(
-    "argument_name, expected_properties",
+    ("argument_name", "expected_properties"),
     [
         ("--offset", {"default": 0, "required": False, "type": int}),
         ("--force-update-hint", {"default": False, "required": False, "action": "store_true"}),

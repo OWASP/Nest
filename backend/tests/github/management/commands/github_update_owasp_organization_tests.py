@@ -1,9 +1,12 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from apps.github.management.commands.github_update_owasp_organization import Command
 
+
 @pytest.mark.parametrize(
-    "argument_name, expected_properties",
+    ("argument_name", "expected_properties"),
     [
         ("--offset", {"default": 0, "required": False, "type": int}),
         (
