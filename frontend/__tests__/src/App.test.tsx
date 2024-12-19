@@ -8,9 +8,9 @@ import '@testing-library/jest-dom'
 
 jest.mock('../../src/pages', () => ({
   Home: jest.fn(() => <div data-testid="home-page">Home Page</div>),
-  Projects: jest.fn(() => <div data-testid="projects-page">Projects Page</div>),
-  Committees: jest.fn(() => <div data-testid="committees-page">Committees Page</div>),
-  Chapters: jest.fn(() => <div data-testid="chapters-page">Chapters Page</div>),
+  ProjectsPage: jest.fn(() => <div data-testid="projects-page">Projects Page</div>),
+  CommitteesPage: jest.fn(() => <div data-testid="committees-page">Committees Page</div>),
+  ChaptersPage: jest.fn(() => <div data-testid="chapters-page">Chapters Page</div>),
 }))
 
 describe('App Component', () => {
