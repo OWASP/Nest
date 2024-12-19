@@ -1,11 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import '@testing-library/jest-dom'
 import { loadData } from '../../../src/lib/api'
 import { ProjectsPage } from '../../../src/pages'
 import mockProjectData from '../data/mockProjectData'
-
 jest.mock('../../../src/lib/api', () => ({
   loadData: jest.fn(),
 }))
@@ -13,6 +12,13 @@ jest.mock('../../../src/lib/api', () => ({
 jest.mock('../../../src/utils/credentials', () => ({
   API_URL: 'https://mock-api.com',
 }))
+jest.mock('../../../src/components/Pagination', () =>
+  jest.fn(({ currentPage, onPageChange }) => (
+    <div>
+      <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
+    </div>
+  ))
+)
 
 describe('ProjectPage Component', () => {
   beforeEach(() => {
@@ -50,6 +56,19 @@ describe('ProjectPage Component', () => {
     render(<ProjectsPage />)
     await waitFor(() => {
       expect(screen.getByText('No projects found')).toBeInTheDocument()
+    })
+  })
+
+  test('handles page change correctly', async () => {
+    window.scrollTo = jest.fn()
+    render(<ProjectsPage />)
+    await waitFor(() => {
+      const nextPageButton = screen.getByText('Next Page')
+      fireEvent.click(nextPageButton)
+    })
+    expect(window.scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      behavior: 'auto',
     })
   })
 })
