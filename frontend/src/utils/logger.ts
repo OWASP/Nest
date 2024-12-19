@@ -8,7 +8,7 @@ import { APPLICATION_ENV } from '../utils/credentials'
  * - Logs are routed to console...i.e only errors are sent to Sentry
  * - Errors and critical issues are sent to Sentry.
  */
-console.log(APPLICATION_ENV)
+
 export const logger = {
   log: (...args: unknown[]) => {
     const message = args
