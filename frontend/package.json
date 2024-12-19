@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 3000",
-    "build": "tsc -b && vite build",
+    "build": "tsc --noEmit && vite build",
     "format": "prettier --log-level warn --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --config eslint.config.js --fix",
@@ -21,6 +21,9 @@
     "@fortawesome/free-regular-svg-icons": "^6.7.0",
     "@fortawesome/free-solid-svg-icons": "^6.7.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@sentry/browser": "^8.46.0",
+    "@sentry/react": "^8.46.0",
+    "@sentry/tracing": "^7.114.0",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",

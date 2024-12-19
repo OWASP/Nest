@@ -5,6 +5,8 @@ __pycache__
 .coverage
 .coverage
 .env
+.env.*
+!.env.example
 .idea
 .local
 .npm
