@@ -4,7 +4,13 @@ export const loadData = async <T>(
   query: string,
   currentPage: number
 ): Promise<T> => {
-  const response = await fetch(`${API_URL}/${endpoint}?q=${query}&page=${currentPage}`)
+  const response = await fetch(
+    `${API_URL}/${endpoint}?` +
+      new URLSearchParams({
+        q: query,
+        page: currentPage.toString(),
+      }).toString()
+  )
   if (!response.ok) {
     throw new Error(`Failed to fetch data: ${response.statusText}`)
   }
