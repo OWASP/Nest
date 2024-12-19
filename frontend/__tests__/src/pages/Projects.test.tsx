@@ -1,8 +1,9 @@
-import React, { act } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
+
 import '@testing-library/jest-dom'
-import { ProjectsPage } from '../../../src/pages'
 import { loadData } from '../../../src/lib/api'
+import { ProjectsPage } from '../../../src/pages'
 import mockProjectData from '../data/mockProjectData'
 
 jest.mock('../../../src/lib/api', () => ({
@@ -22,20 +23,19 @@ describe('ProjectPage Component', () => {
     jest.clearAllMocks()
   })
 
-  it('renders loading spinner initially', () => {
-    act(() => {
-      render(<ProjectsPage />)
-    })
+  test('renders loading spinner initially', async () => {
+    render(<ProjectsPage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
-    expect(loadingSpinner.length).toBeGreaterThan(0)
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
   })
 
-  it('renders project data correctly', async () => {
-    await act(async () => {
-      render(<ProjectsPage />)
+  test('renders project data correctly', async () => {
+    render(<ProjectsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
     })
-
-    expect(screen.getByText('Project 1')).toBeInTheDocument()
 
     expect(screen.getByText('This is a summary of Project 1.')).toBeInTheDocument()
 
@@ -45,13 +45,9 @@ describe('ProjectPage Component', () => {
     expect(viewButton).toBeInTheDocument()
   })
 
-  it('displays "No projects found" when there are no projects', async () => {
+  test('displays "No projects found" when there are no projects', async () => {
     ;(loadData as jest.Mock).mockResolvedValue({ ...mockProjectData, projects: [], total_pages: 0 })
-
-    await act(async () => {
-      render(<ProjectsPage />)
-    })
-
+    render(<ProjectsPage />)
     await waitFor(() => {
       expect(screen.getByText('No projects found')).toBeInTheDocument()
     })

@@ -1,8 +1,9 @@
-import React, { act } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
+
 import '@testing-library/jest-dom'
-import { ChaptersPage } from '../../../src/pages'
 import { loadData } from '../../../src/lib/api'
+import { ChaptersPage } from '../../../src/pages'
 import { mockChapterData } from '../data/mockChapterData'
 
 jest.mock('../../../src/lib/api', () => ({
@@ -22,19 +23,19 @@ describe('ChaptersPage Component', () => {
     jest.clearAllMocks()
   })
 
-  it('renders loading spinner initially', () => {
-    act(() => {
-      render(<ChaptersPage />)
-    })
+  test('renders loading spinner initially', async () => {
+    render(<ChaptersPage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
-    expect(loadingSpinner.length).toBeGreaterThan(0)
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
   })
 
   it('renders chapter data correctly', async () => {
-    await act(async () => {
-      render(<ChaptersPage />)
+    render(<ChaptersPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
     })
-    expect(screen.getByText('Chapter 1')).toBeInTheDocument()
     expect(screen.getByText('This is a summary of Chapter 1.')).toBeInTheDocument()
     expect(screen.getByText('Isanori Sakanashi,')).toBeInTheDocument()
     expect(screen.getByText('Takeshi Murai,')).toBeInTheDocument()
@@ -45,11 +46,7 @@ describe('ChaptersPage Component', () => {
 
   it('displays "No chapters found" when there are no chapters', async () => {
     ;(loadData as jest.Mock).mockResolvedValue({ ...mockChapterData, chapters: [], total_pages: 0 })
-
-    await act(async () => {
-      render(<ChaptersPage />)
-    })
-
+    render(<ChaptersPage />)
     await waitFor(() => {
       expect(screen.getByText('No chapters found')).toBeInTheDocument()
     })
