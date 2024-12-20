@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import Card from '../components/Card'
+import ErrorMessage from '../components/ErrorMessage'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Pagination from '../components/Pagination'
 import SearchBar from '../components/Search'
@@ -16,6 +17,7 @@ const CommitteesPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [totalPages, setTotalPages] = useState<number>(1)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+  const [error, setError] = useState<{ message: string; statusCode?: number } | null>(null)
   useEffect(() => {
     document.title = 'OWASP Committees'
     const fetchApiData = async () => {
@@ -30,6 +32,16 @@ const CommitteesPage = () => {
         setTotalPages(data.total_pages)
       } catch (error) {
         logger.error(error)
+        if (error instanceof Response) {
+          setError({
+            message: `HTTP ${error.status}: ${error.statusText}`,
+            statusCode: error.status,
+          })
+        } else {
+          setError({
+            message: 'An unexpected error occurred. Please try again later.',
+          })
+        }
       }
       setIsLoaded(true)
     }
@@ -46,6 +58,10 @@ const CommitteesPage = () => {
       top: 0,
       behavior: 'auto',
     })
+  }
+
+  if (error) {
+    return <ErrorMessage message={error.message} statusCode={error.statusCode} />
   }
 
   return (
@@ -89,17 +105,14 @@ const CommitteesPage = () => {
             })}
         </div>
       )}
-      {
-        totalPages>1 &&(
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            isLoaded={isLoaded}
-            onPageChange={handlePageChange}
-          />
-        )
-      }
-
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          isLoaded={isLoaded}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   )
 }
