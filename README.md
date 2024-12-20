@@ -4,11 +4,14 @@
 
 Follow these steps to set up the OWASP Nest application:
 
+1. **Fork the Repository**:
+   - Fork <https://github.com/OWASP/Nest> repository using "Fork" button
+
 1. **Clone the Repository**:
-   - Clone the repository code from GitHub using the following command:
+   - Clone the repository code from your GitHub account using the following command:
 
      ```bash
-     git clone https://github.com/owasp/nest
+     git clone https://github.com/<your-account>/<nest-fork>
      ```
 
 1. **Create Environment Files**:
@@ -21,14 +24,21 @@ Follow these steps to set up the OWASP Nest application:
    - Copy the contents from the template file into your new local environment file:
 
      ```bash
-     cp backend/.env/template backend/.env/local
+     cat backend/.env/template > backend/.env/local
      ```
 
    - Create a local environment file in the `frontend` directory:
 
      ```bash
-     cp frontend/.env.example frontend/.env
+     touch frontend/.env
      ```
+
+   - Copy the contents from the template file into your new local environment file:
+
+     ```bash
+     cat frontend/.env.example > frontend/.env
+     ```
+
 
 1. **Configure Environment Variables**:
    - Open the `backend/.env/local` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
@@ -113,13 +123,19 @@ This troubleshooting section is tailored for Windows users.
 
 The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system. If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
 
-#### 2. Install the `make` Command
+#### 2. Ensure WSL integration is enabled in Docker Desktop settings
+
+Check `Resources -- WSL integration` in Docker application settings.
+
+#### 3. Install the `make` Command
 
 When running the `make` command for the first time, you may be prompted to install the `make` tool. Run the following commands in your WSL terminal to install it:
 
 ```bash
-sudo apt update
-sudo apt install make
+$ sudo apt update
+...
+$ sudo apt install make
+...
 ```
 
 ### Resolving Frontend Permission Issues
