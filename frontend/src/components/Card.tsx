@@ -153,9 +153,9 @@ const Card = ({
                 {social && social.length > 0 && (
                   <div id="social" className="flex items-center justify-normal gap-2">
                     {social &&
-                      social.map((item, index) => (
+                      social.map((item) => (
                         <a
-                          key={item.title || `social-${index}`}
+                          key={`${item.title}-${item.url}`}
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
