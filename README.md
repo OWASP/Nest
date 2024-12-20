@@ -156,3 +156,51 @@ If you encounter permission issues while running the `make run` command, follow 
    ```
 
 This should resolve any permission-related issues and ensure the frontend dependencies are installed correctly.
+---
+
+### Important Setup Instructions
+
+1. **Running Make Commands**
+   .
+
+   ```bash
+   make: *** No rule to make target 'run'.  Stop.
+   ```
+
+   Instruction:
+
+   - Always run make commands from the project root directory
+
+2. **Data File Setup**
+
+   ```
+   chmod: cannot access 'backend/data/nest.json.gz': No such file or directory
+   ```
+
+   Instruction:
+
+   - Restore the missing file using git:
+     ```bash
+     git restore backend/data/nest.json.gz
+     ```
+
+3. **File Permissions Setup**
+
+   ```
+   Permission denied: '<file_name>'
+   ```
+
+   Instruction:
+
+   - Add executable permissions to necessary files:
+     ```bash
+     chmod +x <file_name>
+     ```
+
+4. **Command Execution Order**
+   - Required order:
+     1. First terminal: `make run` (wait until it's fully started)
+     2. Second terminal: `another_cmds`
+   - Note: Keep all terminals open while working.
+5. **NPM conflict error**
+   - Do not mix PowerShell npm commands with WSL npm commands in the same project. Use only one environment consistently to avoid conflicts.
