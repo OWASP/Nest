@@ -92,14 +92,14 @@ const CommitteesPage = () => {
       {
         totalPages>1 &&(
           <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          isLoaded={isLoaded}
-          onPageChange={handlePageChange}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            isLoaded={isLoaded}
+            onPageChange={handlePageChange}
           />
         )
       }
-      
+
     </div>
   )
 }
