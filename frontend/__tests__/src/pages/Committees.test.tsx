@@ -14,10 +14,12 @@ jest.mock('../../../src/utils/credentials', () => ({
   API_URL: 'https://mock-api.com',
 }))
 jest.mock('../../../src/components/Pagination', () =>
-  jest.fn(({ currentPage, onPageChange }) => (
-    <div>
-      <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
-    </div>
+  jest.fn(({ currentPage, onPageChange, totalPages }) => (
+    totalPages > 1 ? (
+      <div>
+        <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
+      </div>
+    ) : null
   ))
 )
 describe('Committees Component', () => {
@@ -62,8 +64,13 @@ describe('Committees Component', () => {
       expect(screen.getByText('No committees found')).toBeInTheDocument()
     })
   })
-  test('handles page change correctly', async () => {
+
+  test('handles page change correctly when there are multiple pages', async () => {
     window.scrollTo = jest.fn()
+    ;(loadData as jest.Mock).mockResolvedValue({
+      ...mockCommitteeData,
+      total_pages: 2,
+    })
     render(<CommitteesPage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
@@ -72,6 +79,17 @@ describe('Committees Component', () => {
     expect(window.scrollTo).toHaveBeenCalledWith({
       top: 0,
       behavior: 'auto',
+    })
+  })
+
+  test('does not render pagination when there is only one page', async () => {
+    (loadData as jest.Mock).mockResolvedValue({
+      ...mockCommitteeData,
+      total_pages: 1,
+    })
+    render(<CommitteesPage />)
+    await waitFor(() => {
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
   })
 })
