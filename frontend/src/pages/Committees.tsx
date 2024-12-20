@@ -89,12 +89,17 @@ const CommitteesPage = () => {
             })}
         </div>
       )}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        isLoaded={isLoaded}
-        onPageChange={handlePageChange}
-      />
+      {
+        totalPages>1 &&(
+          <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          isLoaded={isLoaded}
+          onPageChange={handlePageChange}
+          />
+        )
+      }
+      
     </div>
   )
 }
