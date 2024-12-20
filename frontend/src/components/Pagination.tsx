@@ -53,7 +53,7 @@ const Pagination: React.FC<PaginationProps> = ({
   }
 
   const pageNumbers = getPageNumbers()
-  if (!isLoaded || totalPages <= 0) return null
+  if (!isLoaded || totalPages <= 1) return null
 
   return (
     <div className="mt-8 flex flex-col items-center justify-center space-y-3">
