@@ -1,6 +1,6 @@
 import { debounce } from 'lodash'
 import { Search, X } from 'lucide-react'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 
 interface SearchProps {
   /* eslint-disable-next-line */
@@ -17,11 +17,9 @@ const SearchComponent: React.FC<SearchProps> = ({ onSearch, placeholder, initial
     setSearchQuery(initialValue)
   }, [initialValue])
 
-  const debouncedSearch = useCallback(
-    debounce((query: string) => {
-      onSearch(query)
-    }, 500),
-    []
+  const debouncedSearch = useMemo(
+    () => debounce((query: string) => onSearch(query), 500),
+    [onSearch]
   )
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

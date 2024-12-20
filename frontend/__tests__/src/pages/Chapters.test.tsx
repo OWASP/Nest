@@ -1,9 +1,9 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
+import { loadData } from '../../../src/lib/api'
 import { render } from '../../../src/lib/test-util'
 import '@testing-library/jest-dom'
-import { loadData } from '../../../src/lib/api'
 import { ChaptersPage } from '../../../src/pages'
 import { mockChapterData } from '../data/mockChapterData'
 
