@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 
+import ErrorMessage from './components/ErrorMessage'
 import Footer from './components/Footer'
 import Header from './components/Header'
 import { Home, ProjectsPage, CommitteesPage, ChaptersPage } from './pages'
@@ -13,6 +14,7 @@ function App() {
         <Route path="/projects" element={<ProjectsPage />}></Route>
         <Route path="/committees" element={<CommitteesPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
+        <Route path="*" element={<ErrorMessage message="Page not found." statusCode={404} />} />
       </Routes>
       <Footer />
     </main>

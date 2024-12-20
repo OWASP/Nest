@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 import Card from '../components/Card'
 import { level } from '../components/data'
+import ErrorMessage from '../components/ErrorMessage'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Pagination from '../components/Pagination'
 import SearchBar from '../components/Search'
@@ -17,6 +18,7 @@ const ProjectsPage = () => {
   const [totalPages, setTotalPages] = useState<number>(0)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+  const [error, setError] = useState<{ message: string; statusCode?: number } | null>(null)
 
   useEffect(() => {
     document.title = 'OWASP Projects'
@@ -32,6 +34,16 @@ const ProjectsPage = () => {
         setTotalPages(data.total_pages)
       } catch (error) {
         logger.error(error)
+        if (error instanceof Response) {
+          setError({
+            message: `HTTP ${error.status}: ${error.statusText}`,
+            statusCode: error.status,
+          })
+        } else {
+          setError({
+            message: 'An unexpected error occurred. Please try again later.',
+          })
+        }
       }
       setIsLoaded(true)
     }
@@ -49,6 +61,10 @@ const ProjectsPage = () => {
       top: 0,
       behavior: 'auto',
     })
+  }
+
+  if (error) {
+    return <ErrorMessage message={error.message} statusCode={error.statusCode} />
   }
 
   return (
