@@ -55,6 +55,7 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">
+          <ModeToggle />
           <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
@@ -68,7 +69,6 @@ export default function Header() {
               )}
             </button>
           </div>
-          <ModeToggle />
         </div>
       </div>
       <div
@@ -78,6 +78,24 @@ export default function Header() {
         )}
       >
         <div className="space-y-1 px-2 pb-3 pt-2">
+          {/* Logo */}
+          <NavLink to="/">
+            <div className="flex h-full items-center">
+              <img
+                src={'../public/img/owasp_icon_white_sm.png'}
+                className="hidden h-16 dark:block"
+                alt="OWASP Logo"
+              ></img>
+              <img
+                src={'../public/img/owasp_icon_black_sm.png'}
+                className="block h-16 dark:hidden"
+                alt="OWASP Logo"
+              ></img>
+              <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                Nest
+              </div>
+            </div>
+          </NavLink>
           {headerLinks.map((link, i) => (
             <NavLink
               key={i}
