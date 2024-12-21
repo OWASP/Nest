@@ -191,6 +191,7 @@ git checkout -b feature/my-feature-name
 
 ### 3. Make Changes and Commit
 
+- Check that your commits include only related and intended changes. Do not include unrelated files.
 - Follow best practices for code style and testing.
 - Add tests for any new functionality or changes to ensure proper coverage.
 - Run the code quality checks:
