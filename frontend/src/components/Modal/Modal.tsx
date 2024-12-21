@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 
 import { ModalProps } from './types'
 import { useModal } from './useModal'
+import Markdown from '../Markdown'
 
 export const Modal: React.FC<ModalProps> = ({
   title,
@@ -67,12 +68,14 @@ export const Modal: React.FC<ModalProps> = ({
           </small>
           <hr className="border-gray-200 dark:border-gray-700" />
           <h2 className="text-lg font-semibold">Issue Summary</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300">{summary}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            <Markdown>{summary}</Markdown>
+          </p>
           {hint && (
             <>
               <h2 className="text-lg font-semibold">How to tackle it</h2>
               <p className="max-h-[160px] overflow-y-auto text-sm text-gray-500 dark:text-gray-400">
-                {hint}
+                <Markdown>{hint}</Markdown>
               </p>
             </>
           )}
