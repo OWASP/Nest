@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.http import JsonResponse
 
 from apps.common.constants import DAY_IN_SECONDS
+from apps.common.index import IndexSynonymsMixin
 from apps.owasp.models.project import Project
 
 PROJECT_CACHE_PREFIX = "project:"
@@ -45,6 +46,7 @@ def projects(request):
 
     cache_key = f"{PROJECT_CACHE_PREFIX}{query}_page_{page}"
     projects = cache.get(cache_key)
+    active_projects_count = IndexSynonymsMixin.get_algolia_index_count("local_projects")
 
     if projects is None:
         projects = get_projects(query=query, page=page)
@@ -52,7 +54,7 @@ def projects(request):
 
     return JsonResponse(
         {
-            "active_projects_count": Project.active_projects_count(),
+            "active_projects_count": active_projects_count,
             "projects": projects["hits"],
             "total_pages": projects["nbPages"],
         },

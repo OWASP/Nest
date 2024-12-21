@@ -1,7 +1,5 @@
 """Github app issue model."""
 
-from functools import lru_cache
-
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -179,12 +177,6 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     def bulk_save(issues, fields=None):
         """Bulk save issues."""
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
-
-    @staticmethod
-    @lru_cache
-    def open_issues_count():
-        """Return open issues count."""
-        return Issue.open_issues.assignable.count()
 
     @staticmethod
     def update_data(gh_issue, author=None, repository=None, save=True):

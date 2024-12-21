@@ -1,7 +1,5 @@
 """OWASP app project models."""
 
-from functools import lru_cache
-
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -190,12 +188,6 @@ class Project(
             self.generate_summary(prompt=Prompt.get_owasp_project_summary())
 
         super().save(*args, **kwargs)
-
-    @staticmethod
-    @lru_cache
-    def active_projects_count():
-        """Return active projects count."""
-        return Project.active_projects.count()
 
     @staticmethod
     def bulk_save(projects, fields=None):
