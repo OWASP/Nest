@@ -39,7 +39,6 @@ Follow these steps to set up the OWASP Nest application:
      cat frontend/.env.example > frontend/.env
      ```
 
-
 1. **Configure Environment Variables**:
    - Open the `backend/.env/local` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
 
@@ -155,7 +154,8 @@ If you encounter permission issues while running the `make run` command, follow 
    npm install
    ```
 
-This should resolve any permission-related issues and ensure the frontend dependencies are installed correctly.
+   This should resolve any permission-related issues and ensure the frontend dependencies are installed correctly
+
 ---
 
 ### Important Setup Instructions
@@ -171,37 +171,42 @@ This should resolve any permission-related issues and ensure the frontend depend
 
    - Always run make commands from the project root directory
 
-2. **Data File Setup**
+1. **Data File Setup**
 
-   ```
+   ```bash
    chmod: cannot access 'backend/data/nest.json.gz': No such file or directory
    ```
 
    Instruction:
 
    - Restore the missing file using git:
+
      ```bash
      git restore backend/data/nest.json.gz
      ```
 
-3. **File Permissions Setup**
+1. **File Permissions Setup**
 
-   ```
+   ```bash
    Permission denied: '<file_name>'
    ```
 
    Instruction:
 
    - Add executable permissions to necessary files:
+
      ```bash
      chmod +x <file_name>
      ```
 
-4. **Command Execution Order**
+1. **Command Execution Order**
    - Required order:
      1. First terminal: `make run` (wait until it's fully started)
-     2. Second terminal: `another_cmds`
+     1. Second terminal: `another_cmds`
+
 ---
-### Important Notes :
-   - Keep all terminals open while working.
-   - For Windows users: You must use WSL to avoid conflicts and ensure the scripts execute correctly.
+
+### Important Notes
+
+- Keep all terminals open while working.
+- For Windows users: You must use WSL to avoid conflicts and ensure the scripts execute correctly.
