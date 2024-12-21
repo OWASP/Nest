@@ -40,6 +40,21 @@ describe('Committees Component', () => {
     })
   })
 
+  test('renders SearchBar and data concurrently', async () => {
+    render(<CommitteesPage />)
+
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search for OWASP committees...')).toBeInTheDocument()
+      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+    })
+      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+  })
+
   test('renders committee data correctly', async () => {
     render(<CommitteesPage />)
 

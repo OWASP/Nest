@@ -39,6 +39,22 @@ describe('ChaptersPage Component', () => {
     })
   })
 
+  test('renders SearchBar and data concurrently', async () => {
+    render(<ChaptersPage />)
+
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toBeInTheDocument()
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+  })
+
+
   test('renders chapter data correctly', async () => {
     render(<ChaptersPage />)
     await waitFor(() => {

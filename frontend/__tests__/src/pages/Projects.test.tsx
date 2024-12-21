@@ -39,6 +39,21 @@ describe('ProjectPage Component', () => {
     })
   })
 
+  test('renders SearchBar and data concurrently', async () => {
+    render(<ProjectsPage />)
+
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
+    })
+      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+  })
+
   test('renders project data correctly', async () => {
     render(<ProjectsPage />)
     await waitFor(() => {
