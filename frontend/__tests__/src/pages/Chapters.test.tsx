@@ -39,9 +39,6 @@ describe('ChaptersPage Component', () => {
     })
   })
 
-
-
-
   test('renders chapter data correctly', async () => {
     render(<ChaptersPage />)
     await waitFor(() => {
@@ -80,7 +77,7 @@ describe('ChaptersPage Component', () => {
     })
   })
 
-  test('renders SearchBar,data and pagination component concurrently', async () => {
+  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
     window.scrollTo = jest.fn()
     ;(loadData as jest.Mock).mockResolvedValue({
       ...mockChapterData,
@@ -91,14 +88,18 @@ describe('ChaptersPage Component', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.queryByPlaceholderText('Search for OWASP chapters...')).not.toBeInTheDocument()
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
-
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toBeInTheDocument()
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
+
       const nextPageButton = screen.getByText('Next Page')
       fireEvent.click(nextPageButton)
     })
-      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
   })
 })

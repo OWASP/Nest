@@ -39,26 +39,33 @@ describe('ProjectPage Component', () => {
     })
   })
 
-  test('renders SearchBar,data and pagination component concurrently', async () => {
+  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
     window.scrollTo = jest.fn()
     ;(loadData as jest.Mock).mockResolvedValue({
       ...mockProjectData,
       total_pages: 2,
     })
+
     render(<ProjectsPage />)
 
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.queryByPlaceholderText('Search for OWASP projects...')).not.toBeInTheDocument()
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
-
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+
       expect(screen.getByText('Project 1')).toBeInTheDocument()
+
       const nextPageButton = screen.getByText('Next Page')
+      expect(nextPageButton).toBeInTheDocument()
+
       fireEvent.click(nextPageButton)
     })
-      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
   })
 
   test('renders project data correctly', async () => {
