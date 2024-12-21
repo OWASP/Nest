@@ -7,14 +7,14 @@ Follow these steps to set up the OWASP Nest application:
 1. **Fork the Repository**:
    - Fork <https://github.com/OWASP/Nest> repository using "Fork" button
 
-2. **Clone the Repository**:
+1. **Clone the Repository**:
    - Clone the repository code from your GitHub account using the following command:
 
      ```bash
      git clone https://github.com/<your-account>/<nest-fork>
      ```
 
-3. **Create Environment Files**:
+1. **Create Environment Files**:
    - Create a local environment file in the `backend` directory:
 
      ```bash
@@ -40,14 +40,14 @@ Follow these steps to set up the OWASP Nest application:
      ```
 
 
-4. **Configure Environment Variables**:
+1. **Configure Environment Variables**:
    - Open the `backend/.env/local` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
 
      ```plaintext
      DJANGO_CONFIGURATION=Local
      ```
 
-5. **Set Up Algolia**:
+1. **Set Up Algolia**:
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
    - After creating an account, create an Algolia app.
    - Update your `.env/local` file with the following keys from your Algolia app:
@@ -59,7 +59,7 @@ Follow these steps to set up the OWASP Nest application:
 
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
-6. **Run the Application**:
+1. **Run the Application**:
    - In your terminal, navigate to the project directory and run the following command to start the application:
 
    ```bash
@@ -68,21 +68,21 @@ Follow these steps to set up the OWASP Nest application:
 
    - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
 
-7. **Load Initial Data**:
+1. **Load Initial Data**:
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
    ```bash
    make load-data
    ```
 
-8. **Index Data**:
+1. **Index Data**:
    - In the same terminal session, run the following command to index the data:
 
    ```bash
    make index-data
    ```
 
-9. **Verify API Endpoints**:
+1. **Verify API Endpoints**:
    - Check that the data is available via these API endpoints:
      - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
      - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
@@ -98,17 +98,17 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
   make setup
   ```
 
-2. **Generate a GitHub Personal Access Token**:
+1. **Generate a GitHub Personal Access Token**:
     - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-3. **Update Environment Variables with GitHub Token**:
+1. **Update Environment Variables with GitHub Token**:
     - Open `backend/.env/local` again and update it with your GitHub token:
 
       ```plaintext
       GITHUB_TOKEN=<your_github_token>
       ```
 
-4. **Sync Local Database Data**:
+1. **Sync Local Database Data**:
    - Now you should be able to run the following command to sync your local database data with GitHub:
 
    ```bash
