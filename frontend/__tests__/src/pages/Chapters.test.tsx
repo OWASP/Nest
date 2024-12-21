@@ -1,8 +1,9 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
-import '@testing-library/jest-dom'
 import { loadData } from '../../../src/lib/api'
+import { render } from '../../../src/lib/test-util'
+import '@testing-library/jest-dom'
 import { ChaptersPage } from '../../../src/pages'
 import { mockChapterData } from '../data/mockChapterData'
 
@@ -61,6 +62,10 @@ describe('ChaptersPage Component', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
+    ;(loadData as jest.Mock).mockResolvedValue({
+      ...mockChapterData,
+      total_pages: 2,
+    })
     render(<ChaptersPage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
