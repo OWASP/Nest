@@ -1,10 +1,12 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import '@testing-library/jest-dom'
 import { loadData } from '../../../src/lib/api'
+import { render } from '../../../src/lib/test-util'
 import { ProjectsPage } from '../../../src/pages'
 import mockProjectData from '../data/mockProjectData'
+
 jest.mock('../../../src/lib/api', () => ({
   loadData: jest.fn(),
 }))
@@ -61,6 +63,10 @@ describe('ProjectPage Component', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
+    ;(loadData as jest.Mock).mockResolvedValue({
+      ...mockProjectData,
+      total_pages: 2,
+    })
     render(<ProjectsPage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
