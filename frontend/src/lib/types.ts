@@ -27,6 +27,8 @@ export type project = {
 
 export interface IssuesDataType {
   issues: IssueType[]
+  open_issues_count: number
+  total_pages: number
 }
 
 export interface IssueType {

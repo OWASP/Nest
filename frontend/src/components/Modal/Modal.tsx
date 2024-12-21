@@ -74,7 +74,7 @@ export const Modal: React.FC<ModalProps> = ({
           {hint && (
             <>
               <h2 className="text-lg font-semibold">How to tackle it</h2>
-              <p className="max-h-[160px] overflow-y-auto text-sm text-gray-500 dark:text-gray-400">
+              <p className="max-h-[200px] overflow-y-auto text-sm text-gray-500 dark:text-gray-400">
                 <Markdown>{hint}</Markdown>
               </p>
             </>
