@@ -96,8 +96,6 @@ describe('ChaptersPage Component', () => {
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
 
-      const nextPageButton = screen.getByText('Next Page')
-      fireEvent.click(nextPageButton)
     })
 
     expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()

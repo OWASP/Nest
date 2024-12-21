@@ -60,13 +60,8 @@ describe('Committees Component', () => {
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP committees...')).toBeInTheDocument()
-
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
-
-      const nextPageButton = screen.getByText('Next Page')
-      expect(nextPageButton).toBeInTheDocument()
-
-      fireEvent.click(nextPageButton)
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
     expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
   })
