@@ -99,7 +99,7 @@ const Card = ({
               ))}
           </div>
           {projectName && (
-            <a href={projectLink} target="_blank" rel="noopener noreferrer">
+            <a href={projectLink} target="_blank" rel="noopener noreferrer" className="font-bold">
               {projectName}
             </a>
           )}
