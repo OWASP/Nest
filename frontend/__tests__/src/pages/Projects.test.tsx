@@ -1,10 +1,12 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import '@testing-library/jest-dom'
 import { loadData } from '../../../src/lib/api'
+import { render } from '../../../src/lib/test-util'
 import { ProjectsPage } from '../../../src/pages'
 import mockProjectData from '../data/mockProjectData'
+
 jest.mock('../../../src/lib/api', () => ({
   loadData: jest.fn(),
 }))
@@ -37,6 +39,30 @@ describe('ProjectPage Component', () => {
     })
   })
 
+  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
+    window.scrollTo = jest.fn()
+    ;(loadData as jest.Mock).mockResolvedValue({
+      ...mockProjectData,
+      total_pages: 2,
+    })
+
+    render(<ProjectsPage />)
+
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.queryByPlaceholderText('Search for OWASP projects...')).not.toBeInTheDocument()
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+    })
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+  })
+
   test('renders project data correctly', async () => {
     render(<ProjectsPage />)
     await waitFor(() => {
@@ -61,6 +87,10 @@ describe('ProjectPage Component', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
+    ;(loadData as jest.Mock).mockResolvedValue({
+      ...mockProjectData,
+      total_pages: 2,
+    })
     render(<ProjectsPage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
