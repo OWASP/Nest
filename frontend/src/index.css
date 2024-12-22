@@ -68,3 +68,49 @@ a {
 .navlink {
   color: inherit;
 }
+
+:root {
+  --scrollbar-thumb-light: #CBD5E1;
+  --scrollbar-thumb-dark: #0F172A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scrollbar-thumb: var(--scrollbar-thumb-dark);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --scrollbar-thumb: var(--scrollbar-thumb-light);
+  }
+}
+
+.scroll-container {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb);
+}
+
+/* For Firefox */
+.scroll-container {
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+}

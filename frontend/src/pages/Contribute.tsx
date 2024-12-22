@@ -53,6 +53,8 @@ export default function ContributePage() {
         <div className="bg-background/50 fixed inset-0 flex items-center justify-center">
           <LoadingSpinner imageUrl="../public/img/owasp_icon_white_sm.png" />
         </div>
+      ) : contributeData && contributeData?.total_pages === 0 ? (
+        <div>No issues found</div>
       ) : (
         <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
           {contributeData &&

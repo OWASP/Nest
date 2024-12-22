@@ -11,6 +11,7 @@ jest.mock('../../src/pages', () => ({
   ProjectsPage: jest.fn(() => <div data-testid="projects-page">Projects Page</div>),
   CommitteesPage: jest.fn(() => <div data-testid="committees-page">Committees Page</div>),
   ChaptersPage: jest.fn(() => <div data-testid="chapters-page">Chapters Page</div>),
+  ContributePage: jest.fn(() => <div data-testid="contribute-page">Contribute Page</div>),
 }))
 
 describe('App Component', () => {

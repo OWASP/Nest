@@ -1,3 +1,5 @@
+import { faBolt } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { X } from 'lucide-react'
 import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -32,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex max-h-[80vh] items-start justify-center p-4 backdrop-blur-sm sm:p-10"
+      className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-10"
       onKeyDown={handleKeyDown}
       onClick={handleOverlayClick}
       role="presentation"
@@ -43,7 +45,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative z-50 w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ease-in-out dark:border dark:border-gray-800 dark:bg-gray-900"
+        className="relative z-50 w-full max-w-2xl transform rounded-lg bg-white p-6 shadow-xl backdrop-blur-sm transition-all duration-300 ease-in-out dark:border dark:border-gray-800 dark:bg-gray-900"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
@@ -59,7 +61,7 @@ export const Modal: React.FC<ModalProps> = ({
         </button>
 
         {/* Content */}
-        <div className="space-y-4">
+        <div className="space-y-2">
           <h2 id="modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">
             {title}
           </h2>
@@ -72,12 +74,15 @@ export const Modal: React.FC<ModalProps> = ({
             <Markdown>{summary}</Markdown>
           </p>
           {hint && (
-            <>
-              <h2 className="text-lg font-semibold">How to tackle it</h2>
-              <p className="max-h-[200px] overflow-y-auto text-sm text-gray-500 dark:text-gray-400">
+            <div className="rounded-md border border-owasp-blue p-2">
+              <h2 className="space-x-2 text-xl font-semibold">
+                <FontAwesomeIcon icon={faBolt} size="xs" />
+                <span>How to tackle it</span>
+              </h2>
+              <p className="scroll-container max-h-[300px] overflow-y-auto p-2 text-base text-gray-800 dark:border-white dark:text-gray-200">
                 <Markdown>{hint}</Markdown>
               </p>
-            </>
+            </div>
           )}
           {children}
         </div>
