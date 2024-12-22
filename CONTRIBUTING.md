@@ -21,7 +21,7 @@ Before contributing, ensure you have the following installed:
     1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
           If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
     1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
-    1. Ensure WSL integration is enabled in Docker Desktop settings**
+    1. Ensure WSL integration is enabled in Docker Desktop settings
     1. Check `Resources -- WSL integration` in Docker application settings.
 
 ## Setting up the Project
