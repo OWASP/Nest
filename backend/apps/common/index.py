@@ -5,6 +5,7 @@ import logging
 from functools import lru_cache
 from pathlib import Path
 
+from algoliasearch.exceptions import AlgoliaException
 from algoliasearch.search_client import SearchClient
 from django.conf import settings
 
@@ -55,6 +56,6 @@ class IndexBase:
             )
             return index.search("", {"hitsPerPage": 0, "analytics": False})["nbHits"]
 
-        except Exception:
+        except AlgoliaException:
             logger.exception("Error retrieving index count for '%s'", index_name)
-            return None
+            return 0

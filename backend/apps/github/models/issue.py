@@ -1,7 +1,10 @@
 """Github app issue model."""
 
+from functools import lru_cache
+
 from django.db import models
 
+from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
@@ -177,6 +180,12 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     def bulk_save(issues, fields=None):
         """Bulk save issues."""
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
+
+    @staticmethod
+    @lru_cache
+    def open_issues_count():
+        """Return open issues count."""
+        return IndexBase.get_total_count("issues")
 
     @staticmethod
     def update_data(gh_issue, author=None, repository=None, save=True):
