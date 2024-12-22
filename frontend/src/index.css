@@ -71,7 +71,7 @@ a {
 
 :root {
   --scrollbar-thumb-light: #CBD5E1;
-  --scrollbar-thumb-dark: #0F172A;
+  --scrollbar-thumb-dark: #d4e1ff;
 }
 
 @media (prefers-color-scheme: dark) {
