@@ -95,7 +95,6 @@ describe('ChaptersPage Component', () => {
       expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toBeInTheDocument()
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
-
     })
 
     expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()

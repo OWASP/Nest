@@ -5,10 +5,10 @@ const Home = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    navigate('/projects')
+    navigate('/projects', { replace: true })
   }, [navigate])
 
-  return <div>Hello!</div>
+  return null
 }
 
 export default Home

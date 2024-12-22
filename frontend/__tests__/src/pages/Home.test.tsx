@@ -21,7 +21,7 @@ describe('Home Component', () => {
         <Home />
       </BrowserRouter>
     )
-    expect(mockNavigate).toHaveBeenCalledWith('/projects')
+    expect(mockNavigate).toHaveBeenCalledWith('/projects', { replace: true })
     expect(mockNavigate).toHaveBeenCalledTimes(1)
   })
 })
