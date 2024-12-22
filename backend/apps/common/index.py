@@ -1,4 +1,4 @@
-"""Algolia index synonyms support."""
+"""Algolia index synonyms support and record count."""
 
 import json
 import logging
@@ -11,11 +11,11 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-class IndexSynonymsMixin:
-    """Nest index synonyms mixin."""
+class IndexBase:
+    """Nest index synonyms mixin and record count."""
 
     @staticmethod
-    def _get_algolia_client():
+    def _get_client():
         """Reusable method to get the Algolia client."""
         return SearchClient.create(
             settings.ALGOLIA_APPLICATION_ID,
@@ -25,9 +25,7 @@ class IndexSynonymsMixin:
     @staticmethod
     def reindex_synonyms(app_name, index_name):
         """Reindex synonyms."""
-        index = IndexSynonymsMixin._get_algolia_client().init_index(
-            f"{settings.ENVIRONMENT.lower()}_{index_name}"
-        )
+        index = IndexBase._get_client().init_index(f"{settings.ENVIRONMENT.lower()}_{index_name}")
 
         file_path = Path.open(
             f"{settings.BASE_DIR}/apps/{app_name}/index/synonyms/{index_name}.json"
@@ -49,10 +47,12 @@ class IndexSynonymsMixin:
 
     @staticmethod
     @lru_cache(maxsize=1024)
-    def get_algolia_index_count(index_name):
-        """Get the number of records in an Algolia index."""
+    def get_total_count(index_name):
+        """Get  total count of records in an Algolia index."""
         try:
-            index = IndexSynonymsMixin._get_algolia_client().init_index(index_name)
+            index = IndexBase._get_client().init_index(
+                f"{settings.ENVIRONMENT.lower()}_{index_name}"
+            )
             return index.search("", {"hitsPerPage": 0, "analytics": False})["nbHits"]
 
         except Exception:

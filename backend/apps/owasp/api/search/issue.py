@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.http import JsonResponse
 
 from apps.common.constants import DAY_IN_SECONDS
-from apps.common.index import IndexSynonymsMixin
+from apps.common.index import IndexBase
 from apps.github.models.issue import Issue
 
 ISSUE_CACHE_PREFIX = "issue:"
@@ -46,7 +46,6 @@ def project_issues(request):
 
     cache_key = f"{ISSUE_CACHE_PREFIX}{query}_page_{page}"
     issues = cache.get(cache_key)
-    active_issues_count = IndexSynonymsMixin.get_algolia_index_count("local_issues")
 
     if issues is None:
         issues = get_issues(query, page=page, distinct=not query)
@@ -55,7 +54,7 @@ def project_issues(request):
     return JsonResponse(
         {
             "issues": issues["hits"],
-            "open_issues_count": active_issues_count,
+            "open_issues_count": IndexBase.get_total_count("issues"),
             "total_pages": issues["nbPages"],
         },
         safe=False,

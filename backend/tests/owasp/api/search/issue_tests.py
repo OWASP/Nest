@@ -5,7 +5,7 @@ import pytest
 import requests
 from django.http import HttpRequest, JsonResponse
 
-from apps.github.models.issue import Issue
+from apps.common.index import IndexBase
 from apps.owasp.api.search.issue import get_issues, project_issues
 
 MOCKED_HITS = {
@@ -64,7 +64,7 @@ def test_issues(query, page, expected_response):
     request.GET = {"q": query, "page": str(page)}
 
     with (
-        patch.object(Issue, "open_issues_count", return_value=10) as mock_active_count,
+        patch.object(IndexBase, "get_total_count", return_value=10) as mock_active_count,
         patch(
             "apps.owasp.api.search.issue.get_issues", return_value=MOCKED_HITS
         ) as mock_get_issues,

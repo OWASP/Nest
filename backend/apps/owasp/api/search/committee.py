@@ -3,7 +3,7 @@
 from algoliasearch_django import raw_search
 from django.http import JsonResponse
 
-from apps.common.index import IndexSynonymsMixin
+from apps.common.index import IndexBase
 from apps.owasp.models.committee import Committee
 
 
@@ -35,11 +35,10 @@ def committees(request):
     """Search committees API endpoint."""
     page = int(request.GET.get("page", 1))
     query = request.GET.get("q", "")
-    active_committees_count = IndexSynonymsMixin.get_algolia_index_count("local_committees")
     committees = get_committees(query=query, page=page)
     return JsonResponse(
         {
-            "active_committees_count": active_committees_count,
+            "active_committees_count": IndexBase.get_total_count("committees"),
             "committees": committees["hits"],
             "total_pages": committees["nbPages"],
         },

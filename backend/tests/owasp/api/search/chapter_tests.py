@@ -5,8 +5,8 @@ import pytest
 import requests
 from django.http import HttpRequest, JsonResponse
 
+from apps.common.index import IndexBase
 from apps.owasp.api.search.chapter import chapters, get_chapters
-from apps.owasp.models.chapter import Chapter
 
 MOCKED_COORDINATES = (37.7749, -122.4194)
 MOCKED_USER_IP = "127.0.0.1"
@@ -57,7 +57,7 @@ def test_chapters(query, page, expected_response):
     request.META = {"REMOTE_ADDR": MOCKED_USER_IP}
 
     with (
-        patch.object(Chapter, "active_chapters_count", return_value=10) as mock_active_count,
+        patch.object(IndexBase, "get_total_count", return_value=10) as mock_active_count,
         patch(
             "apps.owasp.api.search.chapter.get_chapters", return_value=MOCKED_HITS
         ) as mock_get_chapters,

@@ -5,8 +5,8 @@ import pytest
 import requests
 from django.http import HttpRequest, JsonResponse
 
+from apps.common.index import IndexBase
 from apps.owasp.api.search.committee import committees, get_committees
-from apps.owasp.models.committee import Committee
 
 MOCKED_HITS = {
     ("hits"): [
@@ -60,7 +60,7 @@ def test_committees(query, page, expected_response):
     request.GET = {"q": query, "page": str(page)}
 
     with (
-        patch.object(Committee, "active_committees_count", return_value=10) as mock_active_count,
+        patch.object(IndexBase, "get_total_count", return_value=10) as mock_active_count,
         patch(
             "apps.owasp.api.search.committee.get_committees", return_value=MOCKED_HITS
         ) as mock_get_committees,

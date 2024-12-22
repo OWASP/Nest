@@ -4,7 +4,7 @@ from algoliasearch_django import raw_search
 from django.http import JsonResponse
 
 from apps.common.geocoding import get_ip_coordinates
-from apps.common.index import IndexSynonymsMixin
+from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip
 from apps.owasp.models.chapter import Chapter
 
@@ -40,11 +40,10 @@ def chapters(request):
     """Search chapters API endpoint."""
     page = int(request.GET.get("page", 1))
     query = request.GET.get("q", "")
-    active_chapters_count = IndexSynonymsMixin.get_algolia_index_count("local_chapters")
     chapters = get_chapters(query=query, page=page, meta=request.META)
     return JsonResponse(
         {
-            "active_chapters_count": active_chapters_count,
+            "active_chapters_count": IndexBase.get_total_count("chapters"),
             "chapters": chapters["hits"],
             "total_pages": chapters["nbPages"],
         },
