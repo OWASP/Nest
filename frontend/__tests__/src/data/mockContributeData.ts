@@ -1,28 +1,18 @@
 export const mockContributeData = {
-  contributions: [
+  issues: [
     {
-      idx_created_at: 1609459200,
-      idx_name: 'Contribution 1',
-      idx_leaders: ['Alice Johnson', 'Michael Brown', 'Sofia Lopez'],
-      idx_related_urls: ['https://github.com/OWASP/OWASP-Project', 'https://owasp.org/contribute'],
-      idx_top_contributors: [
-        {
-          avatar_url: 'https://avatars.githubusercontent.com/u/45112345?v=4',
-          contributions_count: 210,
-          login: 'codewarrior123',
-          name: 'Jane Doe',
-        },
-        {
-          avatar_url: 'https://avatars.githubusercontent.com/u/12345678?v=4',
-          contributions_count: 145,
-          login: 'devmaster456',
-          name: 'John Smith',
-        },
-      ],
+      idx_comments_count: 1,
+      idx_created_at: 1734726983,
+      idx_hint: 'Hint',
+      idx_labels: [],
+      idx_project_name: 'Owasp Nest',
+      idx_project_url: 'https://owasp.org/www-project-nest',
+      idx_repository_languages: ['Python', 'TypeScript'],
       idx_summary: 'This is a summary of Contribution 1',
-      idx_updated_at: 1739990400,
-      idx_url: 'https://owasp.org/contribute-guide',
-      objectID: '1',
+      idx_title: 'Contribution 1',
+      idx_updated_at: 1734727031,
+      idx_url: 'https://github.com/OWASP/Nest/issues/225',
+      objectID: '9180',
     },
   ],
 }

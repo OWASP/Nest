@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -58,7 +58,7 @@ export default function ContributePage() {
       ) : (
         <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
           {contributeData &&
-            contributeData.issues.map((issue, index) => {
+            contributeData.issues?.map((issue, index) => {
               const params: string[] = ['idx_created_at', 'idx_comments_count']
               const filteredIcons = getFilteredIcons(issue, params)
 
@@ -69,7 +69,7 @@ export default function ContributePage() {
               }
 
               return (
-                <>
+                <React.Fragment key={issue.objectID || `issue-${index}`}>
                   <Card
                     key={issue.objectID || `issue-${index}`}
                     title={issue.idx_title}
@@ -82,13 +82,14 @@ export default function ContributePage() {
                     button={SubmitButton}
                   />
                   <Modal
+                    key={`modal-${index}`}
                     isOpen={modalOpenIndex === index}
                     onClose={() => setModalOpenIndex(null)}
                     title={issue.idx_title}
                     summary={issue.idx_summary}
                     hint={issue.idx_hint}
                   ></Modal>
-                </>
+                </React.Fragment>
               )
             })}
         </div>

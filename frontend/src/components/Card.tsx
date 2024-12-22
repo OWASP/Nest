@@ -10,7 +10,6 @@ import TopicBadge from './TopicBadge'
 import { CardProps, tooltipStyle } from '../lib/constants'
 import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { cn } from '../lib/utils'
-import Markdown from './Markdown'
 
 const Card = ({
   title,
@@ -74,9 +73,7 @@ const Card = ({
             )}
         </div>
       </div>
-      <p className="mr-8 mt-2 text-gray-600 dark:text-gray-300">
-        <Markdown>{summary}</Markdown>
-      </p>
+      <p className="mr-8 mt-2 text-gray-600 dark:text-gray-300">{summary}</p>
       <h2>
         {leaders && (
           <span className="font-semibold text-gray-600 dark:text-gray-300">

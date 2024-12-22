@@ -46,7 +46,7 @@ describe('Contribute Component', () => {
       expect(screen.getByText('Contribution 1')).toBeInTheDocument()
     })
     expect(screen.getByText('This is a summary of Contribution 1')).toBeInTheDocument()
-    const viewButton = screen.getByText('Learn More')
+    const viewButton = screen.getByText('Read More')
     expect(viewButton).toBeInTheDocument()
   })
 
