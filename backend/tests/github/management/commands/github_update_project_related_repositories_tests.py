@@ -33,7 +33,7 @@ def mock_project():
         (1, 8),
     ],
 )
-@mock.patch.dict("os.environ", {"GITHUB_TOKEN": "fake-token"})
+@mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
 @mock.patch(
     "apps.github.management.commands.github_update_project_related_repositories.github.Github"
 )
@@ -83,19 +83,15 @@ def test_handle(
     ) as mock_project_bulk_save, mock.patch("builtins.print") as mock_print:
         command.handle(offset=offset)
 
-        mock_github.assert_called_once_with("fake-token", per_page=GITHUB_ITEMS_PER_PAGE)
+        mock_github.assert_called_once_with("test-token", per_page=GITHUB_ITEMS_PER_PAGE)
 
-        if offset == 0:
-            mock_get_repository_path.assert_called_with("https://github.com/OWASP/test-repo")
+        mock_get_repository_path.assert_called_with("https://github.com/OWASP/test-repo")
+        mock_gh_client.get_repo.assert_called_with("OWASP/test-repo")
 
-        if offset == 0:
-            mock_gh_client.get_repo.assert_called_with("OWASP/test-repo")
-            assert mock_sync_repository.call_count == projects - offset
-            assert mock_organization.save.called
-            assert mock_project.repositories.add.called
+        assert mock_organization.save.called
+        assert mock_project.repositories.add.called
 
-        else:
-            assert mock_sync_repository.call_count == projects - offset
+        assert mock_sync_repository.call_count == projects - offset
 
         mock_issue_bulk_save.assert_called_once()
         mock_project_bulk_save.assert_called_once()

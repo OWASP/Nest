@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -84,10 +84,12 @@ def test_handle(
         else mock_issues[idx.start : idx.stop]
     )
 
-    type(mock_issue_class).open_issues = PropertyMock(return_value=mock_open_issues)
-    type(mock_open_issues).without_summary = PropertyMock(return_value=mock_open_issues)
-    mock_open_issues.order_by.return_value = mock_ordered_queryset
-    mock_open_issues.without_summary.order_by.return_value = mock_ordered_queryset
+    mock_issue_class.open_issues = mock_open_issues
+    if is_force_update:
+        mock_open_issues.order_by.return_value = mock_ordered_queryset
+    else:
+        mock_open_issues.without_summary = mock_open_issues
+        mock_open_issues.without_summary.order_by.return_value = mock_ordered_queryset
 
     command = Command()
     command.handle(**options)

@@ -127,31 +127,27 @@ def test_handle(
     mock_sync_repository.return_value = (None, Repository())
     mock_repository = Repository()
 
-    with mock.patch.object(Project, "bulk_save") as mock_project_bulk_save, mock.patch.object(
-        Chapter, "bulk_save"
-    ) as mock_chapter_bulk_save, mock.patch.object(
-        Committee, "bulk_save"
-    ) as mock_committee_bulk_save, mock.patch.object(
-        Event, "bulk_save"
-    ) as mock_event_bulk_save, mock.patch.object(
-        Project, "update_data", return_value=mock_repository
-    ) as mock_project_update, mock.patch.object(
-        Chapter, "update_data", return_value=mock_repository
-    ) as mock_chapter_update, mock.patch.object(
-        Committee, "update_data", return_value=mock_repository
-    ) as mock_committee_update, mock.patch.object(
-        Event, "update_data", return_value=mock_repository
-    ) as mock_event_update, mock.patch.object(
-        Project, "objects"
-    ) as mock_project_objects, mock.patch.object(
-        Chapter, "objects"
-    ) as mock_chapter_objects, mock.patch.object(
-        Committee, "objects"
-    ) as mock_committee_objects, mock.patch.object(
-        Event, "objects"
-    ) as mock_event_objects, mock.patch.object(
-        Repository, "objects"
-    ) as mock_repository_objects, mock.patch("builtins.print") as mock_print:
+    with (
+        mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
+        mock.patch.object(Chapter, "bulk_save") as mock_chapter_bulk_save,
+        mock.patch.object(Committee, "bulk_save") as mock_committee_bulk_save,
+        mock.patch.object(Event, "bulk_save") as mock_event_bulk_save,
+        mock.patch.object(Project, "update_data") as mock_project_update,
+        mock.patch.object(Chapter, "update_data") as mock_chapter_update,
+        mock.patch.object(Committee, "update_data") as mock_committee_update,
+        mock.patch.object(Event, "update_data") as mock_event_update,
+        mock.patch.object(Project, "objects") as mock_project_objects,
+        mock.patch.object(Chapter, "objects") as mock_chapter_objects,
+        mock.patch.object(Committee, "objects") as mock_committee_objects,
+        mock.patch.object(Event, "objects") as mock_event_objects,
+        mock.patch.object(Repository, "objects") as mock_repository_objects,
+        mock.patch("builtins.print") as mock_print,
+    ):
+        mock_project_update.return_value = mock_repository
+        mock_chapter_update.return_value = mock_repository
+        mock_committee_update.return_value = mock_repository
+        mock_event_update.return_value = mock_repository
+
         mock_project_objects.all.return_value = []
         mock_chapter_objects.all.return_value = []
         mock_committee_objects.all.return_value = []
@@ -179,11 +175,10 @@ def test_handle(
                 assert mock_committee_update.call_count == expected_calls["committee"]
             elif repository_name.startswith("www-event-"):
                 assert mock_event_update.call_count == expected_calls["event"]
+        else:
+            assert mock_print.call_count > 0
 
         mock_project_bulk_save.assert_called_once()
         mock_chapter_bulk_save.assert_called_once()
         mock_committee_bulk_save.assert_called_once()
         mock_event_bulk_save.assert_called_once()
-
-        if not repository_name:
-            assert mock_print.call_count > 0
