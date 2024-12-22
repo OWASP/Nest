@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import '@testing-library/jest-dom'
+import { MemoryRouter } from 'react-router-dom'
+
 import { loadData } from '../../../src/lib/api'
 import { ContributePage } from '../../../src/pages'
 import { mockContributeData } from '../data/mockContributeData'
@@ -14,13 +16,13 @@ jest.mock('../../../src/utils/credentials', () => ({
   API_URL: 'https://mock-api.com',
 }))
 jest.mock('../../../src/components/Pagination', () =>
-  jest.fn(({ currentPage, onPageChange, totalPages }) => (
+  jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (
       <div>
         <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
       </div>
     ) : null
-  ))
+  )
 )
 describe('Contribute Component', () => {
   beforeEach(() => {
@@ -32,7 +34,11 @@ describe('Contribute Component', () => {
   })
 
   test('renders loading spinner initially', async () => {
-    render(<ContributePage />)
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
@@ -40,7 +46,11 @@ describe('Contribute Component', () => {
   })
 
   test('renders contribute data correctly', async () => {
-    render(<ContributePage />)
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
 
     await waitFor(() => {
       expect(screen.getByText('Contribution 1')).toBeInTheDocument()
@@ -56,7 +66,11 @@ describe('Contribute Component', () => {
       issues: [],
       total_pages: 0,
     })
-    render(<ContributePage />)
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
     await waitFor(() => {
       expect(screen.getByText('No issues found')).toBeInTheDocument()
     })
@@ -68,7 +82,11 @@ describe('Contribute Component', () => {
       ...mockContributeData,
       total_pages: 2,
     })
-    render(<ContributePage />)
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
       fireEvent.click(nextPageButton)
@@ -80,11 +98,15 @@ describe('Contribute Component', () => {
   })
 
   test('does not render pagination when there is only one page', async () => {
-    (loadData as jest.Mock).mockResolvedValue({
+    ;(loadData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       total_pages: 1,
     })
-    render(<ContributePage />)
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
     await waitFor(() => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
