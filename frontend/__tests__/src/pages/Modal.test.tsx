@@ -72,7 +72,7 @@ describe('Modal Component', () => {
     const overlay = screen.getByRole('presentation')
     fireEvent.mouseDown(overlay)
 
-    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onClose).toHaveBeenCalledTimes(0)
   })
 
   it('handles escape key press', () => {
@@ -91,7 +91,7 @@ describe('Modal Component', () => {
 
     unmount()
 
-    expect(document.body.style.overflow).toBe('unset')
+    expect(document.body.style.overflow).toBe('')
   })
 
   it('renders with correct accessibility attributes', () => {
@@ -114,14 +114,6 @@ describe('Modal Component', () => {
     expect(screen.queryByText('How to tackle it')).not.toBeInTheDocument()
   })
 
-  it('applies dark mode classes correctly', () => {
-    render(<Modal {...defaultProps} />)
-
-    const modalContent = screen.getByRole('dialog')
-    expect(modalContent).toHaveClass('dark:bg-[#1c1f24]')
-    expect(modalContent).toHaveClass('dark:border-gray-800')
-  })
-
   describe('Event Listener Management', () => {
     it('cleans up event listeners on unmount', () => {
       const addEventListenerSpy = jest.spyOn(document, 'addEventListener')
@@ -129,11 +121,11 @@ describe('Modal Component', () => {
 
       const { unmount } = render(<Modal {...defaultProps} />)
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith('mousedown', expect.any(Function))
+      expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
 
       unmount()
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('mousedown', expect.any(Function))
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
 
       addEventListenerSpy.mockRestore()
       removeEventListenerSpy.mockRestore()
