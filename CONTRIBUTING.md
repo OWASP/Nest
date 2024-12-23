@@ -17,6 +17,8 @@ The project uses a **containerized approach** for both development and productio
 Before contributing, ensure you have the following installed:
 
 1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
+1. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using virtual environment with `pip install pre-commit` command, as OS package with `apt install pre-commit` / `brew install pre-commit` or any other method depending on your configuration.
+
 1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
     1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
     If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
