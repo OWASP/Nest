@@ -29,9 +29,6 @@ const ChaptersPage = () => {
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       url: chapter.idx_url,
     }
-
-    console.log(chapter)
-
     return (
       <Card
         key={chapter.objectID || `chapter-${index}`}
