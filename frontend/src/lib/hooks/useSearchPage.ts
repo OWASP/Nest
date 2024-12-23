@@ -20,6 +20,10 @@ interface UseSearchPageReturn<T> {
   /* eslint-disable-next-line */
   handlePageChange: (page: number) => void
 }
+interface ApiResponse<T> {
+  total_pages: number
+  [key: string]: T[] | number
+}
 
 export function useSearchPage<T>({
   endpoint,
@@ -45,9 +49,14 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
-        const data = await loadData<any>(endpoint, searchQuery, currentPage)
+        const data = await loadData<ApiResponse<T>>(endpoint, searchQuery, currentPage)
         const itemsKey = endpoint.split('/').pop() + 's'
-        setItems(data[itemsKey])
+        if (Array.isArray(data[itemsKey])) {
+          setItems(data[itemsKey] as T[])
+        } else {
+          logger.error(`Expected ${itemsKey} to be an array.`)
+          setItems([])
+        }
         setTotalPages(data.total_pages)
       } catch (error) {
         logger.error(error)
