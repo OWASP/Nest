@@ -5,6 +5,7 @@ import { AlgoliaResponseType } from './types'
 import { API_URL } from '../utils/credentials'
 import { NEST_ENV } from '../utils/credentials'
 import logger from '../utils/logger'
+import { getParamsForIndexName } from '../utils/paramsMapping'
 export const loadData = async <T>(
   endpoint: string,
   query: string,
@@ -29,6 +30,7 @@ export const fetchAlgoliaData = async <T>(
   currentPage = 0
 ): Promise<AlgoliaResponseType<T>> => {
   try {
+    const params = getParamsForIndexName(indexName)
     const { results } = await client.search({
       requests: [
         {
@@ -37,6 +39,7 @@ export const fetchAlgoliaData = async <T>(
           hitsPerPage: 25,
           page: currentPage - 1,
           attributesToHighlight: [],
+          ...params,
         },
       ],
     })
