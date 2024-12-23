@@ -30,6 +30,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_updated_at',
           'idx_url',
         ],
+        aroundLatLngViaIP: true,
         typoTolerance: 'min',
         minProximity: 4,
       }
