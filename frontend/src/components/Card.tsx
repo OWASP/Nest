@@ -46,7 +46,7 @@ const Card = ({
   }
 
   return (
-    <div className="flex h-fit w-full flex-col items-start justify-normal gap-4 rounded-md border border-border py-6 pl-6 pt-0 md:max-w-6xl md:gap-2">
+    <div className="flex h-fit w-full flex-col items-start justify-normal gap-4 rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl md:gap-2 dark:bg-[#212529]">
       <div className="flex w-full flex-nowrap items-center justify-between gap-2">
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           {level && (
@@ -106,7 +106,7 @@ const Card = ({
 
           {(languages || (topics && topics.length > 0) || (social && social.length > 0)) && (
             <div className="flex w-full flex-col items-center justify-between pr-6 md:flex-row">
-              <div className="flex max-w-4xl items-start justify-start pt-3">
+              <div className="flex max-w-4xl flex-col items-start justify-start gap-2 pt-3">
                 {languages && (
                   <div id="languages" className="flex flex-wrap items-center justify-normal gap-2">
                     {languages &&

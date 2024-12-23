@@ -65,52 +65,52 @@ a {
   color: #1d7bd7;
 }
 
-.navlink {
-  color: inherit;
-}
 
-:root {
-  --scrollbar-thumb-light: #CBD5E1;
-  --scrollbar-thumb-dark: #d4e1ff;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --scrollbar-thumb: var(--scrollbar-thumb-dark);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --scrollbar-thumb: var(--scrollbar-thumb-light);
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-.scroll-container {
-  overflow-y: auto;
-  scrollbar-width: thin;
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
-.scroll-container::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
 }
 
-.scroll-container::-webkit-scrollbar-track {
-  background: transparent;
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
 }
 
-.scroll-container::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 10px;
-}
-
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb);
-}
-
-/* For Firefox */
-.scroll-container {
-  scrollbar-color: var(--scrollbar-thumb) transparent;
-  scrollbar-width: thin;
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out;
 }
