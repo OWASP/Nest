@@ -101,4 +101,23 @@ describe('ProjectPage Component', () => {
       behavior: 'auto',
     })
   })
+
+  // Test window.open functionality on Contribute button click
+  test('opens new window on Contribute button click', async () => {
+    // Mock window.open to track if it's called correctly
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
+
+    render(<ProjectsPage />)
+
+    await waitFor(() => {
+      const contributeButton = screen.getByText('Contribute')
+      fireEvent.click(contributeButton)
+    })
+
+    // Assuming 'Project 1' is the project in the mock data
+    expect(openSpy).toHaveBeenCalledWith('/projects/contribute?q=Project 1', '_blank')
+
+    // Clean up the mock
+    openSpy.mockRestore()
+  })
 })

@@ -47,8 +47,8 @@ const Card = ({
 
   return (
     <div className="flex h-fit w-full flex-col items-start justify-normal gap-4 rounded-md border border-border py-6 pl-6 pt-0 md:max-w-6xl md:gap-2">
-      <div className="flex w-full flex-wrap items-center justify-between gap-2">
-        <div className="mt-4 flex items-center justify-center gap-2">
+      <div className="flex w-full flex-nowrap items-center justify-between gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           {level && (
             <span
               data-tooltip-id="level-tooltip"
@@ -60,7 +60,7 @@ const Card = ({
             </span>
           )}
           <a href={url} target="_blank" rel="noopener noreferrer">
-            <h1 className="text-2xl font-semibold dark:text-sky-600">{title}</h1>
+            <h1 className="text-wrap text-2xl font-semibold dark:text-sky-600">{title}</h1>
           </a>
         </div>
 
@@ -73,6 +73,11 @@ const Card = ({
             )}
         </div>
       </div>
+      {projectName && (
+        <a href={projectLink} target="_blank" rel="noopener noreferrer" className="font-bold">
+          {projectName}
+        </a>
+      )}
       <p className="mr-8 mt-2 text-gray-600 dark:text-gray-300">{summary}</p>
       <h2>
         {leaders && (
@@ -98,11 +103,7 @@ const Card = ({
                 />
               ))}
           </div>
-          {projectName && (
-            <a href={projectLink} target="_blank" rel="noopener noreferrer" className="font-bold">
-              {projectName}
-            </a>
-          )}
+
           {(languages || (topics && topics.length > 0) || (social && social.length > 0)) && (
             <div className="flex w-full flex-col items-center justify-between pr-6 md:flex-row">
               <div className="flex max-w-4xl items-start justify-start pt-3">

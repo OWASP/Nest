@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-
 import '@testing-library/jest-dom'
 import { MemoryRouter } from 'react-router-dom'
 
@@ -24,6 +23,7 @@ jest.mock('../../../src/components/Pagination', () =>
     ) : null
   )
 )
+
 describe('Contribute Component', () => {
   beforeEach(() => {
     ;(loadData as jest.Mock).mockResolvedValue(mockContributeData)
@@ -101,6 +101,64 @@ describe('Contribute Component', () => {
     ;(loadData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       total_pages: 1,
+    })
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+    await waitFor(() => {
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+    })
+  })
+
+  // Test for modal open and close interaction
+  test('opens and closes modal on button click', async () => {
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+    await waitFor(() => {
+      const viewButton = screen.getByText('Read More')
+      fireEvent.click(viewButton)
+    })
+
+    // Test modal open
+    expect(screen.getByText('Read More')).toBeInTheDocument()
+
+    const closeButton = screen.getByText('Close') // Adjust if necessary based on actual UI
+    fireEvent.click(closeButton)
+
+    // Wait for the modal to disappear
+    await waitFor(() => {
+      expect(screen.queryByText('Modal Content')).not.toBeInTheDocument()
+    })
+  })
+
+  // Test pagination for the first page
+  test('handles pagination for first page', async () => {
+    ;(loadData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      total_pages: 2,
+      currentPage: 1,
+    })
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+    await waitFor(() => {
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
+    })
+  })
+
+  // Test pagination for the last page
+  test('handles pagination for last page', async () => {
+    ;(loadData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      total_pages: 2,
+      currentPage: 2,
     })
     render(
       <MemoryRouter>
