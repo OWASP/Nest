@@ -72,7 +72,7 @@ const Card = ({
             )}
         </div>
       </div>
-      <p className="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-300">{summary}</p>
+      <p className="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-300 mr-2">{summary}</p>
       <h2 className="text-sm sm:text-base">
         {leaders && (
           <span className="font-semibold text-gray-600 dark:text-gray-300">
@@ -81,7 +81,7 @@ const Card = ({
         )}
         {leaders &&
           leaders.map((leader, index) => (
-            <span key={`${leader}-${index}`} className="text-gray-600 dark:text-gray-300">
+            <span key={`${leader}-${index}`} className="text-gray-600 dark:text-gray-300 mr-2">
               {index !== leaders.length - 1 ? `${leader}, ` : `${leader}`}
             </span>
           ))}
@@ -130,7 +130,7 @@ const Card = ({
                 </div>
               )}
               {topics && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mr-2 md:mr-0">
                   {topics
                     .slice()
                     .sort((a, b) => a.length - b.length)
