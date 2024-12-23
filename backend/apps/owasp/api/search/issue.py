@@ -5,7 +5,6 @@ from django.core.cache import cache
 from django.http import JsonResponse
 
 from apps.common.constants import DAY_IN_SECONDS
-from apps.common.index import IndexBase
 from apps.github.models.issue import Issue
 
 ISSUE_CACHE_PREFIX = "issue:"
@@ -54,7 +53,7 @@ def project_issues(request):
     return JsonResponse(
         {
             "issues": issues["hits"],
-            "open_issues_count": IndexBase.get_total_count("issues"),
+            "open_issues_count": Issue.open_issues_count(),
             "total_pages": issues["nbPages"],
         },
         safe=False,

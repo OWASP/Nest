@@ -3,7 +3,6 @@
 from algoliasearch_django import raw_search
 from django.http import JsonResponse
 
-from apps.common.index import IndexBase
 from apps.owasp.models.committee import Committee
 
 
@@ -38,7 +37,7 @@ def committees(request):
     committees = get_committees(query=query, page=page)
     return JsonResponse(
         {
-            "active_committees_count": IndexBase.get_total_count("committees"),
+            "active_committees_count": Committee.active_committees_count(),
             "committees": committees["hits"],
             "total_pages": committees["nbPages"],
         },

@@ -5,7 +5,6 @@ from django.core.cache import cache
 from django.http import JsonResponse
 
 from apps.common.constants import DAY_IN_SECONDS
-from apps.common.index import IndexBase
 from apps.owasp.models.project import Project
 
 PROJECT_CACHE_PREFIX = "project:"
@@ -53,7 +52,7 @@ def projects(request):
 
     return JsonResponse(
         {
-            "active_projects_count": IndexBase.get_total_count("projects"),
+            "active_projects_count": Project.active_projects_count(),
             "projects": projects["hits"],
             "total_pages": projects["nbPages"],
         },
