@@ -69,5 +69,9 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
         typoTolerance: 'min',
         minProximity: 4,
       }
+    default:
+      return {
+        attributesToRetrieve: [],
+      }
   }
 }
