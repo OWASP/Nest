@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from django.db import models
 
+from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
@@ -58,7 +59,7 @@ class Committee(
     @lru_cache
     def active_committees_count():
         """Return active committees count."""
-        return Committee.active_committees.count()
+        return IndexBase.get_total_count("committees")
 
     @staticmethod
     def bulk_save(committees, fields=None):
