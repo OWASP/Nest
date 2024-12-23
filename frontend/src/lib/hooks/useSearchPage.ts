@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import logger from '../../utils/logger'
-import { loadData } from '../api'
+import { loadAlgoliaData } from '../api'
+import { AlgoliaResponseType } from '../types'
 
 interface UseSearchPageOptions {
-  endpoint: string
+  indexName: string
   pageTitle: string
 }
 
@@ -22,7 +23,7 @@ interface UseSearchPageReturn<T> {
 }
 
 export function useSearchPage<T>({
-  endpoint,
+  indexName,
   pageTitle,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -45,10 +46,13 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
-        const data = await loadData<any>(endpoint, searchQuery, currentPage)
-        const itemsKey = endpoint.split('/').pop() + 's'
-        setItems(data[itemsKey])
-        setTotalPages(data.total_pages)
+        const data: AlgoliaResponseType<T> = await loadAlgoliaData<any>(
+          indexName,
+          searchQuery,
+          currentPage
+        )
+        setItems(data.hits)
+        setTotalPages(data.pages)
       } catch (error) {
         logger.error(error)
       }
@@ -56,7 +60,7 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, endpoint, pageTitle])
+  }, [currentPage, searchQuery, indexName, pageTitle])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)

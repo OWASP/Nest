@@ -1,19 +1,16 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
-import { loadData } from '../../../src/lib/api'
+import { loadAlgoliaData } from '../../../src/lib/api'
 import { render } from '../../../src/lib/test-util'
 import '@testing-library/jest-dom'
 import { ChaptersPage } from '../../../src/pages'
 import { mockChapterData } from '../data/mockChapterData'
 
 jest.mock('../../../src/lib/api', () => ({
-  loadData: jest.fn(),
+  loadAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/utils/credentials', () => ({
-  API_URL: 'https://mock-api.com',
-}))
 jest.mock('../../../src/components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>
@@ -24,7 +21,10 @@ jest.mock('../../../src/components/Pagination', () =>
 
 describe('ChaptersPage Component', () => {
   beforeEach(() => {
-    ;(loadData as jest.Mock).mockResolvedValue(mockChapterData)
+    ;(loadAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      pages: 2,
+    })
   })
 
   afterEach(() => {
@@ -53,7 +53,10 @@ describe('ChaptersPage Component', () => {
   })
 
   test('displays "No chapters found" when there are no chapters', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({ ...mockChapterData, chapters: [], total_pages: 0 })
+    ;(loadAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [],
+      pages: 0,
+    })
     render(<ChaptersPage />)
     await waitFor(() => {
       expect(screen.getByText('No chapters found')).toBeInTheDocument()
@@ -62,9 +65,9 @@ describe('ChaptersPage Component', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
-    ;(loadData as jest.Mock).mockResolvedValue({
-      ...mockChapterData,
-      total_pages: 2,
+    ;(loadAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      pages: 2,
     })
     render(<ChaptersPage />)
     await waitFor(() => {
@@ -79,9 +82,9 @@ describe('ChaptersPage Component', () => {
 
   test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
     window.scrollTo = jest.fn()
-    ;(loadData as jest.Mock).mockResolvedValue({
-      ...mockChapterData,
-      total_pages: 2,
+    ;(loadAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      pages: 2,
     })
     render(<ChaptersPage />)
 

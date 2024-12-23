@@ -15,7 +15,7 @@ const ChaptersPage = () => {
     handleSearch,
     handlePageChange,
   } = useSearchPage<ChapterType>({
-    endpoint: 'owasp/search/chapter',
+    indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
   })
 
