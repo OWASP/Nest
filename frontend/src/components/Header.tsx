@@ -28,8 +28,8 @@ export default function Header() {
 
   return (
     <div>
-      <div className="h-16 bg-owasp-blue dark:bg-slate-800">
-        <div className="flex h-full items-center" id="navbar-sticky">
+      <div className="fixed inset-x-0 top-0 z-50 bg-owasp-blue shadow-md dark:bg-slate-800">
+        <div className="flex h-16 items-center" id="navbar-sticky">
           <NavLink to="/">
             <div className="flex h-full items-center">
               <img
