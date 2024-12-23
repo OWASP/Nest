@@ -16,7 +16,7 @@ const ProjectsPage = () => {
     handleSearch,
     handlePageChange,
   } = useSearchPage<project>({
-    endpoint: 'owasp/search/project',
+    indexName: 'projects',
     pageTitle: 'OWASP Projects',
   })
 

@@ -15,7 +15,7 @@ const CommitteesPage = () => {
     handleSearch,
     handlePageChange,
   } = useSearchPage<CommitteeType>({
-    endpoint: 'owasp/search/committee',
+    indexName: 'committees',
     pageTitle: 'OWASP Committees',
   })
 
