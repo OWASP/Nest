@@ -89,3 +89,8 @@ export interface CommitteeDataType {
   committees: CommitteeType[]
   total_pages: number
 }
+
+export interface AlgoliaResponseType<T> {
+  hits: T[]
+  totalPages: number
+}
