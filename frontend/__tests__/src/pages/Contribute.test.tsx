@@ -4,11 +4,16 @@ import '@testing-library/jest-dom'
 import { MemoryRouter } from 'react-router-dom'
 
 import { loadData } from '../../../src/lib/api'
+import { getFilteredIcons } from '../../../src/lib/utils'
 import { ContributePage } from '../../../src/pages'
 import { mockContributeData } from '../data/mockContributeData'
 
 jest.mock('../../../src/lib/api', () => ({
   loadData: jest.fn(),
+}))
+
+jest.mock('../../../src/lib/utils', () => ({
+  getFilteredIcons: jest.fn(),
 }))
 
 jest.mock('../../../src/utils/credentials', () => ({
@@ -167,6 +172,104 @@ describe('Contribute Component', () => {
     )
     await waitFor(() => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+    })
+  })
+  test('renders contribute card with filtered icons', async () => {
+    const mockIcons = ['icon1', 'icon2']
+    ;(getFilteredIcons as jest.Mock).mockReturnValue(mockIcons)
+
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(getFilteredIcons).toHaveBeenCalledWith(expect.any(Object), [
+        'idx_created_at',
+        'idx_comments_count',
+      ])
+    })
+  })
+
+  test('handles modal state for multiple cards', async () => {
+    const mockMultipleIssues = {
+      ...mockContributeData,
+      issues: [
+        { idx_title: 'Issue 1', idx_summary: 'Summary 1', idx_hint: 'Hint 1' },
+        { idx_title: 'Issue 2', idx_summary: 'Summary 2', idx_hint: 'Hint 2' },
+      ],
+    }
+    ;(loadData as jest.Mock).mockResolvedValue(mockMultipleIssues)
+
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+
+    // Wait for both cards to be rendered
+    await waitFor(() => {
+      const readMoreButtons = screen.getAllByText('Read More')
+      expect(readMoreButtons).toHaveLength(2)
+    })
+
+    // Click first card's Read More button
+    const readMoreButtons = screen.getAllByText('Read More')
+    fireEvent.click(readMoreButtons[0])
+
+    // Verify first modal is open
+    expect(screen.getByText('Hint 1')).toBeInTheDocument()
+
+    // Click close button
+    const closeButton = screen.getByText('Close')
+    fireEvent.click(closeButton)
+
+    // Click second card's Read More button
+    fireEvent.click(readMoreButtons[1])
+
+    // Verify second modal is open
+    expect(screen.getByText('Hint 2')).toBeInTheDocument()
+  })
+
+  test('handles search functionality', async () => {
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText('Search for OWASP Issues...')
+      fireEvent.change(searchInput, { target: { value: '' } })
+    })
+
+    // Verify that the search API is called with correct parameters
+    expect(loadData).toHaveBeenCalledWith('owasp/search/issue', '', 1)
+  })
+
+  test('handles error states in card rendering', async () => {
+    const mockErrorIssue = {
+      ...mockContributeData,
+      issues: [
+        {
+          idx_title: null,
+          idx_summary: undefined,
+          idx_hint: '',
+        },
+      ],
+    }
+    ;(loadData as jest.Mock).mockResolvedValue(mockErrorIssue)
+
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      // Verify that the card still renders without crashing
+      expect(screen.getByText('Read More')).toBeInTheDocument()
     })
   })
 })
