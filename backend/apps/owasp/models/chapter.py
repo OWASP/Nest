@@ -1,8 +1,11 @@
 """OWASP app chapter model."""
 
+from functools import lru_cache
+
 from django.db import models
 
 from apps.common.geocoding import get_location_coordinates
+from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values
@@ -58,6 +61,12 @@ class Chapter(
     def __str__(self):
         """Chapter human readable representation."""
         return f"{self.name or self.key}"
+
+    @staticmethod
+    @lru_cache
+    def active_chapters_count():
+        """Return active chapters count."""
+        return IndexBase.get_total_count("chapters")
 
     @property
     def is_indexable(self):

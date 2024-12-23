@@ -1,7 +1,10 @@
 """OWASP app commettee model."""
 
+from functools import lru_cache
+
 from django.db import models
 
+from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
@@ -51,6 +54,12 @@ class Committee(
             self.generate_summary(prompt=Prompt.get_owasp_committee_summary())
 
         super().save(*args, **kwargs)
+
+    @staticmethod
+    @lru_cache
+    def active_committees_count():
+        """Return active committees count."""
+        return IndexBase.get_total_count("committees")
 
     @staticmethod
     def bulk_save(committees, fields=None):
