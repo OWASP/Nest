@@ -17,7 +17,7 @@ class IndexBase:
 
     @staticmethod
     def _get_client():
-        """Reusable method to get the Algolia client."""
+        """Get the Algolia client."""
         return SearchClient.create(
             settings.ALGOLIA_APPLICATION_ID,
             settings.ALGOLIA_API_KEY,
@@ -49,7 +49,7 @@ class IndexBase:
     @staticmethod
     @lru_cache(maxsize=1024)
     def get_total_count(index_name):
-        """Get  total count of records in an Algolia index."""
+        """Get total count of records in index."""
         try:
             index = IndexBase._get_client().init_index(
                 f"{settings.ENVIRONMENT.lower()}_{index_name}"
