@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from django.db import models
 
+from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
@@ -184,7 +185,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     @lru_cache
     def open_issues_count():
         """Return open issues count."""
-        return Issue.open_issues.assignable.count()
+        return IndexBase.get_total_count("issues")
 
     @staticmethod
     def update_data(gh_issue, author=None, repository=None, save=True):

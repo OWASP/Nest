@@ -5,6 +5,7 @@ from functools import lru_cache
 from django.db import models
 
 from apps.common.geocoding import get_location_coordinates
+from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values
@@ -65,7 +66,7 @@ class Chapter(
     @lru_cache
     def active_chapters_count():
         """Return active chapters count."""
-        return Chapter.active_chapters.count()
+        return IndexBase.get_total_count("chapters")
 
     @property
     def is_indexable(self):
