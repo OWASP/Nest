@@ -3,7 +3,7 @@ import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 
 import '@testing-library/jest-dom'
-import Home from '@nest-frontend/pages/Home'
+import Home from '@src/pages/Home'
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

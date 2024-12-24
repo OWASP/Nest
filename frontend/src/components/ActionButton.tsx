@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react'
 import { Tooltip } from 'react-tooltip'
 
-import { tooltipStyle } from '@nest-frontend/lib/constants'
+import { tooltipStyle } from '@src/lib/constants'
 
 interface ActionButtonProps {
   url?: string

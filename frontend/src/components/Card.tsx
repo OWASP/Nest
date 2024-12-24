@@ -2,14 +2,14 @@ import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontaw
 import { useState } from 'react'
 import { Tooltip } from 'react-tooltip'
 
-import ActionButton from '@nest-frontend/components/ActionButton'
-import ContributorAvatar from '@nest-frontend/components/ContributorAvatar'
-import { Icons } from '@nest-frontend/components/data'
-import DisplayIcon from '@nest-frontend/components/DisplayIcon'
-import TopicBadge from '@nest-frontend/components/TopicBadge'
-import { CardProps, tooltipStyle } from '@nest-frontend/lib/constants'
-import FontAwesomeIconWrapper from '@nest-frontend/lib/FontAwesomeIconWrapper'
-import { cn } from '@nest-frontend/lib/utils'
+import ActionButton from '@src/components/ActionButton'
+import ContributorAvatar from '@src/components/ContributorAvatar'
+import { Icons } from '@src/components/data'
+import DisplayIcon from '@src/components/DisplayIcon'
+import TopicBadge from '@src/components/TopicBadge'
+import { CardProps, tooltipStyle } from '@src/lib/constants'
+import FontAwesomeIconWrapper from '@src/lib/FontAwesomeIconWrapper'
+import { cn } from '@src/lib/utils'
 
 const Card = ({
   title,

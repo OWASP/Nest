@@ -1,6 +1,6 @@
 import { Tooltip } from 'react-tooltip'
 
-import { tooltipStyle } from '@nest-frontend/lib/constants'
+import { tooltipStyle } from '@src/lib/constants'
 
 const TopicBadge = ({
   topic,

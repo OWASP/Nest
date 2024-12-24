@@ -1,17 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
-import App from '@nest-frontend/App'
+import App from '@src/App'
 import '@testing-library/jest-dom'
 
-jest.mock('@nest-frontend/pages', () => ({
+jest.mock('@src/pages', () => ({
   Home: () => <div data-testid="home-page">Home Page</div>,
   ProjectsPage: () => <div data-testid="projects-page">Projects Page</div>,
   CommitteesPage: () => <div data-testid="committees-page">Committees Page</div>,
   ChaptersPage: () => <div data-testid="chapters-page">Chapters Page</div>,
 }))
 
-jest.mock('@nest-frontend/components/Header', () => {
+jest.mock('@src/components/Header', () => {
   const { Link } = require('react-router-dom')
   return function MockHeader() {
     return (
@@ -32,7 +32,7 @@ jest.mock('@nest-frontend/components/Header', () => {
   }
 })
 
-jest.mock('@nest-frontend/components/Footer', () => {
+jest.mock('@src/components/Footer', () => {
   return function MockFooter() {
     return <footer data-testid="footer">Footer</footer>
   }

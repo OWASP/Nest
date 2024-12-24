@@ -1,9 +1,9 @@
-import Card from '@nest-frontend/components/Card'
-import SearchPageLayout from '@nest-frontend/components/SearchPageLayout'
-import FontAwesomeIconWrapper from '@nest-frontend/lib/FontAwesomeIconWrapper'
-import { useSearchPage } from '@nest-frontend/lib/hooks/useSearchPage'
-import { CommitteeType } from '@nest-frontend/lib/types'
-import { getFilteredIcons, handleSocialUrls } from '@nest-frontend/lib/utils'
+import Card from '@src/components/Card'
+import SearchPageLayout from '@src/components/SearchPageLayout'
+import FontAwesomeIconWrapper from '@src/lib/FontAwesomeIconWrapper'
+import { useSearchPage } from '@src/lib/hooks/useSearchPage'
+import { CommitteeType } from '@src/lib/types'
+import { getFilteredIcons, handleSocialUrls } from '@src/lib/utils'
 
 const CommitteesPage = () => {
   const {

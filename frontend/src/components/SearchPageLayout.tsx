@@ -1,8 +1,8 @@
 import React from 'react'
 
-import LoadingSpinner from '@nest-frontend/components/LoadingSpinner'
-import Pagination from '@nest-frontend/components/Pagination'
-import SearchBar from '@nest-frontend/components/Search'
+import LoadingSpinner from '@src/components/LoadingSpinner'
+import Pagination from '@src/components/Pagination'
+import SearchBar from '@src/components/Search'
 
 interface SearchPageLayoutProps {
   isLoaded: boolean

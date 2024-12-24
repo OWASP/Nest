@@ -31,6 +31,6 @@ export default {
     '^.+\\.tsx?$': 'ts-jest',
   },
   moduleNameMapper: {
-    '^@nest-frontend/(.*)$': '<rootDir>/src/$1',
+    '^@src/(.*)$': '<rootDir>/src/$1',
   },
 }

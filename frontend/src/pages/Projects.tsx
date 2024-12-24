@@ -1,10 +1,10 @@
-import Card from '@nest-frontend/components/Card'
-import { level } from '@nest-frontend/components/data'
-import SearchPageLayout from '@nest-frontend/components/SearchPageLayout'
-import FontAwesomeIconWrapper from '@nest-frontend/lib/FontAwesomeIconWrapper'
-import { useSearchPage } from '@nest-frontend/lib/hooks/useSearchPage'
-import { project } from '@nest-frontend/lib/types'
-import { getFilteredIcons } from '@nest-frontend/lib/utils'
+import Card from '@src/components/Card'
+import { level } from '@src/components/data'
+import SearchPageLayout from '@src/components/SearchPageLayout'
+import FontAwesomeIconWrapper from '@src/lib/FontAwesomeIconWrapper'
+import { useSearchPage } from '@src/lib/hooks/useSearchPage'
+import { project } from '@src/lib/types'
+import { getFilteredIcons } from '@src/lib/utils'
 
 const ProjectsPage = () => {
   const {

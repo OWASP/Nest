@@ -15,7 +15,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@nest-frontend': path.resolve(__dirname, 'src'),
+      '@src': path.resolve(__dirname, 'src'),
     },
   },
   server: {

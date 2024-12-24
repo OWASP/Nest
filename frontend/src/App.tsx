@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 
-import Footer from '@nest-frontend/components/Footer'
-import Header from '@nest-frontend/components/Header'
-import { Home, ProjectsPage, CommitteesPage, ChaptersPage } from '@nest-frontend/pages'
+import Footer from '@src/components/Footer'
+import Header from '@src/components/Header'
+import { Home, ProjectsPage, CommitteesPage, ChaptersPage } from '@src/pages'
 
 function App() {
   const location = useLocation()

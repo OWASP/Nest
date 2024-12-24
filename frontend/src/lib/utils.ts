@@ -3,9 +3,9 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
 
-import { IconType } from '@nest-frontend/lib/constants'
-import { CommitteeType, IssueType, project } from '@nest-frontend/lib/types'
-import { IconKeys, Icons, urlMappings } from '@nest-frontend/components/data'
+import { IconType } from '@src/lib/constants'
+import { CommitteeType, IssueType, project } from '@src/lib/types'
+import { IconKeys, Icons, urlMappings } from '@src/components/data'
 
 dayjs.extend(relativeTime)
 
