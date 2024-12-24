@@ -68,7 +68,12 @@ const Card = ({
           {icons &&
             Object.keys(Icons).map((key, index) =>
               icons[key] !== undefined ? (
-                <DisplayIcon key={`${key}-${index}`} item={key} icons={icons} idx={Object.keys(icons).findIndex(e => e == key)} />
+                <DisplayIcon
+                  key={`${key}-${index}`}
+                  item={key}
+                  icons={icons}
+                  idx={Object.keys(icons).findIndex((e) => e == key)}
+                />
               ) : null
             )}
         </div>
