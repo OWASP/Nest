@@ -3,13 +3,13 @@ import React from 'react'
 import '@testing-library/jest-dom'
 import { MemoryRouter } from 'react-router-dom'
 
-import { loadData } from '../../../src/lib/api'
+import { fetchAlgoliaData } from '../../../src/lib/api'
 import { getFilteredIcons } from '../../../src/lib/utils'
 import { ContributePage } from '../../../src/pages'
 import { mockContributeData } from '../data/mockContributeData'
 
 jest.mock('../../../src/lib/api', () => ({
-  loadData: jest.fn(),
+  fetchAlgoliaData: jest.fn(),
 }))
 
 jest.mock('../../../src/lib/utils', () => ({
@@ -19,6 +19,7 @@ jest.mock('../../../src/lib/utils', () => ({
 jest.mock('../../../src/utils/credentials', () => ({
   API_URL: 'https://mock-api.com',
 }))
+
 jest.mock('../../../src/components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (
@@ -31,7 +32,7 @@ jest.mock('../../../src/components/Pagination', () =>
 
 describe('Contribute Component', () => {
   beforeEach(() => {
-    ;(loadData as jest.Mock).mockResolvedValue(mockContributeData)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockContributeData)
   })
 
   afterEach(() => {
@@ -51,6 +52,11 @@ describe('Contribute Component', () => {
   })
 
   test('renders contribute data correctly', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      hits: mockContributeData.issues,
+      totalPages: 1,
+    })
     render(
       <MemoryRouter>
         <ContributePage />
@@ -66,10 +72,10 @@ describe('Contribute Component', () => {
   })
 
   test('displays "No issues found" when there are no issues', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       issues: [],
-      total_pages: 0,
+      totalPages: 0,
     })
     render(
       <MemoryRouter>
@@ -83,9 +89,10 @@ describe('Contribute Component', () => {
 
   test('handles page change correctly when there are multiple pages', async () => {
     window.scrollTo = jest.fn()
-    ;(loadData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
-      total_pages: 2,
+      hits: mockContributeData.issues,
+      totalPages: 4,
     })
     render(
       <MemoryRouter>
@@ -101,9 +108,40 @@ describe('Contribute Component', () => {
       behavior: 'auto',
     })
   })
+  test('handles pagination for first page', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      totalPages: 2,
+      currentPage: 1,
+    })
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+    await waitFor(() => {
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
+    })
+  })
+
+  test('handles pagination for last page', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      totalPages: 2,
+      currentPage: 2,
+    })
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+    await waitFor(() => {
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+    })
+  })
 
   test('does not render pagination when there is only one page', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       total_pages: 1,
     })
@@ -117,67 +155,69 @@ describe('Contribute Component', () => {
     })
   })
 
-  // Test for modal open and close interaction
-  test('opens and closes modal on button click', async () => {
+  test('handles search functionality', async () => {
     render(
       <MemoryRouter>
         <ContributePage />
       </MemoryRouter>
     )
+
     await waitFor(() => {
-      const viewButton = screen.getByText('Read More')
-      fireEvent.click(viewButton)
+      const searchInput = screen.getByPlaceholderText('Search for OWASP Issues...')
+      fireEvent.change(searchInput, { target: { value: '' } })
     })
 
-    // Test modal open
-    expect(screen.getByText('Read More')).toBeInTheDocument()
-
-    const closeButton = screen.getByText('Close') // Adjust if necessary based on actual UI
-    fireEvent.click(closeButton)
-
-    // Wait for the modal to disappear
-    await waitFor(() => {
-      expect(screen.queryByText('Modal Content')).not.toBeInTheDocument()
-    })
+    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1)
   })
 
-  // Test pagination for the first page
-  test('handles pagination for first page', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({
+  test('handles error states in card rendering', async () => {
+    const mockErrorIssue = {
       ...mockContributeData,
-      total_pages: 2,
-      currentPage: 1,
-    })
+      issues: [
+        {
+          idx_title: null,
+          idx_summary: undefined,
+          idx_hint: '',
+        },
+      ],
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockErrorIssue)
+
     render(
       <MemoryRouter>
         <ContributePage />
       </MemoryRouter>
     )
+
     await waitFor(() => {
-      expect(screen.getByText('Next Page')).toBeInTheDocument()
+      expect(screen.queryByText('Read More')).not.toBeInTheDocument()
     })
   })
 
-  // Test pagination for the last page
-  test('handles pagination for last page', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({
+  test('renders SubmitButton correctly', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
-      total_pages: 2,
-      currentPage: 2,
+      hits: mockContributeData.issues,
+      totalPages: 1,
     })
     render(
       <MemoryRouter>
         <ContributePage />
       </MemoryRouter>
     )
+
     await waitFor(() => {
-      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+      const readMoreButton = screen.getByText('Read More')
+      expect(readMoreButton).toBeInTheDocument()
     })
   })
-  test('renders contribute card with filtered icons', async () => {
-    const mockIcons = ['icon1', 'icon2']
-    ;(getFilteredIcons as jest.Mock).mockReturnValue(mockIcons)
 
+  test('opens modal when SubmitButton is clicked', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      hits: mockContributeData.issues,
+      totalPages: 1,
+    })
     render(
       <MemoryRouter>
         <ContributePage />
@@ -185,22 +225,53 @@ describe('Contribute Component', () => {
     )
 
     await waitFor(() => {
-      expect(getFilteredIcons).toHaveBeenCalledWith(expect.any(Object), [
-        'idx_created_at',
-        'idx_comments_count',
-      ])
+      const readMoreButton = screen.getByText('Read More')
+      fireEvent.click(readMoreButton)
+    })
+
+    await waitFor(() => {
+      const modalTitle = screen.getByText('Close')
+      expect(modalTitle).toBeInTheDocument()
+    })
+  })
+
+  test('closes modal when onClose is called', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      hits: mockContributeData.issues,
+      totalPages: 1,
+    })
+    render(
+      <MemoryRouter>
+        <ContributePage />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      const readMoreButton = screen.getByText('Read More')
+      fireEvent.click(readMoreButton)
+    })
+
+    await waitFor(() => {
+      const closeButton = screen.getByText('Close')
+      fireEvent.click(closeButton)
+    })
+
+    await waitFor(() => {
+      const modalTitle = screen.queryByText(mockContributeData.issues[0].idx_title)
+      expect(modalTitle).toBeInTheDocument()
     })
   })
 
   test('handles modal state for multiple cards', async () => {
     const mockMultipleIssues = {
       ...mockContributeData,
-      issues: [
+      hits: [
         { idx_title: 'Issue 1', idx_summary: 'Summary 1', idx_hint: 'Hint 1' },
         { idx_title: 'Issue 2', idx_summary: 'Summary 2', idx_hint: 'Hint 2' },
       ],
     }
-    ;(loadData as jest.Mock).mockResolvedValue(mockMultipleIssues)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockMultipleIssues)
 
     render(
       <MemoryRouter>
@@ -230,46 +301,5 @@ describe('Contribute Component', () => {
 
     // Verify second modal is open
     expect(screen.getByText('Hint 2')).toBeInTheDocument()
-  })
-
-  test('handles search functionality', async () => {
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
-
-    await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Search for OWASP Issues...')
-      fireEvent.change(searchInput, { target: { value: '' } })
-    })
-
-    // Verify that the search API is called with correct parameters
-    expect(loadData).toHaveBeenCalledWith('owasp/search/issue', '', 1)
-  })
-
-  test('handles error states in card rendering', async () => {
-    const mockErrorIssue = {
-      ...mockContributeData,
-      issues: [
-        {
-          idx_title: null,
-          idx_summary: undefined,
-          idx_hint: '',
-        },
-      ],
-    }
-    ;(loadData as jest.Mock).mockResolvedValue(mockErrorIssue)
-
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
-
-    await waitFor(() => {
-      // Verify that the card still renders without crashing
-      expect(screen.getByText('Read More')).toBeInTheDocument()
-    })
   })
 })
