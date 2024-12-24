@@ -28,7 +28,7 @@ const SearchPageLayout = ({
   onPageChange,
   searchPlaceholder,
   empty,
-  loadingImageUrl = '../public/img/owasp_icon_white_sm.png',
+  loadingImageUrl = '/img/owasp_icon_white_sm.png',
   children,
 }: SearchPageLayoutProps) => {
   return (
