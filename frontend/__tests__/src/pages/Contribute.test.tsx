@@ -162,7 +162,7 @@ describe('Contribute Component', () => {
     )
 
     await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Search for OWASP Issues...')
+      const searchInput = screen.getByPlaceholderText('Search for OWASP issues...')
       fireEvent.change(searchInput, { target: { value: '' } })
     })
 
