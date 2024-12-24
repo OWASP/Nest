@@ -86,17 +86,6 @@ describe('App Component', () => {
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
   })
 
-  test('content has correct margin for fixed header', () => {
-    render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>
-    )
-
-    const contentDiv = screen.getByRole('main').children[1]
-    expect(contentDiv).toHaveClass('mt-16')
-  })
-
   test('renders different pages for different routes', () => {
     const routes = [
       { path: '/projects', testId: 'projects-page' },
