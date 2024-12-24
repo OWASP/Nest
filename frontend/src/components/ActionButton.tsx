@@ -1,7 +1,6 @@
+import { tooltipStyle } from 'lib/constants'
 import React, { ReactNode } from 'react'
 import { Tooltip } from 'react-tooltip'
-
-import { tooltipStyle } from 'lib/constants'
 
 interface ActionButtonProps {
   url?: string

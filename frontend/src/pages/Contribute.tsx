@@ -1,12 +1,11 @@
+import Card from 'components/Card'
+import { Modal } from 'components/Modal/Modal'
+import SearchPageLayout from 'components/SearchPageLayout'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+import { useSearchPage } from 'lib/hooks/useSearchPage'
+import { IssueType } from 'lib/types'
+import { getFilteredIcons } from 'lib/utils'
 import React, { useState } from 'react'
-
-import Card from '../components/Card'
-import { Modal } from '../components/Modal/Modal'
-import SearchPageLayout from '../components/SearchPageLayout'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
-import { useSearchPage } from '../lib/hooks/useSearchPage'
-import { IssueType } from '../lib/types'
-import { getFilteredIcons } from '../lib/utils'
 
 const ContributePage = () => {
   const {

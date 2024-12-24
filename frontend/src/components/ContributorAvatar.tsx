@@ -1,6 +1,5 @@
-import { Tooltip } from 'react-tooltip'
-
 import { tooltipStyle, topContributorsType } from 'lib/constants'
+import { Tooltip } from 'react-tooltip'
 
 const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }) => {
   return (

@@ -38,5 +38,4 @@ export default {
     '^pages/(.*)$': '<rootDir>/src/pages/$1',
     '^@test/(.*)$': '<rootDir>__tests__/src/$1',
   },
-
 }

@@ -1,7 +1,8 @@
+import path from 'path'
+
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import EnvironmentPlugin from 'vite-plugin-environment'
-import path from 'path'
 export default defineConfig({
   plugins: [
     react(),
@@ -16,10 +17,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@src': path.resolve(__dirname, 'src'),
-      'components': path.resolve(__dirname, 'src/components'),
-      'utils': path.resolve(__dirname, 'src/utils'),
-      'lib': path.resolve(__dirname, 'src/lib'),
-      'pages': path.resolve(__dirname, 'src/pages'),
+      components: path.resolve(__dirname, 'src/components'),
+      utils: path.resolve(__dirname, 'src/utils'),
+      lib: path.resolve(__dirname, 'src/lib'),
+      pages: path.resolve(__dirname, 'src/pages'),
       '@test': path.resolve(__dirname, '__tests__/src'),
     },
   },

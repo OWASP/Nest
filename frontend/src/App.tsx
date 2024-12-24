@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage } from '@src/pages'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
-import { Home, ProjectsPage, CommitteesPage, ChaptersPage } from '@src/pages'
+import { useEffect } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 
 function App() {
   const location = useLocation()

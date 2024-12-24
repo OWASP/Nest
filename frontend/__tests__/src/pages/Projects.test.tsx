@@ -1,11 +1,10 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-
 import '@testing-library/jest-dom'
 import { fetchAlgoliaData } from 'lib/api'
 import { render } from 'lib/test-util'
-import ProjectsPage  from 'pages/Projects'
-import {mockProjectData} from '@test/data/mockProjectData'
+import ProjectsPage from 'pages/Projects'
+import { mockProjectData } from '@test/data/mockProjectData'
 
 jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
