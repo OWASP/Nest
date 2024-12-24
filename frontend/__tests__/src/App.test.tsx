@@ -7,10 +7,11 @@ import App from '../../src/App'
 import '@testing-library/jest-dom'
 
 jest.mock('../../src/pages', () => ({
-  Home: () => <div data-testid="home-page">Home Page</div>,
-  ProjectsPage: () => <div data-testid="projects-page">Projects Page</div>,
-  CommitteesPage: () => <div data-testid="committees-page">Committees Page</div>,
-  ChaptersPage: () => <div data-testid="chapters-page">Chapters Page</div>,
+  Home: jest.fn(() => <div data-testid="home-page">Home Page</div>),
+  ProjectsPage: jest.fn(() => <div data-testid="projects-page">Projects Page</div>),
+  CommitteesPage: jest.fn(() => <div data-testid="committees-page">Committees Page</div>),
+  ChaptersPage: jest.fn(() => <div data-testid="chapters-page">Chapters Page</div>),
+  ContributePage: jest.fn(() => <div data-testid="contribute-page">Contribute Page</div>),
 }))
 
 jest.mock('../../src/components/Header', () => {
@@ -86,17 +87,6 @@ describe('App Component', () => {
       expect(screen.getByTestId('chapters-page')).toBeInTheDocument()
     })
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
-  })
-
-  test('content has correct margin for fixed header', () => {
-    render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>
-    )
-
-    const contentDiv = screen.getByRole('main').children[1]
-    expect(contentDiv).toHaveClass('mt-16')
   })
 
   test('renders different pages for different routes', () => {

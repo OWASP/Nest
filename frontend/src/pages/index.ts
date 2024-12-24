@@ -4,7 +4,8 @@
 
 import ChaptersPage from './Chapters'
 import CommitteesPage from './Committees'
+import ContributePage from './Contribute'
 import Home from './Home'
 import ProjectsPage from './Projects'
 
-export { Home, ProjectsPage, CommitteesPage, ChaptersPage }
+export { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage }

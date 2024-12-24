@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 
 import Footer from './components/Footer'
 import Header from './components/Header'
-import { Home, ProjectsPage, CommitteesPage, ChaptersPage } from './pages'
+import { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage } from './pages'
 
 function App() {
   const location = useLocation()
@@ -15,14 +15,13 @@ function App() {
   return (
     <main className="flex min-h-screen w-full flex-col">
       <Header />
-      <div className="mt-16 flex-1">
-        <Routes>
-          <Route path="/" element={<Home />}></Route>
-          <Route path="/projects" element={<ProjectsPage />}></Route>
-          <Route path="/committees" element={<CommitteesPage />}></Route>
-          <Route path="/chapters" element={<ChaptersPage />}></Route>
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />}></Route>
+        <Route path="/projects" element={<ProjectsPage />}></Route>
+        <Route path="/projects/contribute" element={<ContributePage />}></Route>
+        <Route path="/committees" element={<CommitteesPage />}></Route>
+        <Route path="/chapters" element={<ChaptersPage />}></Route>
+      </Routes>
       <Footer />
     </main>
   )
