@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
-import FontAwesomeIconWrapper from '@src/lib/FontAwesomeIconWrapper'
-import { cn } from '@src/lib/utils'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+import { cn } from 'lib/utils'
 
 function ModeToggle({ className }: { className?: string }) {
   const [dark, setDark] = useState(() => {

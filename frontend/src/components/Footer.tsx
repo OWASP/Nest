@@ -1,5 +1,5 @@
-import { footerSections } from '@src/utils/constants'
-import { Section } from '@src/utils/constants'
+import { footerSections } from 'utils/constants'
+import { Section } from 'utils/constants'
 
 export default function Footer() {
   return (

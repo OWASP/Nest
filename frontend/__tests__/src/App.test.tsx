@@ -11,7 +11,7 @@ jest.mock('@src/pages', () => ({
   ChaptersPage: () => <div data-testid="chapters-page">Chapters Page</div>,
 }))
 
-jest.mock('@src/components/Header', () => {
+jest.mock('components/Header', () => {
   const { Link } = require('react-router-dom')
   return function MockHeader() {
     return (
@@ -32,7 +32,7 @@ jest.mock('@src/components/Header', () => {
   }
 })
 
-jest.mock('@src/components/Footer', () => {
+jest.mock('components/Footer', () => {
   return function MockFooter() {
     return <footer data-testid="footer">Footer</footer>
   }

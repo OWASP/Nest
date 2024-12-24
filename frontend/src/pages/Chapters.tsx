@@ -1,9 +1,9 @@
-import Card from '@src/components/Card'
-import SearchPageLayout from '@src/components/SearchPageLayout'
-import FontAwesomeIconWrapper from '@src/lib/FontAwesomeIconWrapper'
-import { useSearchPage } from '@src/lib/hooks/useSearchPage'
-import { ChapterType } from '@src/lib/types'
-import { getFilteredIcons, handleSocialUrls } from '@src/lib/utils'
+import Card from 'components/Card'
+import SearchPageLayout from 'components/SearchPageLayout'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+import { useSearchPage } from 'lib/hooks/useSearchPage'
+import { ChapterType } from 'lib/types'
+import { getFilteredIcons, handleSocialUrls } from 'lib/utils'
 
 const ChaptersPage = () => {
   const {

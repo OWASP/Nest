@@ -32,5 +32,11 @@ export default {
   },
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
+    '^components/(.*)$': '<rootDir>/src/components/$1',
+    '^utils/(.*)$': '<rootDir>/src/utils/$1',
+    '^lib/(.*)$': '<rootDir>/src/lib/$1',
+    '^pages/(.*)$': '<rootDir>/src/pages/$1',
+    '^@test/(.*)$': '<rootDir>__tests__/src/$1',
   },
+
 }

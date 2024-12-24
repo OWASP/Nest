@@ -1,8 +1,8 @@
 import React from 'react'
 
-import LoadingSpinner from '@src/components/LoadingSpinner'
-import Pagination from '@src/components/Pagination'
-import SearchBar from '@src/components/Search'
+import LoadingSpinner from 'components/LoadingSpinner'
+import Pagination from 'components/Pagination'
+import SearchBar from 'components/Search'
 
 interface SearchPageLayoutProps {
   isLoaded: boolean

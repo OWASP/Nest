@@ -1,10 +1,10 @@
-import Card from '@src/components/Card'
-import { level } from '@src/components/data'
-import SearchPageLayout from '@src/components/SearchPageLayout'
-import FontAwesomeIconWrapper from '@src/lib/FontAwesomeIconWrapper'
-import { useSearchPage } from '@src/lib/hooks/useSearchPage'
-import { project } from '@src/lib/types'
-import { getFilteredIcons } from '@src/lib/utils'
+import Card from 'components/Card'
+import { level } from 'components/data'
+import SearchPageLayout from 'components/SearchPageLayout'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+import { useSearchPage } from 'lib/hooks/useSearchPage'
+import { project } from 'lib/types'
+import { getFilteredIcons } from 'lib/utils'
 
 const ProjectsPage = () => {
   const {

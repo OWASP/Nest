@@ -1,11 +1,11 @@
 import { SearchResponse } from 'algoliasearch'
 
-import { client } from '@src/lib/algoliaClient'
-import { AlgoliaResponseType } from '@src/lib/types'
-import { API_URL } from '@src/utils/credentials'
-import { NEST_ENV } from '@src/utils/credentials'
-import logger from '@src/utils/logger'
-import { getParamsForIndexName } from '@src/utils/paramsMapping'
+import { client } from 'lib/algoliaClient'
+import { AlgoliaResponseType } from 'lib/types'
+import { API_URL } from 'utils/credentials'
+import { NEST_ENV } from 'utils/credentials'
+import logger from 'utils/logger'
+import { getParamsForIndexName } from 'utils/paramsMapping'
 
 export const loadData = async <T>(
   endpoint: string,
