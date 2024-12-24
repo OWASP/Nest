@@ -41,7 +41,7 @@ load-data:
 	@echo "Loading Nest data"
 	@cp backend/data/nest.json.gz backend/data/copy.json.gz
 	@gunzip backend/data/nest.json.gz
-	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py load_data" && $(MAKE) exec-backend-command
 	@rm backend/data/nest.json
 	@mv backend/data/copy.json.gz backend/data/nest.json.gz
 
