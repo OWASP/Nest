@@ -18,10 +18,10 @@
     "inlineSources": true,
     "baseUrl": ".",
     "paths": {
-      "@src/*": ["src/*"],
-    },
+      "@src/*": ["src/*"]
+    }
   },
-   "include": ["__test__/**/*"],
+  "include": ["__test__/**/*"],
   "files": [],
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

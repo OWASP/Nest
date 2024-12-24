@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import EnvironmentPlugin from 'vite-plugin-environment'
-import path from "path"
+import path from 'path'
 export default defineConfig({
   plugins: [
     react(),
