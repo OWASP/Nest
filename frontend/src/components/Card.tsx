@@ -46,9 +46,9 @@ const Card = ({
   }
 
   return (
-    <div className="flex h-fit w-full flex-col items-start justify-normal gap-4 rounded-md border border-border py-6 pl-6 pt-0 md:max-w-6xl md:gap-2">
-      <div className="flex w-full flex-wrap items-center justify-between gap-2">
-        <div className="mt-4 flex items-center justify-center gap-2">
+    <div className="flex h-fit w-full flex-col items-start justify-normal rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
+      <div className="flex w-full flex-nowrap items-start justify-between gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           {level && (
             <span
               data-tooltip-id="level-tooltip"
@@ -60,7 +60,7 @@ const Card = ({
             </span>
           )}
           <a href={url} target="_blank" rel="noopener noreferrer">
-            <h1 className="text-2xl font-semibold dark:text-sky-600">{title}</h1>
+            <h1 className="text-wrap text-2xl font-semibold dark:text-sky-600">{title}</h1>
           </a>
         </div>
 
@@ -68,11 +68,21 @@ const Card = ({
           {icons &&
             Object.keys(Icons).map((key, index) =>
               icons[key] !== undefined ? (
-                <DisplayIcon key={`${key}-${index}`} item={key} icons={icons} idx={index} />
+                <DisplayIcon
+                  key={`${key}-${index}`}
+                  item={key}
+                  icons={icons}
+                  idx={Object.keys(icons).findIndex((e) => e == key)}
+                />
               ) : null
             )}
         </div>
       </div>
+      {projectName && (
+        <a href={projectLink} target="_blank" rel="noopener noreferrer" className="font-medium">
+          {projectName}
+        </a>
+      )}
       <p className="mr-8 mt-2 text-gray-600 dark:text-gray-300">{summary}</p>
       <h2>
         {leaders && (
@@ -98,14 +108,10 @@ const Card = ({
                 />
               ))}
           </div>
-          {projectName && (
-            <a href={projectLink} target="_blank" rel="noopener noreferrer">
-              {projectName}
-            </a>
-          )}
+
           {(languages || (topics && topics.length > 0) || (social && social.length > 0)) && (
             <div className="flex w-full flex-col items-center justify-between pr-6 md:flex-row">
-              <div className="flex max-w-4xl items-start justify-start pt-3">
+              <div className="flex max-w-4xl flex-col items-start justify-start gap-2 pt-3">
                 {languages && (
                   <div id="languages" className="flex flex-wrap items-center justify-normal gap-2">
                     {languages &&
