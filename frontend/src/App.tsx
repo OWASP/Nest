@@ -1,12 +1,19 @@
-import { Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 
 import Footer from './components/Footer'
 import Header from './components/Header'
 import { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage } from './pages'
 
 function App() {
+  const location = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+
   return (
-    <main className="m-0 flex min-h-screen w-full flex-col justify-start">
+    <main className="flex min-h-screen w-full flex-col">
       <Header />
       <Routes>
         <Route path="/" element={<Home />}></Route>

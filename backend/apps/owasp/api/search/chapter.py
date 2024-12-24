@@ -39,7 +39,6 @@ def chapters(request):
     """Search chapters API endpoint."""
     page = int(request.GET.get("page", 1))
     query = request.GET.get("q", "")
-
     chapters = get_chapters(query=query, page=page, meta=request.META)
     return JsonResponse(
         {
