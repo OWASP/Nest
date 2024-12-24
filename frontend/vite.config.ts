@@ -6,11 +6,11 @@ export default defineConfig({
   plugins: [
     react(),
     EnvironmentPlugin({
-      VITE_NEST_API_URL: 'http://localhost:8000/api/v1',
-      VITE_NEST_ENV: 'local',
-      VITE_NEST_SENTRY_DSN_URL: null,
       VITE_ALGOLIA_APP_ID: process.env.VITE_ALGOLIA_APP_ID,
       VITE_ALGOLIA_SEARCH_KEY: process.env.VITE_ALGOLIA_SEARCH_KEY,
+      VITE_NEST_API_URL: process.env.VITE_NEST_API_URL,
+      VITE_NEST_ENV: process.env.VITE_NEST_ENV,
+      VITE_NEST_SENTRY_DSN_URL: process.env.VITE_SENTRY_DSN_URL,
     }),
   ],
   server: {
