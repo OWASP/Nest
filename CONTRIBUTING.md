@@ -74,13 +74,17 @@ Follow these steps to set up the OWASP Nest application:
 1. **Set Up Algolia**:
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
    - After creating an account, create an Algolia app.
-   - Update your `.env/local` file with the following keys from your Algolia app:
+   - Update your `backend/.env/local` file with the following keys from your Algolia app:
 
    ```plaintext
    DJANGO_ALGOLIA_API_KEY=<your_algolia_api_key>
    DJANGO_ALGOLIA_APPLICATION_ID=<your_algolia_application_id>
    ```
-
+   - Update your `frontend/.env` with your same key, id pairs of Algolia:
+   ```plaintext
+   VITE_ALGOLIA_SEARCH_KEY="your-algolia-search-key"
+   VITE_ALGOLIA_APP_ID="your-algolia-app-id"
+   ```
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
 1. **Run the Application**:
