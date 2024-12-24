@@ -32,11 +32,7 @@ export default function Header() {
           <NavLink to="/">
             <div className="flex h-full items-center">
               <img
-                src={
-                  !dark
-                    ? '../public/img/owasp_icon_black_sm.png'
-                    : '../public/img/owasp_icon_white_sm.png'
-                }
+                src={!dark ? '/img/owasp_icon_black_sm.png' : '/img/owasp_icon_white_sm.png'}
                 className="h-16 px-2"
                 alt="OWASP Logo"
               ></img>
