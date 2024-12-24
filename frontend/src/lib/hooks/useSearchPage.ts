@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import logger from '../../utils/logger'
-import { fetchAlgoliaData } from '../api'
-import { AlgoliaResponseType } from '../types'
+import logger from '@nest-frontend/utils/logger'
+import { fetchAlgoliaData } from '@nest-frontend/lib/api'
+import { AlgoliaResponseType } from '@nest-frontend/lib/types'
 
 interface UseSearchPageOptions {
   indexName: string

@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import EnvironmentPlugin from 'vite-plugin-environment'
-
+import path from "path"
 export default defineConfig({
   plugins: [
     react(),
@@ -13,6 +13,11 @@ export default defineConfig({
       VITE_ALGOLIA_SEARCH_KEY: process.env.VITE_ALGOLIA_SEARCH_KEY,
     }),
   ],
+  resolve: {
+    alias: {
+      '@nest-frontend': path.resolve(__dirname, 'src'),
+    },
+  },
   server: {
     watch: {
       usePolling: true,

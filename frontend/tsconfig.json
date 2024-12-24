@@ -15,8 +15,13 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "sourceMap": true,
-    "inlineSources": true
+    "inlineSources": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nest-frontend/*": ["src/*"],
+    },
   },
+   "include": ["__test__/**/*"],
   "files": [],
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

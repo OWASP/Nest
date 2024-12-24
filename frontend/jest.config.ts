@@ -30,4 +30,7 @@ export default {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
+  moduleNameMapper: {
+    '^@nest-frontend/(.*)$': '<rootDir>/src/$1',
+  },
 }

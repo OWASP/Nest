@@ -1,17 +1,17 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
-import { fetchAlgoliaData } from '../../../src/lib/api'
-import { render } from '../../../src/lib/test-util'
+import { fetchAlgoliaData } from '@nest-frontend/lib/api'
+import { render } from '@nest-frontend/lib/test-util'
 import '@testing-library/jest-dom'
-import { ChaptersPage } from '../../../src/pages'
+import { ChaptersPage } from '@nest-frontend/pages'
 import { mockChapterData } from '../data/mockChapterData'
 
-jest.mock('../../../src/lib/api', () => ({
+jest.mock('@nest-frontend/lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/components/Pagination', () =>
+jest.mock('@nest-frontend/components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>
       <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>

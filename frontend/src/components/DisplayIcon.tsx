@@ -1,8 +1,8 @@
 import { Tooltip } from 'react-tooltip'
 
 import { IconKeys, Icons } from './data'
-import { IconType, tooltipStyle } from '../lib/constants'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
+import { IconType, tooltipStyle } from '@nest-frontend/lib/constants'
+import FontAwesomeIconWrapper from '@nest-frontend/lib/FontAwesomeIconWrapper'
 
 export default function DisplayIcon({
   item,

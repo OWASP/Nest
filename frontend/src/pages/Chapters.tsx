@@ -1,9 +1,9 @@
-import Card from '../components/Card'
-import SearchPageLayout from '../components/SearchPageLayout'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
-import { useSearchPage } from '../lib/hooks/useSearchPage'
-import { ChapterType } from '../lib/types'
-import { getFilteredIcons, handleSocialUrls } from '../lib/utils'
+import Card from '@nest-frontend/components/Card'
+import SearchPageLayout from '@nest-frontend/components/SearchPageLayout'
+import FontAwesomeIconWrapper from '@nest-frontend/lib/FontAwesomeIconWrapper'
+import { useSearchPage } from '@nest-frontend/lib/hooks/useSearchPage'
+import { ChapterType } from '@nest-frontend/lib/types'
+import { getFilteredIcons, handleSocialUrls } from '@nest-frontend/lib/utils'
 
 const ChaptersPage = () => {
   const {

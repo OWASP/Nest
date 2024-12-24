@@ -1,5 +1,5 @@
-import { logException, logCriticalMessage } from '../sentry.config'
-import { APPLICATION_ENV } from '../utils/credentials'
+import { logException, logCriticalMessage } from '@nest-frontend/sentry.config'
+import { APPLICATION_ENV } from '@nest-frontend/utils/credentials'
 
 /**
  * Logger utility for handling logs and errors.

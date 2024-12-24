@@ -1,5 +1,5 @@
-import { footerSections } from '../utils/constants'
-import { Section } from '../utils/constants'
+import { footerSections } from '@nest-frontend/utils/constants'
+import { Section } from '@nest-frontend/utils/constants'
 
 export default function Footer() {
   return (

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 
-import { headerLinks } from '../utils/constants'
+import { headerLinks } from '@nest-frontend/utils/constants'
 
 export default function Header() {
   const [dark, setDark] = useState(() => {
