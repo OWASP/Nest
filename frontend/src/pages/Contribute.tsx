@@ -68,7 +68,7 @@ const ContributePage = () => {
       searchQuery={searchQuery}
       onSearch={handleSearch}
       onPageChange={handlePageChange}
-      searchPlaceholder="Search for OWASP Issues..."
+      searchPlaceholder="Search for OWASP issues..."
       empty="No issues found"
     >
       {issues && issues.map(renderContributeCard)}
