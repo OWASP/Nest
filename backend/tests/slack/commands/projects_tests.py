@@ -1,16 +1,12 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from django.conf import settings
-from django.template.defaultfilters import pluralize
-from apps.slack.commands.projects import handler, COMMAND, NAME_TRUNCATION_LIMIT
-from apps.owasp.api.search.project import get_projects
-from apps.owasp.models.project import Project
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
-from apps.slack.utils import escape
-from datetime import datetime
+
+from apps.slack.commands.projects import COMMAND, handler
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_slack_command():
     return {
         "text": "web application",
@@ -18,14 +14,14 @@ def mock_slack_command():
     }
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_slack_client():
     client = MagicMock()
     client.conversations_open.return_value = {"channel": {"id": "C123456"}}
     return client
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_project():
     return {
         "idx_name": "Test Project",
@@ -36,7 +32,7 @@ def mock_project():
         "idx_stars_count": 100,
         "idx_updated_at": "2024-12-01",
         "idx_level": "Level 1",
-        "idx_leaders": ["Leader A", "Leader B"]
+        "idx_leaders": ["Leader A", "Leader B"],
     }
 
 
@@ -49,32 +45,34 @@ def test_handler_with_disabled_commands(mock_slack_client, mock_slack_command):
     mock_slack_client.chat_postMessage.assert_not_called()
 
 
-@patch('apps.owasp.api.search.project.get_projects')
+@patch("apps.owasp.api.search.project.get_projects")
 def test_handler_with_no_results(mock_get_projects, mock_slack_client, mock_slack_command):
     mock_get_projects.return_value = {"hits": []}
     settings.SLACK_COMMANDS_ENABLED = True
 
     handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
-    blocks = mock_slack_client.chat_postMessage.call_args[1]['blocks']
+    blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
     assert any(f"No results found for `{COMMAND}" in str(block) for block in blocks)
 
 
-@patch('apps.owasp.api.search.project.get_projects')
-def test_handler_with_results(mock_get_projects, mock_slack_client, mock_slack_command, mock_project):
+@patch("apps.owasp.api.search.project.get_projects")
+def test_handler_with_results(
+    mock_get_projects, mock_slack_client, mock_slack_command, mock_project
+):
     mock_get_projects.return_value = {"hits": [mock_project]}
     settings.SLACK_COMMANDS_ENABLED = True
 
     handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
-    blocks = mock_slack_client.chat_postMessage.call_args[1]['blocks']
+    blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
     assert any("Here are top 10 most OWASP projects" in str(block) for block in blocks)
     assert any(mock_project["idx_name"] in str(block) for block in blocks)
     assert any(mock_project["idx_url"] in str(block) for block in blocks)
     assert any("Test summary" in str(block) for block in blocks)
 
 
-@patch('apps.owasp.api.search.project.get_projects')
+@patch("apps.owasp.api.search.project.get_projects")
 def test_handler_special_characters(mock_get_projects, mock_slack_client):
     command = {"text": "web app <>&", "user_id": "U123456"}
     mock_get_projects.return_value = {"hits": []}
@@ -82,18 +80,20 @@ def test_handler_special_characters(mock_get_projects, mock_slack_client):
 
     handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
-    blocks = mock_slack_client.chat_postMessage.call_args[1]['blocks']
+    blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
     assert any("web app &lt;&gt;&amp;" in str(block) for block in blocks)
 
 
-@patch('apps.owasp.api.search.project.get_projects')
-def test_handler_formatting(mock_get_projects, mock_slack_client, mock_slack_command, mock_project):
+@patch("apps.owasp.api.search.project.get_projects")
+def test_handler_formatting(
+    mock_get_projects, mock_slack_client, mock_slack_command, mock_project
+):
     mock_get_projects.return_value = {"hits": [mock_project]}
     settings.SLACK_COMMANDS_ENABLED = True
 
     handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
-    blocks = mock_slack_client.chat_postMessage.call_args[1]['blocks']
+    blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
     contributors_text = ", 10 contributors"
     forks_text = ", 5 forks"
     stars_text = ", 100 stars"

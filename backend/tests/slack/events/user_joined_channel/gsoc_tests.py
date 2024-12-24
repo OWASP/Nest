@@ -1,16 +1,18 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from django.conf import settings
-from apps.slack.events.user_joined_channel.gsoc import gsoc_handler
+
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
+from apps.slack.events.user_joined_channel.gsoc import gsoc_handler
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_slack_event():
     return {"user": "U123456", "channel": OWASP_GSOC_CHANNEL_ID}
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_slack_client():
     client = MagicMock()
     client.conversations_open.return_value = {"channel": {"id": "C123456"}}
