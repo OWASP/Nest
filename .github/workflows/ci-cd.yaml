@@ -180,7 +180,7 @@ jobs:
           echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.staging
           echo "VITE_ALGOLIA_SEARCH_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
           echo "VITE_NEST_API_URL=https://nest.owasp.dev/api/v1" >> frontend/.env.staging
-          echo "VITE_SENTRY_DSN_URL=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
+          echo "VITE_NEST_SENTRY_DSN_URL=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
           echo "VITE_NEST_ENV=staging" >> frontend/.env.staging
 
       - name: Build frontend image
