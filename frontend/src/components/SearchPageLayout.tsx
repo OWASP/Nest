@@ -57,21 +57,20 @@ const SearchPageLayout = ({
               <LoadingSpinner imageUrl={loadingImageUrl} />
             </div>
           ) : (
-            <>
+            <div>
               {totalPages === 0 && <div className="text bg:text-white m-4 text-xl">{empty}</div>}
               {children}
-            </>
+            </div>
+          )}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+              isLoaded={isLoaded}
+            />
           )}
         </div>
-      )}
-
-      {!isLoaded && totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-          isLoaded={isLoaded}
-        />
       )}
     </div>
   )
