@@ -4,7 +4,6 @@ import '@testing-library/jest-dom'
 import { MemoryRouter } from 'react-router-dom'
 
 import { fetchAlgoliaData } from '../../../src/lib/api'
-import { getFilteredIcons } from '../../../src/lib/utils'
 import { ContributePage } from '../../../src/pages'
 import { mockContributeData } from '../data/mockContributeData'
 
