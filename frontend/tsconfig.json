@@ -7,7 +7,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "types": ["node", "jest", "@testing-library/jest-dom"],
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -15,8 +14,18 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "sourceMap": true,
-    "inlineSources": true
+    "inlineSources": true,
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"],
+      "components/*": ["src/components/*"],
+      "utils/*": ["src/utils/*"],
+      "lib/*": ["src/lib/*"],
+      "pages/*": ["src/pages/*"],
+      "@test/*": ["__tests__/src/*"]
+    }
   },
+  "include": ["__tests__/*"],
   "files": [],
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

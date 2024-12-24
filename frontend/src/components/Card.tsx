@@ -1,15 +1,14 @@
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
+import ActionButton from 'components/ActionButton'
+import ContributorAvatar from 'components/ContributorAvatar'
+import { Icons } from 'components/data'
+import DisplayIcon from 'components/DisplayIcon'
+import TopicBadge from 'components/TopicBadge'
+import { CardProps, tooltipStyle } from 'lib/constants'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+import { cn } from 'lib/utils'
 import { useState } from 'react'
 import { Tooltip } from 'react-tooltip'
-
-import ActionButton from './ActionButton'
-import ContributorAvatar from './ContributorAvatar'
-import { Icons } from './data'
-import DisplayIcon from './DisplayIcon'
-import TopicBadge from './TopicBadge'
-import { CardProps, tooltipStyle } from '../lib/constants'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
-import { cn } from '../lib/utils'
 
 const Card = ({
   title,

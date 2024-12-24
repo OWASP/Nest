@@ -1,9 +1,8 @@
+import { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage } from '@src/pages'
+import Footer from 'components/Footer'
+import Header from 'components/Header'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-
-import Footer from './components/Footer'
-import Header from './components/Header'
-import { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage } from './pages'
 
 function App() {
   const location = useLocation()

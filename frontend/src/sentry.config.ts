@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/react'
-
-import { APPLICATION_SENTRY_URL, APPLICATION_ENV } from './utils/credentials'
+import { APPLICATION_SENTRY_URL, APPLICATION_ENV } from 'utils/credentials'
 
 Sentry.init({
   dsn: APPLICATION_SENTRY_URL,
