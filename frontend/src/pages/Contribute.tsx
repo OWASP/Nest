@@ -18,7 +18,7 @@ const ContributePage = () => {
     handleSearch,
     handlePageChange,
   } = useSearchPage<IssueType>({
-    endpoint: 'owasp/search/issue',
+    indexName: 'issues',
     pageTitle: 'OWASP Issues',
   })
 

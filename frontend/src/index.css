@@ -65,7 +65,9 @@ a {
   color: #1d7bd7;
 }
 
-
+navlink {
+  color: inherit;
+}
 
 @keyframes fadeIn {
   from {
