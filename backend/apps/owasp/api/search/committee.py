@@ -34,7 +34,6 @@ def committees(request):
     """Search committees API endpoint."""
     page = int(request.GET.get("page", 1))
     query = request.GET.get("q", "")
-
     committees = get_committees(query=query, page=page)
     return JsonResponse(
         {

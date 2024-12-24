@@ -1,30 +1,31 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import '@testing-library/jest-dom'
-import { loadData } from '../../../src/lib/api'
+import { fetchAlgoliaData } from '../../../src/lib/api'
+import { render } from '../../../src/lib/test-util'
 import { CommitteesPage } from '../../../src/pages'
 import { mockCommitteeData } from '../data/mockCommitteeData'
 
 jest.mock('../../../src/lib/api', () => ({
-  loadData: jest.fn(),
+  fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/utils/credentials', () => ({
-  API_URL: 'https://mock-api.com',
-}))
 jest.mock('../../../src/components/Pagination', () =>
-  jest.fn(({ currentPage, onPageChange, totalPages }) => (
+  jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (
       <div>
         <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
       </div>
     ) : null
-  ))
+  )
 )
 describe('Committees Component', () => {
   beforeEach(() => {
-    ;(loadData as jest.Mock).mockResolvedValue(mockCommitteeData)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockCommitteeData.committees,
+      totalPages: 2,
+    })
   })
 
   afterEach(() => {
@@ -37,6 +38,32 @@ describe('Committees Component', () => {
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
     })
+  })
+
+  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
+    window.scrollTo = jest.fn()
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockCommitteeData.committees,
+      totalPages: 2,
+    })
+
+    render(<CommitteesPage />)
+
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(
+        screen.queryByPlaceholderText('Search for OWASP committees...')
+      ).not.toBeInTheDocument()
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search for OWASP committees...')).toBeInTheDocument()
+      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
+    })
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
   })
 
   test('renders committee data correctly', async () => {
@@ -54,10 +81,9 @@ describe('Committees Component', () => {
   })
 
   test('displays "No committees found" when there are no committees', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({
-      ...mockCommitteeData,
-      committees: [],
-      total_pages: 0,
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [],
+      totalPages: 0,
     })
     render(<CommitteesPage />)
     await waitFor(() => {
@@ -67,9 +93,9 @@ describe('Committees Component', () => {
 
   test('handles page change correctly when there are multiple pages', async () => {
     window.scrollTo = jest.fn()
-    ;(loadData as jest.Mock).mockResolvedValue({
-      ...mockCommitteeData,
-      total_pages: 2,
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockCommitteeData.committees,
+      totalPages: 2,
     })
     render(<CommitteesPage />)
     await waitFor(() => {
@@ -83,9 +109,9 @@ describe('Committees Component', () => {
   })
 
   test('does not render pagination when there is only one page', async () => {
-    (loadData as jest.Mock).mockResolvedValue({
-      ...mockCommitteeData,
-      total_pages: 1,
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockCommitteeData.committees,
+      totalPages: 1,
     })
     render(<CommitteesPage />)
     await waitFor(() => {

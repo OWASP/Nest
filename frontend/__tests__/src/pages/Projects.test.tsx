@@ -1,17 +1,16 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import '@testing-library/jest-dom'
-import { loadData } from '../../../src/lib/api'
+import { fetchAlgoliaData } from '../../../src/lib/api'
+import { render } from '../../../src/lib/test-util'
 import { ProjectsPage } from '../../../src/pages'
 import mockProjectData from '../data/mockProjectData'
+
 jest.mock('../../../src/lib/api', () => ({
-  loadData: jest.fn(),
+  fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/utils/credentials', () => ({
-  API_URL: 'https://mock-api.com',
-}))
 jest.mock('../../../src/components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>
@@ -22,7 +21,10 @@ jest.mock('../../../src/components/Pagination', () =>
 
 describe('ProjectPage Component', () => {
   beforeEach(() => {
-    ;(loadData as jest.Mock).mockResolvedValue(mockProjectData)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockProjectData.projects,
+      totalPages: 2,
+    })
   })
 
   afterEach(() => {
@@ -35,6 +37,30 @@ describe('ProjectPage Component', () => {
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
     })
+  })
+
+  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
+    window.scrollTo = jest.fn()
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockProjectData.projects,
+      totalPages: 2,
+    })
+
+    render(<ProjectsPage />)
+
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.queryByPlaceholderText('Search for OWASP projects...')).not.toBeInTheDocument()
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+    })
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
   })
 
   test('renders project data correctly', async () => {
@@ -52,7 +78,10 @@ describe('ProjectPage Component', () => {
   })
 
   test('displays "No projects found" when there are no projects', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({ ...mockProjectData, projects: [], total_pages: 0 })
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [],
+      totalPages: 0,
+    })
     render(<ProjectsPage />)
     await waitFor(() => {
       expect(screen.getByText('No projects found')).toBeInTheDocument()
@@ -61,6 +90,10 @@ describe('ProjectPage Component', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockProjectData.projects,
+      totalPages: 2,
+    })
     render(<ProjectsPage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')

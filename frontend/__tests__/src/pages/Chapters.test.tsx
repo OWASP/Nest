@@ -1,18 +1,16 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
+import { fetchAlgoliaData } from '../../../src/lib/api'
+import { render } from '../../../src/lib/test-util'
 import '@testing-library/jest-dom'
-import { loadData } from '../../../src/lib/api'
 import { ChaptersPage } from '../../../src/pages'
 import { mockChapterData } from '../data/mockChapterData'
 
 jest.mock('../../../src/lib/api', () => ({
-  loadData: jest.fn(),
+  fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/utils/credentials', () => ({
-  API_URL: 'https://mock-api.com',
-}))
 jest.mock('../../../src/components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>
@@ -23,7 +21,10 @@ jest.mock('../../../src/components/Pagination', () =>
 
 describe('ChaptersPage Component', () => {
   beforeEach(() => {
-    ;(loadData as jest.Mock).mockResolvedValue(mockChapterData)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      totalPages: 2,
+    })
   })
 
   afterEach(() => {
@@ -52,7 +53,7 @@ describe('ChaptersPage Component', () => {
   })
 
   test('displays "No chapters found" when there are no chapters', async () => {
-    ;(loadData as jest.Mock).mockResolvedValue({ ...mockChapterData, chapters: [], total_pages: 0 })
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
     render(<ChaptersPage />)
     await waitFor(() => {
       expect(screen.getByText('No chapters found')).toBeInTheDocument()
@@ -61,6 +62,10 @@ describe('ChaptersPage Component', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      totalPages: 2,
+    })
     render(<ChaptersPage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
@@ -70,5 +75,28 @@ describe('ChaptersPage Component', () => {
       top: 0,
       behavior: 'auto',
     })
+  })
+
+  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
+    window.scrollTo = jest.fn()
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      totalPages: 2,
+    })
+    render(<ChaptersPage />)
+
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.queryByPlaceholderText('Search for OWASP chapters...')).not.toBeInTheDocument()
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+    })
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toBeInTheDocument()
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+      expect(screen.getByText('Next Page')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
   })
 })
