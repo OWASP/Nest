@@ -34,7 +34,11 @@ def join_values(fields, delimiter=" "):
 
 def natural_date(value):
     """Return humanized version of a date."""
-    return naturaltime(datetime.fromtimestamp(value, tz=timezone.utc))
+    if isinstance(value, str):
+        value = datetime.strptime(value, "%Y-%m-%d")
+    elif isinstance(value, int):
+        value = datetime.fromtimestamp(value, tz=timezone.utc)
+    return naturaltime(value)
 
 
 def natural_number(value, unit=None):
