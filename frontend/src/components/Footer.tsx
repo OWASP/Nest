@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { footerSections, Section } from '../utils/constants'
