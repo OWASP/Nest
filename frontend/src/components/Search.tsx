@@ -22,6 +22,12 @@ const SearchComponent: React.FC<SearchProps> = ({ onSearch, placeholder, initial
     [onSearch]
   )
 
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel()
+    }
+  }, [debouncedSearch])
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
     setSearchQuery(newQuery)
