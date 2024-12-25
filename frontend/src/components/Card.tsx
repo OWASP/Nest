@@ -48,7 +48,7 @@ const Card = ({
   return (
     <div className="flex w-full h-fit flex-col items-start rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
       <div className="flex w-full flex-nowrap items-start justify-between">
-        <div className="mt-4 flex flex-wrap items-center justify-center">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           {level && (
             <span
               data-tooltip-id="level-tooltip"
