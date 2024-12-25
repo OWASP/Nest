@@ -31,6 +31,7 @@ export default {
     '^.+\\.tsx?$': 'ts-jest',
   },
   moduleNameMapper: {
+    '^@src/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/__tests__/src/$1',
   },
   moduleDirectories: ['node_modules', 'src'],

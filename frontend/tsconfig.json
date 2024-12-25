@@ -17,6 +17,7 @@
     "inlineSources": true,
     "baseUrl": "src",
     "paths": {
+      "@src/*": ["*"],
       "@test/*": ["../__tests__/src/*"]
     }
   },
