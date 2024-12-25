@@ -20,7 +20,7 @@ const SearchComponent: React.FC<SearchProps> = ({ onSearch, placeholder, initial
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
-  
+
   const debouncedSearch = useMemo(
     () => debounce((query: string) => onSearch(query), 500),
     [onSearch]
