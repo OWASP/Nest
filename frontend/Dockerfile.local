@@ -2,14 +2,13 @@ FROM node:22-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN groupadd owasp && \
-    useradd --create-home --home-dir /home/owasp -g owasp owasp && \
-    chown -R owasp:owasp /home/owasp && \
+RUN mkdir -p /home/owasp && \
+    chown -R node:node /home/owasp && \
     apt-get update && apt-get upgrade -y && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 3000
 
-USER owasp
+USER node
 
 WORKDIR /home/owasp

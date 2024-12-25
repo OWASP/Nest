@@ -1,142 +1,35 @@
 # OWASP Nest
 
-## Initial Setup
+**OWASP Project Nest** is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
-Follow these steps to set up the OWASP Nest application:
+Key features of the platform include:
 
-1. **Clone the Repository**:
-   - Clone the repository code from GitHub using the following command:
+- **Advanced Search Capabilities:** Enables efficient navigation and filtering of projects and issues based on keywords, tags, and contributor preferences.
+- **Slack Integration:** Supports seamless communication through a Slack bot that facilitates direct and channel messaging for updates and discussions.
+- **OWASP Chapters Proximity Page:** Offers localized information about nearby OWASP chapters to foster community engagement.
+- **AI-Generated Insights:** Provides summarized descriptions and actionable steps for tackling project issues.
 
-     ```bash
-     git clone https://github.com/owasp/nest
-     ```
+OWASP Project Nest promotes collaboration, making it easier for both new and experienced contributors to engage meaningfully with OWASP's mission to improve software security worldwide.
 
-1. **Create Environment Files**:
-   - Create a local environment file in the `backend` directory:
+## Leaders
 
-     ```bash
-     touch backend/.env/local
-     ```
+OWASP Project Nest is led by a dedicated team committed to fostering collaboration and supporting contributors. The leadership team ensures the platform aligns with OWASP's mission, continually improving its features to serve the community better.
+Current Leaders:
 
-   - Copy the contents from the template file into your new local environment file:
+- [Arkadii Yakovets](https://github.com/arkid15r/)
+- [Kate Golovanova](https://github.com/kasya/)
+- [Starr Brown](https://github.com/mamicidal/)
 
-     ```bash
-     cp backend/.env/template backend/.env/local
-     ```
+For questions or discussions with the leadership team and other contributors, please use the `#project-nest` channel on OWASP Slack.
 
-   - Create a local environment file in the `frontend` directory:
+## Contributing
 
-     ```bash
-     cp frontend/.env.example frontend/.env
-     ```
+OWASP Project Nest thrives on community contributions. Whether you are a developer, designer, writer, or enthusiast, there are various ways to get involved:
 
-1. **Configure Environment Variables**:
-   - Open the `backend/.env/local` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
+- Code Contributions: Help improve the platform by fixing issues or adding new features.
+- Code Review: Review and provide feedback on pull requests to ensure code quality and maintainability.
+- Documentation: Enhance user guides or create tutorials to help others navigate the platform.
+- Issue Reporting: Identify and report bugs or suggest improvements.
+- Engagement: Share feedback, participate in discussions, or promote the project in your network.
 
-     ```plaintext
-     DJANGO_CONFIGURATION=Local
-     ```
-
-1. **Set Up Algolia**:
-   - Go to [Algolia](https://www.algolia.com/) and create a free account.
-   - After creating an account, create an Algolia app.
-   - Update your `.env/local` file with the following keys from your Algolia app:
-
-   ```plaintext
-   DJANGO_ALGOLIA_API_KEY=<your_algolia_api_key>
-   DJANGO_ALGOLIA_APPLICATION_ID=<your_algolia_application_id>
-   ```
-
-   - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
-
-1. **Run the Application**:
-   - In your terminal, navigate to the project directory and run the following command to start the application:
-
-   ```bash
-   make run
-   ```
-
-   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
-
-1. **Load Initial Data**:
-   - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
-
-   ```bash
-   make load-data
-   ```
-
-1. **Index Data**:
-   - In the same terminal session, run the following command to index the data:
-
-   ```bash
-   make index-data
-   ```
-
-1. **Verify API Endpoints**:
-   - Check that the data is available via these API endpoints:
-     - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
-     - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
-
-### Optional Steps (for fetching GitHub OWASP organization data)
-
-If you plan to fetch GitHub OWASP data locally, follow these additional steps:
-
-1. **Create a Super User**:
-   - Run the following command to create a super user for accessing the admin interface:
-
-  ```bash
-  make setup
-  ```
-
-1. **Generate a GitHub Personal Access Token**:
-    - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
-
-1. **Update Environment Variables with GitHub Token**:
-    - Open `backend/.env/local` again and update it with your GitHub token:
-
-      ```plaintext
-      GITHUB_TOKEN=<your_github_token>
-      ```
-
-1. **Sync Local Database Data**:
-   - Now you should be able to run the following command to sync your local database data with GitHub:
-
-   ```bash
-   make sync
-   ```
-
-### Troubleshooting Guide for Windows Users
-
-This troubleshooting section is tailored for Windows users.
-
-#### 1. Ensure WSL is Installed
-
-The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system. If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
-
-#### 2. Install the `make` Command
-
-When running the `make` command for the first time, you may be prompted to install the `make` tool. Run the following commands in your WSL terminal to install it:
-
-```bash
-sudo apt update
-sudo apt install make
-```
-
-### Resolving Frontend Permission Issues
-
-If you encounter permission issues while running the `make run` command, follow these steps:
-
-1. Open a new terminal.
-2. Navigate to the frontend directory by running:
-
-   ```bash
-   cd frontend
-   ```
-
-3. Install the necessary dependencies by running:
-
-   ```bash
-   npm install
-   ```
-
-This should resolve any permission-related issues and ensure the frontend dependencies are installed correctly.
+To get started, visit the [OWASP Project Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).

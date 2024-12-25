@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from django.db import models
 
+from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
@@ -195,7 +196,7 @@ class Project(
     @lru_cache
     def active_projects_count():
         """Return active projects count."""
-        return Project.active_projects.count()
+        return IndexBase.get_total_count("projects")
 
     @staticmethod
     def bulk_save(projects, fields=None):

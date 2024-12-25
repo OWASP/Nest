@@ -1,13 +1,27 @@
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
 
 import '@testing-library/jest-dom'
 import Home from '../../../src/pages/Home'
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}))
+
 describe('Home Component', () => {
-  test('renders the Home component with the correct content', () => {
-    render(<Home />)
-    const helloText = screen.getByText(/hello!/i)
-    expect(helloText).toBeInTheDocument()
+  it('redirects to /projects on load', () => {
+    const mockNavigate = jest.fn()
+
+    ;(require('react-router-dom').useNavigate as jest.Mock).mockReturnValue(mockNavigate)
+
+    render(
+      <BrowserRouter>
+        <Home />
+      </BrowserRouter>
+    )
+    expect(mockNavigate).toHaveBeenCalledWith('/projects', { replace: true })
+    expect(mockNavigate).toHaveBeenCalledTimes(1)
   })
 })

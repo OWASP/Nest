@@ -39,7 +39,7 @@ python = "^3.12"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 sentry-sdk = {extras = ["django"], version = "^2.19.2"}
-slack-bolt = "^1.21.3"
+slack-bolt = "^1.22.0"
 django-cors-headers = "^4.6.0"
 
 
@@ -47,7 +47,7 @@ django-cors-headers = "^4.6.0"
 djlint = "^1.36.3"
 isort = "^5.13.2"
 pre-commit = "^4.0.0"
-ruff = "^0.8.3"
+ruff = "^0.8.4"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
