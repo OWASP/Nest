@@ -65,5 +65,5 @@ def test_check_contribute_handler():
         lambda x: x.get("channel") == OWASP_CONTRIBUTE_CHANNEL_ID,
     )
 
-    assert check_contribute_handler({"channel": OWASP_CONTRIBUTE_CHANNEL_ID}) is True
-    assert check_contribute_handler({"channel": "C999999"}) is False
+    assert check_contribute_handler({"channel": OWASP_CONTRIBUTE_CHANNEL_ID})
+    assert not check_contribute_handler({"channel": "C999999"})
