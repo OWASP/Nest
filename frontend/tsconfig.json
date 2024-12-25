@@ -21,7 +21,5 @@
       "*": ["src/*"]
     }
   },
-  "include": ["__tests__/*", "__tests__/src/data"],
-  "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+  "include": ["__tests__/*", "__tests__/src/data"]
 }
