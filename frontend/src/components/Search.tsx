@@ -18,7 +18,7 @@ const SearchComponent: React.FC<SearchProps> = ({ onSearch, placeholder, initial
   }, [initialValue])
 
   const debouncedSearch = useMemo(
-    () => debounce((query: string) => onSearch(query), 500),
+    () => debounce((query: string) => onSearch(query), 750),
     [onSearch]
   )
 
