@@ -93,6 +93,7 @@ describe('ChaptersPage Component', () => {
     })
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toHaveFocus()
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
