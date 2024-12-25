@@ -3,6 +3,9 @@ import { defineConfig } from 'vite'
 import EnvironmentPlugin from 'vite-plugin-environment'
 
 export default defineConfig({
+  build: {
+    sourcemap: true,
+  },
   plugins: [
     react(),
     EnvironmentPlugin({
