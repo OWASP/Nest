@@ -15,13 +15,13 @@
     "jsx": "react-jsx",
     "sourceMap": true,
     "inlineSources": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "@src/*": ["*"],
-      "@test/*": ["../__tests__/src/*"]
+      "@tests/*": ["__tests__/src/*"],
+      "*": ["src/*"]
     }
   },
-  "include": ["__tests__/*"],
+  "include": ["__tests__/*", "__tests__/src/data"],
   "files": [],
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Modal } from 'components/Modal/Modal'
 import React from 'react'
-import '@testing-library/jest-dom'
+
+import { Modal } from 'components/Modal/Modal'
 
 // Mock the portal container
 beforeEach(() => {

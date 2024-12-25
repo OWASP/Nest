@@ -1,10 +1,13 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+
 import React from 'react'
-import '@testing-library/jest-dom'
 import { MemoryRouter } from 'react-router-dom'
+
 import { fetchAlgoliaData } from 'lib/api'
+
 import ContributePage from 'pages/Contribute'
-import { mockContributeData } from '@test/data/mockContributeData'
+
+import { mockContributeData } from '@tests/data/mockContributeData'
 
 jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),

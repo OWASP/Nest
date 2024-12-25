@@ -1,6 +1,7 @@
+import { Tooltip } from 'react-tooltip'
+
 import { IconType, tooltipStyle } from 'lib/constants'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { Tooltip } from 'react-tooltip'
 
 import { IconKeys, Icons } from './data'
 
