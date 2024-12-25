@@ -46,7 +46,7 @@ const Card = ({
   }
 
   return (
-    <div className="flex w-full flex-col items-start rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
+    <div className="flex w-full h-fit flex-col items-start rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
       <div className="flex w-full flex-nowrap items-start justify-between">
         <div className="mt-4 flex flex-wrap items-center justify-center">
           {level && (
@@ -83,7 +83,7 @@ const Card = ({
           {projectName}
         </a>
       )}
-      <p className="mr-8 text-gray-600 dark:text-gray-300 py-1">{summary}</p>
+      <p className="mr-8 py-1 text-gray-600 dark:text-gray-300">{summary}</p>
       <h2 className="py-1">
         {leaders && (
           <span className="font-semibold text-gray-600 dark:text-gray-300">
