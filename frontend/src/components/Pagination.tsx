@@ -93,11 +93,6 @@ const Pagination: React.FC<PaginationProps> = ({
           Next
         </button>
       </div>
-      <div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Page {currentPage} of {totalPages}
-        </p>
-      </div>
     </div>
   )
 }
