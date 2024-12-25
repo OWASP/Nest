@@ -58,6 +58,7 @@ describe('ProjectPage Component', () => {
     })
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toHaveFocus()
       expect(screen.getByText('Project 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
