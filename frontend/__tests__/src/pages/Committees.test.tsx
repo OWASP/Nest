@@ -1,17 +1,19 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+
 import React from 'react'
 
-import '@testing-library/jest-dom'
-import { fetchAlgoliaData } from '../../../src/lib/api'
-import { render } from '../../../src/lib/test-util'
-import { CommitteesPage } from '../../../src/pages'
-import { mockCommitteeData } from '../data/mockCommitteeData'
+import { fetchAlgoliaData } from 'lib/api'
+import { render } from 'lib/test-util'
 
-jest.mock('../../../src/lib/api', () => ({
+import CommitteesPage from 'pages/Committees'
+
+import { mockCommitteeData } from '@tests/data/mockCommitteeData'
+
+jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/components/Pagination', () =>
+jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (
       <div>
@@ -20,6 +22,7 @@ jest.mock('../../../src/components/Pagination', () =>
     ) : null
   )
 )
+
 describe('Committees Component', () => {
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({

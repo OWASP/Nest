@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
-
-import '@testing-library/jest-dom'
-import Home from '../../../src/pages/Home'
+import Home from 'pages/Home'
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
