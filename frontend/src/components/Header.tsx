@@ -19,12 +19,12 @@ export default function Header() {
         <NavLink to="/">
           <div className="flex h-full items-center">
             <img
-              src={'../public/img/owasp_icon_white_sm.png'}
+              src={'/img/owasp_icon_white_sm.png'}
               className="hidden h-16 dark:block"
               alt="OWASP Logo"
             ></img>
             <img
-              src={'../public/img/owasp_icon_black_sm.png'}
+              src={'/img/owasp_icon_black_sm.png'}
               className="block h-16 dark:hidden"
               alt="OWASP Logo"
             ></img>
@@ -79,12 +79,12 @@ export default function Header() {
           <NavLink to="/">
             <div className="flex h-full items-center">
               <img
-                src={'../public/img/owasp_icon_white_sm.png'}
+                src={'/img/owasp_icon_white_sm.png'}
                 className="hidden h-16 dark:block"
                 alt="OWASP Logo"
               ></img>
               <img
-                src={'../public/img/owasp_icon_black_sm.png'}
+                src={'/img/owasp_icon_black_sm.png'}
                 className="block h-16 dark:hidden"
                 alt="OWASP Logo"
               ></img>
