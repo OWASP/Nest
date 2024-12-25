@@ -15,14 +15,9 @@
     "jsx": "react-jsx",
     "sourceMap": true,
     "inlineSources": true,
-    "baseUrl": ".",
+    "baseUrl": "src",
     "paths": {
-      "@src/*": ["src/*"],
-      "components/*": ["src/components/*"],
-      "utils/*": ["src/utils/*"],
-      "lib/*": ["src/lib/*"],
-      "pages/*": ["src/pages/*"],
-      "@test/*": ["__tests__/src/*"]
+      "@test/*": ["../__tests__/src/*"]
     }
   },
   "include": ["__tests__/*"],

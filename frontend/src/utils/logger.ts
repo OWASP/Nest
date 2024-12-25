@@ -1,4 +1,4 @@
-import { logException, logCriticalMessage } from '@src/sentry.config'
+import { logCriticalMessage, logException } from 'sentry.config'
 import { APPLICATION_ENV } from 'utils/credentials'
 
 /**

@@ -2,9 +2,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
-import App from '@src/App'
+import App from 'App'
 
-jest.mock('@src/pages', () => ({
+jest.mock('pages', () => ({
   Home: () => <div data-testid="home-page">Home Page</div>,
   ProjectsPage: () => <div data-testid="projects-page">Projects Page</div>,
   CommitteesPage: () => <div data-testid="committees-page">Committees Page</div>,
