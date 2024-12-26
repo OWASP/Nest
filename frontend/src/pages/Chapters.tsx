@@ -4,6 +4,7 @@ import { ChapterType } from 'lib/types'
 import { getFilteredIcons, handleSocialUrls } from 'lib/utils'
 
 import Card from 'components/Card'
+import { ErrorDisplay } from 'components/ErrorDisplay'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
@@ -15,6 +16,8 @@ const ChaptersPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
+    error,
+    retry,
   } = useSearchPage<ChapterType>({
     indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
@@ -29,6 +32,9 @@ const ChaptersPage = () => {
       label: 'Join',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       url: chapter.idx_url,
+    }
+    if (error) {
+      return <ErrorDisplay error={error} onRetry={error.action === 'retry' ? retry : undefined} />
     }
     return (
       <Card

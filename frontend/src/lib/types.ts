@@ -96,3 +96,15 @@ export interface AlgoliaResponseType<T> {
   hits: T[]
   totalPages: number
 }
+
+export type ErrorSource = 'algolia' | 'runtime' | 'network' | 'http' | 'routing'
+
+export interface ErrorConfig {
+  code: string
+  statusCode?: number
+  title: string
+  message: string
+  source: ErrorSource
+  action?: 'retry' | 'home'
+  technical?: string
+}

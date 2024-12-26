@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import logger from 'utils/logger'
 
 import { fetchAlgoliaData } from 'lib/api'
-import { AlgoliaResponseType } from 'lib/types'
+import { useErrorHandler } from 'lib/hooks/useErrorHandler'
+import { AlgoliaResponseType, ErrorConfig } from 'lib/types'
 
 interface UseSearchPageOptions {
   indexName: string
@@ -20,6 +20,8 @@ interface UseSearchPageReturn<T> {
   handleSearch: (query: string) => void
   /* eslint-disable-next-line */
   handlePageChange: (page: number) => void
+  error: ErrorConfig | null
+  retry: () => void
 }
 
 export function useSearchPage<T>({
@@ -32,6 +34,25 @@ export function useSearchPage<T>({
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+  const { error, handleError, clearError, retry } = useErrorHandler('search')
+  const [shouldFetch, setShouldFetch] = useState(false)
+
+  const fetchData = useCallback(async (): Promise<void> => {
+    try {
+      const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
+        indexName,
+        searchQuery,
+        currentPage
+      )
+      setItems(data.hits)
+      setTotalPages(data.totalPages)
+      clearError()
+    } catch (error) {
+      handleError(error)
+    }
+    setIsLoaded(true)
+    setShouldFetch(false)
+  }, [indexName, searchQuery, currentPage, clearError, handleError])
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -43,24 +64,13 @@ export function useSearchPage<T>({
   useEffect(() => {
     document.title = pageTitle
     setIsLoaded(false)
+    setShouldFetch(true)
+  }, [pageTitle])
 
-    const fetchData = async () => {
-      try {
-        const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
-          indexName,
-          searchQuery,
-          currentPage
-        )
-        setItems(data.hits)
-        setTotalPages(data.totalPages)
-      } catch (error) {
-        logger.error(error)
-      }
-      setIsLoaded(true)
-    }
-
+  useEffect(() => {
+    if (!shouldFetch) return
     fetchData()
-  }, [currentPage, searchQuery, indexName, pageTitle])
+  }, [shouldFetch, fetchData])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -75,6 +85,11 @@ export function useSearchPage<T>({
     })
   }
 
+  const retrySearch = useCallback(() => {
+    retry(fetchData)
+    setShouldFetch(true)
+  }, [retry, fetchData])
+
   return {
     items,
     isLoaded,
@@ -83,5 +98,7 @@ export function useSearchPage<T>({
     searchQuery,
     handleSearch,
     handlePageChange,
+    error,
+    retry: () => retrySearch,
   }
 }

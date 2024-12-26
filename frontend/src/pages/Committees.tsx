@@ -4,6 +4,7 @@ import { CommitteeType } from 'lib/types'
 import { getFilteredIcons, handleSocialUrls } from 'lib/utils'
 
 import Card from 'components/Card'
+import { ErrorDisplay } from 'components/ErrorDisplay'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const CommitteesPage = () => {
@@ -15,6 +16,8 @@ const CommitteesPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
+    error,
+    retry,
   } = useSearchPage<CommitteeType>({
     indexName: 'committees',
     pageTitle: 'OWASP Committees',
@@ -29,6 +32,9 @@ const CommitteesPage = () => {
       label: 'Learn More',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-people-group" />,
       url: committee.idx_url,
+    }
+    if (error) {
+      return <ErrorDisplay error={error} onRetry={error.action === 'retry' ? retry : undefined} />
     }
 
     return (

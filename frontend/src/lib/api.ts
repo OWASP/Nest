@@ -1,7 +1,7 @@
 import { SearchResponse } from 'algoliasearch'
 import { API_URL } from 'utils/credentials'
 import { NEST_ENV } from 'utils/credentials'
-import logger from 'utils/logger'
+
 import { getParamsForIndexName } from 'utils/paramsMapping'
 
 import { client } from 'lib/algoliaClient'
@@ -20,7 +20,9 @@ export const loadData = async <T>(
       }).toString()
   )
   if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${response.statusText}`)
+    const error = new Error('API request failed')
+    error.name = response.status === 429 ? 'RATE_LIMIT' : 'NETWORK_ERROR'
+    throw error
   }
   return await response.json()
 }
@@ -54,7 +56,11 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    logger.error('Error fetching data from Algolia', error)
-    return { hits: [], totalPages: 0 }
+    if (error instanceof Error && error.message.includes('timeout')) {
+      const timeoutError = new Error('Search operation timed out')
+      timeoutError.name = 'SEARCH_TIMEOUT'
+      throw timeoutError
+    }
+    throw error
   }
 }
