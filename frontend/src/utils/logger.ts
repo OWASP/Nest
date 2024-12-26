@@ -1,5 +1,5 @@
-import { logException, logCriticalMessage } from '../sentry.config'
-import { APPLICATION_ENV } from '../utils/credentials'
+import { logCriticalMessage, logException } from 'sentry.config'
+import { APPLICATION_ENV } from 'utils/credentials'
 
 /**
  * Logger utility for handling logs and errors.
