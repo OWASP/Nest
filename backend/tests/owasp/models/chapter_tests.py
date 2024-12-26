@@ -58,7 +58,7 @@ class TestChapterModel:
             (True, "", "Default Location", "Default Location"),
             (False, "Paris, France", None, None),
             (True, "Tokyo, Japan", None, ""),
-            (True, "Berlin, Germany", "", ""), 
+            (True, "Berlin, Germany", "", ""),
         ],
     )
     def test_generate_suggested_location(
