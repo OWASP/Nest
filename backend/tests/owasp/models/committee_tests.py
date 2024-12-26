@@ -34,14 +34,15 @@ class TestCommitteeModel:
     @pytest.mark.parametrize(
         ("summary"),
         [
-            True,
-            False,
+            "A summary",
+            "",
+            None,
         ],
     )
     def test_save_method(self, summary):
         committee = Committee()
         committee.generate_summary = Mock()
-        committee.summary = "Existing Summary" if summary else None
+        committee.summary = summary
 
         with patch(
             "apps.core.models.prompt.Prompt.get_owasp_committee_summary",
