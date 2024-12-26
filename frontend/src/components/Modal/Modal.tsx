@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 
 import { ModalProps } from './types'
 import { useModal } from './useModal'
+import Markdown from '../MarkdownWrapper'
 
 export const Modal: React.FC<ModalProps> = ({
   title,
@@ -82,16 +83,17 @@ export const Modal: React.FC<ModalProps> = ({
           </small>
           <hr className="inset-0 -m-6 border-gray-200 dark:border-gray-700" />
           <h2 className="text-xl font-semibold">Issue Summary</h2>
-          <p className="text-base text-gray-600 dark:text-gray-300">{summary}</p>
+          <Markdown content={summary} className="text-base text-gray-600 dark:text-gray-300" />
           {hint && (
             <div className="rounded-md p-2">
               <h2 className="space-x-2 text-xl font-semibold">
                 <FontAwesomeIcon icon={faBolt} size="xs" />
                 <span>How to tackle it</span>
               </h2>
-              <p className="scroll-container p-2 text-base text-gray-800 dark:border-white dark:text-gray-200">
-                {hint}
-              </p>
+              <Markdown
+                content={hint}
+                className="p-2 text-base text-gray-800 dark:border-white dark:text-gray-200"
+              />
             </div>
           )}
           {children}

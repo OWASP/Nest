@@ -2,15 +2,15 @@ import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontaw
 import { useState } from 'react'
 import { Tooltip } from 'react-tooltip'
 
-import { CardProps, tooltipStyle } from 'lib/constants'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { cn } from 'lib/utils'
-
-import ActionButton from 'components/ActionButton'
-import ContributorAvatar from 'components/ContributorAvatar'
-import { Icons } from 'components/data'
-import DisplayIcon from 'components/DisplayIcon'
-import TopicBadge from 'components/TopicBadge'
+import ActionButton from './ActionButton'
+import ContributorAvatar from './ContributorAvatar'
+import { Icons } from './data'
+import DisplayIcon from './DisplayIcon'
+import Markdown from './MarkdownWrapper'
+import TopicBadge from './TopicBadge'
+import { CardProps, tooltipStyle } from '../lib/constants'
+import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
+import { cn } from '../lib/utils'
 
 const Card = ({
   title,
@@ -84,7 +84,7 @@ const Card = ({
           {projectName}
         </a>
       )}
-      <p className="mr-8 py-1 text-gray-600 dark:text-gray-300">{summary}</p>
+      <Markdown content={summary} className="mr-8 py-1 text-gray-600 dark:text-gray-300" />
       <h2 className="py-1">
         {leaders && (
           <span className="font-semibold text-gray-600 dark:text-gray-300">
