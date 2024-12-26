@@ -1,5 +1,7 @@
 from unittest.mock import Mock, patch
+
 import pytest
+
 from apps.github.models.repository import Repository
 from apps.owasp.models.event import Event
 

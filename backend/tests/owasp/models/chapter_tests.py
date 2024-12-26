@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -30,7 +29,9 @@ class TestChapterModel:
             ("", "", None),
         ],
     )
-    def test_generate_geo_location(self, suggested_location, geo_string, expected_location, monkeypatch):
+    def test_generate_geo_location(
+        self, suggested_location, geo_string, expected_location, monkeypatch
+    ):
         mock_get_location_coordinates = MagicMock(
             side_effect=lambda x: MagicMock(latitude=1, longitude=0) if x else None
         )
@@ -55,12 +56,14 @@ class TestChapterModel:
             (True, "New York, USA, 10001", "Manhattan, NY", "Manhattan, NY"),
             (True, "London, UK, SW1A 1AA", "Westminster, London", "Westminster, London"),
             (True, "", "Default Location", "Default Location"),
-            (False, "Paris, France", None, None),  # Inactive chapter
-            (True, "Tokyo, Japan", None, ""),  # None result from OpenAI
-            (True, "Berlin, Germany", "", ""),  # Empty string from OpenAI
+            (False, "Paris, France", None, None),
+            (True, "Tokyo, Japan", None, ""),
+            (True, "Berlin, Germany", "", ""), 
         ],
     )
-    def test_generate_suggested_location(self, is_active, geo_string, prompt_result, expected_location):
+    def test_generate_suggested_location(
+        self, is_active, geo_string, prompt_result, expected_location
+    ):
         mock_open_ai = MagicMock()
         mock_open_ai.set_input.return_value = mock_open_ai
         mock_open_ai.set_max_tokens.return_value = mock_open_ai
@@ -93,7 +96,6 @@ class TestChapterModel:
             mock_open_ai.set_prompt.assert_not_called()
             mock_open_ai.complete.assert_not_called()
 
-
     @pytest.mark.parametrize(
         ("name", "key", "expected_str"),
         [
@@ -105,9 +107,6 @@ class TestChapterModel:
     def test_str_representation(self, name, key, expected_str):
         chapter = Chapter(name=name, key=key)
         assert str(chapter) == expected_str
-
-    # Repeat this process for other test methods
-    # ...
 
     @pytest.mark.parametrize(
         ("value"),

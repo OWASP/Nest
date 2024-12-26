@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
 from apps.common.index import IndexBase
 from apps.github.models.repository import Repository
 from apps.owasp.models.committee import Committee
@@ -42,7 +44,8 @@ class TestCommitteeModel:
         committee.summary = "Existing Summary" if summary else None
 
         with patch(
-            "apps.core.models.prompt.Prompt.get_owasp_committee_summary", return_value="Test Prompt"
+            "apps.core.models.prompt.Prompt.get_owasp_committee_summary",
+            return_value="Test Prompt",
         ) as mock_prompt, patch("apps.owasp.models.committee.BulkSaveModel.save"):
             committee.save()
 
