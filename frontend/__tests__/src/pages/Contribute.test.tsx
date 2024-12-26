@@ -1,25 +1,27 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+
 import React from 'react'
-import '@testing-library/jest-dom'
 import { MemoryRouter } from 'react-router-dom'
 
-import { fetchAlgoliaData } from '../../../src/lib/api'
-import { ContributePage } from '../../../src/pages'
-import { mockContributeData } from '../data/mockContributeData'
+import { fetchAlgoliaData } from 'lib/api'
 
-jest.mock('../../../src/lib/api', () => ({
+import ContributePage from 'pages/Contribute'
+
+import { mockContributeData } from '@tests/data/mockContributeData'
+
+jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/lib/utils', () => ({
+jest.mock('lib/utils', () => ({
   getFilteredIcons: jest.fn(),
 }))
 
-jest.mock('../../../src/utils/credentials', () => ({
+jest.mock('utils/credentials', () => ({
   API_URL: 'https://mock-api.com',
 }))
 
-jest.mock('../../../src/components/Pagination', () =>
+jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (
       <div>

@@ -17,10 +17,20 @@ const SearchComponent: React.FC<SearchProps> = ({ onSearch, placeholder, initial
     setSearchQuery(initialValue)
   }, [initialValue])
 
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
   const debouncedSearch = useMemo(
-    () => debounce((query: string) => onSearch(query), 500),
+    () => debounce((query: string) => onSearch(query), 750),
     [onSearch]
   )
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel()
+    }
+  }, [debouncedSearch])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
