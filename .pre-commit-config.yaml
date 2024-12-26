@@ -7,7 +7,7 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
         exclude_types:
-            - svg
+          - svg
       - id: mixed-line-ending
         args:
           - --fix=lf
@@ -34,12 +34,3 @@ repos:
     rev: 5.13.2
     hooks:
       - id: isort
-
-  - repo: local
-    hooks:
-      - id: check-uncommitted-changes
-        name: check for uncommitted changes
-        entry: |
-          bash -c "git diff --exit-code ||
-          (echo 'Unstaged changes detected. Run `make check` to address them.' && exit 1)"
-        language: system
