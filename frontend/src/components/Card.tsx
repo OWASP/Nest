@@ -6,11 +6,11 @@ import ActionButton from './ActionButton'
 import ContributorAvatar from './ContributorAvatar'
 import { Icons } from './data'
 import DisplayIcon from './DisplayIcon'
+import MarkdownWrapper from './MarkdownWrapper'
 import TopicBadge from './TopicBadge'
 import { CardProps, tooltipStyle } from '../lib/constants'
 import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { cn } from '../lib/utils'
-import MarkdownWrapper from './MarkdownWrapper'
 
 const Card = ({
   title,

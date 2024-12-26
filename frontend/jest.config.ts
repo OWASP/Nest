@@ -30,4 +30,11 @@ export default {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
+  moduleNameMapper: {
+    'react-markdown': '<rootDir>/__mocks__/src/components/react-markdown.tsx',
+    'rehype-raw': '<rootDir>/__mocks__/src/components/rehype-raw.ts',
+    'rehype-sanitize': '<rootDir>/__mocks__/src/components/rehype-sanitize.ts',
+    'rehype-slug': '<rootDir>/__mocks__/src/components/rehype-slug.ts',
+    'remark-gfm': '<rootDir>/__mocks__/src/components/remark-gfm.ts',
+  },
 }
