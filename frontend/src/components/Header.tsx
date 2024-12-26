@@ -13,7 +13,7 @@ export default function Header() {
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-owasp-blue shadow-md dark:bg-slate-800">
+    <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
         <NavLink to="/">
