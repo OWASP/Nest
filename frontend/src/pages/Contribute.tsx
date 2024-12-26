@@ -6,6 +6,7 @@ import { IssueType } from 'lib/types'
 import { getFilteredIcons } from 'lib/utils'
 
 import Card from 'components/Card'
+import { ErrorDisplay } from 'components/ErrorDisplay'
 import { Modal } from 'components/Modal/Modal'
 import SearchPageLayout from 'components/SearchPageLayout'
 
@@ -18,6 +19,8 @@ const ContributePage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
+    error,
+    retry,
   } = useSearchPage<IssueType>({
     indexName: 'issues',
     pageTitle: 'OWASP Issues',
@@ -59,6 +62,9 @@ const ContributePage = () => {
         ></Modal>
       </React.Fragment>
     )
+  }
+  if (error) {
+    return <ErrorDisplay error={error} onRetry={error.action === 'retry' ? retry : undefined} />
   }
 
   return (

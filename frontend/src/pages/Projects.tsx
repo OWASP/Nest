@@ -5,6 +5,7 @@ import { project } from 'lib/types'
 import { getFilteredIcons } from 'lib/utils'
 import Card from 'components/Card'
 import { level } from 'components/data'
+import { ErrorDisplay } from 'components/ErrorDisplay'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ProjectsPage = () => {
@@ -16,6 +17,8 @@ const ProjectsPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
+    error,
+    retry,
   } = useSearchPage<project>({
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
@@ -38,6 +41,9 @@ const ProjectsPage = () => {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
+    }
+    if (error) {
+      return <ErrorDisplay error={error} onRetry={error.action === 'retry' ? retry : undefined} />
     }
 
     return (

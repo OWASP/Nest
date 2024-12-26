@@ -100,17 +100,14 @@ export interface AlgoliaResponseType<T> {
   totalPages: number
 }
 
-export interface AgloliaRequestType {
-  aroundLatLngViaIP?: boolean
-  attributesToHighlight: string[]
-  attributesToRetrieve: string[]
-  distinct?: number
-  filters?: string
-  hitsPerPage: number
-  indexName: string
-  minProximity?: number
-  page: number
-  query: string
-  removeWordsIfNoResults: 'none' | 'lastWords' | 'firstWords' | 'allOptional'
-  typoTolerance?: string
+export type ErrorSource = 'algolia' | 'runtime' | 'network' | 'http' | 'routing'
+
+export interface ErrorConfig {
+  code: string
+  statusCode?: number
+  title: string
+  message: string
+  source: ErrorSource
+  action?: 'retry' | 'home'
+  technical?: string
 }
