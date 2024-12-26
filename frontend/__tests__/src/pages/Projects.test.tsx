@@ -1,17 +1,19 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+
 import React from 'react'
 
-import '@testing-library/jest-dom'
-import { fetchAlgoliaData } from '../../../src/lib/api'
-import { render } from '../../../src/lib/test-util'
-import { ProjectsPage } from '../../../src/pages'
-import mockProjectData from '../data/mockProjectData'
+import { fetchAlgoliaData } from 'lib/api'
+import { render } from 'lib/test-util'
 
-jest.mock('../../../src/lib/api', () => ({
+import ProjectsPage from 'pages/Projects'
+
+import { mockProjectData } from '@tests/data/mockProjectData'
+
+jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('../../../src/components/Pagination', () =>
+jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>
       <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
@@ -56,6 +58,7 @@ describe('ProjectPage Component', () => {
     })
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toHaveFocus()
       expect(screen.getByText('Project 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
