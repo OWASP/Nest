@@ -10,6 +10,7 @@ import TopicBadge from './TopicBadge'
 import { CardProps, tooltipStyle } from '../lib/constants'
 import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 import { cn } from '../lib/utils'
+import MarkdownWrapper from './MarkdownWrapper'
 
 const Card = ({
   title,
@@ -83,7 +84,9 @@ const Card = ({
           {projectName}
         </a>
       )}
-      <p className="mr-8 py-1 text-gray-600 dark:text-gray-300">{summary}</p>
+      <p className="mr-8 py-1 text-gray-600 dark:text-gray-300">
+        <MarkdownWrapper content={summary} />
+      </p>
       <h2 className="py-1">
         {leaders && (
           <span className="font-semibold text-gray-600 dark:text-gray-300">
