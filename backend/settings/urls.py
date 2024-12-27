@@ -55,10 +55,10 @@ urlpatterns = [
 ]
 
 if SlackConfig.app:
-    from apps.slack.views import slack_events
+    from apps.slack.views import slack_events_handler
 
     urlpatterns += [
-        path("slack/", slack_events, name="slack-events"),
+        path("integrations/slack-events/", slack_events_handler, name="slack-events-handler"),
     ]
 
 if settings.DEBUG:

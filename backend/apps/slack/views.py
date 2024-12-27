@@ -9,5 +9,5 @@ slack_handler = SlackRequestHandler(SlackConfig.app)
 
 
 @csrf_exempt
-def slack_events(request):  # noqa: D103
+def slack_events_handler(request):  # noqa: D103
     return slack_handler.handle(request)
