@@ -116,3 +116,7 @@ a {
 .animate-scaleIn {
   animation: scaleIn 0.3s ease-out;
 }
+
+.md-wrapper ol {
+  list-style: decimal;
+}
