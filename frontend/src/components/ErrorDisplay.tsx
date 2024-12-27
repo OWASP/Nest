@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ErrorConfig } from '../lib/types'
+import { ErrorConfig } from 'lib/types'
 
 interface ErrorDisplayProps {
   error: ErrorConfig
