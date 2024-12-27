@@ -18,6 +18,7 @@ from apps.owasp.api.search.issue import project_issues as search_project_issues
 from apps.owasp.api.search.project import projects as search_projects
 from apps.owasp.api.urls import router as owasp_router
 from apps.owasp.views import home_page
+from apps.slack.apps import SlackConfig
 
 router = routers.DefaultRouter()
 router.registry.extend(github_router.registry)
@@ -52,6 +53,13 @@ urlpatterns = [
     path("", home_page),
     path("a/", admin.site.urls),
 ]
+
+if settings.SLACK_CONFIGURATION != "Local" and SlackConfig.app:
+    from apps.slack.views import slack_events_handler
+
+    urlpatterns += [
+        path("integrations/slack-events/", slack_events_handler, name="slack-events-handler"),
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

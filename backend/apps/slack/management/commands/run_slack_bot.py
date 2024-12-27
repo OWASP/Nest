@@ -15,5 +15,5 @@ class Command(BaseCommand):
     help = "Runs Slack bot application."
 
     def handle(self, *args, **options):
-        if settings.SLACK_APP_TOKEN:
+        if settings.SLACK_CONFIGURATION == "Local" and settings.SLACK_APP_TOKEN != "None":  # noqa: S105
             SocketModeHandler(SlackConfig.app, settings.SLACK_APP_TOKEN).start()
