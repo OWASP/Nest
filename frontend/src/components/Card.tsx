@@ -2,14 +2,15 @@ import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontaw
 import { useState } from 'react'
 import { Tooltip } from 'react-tooltip'
 
-import ActionButton from './ActionButton'
-import ContributorAvatar from './ContributorAvatar'
-import { Icons } from './data'
-import DisplayIcon from './DisplayIcon'
-import TopicBadge from './TopicBadge'
-import { CardProps, tooltipStyle } from '../lib/constants'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
-import { cn } from '../lib/utils'
+import { CardProps, tooltipStyle } from 'lib/constants'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+import { cn } from 'lib/utils'
+
+import ActionButton from 'components/ActionButton'
+import ContributorAvatar from 'components/ContributorAvatar'
+import { Icons } from 'components/data'
+import DisplayIcon from 'components/DisplayIcon'
+import TopicBadge from 'components/TopicBadge'
 
 const Card = ({
   title,
@@ -46,7 +47,7 @@ const Card = ({
   }
 
   return (
-    <div className="flex h-fit w-full flex-col items-start rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
+    <div className="mt-4 flex h-fit w-full flex-col items-start rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
       <div className="flex w-full flex-nowrap items-start justify-between">
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           {level && (

@@ -1,20 +1,18 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import App from 'App'
 import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
-
-import App from '../../src/App'
-
 import '@testing-library/jest-dom'
 
-jest.mock('../../src/pages', () => ({
-  Home: jest.fn(() => <div data-testid="home-page">Home Page</div>),
-  ProjectsPage: jest.fn(() => <div data-testid="projects-page">Projects Page</div>),
-  CommitteesPage: jest.fn(() => <div data-testid="committees-page">Committees Page</div>),
-  ChaptersPage: jest.fn(() => <div data-testid="chapters-page">Chapters Page</div>),
-  ContributePage: jest.fn(() => <div data-testid="contribute-page">Contribute Page</div>),
+jest.mock('pages', () => ({
+  Home: () => <div data-testid="home-page">Home Page</div>,
+  ProjectsPage: () => <div data-testid="projects-page">Projects Page</div>,
+  CommitteesPage: () => <div data-testid="committees-page">Committees Page</div>,
+  ChaptersPage: () => <div data-testid="chapters-page">Chapters Page</div>,
+  ContributePage: () => <div data-testid="contribute-page">Contribute Page</div>, // Mock ContributePage
 }))
 
-jest.mock('../../src/components/Header', () => {
+jest.mock('components/Header', () => {
   const { Link } = require('react-router-dom')
   return function MockHeader() {
     return (
@@ -35,7 +33,7 @@ jest.mock('../../src/components/Header', () => {
   }
 })
 
-jest.mock('../../src/components/Footer', () => {
+jest.mock('components/Footer', () => {
   return function MockFooter() {
     return <footer data-testid="footer">Footer</footer>
   }
@@ -107,6 +105,7 @@ describe('App Component', () => {
       unmount()
     })
   })
+
   test('scrolls to top when navigating from a scrolled position', async () => {
     render(
       <MemoryRouter initialEntries={['/projects']}>
