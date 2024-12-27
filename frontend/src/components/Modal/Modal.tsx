@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
-import { ModalProps } from './types'
-import { useModal } from './useModal'
-import Markdown from '../MarkdownWrapper'
+import Markdown from 'components/MarkdownWrapper'
+import { ModalProps } from 'components/Modal/types'
+import { useModal } from 'components/Modal/useModal'
 
 export const Modal: React.FC<ModalProps> = ({
   title,

@@ -12,7 +12,6 @@ jest.mock('markdown-it', () => {
 
 describe('Markdown Component', () => {
   beforeEach(() => {
-    // Reset all mocks before each test
     jest.clearAllMocks()
 
     // Setup DOMPurify mock to return the input
