@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 
-import { errorService } from '../ErrorServeice'
-import type { ErrorConfig } from '../types'
+import { errorService } from 'lib/ErrorServeice'
+import type { ErrorConfig } from 'lib/types'
 
 export const useErrorHandler = (context?: string) => {
   const [error, setError] = useState<ErrorConfig | null>(null)

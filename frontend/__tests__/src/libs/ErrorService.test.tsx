@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react'
 
-import { errorService } from '../../../src/lib/ErrorServeice'
-import { useErrorHandler } from '../../../src/lib/hooks/useErrorHandler'
+import { errorService } from 'lib/ErrorServeice'
+import { useErrorHandler } from 'lib/hooks/useErrorHandler'
 
 jest.mock('@sentry/react')
-jest.mock('../../../src/utils/logger', () => ({
+jest.mock('utils/logger', () => ({
   error: jest.fn(),
 }))
 

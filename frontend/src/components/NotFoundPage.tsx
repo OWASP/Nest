@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { ErrorDisplay } from './ErrorDisplay'
+import { ErrorDisplay } from 'components/ErrorDisplay'
 
 export const NotFoundPage: React.FC = () => {
   const notFoundError = {

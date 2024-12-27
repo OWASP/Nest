@@ -2,8 +2,8 @@ import * as Sentry from '@sentry/react'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { ErrorDisplay } from './components/ErrorDisplay'
-import { errorService } from './lib/ErrorServeice'
+import { errorService } from 'lib/ErrorServeice'
+import { ErrorDisplay } from 'components/ErrorDisplay'
 
 interface Props {
   children: React.ReactNode
