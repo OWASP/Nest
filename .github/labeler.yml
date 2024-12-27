@@ -1,0 +1,66 @@
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+        include:
+          - backend/**
+        exclude:
+          - backend/apps/slack/**
+
+backend-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+        include:
+          - backend/tests/**
+        exclude:
+          - backend/tests/slack/**
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+
+deploy:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/ansible/**
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docker-*.yaml
+          - '**/Dockerfile.*'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/**
+
+frontend-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/__tests__/**
+
+makefile:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/Makefile'
+
+nestbot:
+  - changed-files:
+      - any-glob-to-any-file:
+          - backend/apps/slack/**
+
+nestbot-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - backend/tests/slack/**
+
+nginx:
+  - changed-files:
+      - any-glob-to-any-file:
+          - nginx/**
