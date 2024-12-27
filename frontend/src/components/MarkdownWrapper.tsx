@@ -14,5 +14,7 @@ export default function Markdown({ content, className }: { content: string; clas
   // Sanitize the HTML
   const safeHtml = DOMPurify.sanitize(rawHtml)
 
-  return <div dangerouslySetInnerHTML={{ __html: safeHtml }} className={className} />
+  return (
+    <div dangerouslySetInnerHTML={{ __html: safeHtml }} className={`md-wrapper ${className}`} />
+  )
 }

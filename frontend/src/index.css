@@ -117,6 +117,6 @@ a {
   animation: scaleIn 0.3s ease-out;
 }
 
-ol {
+.md-wrapper ol {
   list-style: decimal;
 }
