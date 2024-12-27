@@ -6,7 +6,7 @@ services:
       bash -c "
         poetry run python manage.py migrate &&
         poetry run python manage.py collectstatic --noinput &&
-        poetry run gunicorn wsgi:application --bind 0.0.0.0:8000 &
+        poetry run gunicorn wsgi:application --bind 0.0.0.0:8000
       "
     env_file: .env/backend
     depends_on:
