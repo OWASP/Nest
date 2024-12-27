@@ -41,7 +41,7 @@ export default function Header() {
                 key={i}
                 to={link.href}
                 className={cn(
-                  'px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                  'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
                   location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                 )}
                 aria-current="page"
@@ -98,7 +98,7 @@ export default function Header() {
               key={i}
               to={link.href}
               className={cn(
-                'block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
                 location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
               )}
               onClick={toggleMobileMenu}
