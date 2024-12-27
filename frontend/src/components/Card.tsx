@@ -5,11 +5,12 @@ import { Tooltip } from 'react-tooltip'
 import { CardProps, tooltipStyle } from 'lib/constants'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import { cn } from 'lib/utils'
-
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
+
 import { Icons } from 'components/data'
 import DisplayIcon from 'components/DisplayIcon'
+import Markdown from 'components/MarkdownWrapper'
 import TopicBadge from 'components/TopicBadge'
 
 const Card = ({
@@ -84,7 +85,7 @@ const Card = ({
           {projectName}
         </a>
       )}
-      <p className="mr-8 py-1 text-gray-600 dark:text-gray-300">{summary}</p>
+      <Markdown content={summary} className="mr-8 py-1 text-gray-600 dark:text-gray-300" />
       <h2 className="py-1">
         {leaders && (
           <span className="font-semibold text-gray-600 dark:text-gray-300">
