@@ -52,5 +52,5 @@ def test_check_gsoc_handler():
         gsoc_module, "check_gsoc_handler", lambda x: x.get("channel") == OWASP_GSOC_CHANNEL_ID
     )
 
-    assert check_gsoc_handler({"channel": OWASP_GSOC_CHANNEL_ID}) is True
-    assert check_gsoc_handler({"channel": "C999999"}) is False
+    assert check_gsoc_handler({"channel": OWASP_GSOC_CHANNEL_ID}) 
+    assert not check_gsoc_handler({"channel": "C999999"}) 
