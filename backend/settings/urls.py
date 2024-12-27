@@ -54,7 +54,7 @@ urlpatterns = [
     path("a/", admin.site.urls),
 ]
 
-if settings.SLACK_CONFIGURATION != "Local" and SlackConfig.app:
+if SlackConfig.app:
     from apps.slack.views import slack_events_handler
 
     urlpatterns += [

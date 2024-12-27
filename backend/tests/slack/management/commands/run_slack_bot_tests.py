@@ -28,7 +28,7 @@ class TestSlackBotCommand:
     @patch("apps.slack.management.commands.run_slack_bot.SocketModeHandler")
     @patch("apps.slack.management.commands.run_slack_bot.settings")
     def test_handle_with_none_token(self, mock_settings, mock_socket_handler):
-        mock_settings.SLACK_APP_TOKEN = "None"
+        mock_settings.SLACK_APP_TOKEN = "None"  # noqa: S105
         mock_handler = MagicMock()
         mock_socket_handler.return_value = mock_handler
 
