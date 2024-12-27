@@ -1,18 +1,16 @@
 backend:
   - changed-files:
       - any-glob-to-any-file:
-        include:
           - backend/**
-        exclude:
-          - backend/apps/slack/**
+      - all-globs-to-all-files:
+          - '!backend/apps/slack/**'
 
 backend-tests:
   - changed-files:
       - any-glob-to-any-file:
-        include:
           - backend/tests/**
-        exclude:
-          - backend/tests/slack/**
+      - all-globs-to-all-files:
+          - '!backend/tests/slack/**'
 
 ci:
   - changed-files:
