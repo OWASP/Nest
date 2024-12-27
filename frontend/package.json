@@ -10,8 +10,8 @@
     "build:production": "tsc --noEmit && vite build --mode production",
     "format": "prettier --log-level warn --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint . --config eslint.config.js --fix",
-    "lint:check": "eslint . --config eslint.config.js",
+    "lint": "eslint . --config eslint.config.js --fix --max-warnings=0",
+    "lint:check": "eslint . --config eslint.config.js --max-warnings=0",
     "preview": "vite preview",
     "test": "jest",
     "test:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
@@ -78,7 +78,7 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.18.0",
     "util": "^0.12.5",
-    "vite": "^6.0.5",
+    "vite": "^6.0.6",
     "vite-plugin-environment": "^1.1.3"
   },
   "husky": {
