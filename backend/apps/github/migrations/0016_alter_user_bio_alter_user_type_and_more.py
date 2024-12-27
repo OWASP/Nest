@@ -4,28 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0015_remove_user_is_hireable_remove_user_twitter_username_and_more'),
+        ("github", "0015_remove_user_is_hireable_remove_user_twitter_username_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='bio',
-            field=models.TextField(blank=True, default='', help_text="User's GitHub biography", max_length=1000, verbose_name='Bio'),
+            model_name="user",
+            name="bio",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="User's GitHub biography",
+                max_length=1000,
+                verbose_name="Bio",
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='type',
-            field=models.CharField(choices=[('User', 'User'), ('Organization', 'Organization')], default='User', help_text='Distinguishes between User and Organization accounts', max_length=50, verbose_name='User type'),
+            model_name="user",
+            name="type",
+            field=models.CharField(
+                choices=[("User", "User"), ("Organization", "Organization")],
+                default="User",
+                help_text="Distinguishes between User and Organization accounts",
+                max_length=50,
+                verbose_name="User type",
+            ),
         ),
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['login'], name='github_user_login_362b5a_idx'),
+            model_name="user",
+            index=models.Index(fields=["login"], name="github_user_login_362b5a_idx"),
         ),
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['type'], name='github_user_type_c81017_idx'),
+            model_name="user",
+            index=models.Index(fields=["type"], name="github_user_type_c81017_idx"),
         ),
     ]

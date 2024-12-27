@@ -1,22 +1,21 @@
-from django.contrib import admin
-from django.db import models
 from django.core.exceptions import ValidationError
-from algoliasearch_django.decorators import register
+from django.db import models
+
 from apps.common.models import TimestampedModel
 from apps.github.models.common import GenericUserModel, NodeModel
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel):
-    """
-    User model for GitHub organization members.
+    """User model for GitHub organization members.
     Used for displaying and searching users within the GitHub OWASP organization.
     """
+
     class Meta:
         db_table = "github_users"
         verbose_name_plural = "Users"
         indexes = [
-            models.Index(fields=['login']),
-            models.Index(fields=['type']),
+            models.Index(fields=["login"]),
+            models.Index(fields=["type"]),
         ]
 
     bio = models.TextField(
@@ -24,7 +23,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
         max_length=1000,
         blank=True,
         default="",
-        help_text="User's GitHub biography"
+        help_text="User's GitHub biography",
     )
     type = models.CharField(
         verbose_name="User type",
@@ -34,12 +33,12 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
             ("User", "User"),
             ("Organization", "Organization"),
         ],
-        help_text="Distinguishes between User and Organization accounts"
+        help_text="Distinguishes between User and Organization accounts",
     )
     public_repositories_count = models.PositiveIntegerField(
         verbose_name="Public repositories count",
         default=0,
-        help_text="Number of public repositories"
+        help_text="Number of public repositories",
     )
 
     def __str__(self):
@@ -106,4 +105,3 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
             user.save()
 
         return user
-

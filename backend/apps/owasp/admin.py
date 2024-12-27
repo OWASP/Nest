@@ -9,7 +9,6 @@ from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 
 
-
 class GenericEntityAdminMixin:
     def custom_field_github_urls(self, obj):
         """Entity GitHub URLs."""
@@ -106,5 +105,3 @@ admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommetteeAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Project, ProjectAdmin)
-
-

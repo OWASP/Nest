@@ -2,6 +2,7 @@
 
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
+
 from apps.common.index import IndexSynonymsMixin
 from apps.github.models import User
 

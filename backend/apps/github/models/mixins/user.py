@@ -1,5 +1,6 @@
 """GitHub user mixins."""
 
+
 class UserIndexMixin:
     """User index mixin for Algolia search."""
 
