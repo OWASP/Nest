@@ -6,9 +6,7 @@ services:
       bash -c "
         poetry run python manage.py migrate &&
         poetry run python manage.py collectstatic --noinput &&
-        poetry run gunicorn wsgi:application --bind 0.0.0.0:8000 &
-        poetry run python manage.py run_slack_bot;
-        wait
+        poetry run gunicorn wsgi:application --bind 0.0.0.0:8000
       "
     env_file: .env/backend
     depends_on:
@@ -20,6 +18,13 @@ services:
       - nest_db_network
     volumes:
       - ./data:/home/owasp/data
+
+  frontend:
+    container_name: nest-frontend
+    image: arkid15r/owasp-nest-frontend:latest
+    restart: unless-stopped
+    networks:
+      - nest_app_network
 
   certbot:
     container_name: nest-certbot
@@ -65,6 +70,7 @@ services:
       - certbot-webroot:/var/www/certbot
     depends_on:
       - backend
+      - frontend
     networks:
       - nest_app_network
 

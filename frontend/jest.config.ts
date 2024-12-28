@@ -4,7 +4,7 @@ export default {
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
     '!src/components/**',
-    '!src/index.tsx',
+    '!src/**/index.ts',
     '!src/lib/**',
     '!src/main.tsx',
     '!src/reportWebVitals.ts',
@@ -30,4 +30,9 @@ export default {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
+  moduleNameMapper: {
+    '^@tests/(.*)$': '<rootDir>/__tests__/src/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  moduleDirectories: ['node_modules', 'src'],
 }
