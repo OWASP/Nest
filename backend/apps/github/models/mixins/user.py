@@ -1,8 +1,13 @@
-"""GitHub user mixins."""
+"""GitHub user model mixins for index-related functionality."""
 
 
 class UserIndexMixin:
     """User index mixin for Algolia search."""
+
+    @property
+    def is_indexable(self):
+        """Determine if the user should be indexed."""
+        return self.type == "User"
 
     @property
     def idx_login(self):

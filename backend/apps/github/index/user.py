@@ -1,4 +1,4 @@
-"""GitHub user index."""
+"""GitHub user Algolia index configuration."""
 
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register

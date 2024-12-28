@@ -1,18 +1,25 @@
+"""GitHub user model and related functionality."""
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.github.constants import (
+    GITHUB_LOGIN_REQUIRED,
+    GITHUB_NODE_ID_NOT_FOUND,
+    GITHUB_NODE_ID_REQUIRED,
+    GITHUB_USER_DATA_REQUIRED,
+)
 from apps.github.models.common import GenericUserModel, NodeModel
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel):
-    """User model for GitHub organization members.
-    Used for displaying and searching users within the GitHub OWASP organization.
-    """
+    """Model representing a GitHub user or organization."""
 
     class Meta:
         db_table = "github_users"
         verbose_name_plural = "Users"
+        ordering = ["login"]
         indexes = [
             models.Index(fields=["login"]),
             models.Index(fields=["type"]),
@@ -42,25 +49,26 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
     )
 
     def __str__(self):
+        """Return the string representation of the user."""
         return f"{self.name or self.login}"
 
     def clean(self):
-        """Validate the model instance."""
+        """Validate required fields before saving the user."""
         super().clean()
         if not self.login:
-            raise ValidationError("GitHub login is required")
+            raise ValidationError(GITHUB_LOGIN_REQUIRED)
         if not self.node_id:
-            raise ValidationError("GitHub node ID is required")
+            raise ValidationError(GITHUB_NODE_ID_REQUIRED)
 
     def save(self, *args, **kwargs):
-        """Override save to ensure full_clean is called."""
+        """Save the user object after validation."""
         self.full_clean()
         super().save(*args, **kwargs)
 
     def from_github(self, gh_user):
-        """Update instance based on GitHub user data."""
+        """Populate user fields with data from GitHub."""
         if not gh_user:
-            raise ValueError("GitHub user data is required")
+            raise ValueError(GITHUB_USER_DATA_REQUIRED)
 
         super().from_github(gh_user)
 
@@ -87,13 +95,13 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
 
     @staticmethod
     def update_data(gh_user, save=True):
-        """Update GitHub user data."""
+        """Update or create user data based on GitHub user information."""
         if not gh_user:
-            raise ValueError("GitHub user data is required")
+            raise ValueError(GITHUB_USER_DATA_REQUIRED)
 
         user_node_id = User.get_node_id(gh_user)
         if not user_node_id:
-            raise ValueError("Could not determine GitHub node ID")
+            raise ValueError(GITHUB_NODE_ID_NOT_FOUND)
 
         try:
             user = User.objects.get(node_id=user_node_id)
@@ -103,5 +111,4 @@ class User(NodeModel, GenericUserModel, TimestampedModel):
         user.from_github(gh_user)
         if save:
             user.save()
-
         return user
