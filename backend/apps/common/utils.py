@@ -4,13 +4,12 @@ from datetime import datetime, timezone
 
 from django.conf import settings
 from django.template.defaultfilters import pluralize
-from django.urls import reverse
 from humanize import intword, naturaltime
 
 
-def get_absolute_url(view_name):
+def get_absolute_url(path):
     """Return absolute URL for a view."""
-    return f"{settings.SITE_URL}{reverse(view_name)}"
+    return f"{settings.SITE_URL}/{path}"
 
 
 def get_nest_user_agent():
