@@ -108,8 +108,8 @@ jobs:
         with:
           category: '/language:${{ matrix.language }}'
 
-  run-tests:
-    name: Run tests
+  run-backend-tests:
+    name: Run backend tests
     needs:
       - pre-commit
     runs-on: ubuntu-latest
@@ -130,6 +130,15 @@ jobs:
       - name: Run backend tests
         run: |
           make test-backend
+
+  run-frontend-tests:
+    name: Run frontend tests
+    needs:
+      - pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -153,7 +162,8 @@ jobs:
       github.ref == 'refs/heads/main'
     needs:
       - code-ql
-      - run-tests
+      - run-backend-tests
+      - run-frontend-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
