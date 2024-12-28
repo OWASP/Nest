@@ -42,7 +42,6 @@ coverage/
 .python_history
 .ruff_cache
 
-# Miscellaneous files
 *.code-workspace
 .volumes
 backend/data/nest.json
