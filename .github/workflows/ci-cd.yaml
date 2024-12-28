@@ -64,6 +64,10 @@ jobs:
         working-directory: frontend
         run: npm run lint:check
 
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || (echo 'Unstaged changes detected. \
+          Run `make check` and use `git add` to address it.' && exit 1)
 
   code-ql:
     name: CodeQL
@@ -142,8 +146,8 @@ jobs:
         run: |
           make test-frontend
 
-  build-docker-images:
-    name: Build Docker Images
+  build-docker-staging-images:
+    name: Build Docker Staging Images
     environment: staging
     if: |
       github.ref == 'refs/heads/main'
@@ -176,7 +180,24 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:latest
 
-  deploy-staging:
+      - name: Prepare frontend environment
+        run: |
+          echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.staging
+          echo "VITE_ALGOLIA_SEARCH_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
+          echo "VITE_NEST_API_URL=https://nest.owasp.dev/api/v1" >> frontend/.env.staging
+          echo "VITE_NEST_SENTRY_DSN_URL=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
+          echo "VITE_NEST_ENV=staging" >> frontend/.env.staging
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          file: frontend/Dockerfile.staging
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:latest
+
+  deploy-nest-staging:
     name: Deploy Nest Staging
     env:
       ANSIBLE_HOST_KEY_CHECKING: False
@@ -186,7 +207,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/main'
     needs:
-      - build-docker-images
+      - build-docker-staging-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

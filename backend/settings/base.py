@@ -171,3 +171,4 @@ class Base(Configuration):
     SLACK_SIGNING_SECRET = values.SecretValue()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
+    SLACK_CONFIGURATION = values.Value(environ_name="DJANGO_SLACK_CONFIGURATION")

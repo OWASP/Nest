@@ -1,8 +1,9 @@
 import { Tooltip } from 'react-tooltip'
 
+import { IconType, tooltipStyle } from 'lib/constants'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+
 import { IconKeys, Icons } from './data'
-import { IconType, tooltipStyle } from '../lib/constants'
-import FontAwesomeIconWrapper from '../lib/FontAwesomeIconWrapper'
 
 export default function DisplayIcon({
   item,

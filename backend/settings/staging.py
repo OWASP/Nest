@@ -7,7 +7,7 @@ from settings.base import Base
 
 
 class Staging(Base):
-    """Stagind configuration."""
+    """Staging configuration."""
 
     sentry_sdk.init(
         dsn=values.SecretValue(environ_name="SENTRY_DSN"),
@@ -45,3 +45,5 @@ class Staging(Base):
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
+
+    CORS_ALLOWED_ORIGINS = ("https://nest.owasp.dev",)

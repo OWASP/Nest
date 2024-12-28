@@ -1,3 +1,6 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import js from '@eslint/js'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
@@ -8,6 +11,9 @@ import prettier from 'eslint-plugin-prettier'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export default [
   {
@@ -36,6 +42,15 @@ export default [
       react,
     },
     settings: {
+      'import/resolver': {
+        alias: {
+          map: [
+            ['@tests', path.resolve(__dirname, '__tests__/src')],
+            ['@', path.resolve(__dirname, 'src')],
+          ],
+          extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        },
+      },
       react: {
         version: 'detect',
       },
@@ -57,9 +72,17 @@ export default [
       'import/order': [
         'warn',
         {
-          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
           alphabetize: { order: 'asc', caseInsensitive: true },
-          'newlines-between': 'always',
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          pathGroups: [
+            { pattern: 'lib/**', group: 'internal', position: 'after' },
+            { pattern: 'components/**', group: 'internal', position: 'after' },
+            { pattern: 'pages/**', group: 'internal', position: 'after' },
+
+            { pattern: '@tests/**', group: 'internal', position: 'after' },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
+          // 'newlines-between': 'always',
         },
       ],
       'no-console': 'error',
