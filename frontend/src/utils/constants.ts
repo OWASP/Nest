@@ -32,9 +32,9 @@ export const footerSections: Section[] = [
   {
     title: 'About OWASP',
     links: [
-      { text: 'Our Mission', href: '#' },
-      { text: 'Team', href: '#' },
-      { text: 'Careers', href: '#' },
+      { text: 'Our Mission', href: 'https://owasp.org/about/' },
+      { text: 'Team', href: 'https://owasp.org/corporate/#' },
+      { text: 'Careers', href: 'https://owasp.org/careers/' },
     ],
   },
   {
@@ -52,15 +52,15 @@ export const footerSections: Section[] = [
     title: 'Community',
     links: [
       { text: 'Committees', href: 'https://nest.owasp.dev/committees/' },
-      { text: 'Events', href: '#' },
-      { text: 'Forum', href: '#' },
+      { text: 'Events', href: 'https://owasp.org/events/' },
+      { text: 'Forum', href: 'https://owasp.org/www-community/' },
     ],
   },
   {
     title: 'Contact',
     links: [
-      { text: 'Locations', href: '#', isSpan: true },
-      { text: 'Support', href: '#' },
+      { text: 'Locations', href: 'https://www.meetup.com/pro/owasp/' },
+      { text: 'Support', href: 'https://owasp.org/donate/' },
       { text: 'Contact Us', href: 'https://owasp.org/contact/' },
     ],
   },
