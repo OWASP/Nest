@@ -11,38 +11,37 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-
-# Python cache and virtual environments
-__pycache__
-.venv
-
-# Coverage files
-coverage/
-.coverage
-
-# Environment files
-.env
-.env.*
-!.env.example
+*.local
 
 # Editor directories and files
-.vscode/
+.vscode/*
 !.vscode/extensions.json
-.idea/
+.idea
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+coverage
 
-# Cache and temporary files
+# Python specific
+__pycache__
 .bash_history
 .cache
+.coverage
 .python_history
 .ruff_cache
+.venv
 
-*.code-workspace
-.volumes
-backend/data/nest.json
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Miscellaneous
+.local
+.npm
 staticfiles
+/volumes
+backend/data/nest.json
