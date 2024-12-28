@@ -12,13 +12,14 @@ __pycache__
 .pytest_cache
 .python_history
 .ruff_cache
-backend/.venv
 .vscode
 *.code-workspace
 *.local
 *.log
+backend/.venv
 backend/data/nest.json
 backend/staticfiles
+backend/venv
 frontend/.npm
 frontend/coverage
 frontend/dist
@@ -29,4 +30,3 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 logs
 TODO
-backend/venv
