@@ -1,20 +1,49 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node modules and build outputs
+node_modules
+dist
+dist-ssr
+
+# Python cache and virtual environments
 __pycache__
-./frontend/coverage
-.bash_history
-.cache
+.venv
+
+# Coverage files
+coverage/
 .coverage
-.coverage
+
+# Environment files
 .env
 .env.*
 !.env.example
-.idea
-.local
-.npm
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cache and temporary files
+.bash_history
+.cache
 .python_history
 .ruff_cache
-.venv
-.vscode
+
+# Miscellaneous files
 *.code-workspace
-/volumes
+.volumes
 backend/data/nest.json
 staticfiles
