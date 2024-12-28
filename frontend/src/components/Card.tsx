@@ -5,11 +5,12 @@ import { Tooltip } from 'react-tooltip'
 import { CardProps, tooltipStyle } from 'lib/constants'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import { cn } from 'lib/utils'
-
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
+
 import { Icons } from 'components/data'
 import DisplayIcon from 'components/DisplayIcon'
+import Markdown from 'components/MarkdownWrapper'
 import TopicBadge from 'components/TopicBadge'
 
 const Card = ({
@@ -47,7 +48,7 @@ const Card = ({
   }
 
   return (
-    <div className="flex h-fit w-full flex-col items-start rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
+    <div className="mt-4 flex h-fit w-full flex-col items-start rounded-md border border-border bg-white py-6 pl-6 pt-0 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
       <div className="flex w-full flex-nowrap items-start justify-between">
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           {level && (
@@ -84,7 +85,7 @@ const Card = ({
           {projectName}
         </a>
       )}
-      <p className="mr-8 py-1 text-gray-600 dark:text-gray-300">{summary}</p>
+      <Markdown content={summary} className="mr-8 py-1 text-gray-600 dark:text-gray-300" />
       <h2 className="py-1">
         {leaders && (
           <span className="font-semibold text-gray-600 dark:text-gray-300">
