@@ -30,38 +30,53 @@ export interface Section {
 
 export const footerSections: Section[] = [
   {
-    title: 'About OWASP',
+    title: 'OWASP Nest',
     links: [
-      { text: 'Our Mission', href: '#' },
-      { text: 'Team', href: '#' },
-      { text: 'Careers', href: '#' },
+      { text: 'About', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#owasp-nest' },
+      { text: 'Contact', href: 'https://owasp.slack.com/messages/project-nest' },
+      { text: 'Contributing', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
+      { text: 'Leaders', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#leaders' },
+      {
+        text: 'Sponsor',
+        href: 'https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest',
+      },
     ],
   },
   {
     title: 'Resources',
     links: [
+      { text: 'Chapters', href: '/chapters/' },
       {
         text: 'Contribute',
-        href: 'https://nest.owasp.dev/projects/contribute/',
+        href: '/projects/contribute/',
       },
-      { text: 'Projects', href: 'https://nest.owasp.dev/projects/' },
-      { text: 'Chapters', href: 'https://nest.owasp.dev/chapters/' },
+      { text: 'Committees', href: '/committees/' },
+      { text: 'Projects', href: '/projects/' },
     ],
   },
   {
     title: 'Community',
     links: [
-      { text: 'Committees', href: 'https://nest.owasp.dev/committees/' },
-      { text: 'Events', href: '#' },
-      { text: 'Forum', href: '#' },
+      { text: 'Community Content', href: 'https://owasp.org/www-community/' },
+      { text: 'Google Summer of Code', href: 'https://owasp.org/gsoc/gsoc2024' },
+      {
+        text: 'Start a Local Chapter',
+        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/8/group/20/create/90?src=-1419759666',
+      },
+      {
+        text: 'Start a New Project',
+        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/7/create/70?src=-1419759666',
+      },
     ],
   },
   {
-    title: 'Contact',
+    title: 'OWASP',
     links: [
-      { text: 'Locations', href: '#', isSpan: true },
-      { text: 'Support', href: '#' },
-      { text: 'Contact Us', href: 'https://owasp.org/contact/' },
+      { text: 'About', href: 'https://owasp.org/about/' },
+      { text: 'Events', href: 'https://owasp.glueup.com/organization/6727/events/' },
+      { text: 'Membership', href: 'https://owasp.glueup.com/organization/6727/memberships/' },
+      { text: 'Team', href: 'https://owasp.org/corporate/' },
+      { text: 'Contact', href: 'https://owasp.glueup.com/organization/6727/contact/' },
     ],
   },
 ]
