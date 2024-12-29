@@ -1,4 +1,5 @@
 import { Tooltip } from 'react-tooltip'
+import { millify } from "millify";
 import { IconType, tooltipStyle } from 'lib/constants'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import { IconKeys, Icons } from './data'
@@ -18,7 +19,7 @@ export default function DisplayIcon({
       data-tooltip-content={`${Icons[item as keyof typeof Icons]?.label}`}
       className={`flex flex-col items-center justify-center gap-1 border border-border px-4 pb-1 ${idx == 0 ? 'rounded-bl-md' : ''}`}
     >
-      <span className="text-gray-600 dark:text-gray-300">{icons[item]}</span>
+      <span className="text-gray-600 dark:text-gray-300">{typeof icons[item] === "number" ? millify(icons[item], { precision: 1 }) : icons[item]}</span>
       <span>
         <FontAwesomeIconWrapper
           className="text-gray-600 dark:text-gray-300"
