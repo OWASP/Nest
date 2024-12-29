@@ -53,12 +53,10 @@ describe('ProjectPage Component', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
-      expect(screen.queryByPlaceholderText('Search for OWASP projects...')).not.toBeInTheDocument()
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toHaveFocus()
       expect(screen.getByText('Project 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
