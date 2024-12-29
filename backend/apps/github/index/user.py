@@ -9,7 +9,7 @@ from apps.github.models import User
 
 @register(User)
 class UserIndex(AlgoliaIndex, IndexSynonymsMixin):
-    """User index for OWASP GitHub organization members."""
+    """User index."""
 
     index_name = "users"
 
