@@ -74,14 +74,18 @@ class TestOwaspScrapeProjects:
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
-        with mock.patch.object(Project, "active_projects", mock_active_projects), mock.patch(
-            "builtins.print"
-        ) as mock_print, mock.patch("time.sleep", return_value=None), mock.patch(
-            "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
-            return_value=mock_scraper,
-        ), mock.patch(
-            "apps.owasp.management.commands.owasp_scrape_projects.normalize_url",
-            side_effect=normalize_url,
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("builtins.print") as mock_print,
+            mock.patch("time.sleep", return_value=None),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.normalize_url",
+                side_effect=normalize_url,
+            ),
         ):
             command.handle(offset=offset)
 

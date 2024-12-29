@@ -73,13 +73,16 @@ class TestOwaspEnrichProjects:
             mock_active_projects_without_summary
         )
 
-        with mock.patch.object(
-            Project, "active_projects", mock_active_projects
-        ), mock.patch.object(
-            Project.active_projects, "without_summary", mock_active_projects_without_summary
-        ), mock.patch.object(
-            Prompt, "get_owasp_project_summary", mock_prompt.get_owasp_project_summary
-        ), mock.patch("builtins.print") as mock_print:
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch.object(
+                Project.active_projects, "without_summary", mock_active_projects_without_summary
+            ),
+            mock.patch.object(
+                Prompt, "get_owasp_project_summary", mock_prompt.get_owasp_project_summary
+            ),
+            mock.patch("builtins.print") as mock_print,
+        ):
             command.handle(
                 offset=offset,
                 force_update_summary=force_update_summary,

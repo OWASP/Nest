@@ -63,11 +63,14 @@ class TestOwaspEnrichChapters:
         )
         mock_active_chapters.without_geo_data.order_by.return_value = mock_active_chapters
 
-        with mock.patch.object(
-            Chapter, "active_chapters", mock_active_chapters
-        ), mock.patch.object(
-            Prompt, "get_owasp_chapter_summary", mock_prompt.get_owasp_chapter_summary
-        ), mock.patch("builtins.print") as mock_print, mock.patch("time.sleep", return_value=None):
+        with (
+            mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
+            mock.patch.object(
+                Prompt, "get_owasp_chapter_summary", mock_prompt.get_owasp_chapter_summary
+            ),
+            mock.patch("builtins.print") as mock_print,
+            mock.patch("time.sleep", return_value=None),
+        ):
             command.handle(offset=offset)
 
         mock_active_chapters.count.assert_called_once()

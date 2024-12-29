@@ -73,13 +73,18 @@ class TestOwaspEnrichCommittees:
             mock_active_committees_without_summary
         )
 
-        with mock.patch.object(
-            Committee, "active_committees", mock_active_committees
-        ), mock.patch.object(
-            Committee.active_committees, "without_summary", mock_active_committees_without_summary
-        ), mock.patch.object(
-            Prompt, "get_owasp_committee_summary", mock_prompt.get_owasp_committee_summary
-        ), mock.patch("builtins.print") as mock_print:
+        with (
+            mock.patch.object(Committee, "active_committees", mock_active_committees),
+            mock.patch.object(
+                Committee.active_committees,
+                "without_summary",
+                mock_active_committees_without_summary,
+            ),
+            mock.patch.object(
+                Prompt, "get_owasp_committee_summary", mock_prompt.get_owasp_committee_summary
+            ),
+            mock.patch("builtins.print") as mock_print,
+        ):
             command.handle(
                 offset=offset,
                 force_update_summary=force_update_summary,

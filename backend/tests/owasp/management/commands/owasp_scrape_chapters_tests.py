@@ -61,14 +61,18 @@ class TestOwaspScrapeChapters:
         )
         mock_active_chapters.order_by.return_value = mock_active_chapters
 
-        with mock.patch.object(Chapter, "active_chapters", mock_active_chapters), mock.patch(
-            "builtins.print"
-        ) as mock_print, mock.patch("time.sleep", return_value=None), mock.patch(
-            "apps.owasp.management.commands.owasp_scrape_chapters.OwaspScraper",
-            return_value=mock_scraper,
-        ), mock.patch(
-            "apps.owasp.management.commands.owasp_scrape_chapters.normalize_url",
-            side_effect=normalize_url,
+        with (
+            mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
+            mock.patch("builtins.print") as mock_print,
+            mock.patch("time.sleep", return_value=None),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_chapters.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_chapters.normalize_url",
+                side_effect=normalize_url,
+            ),
         ):
             command.handle(offset=offset)
 

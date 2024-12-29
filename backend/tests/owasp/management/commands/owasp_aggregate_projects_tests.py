@@ -47,9 +47,9 @@ class TestOwaspAggregateProjects:
         mock_repository.stars_count = 50
         mock_repository.subscribers_count = 3
         mock_repository.watchers_count = 7
-        mock_repository.top_languages = {"Python", "JavaScript"}
+        mock_repository.top_languages = ["Python", "JavaScript"]
         mock_repository.license = "MIT"
-        mock_repository.topics = {"security", "owasp"}
+        mock_repository.topics = ["security", "owasp"]
 
         mock_project.repositories.all.return_value = [mock_repository]
         mock_projects_list = [mock_project] * projects
@@ -63,9 +63,10 @@ class TestOwaspAggregateProjects:
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
-        with mock.patch.object(Project, "active_projects", mock_active_projects), mock.patch(
-            "builtins.print"
-        ) as mock_print:
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("builtins.print") as mock_print,
+        ):
             command.handle(offset=offset)
 
         assert mock_bulk_save.called

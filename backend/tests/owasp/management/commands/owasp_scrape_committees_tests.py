@@ -61,14 +61,18 @@ class TestOwaspScrapeCommittees:
         )
         mock_active_committees.order_by.return_value = mock_active_committees
 
-        with mock.patch.object(Committee, "active_committees", mock_active_committees), mock.patch(
-            "builtins.print"
-        ) as mock_print, mock.patch("time.sleep", return_value=None), mock.patch(
-            "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
-            return_value=mock_scraper,
-        ), mock.patch(
-            "apps.owasp.management.commands.owasp_scrape_committees.normalize_url",
-            side_effect=normalize_url,
+        with (
+            mock.patch.object(Committee, "active_committees", mock_active_committees),
+            mock.patch("builtins.print") as mock_print,
+            mock.patch("time.sleep", return_value=None),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_committees.normalize_url",
+                side_effect=normalize_url,
+            ),
         ):
             command.handle(offset=offset)
 
