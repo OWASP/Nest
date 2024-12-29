@@ -12,7 +12,7 @@ on:
       - main
     paths-ignore:
       - backend/data/nest.json.gz
-  
+
   release:
     types: [published]
 
@@ -235,7 +235,7 @@ jobs:
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/deploy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-  
+
   build-docker-production-images:
     name: Build Docker Production Images
     environment: production
@@ -266,7 +266,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: backend
-          file: backend/Dockerfile.production  
+          file: backend/Dockerfile.production
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:latest
@@ -283,7 +283,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: frontend
-          file: frontend/Dockerfile.production  
+          file: frontend/Dockerfile.production
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:latest
