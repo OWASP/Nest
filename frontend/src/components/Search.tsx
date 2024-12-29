@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback } from 'react'
 import Autocomplete from './AutoSuggestion'
 
 interface SearchProps {
@@ -6,23 +6,33 @@ interface SearchProps {
   onSearch: (query: string) => void
   placeholder: string
   initialValue?: string
+  indexName: string
+  onReady: () => void
 }
 
-const SearchComponent: React.FC<SearchProps> = ({ onSearch, placeholder, initialValue = '' }) => {
-  const [searchQuery, setSearchQuery] = useState(initialValue)
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query)
-    onSearch(query)
-  }
+const SearchComponent: React.FC<SearchProps> = ({
+  onSearch,
+  placeholder,
+  initialValue = '',
+  indexName = 'issue_suggestions',
+  onReady,
+}) => {
+  const handleSearchChange = useCallback(
+    (query: string) => {
+      onSearch(query)
+    },
+    [onSearch]
+  )
 
   return (
     <div className="w-full max-w-md p-4">
       <div className="relative">
         <Autocomplete
-          initialValue={searchQuery}
+          indexName={indexName}
+          initialValue={initialValue}
           onChange={handleSearchChange}
           placeholder={placeholder}
+          onReady={onReady}
         />
       </div>
     </div>

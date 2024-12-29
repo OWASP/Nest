@@ -50,6 +50,7 @@ const CommitteesPage = () => {
   return (
     <SearchPageLayout
       isLoaded={isLoaded}
+      indexName="committees"
       totalPages={totalPages}
       currentPage={currentPage}
       onSearch={handleSearch}
