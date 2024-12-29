@@ -7,7 +7,7 @@ from settings.base import Base
 
 
 class Staging(Base):
-    """Stagind configuration."""
+    """Staging configuration."""
 
     sentry_sdk.init(
         dsn=values.SecretValue(environ_name="SENTRY_DSN"),
