@@ -4,13 +4,12 @@ from datetime import datetime, timezone
 
 from django.conf import settings
 from django.template.defaultfilters import pluralize
-from django.urls import reverse
 from humanize import intword, naturaltime
 
 
-def get_absolute_url(view_name):
+def get_absolute_url(path):
     """Return absolute URL for a view."""
-    return f"{settings.SITE_URL}{reverse(view_name)}"
+    return f"{settings.SITE_URL}/{path}"
 
 
 def get_nest_user_agent():
@@ -34,7 +33,11 @@ def join_values(fields, delimiter=" "):
 
 def natural_date(value):
     """Return humanized version of a date."""
-    return naturaltime(datetime.fromtimestamp(value, tz=timezone.utc))
+    if isinstance(value, str):
+        value = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    elif isinstance(value, int):
+        value = datetime.fromtimestamp(value, tz=timezone.utc)
+    return naturaltime(value)
 
 
 def natural_number(value, unit=None):
