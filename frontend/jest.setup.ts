@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom'
 import { TextEncoder } from 'util'
+import dotenv from 'dotenv'
+dotenv.config()
 beforeEach(() => {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

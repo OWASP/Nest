@@ -13,14 +13,6 @@ jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('lib/utils', () => ({
-  getFilteredIcons: jest.fn(),
-}))
-
-jest.mock('utils/credentials', () => ({
-  API_URL: 'https://mock-api.com',
-}))
-
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (
