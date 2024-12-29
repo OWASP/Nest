@@ -160,7 +160,7 @@ const Card = ({
                   <TopicBadge
                     key={topic || `topic-${index}`}
                     topic={topic}
-                    tooltipLabel={`This project is labeled as \"${topic}\"`}
+                    tooltipLabel={`This project is labeled as "${topic}"`}
                     type="topic"
                   />
                 ))}
