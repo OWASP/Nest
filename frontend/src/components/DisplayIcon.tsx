@@ -1,8 +1,6 @@
 import { Tooltip } from 'react-tooltip'
-
 import { IconType, tooltipStyle } from 'lib/constants'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-
 import { IconKeys, Icons } from './data'
 
 export default function DisplayIcon({
@@ -18,7 +16,7 @@ export default function DisplayIcon({
     <div
       data-tooltip-id={`icon-tooltip-${item}`}
       data-tooltip-content={`${Icons[item as keyof typeof Icons]?.label}`}
-      className={`flex flex-col items-center justify-center gap-1 border-b border-l border-border px-4 pb-1 ${idx == 0 ? 'rounded-bl-md' : ''}`}
+      className={`flex flex-col items-center justify-center gap-1 border border-border px-4 pb-1 ${idx == 0 ? 'rounded-bl-md' : ''}`}
     >
       <span className="text-gray-600 dark:text-gray-300">{icons[item]}</span>
       <span>

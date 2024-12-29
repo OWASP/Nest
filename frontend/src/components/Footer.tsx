@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { footerSections, Section } from '../utils/constants'
@@ -33,9 +32,8 @@ export default function Footer() {
               </button>
               <ul
                 id={`footer-section-${section.title}`}
-                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
-                  openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
-                }`}
+                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
+                  }`}
               >
                 {section.links.map((link, index) => (
                   <li key={index} className="py-1">
