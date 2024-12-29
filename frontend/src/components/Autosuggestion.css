@@ -65,7 +65,6 @@
 }
 
 body {
-
   &[data-theme='dark'],
   &.dark {
     --aa-text-color-rgb: 183, 192, 199;

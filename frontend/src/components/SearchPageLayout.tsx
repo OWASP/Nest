@@ -54,19 +54,23 @@ const SearchPageLayout = ({
           onReady={handleSearchBarReady}
         />
       </div>
-      {isLoaded && isSearchBarReady && (
-        <div className="flex h-fit w-full flex-col items-center justify-normal gap-4">
+      {!isLoaded ? (
+        <div className="mt-20 flex h-64 w-full items-center justify-center">
+          <LoadingSpinner imageUrl={loadingImageUrl} />
+        </div>
+      ) : (
+        <div>
           {totalPages === 0 && <div className="text bg:text-white m-4 text-xl">{empty}</div>}
           {children}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={onPageChange}
-              isLoaded={isLoaded}
-            />
-          )}
         </div>
+      )}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          isLoaded={isLoaded}
+        />
       )}
     </div>
   )

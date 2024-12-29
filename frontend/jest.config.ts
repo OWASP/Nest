@@ -33,6 +33,7 @@ export default {
   moduleNameMapper: {
     '^@tests/(.*)$': '<rootDir>/__tests__/src/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(scss|sass|css)$': 'identity-obj-proxy',
   },
   moduleDirectories: ['node_modules', 'src'],
 }
