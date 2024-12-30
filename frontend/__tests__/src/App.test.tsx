@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import App from 'App'
-import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
 
