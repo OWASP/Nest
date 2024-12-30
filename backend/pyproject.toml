@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "OWASP Nest"
 version = "0.1.0"
-description = "Streamlines OWASP entities management"
+description = "Your gateway to OWASP"
 authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
 readme = "README.md"
 
@@ -24,6 +24,7 @@ omit = [
 algoliasearch-django = "^3.0.0"
 django = "^5.1"
 django-configurations = "^2.5.1"
+django-cors-headers = "^4.6.0"
 django-filter = "^24.3"
 django-storages = { extras = ["s3"], version = "^1.14.4" }
 djangorestframework = "^3.15.2"
@@ -35,12 +36,11 @@ markdown = "^3.7"
 openai = "^1.58.1"
 psycopg = "^3.2.3"
 pygithub = "^2.5.0"
-python = "^3.12"
+python = "^3.13"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 sentry-sdk = {extras = ["django"], version = "^2.19.2"}
 slack-bolt = "^1.22.0"
-django-cors-headers = "^4.6.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -51,21 +51,21 @@ ruff = "^0.8.4"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
-pytest-django = "^4.5"
 pytest-cov = "^6.0"
-pytest-xdist = "^3.0"
+pytest-django = "^4.5"
 pytest-mock = "^3.0"
+pytest-xdist = "^3.0"
 python-dotenv = "^1.0.1"
 
 [tool.djlint]
 format = true
-format_js = true
 format_css = true
+format_js = true
 indent = 4
 
 [tool.isort]
-known_third_party = ["django", "rest_framework"]
 known_first_party = ["apps"]
+known_third_party = ["django", "rest_framework"]
 multi_line_output = 3
 profile = "black"
 
@@ -117,15 +117,15 @@ select = ["ALL"]
 [tool.ruff.per-file-ignores]
 "**/__init__.py" = ["D104", "F401"]
 "**/admin.py" = ["D100", "D101", "D104"]
+"**/api/*.py" = ["D106"]
 "**/apps.py" = ["D100", "D101", "D104"]
 "**/management/commands/*.py" = ["D101", "D102", "T201"]
 "**/migrations/*.py" = ["D100", "D101", "D104"]
 "**/models.py" = ["D106"]
-"**/api/*.py" = ["D106"]
 "**/models/*.py" = ["D106"]
 "**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "S101"]
 
 
 [build-system]
-requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]

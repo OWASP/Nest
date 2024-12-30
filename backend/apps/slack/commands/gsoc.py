@@ -5,7 +5,7 @@ from django.conf import settings
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.commands.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
 
 COMMAND = "/gsoc"
 
@@ -19,7 +19,7 @@ def handler(ack, command, client):
         return
 
     command_text = command["text"].strip()
-    if command_text in COMMAND_START:
+    if not command_text or command_text in COMMAND_START:
         blocks = [
             *GSOC_GENERAL_INFORMATION_BLOCKS,
             markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
@@ -27,9 +27,9 @@ def handler(ack, command, client):
     else:
         blocks = [
             markdown(
-                f"*`{COMMAND} {command_text}` is not supported*\n"
+                f"*`{COMMAND} {command_text}` is not supported*{NL}"
                 if command_text
-                else f"*`{COMMAND}` is not supported*\n"
+                else f"*`{COMMAND}` is not supported*{NL}"
             ),
         ]
 

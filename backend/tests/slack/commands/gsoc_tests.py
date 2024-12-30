@@ -25,7 +25,7 @@ class TestGsocHandler:
         ("commands_enabled", "command_text", "expected_message"),
         [
             (False, "", None),  # Disabled commands case
-            (True, "", f"*`{COMMAND}` is not supported*"),  # Empty text case
+            (True, "", "GSOC_GENERAL_INFORMATION_BLOCKS"),  # Empty text case
             (True, "invalid", f"*`{COMMAND} invalid` is not supported*"),  # Invalid text case
         ],
     )
@@ -36,7 +36,8 @@ class TestGsocHandler:
         command = {"text": command_text, "user_id": "U123456"}
 
         with patch(
-            "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS", new=[markdown("Mocked Info")]
+            "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
+            new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
         ):
             handler(ack=MagicMock(), command=command, client=mock_slack_client)
 

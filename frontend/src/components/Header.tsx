@@ -1,8 +1,7 @@
 import { faMoon, faSun, faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState, useEffect } from 'react'
-import { NavLink } from 'react-router-dom'
-import { headerLinks } from 'utils/constants'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 
 export default function Header() {
   const [dark, setDark] = useState(() => {
@@ -19,12 +18,11 @@ export default function Header() {
     }
   }, [dark])
 
-  function toggleTheme() {
-    setDark(!dark)
-    const newTheme = !dark ? 'dark' : 'light'
-    document.body.classList.toggle('dark', !dark)
-    localStorage.setItem('theme', newTheme)
-  }
+
+export default function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   function toggleMenu() {
     setIsMenuOpen(!isMenuOpen)
@@ -109,6 +107,6 @@ export default function Header() {
           </div>
         </div>
       </div>
-    </div>
+    </header>
   )
 }

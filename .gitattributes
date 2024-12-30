@@ -1,0 +1,9 @@
+* text=auto
+
+*.js eol=lf
+*.json eol=lf
+*.jsx eol=lf
+*.md eol=lf
+*.py eol=lf
+*.ts eol=lf
+*.tsx eol=lf
