@@ -76,14 +76,15 @@ Follow these steps to set up the OWASP Nest application:
    - After creating an account, create an Algolia app.
    - Update your `backend/.env/local` file with the following keys from your Algolia app:
 
-   ```plaintext
-   DJANGO_ALGOLIA_API_KEY=<your_algolia_api_key>
-   DJANGO_ALGOLIA_APPLICATION_ID=<your_algolia_application_id>
-   ```
+     ```plaintext
+     DJANGO_ALGOLIA_API_KEY=<your_algolia_api_key>
+     DJANGO_ALGOLIA_APPLICATION_ID=<your_algolia_application_id>
+     ```
    - Update your `frontend/.env` file with the following keys from your Algolia app:
-   ```plaintext
-   VITE_ALGOLIA_APP_ID="your-algolia-app-id"
-   VITE_ALGOLIA_SEARCH_KEY="your-algolia-search-key"
+     ```plaintext
+     VITE_ALGOLIA_APP_ID="your-algolia-app-id"
+     VITE_ALGOLIA_SEARCH_KEY="your-algolia-search-key"
+     ```
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
 1. **Run the Application**:
@@ -91,9 +92,9 @@ Follow these steps to set up the OWASP Nest application:
    Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main
    [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
 
-   ```bash
-   make run
-   ```
+      ```bash
+      make run
+      ```
 
    - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
    - Please note as we use containerazed approach this command must be run in parallel to other Nest commands you may want to use.
@@ -102,22 +103,63 @@ Follow these steps to set up the OWASP Nest application:
 1. **Load Initial Data**:
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
-   ```bash
-   make load-data
-   ```
+      ```bash
+      make load-data
+      ```
 
 1. **Index Data**:
    - In the same terminal session, run the following command to index the data:
 
-   ```bash
-   make index-data
-   ```
+      ```bash
+      make index-data
+      ```
 
 1. **Verify API Endpoints**:
    - Check that the data is available via these API endpoints:
      - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
      - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
 
+### Optional Steps (for NestBot development)
+
+To setup NestBot development envirnment, follow these steps:
+
+1. **Set Up ngrok**:
+   - Go to [ngrok](https://ngrok.com/) and create a free account.
+   - After createing an account, use the following commands to install ngrok on Linux (other platforms may have different instructions):
+     ```bash
+     curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+     | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+     && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" \
+     | sudo tee /etc/apt/sources.list.d/ngrok.list \
+     && sudo apt update \
+     && sudo apt install ngrok
+     ```
+
+   - For other operating systems, download the ngrok binary from the [ngrok downloads page](https://download.ngrok.com/) and follow the installation instructions provided.
+   - Copy your authtoken from the ngrok dashboard under the [Get Started](https://dashboard.ngrok.com/get-started/setup/) section.
+   - Run the following command to authenticate ngrok:
+     ```bash
+     ngrok config add-authtoken <your-authtoken>
+     ```
+     
+   - Create your static domain by simply going to [ngrok Domains](https://dashboard.ngrok.com/domains), click on *Create Domain*. Copy that domain.
+   - Run the following commands to edit ngrok configuration:
+     ```bash
+     ngrok config edit
+     ```
+   - Copy these lines under `Authtoken`, replacing your static domain.
+
+     ```plaintext
+     tunnels:
+        Nestbot:
+          addr: 8000
+          proto: http
+          hostname: <your-static-domain>
+     ```
+   - Now ngrok is all set, you access your local setup over internet, running the follwing command:
+     ```bash
+     ngrok start Nestbot
+     ```
 ### Optional Steps (for fetching GitHub OWASP organization data)
 
 If you plan to fetch GitHub OWASP data locally, follow these additional steps:
@@ -125,9 +167,9 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 1. **Create a Super User**:
    - Run the following command to create a super user for accessing the admin interface:
 
-  ```bash
-  make setup
-  ```
+      ```bash
+      make setup
+      ```
 
 1. **Generate a GitHub Personal Access Token**:
     - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
@@ -142,9 +184,9 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 1. **Sync Local Database Data**:
    - Now you should be able to run the following command to sync your local database data with GitHub:
 
-   ```bash
-   make sync
-   ```
+      ```bash
+      make sync
+      ```
 
 ## Code Quality Checks
 
