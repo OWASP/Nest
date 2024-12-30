@@ -1,7 +1,7 @@
 services:
   backend:
     container_name: nest-backend
-    image: arkid15r/owasp-nest-backend:latest
+    image: arkid15r/owasp-nest-backend:release
     command: >
       bash -c "
         poetry run python manage.py migrate &&
@@ -21,7 +21,7 @@ services:
 
   frontend:
     container_name: nest-frontend
-    image: arkid15r/owasp-nest-frontend:latest
+    image: arkid15r/owasp-nest-frontend:release
     restart: unless-stopped
     networks:
       - nest_app_network
@@ -60,7 +60,7 @@ services:
 
   nginx:
     container_name: nest-nginx
-    image: nginx:latest
+    image: nginx:release
     ports:
       - '80:80'
       - '443:443'

@@ -269,13 +269,13 @@ jobs:
           file: backend/Dockerfile.production
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:release
 
       - name: Prepare frontend environment
         run: |
           echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.production
           echo "VITE_ALGOLIA_SEARCH_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
-          echo "VITE_NEST_API_URL=https://nest.owasp.dev/api/v1" >> frontend/.env.production
+          echo "VITE_NEST_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
           echo "VITE_NEST_SENTRY_DSN_URL=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
           echo "VITE_NEST_ENV=production" >> frontend/.env.production
 
@@ -286,7 +286,7 @@ jobs:
           file: frontend/Dockerfile.production
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:release
 
   deploy-nest-production:
     name: Deploy Nest Production
