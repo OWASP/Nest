@@ -40,7 +40,7 @@ jobs:
         with:
           cache: poetry
           cache-dependency-path: backend/poetry.lock
-          python-version: '3.12'
+          python-version: '3.13'
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
@@ -125,7 +125,7 @@ jobs:
         with:
           cache: poetry
           cache-dependency-path: backend/poetry.lock
-          python-version: '3.12'
+          python-version: '3.13'
 
       - name: Run backend tests
         run: |

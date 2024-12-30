@@ -30,6 +30,7 @@ import {
   faWandMagicSparkles,
   faX,
   faPeopleGroup,
+  faSun,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -58,7 +59,8 @@ library.add(
   faDiscord,
   faSlack,
   faPeopleGroup,
-  faXTwitter
+  faXTwitter,
+  faSun
 )
 
 export const Icons = {
