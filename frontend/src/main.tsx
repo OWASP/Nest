@@ -1,12 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import TagManager from 'react-gtm-module'
 import { BrowserRouter } from 'react-router-dom'
 
+import { GTM_AUTH, GTM_ID, GTM_PREVIEW } from 'utils/credentials.ts'
 import App from './App.tsx'
 import ErrorWrapper from './ErrorWrapper'
-import TagManager from 'react-gtm-module'
-import { GTM_AUTH, GTM_ID, GTM_PREVIEW } from 'utils/credentials.ts'
 
 const tagManagerArgs = {
   gtmId: GTM_ID,
