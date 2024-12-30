@@ -167,6 +167,8 @@ To setup NestBot development environment, follow these steps:
      ```
 
      ```plaintext
+     agent:
+        authtoken: <your-auth-token>
      tunnels:
         NestBot:
           addr: 8000
