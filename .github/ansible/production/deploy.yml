@@ -3,7 +3,7 @@
   tasks:
     - name: Copy Nginx configuration file
       ansible.builtin.copy:
-        src: '{{ github_workspace }}/nginx/staging.conf'
+        src: '{{ github_workspace }}/nginx/production.conf'
         dest: ~/nginx/nginx.conf
         mode: '0644'
 
