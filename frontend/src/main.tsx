@@ -9,9 +9,9 @@ import TagManager from 'react-gtm-module'
 import { GTM_AUTH, GTM_ID, GTM_PREVIEW } from 'utils/credentials.ts'
 
 const tagManagerArgs = {
-    gtmId: GTM_ID,
-    auth: GTM_AUTH,
-    preview: GTM_PREVIEW
+  gtmId: GTM_ID,
+  auth: GTM_AUTH,
+  preview: GTM_PREVIEW,
 }
 
 TagManager.initialize(tagManagerArgs)
