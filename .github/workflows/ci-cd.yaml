@@ -12,11 +12,11 @@ on:
       - main
     paths-ignore:
       - backend/data/nest.json.gz
-
   release:
-    types: [published]
-
+    types:
+      - published
   workflow_dispatch:
+
 permissions:
   contents: read
 
@@ -191,7 +191,7 @@ jobs:
           file: backend/Dockerfile.staging
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
       - name: Prepare frontend environment
         run: |
@@ -208,7 +208,7 @@ jobs:
           file: frontend/Dockerfile.staging
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
   deploy-nest-staging:
     name: Deploy Nest Staging
@@ -269,7 +269,7 @@ jobs:
           file: backend/Dockerfile.production
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:release
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
 
       - name: Prepare frontend environment
         run: |
@@ -286,7 +286,7 @@ jobs:
           file: frontend/Dockerfile.production
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:release
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
   deploy-nest-production:
     name: Deploy Nest Production

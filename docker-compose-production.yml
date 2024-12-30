@@ -60,7 +60,7 @@ services:
 
   nginx:
     container_name: nest-nginx
-    image: nginx:release
+    image: nginx:latest
     ports:
       - '80:80'
       - '443:443'
