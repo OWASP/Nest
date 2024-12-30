@@ -4,9 +4,9 @@ import '@algolia/autocomplete-theme-classic'
 import { debounce } from 'lodash'
 import React from 'react'
 import { useEffect, useRef } from 'react'
+import { NEST_ENV } from 'utils/credentials'
 import { client } from '../lib/algoliaClient'
 import './Autosuggestion.css'
-import { NEST_ENV } from 'utils/credentials'
 
 interface SearchProps {
   // eslint-disable-next-line no-unused-vars
