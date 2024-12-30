@@ -80,11 +80,14 @@ Follow these steps to set up the OWASP Nest application:
      DJANGO_ALGOLIA_API_KEY=<your_algolia_api_key>
      DJANGO_ALGOLIA_APPLICATION_ID=<your_algolia_application_id>
      ```
+
    - Update your `frontend/.env` file with the following keys from your Algolia app:
+
      ```plaintext
      VITE_ALGOLIA_APP_ID="your-algolia-app-id"
      VITE_ALGOLIA_SEARCH_KEY="your-algolia-search-key"
      ```
+
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
 1. **Run the Application**:
@@ -119,60 +122,9 @@ Follow these steps to set up the OWASP Nest application:
      - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
      - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
 
-### Optional Steps (for NestBot development)
+### Optional Steps
 
-To setup NestBot development envirnment, follow these steps:
-
-1. **Set Up ngrok**:
-   - Go to [ngrok](https://ngrok.com/) and create a free account.
-   - After createing an account, use the following commands to install ngrok on Linux (other platforms may have different instructions):
-     ```bash
-     curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
-     | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
-     && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" \
-     | sudo tee /etc/apt/sources.list.d/ngrok.list \
-     && sudo apt update \
-     && sudo apt install ngrok
-     ```
-
-   - For other operating systems, download the ngrok binary from the [ngrok downloads page](https://download.ngrok.com/) and follow the installation instructions provided.
-   - Copy your authtoken from the ngrok dashboard under the [Get Started](https://dashboard.ngrok.com/get-started/setup/) section.
-   - Run the following command to authenticate ngrok:
-     ```bash
-     ngrok config add-authtoken <your-authtoken>
-     ```
-
-   - Create your static domain by simply going to [ngrok Domains](https://dashboard.ngrok.com/domains), click on *Create Domain*. Copy that domain.
-   - Run the following commands to edit ngrok configuration:
-     ```bash
-     ngrok config edit
-     ```
-   - Copy these lines under `Authtoken`, replacing your static domain.
-
-     ```plaintext
-     tunnels:
-        Nestbot:
-          addr: 8000
-          proto: http
-          hostname: <your-static-domain>
-     ```
-   - Now ngrok is all set, you access your local setup over internet, running the follwing command:
-     ```bash
-     ngrok start Nestbot
-     ```
-
-1. **Update Environment Varibles with your NestBot Configuration**:
-   - Open `backend/.env/local` again and update it with your Slack App tokens:
-      ```plaintext
-      DJANGO_SLACK_APP_TOKEN=<your-slack-app-id>
-      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-OAuth-token>
-      DJANGO_SLACK_SIGNING_SECRET=<your-slack-app-signing-secret>
-      ```
-1. **Slash commands setup**:
-   - now add your slash commands to your slack app
-   - Set Request URL to `http://<your-static-domain>/integrations/slack/events/`
-
-### Optional Steps (for fetching GitHub OWASP organization data)
+#### GitHub Data Fetch
 
 If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 
@@ -199,6 +151,52 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
       ```bash
       make sync
       ```
+
+#### NestBot Development
+
+To setup NestBot development environment, follow these steps:
+
+1. **Set Up ngrok**:
+   - Go to [ngrok](https://ngrok.com/) and create a free account.
+   - Install and configure ngrok on your machine using these [instructions](https://ngrok.com/docs/getting-started/#step-1-install)
+   - Create your static domain by simply going to [ngrok domains](https://dashboard.ngrok.com/domains)
+   - Run the following commands to edit ngrok configuration:
+
+     ```bash
+     ngrok config edit
+     ```
+
+     ```plaintext
+     tunnels:
+        NestBot:
+          addr: 8000
+          proto: http
+          hostname: <your-static-domain>
+     ```
+
+   - Now ngrok is all set, you access your local setup over internet, running the follwing command:
+
+     ```bash
+     ngrok start NestBot
+     ```
+
+1. **Update environment Variables with your NestBot Configuration**:
+   - Update `backend/.env/local` with your Slack application tokens:
+     - Bot User OAuth Token from `Settings -- Install App -- OAuth Tokens` section
+     - Signing Secret from `Settings -- Basic Information -- App Credentials` section
+
+      ```plaintext
+      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-OAuth-token>
+      DJANGO_SLACK_SIGNING_SECRET=<your-slack-app-signing-secret>
+      ```
+
+1. **Set up Slack slash commands**:
+   - Add the slash commands (`/contribute`, `/gsoc`, `/owasp`) to your Slack application in
+    `Features -- Slash Commands` section using `http://<your-static-domain>/integrations/slack/events/` as the `Request URL`.
+   - Configure event subscriptions in `Features -- Event Subscriptions` section to use your
+    `http://<your-static-domain>/integrations/slack/events/` URL.
+    Make sure `member_joined_channel` and `team_join` events are included for bot events.
+   - Reinstall your Slack application after making the changes in `Features -- OAuth & Permissions` section.
 
 ## Code Quality Checks
 
