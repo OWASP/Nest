@@ -28,7 +28,7 @@ export default {
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: ['<rootDir>/__tests__/src/data/'],
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': '@swc/jest',
   },
   moduleNameMapper: {
     '^@tests/(.*)$': '<rootDir>/__tests__/src/$1',
