@@ -6,6 +6,7 @@ import React from 'react'
 import { useEffect, useRef } from 'react'
 import { client } from '../lib/algoliaClient'
 import './Autosuggestion.css'
+import { NEST_ENV } from 'utils/credentials'
 
 interface SearchProps {
   // eslint-disable-next-line no-unused-vars
@@ -35,7 +36,7 @@ const Autocomplete = React.memo(
       if (containerRef.current) {
         const querySuggestionsPlugin = createQuerySuggestionsPlugin({
           searchClient: client,
-          indexName: indexName,
+          indexName: `${NEST_ENV}_${indexName}_suggestions`,
           getSearchParams: () => ({
             hitsPerPage: 7,
           }),
