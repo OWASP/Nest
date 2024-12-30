@@ -141,7 +141,7 @@ To setup NestBot development envirnment, follow these steps:
      ```bash
      ngrok config add-authtoken <your-authtoken>
      ```
-     
+
    - Create your static domain by simply going to [ngrok Domains](https://dashboard.ngrok.com/domains), click on *Create Domain*. Copy that domain.
    - Run the following commands to edit ngrok configuration:
      ```bash
@@ -167,7 +167,7 @@ To setup NestBot development envirnment, follow these steps:
       DJANGO_SLACK_APP_TOKEN=<your-slack-app-id>
       DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-OAuth-token>
       DJANGO_SLACK_SIGNING_SECRET=<your-slack-app-signing-secret>
-      ``` 
+      ```
 1. **Slash commands setup**:
    - now add your slash commands to your slack app
    - Set Request URL to `http://<your-static-domain>/integrations/slack/events/`
