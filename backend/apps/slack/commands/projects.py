@@ -7,7 +7,7 @@ from django.utils.text import Truncator
 from apps.common.utils import get_absolute_url, natural_date, natural_number
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
 from apps.slack.utils import escape
 
 COMMAND = "/projects"
@@ -26,7 +26,7 @@ def handler(ack, command, client):
     search_query = command["text"]
     search_query_escaped = escape(command["text"])
     blocks = [
-        markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
+        markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}"),
     ]
 
     attributes = [
@@ -48,15 +48,11 @@ def handler(ack, command, client):
         blocks = [
             markdown(
                 (
-                    f"\n*Here are top 10 most OWASP projects "
-                    f"that I found based on *\n `{COMMAND} {search_query_escaped}`:\n"
+                    f"{NL}*Here are top 10 most OWASP projects "
+                    f"that I found for* `{search_query_escaped}` query:{NL}"
                 )
                 if search_query_escaped
-                else (
-                    "\n*Here are top 10 OWASP projects:*\n"
-                    "You can refine the results by using a more specific query, e.g.\n"
-                    f"`{COMMAND} application security`"
-                )
+                else (f"{NL}*Here are top 10 OWASP projects:*{NL}")
             ),
         ]
 
@@ -82,12 +78,12 @@ def handler(ack, command, client):
             leaders = project["idx_leaders"]
             blocks.append(
                 markdown(
-                    f"\n*{idx + 1}.* <{project['idx_url']}|*{name_truncated}*>\n"
+                    f"{NL}*{idx + 1}.* <{project['idx_url']}|*{name_truncated}*>{NL}"
                     f"_Updated {natural_date(project['idx_updated_at'])}"
-                    f"{stars_count}{forks_count}{contributors_count}_\n"
+                    f"{stars_count}{forks_count}{contributors_count}_{NL}"
                     f"_{project['idx_level'].capitalize()} project. "
-                    f"Leader{pluralize(len(leaders))}: {', '.join(leaders)}_\n"
-                    f"{escape(project['idx_summary'])}\n"
+                    f"Leader{pluralize(len(leaders))}: {', '.join(leaders)}_{NL}"
+                    f"{escape(project['idx_summary'])}{NL}"
                 )
             )
 
@@ -95,7 +91,7 @@ def handler(ack, command, client):
             markdown(
                 f"⚠️ *Extended search over {Project.active_projects_count()} OWASP projects "
                 f"is available at <{get_absolute_url('projects')}"
-                f"?q={search_query}|{settings.SITE_NAME}>*\n"
+                f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             ),
         )

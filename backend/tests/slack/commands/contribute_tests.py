@@ -163,4 +163,4 @@ class TestContributeHandler:
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         assert len(blocks) > 0
-        assert FEEDBACK_CHANNEL_MESSAGE in str(blocks)
+        assert FEEDBACK_CHANNEL_MESSAGE.strip() in str(blocks)

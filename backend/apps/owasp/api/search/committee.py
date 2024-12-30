@@ -1,7 +1,6 @@
 """OWASP app committee search API."""
 
 from algoliasearch_django import raw_search
-from django.http import JsonResponse
 
 from apps.owasp.models.committee import Committee
 
@@ -28,18 +27,3 @@ def get_committees(query, attributes=None, limit=25, page=1):
     }
 
     return raw_search(Committee, query, params)
-
-
-def committees(request):
-    """Search committees API endpoint."""
-    page = int(request.GET.get("page", 1))
-    query = request.GET.get("q", "")
-    committees = get_committees(query=query, page=page)
-    return JsonResponse(
-        {
-            "active_committees_count": Committee.active_committees_count(),
-            "committees": committees["hits"],
-            "total_pages": committees["nbPages"],
-        },
-        safe=False,
-    )

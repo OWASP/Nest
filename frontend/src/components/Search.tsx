@@ -2,7 +2,6 @@ import React, { useCallback } from 'react'
 import Autocomplete from './AutoSuggestion'
 
 interface SearchProps {
-  /* eslint-disable-next-line */
   onSearch: (query: string) => void
   placeholder: string
   initialValue?: string

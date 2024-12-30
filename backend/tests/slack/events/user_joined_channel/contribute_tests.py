@@ -35,7 +35,7 @@ class TestContributeEventHandler:
                     "50 recently opened issues",
                     NEST_BOT_NAME,
                     "/contribute --start",
-                    FEEDBACK_CHANNEL_MESSAGE,
+                    FEEDBACK_CHANNEL_MESSAGE.strip(),
                 ],
             ),
         ],
