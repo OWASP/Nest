@@ -160,6 +160,18 @@ To setup NestBot development envirnment, follow these steps:
      ```bash
      ngrok start Nestbot
      ```
+
+1. **Update Environment Varibles with your NestBot Configuration**:
+   - Open `backend/.env/local` again and update it with your Slack App tokens:
+      ```plaintext
+      DJANGO_SLACK_APP_TOKEN=<your-slack-app-id>
+      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-OAuth-token>
+      DJANGO_SLACK_SIGNING_SECRET=<your-slack-app-signing-secret>
+      ``` 
+1. **Slash commands setup**:
+   - now add your slash commands to your slack app
+   - Set Request URL to `http://<your-static-domain>/integrations/slack/events/`
+
 ### Optional Steps (for fetching GitHub OWASP organization data)
 
 If you plan to fetch GitHub OWASP data locally, follow these additional steps:
