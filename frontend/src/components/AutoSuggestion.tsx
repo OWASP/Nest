@@ -9,7 +9,6 @@ import { client } from '../lib/algoliaClient'
 import './Autosuggestion.css'
 
 interface SearchProps {
-  // eslint-disable-next-line no-unused-vars
   onChange: (query: string) => void
   placeholder: string
   initialValue?: string
