@@ -7,7 +7,7 @@ from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.commands.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
 from apps.slack.utils import escape
 
 COMMAND = "/contribute"
@@ -34,7 +34,7 @@ def handler(ack, command, client):
     else:
         search_query_escaped = escape(command_text)
         blocks = [
-            markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*\n"),
+            markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}"),
         ]
 
         attributes = [
@@ -52,15 +52,11 @@ def handler(ack, command, client):
             blocks = [
                 markdown(
                     (
-                        f"\n*Here are top 10 most relevant issues "
-                        f"that I found based on *\n `{COMMAND} {search_query_escaped}`:\n"
+                        f"{NL}*Here are top 10 most relevant issues "
+                        f"that I found based on *{NL} `{COMMAND} {search_query_escaped}`:{NL}"
                     )
                     if search_query_escaped
-                    else (
-                        "\n*Here are top 10 most recent issues:*\n"
-                        "You can refine the results by using a more specific query, e.g.\n"
-                        f"`{COMMAND} python good first issue`"
-                    )
+                    else (f"{NL}*Here are top 10 most recent issues:*{NL}")
                 ),
             ]
 
@@ -73,9 +69,9 @@ def handler(ack, command, client):
                 )
                 blocks.append(
                     markdown(
-                        f"\n*{idx + 1}.* <{issue['idx_url']}|*{title_truncated}*>\n"
-                        f"{escape(issue['idx_project_name'])}\n"
-                        f"{escape(summary_truncated)}\n"
+                        f"{NL}*{idx + 1}.* <{issue['idx_url']}|*{title_truncated}*>{NL}"
+                        f"{escape(issue['idx_project_name'])}{NL}"
+                        f"{escape(summary_truncated)}{NL}"
                     ),
                 )
 

@@ -28,7 +28,7 @@ class TestGsocEventHandler:
                     "Hello <@U123456>",
                     "Here's how you can start your journey",
                     "🎉 We're excited to have you on board",
-                    FEEDBACK_CHANNEL_MESSAGE,
+                    FEEDBACK_CHANNEL_MESSAGE.strip(),
                 ],
             ),
         ],
