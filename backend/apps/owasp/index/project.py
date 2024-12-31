@@ -39,6 +39,9 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     )
 
     settings = {
+        "attributesForFaceting": [
+            "filterOnly(idx_key)",
+        ],
         "indexLanguages": ["en"],
         "customRanking": [
             "desc(idx_level_raw)",

@@ -22,6 +22,7 @@ export type project = {
   idx_type: string
   idx_updated_at: number
   idx_url: string
+  idx_key: string
   objectID: string
 }
 
@@ -48,6 +49,7 @@ export interface IssueType {
 
 export interface ChapterType {
   idx_created_at: number
+  idx_key: string
   idx_leaders: string[]
   idx_name: string
   idx_related_urls: string[]
@@ -71,6 +73,7 @@ export interface ChapterDataType {
 
 export interface CommitteeType {
   idx_created_at: number
+  idx_key: string
   idx_leaders: string[]
   idx_name: string
   idx_related_urls: string[]
@@ -95,4 +98,19 @@ export interface CommitteeDataType {
 export interface AlgoliaResponseType<T> {
   hits: T[]
   totalPages: number
+}
+
+export interface AgloliaRequestType {
+  aroundLatLngViaIP?: boolean
+  attributesToHighlight: string[]
+  attributesToRetrieve: string[]
+  distinct?: number
+  filters?: string
+  hitsPerPage: number
+  indexName: string
+  minProximity?: number
+  page: number
+  query: string
+  removeWordsIfNoResults: 'none' | 'lastWords' | 'firstWords' | 'allOptional'
+  typoTolerance?: string
 }
