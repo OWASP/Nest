@@ -62,7 +62,7 @@ class TestGsocHandler:
                     "idx_summary": "Project summary",
                     "idx_type": "Documentation",
                     "idx_level": "Beginner",
-                    "idx_url": "https://example.com",
+                    "idx_url": "https://owasp.org/www-project-bug-logging-tool/",
                 }
             ]
         }
@@ -83,4 +83,4 @@ class TestGsocHandler:
             assert "Project summary" in project_block
             assert "Type: Documentation" in project_block
             assert "Level: Beginner" in project_block
-            assert "https://example.com" in project_block
+            assert "https://owasp.org/www-project-bug-logging-tool/" in project_block
