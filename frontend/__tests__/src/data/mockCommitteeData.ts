@@ -18,6 +18,7 @@ export const mockCommitteeData = {
       ],
       idx_summary: 'This is a summary of Committee 1.',
       idx_updated_at: 1727390473,
+      idx_key: 'committee_1',
       idx_url: 'https://owasp.org/www-committee-chapter',
       objectID: '4',
     },

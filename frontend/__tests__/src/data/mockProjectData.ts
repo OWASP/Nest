@@ -11,6 +11,7 @@ export const mockProjectData = {
       idx_topics: ['Topic 1'],
       idx_updated_at: '2023-10-01',
       idx_forks_count: 10,
+      idx_key: 'project_1',
       idx_stars_count: 20,
       idx_contributors_count: 5,
     },
