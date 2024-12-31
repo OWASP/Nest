@@ -30,6 +30,11 @@ class UserIndexMixin:
         return self.email
 
     @property
+    def idx_key(self):
+        """Return key for indexing."""
+        return self.login
+
+    @property
     def idx_followers_count(self):
         """Return followers count for indexing."""
         return self.followers_count
