@@ -18,6 +18,9 @@
     "watch": "jest --watch"
   },
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.17.8",
+    "@algolia/autocomplete-plugin-query-suggestions": "^1.17.8",
+    "@algolia/autocomplete-theme-classic": "^1.17.8",
     "@fortawesome/fontawesome-svg-core": "^6.7.0",
     "@fortawesome/free-brands-svg-icons": "^6.7.0",
     "@fortawesome/free-regular-svg-icons": "^6.7.0",
@@ -45,9 +48,6 @@
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
-    "@algolia/autocomplete-js": "^1.17.8",
-    "@algolia/autocomplete-plugin-query-suggestions": "^1.17.8",
-    "@algolia/autocomplete-theme-classic": "^1.17.8",
     "@eslint/js": "^9.15.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",

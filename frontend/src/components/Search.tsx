@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import Autocomplete from './AutoSuggestion'
+import Autocomplete from 'components/AutoSuggestion'
 
 interface SearchProps {
   onSearch: (query: string) => void

@@ -5,8 +5,8 @@ import { debounce } from 'lodash'
 import React from 'react'
 import { useEffect, useRef } from 'react'
 import { NEST_ENV } from 'utils/credentials'
-import { client } from '../lib/algoliaClient'
-import './Autosuggestion.css'
+import { client } from 'lib/algoliaClient'
+import 'components/Autosuggestion.css'
 
 interface SearchProps {
   onChange: (query: string) => void
@@ -45,7 +45,6 @@ const Autocomplete = React.memo(
           container: containerRef.current,
           placeholder,
           autoFocus: true,
-          openOnFocus: true,
           insights: true,
           plugins: [querySuggestionsPlugin],
           initialState: { query: initialValue },
