@@ -3,7 +3,6 @@ import { Search, X } from 'lucide-react'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 
 interface SearchProps {
-  /* eslint-disable-next-line */
   onSearch: (query: string) => void
   placeholder: string
   initialValue?: string
