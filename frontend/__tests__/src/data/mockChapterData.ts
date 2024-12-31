@@ -20,6 +20,7 @@ export const mockChapterData = {
       ],
       idx_summary: 'This is a summary of Chapter 1.',
       idx_updated_at: 1723121926,
+      idx_key: 'chapter_1',
       idx_url: 'https://owasp.org/www-chapter-nagoya',
       objectID: '539',
     },
