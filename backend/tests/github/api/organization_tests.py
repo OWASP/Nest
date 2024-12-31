@@ -27,9 +27,11 @@ class TestOrganizationSerializer:
             },
         ],
     )
+    # Ensures that test runs without actual database access by simulating behavior of a queryset.
     @patch("apps.github.models.organization.Organization.objects.filter")
     def test_organization_serializer(self, mock_filter, organization_data):
         mock_qs = MagicMock()
+        # To mimic a queryset where no matching objects are found.
         mock_qs.exists.return_value = False
         mock_filter.return_value = mock_qs
 

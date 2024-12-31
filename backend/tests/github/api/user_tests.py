@@ -27,9 +27,11 @@ class TestUserSerializer:
             },
         ],
     )
+    # Ensures that test runs without actual database access by simulating behavior of a queryset.
     @patch("apps.github.models.user.User.objects.filter")
     def test_user_serializer(self, mock_filter, user_data):
         mock_qs = MagicMock()
+        # To mimic a queryset where no matching objects are found.
         mock_qs.exists.return_value = False
         mock_filter.return_value = mock_qs
 
