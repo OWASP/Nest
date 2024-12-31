@@ -9,9 +9,9 @@ interface SearchPageLayoutProps {
   totalPages: number
   currentPage: number
   searchQuery: string
-  /* eslint-disable-next-line */
+
   onSearch: (query: string) => void
-  /* eslint-disable-next-line */
+
   onPageChange: (page: number) => void
   searchPlaceholder: string
   empty: string

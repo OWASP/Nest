@@ -33,6 +33,11 @@ class ProjectIndexMixin(GenericEntityMixin):
         return self.languages
 
     @property
+    def idx_key(self):
+        """Return key for indexing."""
+        return self.key.replace("www-project-", "")
+
+    @property
     def idx_level(self):
         """Return level text value for indexing."""
         return self.level

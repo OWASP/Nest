@@ -22,6 +22,11 @@ class ChapterIndexMixin(GenericEntityMixin):
         return self.latitude, self.longitude
 
     @property
+    def idx_key(self):
+        """Return key for indexing."""
+        return self.key.replace("www-chapter-", "")
+
+    @property
     def idx_meetup_group(self):
         """Return meetup group for indexing."""
         return self.meetup_group

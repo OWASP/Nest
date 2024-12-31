@@ -35,11 +35,12 @@ export const fetchAlgoliaData = async <T>(
     const { results } = await client.search({
       requests: [
         {
-          indexName: `${NEST_ENV}_${indexName}`,
-          query,
-          hitsPerPage: 25,
-          page: currentPage - 1,
           attributesToHighlight: [],
+          hitsPerPage: 25,
+          indexName: `${NEST_ENV}_${indexName}`,
+          page: currentPage - 1,
+          query: query,
+          removeWordsIfNoResults: 'allOptional',
           ...params,
         },
       ],
