@@ -15,7 +15,7 @@ class Base(Configuration):
     if ENVIRONMENT == "Test":
         from dotenv import load_dotenv
 
-        load_dotenv(BASE_DIR / ".env/template")
+        load_dotenv(BASE_DIR / ".env.example")
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
@@ -90,11 +90,11 @@ class Base(Configuration):
 
     WSGI_APPLICATION = "wsgi.application"
 
-    ALGOLIA_API_KEY = values.SecretValue(environ_name="ALGOLIA_API_KEY")
     ALGOLIA_APPLICATION_ID = values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID")
+    ALGOLIA_WRITE_API_KEY = values.SecretValue(environ_name="ALGOLIA_WRITE_API_KEY")
 
     ALGOLIA = {
-        "API_KEY": ALGOLIA_API_KEY,
+        "API_KEY": ALGOLIA_WRITE_API_KEY,
         "APPLICATION_ID": ALGOLIA_APPLICATION_ID,
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
@@ -166,9 +166,7 @@ class Base(Configuration):
 
     OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
 
-    SLACK_APP_TOKEN = values.SecretValue()
     SLACK_BOT_TOKEN = values.SecretValue()
-    SLACK_SIGNING_SECRET = values.SecretValue()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-    SLACK_CONFIGURATION = values.Value(environ_name="DJANGO_SLACK_CONFIGURATION")
+    SLACK_SIGNING_SECRET = values.SecretValue()

@@ -1,5 +1,5 @@
 import { logCriticalMessage, logException } from 'sentry.config'
-import { APPLICATION_ENV } from 'utils/credentials'
+import { ENVIRONMENT } from 'utils/credentials'
 
 /**
  * Logger utility for handling logs and errors.
@@ -18,7 +18,7 @@ export const logger = {
   },
 
   error: (...args: unknown[]) => {
-    if (APPLICATION_ENV === 'development' || APPLICATION_ENV === 'local') {
+    if (ENVIRONMENT === 'development' || ENVIRONMENT === 'local') {
       console.error(...args)
     } else {
       args.forEach((arg) => {
