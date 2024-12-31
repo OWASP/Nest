@@ -15,8 +15,8 @@ class LabelSerializer(serializers.HyperlinkedModelSerializer):
             "name",
             "description",
             "color",
-            "created_at",
-            "updated_at",
+            "nest_created_at",
+            "nest_updated_at",
         )
 
 
