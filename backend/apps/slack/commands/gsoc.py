@@ -1,3 +1,5 @@
+"""Slack bot gsoc command."""
+
 from django.conf import settings
 
 from apps.slack.apps import SlackConfig
