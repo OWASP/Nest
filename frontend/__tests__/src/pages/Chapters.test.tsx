@@ -1,16 +1,19 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
+import { useNavigate } from 'react-router-dom'
 import { fetchAlgoliaData } from 'lib/api'
 import { render } from 'lib/test-util'
 
 import ChaptersPage from 'pages/Chapters'
-
 import { mockChapterData } from '@tests/data/mockChapterData'
 
 jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
-
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}))
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>
@@ -48,7 +51,7 @@ describe('ChaptersPage Component', () => {
     expect(screen.getByText('Isanori Sakanashi,')).toBeInTheDocument()
     expect(screen.getByText('Takeshi Murai,')).toBeInTheDocument()
     expect(screen.getByText('Yukiharu Niwa')).toBeInTheDocument()
-    const viewButton = screen.getByText('Join')
+    const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
   })
 
@@ -99,5 +102,23 @@ describe('ChaptersPage Component', () => {
     })
 
     expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+  })
+  test('opens  window on View Details button click', async () => {
+    const navigateMock = jest.fn()
+    ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      const contributeButton = screen.getByText('View Details')
+      expect(contributeButton).toBeInTheDocument()
+      fireEvent.click(contributeButton)
+    })
+
+    //suppose index_key is chapter_1
+    expect(navigateMock).toHaveBeenCalledWith('/chapters/chapter_1')
+
+    // Clean up the mock
+    jest.restoreAllMocks()
   })
 })
