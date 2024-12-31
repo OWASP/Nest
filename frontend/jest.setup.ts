@@ -19,5 +19,6 @@ beforeEach(() => {
 })
 jest.mock('@algolia/autocomplete-theme-classic', () => ({}))
 import React from 'react'
+
 global.React = React
 global.TextEncoder = TextEncoder
