@@ -23,7 +23,6 @@ from apps.github.api.label import LabelSerializer
     ],
 )
 def test_label_serializer(label_data):
-    """Test the LabelSerializer with various label data."""
     serializer = LabelSerializer(data=label_data)
     assert serializer.is_valid(), serializer.errors
     validated_data = serializer.validated_data

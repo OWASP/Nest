@@ -28,8 +28,6 @@ from apps.github.api.user import UserSerializer
 )
 @patch("apps.github.models.user.User.objects.filter")
 def test_user_serializer(mock_filter, user_data):
-    """Test the OrganizationSerializer with various organization data."""
-    # Mock the queryset
     mock_qs = MagicMock()
     mock_qs.exists.return_value = False
     mock_filter.return_value = mock_qs
@@ -37,6 +35,7 @@ def test_user_serializer(mock_filter, user_data):
     serializer = UserSerializer(data=user_data)
     assert serializer.is_valid()
     validated_data = serializer.validated_data
+
     validated_data["created_at"] = validated_data["created_at"].isoformat().replace("+00:00", "Z")
     validated_data["updated_at"] = validated_data["updated_at"].isoformat().replace("+00:00", "Z")
     assert validated_data == user_data

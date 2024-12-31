@@ -1,6 +1,5 @@
 import pytest
 
-# from rest_framework import routers
 from apps.github.api.issue import IssueViewSet
 from apps.github.api.label import LabelViewSet
 from apps.github.api.organization import OrganizationViewSet

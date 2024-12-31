@@ -23,11 +23,10 @@ from apps.github.api.release import ReleaseSerializer
     ],
 )
 def test_release_serializer(release_data):
-    """Test the ReleaseSerializer with various release data."""
     serializer = ReleaseSerializer(data=release_data)
     assert serializer.is_valid()
     validated_data = serializer.validated_data
-    # Convert datetime objects to ISO format strings for comparison
+
     validated_data["created_at"] = validated_data["created_at"].isoformat().replace("+00:00", "Z")
     validated_data["published_at"] = (
         validated_data["published_at"].isoformat().replace("+00:00", "Z")

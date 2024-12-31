@@ -28,7 +28,6 @@ from apps.github.api.organization import OrganizationSerializer
 )
 @patch("apps.github.models.organization.Organization.objects.filter")
 def test_organization_serializer(mock_filter, organization_data):
-    # Mock the queryset
     mock_qs = MagicMock()
     mock_qs.exists.return_value = False
     mock_filter.return_value = mock_qs
