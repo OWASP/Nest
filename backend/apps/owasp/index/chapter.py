@@ -32,6 +32,9 @@ class ChapterIndex(AlgoliaIndex):
     geo_field = "idx_geo_location"
 
     settings = {
+        "attributesForFaceting": [
+            "filterOnly(idx_key)",
+        ],
         "indexLanguages": ["en"],
         "customRanking": [
             "asc(idx_created_at)",
