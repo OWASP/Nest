@@ -4,6 +4,9 @@ exec-backend-command:
 exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
+exec-db-command:
+	@docker exec -it nest-db $(CMD)
+
 clear-cache:
 	@CMD="poetry run python manage.py clear_cache" $(MAKE) exec-backend-command
 
@@ -41,7 +44,7 @@ load-data:
 	@echo "Loading Nest data"
 	@cp backend/data/nest.json.gz backend/data/copy.json.gz
 	@gunzip backend/data/nest.json.gz
-	@CMD="poetry run python manage.py load_data" && $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
 	@rm backend/data/nest.json
 	@mv backend/data/copy.json.gz backend/data/nest.json.gz
 
@@ -87,6 +90,12 @@ poetry-update:
 
 purge-data:
 	@CMD="poetry run python manage.py purge_data" $(MAKE) exec-backend-command
+
+recreate-schema:
+	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
+		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
+	  	$(MAKE) exec-db-command 2>/dev/null
+	$(MAKE) migrate
 
 setup:
 	@CMD="poetry run python manage.py createsuperuser" $(MAKE) exec-backend-command-it

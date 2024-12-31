@@ -3,40 +3,37 @@
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
-from apps.common.index import IndexSynonymsMixin
-from apps.github.models import User
+from apps.common.index import IndexBase
+from apps.github.models.user import User
 
 
 @register(User)
-class UserIndex(AlgoliaIndex, IndexSynonymsMixin):
+class UserIndex(AlgoliaIndex, IndexBase):
     """User index."""
 
     index_name = "users"
 
     fields = (
-        "idx_login",
-        "idx_name",
-        "idx_bio",
         "idx_avatar_url",
+        "idx_bio",
         "idx_company",
-        "idx_location",
+        "idx_created_at",
         "idx_email",
-        "idx_public_repositories_count",
         "idx_followers_count",
         "idx_following_count",
-        "idx_created_at",
-        "idx_updated_at",
-        "idx_type",
-        "idx_url",
+        "idx_location",
+        "idx_login",
+        "idx_name",
+        "idx_public_repositories_count",
         "idx_title",
+        "idx_updated_at",
+        "idx_url",
     )
 
     settings = {
         "attributeForDistinct": "idx_login",
         "minProximity": 4,
-        "indexLanguages": ["en"],
         "customRanking": [
-            "desc(idx_public_repositories_count)",
             "desc(idx_followers_count)",
             "desc(idx_created_at)",
         ],
@@ -50,10 +47,9 @@ class UserIndex(AlgoliaIndex, IndexSynonymsMixin):
             "custom",
         ],
         "searchableAttributes": [
-            "unordered(idx_login, idx_name)",
-            "unordered(idx_bio)",
+            "unordered(idx_email, idx_login, idx_name)",
             "unordered(idx_company, idx_location)",
-            "unordered(idx_email)",
+            "unordered(idx_bio)",
         ],
     }
 
@@ -61,7 +57,7 @@ class UserIndex(AlgoliaIndex, IndexSynonymsMixin):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return User.objects.filter(type="User").select_related()
+        return User.objects.all()
 
     @staticmethod
     def update_synonyms():

@@ -2,27 +2,7 @@
 
 
 class UserIndexMixin:
-    """User index mixin for Algolia search."""
-
-    @property
-    def is_indexable(self):
-        """Determine if the user should be indexed."""
-        return self.type == "User"
-
-    @property
-    def idx_login(self):
-        """Return login for indexing."""
-        return self.login
-
-    @property
-    def idx_name(self):
-        """Return name for indexing."""
-        return self.name or ""
-
-    @property
-    def idx_bio(self):
-        """Return bio for indexing."""
-        return self.bio or ""
+    """User index mixin."""
 
     @property
     def idx_avatar_url(self):
@@ -30,24 +10,24 @@ class UserIndexMixin:
         return self.avatar_url
 
     @property
-    def idx_company(self):
-        """Return company for indexing."""
-        return self.company or ""
+    def idx_bio(self):
+        """Return bio for indexing."""
+        return self.bio
 
     @property
-    def idx_location(self):
-        """Return location for indexing."""
-        return self.location or ""
+    def idx_company(self):
+        """Return company for indexing."""
+        return self.company
+
+    @property
+    def idx_created_at(self):
+        """Return created at timestamp for indexing."""
+        return self.created_at
 
     @property
     def idx_email(self):
         """Return email for indexing."""
-        return self.email or ""
-
-    @property
-    def idx_public_repositories_count(self):
-        """Return public repositories count for indexing."""
-        return self.public_repositories_count
+        return self.email
 
     @property
     def idx_followers_count(self):
@@ -60,9 +40,29 @@ class UserIndexMixin:
         return self.following_count
 
     @property
-    def idx_created_at(self):
-        """Return created at timestamp for indexing."""
-        return self.created_at
+    def idx_location(self):
+        """Return location for indexing."""
+        return self.location
+
+    @property
+    def idx_login(self):
+        """Return login for indexing."""
+        return self.login
+
+    @property
+    def idx_name(self):
+        """Return name for indexing."""
+        return self.name
+
+    @property
+    def idx_public_repositories_count(self):
+        """Return public repositories count for indexing."""
+        return self.public_repositories_count
+
+    @property
+    def idx_title(self):
+        """Return title for indexing."""
+        return self.title
 
     @property
     def idx_updated_at(self):
@@ -70,16 +70,6 @@ class UserIndexMixin:
         return self.updated_at
 
     @property
-    def idx_type(self):
-        """Return user type for indexing."""
-        return self.type
-
-    @property
     def idx_url(self):
         """Return GitHub profile URL for indexing."""
         return self.url
-
-    @property
-    def idx_title(self):
-        """Return title for indexing."""
-        return self.title
