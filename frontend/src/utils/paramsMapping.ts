@@ -22,6 +22,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
       return {
         attributesToRetrieve: [
           'idx_created_at',
+          'idx_key',
           'idx_leaders',
           'idx_name',
           'idx_related_urls',
@@ -29,11 +30,10 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_top_contributors',
           'idx_updated_at',
           'idx_url',
-          'idx_key',
         ],
         aroundLatLngViaIP: true,
-        typoTolerance: 'min',
         minProximity: 4,
+        typoTolerance: 'min',
       }
 
     case 'projects':
@@ -41,6 +41,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
         attributesToRetrieve: [
           'idx_contributors_count',
           'idx_forks_count',
+          'idx_key',
           'idx_leaders',
           'idx_level',
           'idx_name',
@@ -51,15 +52,15 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_type',
           'idx_updated_at',
           'idx_url',
-          'idx_key',
         ],
-        typoTolerance: 'min',
         minProximity: 4,
+        typoTolerance: 'min',
       }
     case 'committees':
       return {
         attributesToRetrieve: [
           'idx_created_at',
+          'idx_key',
           'idx_leaders',
           'idx_name',
           'idx_related_urls',
@@ -67,10 +68,9 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_top_contributors',
           'idx_updated_at',
           'idx_url',
-          'idx_key',
         ],
-        typoTolerance: 'min',
         minProximity: 4,
+        typoTolerance: 'min',
       }
     default:
       return {

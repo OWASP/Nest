@@ -38,7 +38,7 @@ const ChaptersPage = () => {
       <Card
         key={chapter.objectID || `chapter-${index}`}
         title={chapter.idx_name}
-        url={chapter.idx_url}
+        url={`chapters/${chapter.idx_key}`}
         summary={chapter.idx_summary}
         icons={filteredIcons}
         leaders={chapter.idx_leaders}

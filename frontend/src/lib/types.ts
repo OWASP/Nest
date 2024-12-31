@@ -49,6 +49,7 @@ export interface IssueType {
 
 export interface ChapterType {
   idx_created_at: number
+  idx_key: string
   idx_leaders: string[]
   idx_name: string
   idx_related_urls: string[]
@@ -61,7 +62,6 @@ export interface ChapterType {
   idx_summary: string
   idx_updated_at: number
   idx_url: string
-  idx_key: string
   objectID: string
 }
 
@@ -73,6 +73,7 @@ export interface ChapterDataType {
 
 export interface CommitteeType {
   idx_created_at: number
+  idx_key: string
   idx_leaders: string[]
   idx_name: string
   idx_related_urls: string[]
@@ -84,7 +85,6 @@ export interface CommitteeType {
   }[]
   idx_summary: string
   idx_updated_at: number
-  idx_key: string
   idx_url: string
   objectID: string
 }
@@ -101,16 +101,16 @@ export interface AlgoliaResponseType<T> {
 }
 
 export interface AgloliaRequestType {
+  aroundLatLngViaIP?: boolean
   attributesToHighlight: string[]
   attributesToRetrieve: string[]
+  distinct?: number
+  filters?: string
   hitsPerPage: number
   indexName: string
+  minProximity?: number
   page: number
   query: string
   removeWordsIfNoResults: 'none' | 'lastWords' | 'firstWords' | 'allOptional'
-  filters?: string
-  distinct?: number
-  aroundLatLngViaIP?: boolean
   typoTolerance?: string
-  minProximity?: number
 }

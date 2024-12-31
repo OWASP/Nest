@@ -61,7 +61,7 @@ const Card = ({
               <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
           )}
-          <a href={url} target="_blank" rel="noopener noreferrer">
+          <a href={url} rel="noopener noreferrer">
             <h1 className="text-wrap text-2xl font-semibold dark:text-sky-600">{title}</h1>
           </a>
         </div>

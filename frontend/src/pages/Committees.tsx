@@ -38,7 +38,7 @@ const CommitteesPage = () => {
       <Card
         key={committee.objectID || `committee-${index}`}
         title={committee.idx_name}
-        url={committee.idx_url}
+        url={`committees/${committee.idx_key}`}
         summary={committee.idx_summary}
         icons={filteredIcons}
         leaders={committee.idx_leaders}
