@@ -19,6 +19,7 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         "idx_custom_tags",
         "idx_description",
         "idx_forks_count",
+        "idx_key",
         "idx_languages",
         "idx_leaders",
         "idx_level_raw",

@@ -9,10 +9,10 @@ OWASP_PROJECT_NEST_CHANNEL_ID = "C07JLLG2GFQ"
 OWASP_PROJECT_NETTACKER_CHANNEL_ID = "CQZGG24FQ"
 OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID = "CURE8PQ68"
 
-FEEDBACK_CHANNEL_MESSAGE = (
-    f"💬 You can share feedback on your {NEST_BOT_NAME} experience "
-    f"in the <#{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel."
-)
-
 NL = "\n"
 NLNL = "\n\n"
+
+FEEDBACK_CHANNEL_MESSAGE = (
+    f"💬 You can share feedback on your {NEST_BOT_NAME} experience "
+    f"in the <#{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel.{NL}"
+)

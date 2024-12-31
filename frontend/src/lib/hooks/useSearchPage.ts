@@ -16,9 +16,9 @@ interface UseSearchPageReturn<T> {
   currentPage: number
   totalPages: number
   searchQuery: string
-  /* eslint-disable-next-line */
+
   handleSearch: (query: string) => void
-  /* eslint-disable-next-line */
+
   handlePageChange: (page: number) => void
   error: ErrorConfig | null
   retry: () => void
