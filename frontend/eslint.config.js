@@ -87,6 +87,7 @@ export default [
       ],
       'no-console': 'error',
       'no-unused-vars': 'off',
+      'import/no-relative-parent-imports': 'error',
     },
     ignores: ['src/utils/logger.ts'],
   },
