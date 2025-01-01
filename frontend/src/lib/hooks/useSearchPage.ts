@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
-
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchAlgoliaData } from 'lib/api'
-import { useErrorHandler } from 'lib/hooks/useErrorHandler'
-import { AlgoliaResponseType, ErrorConfig } from 'lib/types'
+import { handleError } from 'lib/ErrorHandler'
+import { AlgoliaResponseType } from 'lib/types'
 
 interface UseSearchPageOptions {
   indexName: string
@@ -20,39 +19,19 @@ interface UseSearchPageReturn<T> {
   handleSearch: (query: string) => void
 
   handlePageChange: (page: number) => void
-  error: ErrorConfig | null
-  retry: () => void
 }
 
 export function useSearchPage<T>({
   indexName,
   pageTitle,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState<T[]>([])
   const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1'))
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
-  const { error, handleError, clearError, retry } = useErrorHandler('search')
-  const [shouldFetch, setShouldFetch] = useState(false)
-
-  const fetchData = useCallback(async (): Promise<void> => {
-    try {
-      const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
-        indexName,
-        searchQuery,
-        currentPage
-      )
-      setItems(data.hits)
-      setTotalPages(data.totalPages)
-      clearError()
-    } catch (error) {
-      handleError(error)
-    }
-    setIsLoaded(true)
-    setShouldFetch(false)
-  }, [indexName, searchQuery, currentPage, clearError, handleError])
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -64,13 +43,24 @@ export function useSearchPage<T>({
   useEffect(() => {
     document.title = pageTitle
     setIsLoaded(false)
-    setShouldFetch(true)
-  }, [pageTitle])
 
-  useEffect(() => {
-    if (!shouldFetch) return
+    const fetchData = async () => {
+      try {
+        const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
+          indexName,
+          searchQuery,
+          currentPage
+        )
+        setItems(data.hits)
+        setTotalPages(data.totalPages)
+      } catch (error) {
+        return handleError(error, navigate)
+      }
+      setIsLoaded(true)
+    }
+
     fetchData()
-  }, [shouldFetch, fetchData])
+  }, [currentPage, searchQuery, indexName, pageTitle, navigate])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -85,11 +75,6 @@ export function useSearchPage<T>({
     })
   }
 
-  const retrySearch = useCallback(() => {
-    retry(fetchData)
-    setShouldFetch(true)
-  }, [retry, fetchData])
-
   return {
     items,
     isLoaded,
@@ -98,7 +83,5 @@ export function useSearchPage<T>({
     searchQuery,
     handleSearch,
     handlePageChange,
-    error,
-    retry: () => retrySearch,
   }
 }

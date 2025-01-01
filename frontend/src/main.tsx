@@ -4,7 +4,7 @@ import './index.css'
 import { BrowserRouter } from 'react-router-dom'
 
 import App from './App.tsx'
-import ErrorWrapper from './ErrorWrapper'
+import { ErrorWrapper } from './ErrorWrapper.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
