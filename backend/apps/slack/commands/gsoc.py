@@ -18,7 +18,7 @@ def get_gsoc_projects_by_year(year):
     query = f"gsoc{year}"
     return get_projects(
         query=query,
-        attributes=["idx_name", "idx_summary", "idx_url", "idx_type", "idx_level"],
+        attributes=["idx_name", "idx_url"],
         limit=100,
     )
 
@@ -45,16 +45,7 @@ def handler(ack, command, client):
                 if results["hits"]:
                     blocks = []
                     for hit in results["hits"]:
-                        blocks.extend(
-                            [
-                                markdown(
-                                    f"*{hit['idx_name']}*\n"
-                                    f"{hit['idx_summary']}\n"
-                                    f"Type: {hit['idx_type']} | Level: {hit['idx_level']}\n"
-                                    f"URL: {hit['idx_url']}"
-                                )
-                            ]
-                        )
+                        blocks.extend([markdown(f"<{hit['idx_url']}|{hit['idx_name']}>")])
                 else:
                     blocks = [markdown(f"No projects found for GSOC {year}")]
             else:

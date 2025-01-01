@@ -59,9 +59,6 @@ class TestGsocHandler:
             "hits": [
                 {
                     "idx_name": "Test Project",
-                    "idx_summary": "Project summary",
-                    "idx_type": "Documentation",
-                    "idx_level": "Beginner",
                     "idx_url": "https://owasp.org/www-project-bug-logging-tool/",
                 }
             ]
@@ -79,8 +76,5 @@ class TestGsocHandler:
             blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
             project_block = str(blocks[0])
 
-            assert "Test Project" in project_block
-            assert "Project summary" in project_block
-            assert "Type: Documentation" in project_block
-            assert "Level: Beginner" in project_block
-            assert "https://owasp.org/www-project-bug-logging-tool/" in project_block
+            expected_link = "<https://owasp.org/www-project-bug-logging-tool/|Test Project>"
+            assert expected_link in project_block
