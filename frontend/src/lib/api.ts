@@ -20,9 +20,7 @@ export const loadData = async <T>(
       }).toString()
   )
   if (!response.ok) {
-    const error = new Error('API request failed')
-    error.name = response.status === 429 ? 'RATE_LIMIT' : 'NETWORK_ERROR'
-    throw error
+    throw new Error('ServerError')
   }
   return await response.json()
 }
@@ -63,11 +61,6 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    if (error instanceof Error && error.message.includes('timeout')) {
-      const timeoutError = new Error('Search operation timed out')
-      timeoutError.name = 'SEARCH_TIMEOUT'
-      throw timeoutError
-    }
-    throw error
+    throw new error()
   }
 }

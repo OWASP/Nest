@@ -1,23 +1,14 @@
 import * as Sentry from '@sentry/react'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
+import { ErrorDisplay, ERROR_CONFIGS } from 'lib/ErrorHandler'
 
-import { errorService } from 'lib/ErrorServeice'
-import { ErrorDisplay } from 'components/ErrorDisplay'
-
-interface Props {
-  children: React.ReactNode
-}
-
-const ErrorWrapper: React.FC<Props> = ({ children }) => {
+export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
 
   return (
     <Sentry.ErrorBoundary
-      fallback={({ error }) => {
-        const errorConfig = errorService.handleError(error, 'boundary')
-        return <ErrorDisplay error={errorConfig} />
-      }}
+      fallback={() => <ErrorDisplay {...ERROR_CONFIGS['500']} />}
       beforeCapture={(scope) => {
         scope.setTag('location', location.pathname)
         scope.setTag('environment', process.env.NODE_ENV)
@@ -27,4 +18,3 @@ const ErrorWrapper: React.FC<Props> = ({ children }) => {
     </Sentry.ErrorBoundary>
   )
 }
-export default ErrorWrapper
