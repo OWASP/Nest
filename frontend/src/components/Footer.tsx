@@ -3,7 +3,7 @@ import { Section } from 'utils/constants'
 
 export default function Footer() {
   return (
-    <footer className="container mt-auto w-full border-t bg-slate-200 dark:bg-slate-800">
+    <footer className="mt-auto w-full border-t bg-slate-200 xl:max-w-full dark:bg-slate-800">
       <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
         <div className="grid w-full gap-20 sm:grid-cols-2 md:grid-cols-4">
           {footerSections.map((section: Section) => (
