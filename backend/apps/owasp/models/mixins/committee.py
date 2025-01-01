@@ -12,6 +12,11 @@ class CommitteeIndexMixin(GenericEntityMixin):
         return self.created_at
 
     @property
+    def idx_key(self):
+        """Return key for indexing."""
+        return self.key.replace("www-committee-", "")
+
+    @property
     def idx_related_urls(self):
         """Return related URLs for indexing."""
         return self.related_urls

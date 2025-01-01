@@ -13,7 +13,7 @@
     "lint": "eslint . --config eslint.config.js --fix --max-warnings=0",
     "lint:check": "eslint . --config eslint.config.js --max-warnings=0",
     "preview": "vite preview",
-    "test": "jest",
+    "test": "tsc --noEmit && jest",
     "test:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
     "watch": "jest --watch"
   },
@@ -46,6 +46,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@swc/core": "^1.10.4",
+    "@swc/jest": "^0.2.37",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/jest": "^29.5.14",
@@ -79,7 +81,7 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "~5.7.2",
-    "typescript-eslint": "^8.18.0",
+    "typescript-eslint": "^8.19.0",
     "util": "^0.12.5",
     "vite": "^6.0.6",
     "vite-plugin-environment": "^1.1.3"

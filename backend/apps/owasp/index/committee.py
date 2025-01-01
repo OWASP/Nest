@@ -14,6 +14,7 @@ class CommitteeIndex(AlgoliaIndex):
 
     fields = (
         "idx_created_at",
+        "idx_key",
         "idx_leaders",
         "idx_name",
         "idx_related_urls",
@@ -25,6 +26,9 @@ class CommitteeIndex(AlgoliaIndex):
     )
 
     settings = {
+        "attributesForFaceting": [
+            "filterOnly(idx_key)",
+        ],
         "indexLanguages": ["en"],
         "customRanking": [
             "asc(idx_name)",
