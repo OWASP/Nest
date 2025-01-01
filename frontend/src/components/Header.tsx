@@ -11,6 +11,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const icon = !dark ? <FontAwesomeIcon icon={faSun} /> : <FontAwesomeIcon icon={faMoon} />
 
+  // Effect to apply the dark class to the body when theme changes
   useEffect(() => {
     if (dark) {
       document.body.classList.add('dark')
@@ -19,13 +20,15 @@ export default function Header() {
     }
   }, [dark])
 
+  // Function to toggle the theme between light and dark
   function toggleTheme() {
     setDark(!dark)
     const newTheme = !dark ? 'dark' : 'light'
     document.body.classList.toggle('dark', !dark)
-    localStorage.setItem('theme', newTheme)
+    localStorage.setItem('theme', newTheme) // Store the theme in localStorage
   }
 
+  // Function to toggle the mobile menu open/close
   function toggleMenu() {
     setIsMenuOpen(!isMenuOpen)
   }
@@ -34,6 +37,7 @@ export default function Header() {
     <div>
       <div className="fixed inset-x-0 top-0 z-50 bg-owasp-blue shadow-md dark:bg-slate-800">
         <div className="flex h-16 items-center justify-between" id="navbar-sticky">
+          {/* Logo and Site Name */}
           <div>
             <NavLink to="/">
               <div className="flex h-full items-center">
@@ -48,6 +52,7 @@ export default function Header() {
               </div>
             </NavLink>
           </div>
+          {/* Desktop navigation links */}
           <div className="flex-1 justify-between rounded-lg pl-6 font-medium hidden md:flex">
             <div className="flex justify-start pl-6 text-slate-700 dark:text-slate-300">
               {headerLinks.map((link, i) => (
@@ -62,9 +67,11 @@ export default function Header() {
               ))}
             </div>
           </div>
+          {/* Theme toggle and mobile menu button */}
           <div>
             <div className="flex justify-between items-center w-full p-4">
               <div className="flex items-center">
+                {/* Theme toggle checkbox */}
                 <label className="inline-flex cursor-pointer content-center items-center">
                   <span className="ms-3 pr-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                     {icon}
@@ -75,12 +82,9 @@ export default function Header() {
                     className="peer sr-only"
                   />
                   <div className="peer relative h-5 w-9 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-500 peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full dark:border-gray-500 dark:bg-gray-700"></div>
-                  <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                    <i className="fa-regular fa-moon"></i>
-                  </span>
                 </label>
               </div>
-
+              {/* Mobile menu toggle button (bars or close icon) */}
               <button
                 onClick={toggleMenu}
                 className="ml-4 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200 md:hidden"
@@ -89,7 +93,6 @@ export default function Header() {
               </button>
             </div>
           </div>
-
         </div>
         {/* Mobile menu */}
         <div
@@ -113,5 +116,3 @@ export default function Header() {
     </div>
   )
 }
-
-

@@ -11,6 +11,8 @@ import DisplayIcon from 'components/DisplayIcon';
 import Markdown from 'components/MarkdownWrapper';
 import TopicBadge from 'components/TopicBadge';
 
+// Initial check for mobile screen size
+const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const Card = ({
   title,
@@ -28,12 +30,13 @@ const Card = ({
   social,
   tooltipLabel,
 }: CardProps) => {
-  const [visibleLanguages, setVisibleLanguages] = useState(18);
-  const [visibleTopics, setVisibleTopics] = useState(18);
+  const [visibleLanguages, setVisibleLanguages] = useState(isMobileInitial ? 4 : 18);
+  const [visibleTopics, setVisibleTopics] = useState(isMobileInitial ? 4 : 18);
   const [toggleLanguages, setToggleLanguages] = useState(false);
   const [toggleTopics, setToggleTopics] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(isMobileInitial);
 
+  // Resize listener to adjust display based on screen width
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
@@ -41,7 +44,6 @@ const Card = ({
       setVisibleLanguages(mobile ? 4 : 18);
       setVisibleTopics(mobile ? 4 : 18);
     };
-    checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -60,6 +62,7 @@ const Card = ({
     <div className="mt-4 w-full flex flex-col items-start rounded-md border border-border bg-white mb-2 pl-4 pb-4 transition-colors duration-300 ease-linear md:max-w-6xl dark:bg-[#212529]">
       <div className="flex flex-col sm:flex-row w-full items-start sm:items-center gap-4 sm:gap-6 pt-2 md:pt-0">
         <div className="flex gap-3 items-center">
+          {/* Display project level badge (if available) */}
           {level && (
             <span
               data-tooltip-id="level-tooltip"
@@ -72,6 +75,7 @@ const Card = ({
               <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
           )}
+          {/* Project title and link */}
           <a
             href={url}
             target="_blank"
@@ -83,6 +87,7 @@ const Card = ({
             </h1>
           </a>
         </div>
+        {/* Icons associated with the project */}
         <div className="flex flex-row items-center justify-end flex-grow overflow-auto min-w-[30%]">
           {icons &&
             Object.keys(Icons).map((key, index) =>
@@ -91,18 +96,21 @@ const Card = ({
                   key={`${key}-${index}`}
                   item={key}
                   icons={icons}
-                  idx={Object.keys(icons).findIndex((e) => e === key)}
+                  idx={Object.keys(icons).findIndex((e) => e === key) === Object.keys(icons).length - 1 ? -1 : Object.keys(icons).findIndex((e) => e === key)}
                 />
               ) : null
             )}
         </div>
       </div>
+      {/* Link to project name if provided */}
       {projectName && (
         <a href={projectLink} target="_blank" rel="noopener noreferrer" className="font-medium mt-2">
           {projectName}
         </a>
       )}
+      {/* Render project summary using Markdown */}
       <Markdown content={summary} className="py-2 text-gray-600 dark:text-gray-300 pr-4" />
+      {/* Display leaders of the project */}
       {leaders && (
         <h2 className="py-1">
           <span className="font-semibold text-gray-600 dark:text-gray-300">
@@ -116,6 +124,7 @@ const Card = ({
         </h2>
       )}
       <div className="flex flex-col gap-4 w-full pr-4">
+        {/* Render top contributors as avatars */}
         <div className="w-full flex flex-wrap items-center gap-2">
           {topContributors?.map((contributor, index) => (
             <ContributorAvatar
@@ -130,6 +139,7 @@ const Card = ({
             isMobile && (toggleLanguages || toggleTopics) && 'flex-col items-start'
           )}
         >
+          {/* Render languages and topics with load more functionality */}
           <div className={cn(
             'flex flex-wrap items-center gap-4',
             isMobile && (toggleLanguages || toggleTopics) && 'w-full'
@@ -174,6 +184,7 @@ const Card = ({
                 )}
               </div>
             )}
+            {/* Render social links if available */}
             {social && social.length > 0 && (
               <div id="social" className="flex items-center gap-3 mt-2">
                 {social.map((item) => (
@@ -190,6 +201,7 @@ const Card = ({
               </div>
             )}
           </div>
+          {/* Action button */}
           <div className={cn(
             'flex items-center',
             isMobile && (toggleLanguages || toggleTopics) && 'w-full justify-end mt-4'
