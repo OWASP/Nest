@@ -1,8 +1,8 @@
+import { useNavigate } from 'react-router-dom'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import { useSearchPage } from 'lib/hooks/useSearchPage'
 import { project } from 'lib/types'
 import { getFilteredIcons } from 'lib/utils'
-
 import Card from 'components/Card'
 import { level } from 'components/data'
 import SearchPageLayout from 'components/SearchPageLayout'
@@ -20,7 +20,7 @@ const ProjectsPage = () => {
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
   })
-
+  const navigate = useNavigate()
   const renderProjectCard = (project: project, index: number) => {
     const params: string[] = [
       'idx_updated_at',
@@ -31,12 +31,12 @@ const ProjectsPage = () => {
     const filteredIcons = getFilteredIcons(project, params)
 
     const handleButtonClick = () => {
-      window.open(`/projects/contribute?q=${project.idx_name}`, '_blank')
+      navigate(`/projects/${project.idx_key}`)
     }
 
     const SubmitButton = {
-      label: 'Contribute',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
+      label: 'View Details',
+      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
     }
 
@@ -44,7 +44,7 @@ const ProjectsPage = () => {
       <Card
         key={project.objectID || `project-${index}`}
         title={project.idx_name}
-        url={project.idx_url}
+        url={`projects/${project.idx_key}`}
         summary={project.idx_summary}
         level={level[`${project.idx_level as keyof typeof level}`]}
         icons={filteredIcons}

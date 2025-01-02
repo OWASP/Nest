@@ -15,8 +15,6 @@ class LabelSerializer(serializers.HyperlinkedModelSerializer):
             "name",
             "description",
             "color",
-            "created_at",
-            "updated_at",
         )
 
 

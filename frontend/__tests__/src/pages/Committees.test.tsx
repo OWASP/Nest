@@ -1,16 +1,19 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
+import { useNavigate } from 'react-router-dom'
 import { fetchAlgoliaData } from 'lib/api'
 import { render } from 'lib/test-util'
 
 import CommitteesPage from 'pages/Committees'
-
 import { mockCommitteeData } from '@tests/data/mockCommitteeData'
 
 jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
-
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}))
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (
@@ -75,7 +78,7 @@ describe('Committees Component', () => {
     expect(screen.getByText('Edmond Momartin,')).toBeInTheDocument()
     expect(screen.getByText('Garth Boyd,')).toBeInTheDocument()
     expect(screen.getByText('Kyle Smith')).toBeInTheDocument()
-    const viewButton = screen.getByText('Learn More')
+    const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
   })
 
@@ -116,5 +119,23 @@ describe('Committees Component', () => {
     await waitFor(() => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
+  })
+
+  test('opens  window on View Details button click', async () => {
+    const navigateMock = jest.fn()
+    ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
+
+    render(<CommitteesPage />)
+
+    await waitFor(() => {
+      const contributeButton = screen.getByText('View Details')
+      expect(contributeButton).toBeInTheDocument()
+      fireEvent.click(contributeButton)
+    })
+    //suppose index_key is committee_1
+    expect(navigateMock).toHaveBeenCalledWith('/committees/committee_1')
+
+    // Clean up the mock
+    jest.restoreAllMocks()
   })
 })

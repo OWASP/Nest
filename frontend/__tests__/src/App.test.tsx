@@ -8,7 +8,10 @@ jest.mock('pages', () => ({
   ProjectsPage: () => <div data-testid="projects-page">Projects Page</div>,
   CommitteesPage: () => <div data-testid="committees-page">Committees Page</div>,
   ChaptersPage: () => <div data-testid="chapters-page">Chapters Page</div>,
-  ContributePage: () => <div data-testid="contribute-page">Contribute Page</div>, // Mock ContributePage
+  ContributePage: () => <div data-testid="contribute-page">Contribute Page</div>,
+  ChapterDetailsPage: () => <div data-testid="contribute-page">ChapterDetailsPage Page</div>,
+  CommitteeDetailsPage: () => <div data-testid="contribute-page">CommitteeDetails Page</div>,
+  ProjectDetailsPage: () => <div data-testid="contribute-page">ProjectDetails Page</div>,
 }))
 
 jest.mock('components/Header', () => {
