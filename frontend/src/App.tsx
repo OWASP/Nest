@@ -1,4 +1,13 @@
-import { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage } from 'pages'
+import {
+  Home,
+  ProjectsPage,
+  CommitteesPage,
+  ChaptersPage,
+  ContributePage,
+  ProjectDetailsPage,
+  CommitteeDetailsPage,
+  ChapterDetailsPage,
+} from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 
@@ -21,9 +30,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />}></Route>
         <Route path="/projects" element={<ProjectsPage />}></Route>
+        <Route path="/projects/:projectKey" element={<ProjectDetailsPage />}></Route>
         <Route path="/projects/contribute" element={<ContributePage />}></Route>
         <Route path="/committees" element={<CommitteesPage />}></Route>
+        <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
+        <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />
