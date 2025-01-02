@@ -3,7 +3,8 @@ import { ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY } from 'utils/credentials'
 
 export const createAlgoliaClient = () => {
   if (!ALGOLIA_APP_ID || !ALGOLIA_SEARCH_KEY) {
-    throw new Error('Algolia keys not found.')
+    const error = new Error('something went wrong ')
+    throw error
   }
 
   return algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)

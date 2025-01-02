@@ -35,7 +35,7 @@ const ProjectDetailsPage = () => {
   if (!project)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-muted-foreground text-lg font-medium">No project details found.</p>
+        <p className="text-lg font-medium text-muted-foreground">No project details found.</p>
       </div>
     )
   const params = ['idx_updated_at', 'idx_forks_count', 'idx_stars_count', 'idx_contributors_count']

@@ -1,7 +1,7 @@
 import { SearchResponse } from 'algoliasearch'
 import { API_URL } from 'utils/credentials'
 import { NEST_ENV } from 'utils/credentials'
-import logger from 'utils/logger'
+
 import { getParamsForIndexName } from 'utils/paramsMapping'
 
 import { client } from 'lib/algoliaClient'
@@ -20,7 +20,7 @@ export const loadData = async <T>(
       }).toString()
   )
   if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${response.statusText}`)
+    throw new Error('ServerError')
   }
   return await response.json()
 }
@@ -61,7 +61,6 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    logger.error('Error fetching data from Algolia', error)
-    return { hits: [], totalPages: 0 }
+    throw new error()
   }
 }

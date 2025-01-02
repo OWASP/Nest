@@ -34,6 +34,7 @@ const ChaptersPage = () => {
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket " />,
       onclick: handleButtonClick,
     }
+
     return (
       <Card
         key={chapter.objectID || `chapter-${index}`}

@@ -33,7 +33,7 @@ const CommitteeDetailsPage = () => {
   if (!committee)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-muted-foreground text-lg font-medium">No committee details found.</p>
+        <p className="text-lg font-medium text-muted-foreground">No committee details found.</p>
       </div>
     )
 
