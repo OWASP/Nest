@@ -1,16 +1,16 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useState, useCallback } from 'react';
-import { footerSections, Section } from '../utils/constants';
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { footerSections, Section } from '../utils/constants'
 
 export default function Footer() {
   // State to keep track of the open section in the footer
-  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [openSection, setOpenSection] = useState<string | null>(null)
 
   // Function to toggle the section open/closed
   const toggleSection = useCallback((title: string) => {
     // If the section is already open, close it, otherwise open it
-    setOpenSection((prev) => (prev === title ? null : title));
-  }, []);
+    setOpenSection((prev) => (prev === title ? null : title))
+  }, [])
 
   return (
     <footer className="w-full border-t bg-slate-200 dark:bg-slate-800">
@@ -37,8 +37,9 @@ export default function Footer() {
               </button>
               <ul
                 id={`footer-section-${section.title}`}
-                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
-                  }`}
+                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
+                  openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
+                }`}
               >
                 {/* Iterate through section links */}
                 {section.links.map((link, index) => (
@@ -85,5 +86,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

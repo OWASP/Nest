@@ -53,7 +53,7 @@ export default function Header() {
             </NavLink>
           </div>
           {/* Desktop navigation links */}
-          <div className="flex-1 justify-between rounded-lg pl-6 font-medium hidden md:flex">
+          <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:flex">
             <div className="flex justify-start pl-6 text-slate-700 dark:text-slate-300">
               {headerLinks.map((link, i) => (
                 <NavLink
@@ -69,25 +69,21 @@ export default function Header() {
           </div>
           {/* Theme toggle and mobile menu button */}
           <div>
-            <div className="flex justify-between items-center w-full p-4">
+            <div className="flex w-full items-center justify-between p-4">
               <div className="flex items-center">
                 {/* Theme toggle checkbox */}
                 <label className="inline-flex cursor-pointer content-center items-center">
                   <span className="ms-3 pr-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                     {icon}
                   </span>
-                  <input
-                    onChange={toggleTheme}
-                    type="checkbox"
-                    className="peer sr-only"
-                  />
+                  <input onChange={toggleTheme} type="checkbox" className="peer sr-only" />
                   <div className="peer relative h-5 w-9 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-500 peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full dark:border-gray-500 dark:bg-gray-700"></div>
                 </label>
               </div>
               {/* Mobile menu toggle button (bars or close icon) */}
               <button
                 onClick={toggleMenu}
-                className="ml-4 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200 md:hidden"
+                className="ml-4 text-slate-700 hover:text-slate-800 md:hidden dark:text-slate-300 dark:hover:text-slate-200"
               >
                 <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="h-6 w-6" />
               </button>
@@ -96,8 +92,9 @@ export default function Header() {
         </div>
         {/* Mobile menu */}
         <div
-          className={`${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-            } overflow-hidden transition-all duration-300 ease-in-out md:hidden`}
+          className={`${
+            isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+          } overflow-hidden transition-all duration-300 ease-in-out md:hidden`}
         >
           <div className="space-y-1 px-4 pb-3 pt-2">
             {headerLinks.map((link, i) => (
