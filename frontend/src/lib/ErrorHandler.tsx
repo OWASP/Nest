@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react'
 import React from 'react'
-import { toast } from 'react-hot-toast'
 import { NavigateFunction, useNavigate } from 'react-router-dom'
+import { toast } from 'lib/hooks/use-toast'
 
 interface ErrorDisplayConfig {
   statusCode: number
@@ -20,16 +20,10 @@ export const ERROR_CONFIGS: Record<string, ErrorDisplayConfig> = {
     title: 'Server Error',
     message: 'An unexpected server error occurred.',
   },
-  default: {
-    statusCode: 400,
-    title: 'Error',
-    message: 'Something went wrong',
-  },
 }
 
 export const ErrorDisplay: React.FC<ErrorDisplayConfig> = ({ statusCode, title, message }) => {
   const navigate = useNavigate()
-
   return (
     <main className="flex min-h-screen flex-col items-center bg-white pt-8 dark:bg-slate-900">
       <div className="flex flex-1 flex-col items-center justify-center px-4">
@@ -69,12 +63,20 @@ export const handleError = (
         return <ErrorDisplay {...ERROR_CONFIGS['500']} />
 
       default:
-        toast.error(ERROR_CONFIGS['default'].message)
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Something went wrong',
+        })
         navigate?.('/')
         return
     }
   }
 
-  toast.error(ERROR_CONFIGS['default'].message)
+  toast({
+    variant: 'destructive',
+    title: 'Error',
+    description: 'Something went wrong',
+  })
   navigate?.('/')
 }

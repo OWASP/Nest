@@ -1,17 +1,15 @@
 import * as Sentry from '@sentry/react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { toast } from 'react-hot-toast'
 import { MemoryRouter } from 'react-router-dom'
 import { ErrorDisplay, handleError, ERROR_CONFIGS } from 'lib/ErrorHandler' // Adjust the path as necessary
+import { toast } from 'lib/hooks/use-toast'
 
 jest.mock('@sentry/react', () => ({
   captureException: jest.fn(),
 }))
 
-jest.mock('react-hot-toast', () => ({
-  toast: {
-    error: jest.fn(),
-  },
+jest.mock('lib/hooks/use-toast', () => ({
+  toast: jest.fn(),
 }))
 
 const mockNavigate = jest.fn()
@@ -84,7 +82,7 @@ describe('ErrorHandler Tests', () => {
       expect(screen.getByText(ERROR_CONFIGS['404'].message)).toBeInTheDocument()
 
       expect(Sentry.captureException).toHaveBeenCalledWith(error)
-      expect(toast.error).not.toHaveBeenCalled()
+      expect(toast).not.toHaveBeenCalled()
     })
 
     it('logs ServerError and returns the 500 ErrorDisplay component', () => {
@@ -105,7 +103,7 @@ describe('ErrorHandler Tests', () => {
       expect(screen.getByText(ERROR_CONFIGS['500'].message)).toBeInTheDocument()
 
       expect(Sentry.captureException).toHaveBeenCalledWith(error)
-      expect(toast.error).not.toHaveBeenCalled()
+      expect(toast).not.toHaveBeenCalled()
     })
 
     it('shows toast error for other error types and navigates to home', () => {
@@ -114,7 +112,11 @@ describe('ErrorHandler Tests', () => {
       const result = handleError(error, mockNavigate)
 
       expect(result).toBeUndefined()
-      expect(toast.error).toHaveBeenCalledWith('Something went wrong')
+      expect(toast).toHaveBeenCalledWith({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Something went wrong',
+      })
       expect(mockNavigate).toHaveBeenCalledWith('/')
       expect(Sentry.captureException).toHaveBeenCalledWith(error)
     })
@@ -125,7 +127,11 @@ describe('ErrorHandler Tests', () => {
       const result = handleError(error, mockNavigate)
 
       expect(result).toBeUndefined()
-      expect(toast.error).toHaveBeenCalledWith('Something went wrong')
+      expect(toast).toHaveBeenCalledWith({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Something went wrong',
+      })
       expect(mockNavigate).toHaveBeenCalledWith('/')
       expect(Sentry.captureException).toHaveBeenCalledWith(error)
     })
