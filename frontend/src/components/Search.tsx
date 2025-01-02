@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
-import Autocomplete from 'components/AutoSuggestion'
 import TagManager from 'react-gtm-module'
+import Autocomplete from 'components/AutoSuggestion'
 
 interface SearchProps {
   onSearch: (query: string) => void
@@ -20,16 +20,17 @@ const SearchComponent: React.FC<SearchProps> = ({
   const handleSearchChange = useCallback(
     (query: string) => {
       onSearch(query)
+      TagManager.dataLayer({
+        dataLayer: {
+          event: 'search',
+          search_term: query,
+          page_path: window.location.pathname,
+        },
+      })
     },
     [onSearch]
   )
-  TagManager.dataLayer({
-    dataLayer: {
-      event: 'search',
-      search_term: searchQuery,
-      page_path: window.location.pathname,
-    },
-  })
+
   return (
     <div className="w-full max-w-md p-4">
       <div className="relative">
