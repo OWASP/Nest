@@ -88,7 +88,7 @@ const Card = ({
                 <DisplayIcon
                   key={`${key}-${index}`}
                   item={key}
-                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))} // only pass in truthy meta data 
+                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))} // only pass in truthy meta data
                   idx={
                     Object.keys(icons).findIndex((e) => e === key) ===
                     Object.keys(icons).filter((key) => icons[key]).length - 1
