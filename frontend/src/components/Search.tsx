@@ -1,6 +1,7 @@
 import { debounce } from 'lodash'
 import { Search, X } from 'lucide-react'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
+import TagManager from 'react-gtm-module'
 
 interface SearchProps {
   onSearch: (query: string) => void
@@ -36,6 +37,14 @@ const SearchComponent: React.FC<SearchProps> = ({ onSearch, placeholder, initial
     setSearchQuery(newQuery)
     debouncedSearch(newQuery)
   }
+
+  TagManager.dataLayer({
+    dataLayer: {
+      event: 'search',
+      search_term: searchQuery,
+      page_path: window.location.pathname,
+    },
+  })
 
   const handleClearSearch = () => {
     setSearchQuery('')
