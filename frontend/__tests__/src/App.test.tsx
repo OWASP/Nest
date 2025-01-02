@@ -2,6 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import App from 'App'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
+import { useToast } from 'lib/hooks/use-toast'
+import { Toaster } from 'components/ui/toaster'
 
 jest.mock('pages', () => ({
   Home: () => <div data-testid="home-page">Home Page</div>,
@@ -12,6 +14,13 @@ jest.mock('pages', () => ({
   ChapterDetailsPage: () => <div data-testid="contribute-page">ChapterDetailsPage Page</div>,
   CommitteeDetailsPage: () => <div data-testid="contribute-page">CommitteeDetails Page</div>,
   ProjectDetailsPage: () => <div data-testid="contribute-page">ProjectDetails Page</div>,
+}))
+jest.mock('@/lib/hooks/use-toast', () => ({
+  useToast: jest.fn(() => ({
+    toasts: [],
+    toast: jest.fn(),
+    dismiss: jest.fn(),
+  })),
 }))
 
 jest.mock('components/Header', () => {
@@ -44,6 +53,11 @@ jest.mock('components/Footer', () => {
 describe('App Component', () => {
   beforeEach(() => {
     window.scrollTo = jest.fn()
+    ;(useToast as jest.Mock).mockImplementation(() => ({
+      toasts: [],
+      toast: jest.fn(),
+      dismiss: jest.fn(),
+    }))
   })
 
   afterEach(() => {
@@ -140,5 +154,28 @@ describe('App Component', () => {
 
       expect(window.scrollTo).toHaveBeenLastCalledWith(0, 0)
     })
+  })
+})
+describe('Toaster Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('renders toast with title and description', () => {
+    const mockToast = {
+      id: '1',
+      title: 'Test Title',
+      description: 'Test Description',
+      open: true,
+    }
+
+    ;(useToast as jest.Mock).mockReturnValue({
+      toasts: [mockToast],
+    })
+
+    render(<Toaster />)
+
+    expect(screen.getByText('Test Title')).toBeInTheDocument()
+    expect(screen.getByText('Test Description')).toBeInTheDocument()
   })
 })
