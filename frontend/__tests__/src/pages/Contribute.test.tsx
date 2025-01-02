@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
-import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 
 import { fetchAlgoliaData } from 'lib/api'
@@ -11,14 +10,6 @@ import { mockContributeData } from '@tests/data/mockContributeData'
 
 jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
-}))
-
-jest.mock('lib/utils', () => ({
-  getFilteredIcons: jest.fn(),
-}))
-
-jest.mock('utils/credentials', () => ({
-  API_URL: 'https://mock-api.com',
 }))
 
 jest.mock('components/Pagination', () =>

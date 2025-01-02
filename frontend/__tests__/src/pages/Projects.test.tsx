@@ -1,16 +1,18 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
-import React from 'react'
-
+import { useNavigate } from 'react-router-dom'
 import { fetchAlgoliaData } from 'lib/api'
 import { render } from 'lib/test-util'
 
 import ProjectsPage from 'pages/Projects'
-
 import { mockProjectData } from '@tests/data/mockProjectData'
 
 jest.mock('lib/api', () => ({
   fetchAlgoliaData: jest.fn(),
+}))
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
 }))
 
 jest.mock('components/Pagination', () =>
@@ -76,7 +78,7 @@ describe('ProjectPage Component', () => {
 
     expect(screen.getByText('Leader 1')).toBeInTheDocument()
 
-    const viewButton = screen.getByText('Contribute')
+    const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
   })
 
@@ -108,22 +110,21 @@ describe('ProjectPage Component', () => {
     })
   })
 
-  // Test window.open functionality on Contribute button click
-  test('opens new window on Contribute button click', async () => {
-    // Mock window.open to track if it's called correctly
-    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
+  test('opens  window on View Details button click', async () => {
+    const navigateMock = jest.fn()
+    ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
 
     render(<ProjectsPage />)
 
     await waitFor(() => {
-      const contributeButton = screen.getByText('Contribute')
+      const contributeButton = screen.getByText('View Details')
+      expect(contributeButton).toBeInTheDocument()
       fireEvent.click(contributeButton)
     })
-
-    // Assuming 'Project 1' is the project in the mock data
-    expect(openSpy).toHaveBeenCalledWith('/projects/contribute?q=Project 1', '_blank')
+    //suppose index_key is project_1
+    expect(navigateMock).toHaveBeenCalledWith('/projects/project_1')
 
     // Clean up the mock
-    openSpy.mockRestore()
+    jest.restoreAllMocks()
   })
 })

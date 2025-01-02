@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState, useMemo } from 'react'
 import TagManager from 'react-gtm-module'
 
 interface SearchProps {
-  /* eslint-disable-next-line */
   onSearch: (query: string) => void
   placeholder: string
   initialValue?: string

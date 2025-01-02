@@ -5,7 +5,7 @@ import logger from 'utils/logger'
 import { getParamsForIndexName } from 'utils/paramsMapping'
 
 import { client } from 'lib/algoliaClient'
-import { AlgoliaResponseType } from 'lib/types'
+import { AgloliaRequestType, AlgoliaResponseType } from 'lib/types'
 
 export const loadData = async <T>(
   endpoint: string,
@@ -28,22 +28,29 @@ export const loadData = async <T>(
 export const fetchAlgoliaData = async <T>(
   indexName: string,
   query = '',
-  currentPage = 0
+  currentPage = 0,
+  filterKey?: string
 ): Promise<AlgoliaResponseType<T>> => {
   try {
     const params = getParamsForIndexName(indexName)
+
+    const request: AgloliaRequestType = {
+      attributesToHighlight: [],
+      hitsPerPage: 25,
+      indexName: `${NEST_ENV}_${indexName}`,
+      page: currentPage - 1,
+      query: query,
+      removeWordsIfNoResults: 'allOptional',
+      ...params,
+    }
+    if (filterKey) {
+      request.filters = `idx_key: ${filterKey}`
+    }
+
     const { results } = await client.search({
-      requests: [
-        {
-          indexName: `${NEST_ENV}_${indexName}`,
-          query,
-          hitsPerPage: 25,
-          page: currentPage - 1,
-          attributesToHighlight: [],
-          ...params,
-        },
-      ],
+      requests: [request],
     })
+
     if (results && results.length > 0) {
       const { hits, nbPages } = results[0] as SearchResponse<T>
       return {
