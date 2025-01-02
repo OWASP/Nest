@@ -1,11 +1,11 @@
 import { Home, ProjectsPage, CommitteesPage, ChaptersPage, ContributePage } from 'pages'
 import { useEffect } from 'react'
-import { Toaster } from 'react-hot-toast'
 import { Routes, Route, useLocation } from 'react-router-dom'
 
 import { ErrorDisplay, ERROR_CONFIGS } from 'lib/ErrorHandler'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
+import { Toaster } from 'components/ui/toaster'
 
 function App() {
   const location = useLocation()
@@ -16,7 +16,7 @@ function App() {
 
   return (
     <main className="flex min-h-screen w-full flex-col">
-      <Toaster position="top-center" />
+      <Toaster />
       <Header />
       <Routes>
         <Route path="/" element={<Home />}></Route>
