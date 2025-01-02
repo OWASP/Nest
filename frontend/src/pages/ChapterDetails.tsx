@@ -49,7 +49,7 @@ const ChapterDetailsPage = () => {
   }
 
   return (
-    <div className="container mx-auto pb-16 pt-24">
+    <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
       <div className="flex justify-center">
         <Card
           key={chapter.objectID}
