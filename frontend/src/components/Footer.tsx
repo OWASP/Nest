@@ -13,9 +13,9 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="w-full border-t bg-slate-200 dark:bg-slate-800">
-      <div className="container px-4 py-8 text-slate-800 dark:text-slate-200">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="mt-auto w-full border-t bg-slate-200 xl:max-w-full dark:bg-slate-800">
+      <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
+        <div className="grid w-full gap-20 sm:grid-cols-2 md:grid-cols-4">
           {/* Iterate over footerSections to render each section */}
           {footerSections.map((section: Section) => (
             <div key={section.title} className="space-y-4">
@@ -62,8 +62,9 @@ export default function Footer() {
           ))}
         </div>
         {/* Footer bottom section with copyright and links */}
-        <div className="mt-8 border-t border-slate-300 pt-8 dark:border-slate-700">
-          <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+        <div className="grid w-full place-content-center">
+          <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:text-left">
+
             <p className="text-sm text-slate-600 dark:text-slate-400">
               © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
             </p>
