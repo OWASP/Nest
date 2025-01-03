@@ -25,7 +25,7 @@ def gsoc_handler(event, client, ack):
     try:
         conversation = client.conversations_open(users=user_id)
     except SlackApiError as e:
-        if e.error == "cannot_dm_bot":
+        if e.response["error"] == "cannot_dm_bot":
             logger.warning("Error opening conversation with bot user %s", user_id)
             return
         raise
