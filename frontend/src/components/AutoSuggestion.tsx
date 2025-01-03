@@ -4,7 +4,7 @@ import '@algolia/autocomplete-theme-classic'
 import { debounce } from 'lodash'
 import React from 'react'
 import { useEffect, useRef } from 'react'
-import { NEST_ENV } from 'utils/credentials'
+import { ENVIRONMENT } from 'utils/credentials'
 import { client } from 'lib/algoliaClient'
 import 'components/Autosuggestion.css'
 
@@ -35,7 +35,7 @@ const Autocomplete = React.memo(
       if (containerRef.current) {
         const querySuggestionsPlugin = createQuerySuggestionsPlugin({
           searchClient: client,
-          indexName: `${NEST_ENV}_${indexName}_suggestions`,
+          indexName: `${ENVIRONMENT}_${indexName}_suggestions`,
           getSearchParams: () => ({
             hitsPerPage: 7,
           }),
