@@ -1,20 +1,18 @@
 """Slack bot gsoc command."""
-
 from django.conf import settings
-
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.commands.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
 
 COMMAND = "/gsoc"
-VALID_YEARS = range(2020, 2025)
+SUPPORTED_YEARS = {2020, 2021, 2022, 2023, 2024}
 
 
 def get_gsoc_projects_by_year(year):
     """Get GSOC projects for a specific year using search."""
     from apps.owasp.api.search.project import get_projects
-
+    
     query = f"gsoc{year}"
     return get_projects(
         query=query,
@@ -26,12 +24,13 @@ def get_gsoc_projects_by_year(year):
 def handler(ack, command, client):
     """Slack /gsoc command handler."""
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
-
+    
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
     command_text = command["text"].strip()
+    
     if not command_text or command_text in COMMAND_START:
         blocks = [
             *GSOC_GENERAL_INFORMATION_BLOCKS,
@@ -40,18 +39,23 @@ def handler(ack, command, client):
     else:
         try:
             year = int(command_text)
-            if year in VALID_YEARS:
+            if year in SUPPORTED_YEARS:
                 results = get_gsoc_projects_by_year(year)
-                if results["hits"]:
-                    blocks = []
-                    for hit in results["hits"]:
-                        blocks.extend([markdown(f"<{hit['idx_url']}|{hit['idx_name']}>")])
-                else:
-                    blocks = [markdown(f"No projects found for GSOC {year}")]
+                projects_list = "\n".join(
+                    f"• <{hit['idx_url']}|{hit['idx_name']}>"
+                    for hit in results["hits"]
+                )
+                blocks = [markdown(f"GSoC {year} Projects:\n\n{projects_list}")]
             else:
                 blocks = [markdown("Usage: `/gsoc [year]`\nValid years: 2020-2024")]
         except ValueError:
-            blocks = [markdown("Usage: `/gsoc [year]`\nValid years: 2020-2024")]
+            blocks = [
+                markdown(
+                    f"*`{COMMAND} {command_text}` is not supported*{NL}"
+                    if command_text
+                    else f"*`{COMMAND}` is not supported*{NL}"
+                ),
+            ]
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
