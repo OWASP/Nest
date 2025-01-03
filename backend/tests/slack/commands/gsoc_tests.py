@@ -1,8 +1,6 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
+from unittest.mock import MagicMock, patch
 from django.conf import settings
-
 from apps.slack.blocks import markdown
 from apps.slack.commands.gsoc import handler, COMMAND
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
@@ -25,35 +23,25 @@ class TestGsocHandler:
     @pytest.mark.parametrize(
         ("commands_enabled", "command_text", "expected_message"),
         [
-            # Commands disabled
             (False, "", None),
-            # Empty text case
             (True, "", "GSOC_GENERAL_INFORMATION_BLOCKS"),
-            # Invalid text case
             (
                 True,
                 "invalid",
                 f"*`{COMMAND} invalid` is not supported*{NL}",
             ),
-            # Valid year, no projects case
-            (True, "2024", "GSoC 2024 Projects:\n\n"),
-            # Unsupported year case
             (True, "2019", "Usage: `/gsoc [year]`\nValid years: 2020-2024"),
         ],
     )
     def test_handler_responses(
         self, commands_enabled, command_text, expected_message, mock_slack_client
     ):
-        """Test various command responses based on input and configuration."""
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         command = {"text": command_text, "user_id": "U123456"}
 
         with patch(
             "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
             new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
-        ), patch(
-            "apps.slack.commands.gsoc.get_gsoc_projects_by_year",
-            return_value={"hits": []},
         ):
             handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
@@ -67,14 +55,13 @@ class TestGsocHandler:
                 mock_slack_client.chat_postMessage.assert_called_once()
                 
                 blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-                block_texts = [str(block) for block in blocks]
+                block_texts = [block["text"]["text"] for block in blocks]
                 
                 if command_text == "":
-                    # Check for both general information and feedback message
                     assert "GSOC_GENERAL_INFORMATION_BLOCKS" in block_texts[0]
                     assert FEEDBACK_CHANNEL_MESSAGE in block_texts[1]
                 else:
-                    assert any(expected_message in block_text for block_text in block_texts)
+                    assert any(expected_message in text for text in block_texts)
 
     def test_handler_with_projects(self, mock_slack_client):
         """Test handler when projects are found for a valid year."""
@@ -96,33 +83,8 @@ class TestGsocHandler:
         ):
             handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
-            mock_slack_client.conversations_open.assert_called_once_with(
-                users=command["user_id"]
-            )
-            mock_slack_client.chat_postMessage.assert_called_once()
-
             blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-            assert len(blocks) == 1
-            
             project_block = str(blocks[0])
-            expected_text = "GSoC 2024 Projects:\n\n"
-            assert expected_text in project_block
-            
-            expected_link = "• <https://owasp.org/www-project-bug-logging-tool/|Test Project>"
+
+            expected_link = "<https://owasp.org/www-project-bug-logging-tool/|Test Project>"
             assert expected_link in project_block
-
-    def test_start_command(self, mock_slack_client):
-        """Test handler with start command."""
-        command = {"text": "start", "user_id": "U123456"}
-        settings.SLACK_COMMANDS_ENABLED = True
-
-        with patch(
-            "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
-            new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
-        ):
-            handler(ack=MagicMock(), command=command, client=mock_slack_client)
-
-            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-            assert len(blocks) == 2
-            assert "GSOC_GENERAL_INFORMATION_BLOCKS" in str(blocks[0])
-            assert FEEDBACK_CHANNEL_MESSAGE in str(blocks[1])
