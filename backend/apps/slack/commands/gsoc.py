@@ -39,9 +39,7 @@ def handler(ack, command, client):
         ]
     else:
         try:
-            print("entered in these")
             year = int(command_text)
-            print(f"year ",year)
             if year in SUPPORTED_YEARS:
                 results = get_gsoc_projects_by_year(year)
                 projects_list = "\n".join(
