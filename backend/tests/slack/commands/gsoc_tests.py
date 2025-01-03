@@ -1,20 +1,22 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from django.conf import settings
+
 from apps.slack.blocks import markdown
-from apps.slack.commands.gsoc import handler, COMMAND
+from apps.slack.commands.gsoc import COMMAND, handler
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
 
 
 class TestGsocHandler:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_slack_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -53,10 +55,10 @@ class TestGsocHandler:
                     users=command["user_id"]
                 )
                 mock_slack_client.chat_postMessage.assert_called_once()
-                
+
                 blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
                 block_texts = [block["text"]["text"] for block in blocks]
-                
+
                 if command_text == "":
                     assert "GSOC_GENERAL_INFORMATION_BLOCKS" in block_texts[0]
                     assert FEEDBACK_CHANNEL_MESSAGE in block_texts[1]
