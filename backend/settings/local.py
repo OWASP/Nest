@@ -1,7 +1,5 @@
 """OWASP Nest local configuration."""
 
-from configurations import values
-
 from settings.base import Base
 
 
@@ -15,8 +13,4 @@ class Local(Base):
 
     APP_NAME = "OWASP Nest Local"
 
-    LOCAL_EXTERNAL_IP = values.SecretValue(environ_name="LOCAL_EXTERNAL_IP")
-    CORS_ALLOWED_ORIGINS = (
-        "http://localhost:3000",
-        "http://localhost:8000",
-    )
+    CORS_ALLOWED_ORIGINS = ("http://localhost:3000",)

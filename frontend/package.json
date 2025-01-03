@@ -13,7 +13,7 @@
     "lint": "eslint . --config eslint.config.js --fix --max-warnings=0",
     "lint:check": "eslint . --config eslint.config.js --max-warnings=0",
     "preview": "vite preview",
-    "test": "tsc --noEmit && jest",
+    "test": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest",
     "test:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
     "watch": "jest --watch"
   },
@@ -106,5 +106,23 @@
       "prettier --write"
     ],
     "/node_modules/*": "echo 'Skipping node_modules/'"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {},
+      "tailwindcss": {}
+    }
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "endOfLine": "lf",
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ],
+    "printWidth": 100,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5"
   }
 }
