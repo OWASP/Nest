@@ -18,7 +18,7 @@ const UsersPage = () => {
     pageTitle: 'OWASP Users',
   })
 
-  const navigate = useNavigate() 
+  const navigate = useNavigate()
 
   const handleButtonClick = (user: user) => {
     navigate(`/projects/${user.idx_key}`)
