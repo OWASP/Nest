@@ -13,12 +13,11 @@ SUPPORTED_YEARS = {2020, 2021, 2022, 2023, 2024}
 
 def get_gsoc_projects_by_year(year):
     """Get GSOC projects for a specific year using search."""
-    from apps.owasp.api.search.project import get_projects
+    from apps.owasp.models.project import Project
 
-    query = f"gsoc{year}"
-    return get_projects(
-        query=query,
-        attributes=["idx_name", "idx_url"],
+    return Project.get_gsoc_projects(
+        year,
+        attributes=["name", "related_urls"],
         limit=100,
     )
 
@@ -40,7 +39,9 @@ def handler(ack, command, client):
         ]
     else:
         try:
+            print("entered in these")
             year = int(command_text)
+            print(f"year ",year)
             if year in SUPPORTED_YEARS:
                 results = get_gsoc_projects_by_year(year)
                 projects_list = "\n".join(
