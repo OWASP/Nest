@@ -45,10 +45,10 @@ def handler(event, client, ack):
             markdown(
                 f"*Get Started*:{NL}"
                 "To explore the full spectrum of OWASP's projects, chapters, and resources, "
-                f"check out <{settings.SITE_URL}|*OWASP Nest*>. It's your gateway to discovering "
-                "ways to contribute, stay informed, and connect with the OWASP community. "
-                "From finding projects aligned with your interests to engaging with chapters in "
-                f"your area, OWASP Nest makes it easier to navigate and get involved."
+                "check out <https://nest.owasp.org|*OWASP Nest*>. It's your gateway to "
+                "discovering ways to contribute, stay informed, and connect with the OWASP "
+                "community. From finding projects aligned with your interests to engaging with "
+                "chapters in your area, OWASP Nest makes it easier to navigate and get involved."
             ),
             markdown(
                 f"*Connect and Grow:*{NL}"
