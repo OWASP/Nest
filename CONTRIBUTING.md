@@ -43,13 +43,13 @@ Follow these steps to set up the OWASP Nest application:
     - Create a local environment file in the `backend` directory:
 
       ```bash
-      touch backend/.env/local
+      touch backend/.env
       ```
 
     - Copy the contents from the template file into your new local environment file:
 
       ```bash
-      cat backend/.env/template > backend/.env/local
+      cat backend/.env.example > backend/.env
       ```
 
     - Create a local environment file in the `frontend` directory:
@@ -76,18 +76,18 @@ Follow these steps to set up the OWASP Nest application:
 1. **Set Up Algolia**:
     - Go to [Algolia](https://www.algolia.com/) and create a free account.
     - After creating an account, create an Algolia app.
-    - Update your `backend/.env/local` file with the following keys from your Algolia app:
+    - Update your `backend/.env/local` file with the following keys from your Algolia app (use **write** API key for backend):
 
       ```plaintext
-      DJANGO_ALGOLIA_API_KEY=<your_algolia_api_key>
-      DJANGO_ALGOLIA_APPLICATION_ID=<your_algolia_application_id>
+      DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
+      DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
       ```
 
-    - Update your `frontend/.env` file with the following keys from your Algolia app:
+    - Update your `frontend/.env` file with the following keys from your Algolia app (use **search** API key for frontend):
 
       ```plaintext
-      VITE_ALGOLIA_APP_ID="your-algolia-app-id"
-      VITE_ALGOLIA_SEARCH_KEY="your-algolia-search-key"
+      VITE_ALGOLIA_APP_ID=<your-algolia-application-id>
+      VITE_ALGOLIA_SEARCH_API_KEY=<your-algolia-search-api-key>
       ```
 
     - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
@@ -141,7 +141,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
     - Open `backend/.env/local` again and update it with your GitHub token:
 
       ```plaintext
-      GITHUB_TOKEN=<your_github_token>
+      GITHUB_TOKEN=<your-github-token>
       ```
 
 1. **Sync Local Database Data**:
@@ -187,8 +187,8 @@ To setup NestBot development environment, follow these steps:
       - Signing Secret from `Settings -- Basic Information -- App Credentials` section
 
       ```plaintext
-      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-OAuth-token>
-      DJANGO_SLACK_SIGNING_SECRET=<your-slack-app-signing-secret>
+      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
+      DJANGO_SLACK_SIGNING_SECRET=<your-slack-signing-secret>
       ```
 
 1. **Set up Slack slash commands**:
