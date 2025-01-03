@@ -188,6 +188,8 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
           context: backend
           file: backend/Dockerfile.staging
           platforms: linux/amd64
@@ -205,6 +207,8 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
           context: frontend
           file: frontend/Dockerfile.staging
           platforms: linux/amd64
@@ -240,6 +244,7 @@ jobs:
 
   build-docker-production-images:
     name: Build Docker Production Images
+    environment: production
     if: |
       github.event_name == 'release' &&
       github.event.action == 'published'
@@ -267,6 +272,8 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
           context: backend
           file: backend/Dockerfile.production
           platforms: linux/amd64
@@ -284,6 +291,8 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
           context: frontend
           file: frontend/Dockerfile.production
           platforms: linux/amd64
