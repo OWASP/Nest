@@ -42,7 +42,7 @@ const SearchPageLayout = ({
   return (
     <div className="mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
       {isFirstLoad ? (
-        <div className="fixed inset-0 flex items-center justify-center bg-background/50">
+        <div className="bg-background/50 fixed inset-0 flex items-center justify-center">
           <LoadingSpinner imageUrl={loadingImageUrl} />
         </div>
       ) : (

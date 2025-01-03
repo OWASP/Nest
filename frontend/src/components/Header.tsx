@@ -77,13 +77,13 @@ export default function Header() {
                     {icon}
                   </span>
                   <input onChange={toggleTheme} type="checkbox" className="peer sr-only" />
-                  <div className="peer relative h-5 w-9 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-500 peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full dark:border-gray-500 dark:bg-gray-700"></div>
+                  <div className="peer relative h-5 w-9 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-500 peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-500 dark:bg-gray-700 rtl:peer-checked:after:-translate-x-full"></div>
                 </label>
               </div>
               {/* Mobile menu toggle button (bars or close icon) */}
               <button
                 onClick={toggleMenu}
-                className="ml-4 text-slate-700 hover:text-slate-800 md:hidden dark:text-slate-300 dark:hover:text-slate-200"
+                className="ml-4 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200 md:hidden"
               >
                 <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="h-6 w-6" />
               </button>

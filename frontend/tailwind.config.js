@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: 'hsl(var(--background))',
-        border: 'hsl(var(--border))',
+        background: 'var(--background)',
+        border: 'var(--border)',
         text: 'var(--text)',
         'owasp-blue': '#98AFC7',
         foreground: 'hsl(var(--foreground))',
@@ -54,6 +54,6 @@ export default {
       },
     },
   },
-  darkMode: ['selector', 'class'],
+  darkMode: ['class'],
   plugins: [require('tailwindcss-animate')],
 }

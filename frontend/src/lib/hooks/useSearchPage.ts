@@ -32,6 +32,7 @@ export function useSearchPage<T>({
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+  const [error, setError] = useState<boolean>(false)
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -39,6 +40,13 @@ export function useSearchPage<T>({
     if (currentPage > 1) params.set('page', currentPage.toString())
     setSearchParams(params)
   }, [searchQuery, currentPage, setSearchParams])
+
+  useEffect(() => {
+    if (error) {
+      handleError(error)
+      setError(null)
+    }
+  }, [error])
 
   useEffect(() => {
     document.title = pageTitle
@@ -54,7 +62,7 @@ export function useSearchPage<T>({
         setItems(data.hits)
         setTotalPages(data.totalPages)
       } catch (error) {
-        return handleError(error, navigate)
+        setError(error)
       }
       setIsLoaded(true)
     }

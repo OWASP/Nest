@@ -5,6 +5,7 @@ import { NEST_ENV } from 'utils/credentials'
 import { getParamsForIndexName } from 'utils/paramsMapping'
 
 import { client } from 'lib/algoliaClient'
+import { handleError } from 'lib/ErrorHandler'
 import { AgloliaRequestType, AlgoliaResponseType } from 'lib/types'
 
 export const loadData = async <T>(
@@ -12,17 +13,22 @@ export const loadData = async <T>(
   query: string,
   currentPage: number
 ): Promise<T> => {
-  const response = await fetch(
-    `${API_URL}/${endpoint}?` +
-      new URLSearchParams({
-        q: query,
-        page: currentPage.toString(),
-      }).toString()
-  )
-  if (!response.ok) {
-    throw new Error('ServerError')
+  try {
+    const response = await fetch(
+      `${API_URL}/${endpoint}?` +
+        new URLSearchParams({
+          q: query,
+          page: currentPage.toString(),
+        }).toString()
+    )
+    if (!response.ok) {
+      const error = new Error('An unexpected error occurred.')
+      handleError(error)
+    }
+    return await response.json()
+  } catch (error) {
+    handleError(error)
   }
-  return await response.json()
 }
 
 export const fetchAlgoliaData = async <T>(
@@ -61,6 +67,7 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    throw new error()
+    handleError(error)
+    return { hits: [], totalPages: 0 }
   }
 }

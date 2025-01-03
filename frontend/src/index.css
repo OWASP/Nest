@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: #f4f6fc;
     --text: #000;
-    --border: 0 0% 89.8%;
+    --border: #0000002d;
     --rt-color-white: #222; /* customizing tooltip colors*/
     --rt-color-dark: #fff; /* customizing tooltip colors*/
     --foreground: 0 0% 3.9%;
@@ -35,9 +35,9 @@
   }
 
   .dark {
-    --background: 0 0% 3.9%;
+    --background: #212529;
     --text: #fff;
-    --border: 0 0% 14.9%;
+    --border: #ffffff26;
     --rt-color-white: #222; /* customizing tooltip colors*/
     --rt-color-dark: #fff; /* customizing tooltip colors*/
     --foreground: 0 0% 98%;
