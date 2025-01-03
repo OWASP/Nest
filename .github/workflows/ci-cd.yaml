@@ -240,7 +240,6 @@ jobs:
 
   build-docker-production-images:
     name: Build Docker Production Images
-    environment: production
     if: |
       github.event_name == 'release' &&
       github.event.action == 'published'
