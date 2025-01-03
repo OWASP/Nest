@@ -162,6 +162,7 @@ jobs:
     name: Build Docker Staging Images
     environment: staging
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
       - code-ql
@@ -218,6 +219,7 @@ jobs:
       STAGING_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_staging_private_key'
     environment: staging
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
       - build-docker-staging-images
@@ -240,7 +242,8 @@ jobs:
     name: Build Docker Production Images
     environment: production
     if: |
-      github.event_name == 'release' && github.event.action == 'created'
+      github.event_name == 'release' &&
+      github.event.action == 'published'
     needs:
       - code-ql
       - run-backend-tests
@@ -296,7 +299,8 @@ jobs:
       PRODUCTION_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_production_private_key'
     environment: production
     if: |
-      github.event_name == 'release' &&  github.event.action == 'created'
+      github.event_name == 'release' &&
+      github.event.action == 'published'
     needs:
       - build-docker-production-images
     runs-on: ubuntu-latest
