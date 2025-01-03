@@ -42,11 +42,9 @@ index-data:
 
 load-data:
 	@echo "Loading Nest data"
-	@cp backend/data/nest.json.gz backend/data/copy.json.gz
-	@gunzip backend/data/nest.json.gz
+	@gunzip -c backend/data/nest.json.gz > backend/data/nest_data.json
 	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
-	@rm backend/data/nest.json
-	@mv backend/data/copy.json.gz backend/data/nest.json.gz
+	@rm backend/data/nest_data.json
 
 merge-migrations:
 	@CMD="poetry run python manage.py makemigrations --merge" $(MAKE) exec-backend-command

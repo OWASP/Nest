@@ -17,7 +17,7 @@ __pycache__
 *.log
 backend/.venv
 backend/data/copy.json.gz
-backend/data/nest.json
+backend/data/nest_data.json
 backend/staticfiles
 backend/venv
 frontend/.npm
