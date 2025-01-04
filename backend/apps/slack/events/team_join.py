@@ -1,7 +1,6 @@
 """Slack bot user joined team handler."""
 
 import logging
-import time
 
 from django.conf import settings
 from slack_sdk.errors import SlackApiError
@@ -36,9 +35,7 @@ def handler(event, client, ack):
     if not settings.SLACK_EVENTS_ENABLED:
         return
 
-    time.sleep(10)
-
-    user_id = event["user"]
+    user_id = event["user"]["id"]
     try:
         conversation = client.conversations_open(users=user_id)
     except SlackApiError as e:
