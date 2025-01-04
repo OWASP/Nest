@@ -29,22 +29,22 @@ class TestUserModel:
         assert user.is_indexable is expected_indexable
 
     def test_from_github(self, mocker):
-        gh_user = mocker.Mock(
+        gh_user_mock = mocker.Mock(
             bio="Bio",
             hireable=True,
             twitter_username="twitter",
         )
 
         user = User()
-        user.from_github(gh_user)
+        user.from_github(gh_user_mock)
 
         assert user.bio == "Bio"
         assert user.is_hireable
         assert user.twitter_username == "twitter"
 
     def test_update_data(self, mocker):
-        gh_user = mocker.Mock()
-        gh_user.raw_data = {"node_id": "12345"}
+        gh_user_mock = mocker.Mock()
+        gh_user_mock.raw_data = {"node_id": "12345"}
 
         mock_user = mocker.Mock(spec=User)
         mock_user.node_id = "12345"
@@ -53,7 +53,7 @@ class TestUserModel:
         user = User()
         user.from_github = mocker.Mock()
 
-        updated_user = User.update_data(gh_user)
+        updated_user = User.update_data(gh_user_mock)
 
         assert updated_user.node_id == mock_user.node_id
         assert updated_user.from_github.call_count == 1

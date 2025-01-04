@@ -11,8 +11,8 @@ class TestLabelModel:
             mock_bulk_save.assert_called_once_with(Label, mock_labels)
 
     def test_update_data(self, mocker):
-        gh_label = mocker.Mock()
-        gh_label.raw_data = {"node_id": "12345"}
+        gh_label_mock = mocker.Mock()
+        gh_label_mock.raw_data = {"node_id": "12345"}
 
         mock_label = mocker.Mock(spec=Label)
         mock_label.node_id = "12345"
@@ -21,20 +21,20 @@ class TestLabelModel:
         label = Label()
         label.from_github = mocker.Mock()
 
-        updated_label = Label.update_data(gh_label)
+        updated_label = Label.update_data(gh_label_mock)
 
         assert updated_label.node_id == mock_label.node_id
         assert updated_label.from_github.call_count == 1
 
     def test_from_github(self):
-        gh_label = Mock()
-        gh_label.color = "000000"
-        gh_label.description = "Description"
-        gh_label.name = "Name"
+        gh_label_mock = Mock()
+        gh_label_mock.color = "000000"
+        gh_label_mock.description = "Description"
+        gh_label_mock.name = "Name"
 
         label = Label()
-        label.from_github(gh_label)
+        label.from_github(gh_label_mock)
 
-        assert label.color == gh_label.color
-        assert label.description == gh_label.description
-        assert label.name == gh_label.name
+        assert label.color == gh_label_mock.color
+        assert label.description == gh_label_mock.description
+        assert label.name == gh_label_mock.name

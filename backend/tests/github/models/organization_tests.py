@@ -30,10 +30,10 @@ class TestOrganizationModel:
             mock_from_github.assert_called_once_with(gh_organization_mock)
 
     def test_from_github(self):
-        gh_organization = Mock()
-        gh_organization.description = "Description"
+        gh_organization_mock = Mock()
+        gh_organization_mock.description = "Description"
 
         organization = Organization()
-        organization.from_github(gh_organization)
+        organization.from_github(gh_organization_mock)
 
-        assert organization.description == gh_organization.description
+        assert organization.description == gh_organization_mock.description

@@ -9,8 +9,8 @@ from apps.github.models.repository import Repository
 
 class TestRepositoryModel:
     def test_update_data(self, mocker):
-        gh_repository = MagicMock()
-        gh_repository.raw_data = {"node_id": "12345"}
+        gh_repository_mock = MagicMock()
+        gh_repository_mock.raw_data = {"node_id": "12345"}
 
         mock_repository = mocker.Mock(spec=Repository)
         mock_repository.node_id = "12345"
@@ -21,7 +21,7 @@ class TestRepositoryModel:
         repository = Repository()
         repository.from_github = mocker.Mock()
 
-        updated_repository = Repository.update_data(gh_repository)
+        updated_repository = Repository.update_data(gh_repository_mock)
 
         assert updated_repository.node_id == mock_repository.node_id
         assert updated_repository.from_github.call_count == 1
