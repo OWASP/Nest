@@ -198,11 +198,11 @@ jobs:
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_ALGOLIA_APP_ID=${{ secrets.VITE_ALGOLIA_APP_ID }}" > .env.frontend
-          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> .env.frontend
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
-          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> .env.frontend
-          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.frontend
+          echo "VITE_ALGOLIA_APP_ID=${{ secrets.VITE_ALGOLIA_APP_ID }}" > frontend/.env.staging
+          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.staging
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
+          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
 
       - name: Build frontend image
         uses: docker/build-push-action@v6

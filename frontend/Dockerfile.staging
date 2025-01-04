@@ -6,7 +6,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
-COPY .env.frontend .env.staging
+COPY .env.staging .env.staging
 RUN npm run build:staging
 
 FROM nginx:stable-alpine
