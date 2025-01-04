@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
         # Run loaddata
         with transaction.atomic():
-            call_command("loaddata", "data/nest.json", "-v", "3")
+            call_command("loaddata", "data/nest.json.gz", "-v", "3")
 
         # Enable indexing
         for nest_app in nest_apps:
