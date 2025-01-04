@@ -4,30 +4,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='UserSearchQuery',
+            name="UserSearchQuery",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('query', models.TextField()),
-                ('source', models.CharField(choices=[('slackbot', 'Slackbot'), ('frontend', 'Frontend')], default='frontend', max_length=50)),
-                ('user_id', models.CharField(blank=True, max_length=255, null=True)),
-                ('session_id', models.CharField(blank=True, max_length=255, null=True)),
-                ('location', models.CharField(blank=True, max_length=255, null=True)),
-                ('device_info', models.CharField(blank=True, max_length=255, null=True)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("query", models.TextField()),
+                (
+                    "source",
+                    models.CharField(
+                        choices=[("slackbot", "Slackbot"), ("frontend", "Frontend")],
+                        default="frontend",
+                        max_length=50,
+                    ),
+                ),
+                ("user_id", models.CharField(blank=True, max_length=255, null=True)),
+                ("session_id", models.CharField(blank=True, max_length=255, null=True)),
+                ("location", models.CharField(blank=True, max_length=255, null=True)),
+                ("device_info", models.CharField(blank=True, max_length=255, null=True)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'User Search Query',
-                'verbose_name_plural': 'User Search Queries',
-                'db_table': 'analytics_usersearchquery',
-                'indexes': [models.Index(fields=['query'], name='analytics_u_query_dfad69_idx'), models.Index(fields=['source'], name='analytics_u_source_b44b2c_idx'), models.Index(fields=['timestamp'], name='analytics_u_timesta_b42e3f_idx'), models.Index(fields=['user_id'], name='analytics_u_user_id_906cb6_idx')],
+                "verbose_name": "User Search Query",
+                "verbose_name_plural": "User Search Queries",
+                "db_table": "analytics_usersearchquery",
+                "indexes": [
+                    models.Index(fields=["query"], name="analytics_u_query_dfad69_idx"),
+                    models.Index(fields=["source"], name="analytics_u_source_b44b2c_idx"),
+                    models.Index(fields=["timestamp"], name="analytics_u_timesta_b42e3f_idx"),
+                    models.Index(fields=["user_id"], name="analytics_u_user_id_906cb6_idx"),
+                ],
             },
         ),
     ]

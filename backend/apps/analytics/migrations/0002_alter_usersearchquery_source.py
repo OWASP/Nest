@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('analytics', '0001_initial'),
+        ("analytics", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usersearchquery',
-            name='source',
-            field=models.CharField(choices=[('nextbot', 'NestBot'), ('frontend', 'Frontend')], default='frontend', max_length=50),
+            model_name="usersearchquery",
+            name="source",
+            field=models.CharField(
+                choices=[("nextbot", "NestBot"), ("frontend", "Frontend")],
+                default="frontend",
+                max_length=50,
+            ),
         ),
     ]

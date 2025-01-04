@@ -4,15 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('analytics', '0004_remove_usersearchquery_analytics_u_user_id_906cb6_idx_and_more'),
+        ("analytics", "0004_remove_usersearchquery_analytics_u_user_id_906cb6_idx_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usersearchquery',
-            name='category',
-            field=models.CharField(choices=[('projects', 'Projects'), ('chapters', 'Chapters'), ('committees', 'Committees'), ('others', 'Others')], default='others', max_length=20),
+            model_name="usersearchquery",
+            name="category",
+            field=models.CharField(
+                choices=[
+                    ("projects", "Projects"),
+                    ("chapters", "Chapters"),
+                    ("committees", "Committees"),
+                    ("others", "Others"),
+                ],
+                default="others",
+                max_length=20,
+            ),
         ),
     ]
