@@ -125,7 +125,7 @@ describe('UsersPage Component', () => {
       fireEvent.click(viewDetailsButtons[0])
     })
 
-    expect(navigateMock).toHaveBeenCalledWith('/projects/user_1')
+    expect(navigateMock).toHaveBeenCalledWith('/users/user_1')
   })
 
   test('handles search input correctly', async () => {
