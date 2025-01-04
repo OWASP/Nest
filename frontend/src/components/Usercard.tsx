@@ -1,6 +1,6 @@
 import { UserCardProps } from "lib/constants"
 
-const UserCard: React.FC<UserCardProps> = ({ avatar, name, company, button }) => {
+const UserCard = ({ avatar, name, company, button }:UserCardProps) => {
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden p-4 my-2 flex flex-col items-center justify-center w-64 h-64">
       <div className="w-16 h-16 mb-4">
