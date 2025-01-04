@@ -1,6 +1,6 @@
 import { SearchResponse } from 'algoliasearch'
 import { API_URL } from 'utils/credentials'
-import { NEST_ENV } from 'utils/credentials'
+import { ENVIRONMENT } from 'utils/credentials'
 
 import { getParamsForIndexName } from 'utils/paramsMapping'
 
@@ -43,7 +43,7 @@ export const fetchAlgoliaData = async <T>(
     const request: AgloliaRequestType = {
       attributesToHighlight: [],
       hitsPerPage: 25,
-      indexName: `${NEST_ENV}_${indexName}`,
+      indexName: `${ENVIRONMENT}_${indexName}`,
       page: currentPage - 1,
       query: query,
       removeWordsIfNoResults: 'allOptional',

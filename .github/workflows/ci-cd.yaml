@@ -162,6 +162,7 @@ jobs:
     name: Build Docker Staging Images
     environment: staging
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
       - code-ql
@@ -187,6 +188,8 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
           context: backend
           file: backend/Dockerfile.staging
           platforms: linux/amd64
@@ -196,14 +199,16 @@ jobs:
       - name: Prepare frontend environment
         run: |
           echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.staging
-          echo "VITE_ALGOLIA_SEARCH_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
-          echo "VITE_NEST_API_URL=https://nest.owasp.dev/api/v1" >> frontend/.env.staging
-          echo "VITE_NEST_SENTRY_DSN_URL=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
-          echo "VITE_NEST_ENV=staging" >> frontend/.env.staging
+          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
+          echo "VITE_API_URL=https://nest.owasp.dev/api/v1" >> frontend/.env.staging
+          echo "VITE_ENVIRONMENT=staging" >> frontend/.env.staging
+          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
           context: frontend
           file: frontend/Dockerfile.staging
           platforms: linux/amd64
@@ -218,6 +223,7 @@ jobs:
       STAGING_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_staging_private_key'
     environment: staging
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
       - build-docker-staging-images
@@ -240,7 +246,8 @@ jobs:
     name: Build Docker Production Images
     environment: production
     if: |
-      github.event_name == 'release' && github.event.action == 'created'
+      github.event_name == 'release' &&
+      github.event.action == 'published'
     needs:
       - code-ql
       - run-backend-tests
@@ -265,6 +272,8 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
           context: backend
           file: backend/Dockerfile.production
           platforms: linux/amd64
@@ -274,14 +283,16 @@ jobs:
       - name: Prepare frontend environment
         run: |
           echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.production
-          echo "VITE_ALGOLIA_SEARCH_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
-          echo "VITE_NEST_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
-          echo "VITE_NEST_SENTRY_DSN_URL=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
-          echo "VITE_NEST_ENV=production" >> frontend/.env.production
+          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
+          echo "VITE_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
+          echo "VITE_ENVIRONMENT=production" >> frontend/.env.production
+          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
           context: frontend
           file: frontend/Dockerfile.production
           platforms: linux/amd64
@@ -296,7 +307,8 @@ jobs:
       PRODUCTION_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_production_private_key'
     environment: production
     if: |
-      github.event_name == 'release' &&  github.event.action == 'created'
+      github.event_name == 'release' &&
+      github.event.action == 'published'
     needs:
       - build-docker-production-images
     runs-on: ubuntu-latest

@@ -5,9 +5,7 @@ services:
       bash -c "
         poetry install --no-root &&
         poetry run python manage.py migrate &&
-        poetry run python manage.py runserver 0.0.0.0:8000 &
-        poetry run python manage.py run_slack_bot;
-        wait
+        poetry run python manage.py runserver 0.0.0.0:8000
       "
     build:
       context: ./backend
@@ -15,7 +13,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file: backend/.env/local
+    env_file: backend/.env
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
