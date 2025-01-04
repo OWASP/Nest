@@ -39,6 +39,6 @@ class TestLoadDataCommand:
             mock_get_app_config.assert_any_call(app)
             mock_app_config.get_models.assert_any_call()
 
-        mock_call_command.assert_called_once_with("loaddata", "data/nest.json", "-v", "3")
+        mock_call_command.assert_called_once_with("loaddata", "data/nest.json.gz", "-v", "3")
 
         mock_register.assert_called_with(mock_model)
