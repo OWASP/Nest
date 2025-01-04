@@ -7,13 +7,14 @@ import {
   ProjectDetailsPage,
   CommitteeDetailsPage,
   ChapterDetailsPage,
+  UsersPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
-import UsersPage from 'pages/Users'
+
 
 function App() {
   const location = useLocation()
