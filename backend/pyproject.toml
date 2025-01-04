@@ -78,6 +78,8 @@ addopts = [
     "--cov-report=term-missing",
     "--cov=.",
     "--dist=loadscope",
+    "--durations-min=1",
+    "--durations=5",
     "--no-cov-on-fail",
     "--numprocesses=auto",
 ]
