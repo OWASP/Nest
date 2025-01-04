@@ -1,10 +1,15 @@
 """Slack bot user joined #gsoc channel handler."""
 
+import logging
+
 from django.conf import settings
+from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL, OWASP_GSOC_CHANNEL_ID
+
+logger = logging.getLogger(__name__)
 
 
 def gsoc_handler(event, client, ack):
@@ -16,7 +21,14 @@ def gsoc_handler(event, client, ack):
         return
 
     user_id = event["user"]
-    conversation = client.conversations_open(users=user_id)
+
+    try:
+        conversation = client.conversations_open(users=user_id)
+    except SlackApiError as e:
+        if e.response["error"] == "cannot_dm_bot":
+            logger.warning("Error opening conversation with bot user %s", user_id)
+            return
+        raise
 
     client.chat_postMessage(
         channel=conversation["channel"]["id"],
