@@ -234,7 +234,7 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > '${{ vars.STAGING_SSH_PRIVATE_KEY_PATH }}'
+          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ${{ vars.STAGING_SSH_PRIVATE_KEY_PATH }}
           chmod 400 ${{ vars.STAGING_SSH_PRIVATE_KEY_PATH }}
 
       - name: Prepare secrets
