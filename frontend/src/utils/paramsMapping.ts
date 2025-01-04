@@ -84,7 +84,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_login',
           'idx_updated_at',
           'idx_url',
-          'idx_avatar_url'
+          'idx_avatar_url',
         ],
         minProximity: 4,
         typoTolerance: 'min',

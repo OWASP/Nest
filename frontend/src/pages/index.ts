@@ -20,5 +20,5 @@ export {
   CommitteeDetailsPage,
   ChapterDetailsPage,
   ProjectDetailsPage,
-  UsersPage
+  UsersPage,
 }

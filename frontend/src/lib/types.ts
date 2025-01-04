@@ -4,8 +4,7 @@ export interface ProjectDataType {
   total_pages: number
 }
 
-
-export type user= {
+export type user = {
   idx_email: string
   idx_login: string
   idx_name: string
@@ -22,7 +21,7 @@ export type user= {
   idx_updated_at: number
   idx_url: string
   objectID: string
-};
+}
 
 export type project = {
   idx_top_contributors: {

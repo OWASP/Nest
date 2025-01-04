@@ -5,14 +5,13 @@ import { render } from 'lib/test-util'
 import UsersPage from 'pages/Users'
 import { mockUserData } from '@tests/data/mockUserData'
 
-
 jest.mock('lib/api', () => ({
-  fetchAlgoliaData: jest.fn()
+  fetchAlgoliaData: jest.fn(),
 }))
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn()
+  useNavigate: jest.fn(),
 }))
 
 jest.mock('components/Pagination', () =>
@@ -25,14 +24,14 @@ jest.mock('components/Pagination', () =>
 
 jest.mock('lib/FontAwesomeIconWrapper', () => ({
   __esModule: true,
-  default: () => <span data-testid="mock-icon" />
+  default: () => <span data-testid="mock-icon" />,
 }))
 
 describe('UsersPage Component', () => {
   beforeEach(() => {
-    (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockUserData.users,
-      totalPages: 2
+      totalPages: 2,
     })
   })
 
@@ -86,9 +85,9 @@ describe('UsersPage Component', () => {
   })
 
   test('displays "No Users found" when there are no users', async () => {
-    (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [],
-      totalPages: 0
+      totalPages: 0,
     })
 
     render(<UsersPage />)
@@ -110,7 +109,7 @@ describe('UsersPage Component', () => {
 
     expect(window.scrollTo).toHaveBeenCalledWith({
       top: 0,
-      behavior: 'auto'
+      behavior: 'auto',
     })
   })
 
@@ -142,7 +141,9 @@ describe('UsersPage Component', () => {
       // First call is the initial page load, second call is the search
       expect(fetchAlgoliaData).toHaveBeenCalledTimes(2)
       // Check the latest call arguments
-      const lastCall = (fetchAlgoliaData as jest.Mock).mock.calls[(fetchAlgoliaData as jest.Mock).mock.calls.length - 1]
+      const lastCall = (fetchAlgoliaData as jest.Mock).mock.calls[
+        (fetchAlgoliaData as jest.Mock).mock.calls.length - 1
+      ]
       expect(lastCall).toEqual(['users', 'John', 1])
     })
   })
