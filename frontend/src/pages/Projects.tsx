@@ -62,6 +62,7 @@ const ProjectsPage = () => {
       totalPages={totalPages}
       currentPage={currentPage}
       searchQuery={searchQuery}
+      indexName="projects"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       empty="No projects found"

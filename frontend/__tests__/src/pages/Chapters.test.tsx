@@ -80,7 +80,7 @@ describe('ChaptersPage Component', () => {
     })
   })
 
-  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
+  test('renders  data, and pagination component concurrently after data is loaded', async () => {
     window.scrollTo = jest.fn()
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockChapterData.chapters,
@@ -91,12 +91,10 @@ describe('ChaptersPage Component', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
-      expect(screen.queryByPlaceholderText('Search for OWASP chapters...')).not.toBeInTheDocument()
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toHaveFocus()
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

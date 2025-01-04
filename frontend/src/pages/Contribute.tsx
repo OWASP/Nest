@@ -64,6 +64,7 @@ const ContributePage = () => {
   return (
     <SearchPageLayout
       isLoaded={isLoaded}
+      indexName="issues"
       totalPages={totalPages}
       currentPage={currentPage}
       searchQuery={searchQuery}
