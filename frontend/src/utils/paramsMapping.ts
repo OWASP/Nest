@@ -72,6 +72,23 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
         minProximity: 4,
         typoTolerance: 'min',
       }
+    case 'users':
+      return {
+        attributesToRetrieve: [
+          'idx_created_at',
+          'idx_key',
+          'idx_email',
+          'idx_name',
+          'idx_followers_count',
+          'idx_company',
+          'idx_login',
+          'idx_updated_at',
+          'idx_url',
+          'idx_avatar_url'
+        ],
+        minProximity: 4,
+        typoTolerance: 'min',
+      }
     default:
       return {
         attributesToRetrieve: [],

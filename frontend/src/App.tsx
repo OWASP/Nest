@@ -13,6 +13,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
+import UsersPage from 'pages/Users'
 
 function App() {
   const location = useLocation()
@@ -33,6 +34,7 @@ function App() {
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
+        <Route path="/users" element={<UsersPage />}></Route>
       </Routes>
       <Footer />
     </main>
