@@ -26,7 +26,7 @@ class TestUserModel:
     )
     def test_is_indexable(self, login, expected_indexable):
         user = User(login=login)
-        assert user.is_indexable == expected_indexable
+        assert user.is_indexable is expected_indexable
 
     def test_from_github(self, mocker):
         gh_user = mocker.Mock(
@@ -39,7 +39,7 @@ class TestUserModel:
         user.from_github(gh_user)
 
         assert user.bio == "Bio"
-        assert user.is_hireable is True
+        assert user.is_hireable
         assert user.twitter_username == "twitter"
 
     def test_update_data(self, mocker):

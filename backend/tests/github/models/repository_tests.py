@@ -52,10 +52,10 @@ class TestRepositoryModel:
         mock_gh_repository.project_set = mock_project_set
 
         mock_gh_repository.is_indexable = True
-        assert mock_gh_repository.is_indexable is True
+        assert mock_gh_repository.is_indexable
 
         mock_gh_repository.is_indexable = False
-        assert mock_gh_repository.is_indexable is False
+        assert not mock_gh_repository.is_indexable
 
     def test_from_github_with_missing_funding(self, mock_gh_repository, mocker):
         mock_gh_repository.get_contents.side_effect = GithubException(
@@ -65,8 +65,8 @@ class TestRepositoryModel:
         repository = Repository()
         repository.from_github(gh_repository=mock_gh_repository)
 
-        assert repository.has_funding_yml is False
-        assert repository.is_funding_policy_compliant is True
+        assert not repository.has_funding_yml
+        assert repository.is_funding_policy_compliant
 
     def test_from_github_with_funding(self, mock_gh_repository, mocker):
         mock_gh_repository.get_contents.return_value = MagicMock(
@@ -76,8 +76,8 @@ class TestRepositoryModel:
         repository = Repository()
         repository.from_github(gh_repository=mock_gh_repository)
 
-        assert repository.has_funding_yml is True
-        assert repository.is_funding_policy_compliant is False
+        assert repository.has_funding_yml
+        assert not repository.is_funding_policy_compliant
 
     def test_latest_release(self, mock_gh_repository):
         mock_release = MagicMock()
