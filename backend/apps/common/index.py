@@ -20,7 +20,7 @@ class IndexBase:
         """Get the Algolia client."""
         return SearchClient.create(
             settings.ALGOLIA_APPLICATION_ID,
-            settings.ALGOLIA_API_KEY,
+            settings.ALGOLIA_WRITE_API_KEY,
         )
 
     @staticmethod

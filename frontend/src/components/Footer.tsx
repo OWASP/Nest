@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useState, useCallback } from 'react'
-import { footerSections, Section } from '../utils/constants'
+import { footerSections, Section } from 'utils/constants'
 
 export default function Footer() {
   // State to keep track of the open section in the footer

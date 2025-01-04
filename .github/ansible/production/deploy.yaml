@@ -1,13 +1,19 @@
 - name: Deploy Nest to Production
   hosts: nest_production
   tasks:
+    - name: Ensure nginx directory exists
+      ansible.builtin.file:
+        path: ~/nginx
+        state: directory
+        mode: '0755'
+
     - name: Copy Nginx configuration file
       ansible.builtin.copy:
         src: '{{ github_workspace }}/nginx/production.conf'
         dest: ~/nginx/nginx.conf
         mode: '0644'
 
-    - name: Copy docker-compose.yml
+    - name: Copy docker-compose.yaml
       ansible.builtin.copy:
         src: '{{ github_workspace }}/docker-compose-production.yaml'
         dest: ~/docker-compose.yaml
@@ -25,7 +31,7 @@
         dest: ~/backend/Makefile
         mode: '0644'
 
-    - name: Ensure backend directory exists
+    - name: Ensure frontend directory exists
       ansible.builtin.file:
         path: ~/frontend
         state: directory
@@ -42,12 +48,6 @@
         src: '{{ github_workspace }}/Makefile'
         dest: ~/Makefile
         mode: '0644'
-
-    - name: Ensure data directory exists
-      ansible.builtin.file:
-        path: ~/data
-        state: directory
-        mode: '0755'
 
     - name: Copy directory recursively
       copy:

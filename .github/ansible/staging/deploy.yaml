@@ -1,13 +1,19 @@
 - name: Deploy Nest to Staging
   hosts: nest_staging
   tasks:
+    - name: Ensure nginx directory exists
+      ansible.builtin.file:
+        path: ~/nginx
+        state: directory
+        mode: '0755'
+
     - name: Copy Nginx configuration file
       ansible.builtin.copy:
         src: '{{ github_workspace }}/nginx/staging.conf'
         dest: ~/nginx/nginx.conf
         mode: '0644'
 
-    - name: Copy docker-compose.yml
+    - name: Copy docker-compose.yaml
       ansible.builtin.copy:
         src: '{{ github_workspace }}/docker-compose-staging.yaml'
         dest: ~/docker-compose.yaml

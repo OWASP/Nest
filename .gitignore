@@ -1,11 +1,10 @@
 __pycache__
-!.env.example
 .bash_history
 .cache
 .coverage
 .DS_Store
-.env
-.env.*
+.env*
+!.env.example
 .idea
 .local
 .mypy_cache

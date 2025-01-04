@@ -19,10 +19,10 @@ USER owasp
 COPY poetry.lock pyproject.toml ./
 RUN poetry install --no-root
 
+COPY .env.example .env.example
 COPY apps apps
+COPY manage.py wsgi.py ./
 COPY settings settings
 COPY static static
 COPY templates templates
 COPY tests tests
-COPY .env/template .env/template
-COPY manage.py wsgi.py ./

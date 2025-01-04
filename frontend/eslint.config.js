@@ -46,7 +46,7 @@ export default [
       'import/resolver': {
         alias: {
           map: [
-            ['@tests', path.resolve(__dirname, '__tests__/src')],
+            ['@tests', path.resolve(__dirname, '__tests__')],
             ['@', path.resolve(__dirname, 'src')],
           ],
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -87,6 +87,7 @@ export default [
       ],
       'no-console': 'error',
       'no-unused-vars': 'off',
+      'import/no-relative-parent-imports': 'error',
     },
     ignores: ['src/utils/logger.ts'],
   },
