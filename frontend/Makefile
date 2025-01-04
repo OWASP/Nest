@@ -8,7 +8,7 @@ format-frontend-code:
 	@CMD="npm run format" $(MAKE) exec-frontend-command
 
 lint-frontend-code:
-	@CMD="npm run lint" $(MAKE) exec-frontend-command
+	@CMD="npm run lint -- --fix" $(MAKE) exec-frontend-command
 
 npm-update:
 	@CMD="npm update" $(MAKE) exec-frontend-command-it
