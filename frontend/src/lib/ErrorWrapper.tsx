@@ -9,7 +9,7 @@ interface ErrorDisplayProps {
   message: string
 }
 
-const ERROR_CONFIGS: Record<string, ErrorDisplayProps> = {
+export const ERROR_CONFIGS: Record<string, ErrorDisplayProps> = {
   '404': {
     statusCode: 404,
     title: 'Page Not Found',
@@ -22,7 +22,7 @@ const ERROR_CONFIGS: Record<string, ErrorDisplayProps> = {
   },
 }
 
-const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, message }) => {
+export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, message }) => {
   const navigate = useNavigate()
   return (
     <main className="flex min-h-screen flex-col items-center bg-white pt-8 dark:bg-slate-900">
@@ -61,7 +61,7 @@ export const handleAppError = (error: unknown): void => {
   Sentry.captureException(error)
 
   if (error instanceof AppError && error.statusCode === 404) {
-    throw error // Let ErrorBoundary handle 404s with proper page
+    throw error
   }
 
   // Show toast for all other errors

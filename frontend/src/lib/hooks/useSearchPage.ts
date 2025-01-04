@@ -1,8 +1,7 @@
-import { handleAppError } from 'ErrorWrapper'
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchAlgoliaData } from 'lib/api'
-// import { handleError } from 'lib/ErrorHandler'
+import { handleAppError } from 'lib/ErrorWrapper'
 import { AlgoliaResponseType } from 'lib/types'
 
 interface UseSearchPageOptions {
@@ -33,7 +32,6 @@ export function useSearchPage<T>({
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
-  // const [error, setError] = useState<boolean>(false)
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -41,13 +39,6 @@ export function useSearchPage<T>({
     if (currentPage > 1) params.set('page', currentPage.toString())
     setSearchParams(params)
   }, [searchQuery, currentPage, setSearchParams])
-
-  // useEffect(() => {
-  //   if (error) {
-  //     handleError(error)
-  //     setError(null)
-  //   }
-  // }, [error])
 
   useEffect(() => {
     document.title = pageTitle

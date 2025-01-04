@@ -1,11 +1,11 @@
 import { SearchResponse } from 'algoliasearch'
-import { AppError, handleAppError } from 'ErrorWrapper'
 import { API_URL } from 'utils/credentials'
 import { ENVIRONMENT } from 'utils/credentials'
 
 import { getParamsForIndexName } from 'utils/paramsMapping'
 
 import { client } from 'lib/algoliaClient'
+import { AppError, handleAppError } from 'lib/ErrorWrapper'
 import { AgloliaRequestType, AlgoliaResponseType } from 'lib/types'
 
 export const loadData = async <T>(
@@ -25,7 +25,7 @@ export const loadData = async <T>(
       if (response.status === 404) {
         throw new AppError(404, 'Resource not found')
       }
-      throw new AppError()
+      throw new AppError(500, 'Server error occurred')
     }
     return await response.json()
   } catch (error) {
