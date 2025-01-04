@@ -1,9 +1,10 @@
+import { useNavigate } from 'react-router-dom'
+import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import { useSearchPage } from 'lib/hooks/useSearchPage'
 import { user } from 'lib/types'
 import SearchPageLayout from 'components/SearchPageLayout'
-import { useNavigate } from 'react-router-dom'
 import UserCard from 'components/Usercard'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
+
 
 
 const UsersPage = () => {
