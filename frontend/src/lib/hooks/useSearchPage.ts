@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import logger from 'utils/logger'
 
+import { sendAnalyticsData } from 'lib/analytics'
 import { fetchAlgoliaData } from 'lib/api'
 import { AlgoliaResponseType } from 'lib/types'
 
@@ -61,6 +62,22 @@ export function useSearchPage<T>({
 
     fetchData()
   }, [currentPage, searchQuery, indexName, pageTitle])
+
+  useEffect(() => {
+    if (searchQuery) {
+      const sendSearchQuery = async () => {
+        try {
+          await sendAnalyticsData({
+            query: searchQuery,
+            category: indexName,
+          })
+        } catch (error) {
+          logger.error('Failed to send analytics data:', error)
+        }
+      }
+      sendSearchQuery()
+    }
+  }, [searchQuery, currentPage, indexName])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)

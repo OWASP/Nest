@@ -13,6 +13,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
+import AnalyticsDashboard from 'pages/Analytics_dashboard'
 
 function App() {
   const location = useLocation()
@@ -33,6 +34,7 @@ function App() {
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
+        <Route path="/analytics_dashboard" element={<AnalyticsDashboard />}></Route>
       </Routes>
       <Footer />
     </main>
