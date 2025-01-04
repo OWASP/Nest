@@ -16,7 +16,6 @@ class TestOrganizationModel:
 
     @patch("apps.github.models.organization.Organization.objects.get")
     def test_update_data(self, mock_get):
-        # Mock the database behavior
         mock_get.side_effect = Organization.DoesNotExist
 
         gh_organization_mock = Mock()
@@ -27,7 +26,6 @@ class TestOrganizationModel:
         ) as mock_from_github:
             Organization.update_data(gh_organization_mock)
 
-            # Assert the appropriate calls
             mock_save.assert_called_once()
             mock_from_github.assert_called_once_with(gh_organization_mock)
 
