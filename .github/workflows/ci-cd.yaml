@@ -198,11 +198,11 @@ jobs:
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.staging
-          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
-          echo "VITE_API_URL=https://nest.owasp.dev/api/v1" >> frontend/.env.staging
-          echo "VITE_ENVIRONMENT=staging" >> frontend/.env.staging
-          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
+          echo "VITE_ALGOLIA_APP_ID=${{ secrets.VITE_ALGOLIA_APP_ID }}" > .env.frontend
+          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> .env.frontend
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> .env.frontend
+          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.frontend
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
@@ -220,7 +220,6 @@ jobs:
     env:
       ANSIBLE_HOST_KEY_CHECKING: False
       STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'
-      STAGING_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_staging_private_key'
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -237,6 +236,32 @@ jobs:
           mkdir -m 700 ~/.ssh
           echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
           chmod 400 ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
+
+      - name: Prepare secrets
+        run: |
+          # Backend
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" >> .env.backend
+          echo "DJANGO_ALGOLIA_WRITE_API_KEY=${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}" > .env.backend
+          echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env.backend
+          echo "DJANGO_AWS_ACCESS_KEY_ID=${{ secrets.DJANGO_AWS_SECRET_ACCESS_KEY }}" >> .env.backend
+          echo "DJANGO_AWS_SECRET_ACCESS_KEY=${{ secrets.DJANGO_AWS_SECRET_ACCESS_KEY }}" >> .env.backend
+          echo "DJANGO_CONFIGURATION=${{ secrets.DJANGO_CONFIGURATION }}" >> .env.backend
+          echo "DJANGO_DB_HOST=${{ secrets.DJANGO_DB_HOST }}" >> .env.backend
+          echo "DJANGO_DB_NAME={{ env.DJANGO_DB_NAME }}" >> .env.backend
+          echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.backend
+          echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
+          echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
+          echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > .env.backend
+          echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
+          echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
+          echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }} >> .env.backend
+          echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+
+          # Database
+          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" > .env.db
+          echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
+          echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
 
       - name: Run Nest deploy
         working-directory: .github/ansible
