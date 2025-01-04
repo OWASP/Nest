@@ -63,12 +63,11 @@ class TestAddProjectCustomTags:
         assert expected_output in captured.err
 
     @pytest.mark.parametrize(
-        ("file_content", "projects", "tags", "expected_saved_tags"),
+        ("file_content", "projects", "expected_saved_tags"),
         [
             (
                 json.dumps({"projects": ["proj1"], "tags": ["tag1"]}),
                 {"proj1": ["tag2"]},
-                ["tag1"],
                 {"proj1": ["tag1", "tag2"]},
             ),
         ],
@@ -87,9 +86,7 @@ class TestAddProjectCustomTags:
         mock_get,
         file_content,
         projects,
-        tags,
         expected_saved_tags,
-        capsys,
     ):
         mock_exists.return_value = True
         mock_open_func.side_effect = lambda *_args, **__kwargs: StringIO(file_content)
