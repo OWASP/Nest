@@ -15,7 +15,7 @@ export default defineConfig({
       VITE_ALGOLIA_SEARCH_API_KEY: process.env.VITE_ALGOLIA_SEARCH_API_KEY,
       VITE_API_URL: process.env.VITE_API_URL,
       VITE_ENVIRONMENT: process.env.VITE_ENVIRONMENT,
-      VITE_SENTRY_DSN: process.env.VITE_SENTRY_DSN,
+      VITE_SENTRY_DSN: process.env.VITE_SENTRY_DSN || '',
     }),
   ],
   resolve: {
