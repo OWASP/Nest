@@ -204,6 +204,17 @@ class Project(
         BulkSaveModel.bulk_save(Project, projects, fields=fields)
 
     @staticmethod
+    def get_gsoc_projects(year, attributes=None, limit=100):
+        """GSOC project data."""
+        gsoc_tag = f"gsoc{year}"
+        queryset = Project.objects.filter(custom_tags__contains=[gsoc_tag])
+        queryset = queryset[:limit]
+        if attributes:
+            queryset = queryset.values(*attributes)
+        project_list = list(queryset)
+        return {"hits": project_list}
+
+    @staticmethod
     def update_data(gh_repository, repository, save=True):
         """Update project data."""
         key = gh_repository.name.lower()
