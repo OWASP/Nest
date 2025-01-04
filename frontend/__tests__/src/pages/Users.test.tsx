@@ -73,7 +73,7 @@ describe('UsersPage Component', () => {
 
   test('renders user cards correctly', async () => {
     render(<UsersPage />)
-    
+
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('OWASP')).toBeInTheDocument()
@@ -90,9 +90,9 @@ describe('UsersPage Component', () => {
       hits: [],
       totalPages: 0
     })
-    
+
     render(<UsersPage />)
-    
+
     await waitFor(() => {
       expect(screen.getByText('No Users found')).toBeInTheDocument()
     })
@@ -100,14 +100,14 @@ describe('UsersPage Component', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
-    
+
     render(<UsersPage />)
-    
+
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
       fireEvent.click(nextPageButton)
     })
-    
+
     expect(window.scrollTo).toHaveBeenCalledWith({
       top: 0,
       behavior: 'auto'
