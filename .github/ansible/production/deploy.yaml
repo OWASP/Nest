@@ -25,6 +25,10 @@
         state: directory
         mode: '0755'
 
+    - name: Update Makefile for the production environment
+      ansible.builtin.shell:
+        cmd: "sed -i 's/\\bnest-backend\\b/production-nest-backend/' ~/backend/Makefile"
+
     - name: Copy Backend Makefile
       ansible.builtin.copy:
         src: '{{ github_workspace }}/backend/Makefile'
