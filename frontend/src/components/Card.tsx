@@ -159,14 +159,6 @@ const Card = ({
                     type="language"
                   />
                 ))}
-                {languages.length > 8 && (
-                  <button
-                    onClick={loadMoreLanguages}
-                    className="mt-2 text-gray-600 dark:text-gray-300"
-                  >
-                    {toggleLanguages ? 'Show less' : 'Show more'}
-                  </button>
-                )}
               </div>
             )}
             {topics && topics.length > 0 && (
@@ -179,12 +171,15 @@ const Card = ({
                     type="topic"
                   />
                 ))}
-                {topics.length > 18 && (
+                {(languages?.length > 8 || topics?.length > 18) && (
                   <button
-                    onClick={loadMoreTopics}
+                    onClick={() => {
+                      if (languages?.length > 8) loadMoreLanguages()
+                      if (topics?.length > 18) loadMoreTopics()
+                    }}
                     className="mt-2 text-gray-600 dark:text-gray-300"
                   >
-                    {toggleTopics ? 'Show less' : 'Show more'}
+                    {toggleLanguages || toggleTopics ? 'Show less' : 'Show more'}
                   </button>
                 )}
               </div>
