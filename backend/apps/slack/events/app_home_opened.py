@@ -6,7 +6,7 @@ from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.blocks import get_header
 
 logger = logging.getLogger(__name__)
 
@@ -21,49 +21,17 @@ def handler(event, client, ack):
     user_id = event["user"]
 
     try:
-        # Define the Home Tab view
         home_view = {
             "type": "home",
             "blocks": [
+                *get_header(),
                 {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Projects",
-                                "emoji": True,
-                            },
-                            "value": "view_projects",
-                            "action_id": "view_projects_action",
-                        },
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Committees",
-                                "emoji": True,
-                            },
-                            "value": "view_committees",
-                            "action_id": "view_committees_action",
-                        },
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Chapters",
-                                "emoji": True,
-                            },
-                            "value": "view_chapters",
-                            "action_id": "view_chapters_action",
-                        },
-                    ],
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*🏠 Welcome to NestBot, <@{user_id}>!*",
+                    },
                 },
-                markdown(
-                    f"""*🏠 Welcome to NestBot, <@{user_id}>!*
-                    """
-                ),
             ],
         }
 
