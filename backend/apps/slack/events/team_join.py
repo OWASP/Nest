@@ -35,13 +35,14 @@ def handler(event, client, ack):
     if not settings.SLACK_EVENTS_ENABLED:
         return
 
-    user_id = event["user"]
+    user_id = event["user"]["id"]  # User object is returned -- other events return just the ID!
     try:
         conversation = client.conversations_open(users=user_id)
     except SlackApiError as e:
         if e.response["error"] == "cannot_dm_bot":
             logger.warning("Error opening conversation with bot user %s", user_id)
             return
+        logger.exception(client.users_info(user=user_id))
         raise
 
     client.chat_postMessage(

@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -12,13 +12,14 @@ class TestSlackHandler:
         mocker.patch("apps.slack.apps.SlackConfig.app", mock_app)
         return mock_app
 
-    def test_handler_user_joined(self, mocker):
+    def test_handler_user_joined(self):
         mock_ack = Mock()
         mock_client = Mock()
         mock_conversation = {"channel": {"id": "C67890"}}
         mock_client.conversations_open.return_value = mock_conversation
 
-        handler({"user": "U12345"}, mock_client, mock_ack)
+        with patch("time.sleep", return_value=None):
+            handler({"user": {"id": "U12345"}}, mock_client, mock_ack)
 
         mock_ack.assert_called_once()
         mock_client.conversations_open.assert_called_once_with(users="U12345")
