@@ -6,6 +6,7 @@ from django.db import models
 
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
@@ -141,6 +142,16 @@ class Project(
         """Projects to index."""
         return self.is_active and self.has_active_repositories
 
+    @property
+    def nest_key(self):
+        """Get Nest key."""
+        return self.key.replace("www-project-", "")
+
+    @property
+    def nest_url(self):
+        """Get Nest URL for project."""
+        return get_absolute_url(f"projects/{self.nest_key}")
+
     def deactivate(self):
         """Deactivate project."""
         self.is_active = False
@@ -204,15 +215,13 @@ class Project(
         BulkSaveModel.bulk_save(Project, projects, fields=fields)
 
     @staticmethod
-    def get_gsoc_projects(year, attributes=None, limit=100):
-        """GSOC project data."""
-        gsoc_tag = f"gsoc{year}"
-        queryset = Project.objects.filter(custom_tags__contains=[gsoc_tag])
-        queryset = queryset[:limit]
+    def get_gsoc_projects(year, attributes=None):
+        """Return GSoC projects."""
+        projects = Project.objects.filter(custom_tags__contains=[f"gsoc{year}"])
         if attributes:
-            queryset = queryset.values(*attributes)
-        project_list = list(queryset)
-        return {"hits": project_list}
+            projects = projects.values(*attributes)
+
+        return projects
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):
