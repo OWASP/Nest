@@ -28,10 +28,8 @@ class TestIndexBase:
     @patch("apps.common.index.IndexBase._get_client")
     @patch("apps.common.index.settings")
     @patch("apps.common.index.json.load")
-    @patch("apps.common.index.logger")
     def test_reindex_synonyms(
         self,
-        mock_logger,
         mock_json_load,
         mock_settings,
         mock_get_client,
@@ -50,7 +48,8 @@ class TestIndexBase:
 
         expected_file_path = f"/base/dir/apps/{app_name}/index/synonyms/{index_name}.json"
 
-        IndexBase.reindex_synonyms(app_name, index_name)
+        with patch("apps.common.index.logger"):
+            IndexBase.reindex_synonyms(app_name, index_name)
 
         mock_open.assert_called_once_with(expected_file_path)
         mock_index.clear_synonyms.assert_called_once()
