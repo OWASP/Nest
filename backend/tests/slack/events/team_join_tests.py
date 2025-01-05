@@ -19,7 +19,7 @@ class TestSlackHandler:
         mock_client.conversations_open.return_value = mock_conversation
 
         with patch("time.sleep", return_value=None):
-            handler({"user": "U12345"}, mock_client, mock_ack)
+            handler({"user": {"id": "U12345"}}, mock_client, mock_ack)
 
         mock_ack.assert_called_once()
         mock_client.conversations_open.assert_called_once_with(users="U12345")
