@@ -5,6 +5,7 @@ import logging
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
+from apps.slack.constants import NL
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ def handle_home_actions(ack, body, client):
     try:
         if action_id == "view_projects_action":
             project_details = get_projects(query="", limit=10, page=1)
-            view_title = "*Top Projects*"
+            view_title = "*Projects*"
             blocks = []
 
             if project_details["hits"]:
@@ -36,20 +37,14 @@ def handle_home_actions(ack, body, client):
                         "text": {
                             "type": "mrkdwn",
                             "text": (
-                                f"*<{project['idx_url']}|{project['idx_name']}>*\n"
-                                f"• :bust_in_silhouette: *Contributors:*"
-                                "{project['idx_contributors_count']}\n"
-                                f"• :fork_and_knife: *Forks:* {project['idx_forks_count']}\n"
-                                f"• :star2: *Stars:* {project['idx_stars_count']}\n"
+                                f"*<{project['idx_url']}|{project['idx_name']}>*{NL}"
+                                f":bust_in_silhouette: *Contributors:* "
+                                f"{project['idx_contributors_count']}"
+                                f" :fork_and_knife: *Forks:* {project['idx_forks_count']}"
+                                f" :star2: *Stars:* {project['idx_stars_count']}\n"
                             ),
                         },
                     }
-                    blocks.append(
-                        {
-                            "type": "section",
-                            "text": {"type": "mrkdwn", "text": "━━━━━━━━━━━━━━━━━━━━"},
-                        }
-                    )
                     blocks.append(project_card)
 
             else:
@@ -58,7 +53,7 @@ def handle_home_actions(ack, body, client):
 
         elif action_id == "view_committees_action":
             committee_details = get_committees(query="", limit=10, page=1)
-            view_title = "*Top Committees*"
+            view_title = "*Committees*"
             blocks = []
 
             if committee_details["hits"]:
@@ -72,16 +67,10 @@ def handle_home_actions(ack, body, client):
                             "type": "mrkdwn",
                             "text": (
                                 f"*<{committee['idx_url']}|{committee['idx_name']}>*\n"
-                                f"• :star2: *Summary:* {committee['idx_summary']}\n"
+                                f"{committee['idx_summary']}\n"
                             ),
                         },
                     }
-                    blocks.append(
-                        {
-                            "type": "section",
-                            "text": {"type": "mrkdwn", "text": "━━━━━━━━━━━━━━━━━━━━"},
-                        }
-                    )
                     blocks.append(committee_card)
 
             else:
@@ -90,7 +79,7 @@ def handle_home_actions(ack, body, client):
 
         elif action_id == "view_chapters_action":
             chapter_details = get_chapters(query="", limit=10, page=1)
-            view_title = "*Top Chapters*"
+            view_title = "*Chapters*"
             blocks = []
 
             if chapter_details["hits"]:
@@ -103,16 +92,10 @@ def handle_home_actions(ack, body, client):
                             "type": "mrkdwn",
                             "text": (
                                 f"*<{chapter['idx_url']}|{chapter['idx_name']}>*\n"
-                                f"• :star2: *Summary:* {chapter['idx_summary']}\n"
+                                f"{chapter['idx_summary']}\n"
                             ),
                         },
                     }
-                    blocks.append(
-                        {
-                            "type": "section",
-                            "text": {"type": "mrkdwn", "text": "━━━━━━━━━━━━━━━━━━━━"},
-                        }
-                    )
                     blocks.append(chapter_card)
 
             else:
@@ -137,8 +120,7 @@ def handle_home_actions(ack, body, client):
         logger.exception("Error publishing Home Tab for user %s: %s", user_id, e.response["error"])
 
 
-# actions
 if SlackConfig.app:
-    SlackConfig.app.action("view_projects_action")(handle_home_actions)
-    SlackConfig.app.action("view_committees_action")(handle_home_actions)
     SlackConfig.app.action("view_chapters_action")(handle_home_actions)
+    SlackConfig.app.action("view_committees_action")(handle_home_actions)
+    SlackConfig.app.action("view_projects_action")(handle_home_actions)

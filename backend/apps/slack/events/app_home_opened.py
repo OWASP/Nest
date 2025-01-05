@@ -25,7 +25,6 @@ def handler(event, client, ack):
         home_view = {
             "type": "home",
             "blocks": [
-                markdown("*Quick Actions:*"),
                 {
                     "type": "actions",
                     "elements": [
@@ -33,7 +32,7 @@ def handler(event, client, ack):
                             "type": "button",
                             "text": {
                                 "type": "plain_text",
-                                "text": "🌟 View Projects",
+                                "text": "Projects",
                                 "emoji": True,
                             },
                             "value": "view_projects",
@@ -43,7 +42,7 @@ def handler(event, client, ack):
                             "type": "button",
                             "text": {
                                 "type": "plain_text",
-                                "text": "👥 View Committees",
+                                "text": "Committees",
                                 "emoji": True,
                             },
                             "value": "view_committees",
@@ -53,7 +52,7 @@ def handler(event, client, ack):
                             "type": "button",
                             "text": {
                                 "type": "plain_text",
-                                "text": "📚 View Chapters",
+                                "text": "Chapters",
                                 "emoji": True,
                             },
                             "value": "view_chapters",
