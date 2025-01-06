@@ -1,6 +1,6 @@
-import { UserCardProps } from 'lib/constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons';
+import { UserCardProps } from 'lib/constants';
 
 const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
   return (
