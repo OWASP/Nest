@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react'
 import React from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { toast } from 'lib/hooks/use-toast'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'lib/hooks/useToast'
 
 interface ErrorDisplayProps {
   statusCode: number
@@ -54,38 +54,40 @@ export class AppError extends Error {
   ) {
     super(message)
     this.name = 'AppError'
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AppError)
+    }
   }
 }
 
-export const handleAppError = (error: unknown): void => {
-  Sentry.captureException(error)
+export const handleAppError = (error: unknown) => {
+  const appError =
+    error instanceof AppError
+      ? error
+      : new AppError(500, error instanceof Error ? error.message : ERROR_CONFIGS['500'].message)
 
-  if (error instanceof AppError && error.statusCode === 404) {
-    throw error
+  // Log to Sentry
+  if (appError.statusCode >= 500) {
+    Sentry.captureException(error instanceof Error ? error : appError)
   }
+  const errorConfig = ERROR_CONFIGS[appError.statusCode === 404 ? '404' : '500']
 
-  // Show toast for all other errors
   toast({
     variant: 'destructive',
-    title: 'Error',
-    description: 'Something went wrong',
+    title: errorConfig.title,
+    description: errorConfig.message || appError.message,
+    duration: 5000,
   })
 }
 
+// Main error boundary wrapper
 export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation()
-
   return (
     <Sentry.ErrorBoundary
       fallback={({ error }) => {
-        if (error instanceof AppError && error.statusCode === 404) {
-          return <ErrorDisplay {...ERROR_CONFIGS['404']} />
-        }
-        return <ErrorDisplay {...ERROR_CONFIGS['500']} />
-      }}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname)
-        scope.setTag('environment', process.env.NODE_ENV)
+        Sentry.captureException(error)
+        const errorConfig = ERROR_CONFIGS['500']
+        return <ErrorDisplay {...errorConfig} />
       }}
     >
       {children}
