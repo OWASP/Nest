@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
+import { headerLinks } from 'utils/constants'
+import { cn } from 'lib/utils'
 import ModeToggle from './ModeToggle'
-import { cn } from '../lib/utils'
-import { headerLinks } from '../utils/constants'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
