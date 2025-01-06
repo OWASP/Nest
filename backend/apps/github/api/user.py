@@ -1,6 +1,8 @@
 """User API."""
 
 from rest_framework import serializers, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from apps.github.models.user import User
 
@@ -12,10 +14,18 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = (
-            "name",
-            "login",
+            "avatar_url",
+            "bio",
             "company",
+            "email",
+            "followers_count",
+            "following_count",
             "location",
+            "login",
+            "name",
+            "public_repositories_count",
+            "title",
+            "url",
             "created_at",
             "updated_at",
         )
@@ -27,3 +37,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    @action(detail=False, methods=["get"], url_path="login/(?P<login>[^/.]+)")
+    def get_user_by_login(self, request, login=None):
+        """Get user by login."""
+        try:
+            user = User.objects.get(login=login)
+            serializer = self.get_serializer(user)
+            data = serializer.data
+            return Response(data)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=404)
