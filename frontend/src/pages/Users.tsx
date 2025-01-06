@@ -5,7 +5,6 @@ import { user } from 'lib/types'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/Usercard'
 
-
 const UsersPage = () => {
   const {
     items: users,

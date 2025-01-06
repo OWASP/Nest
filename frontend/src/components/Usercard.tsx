@@ -1,12 +1,12 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons';
-import { UserCardProps } from 'lib/constants';
+import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { UserCardProps } from 'lib/constants'
 
 const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
   return (
     <button
       onClick={button.onclick}
-      className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-all hover:scale-102 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+      className="hover:scale-102 group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-all hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full flex-col items-center space-y-4">
         <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 transition-all group-hover:ring-blue-500 dark:ring-gray-700">
@@ -44,7 +44,7 @@ const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
         />
       </div>
     </button>
-  );
-};
+  )
+}
 
-export default UserCard;
+export default UserCard
