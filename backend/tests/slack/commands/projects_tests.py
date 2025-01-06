@@ -42,10 +42,12 @@ class TestProjectsHandler:
             (True, True, "Here are top 10 most OWASP projects"),  # With results
         ],
     )
+    @patch("apps.owasp.models.project.Project.active_projects_count")
     @patch("apps.owasp.api.search.project.get_projects")
     def test_handler_responses(
         self,
         mock_get_projects,
+        mock_active_projects_count,
         commands_enabled,
         has_results,
         expected_message,
@@ -55,6 +57,7 @@ class TestProjectsHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
+        mock_active_projects_count.return_value = 42
 
         handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
@@ -76,16 +79,19 @@ class TestProjectsHandler:
             ("normal search", "normal search"),
         ],
     )
+    @patch("apps.owasp.models.project.Project.active_projects_count")
     @patch("apps.owasp.api.search.project.get_projects")
     def test_handler_special_characters(
         self,
         mock_get_projects,
+        mock_active_projects_count,
         search_text,
         expected_escaped,
         mock_slack_client,
     ):
         command = {"text": search_text, "user_id": "U123456"}
         mock_get_projects.return_value = {"hits": []}
+        mock_active_projects_count.return_value = 42
         settings.SLACK_COMMANDS_ENABLED = True
 
         handler(ack=MagicMock(), command=command, client=mock_slack_client)
@@ -102,10 +108,12 @@ class TestProjectsHandler:
             ("leaders", "Leader A, Leader B"),
         ],
     )
+    @patch("apps.owasp.models.project.Project.active_projects_count")
     @patch("apps.owasp.api.search.project.get_projects")
     def test_handler_field_formatting(
         self,
         mock_get_projects,
+        mock_active_projects_count,
         field,
         expected_text,
         mock_slack_client,
@@ -113,6 +121,7 @@ class TestProjectsHandler:
         mock_project,
     ):
         mock_get_projects.return_value = {"hits": [mock_project]}
+        mock_active_projects_count.return_value = 42
         settings.SLACK_COMMANDS_ENABLED = True
 
         handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
