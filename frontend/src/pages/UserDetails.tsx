@@ -1,4 +1,4 @@
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import { faGithub, faXTwitter } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
 import {
   faBuildingUser,
@@ -111,6 +111,17 @@ const UserDetailsPage: React.FC = () => {
                   <FontAwesomeIcon icon={faLocationDot} className="text-sm" />
                   <span>{user.location}</span>
                 </div>
+              )}
+              {user.twitter_username && (
+                <a
+                  href={`https://x.com/${user.twitter_username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
+                >
+                  <FontAwesomeIcon icon={faXTwitter} className="text-sm" />
+                  <span>{user.twitter_username}</span>
+                </a>
               )}
               {user.email && (
                 <a

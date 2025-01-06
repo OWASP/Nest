@@ -127,6 +127,7 @@ export interface UserDetailsProps {
   name: string
   public_repositories_count: number
   title: string
+  twitter_username: string
   url: string
   created_at: string
   updated_at: string

@@ -25,6 +25,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             "name",
             "public_repositories_count",
             "title",
+            "twitter_username",
             "url",
             "created_at",
             "updated_at",
