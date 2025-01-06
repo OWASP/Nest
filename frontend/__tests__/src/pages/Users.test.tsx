@@ -80,7 +80,7 @@ describe('UsersPage Component', () => {
       expect(screen.getByText('Security Co')).toBeInTheDocument()
     })
 
-    const viewButtons = screen.getAllByText('View Details')
+    const viewButtons = screen.getAllByText('View Profile')
     expect(viewButtons).toHaveLength(2)
   })
 
@@ -120,7 +120,7 @@ describe('UsersPage Component', () => {
     render(<UsersPage />)
 
     await waitFor(() => {
-      const viewDetailsButtons = screen.getAllByText('View Details')
+      const viewDetailsButtons = screen.getAllByText('View Profile')
       expect(viewDetailsButtons[0]).toBeInTheDocument()
       fireEvent.click(viewDetailsButtons[0])
     })

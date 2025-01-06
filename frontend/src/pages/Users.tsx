@@ -3,7 +3,9 @@ import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import { useSearchPage } from 'lib/hooks/useSearchPage'
 import { user } from 'lib/types'
 import SearchPageLayout from 'components/SearchPageLayout'
-import UserCard from 'components/Usercard'
+import UserCard from 'components/UserCard'
+
+
 
 const UsersPage = () => {
   const {
