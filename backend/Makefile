@@ -7,9 +7,6 @@ exec-backend-command-it:
 exec-db-command:
 	@docker exec -it nest-db $(CMD)
 
-clear-cache:
-	@CMD="poetry run python manage.py clear_cache" $(MAKE) exec-backend-command
-
 collect-static:
 	@CMD="poetry run python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
@@ -42,11 +39,7 @@ index-data:
 
 load-data:
 	@echo "Loading Nest data"
-	@cp backend/data/nest.json.gz backend/data/copy.json.gz
-	@gunzip backend/data/nest.json.gz
 	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
-	@rm backend/data/nest.json
-	@mv backend/data/copy.json.gz backend/data/nest.json.gz
 
 merge-migrations:
 	@CMD="poetry run python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -103,7 +96,7 @@ setup:
 shell-backend:
 	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
 
-sync: update-data enrich-data index-data clear-cache
+sync-data: update-data enrich-data index-data
 
 test-backend:
 	@docker build -f backend/Dockerfile.test backend -t nest-backend-test 2>/dev/null
