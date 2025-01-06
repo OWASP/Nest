@@ -37,7 +37,7 @@ class RepositoryIndexMixin:
     @property
     def idx_pushed_at(self):
         """Return pushed at for indexing."""
-        return self.pushed_at
+        return self.pushed_at.timestamp()
 
     @property
     def idx_stars_count(self):
