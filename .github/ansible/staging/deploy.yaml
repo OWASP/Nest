@@ -27,7 +27,7 @@
 
     - name: Update Makefile for the staging environment
       ansible.builtin.shell:
-        cmd: "sed -i 's/\\bnest-backend\\b/staging-nest-backend/' ~/backend/Makefile"
+        cmd: "sed -i 's/\\bnest-backend\\b/staging-nest-backend/' {{ github_workspace }}/backend/Makefile"
 
     - name: Copy Backend Makefile
       ansible.builtin.copy:
