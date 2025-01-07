@@ -105,7 +105,7 @@ class RepositoryBasedEntityModel(models.Model):
 
     def generate_summary(self, prompt, open_ai=None, max_tokens=500):
         """Generate entity summary."""
-        if not self.is_active:
+        if not self.is_active or not prompt:
             return
 
         open_ai = open_ai or OpenAi()

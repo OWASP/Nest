@@ -29,8 +29,8 @@ class Command(BaseCommand):
             print(f"{prefix:<10} {chapter.owasp_url}")
 
             # Summary.
-            if not chapter.summary:
-                chapter.generate_summary(prompt=Prompt.get_owasp_chapter_summary())
+            if not chapter.summary and (prompt := Prompt.get_owasp_chapter_summary()):
+                chapter.generate_summary(prompt=prompt)
 
             # Suggested location.
             if not chapter.suggested_location:
