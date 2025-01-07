@@ -67,7 +67,7 @@ Follow these steps to set up the OWASP Nest application:
     Please note you need to restart the application in order to apply any `.env` file changes.
 
 1. **Configure Environment Variables**:
-    - Open the `backend/.env/local` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
+    - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
 
       ```plaintext
       DJANGO_CONFIGURATION=Local
@@ -76,7 +76,7 @@ Follow these steps to set up the OWASP Nest application:
 1. **Set Up Algolia**:
     - Go to [Algolia](https://www.algolia.com/) and create a free account.
     - After creating an account, create an Algolia app.
-    - Update your `backend/.env/local` file with the following keys from your Algolia app (use **write** API key for backend):
+    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
       ```plaintext
       DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
@@ -138,7 +138,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
     - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
 1. **Update Environment Variables with GitHub Token**:
-    - Open `backend/.env/local` again and update it with your GitHub token:
+    - Open `backend/.env` again and update it with your GitHub token:
 
       ```plaintext
       GITHUB_TOKEN=<your-github-token>
@@ -148,7 +148,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
     - Now you should be able to run the following command to sync your local database data with GitHub:
 
       ```bash
-      make sync
+      make sync-data
       ```
 
 #### NestBot Development
@@ -182,7 +182,7 @@ To setup NestBot development environment, follow these steps:
       ```
 
 1. **Update environment Variables with your NestBot Configuration**:
-    - Update `backend/.env/local` with your Slack application tokens:
+    - Update `backend/.env` with your Slack application tokens:
       - Bot User OAuth Token from `Settings -- Install App -- OAuth Tokens` section
       - Signing Secret from `Settings -- Basic Information -- App Credentials` section
 
