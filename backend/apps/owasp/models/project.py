@@ -6,6 +6,7 @@ from django.db import models
 
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
@@ -146,6 +147,11 @@ class Project(
         """Get Nest key."""
         return self.key.replace("www-project-", "")
 
+    @property
+    def nest_url(self):
+        """Get Nest URL for project."""
+        return get_absolute_url(f"projects/{self.nest_key}")
+
     def deactivate(self):
         """Deactivate project."""
         self.is_active = False
@@ -207,6 +213,15 @@ class Project(
     def bulk_save(projects, fields=None):
         """Bulk save projects."""
         BulkSaveModel.bulk_save(Project, projects, fields=fields)
+
+    @staticmethod
+    def get_gsoc_projects(year, attributes=None):
+        """Return GSoC projects."""
+        projects = Project.objects.filter(custom_tags__contains=[f"gsoc{year}"])
+        if attributes:
+            projects = projects.values(*attributes)
+
+        return projects
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):
