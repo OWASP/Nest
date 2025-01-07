@@ -58,8 +58,7 @@ class IndexBase:
             return client.search_single_index(
                 index_name=f"{settings.ENVIRONMENT.lower()}_{index_name}",
                 search_params={"query": "", "hitsPerPage": 0, "analytics": False},
-            )["nbHits"]
-
+            ).nb_hits
         except AlgoliaException:
             logger.exception("Error retrieving index count for '%s'", index_name)
             return 0

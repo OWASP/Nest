@@ -4,6 +4,7 @@ import logging
 
 from slack_sdk.errors import SlackApiError
 
+from apps.common.utils import truncate
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header
 from apps.slack.constants import (
@@ -29,12 +30,10 @@ def handle_home_actions(ack, body, client):
 
     try:
         blocks = []
-        view_title = ""
 
         match action_id:
             case "view_projects_action":
                 details = get_projects(query="", limit=10, page=1)
-                view_title = "*Projects*"
                 blocks = (
                     [
                         {
@@ -42,15 +41,15 @@ def handle_home_actions(ack, body, client):
                             "text": {
                                 "type": "mrkdwn",
                                 "text": (
-                                    f"*<{project['idx_url']}|{project['idx_name']}>*{NL}"
-                                    f":bust_in_silhouette: *Contributors:*"
-                                    "{project['idx_contributors_count']} "
-                                    f":fork_and_knife: *Forks:* {project['idx_forks_count']} "
-                                    f":star2: *Stars:* {project['idx_stars_count']}\n"
+                                    f"*<{project['idx_url']}|{idx}. {project['idx_name']}>*{NL}"
+                                    f"Contributors: {project['idx_contributors_count']} | "
+                                    f"Forks: {project['idx_forks_count']} | "
+                                    f"Stars: {project['idx_stars_count']}{NL}"
+                                    f"{truncate(project['idx_summary'], 300)}"
                                 ),
                             },
                         }
-                        for project in details["hits"]
+                        for idx, project in enumerate(details["hits"], 1)
                     ]
                     if details["hits"]
                     else [
@@ -66,7 +65,6 @@ def handle_home_actions(ack, body, client):
 
             case "view_committees_action":
                 details = get_committees(query="", limit=10, page=1)
-                view_title = "*Committees*"
                 blocks = (
                     [
                         {
@@ -74,12 +72,12 @@ def handle_home_actions(ack, body, client):
                             "text": {
                                 "type": "mrkdwn",
                                 "text": (
-                                    f"*<{committee['idx_url']}|{committee['idx_name']}>*\n"
-                                    f"{committee['idx_summary']}\n"
+                                    f"*<{committee['idx_url']}|{idx}. {committee['idx_name']}>*\n"
+                                    f"{truncate(committee['idx_summary'], 300)}{NL}"
                                 ),
                             },
                         }
-                        for committee in details["hits"]
+                        for idx, committee in enumerate(details["hits"], 1)
                     ]
                     if details["hits"]
                     else [
@@ -95,7 +93,6 @@ def handle_home_actions(ack, body, client):
 
             case "view_chapters_action":
                 details = get_chapters(query="", limit=10, page=1)
-                view_title = "*Chapters*"
                 blocks = (
                     [
                         {
@@ -103,12 +100,12 @@ def handle_home_actions(ack, body, client):
                             "text": {
                                 "type": "mrkdwn",
                                 "text": (
-                                    f"*<{chapter['idx_url']}|{chapter['idx_name']}>*\n"
-                                    f"{chapter['idx_summary']}\n"
+                                    f"*<{chapter['idx_url']}|{idx}. {chapter['idx_name']}>*\n"
+                                    f"{truncate(chapter['idx_summary'], 300)}{NL}"
                                 ),
                             },
                         }
-                        for chapter in details["hits"]
+                        for idx, chapter in enumerate(details["hits"], 1)
                     ]
                     if details["hits"]
                     else [
@@ -123,7 +120,6 @@ def handle_home_actions(ack, body, client):
                 )
 
             case _:
-                view_title = "*Unknown Action*"
                 blocks.append(
                     {
                         "type": "section",
@@ -135,7 +131,6 @@ def handle_home_actions(ack, body, client):
             "type": "home",
             "blocks": [
                 *get_header(),
-                {"type": "section", "text": {"type": "mrkdwn", "text": view_title}},
                 *blocks,
             ],
         }

@@ -25,6 +25,7 @@ VIEW_CHAPTERS_ACTION = "view_chapters_action"
 
 NL = "\n"
 NLNL = 2 * NL
+TAB = "\t"
 
 FEEDBACK_CHANNEL_MESSAGE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "

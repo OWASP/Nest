@@ -17,7 +17,6 @@ def markdown(text):
 def get_header():
     """Return the header block."""
     return [
-        {"type": "section", "text": {"type": "mrkdwn", "text": "*Quick Actions.*"}},
         {
             "type": "actions",
             "elements": [
@@ -35,21 +34,21 @@ def get_header():
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "Committees",
-                        "emoji": True,
-                    },
-                    "value": "view_committees",
-                    "action_id": "view_committees_action",
-                },
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
                         "text": "Chapters",
                         "emoji": True,
                     },
                     "value": "view_chapters",
                     "action_id": "view_chapters_action",
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Committees",
+                        "emoji": True,
+                    },
+                    "value": "view_committees",
+                    "action_id": "view_committees_action",
                 },
             ],
         },

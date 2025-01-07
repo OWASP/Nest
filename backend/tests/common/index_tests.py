@@ -6,6 +6,11 @@ from algoliasearch.http.exceptions import AlgoliaException
 from apps.common.index import IndexBase
 
 
+class MockSearchResponse:
+    def __init__(self, nb_hits):
+        self.nb_hits = nb_hits
+
+
 class TestIndexBase:
     @pytest.mark.parametrize(
         ("synonyms_data", "expected_enriched_synonyms"),
@@ -84,7 +89,7 @@ class TestIndexBase:
     @pytest.mark.parametrize(
         ("index_name", "search_response", "expected_count"),
         [
-            ("index1", {"nbHits": 5}, 5),
+            ("index1", MockSearchResponse(5), 5),
             ("index2", AlgoliaException("Error"), 0),
         ],
     )
@@ -105,7 +110,7 @@ class TestIndexBase:
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
 
-        if isinstance(search_response, dict):
+        if isinstance(search_response, MockSearchResponse):
             mock_client.search_single_index.return_value = search_response
         else:
             mock_client.search_single_index.side_effect = search_response
@@ -113,7 +118,7 @@ class TestIndexBase:
         count = IndexBase.get_total_count(index_name)
 
         assert count == expected_count
-        if isinstance(search_response, dict):
+        if isinstance(search_response, MockSearchResponse):
             mock_client.search_single_index.assert_called_once_with(
                 index_name=f"testenv_{index_name}",
                 search_params={"query": "", "hitsPerPage": 0, "analytics": False},
