@@ -67,21 +67,6 @@ export default function Footer() {
             <p className="text-sm text-slate-600 dark:text-slate-400">
               © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
             </p>
-            <div className="flex space-x-4">
-              {/* Privacy policy and Terms of Service links */}
-              <a
-                href="#"
-                className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-              >
-                Privacy Policy
-              </a>
-              <a
-                href="#"
-                className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-              >
-                Terms of Service
-              </a>
-            </div>
           </div>
         </div>
       </div>

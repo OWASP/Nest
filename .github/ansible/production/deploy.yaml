@@ -31,6 +31,10 @@
         dest: ~/backend/Makefile
         mode: '0644'
 
+    - name: Update Makefile for the production environment
+      shell:
+        cmd: "sed -i 's/\\bnest-backend\\b/production-nest-backend/' ~/backend/Makefile"
+
     - name: Ensure frontend directory exists
       ansible.builtin.file:
         path: ~/frontend
