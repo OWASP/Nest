@@ -99,7 +99,7 @@ shell-backend:
 sync-data: update-data enrich-data index-data
 
 test-backend:
-	@docker build -f backend/Dockerfile.test backend -t nest-backend-test
+	@docker build -f backend/Dockerfile.test backend -t nest-backend-test 2>/dev/null
 	@docker run -e DJANGO_CONFIGURATION=Test nest-backend-test poetry run pytest
 
 update-data: \
