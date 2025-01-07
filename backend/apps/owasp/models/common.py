@@ -60,6 +60,11 @@ class RepositoryBasedEntityModel(models.Model):
         return f"https://github.com/owasp/{self.key}"
 
     @property
+    def owasp_name(self):
+        """Get OWASP name."""
+        return self.name if self.name.startswith("OWASP ") else f"OWASP {self.name}"
+
+    @property
     def owasp_url(self):
         """Get OWASP URL."""
         return f"https://owasp.org/{self.key}"

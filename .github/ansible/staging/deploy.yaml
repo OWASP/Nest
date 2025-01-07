@@ -31,6 +31,10 @@
         dest: ~/backend/Makefile
         mode: '0644'
 
+    - name: Update Makefile for the staging environment
+      shell:
+        cmd: "sed -i 's/\\bnest-backend\\b/staging-nest-backend/' ~/backend/Makefile"
+
     - name: Ensure backend directory exists
       ansible.builtin.file:
         path: ~/frontend
@@ -60,6 +64,18 @@
         src: '{{ github_workspace }}/backend/data'
         dest: ~/
         mode: '0755'
+
+    - name: Copy .env.backend
+      copy:
+        src: '{{ github_workspace }}/.env.backend'
+        dest: ~/
+        mode: '0400'
+
+    - name: Copy .env.db
+      copy:
+        src: '{{ github_workspace }}/.env.db'
+        dest: ~/
+        mode: '0400'
 
     - name: Prune docker images
       shell:
