@@ -32,7 +32,7 @@ def handler(event, client, ack):
                     "members, collaborate on projects, and learn about the latest OWASP news and "
                     f"events.{2*NL}"
                     "I'm OWASP @nestbot, your friendly neighborhood bot. Please use one of the "
-                    "following commands:{NL}"
+                    f"following commands:{NL}"
                     f"{TAB}• /contribute --help{NL}"
                     f"{TAB}• /gsoc --help{NL}"
                     f"{TAB}• /projects --help{NL}"
