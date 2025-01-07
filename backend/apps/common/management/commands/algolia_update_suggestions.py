@@ -1,3 +1,5 @@
+"""A command to update OWASP Nest suggestions index."""
+
 from algoliasearch.query_suggestions.client import QuerySuggestionsClientSync
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -86,5 +88,4 @@ class Command(BaseCommand):
                     "exclude": ["test"],
                 }
             )
-            print(
-                f"Query Suggestions for {settings.ENVIRONMENT.lower()}_{entity}: {response}")
+            print(f"Query Suggestions for {settings.ENVIRONMENT.lower()}_{entity}: {response}")
