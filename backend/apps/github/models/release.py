@@ -4,9 +4,10 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
+from apps.github.models.mixins.release import ReleaseIndexMixin
 
 
-class Release(BulkSaveModel, NodeModel, TimestampedModel):
+class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     """Release model."""
 
     class Meta:
@@ -37,6 +38,11 @@ class Release(BulkSaveModel, NodeModel, TimestampedModel):
     def __str__(self):
         """User human readable representation."""
         return f"{self.name} by {self.author}"
+
+    @property
+    def is_indexable(self):
+        """Releases to index."""
+        return not self.is_draft
 
     def from_github(self, gh_release, author=None, repository=None):
         """Update instance based on GitHub release data."""
