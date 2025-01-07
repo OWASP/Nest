@@ -50,8 +50,8 @@ class Committee(
 
     def save(self, *args, **kwargs):
         """Save committee."""
-        if not self.summary:
-            self.generate_summary(prompt=Prompt.get_owasp_committee_summary())
+        if not self.summary and (prompt := Prompt.get_owasp_committee_summary()):
+            self.generate_summary(prompt=prompt)
 
         super().save(*args, **kwargs)
 
