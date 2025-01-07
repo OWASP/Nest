@@ -97,7 +97,7 @@ class IssueIndexMixin:
     @property
     def idx_repository_languages(self):
         """Return repository languages for indexing."""
-        return self.repository.idx_languages
+        return self.repository.top_languages
 
     @property
     def idx_repository_name(self):
