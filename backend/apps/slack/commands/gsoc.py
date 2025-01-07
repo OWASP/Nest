@@ -5,7 +5,6 @@ from django.conf import settings
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.commands.constants import COMMAND_START
-from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
 
 COMMAND = "/gsoc"
@@ -15,6 +14,7 @@ SUPPORTED_YEARS = set(range(2020, 2025))  # 2020-2024
 def handler(ack, command, client):
     """Slack /gsoc command handler."""
     from apps.owasp.models.project import Project
+    from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
 
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:

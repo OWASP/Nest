@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from django.conf import settings
@@ -32,7 +32,7 @@ class TestGsocHandler:
                 "invalid",
                 f"*`{COMMAND} invalid` is not supported*{NL}",
             ),
-            (True, "2019", "Usage: `/gsoc [year]`\nValid years: 2020-2024"),
+            (True, "2019", "Year 2019 is not supported. Supported years: 2020-2024"),
         ],
     )
     def test_handler_responses(
@@ -67,20 +67,16 @@ class TestGsocHandler:
 
     def test_handler_with_projects(self, mock_slack_client):
         """Test handler when projects are found for a valid year."""
-        mock_projects = {
-            "hits": [
-                {
-                    "idx_name": "Test Project",
-                    "idx_url": "https://owasp.org/www-project-bug-logging-tool/",
-                }
-            ]
-        }
+        mock_project = Mock()
+        mock_project.nest_url = "https://owasp.org/www-project-bug-logging-tool/"
+        mock_project.owasp_name = "Test Project"
+        mock_projects = [mock_project]
 
         command = {"text": "2024", "user_id": "U123456"}
         settings.SLACK_COMMANDS_ENABLED = True
 
         with patch(
-            "apps.slack.commands.gsoc.get_gsoc_projects_by_year",
+            "apps.owasp.models.project.Project.get_gsoc_projects",
             return_value=mock_projects,
         ):
             handler(ack=MagicMock(), command=command, client=mock_slack_client)
