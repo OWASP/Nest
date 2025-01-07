@@ -1,17 +1,16 @@
 """A command to donload OWASP Nest index synonyms."""
 
-from django.core.management.base import BaseCommand
 from algoliasearch.query_suggestions.client import QuerySuggestionsClientSync
 from django.conf import settings
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = 'Create query suggestions for Algolia indices'
+    help = "Create query suggestions for Algolia indices"
 
     def handle(self, *args, **kwargs):
         client = QuerySuggestionsClientSync(
-            settings.ALGOLIA_APPLICATION_ID,
-            settings.ALGOLIA_WRITE_API_KEY, "eu"
+            settings.ALGOLIA_APPLICATION_ID, settings.ALGOLIA_WRITE_API_KEY, "eu"
         )
         print("Algolia client initialized")
         response_issues = client.create_config(
@@ -39,8 +38,7 @@ class Command(BaseCommand):
                 "exclude": ["test"],
             }
         )
-        self.stdout.write(self.style.SUCCESS(
-            f"Query Suggestions for {settings.ENVIRONMENT.lower()}_issues: {response_issues}"))
+        print(f"Query Suggestions for {settings.ENVIRONMENT.lower()}_issues:{response_issues}")
 
         response_chapters = client.create_config(
             configuration_with_index={
@@ -68,8 +66,10 @@ class Command(BaseCommand):
                 "exclude": ["test"],
             }
         )
-        self.stdout.write(self.style.SUCCESS(
-            f"Query Suggestions for {settings.ENVIRONMENT.lower()}_chapters: {response_chapters}"))
+        print(
+            f"Query Suggestions for {settings.ENVIRONMENT.lower()}_chapters:"
+            f"{response_chapters}"
+        )
 
         response_projects = client.create_config(
             configuration_with_index={
@@ -93,8 +93,10 @@ class Command(BaseCommand):
                 "exclude": ["test"],
             }
         )
-        self.stdout.write(self.style.SUCCESS(
-            f"Query Suggestions for {settings.ENVIRONMENT.lower()}_projects: {response_projects}"))
+        print(
+            f"Query Suggestions for {settings.ENVIRONMENT.lower()}_projects:"
+            f"{response_projects}"
+        )
 
         response_committees = client.create_config(
             configuration_with_index={
@@ -116,5 +118,8 @@ class Command(BaseCommand):
                 "exclude": ["test"],
             }
         )
-        self.stdout.write(self.style.SUCCESS(
-            f"Query Suggestions for {settings.ENVIRONMENT.lower()}_committees: {response_committees}"))
+        print(
+            "Query Suggestions for"
+            f"{settings.ENVIRONMENT.lower()}_committees: "
+            f"{response_committees}"
+        )
