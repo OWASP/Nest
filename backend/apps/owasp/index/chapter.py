@@ -62,6 +62,6 @@ class ChapterIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        return Chapter.active_chapters.prefetch_related(
+        return Chapter.active_chapters.select_related(
             "owasp_repository",
         )

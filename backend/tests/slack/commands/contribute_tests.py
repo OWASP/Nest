@@ -45,8 +45,10 @@ class TestContributeHandler:
         ],
     )
     @patch("apps.owasp.api.search.issue.get_issues")
+    @patch("apps.github.models.issue.Issue.open_issues_count")
     def test_handler_results(
         self,
+        mock_open_issues_count,
         mock_get_issues,
         command_enabled,
         has_results,
@@ -57,6 +59,7 @@ class TestContributeHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = command_enabled
         mock_get_issues.return_value = {"hits": [mock_issue] if has_results else []}
+        mock_open_issues_count.return_value = 42
 
         handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
@@ -77,8 +80,10 @@ class TestContributeHandler:
         ],
     )
     @patch("apps.owasp.api.search.issue.get_issues")
+    @patch("apps.github.models.issue.Issue.open_issues_count")
     def test_handler_text_truncation(
         self,
+        mock_open_issues_count,
         mock_get_issues,
         title_length,
         summary_length,
@@ -96,6 +101,7 @@ class TestContributeHandler:
             "idx_url": "http://example.com/issue/1",
         }
         mock_get_issues.return_value = {"hits": [mock_issue]}
+        mock_open_issues_count.return_value = 42
         settings.SLACK_COMMANDS_ENABLED = True
 
         handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
@@ -122,8 +128,10 @@ class TestContributeHandler:
         ],
     )
     @patch("apps.owasp.api.search.issue.get_issues")
+    @patch("apps.github.models.issue.Issue.open_issues_count")
     def test_handler_search_queries(
         self,
+        mock_open_issues_count,
         mock_get_issues,
         search_text,
         expected_search,
@@ -133,6 +141,7 @@ class TestContributeHandler:
     ):
         command = {"text": search_text, "user_id": "U123456"}
         mock_get_issues.return_value = {"hits": []}
+        mock_open_issues_count.return_value = 42
         settings.SLACK_COMMANDS_ENABLED = True
 
         handler(ack=MagicMock(), command=command, client=mock_slack_client)
@@ -149,8 +158,10 @@ class TestContributeHandler:
 
     @pytest.mark.parametrize("command_text", sorted(COMMAND_START))
     @patch("apps.owasp.api.search.issue.get_issues")
+    @patch("apps.github.models.issue.Issue.open_issues_count")
     def test_handler_start_commands(
         self,
+        mock_open_issues_count,
         mock_get_issues,
         command_text,
         mock_slack_client,
@@ -158,6 +169,8 @@ class TestContributeHandler:
         command = {"text": command_text, "user_id": "U123456"}
         settings.SLACK_COMMANDS_ENABLED = True
         mock_get_issues.return_value = {"hits": []}
+        mock_open_issues_count.return_value = 42
+        settings.SLACK_COMMANDS_ENABLED = True
 
         handler(ack=MagicMock(), command=command, client=mock_slack_client)
 

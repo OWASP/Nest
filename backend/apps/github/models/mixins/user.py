@@ -22,7 +22,7 @@ class UserIndexMixin:
     @property
     def idx_created_at(self):
         """Return created at timestamp for indexing."""
-        return self.created_at
+        return self.created_at.timestamp()
 
     @property
     def idx_email(self):
@@ -72,7 +72,7 @@ class UserIndexMixin:
     @property
     def idx_updated_at(self):
         """Return updated at timestamp for indexing."""
-        return self.updated_at
+        return self.updated_at.timestamp()
 
     @property
     def idx_url(self):
