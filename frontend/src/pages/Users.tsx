@@ -22,7 +22,7 @@ const UsersPage = () => {
   const navigate = useNavigate()
 
   const handleButtonClick = (user: user) => {
-    navigate(`/users/${user.idx_key}`)
+    navigate(`/community/users/${user.idx_key}`)
   }
 
   const renderUserCard = (user: user) => {
