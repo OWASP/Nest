@@ -11,6 +11,6 @@ export default {
       },
     },
   },
-  darkMode: 'selector',
-  plugins: [],
+  darkMode: ['selector', 'class'],
+  plugins: [require('tailwindcss-animate')],
 }

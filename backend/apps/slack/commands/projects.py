@@ -8,7 +8,7 @@ from apps.common.utils import get_absolute_url, natural_date, natural_number
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
-from apps.slack.utils import escape
+from apps.slack.utils import escape, send_to_analytics
 
 COMMAND = "/projects"
 NAME_TRUNCATION_LIMIT = 80
@@ -25,6 +25,7 @@ def handler(ack, command, client):
 
     search_query = command["text"]
     search_query_escaped = escape(command["text"])
+    send_to_analytics(search_query, COMMAND)
     blocks = [
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}"),
     ]

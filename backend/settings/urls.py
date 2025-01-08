@@ -10,6 +10,7 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
+from apps.analytics.api.urls import router as analytics_router
 from apps.github.api.urls import router as github_router
 from apps.owasp.api.urls import router as owasp_router
 from apps.slack.apps import SlackConfig
@@ -17,6 +18,7 @@ from apps.slack.apps import SlackConfig
 router = routers.DefaultRouter()
 router.registry.extend(github_router.registry)
 router.registry.extend(owasp_router.registry)
+router.registry.extend(analytics_router.registry)
 
 urlpatterns = [
     path("api/v1/", include(router.urls)),
