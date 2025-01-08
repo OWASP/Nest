@@ -11,9 +11,10 @@ jest.mock('pages', () => ({
   CommitteesPage: () => <div data-testid="committees-page">Committees Page</div>,
   ChaptersPage: () => <div data-testid="chapters-page">Chapters Page</div>,
   ContributePage: () => <div data-testid="contribute-page">Contribute Page</div>,
-  ChapterDetailsPage: () => <div data-testid="contribute-page">ChapterDetailsPage Page</div>,
-  CommitteeDetailsPage: () => <div data-testid="contribute-page">CommitteeDetails Page</div>,
-  ProjectDetailsPage: () => <div data-testid="contribute-page">ProjectDetails Page</div>,
+  ChapterDetailsPage: () => <div data-testid="chapterdetails-page">ChapterDetailsPage Page</div>,
+  CommitteeDetailsPage: () => <div data-testid="committeedetails-page">CommitteeDetails Page</div>,
+  ProjectDetailsPage: () => <div data-testid="projectdetails-page">ProjectDetails Page</div>,
+  UserDetailsPage: () => <div data-testid="userdetails-page">UserDetails Page</div>,
 }))
 jest.mock('lib/hooks/useToast', () => ({
   useToast: jest.fn(() => ({

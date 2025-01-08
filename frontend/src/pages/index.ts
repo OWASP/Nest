@@ -10,6 +10,9 @@ import ContributePage from './Contribute'
 import Home from './Home'
 import ProjectDetailsPage from './ProjectDetails'
 import ProjectsPage from './Projects'
+import UserDetailsPage from './UserDetails'
+import UsersPage from './Users'
+
 export {
   Home,
   ProjectsPage,
@@ -19,4 +22,6 @@ export {
   CommitteeDetailsPage,
   ChapterDetailsPage,
   ProjectDetailsPage,
+  UsersPage,
+  UserDetailsPage,
 }
