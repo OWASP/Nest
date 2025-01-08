@@ -4,8 +4,6 @@ import pytest
 
 from apps.common.management.commands.algolia_update_suggestions import Command
 
-EXPECTED_CALL_COUNT = 5
-
 
 class TestUpdateSuggestionsCommand:
     @pytest.mark.parametrize(
@@ -100,7 +98,9 @@ class TestUpdateSuggestionsCommand:
 
         mock_client.update_config.return_value = None
 
+        expected_call_count = 5
         # Act
+
         command = Command()
         command.handle()
 
@@ -120,4 +120,4 @@ class TestUpdateSuggestionsCommand:
         )
 
         # Use constant for the expected call count
-        assert mock_client.update_config.call_count == EXPECTED_CALL_COUNT
+        assert mock_client.update_config.call_count == expected_call_count

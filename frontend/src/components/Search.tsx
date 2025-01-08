@@ -14,7 +14,7 @@ const SearchComponent: React.FC<SearchProps> = ({
   onSearch,
   placeholder,
   initialValue = '',
-  indexName = 'issue_suggestions',
+  indexName,
   onReady,
 }) => {
   const handleSearchChange = useCallback(
