@@ -80,7 +80,7 @@ describe('ChaptersPage Component', () => {
     })
   })
 
-  test('renders SearchBar, data and pagination component concurrently after data is loaded', async () => {
+  test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
     window.scrollTo = jest.fn()
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockChapterData.chapters,
