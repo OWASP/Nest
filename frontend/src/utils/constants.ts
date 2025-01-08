@@ -18,10 +18,6 @@ export const headerLinks: Link[] = [
     href: '/chapters',
   },
   {
-    text: 'Committees',
-    href: '/committees',
-  },
-  {
     text: 'Community',
     href: '/community/users',
   },
