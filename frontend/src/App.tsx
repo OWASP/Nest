@@ -33,6 +33,7 @@ function App() {
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
+        
       </Routes>
       <Footer />
     </main>

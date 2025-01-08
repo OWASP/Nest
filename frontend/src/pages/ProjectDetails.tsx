@@ -42,7 +42,7 @@ const ProjectDetailsPage = () => {
   const filteredIcons = getFilteredIcons(project, params)
 
   const handleButtonClick = () => {
-    window.open(`/projects/contribute?q=${project.idx_name}`, '_blank')
+    window.open(`/projects/contribute?q=${project.idx_name}`)
   }
 
   const SubmitButton = {

@@ -69,12 +69,12 @@ const Card = ({
               data-tooltip-content={`${level.level} project`}
               className={cn('flex h-8 w-8 items-center justify-center rounded-full text-xs shadow')}
               style={{ backgroundColor: level.color }}
-            >
+            > 
               <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
           )}
           {/* Project title and link */}
-          <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
+          <a href={url} rel="noopener noreferrer" className="flex-1">
             <h1 className="max-w-full break-words text-base font-semibold sm:break-normal sm:text-lg lg:text-2xl dark:text-sky-600">
               {title}
             </h1>
@@ -104,7 +104,6 @@ const Card = ({
       {projectName && (
         <a
           href={projectLink}
-          target="_blank"
           rel="noopener noreferrer"
           className="mt-2 font-medium"
         >
