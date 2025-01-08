@@ -21,7 +21,8 @@ omit = [
 ]
 
 [tool.poetry.dependencies]
-algoliasearch-django = "^3.0.0"
+algoliasearch = "^4.11.2"
+algoliasearch-django = "^4.0.0"
 django = "^5.1"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.6.0"
@@ -33,7 +34,7 @@ gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 lxml = "^5.3.0"
 markdown = "^3.7"
-openai = "^1.58.1"
+openai = "^1.59.3"
 psycopg = "^3.2.3"
 pygithub = "^2.5.0"
 python = "^3.13"
@@ -47,7 +48,7 @@ slack-bolt = "^1.22.0"
 djlint = "^1.36.4"
 isort = "^5.13.2"
 pre-commit = "^4.0.0"
-ruff = "^0.8.5"
+ruff = "^0.8.6"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
@@ -125,7 +126,7 @@ select = ["ALL"]
 "**/migrations/*.py" = ["D100", "D101", "D104"]
 "**/models.py" = ["D106"]
 "**/models/*.py" = ["D106"]
-"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "S101"]
+"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
 
 
 [build-system]

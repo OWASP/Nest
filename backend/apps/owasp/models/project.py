@@ -141,6 +141,11 @@ class Project(
         """Projects to index."""
         return self.is_active and self.has_active_repositories
 
+    @property
+    def nest_key(self):
+        """Get Nest key."""
+        return self.key.replace("www-project-", "")
+
     def deactivate(self):
         """Deactivate project."""
         self.is_active = False
