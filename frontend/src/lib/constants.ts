@@ -24,6 +24,13 @@ export type ButtonType = {
   url?: string
 }
 
+export interface UserCardProps {
+  avatar: string
+  name: string
+  company: string
+  button: ButtonType
+}
+
 export interface CardProps {
   title: string
   url: string

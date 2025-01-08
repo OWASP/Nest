@@ -7,7 +7,7 @@ const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }
     <a
       data-tooltip-id={`avatar-tooltip-${contributor.login}`}
       data-tooltip-content={`${contributor.contributions_count} contributions by ${contributor.name}`}
-      href={`https://github.com/${contributor.login}`}
+      href={`/community/users/${contributor.login}`}
       target="_blank"
     >
       <img
