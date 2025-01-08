@@ -60,6 +60,11 @@ class RepositoryBasedEntityModel(models.Model):
         return f"https://github.com/owasp/{self.key}"
 
     @property
+    def owasp_name(self):
+        """Get OWASP name."""
+        return self.name if self.name.startswith("OWASP ") else f"OWASP {self.name}"
+
+    @property
     def owasp_url(self):
         """Get OWASP URL."""
         return f"https://owasp.org/{self.key}"
@@ -100,7 +105,7 @@ class RepositoryBasedEntityModel(models.Model):
 
     def generate_summary(self, prompt, open_ai=None, max_tokens=500):
         """Generate entity summary."""
-        if not self.is_active:
+        if not self.is_active or not prompt:
             return
 
         open_ai = open_ai or OpenAi()
