@@ -19,8 +19,13 @@ OWASP_PROJECT_NETTACKER_CHANNEL_ID = "CQZGG24FQ"
 OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID = "CURE8PQ68"
 OWASP_THREAT_MODELING_CHANNEL_ID = "C1CS3C6AF"
 
+VIEW_PROJECTS_ACTION = "view_projects_action"
+VIEW_COMMITTEES_ACTION = "view_committees_action"
+VIEW_CHAPTERS_ACTION = "view_chapters_action"
+
 NL = "\n"
 NLNL = 2 * NL
+TAB = "\t"
 
 FEEDBACK_CHANNEL_MESSAGE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "

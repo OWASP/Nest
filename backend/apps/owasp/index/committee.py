@@ -55,6 +55,6 @@ class CommitteeIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        return Committee.active_committees.prefetch_related(
+        return Committee.active_committees.select_related(
             "owasp_repository",
         )

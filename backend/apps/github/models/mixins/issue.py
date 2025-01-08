@@ -32,7 +32,7 @@ class IssueIndexMixin:
     @property
     def idx_created_at(self):
         """Return created at for indexing."""
-        return self.created_at
+        return self.created_at.timestamp()
 
     @property
     def idx_hint(self):
@@ -97,7 +97,7 @@ class IssueIndexMixin:
     @property
     def idx_repository_languages(self):
         """Return repository languages for indexing."""
-        return self.repository.idx_languages
+        return self.repository.top_languages
 
     @property
     def idx_repository_name(self):
@@ -127,7 +127,7 @@ class IssueIndexMixin:
     @property
     def idx_updated_at(self):
         """Return updated at for indexing."""
-        return self.updated_at
+        return self.updated_at.timestamp()
 
     @property
     def idx_url(self):

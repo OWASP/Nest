@@ -147,9 +147,12 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         if self.id and not self.is_indexable:
             return
 
+        if not (prompt := Prompt.get_github_issue_hint()):
+            return
+
         open_ai = open_ai or OpenAi()
         open_ai.set_input(f"{self.title}\r\n{self.body}")
-        open_ai.set_max_tokens(max_tokens).set_prompt(Prompt.get_github_issue_hint())
+        open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.hint = open_ai.complete() or ""
 
     def generate_summary(self, open_ai=None, max_tokens=500):
@@ -157,13 +160,17 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         if self.id and not self.is_indexable:
             return
 
-        open_ai = open_ai or OpenAi()
-        open_ai.set_input(f"{self.title}\r\n{self.body}")
-        open_ai.set_max_tokens(max_tokens).set_prompt(
+        prompt = (
             Prompt.get_github_issue_documentation_project_summary()
             if self.project.is_documentation_type
             else Prompt.get_github_issue_project_summary()
         )
+        if not prompt:
+            return
+
+        open_ai = open_ai or OpenAi()
+        open_ai.set_input(f"{self.title}\r\n{self.body}")
+        open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
     def save(self, *args, **kwargs):
