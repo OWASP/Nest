@@ -81,6 +81,7 @@ Follow these steps to set up the OWASP Nest application:
       ```plaintext
       DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
       DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
+      DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
       ```
 
     - Update your `frontend/.env` file with the following keys from your Algolia app (use **search** API key for frontend):

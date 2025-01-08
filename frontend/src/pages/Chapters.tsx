@@ -55,6 +55,7 @@ const ChaptersPage = () => {
       totalPages={totalPages}
       currentPage={currentPage}
       searchQuery={searchQuery}
+      indexName="chapters"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       searchPlaceholder="Search for OWASP chapters..."

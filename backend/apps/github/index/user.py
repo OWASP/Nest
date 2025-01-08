@@ -32,6 +32,11 @@ class UserIndex(AlgoliaIndex, IndexBase):
     )
 
     settings = {
+        "attributesForFaceting": [
+            "idx_key",
+            "idx_name",
+            "idx_title",
+        ],
         "attributeForDistinct": "idx_login",
         "minProximity": 4,
         "customRanking": [
