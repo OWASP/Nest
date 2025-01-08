@@ -13,6 +13,7 @@ jest.mock('pages', () => ({
   CommitteeDetailsPage: () => <div data-testid="committeedetails-page">CommitteeDetails Page</div>,
   ProjectDetailsPage: () => <div data-testid="projectdetails-page">ProjectDetails Page</div>,
   UserDetailsPage: () => <div data-testid="userdetails-page">UserDetails Page</div>,
+  UsersPage: () => <div data-testid="users-page">Users Page</div>,
 }))
 
 jest.mock('components/Header', () => {
@@ -44,6 +45,9 @@ jest.mock('components/Footer', () => {
 
 describe('App Component', () => {
   beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation((...args) => {
+      throw new Error('Console error was thrown: ' + args.join(' '))
+    })
     window.scrollTo = jest.fn()
   })
 
