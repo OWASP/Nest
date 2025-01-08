@@ -21,7 +21,8 @@ omit = [
 ]
 
 [tool.poetry.dependencies]
-algoliasearch-django = "^3.0.0"
+algoliasearch = "^4.11.2"
+algoliasearch-django = "^4.0.0"
 django = "^5.1"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.6.0"
@@ -125,7 +126,7 @@ select = ["ALL"]
 "**/migrations/*.py" = ["D100", "D101", "D104"]
 "**/models.py" = ["D106"]
 "**/models/*.py" = ["D106"]
-"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "S101"]
+"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
 
 
 [build-system]

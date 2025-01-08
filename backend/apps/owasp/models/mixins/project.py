@@ -101,4 +101,4 @@ class ProjectIndexMixin(GenericEntityMixin):
     @property
     def idx_updated_at(self):
         """Return updated at for indexing."""
-        return self.updated_at
+        return self.updated_at.timestamp()

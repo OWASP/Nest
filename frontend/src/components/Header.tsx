@@ -1,115 +1,113 @@
-import { faMoon, faSun, faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState, useEffect } from 'react'
-import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
+
 import { headerLinks } from 'utils/constants'
+import { cn } from 'lib/utils'
+import ModeToggle from './ModeToggle'
 
 export default function Header() {
-  const [dark, setDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark'
-  })
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const icon = !dark ? <FontAwesomeIcon icon={faSun} /> : <FontAwesomeIcon icon={faMoon} />
-
-  // Effect to apply the dark class to the body when theme changes
-  useEffect(() => {
-    if (dark) {
-      document.body.classList.add('dark')
-    } else {
-      document.body.classList.remove('dark')
-    }
-  }, [dark])
-
-  // Function to toggle the theme between light and dark
-  function toggleTheme() {
-    setDark(!dark)
-    const newTheme = !dark ? 'dark' : 'light'
-    document.body.classList.toggle('dark', !dark)
-    localStorage.setItem('theme', newTheme) // Store the theme in localStorage
-  }
-
-  // Function to toggle the mobile menu open/close
-  function toggleMenu() {
-    setIsMenuOpen(!isMenuOpen)
-  }
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   return (
-    <div>
-      <div className="fixed inset-x-0 top-0 z-50 bg-owasp-blue shadow-md dark:bg-slate-800">
-        <div className="flex h-16 items-center justify-between" id="navbar-sticky">
-          {/* Logo and Site Name */}
-          <div>
-            <NavLink to="/">
-              <div className="flex h-full items-center">
-                <img
-                  src={!dark ? '/img/owasp_icon_black_sm.png' : '/img/owasp_icon_white_sm.png'}
-                  className="h-16 px-2"
-                  alt="OWASP Logo"
-                />
-                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-                  Nest
-                </div>
-              </div>
-            </NavLink>
-          </div>
-          {/* Desktop navigation links */}
-          <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:flex">
-            <div className="flex justify-start pl-6 text-slate-700 dark:text-slate-300">
-              {headerLinks.map((link, i) => (
-                <NavLink
-                  key={i}
-                  to={link.href}
-                  className="navlink px-3 py-2 hover:text-slate-800 dark:hover:text-slate-200"
-                  aria-current="page"
-                >
-                  {link.text}
-                </NavLink>
-              ))}
+    <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
+      <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
+        {/* Logo */}
+        <NavLink to="/">
+          <div className="flex h-full items-center">
+            <img
+              src={'/img/owasp_icon_white_sm.png'}
+              className="hidden h-16 dark:block"
+              alt="OWASP Logo"
+            ></img>
+            <img
+              src={'/img/owasp_icon_black_sm.png'}
+              className="block h-16 dark:hidden"
+              alt="OWASP Logo"
+            ></img>
+            <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+              Nest
             </div>
           </div>
-          {/* Theme toggle and mobile menu button */}
-          <div>
-            <div className="flex w-full items-center justify-between p-4">
-              <div className="flex items-center">
-                {/* Theme toggle checkbox */}
-                <label className="inline-flex cursor-pointer content-center items-center">
-                  <span className="ms-3 pr-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                    {icon}
-                  </span>
-                  <input onChange={toggleTheme} type="checkbox" className="peer sr-only" />
-                  <div className="peer relative h-5 w-9 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-500 peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-500 dark:bg-gray-700 rtl:peer-checked:after:-translate-x-full"></div>
-                </label>
-              </div>
-              {/* Mobile menu toggle button (bars or close icon) */}
-              <button
-                onClick={toggleMenu}
-                className="ml-4 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200 md:hidden"
-              >
-                <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </div>
-        {/* Mobile menu */}
-        <div
-          className={`${
-            isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-          } overflow-hidden transition-all duration-300 ease-in-out md:hidden`}
-        >
-          <div className="space-y-1 px-4 pb-3 pt-2">
+        </NavLink>
+        {/* Desktop Header Links */}
+        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
+          <div className="flex justify-start pl-6">
             {headerLinks.map((link, i) => (
               <NavLink
                 key={i}
                 to={link.href}
-                className="block rounded-md px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                onClick={() => setIsMenuOpen(false)}
+                className={cn(
+                  'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                  location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                )}
+                aria-current="page"
               >
                 {link.text}
               </NavLink>
             ))}
           </div>
         </div>
+        <div className="flex items-center justify-normal space-x-4">
+          <ModeToggle />
+          <div className="md:hidden">
+            <button
+              onClick={toggleMobileMenu}
+              className="text-slate-300 hover:text-slate-100 focus:outline-none"
+            >
+              <span className="sr-only">Open main menu</span>
+              {mobileMenuOpen ? (
+                <FontAwesomeIcon icon={faTimes} className="h-6 w-6" />
+              ) : (
+                <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="space-y-1 px-2 pb-3 pt-2">
+          {/* Logo */}
+          <NavLink to="/">
+            <div className="flex h-full items-center">
+              <img
+                src={'/img/owasp_icon_white_sm.png'}
+                className="hidden h-16 dark:block"
+                alt="OWASP Logo"
+              ></img>
+              <img
+                src={'/img/owasp_icon_black_sm.png'}
+                className="block h-16 dark:hidden"
+                alt="OWASP Logo"
+              ></img>
+              <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                Nest
+              </div>
+            </div>
+          </NavLink>
+          {headerLinks.map((link, i) => (
+            <NavLink
+              key={i}
+              to={link.href}
+              className={cn(
+                'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+              )}
+              onClick={toggleMobileMenu}
+            >
+              {link.text}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    </header>
   )
 }
