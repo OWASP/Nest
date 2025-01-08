@@ -8,6 +8,7 @@ import {
   CommitteeDetailsPage,
   ChapterDetailsPage,
   UsersPage,
+  UserDetailsPage
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
@@ -35,6 +36,7 @@ function App() {
         <Route path="/chapters" element={<ChaptersPage />}></Route>
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
         <Route path="/community/users" element={<UsersPage />}></Route>
+        <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
       </Routes>
       <Footer />
     </main>

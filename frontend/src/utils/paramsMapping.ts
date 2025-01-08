@@ -74,7 +74,24 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
       }
     case 'users':
       return {
-        attributesToRetrieve: ['idx_key', 'idx_name', 'idx_company', 'idx_avatar_url'],
+        attributesToRetrieve: [
+          'idx_avatar_url',
+          'idx_bio',
+          'idx_company',
+          'idx_created_at',
+          'idx_email',
+          'idx_followers_count',
+          'idx_following_count',
+          'idx_key',
+          'idx_location',
+          'idx_login',
+          'idx_name',
+          'idx_public_repositories_count',
+          'idx_title',
+          'idx_updated_at',
+          'idx_url',
+          'objectID',
+        ],
         hitsPerPage: 24,
         minProximity: 4,
         typoTolerance: 'min',

@@ -133,3 +133,21 @@ export interface AgloliaRequestType {
   removeWordsIfNoResults: 'none' | 'lastWords' | 'firstWords' | 'allOptional'
   typoTolerance?: string
 }
+
+export interface UserDetailsProps {
+  avatar_url: string
+  bio: string
+  company: string
+  email: string
+  followers_count: number
+  following_count: number
+  location: string
+  login: string
+  name: string
+  public_repositories_count: number
+  title: string
+  twitter_username: string
+  url: string
+  created_at: string
+  updated_at: string
+}
