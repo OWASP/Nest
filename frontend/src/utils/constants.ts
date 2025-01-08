@@ -21,6 +21,10 @@ export const headerLinks: Link[] = [
     text: 'Committees',
     href: '/committees',
   },
+  {
+    text: 'Community',
+    href: '/community/users',
+  },
 ]
 
 export interface Section {

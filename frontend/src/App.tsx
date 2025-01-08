@@ -7,6 +7,7 @@ import {
   ProjectDetailsPage,
   CommitteeDetailsPage,
   ChapterDetailsPage,
+  UsersPage,
   UserDetailsPage,
 } from 'pages'
 import { useEffect } from 'react'
@@ -34,6 +35,7 @@ function App() {
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
+        <Route path="/community/users" element={<UsersPage />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
       </Routes>
       <Footer />

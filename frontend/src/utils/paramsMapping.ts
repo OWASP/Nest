@@ -92,6 +92,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_url',
           'objectID',
         ],
+        hitsPerPage: 24,
         minProximity: 4,
         typoTolerance: 'min',
       }
