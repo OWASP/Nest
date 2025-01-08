@@ -28,7 +28,7 @@
     "@sentry/tracing": "^7.114.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/lodash": "^4.17.14",
-    "algoliasearch": "^5.18.0",
+    "algoliasearch": "^5.19.0",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
