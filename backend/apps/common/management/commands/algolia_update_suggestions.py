@@ -10,27 +10,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         client = QuerySuggestionsClientSync(
-            settings.ALGOLIA_APPLICATION_ID, settings.ALGOLIA_WRITE_API_KEY, "eu"
+            settings.ALGOLIA_APPLICATION_ID,
+            settings.ALGOLIA_WRITE_API_KEY,
+            settings.ALGOLIA_APPLICATION_REGION,
         )
-        print("Algolia client initialized")
 
         entity_configs = {
-            "issues": {
-                "facets": [
-                    {"attribute": "idx_title"},
-                    {"attribute": "idx_project_name"},
-                    {"attribute": "idx_repository_name"},
-                    {"attribute": "idx_project_tags"},
-                    {"attribute": "idx_repository_topics"},
-                ],
-                "generate": [
-                    ["idx_title"],
-                    ["idx_project_name"],
-                    ["idx_repository_name"],
-                    ["idx_project_tags"],
-                    ["idx_repository_topics"],
-                ],
-            },
             "chapters": {
                 "facets": [
                     {"attribute": "idx_key"},
@@ -48,6 +33,33 @@ class Command(BaseCommand):
                     ["idx_suggested_location"],
                 ],
             },
+            "committees": {
+                "facets": [
+                    {"attribute": "idx_key"},
+                    {"attribute": "idx_name"},
+                    {"attribute": "idx_tags"},
+                ],
+                "generate": [
+                    ["idx_name"],
+                    ["idx_tags"],
+                ],
+            },
+            "issues": {
+                "facets": [
+                    {"attribute": "idx_title"},
+                    {"attribute": "idx_project_name"},
+                    {"attribute": "idx_repository_name"},
+                    {"attribute": "idx_project_tags"},
+                    {"attribute": "idx_repository_topics"},
+                ],
+                "generate": [
+                    ["idx_title"],
+                    ["idx_project_name"],
+                    ["idx_repository_name"],
+                    ["idx_project_tags"],
+                    ["idx_repository_topics"],
+                ],
+            },
             "projects": {
                 "facets": [
                     {"attribute": "idx_key"},
@@ -61,31 +73,22 @@ class Command(BaseCommand):
                     ["idx_repository_names"],
                 ],
             },
-            "committees": {
-                "facets": [
-                    {"attribute": "idx_key"},
-                    {"attribute": "idx_name"},
-                    {"attribute": "idx_tags"},
-                ],
-                "generate": [
-                    ["idx_name"],
-                    ["idx_tags"],
-                ],
-            },
         }
 
-        # Iterate over entity
-        for entity, config in entity_configs.items():
-            response = client.create_config(
-                configuration_with_index={
-                    "indexName": f"{settings.ENVIRONMENT.lower()}_{entity}_suggestions",
-                    "sourceIndices": [
-                        {
-                            "indexName": f"{settings.ENVIRONMENT.lower()}_{entity}",
-                            **config,
-                        }
-                    ],
-                    "exclude": ["test"],
-                }
+        for entity, suggestion_settings in entity_configs.items():
+            source_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}"
+            suggestions_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}_suggestions"
+
+            configuration = {
+                "sourceIndices": [
+                    {
+                        "indexName": source_index_name,
+                        **suggestion_settings,
+                    }
+                ]
+            }
+            client.update_config(
+                index_name=suggestions_index_name,
+                configuration=configuration,
             )
-            print(f"Query Suggestions for {settings.ENVIRONMENT.lower()}_{entity}: {response}")
+            print(f"Updated query suggestions index for {entity.capitalize()}")

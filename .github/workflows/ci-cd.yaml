@@ -242,6 +242,7 @@ jobs:
         run: |
           # Backend
           echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" > .env.backend
+          echo "DJANGO_ALGOLIA_APPLICATION_REGION=${{ secrets.DJANGO_ALGOLIA_APPLICATION_REGION }}" > .env.backend
           echo "DJANGO_ALGOLIA_WRITE_API_KEY=${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}" >> .env.backend
           echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env.backend
           echo "DJANGO_AWS_ACCESS_KEY_ID=${{ secrets.DJANGO_AWS_ACCESS_KEY_ID }}" >> .env.backend

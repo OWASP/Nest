@@ -23,7 +23,7 @@ const Autocomplete = React.memo(
 
     const debouncedOnChange = debounce((query: string) => {
       onChange(query)
-    }, 1000)
+    }, 750)
 
     useEffect(() => {
       return () => {
