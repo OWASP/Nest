@@ -41,16 +41,20 @@ const UserDetailsPage: React.FC = () => {
     fetchUserData()
   }, [userKey])
 
-  useEffect(() => {
-    if (!isLoading && user == null) throw new Error('User not found')
-  }, [user, isLoading])
-
   if (isLoading)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
+
+  if (!isLoading && user == null) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">User not found</h1>
+      </div>
+    )
+  }
 
   return (
     <div className="mt-24 min-h-screen w-full p-4">

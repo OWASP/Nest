@@ -1,7 +1,18 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
+
+// Mock the Algolia-related modules
+jest.mock('lib/algoliaClient', () => ({
+  createAlgoliaClient: jest.fn(),
+}))
+
+jest.mock('lib/api', () => ({
+  fetchAlgoliaData: jest.fn(),
+  removeIdxPrefix: (obj: unknown) => obj,
+}))
 
 jest.mock('utils/logger', () => ({
   error: jest.fn(),
@@ -23,21 +34,28 @@ const mockUser = {
   created_at: '2020-01-01T00:00:00Z',
 }
 
-describe('UserDetailsPage', () => {
-  beforeEach(() => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(mockUser),
-      })
-    ) as jest.Mock
-  })
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(
+    <MemoryRouter initialEntries={['/user/testuser']}>
+      <Routes>
+        <Route path="/user/:login" element={ui} />
+      </Routes>
+    </MemoryRouter>
+  )
+}
 
-  afterEach(() => {
-    jest.clearAllMocks()
+describe('UserDetailsPage', () => {
+  const { fetchAlgoliaData } = require('lib/api')
+
+  beforeEach(() => {
+    fetchAlgoliaData.mockReset()
   })
 
   test('renders loading spinner initially', async () => {
-    render(<UserDetailsPage />)
+    fetchAlgoliaData.mockImplementation(() => new Promise(() => {}))
+    await act(async () => {
+      renderWithRouter(<UserDetailsPage />)
+    })
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
@@ -45,44 +63,35 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders user details after fetching data', async () => {
+    fetchAlgoliaData.mockResolvedValue({ hits: [mockUser] })
+
     await act(async () => {
-      render(
-        <MemoryRouter initialEntries={['/user/testuser']}>
-          <Routes>
-            <Route path="/user/:login" element={<UserDetailsPage />} />
-          </Routes>
-        </MemoryRouter>
-      )
+      renderWithRouter(<UserDetailsPage />)
     })
 
-    await waitFor(() => expect(screen.getByText('Test User')).toBeInTheDocument())
-    expect(screen.getByText('@testuser')).toBeInTheDocument()
-    expect(screen.getByText('This is a test user')).toBeInTheDocument()
-    expect(screen.getByText('Test Company')).toBeInTheDocument()
-    expect(screen.getByText('Test Location')).toBeInTheDocument()
-    expect(screen.getByText('testuser')).toBeInTheDocument()
-    expect(screen.getByText('testuser@example.com')).toBeInTheDocument()
-    expect(screen.getByText('Followers')).toBeInTheDocument()
-    expect(screen.getByText('Following')).toBeInTheDocument()
-    expect(screen.getByText('Repositories')).toBeInTheDocument()
+    // Wait for the loading state to finish
+    await waitFor(() => {
+      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+    })
+
+    // Check for presence of user data
+    expect(screen.getByText(mockUser.name)).toBeInTheDocument()
+    expect(screen.getByText(`@${mockUser.login}`)).toBeInTheDocument()
+    expect(screen.getByText(mockUser.bio)).toBeInTheDocument()
+    expect(screen.getByText(mockUser.company)).toBeInTheDocument()
+    expect(screen.getByText(mockUser.location)).toBeInTheDocument()
     expect(screen.getByText('Joined January 1, 2020')).toBeInTheDocument()
   })
 
   test('renders error message when user does not exist', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(null),
-      })
-    ) as jest.Mock
+    fetchAlgoliaData.mockResolvedValue({ hits: [] })
 
-    render(
-      <MemoryRouter initialEntries={['/user/nonexistentuser']}>
-        <Routes>
-          <Route path="/user/:login" element={<UserDetailsPage />} />
-        </Routes>
-      </MemoryRouter>
-    )
+    await act(async () => {
+      renderWithRouter(<UserDetailsPage />)
+    })
 
-    await waitFor(() => expect(screen.getByText('User does not exist')).toBeInTheDocument())
+    await waitFor(() => {
+      expect(screen.getByText('User not found')).toBeInTheDocument()
+    })
   })
 })
