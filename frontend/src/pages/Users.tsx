@@ -44,6 +44,7 @@ const UsersPage = () => {
 
   return (
     <SearchPageLayout
+      indexName="users"
       isLoaded={isLoaded}
       totalPages={totalPages}
       currentPage={currentPage}
