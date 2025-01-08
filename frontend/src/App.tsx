@@ -34,7 +34,7 @@ function App() {
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
-        <Route path="/user/:login" element={<UserDetailsPage />}></Route>
+        <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
       </Routes>
       <Footer />
     </main>

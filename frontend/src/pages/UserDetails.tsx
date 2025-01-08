@@ -1,8 +1,7 @@
-import { faGithub, faXTwitter } from '@fortawesome/free-brands-svg-icons'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
 import {
   faBuildingUser,
-  faCode,
   faCodeBranch,
   faLocationDot,
   faUserPlus,
@@ -11,23 +10,27 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { API_URL } from 'utils/credentials'
 import logger from 'utils/logger'
+import { fetchAlgoliaData } from 'lib/api'
 import { UserDetailsProps } from 'lib/types'
+import { IndexedObject, removeIdxPrefix } from 'lib/utils'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
-  const { login } = useParams()
-  const [user, setUser] = useState<UserDetailsProps | null>(null)
+  const { userKey } = useParams()
+  const [user, setUser] = useState<UserDetailsProps | null>()
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        setIsLoading(true)
-        const response = await fetch(`${API_URL}/github/users/login/${login}`)
-        const data = await response.json()
-        setUser(data)
+        const { hits } = await fetchAlgoliaData('users', userKey, 1)
+        if (hits.length === 0) {
+          setUser(null)
+        } else {
+          const userData = removeIdxPrefix(hits[0] as IndexedObject)
+          setUser(userData as unknown as UserDetailsProps)
+        }
       } catch (error) {
         logger.error(error)
       } finally {
@@ -36,7 +39,11 @@ const UserDetailsPage: React.FC = () => {
     }
 
     fetchUserData()
-  }, [login])
+  }, [userKey])
+
+  useEffect(() => {
+    if (!isLoading && user == null) throw new Error('User not found')
+  }, [user, isLoading])
 
   if (isLoading)
     return (
@@ -44,10 +51,6 @@ const UserDetailsPage: React.FC = () => {
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
-
-  if (!user) {
-    return <div className="flex h-screen items-center justify-center">User does not exist</div>
-  }
 
   return (
     <div className="mt-24 min-h-screen w-full p-4">
@@ -70,7 +73,7 @@ const UserDetailsPage: React.FC = () => {
                       {user.name}
                     </h1>
                     <a
-                      href={`https://www.github.com/${login}`}
+                      href={`https://www.github.com/${user.login}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-lg text-gray-700 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-300"
@@ -92,12 +95,7 @@ const UserDetailsPage: React.FC = () => {
             </div>
           </div>
           <div className="px-6 py-6">
-            {user.bio && (
-              <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-                <FontAwesomeIcon icon={faCode} className="text-sm" />
-                <p className="text-lg">{user.bio}</p>
-              </div>
-            )}
+            {user.bio && <p className="text-lg text-gray-700 dark:text-gray-300">{user.bio}</p>}
 
             <div className="mt-4 space-y-3">
               {user.company && (
@@ -112,21 +110,11 @@ const UserDetailsPage: React.FC = () => {
                   <span>{user.location}</span>
                 </div>
               )}
-              {user.twitter_username && (
-                <a
-                  href={`https://x.com/${user.twitter_username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
-                >
-                  <FontAwesomeIcon icon={faXTwitter} className="text-sm" />
-                  <span>{user.twitter_username}</span>
-                </a>
-              )}
+
               {user.email && (
                 <a
                   href={`mailto:${user.email}`}
-                  className="flex items-center space-x-2 text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
+                  className="flex w-fit items-center space-x-2 text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
                 >
                   <FontAwesomeIcon icon={faEnvelope} className="text-sm" />
                   <span>{user.email}</span>
