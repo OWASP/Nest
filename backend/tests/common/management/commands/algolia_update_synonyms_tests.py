@@ -4,7 +4,7 @@ import pytest
 
 from apps.common.management.commands.algolia_update_suggestions import Command
 
-EXPECTED_CALL_COUNT = 4
+EXPECTED_CALL_COUNT = 5
 
 
 class TestUpdateSuggestionsCommand:
@@ -70,6 +70,18 @@ class TestUpdateSuggestionsCommand:
                     ["idx_name"],
                     ["idx_tags"],
                     ["idx_repository_names"],
+                ],
+            ),
+            (
+                "users",
+                [
+                    {"attribute": "idx_key"},
+                    {"attribute": "idx_name"},
+                    {"attribute": "idx_title"},
+                ],
+                [
+                    ["idx_name"],
+                    ["idx_title"],
                 ],
             ),
         ],

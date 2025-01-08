@@ -73,6 +73,17 @@ class Command(BaseCommand):
                     ["idx_repository_names"],
                 ],
             },
+            "users": {
+                "facets": [
+                    {"attribute": "idx_key"},
+                    {"attribute": "idx_name"},
+                    {"attribute": "idx_title"},
+                ],
+                "generate": [
+                    ["idx_name"],
+                    ["idx_title"],
+                ],
+            },
         }
 
         for entity, suggestion_settings in entity_configs.items():
