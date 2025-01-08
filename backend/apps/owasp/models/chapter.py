@@ -115,11 +115,12 @@ class Chapter(
         if not self.is_active:
             return
 
+        if not (prompt := Prompt.get_owasp_chapter_suggested_location()):
+            return
+
         open_ai = open_ai or OpenAi()
         open_ai.set_input(self.get_geo_string())
-        open_ai.set_max_tokens(max_tokens).set_prompt(
-            Prompt.get_owasp_chapter_suggested_location()
-        )
+        open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.suggested_location = open_ai.complete() or ""
 
     def get_geo_string(self, include_name=True):

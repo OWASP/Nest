@@ -198,8 +198,8 @@ class Project(
 
     def save(self, *args, **kwargs):
         """Save project."""
-        if not self.summary:
-            self.generate_summary(prompt=Prompt.get_owasp_project_summary())
+        if not self.summary and (prompt := Prompt.get_owasp_project_summary()):
+            self.generate_summary(prompt=prompt)
 
         super().save(*args, **kwargs)
 
