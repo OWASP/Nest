@@ -2,10 +2,11 @@
 
 from django.conf import settings
 
+from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.commands.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
 COMMAND = "/gsoc"
 SUPPORTED_YEARS = set(range(2020, 2025))  # 2020-2024

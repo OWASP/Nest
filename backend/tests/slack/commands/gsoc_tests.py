@@ -3,9 +3,10 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from django.conf import settings
 
+from apps.common.constants import NL
 from apps.slack.blocks import markdown
 from apps.slack.commands.gsoc import COMMAND, handler
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
 
 class TestGsocHandler:

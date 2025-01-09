@@ -11,11 +11,7 @@ const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
       <div className="flex w-full flex-col items-center space-y-4">
         <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 transition-all group-hover:ring-blue-500 dark:ring-gray-700">
           {avatar ? (
-            <img
-              src={avatar}
-              alt={`${name || 'Anonymous'} Avatar`}
-              className="h-full w-full object-cover"
-            />
+            <img src={avatar} alt={name} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
               <FontAwesomeIcon
@@ -28,10 +24,10 @@ const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
 
         <div className="text-center">
           <h3 className="line-clamp-1 text-lg font-semibold text-gray-900 group-hover:text-blue-500 dark:text-white sm:text-xl">
-            {name || 'Anonymous'}
+            {name}
           </h3>
           <p className="mt-1 line-clamp-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-            {company || 'No Company'}
+            {company || ''}
           </p>
         </div>
       </div>

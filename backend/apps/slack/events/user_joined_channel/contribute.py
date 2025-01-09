@@ -5,13 +5,13 @@ import logging
 from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
+from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
     NEST_BOT_NAME,
-    NL,
     OWASP_CONTRIBUTE_CHANNEL_ID,
 )
 

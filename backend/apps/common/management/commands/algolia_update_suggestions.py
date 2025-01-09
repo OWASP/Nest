@@ -86,6 +86,7 @@ class Command(BaseCommand):
             },
         }
 
+        print("\nThe following query suggestion index were updated:")
         for entity, suggestion_settings in entity_configs.items():
             source_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}"
             suggestions_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}_suggestions"
@@ -102,4 +103,4 @@ class Command(BaseCommand):
                 index_name=suggestions_index_name,
                 configuration=configuration,
             )
-            print(f"Updated query suggestions index for {entity.capitalize()}")
+            print(f"{7*' '} * {entity.capitalize()}")

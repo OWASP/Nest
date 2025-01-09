@@ -35,7 +35,7 @@ const UsersPage = () => {
     return (
       <UserCard
         avatar={user.idx_avatar_url}
-        name={user.idx_name}
+        name={user.idx_name || `@${user.idx_login}`}
         company={user.idx_company}
         button={SubmitButton}
       />
