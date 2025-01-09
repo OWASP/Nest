@@ -33,7 +33,7 @@ class TestGsocHandler:
                 "invalid",
                 f"*`{COMMAND} invalid` is not supported*{NL}",
             ),
-            (True, "2019", "Year 2019 is not supported. Supported years: 2020-2024"),
+            (True, "2011", "Year 2011 is not supported. Supported years: 2012-2024"),
         ],
     )
     def test_handler_responses(

@@ -1,0 +1,18 @@
+{
+  "projects": [
+    "www-project-appsensor",
+    "www-project-dotnet_ansa",
+    "www-project-hackademic-challenges",
+    "www-project-owtf",
+    "www-project-passfault",
+    "www-project-phpsec",
+    "www-project-purecaptcha",
+    "www-project-rbac",
+    "www-project-seraphimdroid",
+    "www-project-web-security-testing-guide",
+    "www-project-webgoat-php",
+    "www-project-webgoat.net",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2015"]
+}
