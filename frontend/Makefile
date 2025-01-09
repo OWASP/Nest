@@ -18,4 +18,4 @@ shell-frontend:
 
 test-frontend:
 	@docker build -f frontend/Dockerfile.test frontend -t nest-frontend-test
-	@docker run nest-frontend-test npm run test
+	@docker run --env-file frontend/.env.example nest-frontend-test npm run test

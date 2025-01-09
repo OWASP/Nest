@@ -39,6 +39,13 @@ class IssueIndex(AlgoliaIndex, IndexBase):
     )
 
     settings = {
+        "attributesForFaceting": [
+            "idx_title",
+            "idx_project_name",
+            "idx_repository_name",
+            "idx_project_tags",
+            "idx_repository_topics",
+        ],
         "attributeForDistinct": "idx_project_name",
         "minProximity": 4,
         "indexLanguages": ["en"],
