@@ -5,6 +5,7 @@ from algoliasearch_django.decorators import register
 
 from apps.common.index import IndexBase
 from apps.github.models.user import User
+from apps.github.models.organization import Organization
 
 
 @register(User)
@@ -63,7 +64,7 @@ class UserIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return User.objects.all()
+        return User.objects.exclude(login__in=Organization.get_logins())
 
     @staticmethod
     def update_synonyms():
