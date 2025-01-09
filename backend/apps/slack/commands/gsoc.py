@@ -9,7 +9,10 @@ from apps.slack.commands.constants import COMMAND_START
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
 COMMAND = "/gsoc"
-SUPPORTED_YEARS = set(range(2020, 2025))  # 2020-2024
+
+SUPPORTED_YEAR_START = 2012
+SUPPORTED_YEAR_END = 2024
+SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))  # 2012-2024
 
 
 def handler(ack, command, client):
@@ -49,8 +52,9 @@ def handler(ack, command, client):
         else:
             blocks = [
                 markdown(
-                    f"Year {year} is not supported. Supported years: 2020-2024, "
-                    f"e.g. `{COMMAND} {sorted(SUPPORTED_YEARS)[-1]}`"
+                    f"Year {year} is not supported. Supported years: "
+                    f"{SUPPORTED_YEAR_START}-{SUPPORTED_YEAR_END}, "
+                    f"e.g. `{COMMAND} {SUPPORTED_YEAR_END}`"
                 )
             ]
     else:

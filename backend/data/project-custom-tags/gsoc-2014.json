@@ -1,0 +1,17 @@
+{
+  "projects": [
+    "www-project-csrfguard",
+    "www-project-enterprise-security-api",
+    "www-project-hackademic-challenges",
+    "www-project-igoat-tool",
+    "www-project-modsecurity-core-rule-set",
+    "www-project-owasppcitoolkit",
+    "www-project-webgoat-php",
+    "www-project-owtf",
+    "www-project-phpsec",
+    "www-project-rbac",
+    "www-project-seraphimdroid",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2014"]
+}

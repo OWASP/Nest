@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.common.management.commands.add_project_custom_tags import Command, Project
+from apps.owasp.management.commands.add_project_custom_tags import Command, Project
 
 
 class TestAddProjectCustomTags:
@@ -25,11 +25,11 @@ class TestAddProjectCustomTags:
             ),
         ],
     )
-    @patch("apps.common.management.commands.add_project_custom_tags.Project.objects.get")
-    @patch("apps.common.management.commands.add_project_custom_tags.Path.open")
-    @patch("apps.common.management.commands.add_project_custom_tags.Path.exists")
+    @patch("apps.owasp.management.commands.add_project_custom_tags.Project.objects.get")
+    @patch("apps.owasp.management.commands.add_project_custom_tags.Path.open")
+    @patch("apps.owasp.management.commands.add_project_custom_tags.Path.exists")
     @patch(
-        "apps.common.management.commands.add_project_custom_tags.settings.BASE_DIR",
+        "apps.owasp.management.commands.add_project_custom_tags.settings.BASE_DIR",
         new=Path("/mocked/path"),
     )
     def test_handle(
@@ -72,11 +72,11 @@ class TestAddProjectCustomTags:
             ),
         ],
     )
-    @patch("apps.common.management.commands.add_project_custom_tags.Project.objects.get")
-    @patch("apps.common.management.commands.add_project_custom_tags.Path.open")
-    @patch("apps.common.management.commands.add_project_custom_tags.Path.exists")
+    @patch("apps.owasp.management.commands.add_project_custom_tags.Project.objects.get")
+    @patch("apps.owasp.management.commands.add_project_custom_tags.Path.open")
+    @patch("apps.owasp.management.commands.add_project_custom_tags.Path.exists")
     @patch(
-        "apps.common.management.commands.add_project_custom_tags.settings.BASE_DIR",
+        "apps.owasp.management.commands.add_project_custom_tags.settings.BASE_DIR",
         new=Path("/mocked/path"),
     )
     def test_handle_with_projects_and_tags(

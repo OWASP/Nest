@@ -2,4 +2,4 @@ blank_issues_enabled: true
 contact_links:
   - name: Got questions about OWASP Nest? We're here to help!
     url: https://owasp.slack.com/archives/project-nest
-    about: Join our OWASP Slack channel \#project-nest
+    about: 'Join our OWASP Slack channel #project-nest'
