@@ -80,7 +80,18 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText(mockUser.bio)).toBeInTheDocument()
     expect(screen.getByText(mockUser.company)).toBeInTheDocument()
     expect(screen.getByText(mockUser.location)).toBeInTheDocument()
-    expect(screen.getByText('Joined January 1, 2020')).toBeInTheDocument()
+
+    // Correctly format the joined date based on mockUser.created_at
+    const formattedJoinDate = new Date(Number(mockUser.created_at) * 1000).toLocaleDateString(
+      'en-US',
+      {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }
+    )
+    // Ensure the formatted join date is in the document
+    expect(screen.getByText(`Joined ${formattedJoinDate}`)).toBeInTheDocument()
   })
 
   test('renders error message when user does not exist', async () => {
