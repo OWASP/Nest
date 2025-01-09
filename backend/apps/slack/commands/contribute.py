@@ -3,11 +3,12 @@
 from django.conf import settings
 from django.utils.text import Truncator
 
+from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.commands.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 COMMAND = "/contribute"

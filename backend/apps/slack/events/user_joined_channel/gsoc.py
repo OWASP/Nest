@@ -5,9 +5,10 @@ import logging
 from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
+from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL, OWASP_GSOC_CHANNEL_ID
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
 
 logger = logging.getLogger(__name__)
 

@@ -34,6 +34,7 @@ const ChaptersPage = () => {
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket " />,
       onclick: handleButtonClick,
     }
+
     return (
       <Card
         key={chapter.objectID || `chapter-${index}`}
@@ -55,6 +56,7 @@ const ChaptersPage = () => {
       totalPages={totalPages}
       currentPage={currentPage}
       searchQuery={searchQuery}
+      indexName="chapters"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       searchPlaceholder="Search for OWASP chapters..."
