@@ -28,6 +28,8 @@ class CommitteeIndex(AlgoliaIndex):
     settings = {
         "attributesForFaceting": [
             "filterOnly(idx_key)",
+            "idx_name",
+            "idx_tags",
         ],
         "indexLanguages": ["en"],
         "customRanking": [

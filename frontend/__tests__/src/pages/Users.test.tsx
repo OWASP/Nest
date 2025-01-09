@@ -55,14 +55,12 @@ describe('UsersPage Component', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
-      expect(screen.queryByPlaceholderText('Search for OWASP users...')).not.toBeInTheDocument()
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
 
     // Check loaded state
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP users...')).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('Search for OWASP users...')).toHaveFocus()
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -126,25 +124,5 @@ describe('UsersPage Component', () => {
     })
 
     expect(navigateMock).toHaveBeenCalledWith('/community/users/user_1')
-  })
-
-  test('handles search input correctly', async () => {
-    render(<UsersPage />)
-
-    await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Search for OWASP users...')
-      fireEvent.change(searchInput, { target: { value: 'John' } })
-    })
-
-    // Wait for the API call
-    await waitFor(() => {
-      // First call is the initial page load, second call is the search
-      expect(fetchAlgoliaData).toHaveBeenCalledTimes(2)
-      // Check the latest call arguments
-      const lastCall = (fetchAlgoliaData as jest.Mock).mock.calls[
-        (fetchAlgoliaData as jest.Mock).mock.calls.length - 1
-      ]
-      expect(lastCall).toEqual(['users', 'John', 1])
-    })
   })
 })

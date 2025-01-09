@@ -33,7 +33,7 @@ class IndexBase:
             synonyms = json.load(file_path)
         except FileNotFoundError:
             logger.exception("Synonyms file not found", extra={"file_path": file_path})
-            return
+            return None
 
         for idx, synonym in enumerate(synonyms, 1):
             synonym["objectID"] = f"{index_name}-synonym-{idx}"
@@ -48,6 +48,8 @@ class IndexBase:
         client.save_synonyms(
             index_name=index_name, synonym_hit=synonyms, replace_existing_synonyms=True
         )
+
+        return len(synonyms)
 
     @staticmethod
     @lru_cache(maxsize=1024)

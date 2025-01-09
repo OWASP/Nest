@@ -41,6 +41,9 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     settings = {
         "attributesForFaceting": [
             "filterOnly(idx_key)",
+            "idx_name",
+            "idx_tags",
+            "idx_repository_names",
         ],
         "indexLanguages": ["en"],
         "customRanking": [
@@ -82,4 +85,4 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
-        ProjectIndex.reindex_synonyms("owasp", "projects")
+        return ProjectIndex.reindex_synonyms("owasp", "projects")
