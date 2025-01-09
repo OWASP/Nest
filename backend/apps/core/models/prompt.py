@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db import models
 from django.template.defaultfilters import slugify
 
@@ -37,7 +38,8 @@ class Prompt(TimestampedModel):
         try:
             return Prompt.objects.get(key=key).text
         except Prompt.DoesNotExist:
-            logger.exception("Prompt with key '%s' does not exist.", key)
+            if settings.OPEN_AI_SECRET_KEY != "None":  # noqa: S105
+                logger.exception("Prompt with key '%s' does not exist.", key)
 
     @staticmethod
     def get_github_issue_hint():
