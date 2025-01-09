@@ -1,10 +1,11 @@
 import { SearchResponse } from 'algoliasearch'
 import { API_URL } from 'utils/credentials'
 import { ENVIRONMENT } from 'utils/credentials'
-import logger from 'utils/logger'
+
 import { getParamsForIndexName } from 'utils/paramsMapping'
 
 import { client } from 'lib/algoliaClient'
+import { AppError } from 'lib/ErrorWrapper'
 import { AgloliaRequestType, AlgoliaResponseType } from 'lib/types'
 
 export const loadData = async <T>(
@@ -20,7 +21,10 @@ export const loadData = async <T>(
       }).toString()
   )
   if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${response.statusText}`)
+    throw new AppError(
+      response.status === 404 ? 404 : 500,
+      response.status === 404 ? 'Resource not found' : 'Server error occurred'
+    )
   }
   return await response.json()
 }
@@ -31,9 +35,11 @@ export const fetchAlgoliaData = async <T>(
   currentPage = 0,
   filterKey?: string
 ): Promise<AlgoliaResponseType<T>> => {
+  if (!client) {
+    throw new AppError(500, 'Search client not initialized')
+  }
   try {
     const params = getParamsForIndexName(indexName)
-
     const request: AgloliaRequestType = {
       attributesToHighlight: [],
       hitsPerPage: 25,
@@ -50,7 +56,9 @@ export const fetchAlgoliaData = async <T>(
     const { results } = await client.search({
       requests: [request],
     })
-
+    if (!results?.length) {
+      throw new AppError(404, 'No results found')
+    }
     if (results && results.length > 0) {
       const { hits, nbPages } = results[0] as SearchResponse<T>
       return {
@@ -61,7 +69,9 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    logger.error('Error fetching data from Algolia', error)
-    return { hits: [], totalPages: 0 }
+    if (error instanceof AppError) {
+      throw error
+    }
+    throw new AppError(500, 'Search service error')
   }
 }

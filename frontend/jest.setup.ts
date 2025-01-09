@@ -2,10 +2,17 @@ import '@testing-library/jest-dom'
 import { TextEncoder } from 'util'
 import dotenv from 'dotenv'
 import React from 'react'
+
 dotenv.config()
+
 global.React = React
 global.TextEncoder = TextEncoder
+
 beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation((...args) => {
+    throw new Error(`Console error: ${args.join(' ')}`)
+  })
+
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
@@ -20,4 +27,5 @@ beforeEach(() => {
     })),
   })
 })
+
 jest.mock('@algolia/autocomplete-theme-classic', () => ({}))
