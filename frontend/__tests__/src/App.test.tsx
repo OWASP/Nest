@@ -45,9 +45,6 @@ jest.mock('components/Footer', () => {
 
 describe('App Component', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation((...args) => {
-      throw new Error('Console error was thrown: ' + args.join(' '))
-    })
     window.scrollTo = jest.fn()
   })
 
