@@ -9,7 +9,11 @@ from apps.slack.commands.constants import COMMAND_START
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
 COMMAND = "/gsoc"
-SUPPORTED_YEARS = set(range(2020, 2025))  # 2020-2024
+
+SUPPORTED_YEAR_START = 2012
+SUPPORTED_YEAR_END = 2024
+SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))  # 2012-2024
+SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
 
 def handler(ack, command, client):
@@ -36,21 +40,31 @@ def handler(ack, command, client):
                 f"  • <{gp.nest_url}|{gp.owasp_name}>"
                 for gp in sorted(gsoc_projects, key=lambda p: p.owasp_name)
             )
+            additional_info = []
             blocks = [
                 markdown(f"*GSoC {year} projects:*{2*NL}{gsoc_projects_markwown}"),
-                markdown(
-                    f"Additional information:{NL}"
+            ]
+            if year in SUPPORTED_ANNOUNCEMENT_YEARS:
+                additional_info.append(
                     f"  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{year}|"
                     f"GSoC {year} announcement>{NL}"
-                    f"  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{year}ideas|"
-                    f"GSoC {year} ideas>"
+                )
+
+            additional_info.append(
+                f"  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{year}ideas|"
+                f"GSoC {year} ideas>"
+            )
+            blocks.append(
+                markdown(
+                    f"Additional information:{NL}{''.join(additional_info)}",
                 ),
-            ]
+            )
         else:
             blocks = [
                 markdown(
-                    f"Year {year} is not supported. Supported years: 2020-2024, "
-                    f"e.g. `{COMMAND} {sorted(SUPPORTED_YEARS)[-1]}`"
+                    f"Year {year} is not supported. Supported years: "
+                    f"{SUPPORTED_YEAR_START}-{SUPPORTED_YEAR_END}, "
+                    f"e.g. `{COMMAND} {SUPPORTED_YEAR_END}`"
                 )
             ]
     else:

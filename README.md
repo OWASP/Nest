@@ -15,7 +15,7 @@
 Key features of the platform include:
 
 - **Advanced Search Capabilities:** Enables efficient navigation and filtering of projects and issues based on keywords, tags, and contributor preferences.
-- **Slack Integration:** Supports seamless communication through a Slack bot that facilitates direct and channel messaging for updates and discussions.
+- **Slack Integration:** Supports seamless communication through a [Slack bot](https://owasp.slack.com/team/U07M1C4JASK) that facilitates direct and channel messaging for updates and discussions.
 - **OWASP Chapters Proximity Page:** Offers localized information about nearby OWASP chapters to foster community engagement.
 - **AI-Generated Insights:** Provides summarized descriptions and actionable steps for tackling project issues.
 
@@ -30,7 +30,7 @@ Current Leaders:
 - [Kate Golovanova](https://github.com/kasya/)
 - [Starr Brown](https://github.com/mamicidal/)
 
-For questions or discussions with the leadership team and other contributors, please use the `#project-nest` channel on OWASP Slack.
+For questions or discussions with the leadership team and other contributors, please use the [#project-nest](https://owasp.slack.com/archives/project-nest) channel on OWASP Slack.
 
 ## Contributing
 

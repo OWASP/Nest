@@ -1,0 +1,13 @@
+{
+  "projects": [
+    "www-project-bug-logging-tool",
+    "www-project-csrfprotector",
+    "www-project-juice-shop",
+    "www-project-nettacker",
+    "www-project-owtf",
+    "www-project-railsgoat",
+    "www-project-security-knowledge-framework",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2018"]
+}
