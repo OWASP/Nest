@@ -1,9 +1,9 @@
 {
   "projects": [
     "www-project-defectdojo",
-    "www-project-igoat",
-    "www-project-iotgoat",
     "www-project-honeypot",
+    "www-project-igoat-tool",
+    "www-project-internet-of-things",
     "www-project-juice-shop",
     "www-project-owtf",
     "www-project-risk-assessment-framework",
