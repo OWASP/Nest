@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 project = Project.objects.get(key=project_key)
             except Project.DoesNotExist:
                 self.stderr.write(f"Project {project_key} does not exists.")
-                return
+                continue
 
             project.custom_tags = sorted(set(project.custom_tags + tags))
             project.save(update_fields=["custom_tags"])
