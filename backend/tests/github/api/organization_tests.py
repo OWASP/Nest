@@ -5,6 +5,7 @@ import pytest
 from apps.github.api.organization import OrganizationSerializer
 from apps.github.models.organization import Organization
 
+
 class TestOrganizationSerializer:
     @pytest.mark.parametrize(
         "organization_data",

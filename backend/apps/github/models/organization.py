@@ -42,7 +42,7 @@ class Organization(
 
     @staticmethod
     def get_logins():
-        """Retrieve all organization logins """
+        """Retrieve all organization logins."""
         return list(Organization.objects.values_list("name", flat=True))
 
     @staticmethod

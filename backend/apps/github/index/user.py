@@ -4,8 +4,8 @@ from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
 from apps.common.index import IndexBase
-from apps.github.models.user import User
 from apps.github.models.organization import Organization
+from apps.github.models.user import User
 
 
 @register(User)
