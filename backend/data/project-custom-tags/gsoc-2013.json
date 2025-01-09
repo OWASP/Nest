@@ -1,0 +1,16 @@
+{
+  "projects": [
+    "www-project-csrfguard",
+    "www-project-enterprise-security-api",
+    "www-project-hackademic-challenges",
+    "www-project-modsecurity",
+    "www-project-owaspwebgoatphp",
+    "www-project-owtf",
+    "www-project-phpsec",
+    "www-project-rbac",
+    "www-project-winsrdf",
+    "www-project-xsser",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2013"]
+}

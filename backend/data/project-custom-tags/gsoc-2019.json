@@ -1,0 +1,16 @@
+{
+  "projects": [
+    "www-project-defectdojo",
+    "www-project-igoat",
+    "www-project-iotgoat",
+    "www-project-honeypot",
+    "www-project-juice-shop",
+    "www-project-owtf",
+    "www-project-risk-assessment-framework",
+    "www-project-securetea",
+    "www-project-security-knowledge-framework",
+    "www-project-seraphimdroid",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2019"]
+}

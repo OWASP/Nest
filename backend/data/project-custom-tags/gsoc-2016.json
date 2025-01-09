@@ -1,0 +1,13 @@
+{
+  "projects": [
+    "www-project-appsensor",
+    "www-project-hackademic-challenges",
+    "www-project-o-saft",
+    "www-project-owtf",
+    "www-project-security-knowledge-framework",
+    "www-project-seraphimdroid",
+    "www-project-zap",
+    "www-project-zsc"
+  ],
+  "tags": ["gsoc2016"]
+}

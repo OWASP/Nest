@@ -1,0 +1,13 @@
+{
+  "projects": [
+    "www-project-antisamy",
+    "www-project-appsensor",
+    "www-project-enterprise-security-api",
+    "www-project-goatdroid",
+    "www-project-hackademic-challenges",
+    "www-project-modsecurity-core-rule-set",
+    "www-project-webgoat",
+    "www-project-zap"
+  ],
+  "tags": ["gsoc2012"]
+}
