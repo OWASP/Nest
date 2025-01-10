@@ -30,7 +30,7 @@ class TestChaptersHandler:
             "idx_url": "http://example.com/chapter/1",
             "idx_leaders": ["Leader A", "Leader B"],
             "idx_region": "Test Region",
-            "idx_country": "Test Country"
+            "idx_country": "Test Country",
         }
 
     @pytest.mark.parametrize(

@@ -3,10 +3,10 @@
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.common.utils import get_absolute_url 
+from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.commands.constants import COMMAND_START, COMMAND_HELP
+from apps.slack.commands.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
@@ -23,7 +23,7 @@ def handler(ack, command, client):
         return
 
     command_text = command["text"].strip()
-    
+
     if command_text in COMMAND_HELP:
         blocks = [
             markdown(
@@ -47,9 +47,9 @@ def handler(ack, command, client):
             "idx_leaders",
             "idx_region",
             "idx_country",
-            "idx_updated_at"
+            "idx_updated_at",
         ]
-        
+
         if chapters := get_chapters(
             search_query,
             attributes=attributes,
@@ -67,11 +67,16 @@ def handler(ack, command, client):
             ]
 
             for idx, chapter in enumerate(chapters):
-                location = f"{chapter['idx_region']}, {chapter['idx_country']}" if chapter['idx_region'] and chapter['idx_country'] else chapter['idx_country']
+                location = (
+                    f"{chapter['idx_region']}, {chapter['idx_country']}"
+                    if chapter["idx_region"] and chapter["idx_country"]
+                    else chapter["idx_country"]
+                )
                 leaders = chapter.get("idx_leaders", [])
                 blocks.append(
                     markdown(
-                        f"{NL}*{idx + 1}.* <{chapter['idx_url']}|*{escape(chapter['idx_name'])}*>{NL}"
+                        f"{NL}*{idx + 1}.*"
+                        f"<{chapter['idx_url']}|*{escape(chapter['idx_name'])}*>{NL}"
                         f"_{location}_"
                         f"{NL}Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}{NL}"
                         f"{escape(chapter['idx_summary'])}{NL}"
