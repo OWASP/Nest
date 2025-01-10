@@ -1,4 +1,5 @@
 import { SearchResponse } from 'algoliasearch'
+import { AlgoliaRequestType, AlgoliaResponseType } from 'types/algolia'
 import { API_URL } from 'utils/credentials'
 import { ENVIRONMENT } from 'utils/credentials'
 
@@ -6,7 +7,6 @@ import { getParamsForIndexName } from 'utils/paramsMapping'
 
 import { client } from 'lib/algoliaClient'
 import { AppError } from 'lib/ErrorWrapper'
-import { AgloliaRequestType, AlgoliaResponseType } from 'lib/types'
 
 export const loadData = async <T>(
   endpoint: string,
@@ -40,7 +40,7 @@ export const fetchAlgoliaData = async <T>(
   }
   try {
     const params = getParamsForIndexName(indexName)
-    const request: AgloliaRequestType = {
+    const request: AlgoliaRequestType = {
       attributesToHighlight: [],
       hitsPerPage: 25,
       indexName: `${ENVIRONMENT}_${indexName}`,

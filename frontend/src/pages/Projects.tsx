@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
+import { project } from 'types/project'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import { useSearchPage } from 'lib/hooks/useSearchPage'
-import { project } from 'lib/types'
 import { getFilteredIcons } from 'lib/utils'
 import Card from 'components/Card'
 import { level } from 'components/data'

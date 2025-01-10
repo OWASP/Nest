@@ -24,6 +24,7 @@ export default defineConfig({
       lib: path.resolve(__dirname, 'src/lib'),
       pages: path.resolve(__dirname, 'src/pages'),
       utils: path.resolve(__dirname, 'src/utils'),
+      styles: path.resolve(__dirname, 'src/styles'),
       'sentry.config': path.resolve(__dirname, 'src/sentry.config.ts'),
       '@tests': path.resolve(__dirname, '__tests__'),
     },

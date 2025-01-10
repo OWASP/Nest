@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { AlgoliaResponseType } from 'types/algolia'
 import { fetchAlgoliaData } from 'lib/api'
 import { handleAppError } from 'lib/ErrorWrapper'
-import { AlgoliaResponseType } from 'lib/types'
 
 interface UseSearchPageOptions {
   indexName: string

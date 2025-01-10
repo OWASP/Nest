@@ -10,9 +10,9 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { UserDetailsProps } from 'types/user'
 import logger from 'utils/logger'
 import { fetchAlgoliaData } from 'lib/api'
-import { UserDetailsProps } from 'lib/types'
 import { IndexedObject, removeIdxPrefix } from 'lib/utils'
 import LoadingSpinner from 'components/LoadingSpinner'
 
