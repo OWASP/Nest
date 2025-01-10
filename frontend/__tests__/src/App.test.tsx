@@ -17,7 +17,7 @@ jest.mock('pages', () => ({
   UserDetailsPage: () => <div data-testid="userdetails-page">UserDetails Page</div>,
   UsersPage: () => <div data-testid="users-page">Users Page</div>,
 }))
-jest.mock('lib/hooks/useToast', () => ({
+jest.mock('hooks/useToast', () => ({
   useToast: jest.fn(() => ({
     toasts: [],
     toast: jest.fn(),

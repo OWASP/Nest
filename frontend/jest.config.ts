@@ -12,6 +12,7 @@ export default {
     '!src/utils/**',
     '!src/ErrorWrapper.tsx',
     '!src/sentry.config.ts',
+    '!src/hooks/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
