@@ -13,7 +13,7 @@ COMMAND = "/owasp"
 
 def handler(ack, command, client):
     """Slack /owasp command handler."""
-    from apps.slack.commands import contribute, gsoc, projects
+    from apps.slack.commands import contribute, gsoc, leaders, projects
 
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
@@ -25,6 +25,7 @@ def handler(ack, command, client):
             markdown(
                 f"• `{COMMAND} contribute` -- OWASP projects contribution opportunities{NL}"
                 f"• `{COMMAND} gsoc` -- Google Summer of Code participants information{NL}"
+                f"• `{COMMAND} leaders` -- Chapter and project leaders search{NL}"
                 f"• `{COMMAND} projects` -- Explore OWASP projects{NL}"
             ),
         ]
@@ -38,6 +39,8 @@ def handler(ack, command, client):
                 contribute.handler(ack, command, client)
             case "gsoc":
                 gsoc.handler(ack, command, client)
+            case "leaders":
+                leaders.handler(ack, command, client)
             case "projects":
                 projects.handler(ack, command, client)
             case _:
