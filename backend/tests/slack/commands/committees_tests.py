@@ -28,7 +28,7 @@ class TestCommitteesHandler:
             "idx_name": "Test Committee",
             "idx_summary": "Test committee summary",
             "idx_url": "http://example.com/committee/1",
-            "idx_leaders": ["Leader A", "Leader B"]
+            "idx_leaders": ["Leader A", "Leader B"],
         }
 
     @pytest.mark.parametrize(
