@@ -5,9 +5,9 @@ import logging
 from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
+from apps.common.constants import NL, TAB
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
-from apps.slack.constants import NL, TAB
 
 logger = logging.getLogger(__name__)
 

@@ -4,11 +4,11 @@ import logging
 
 from slack_sdk.errors import SlackApiError
 
+from apps.common.constants import NL
 from apps.common.utils import truncate
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header
 from apps.slack.constants import (
-    NL,
     VIEW_CHAPTERS_ACTION,
     VIEW_COMMITTEES_ACTION,
     VIEW_PROJECTS_ACTION,

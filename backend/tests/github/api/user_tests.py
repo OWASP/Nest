@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from apps.github.api.user import UserSerializer
+from apps.github.models.user import User
 
 
 class TestUserSerializer:
@@ -46,3 +47,17 @@ class TestUserSerializer:
             validated_data["updated_at"].isoformat().replace("+00:00", "Z")
         )
         assert validated_data == user_data
+
+    @pytest.mark.parametrize(
+        ("login", "organization_logins", "expected_result"),
+        [
+            ("johndoe", ["github", "microsoft"], True),  # Normal user
+            ("github", ["github", "microsoft"], False),  # Organization login
+            ("ghost", ["github", "microsoft"], False),  # Special 'ghost' user
+        ],
+    )
+    @patch("apps.github.models.organization.Organization.get_logins")
+    def test_is_indexable(self, mock_get_logins, login, organization_logins, expected_result):
+        mock_get_logins.return_value = organization_logins
+        user = User(login=login)
+        assert user.is_indexable == expected_result

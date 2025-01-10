@@ -28,6 +28,8 @@ class CommitteeIndex(AlgoliaIndex):
     settings = {
         "attributesForFaceting": [
             "filterOnly(idx_key)",
+            "idx_name",
+            "idx_tags",
         ],
         "indexLanguages": ["en"],
         "customRanking": [
@@ -46,7 +48,8 @@ class CommitteeIndex(AlgoliaIndex):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_leaders, idx_top_contributors.login, idx_top_contributors.name)",
+            "unordered(idx_leaders)"
+            "unordered(idx_top_contributors.login, idx_top_contributors.name)",
             "unordered(idx_tags)",
         ],
     }

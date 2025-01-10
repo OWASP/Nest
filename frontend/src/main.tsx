@@ -5,8 +5,8 @@ import TagManager from 'react-gtm-module'
 import { BrowserRouter } from 'react-router-dom'
 
 import { GTM_AUTH, GTM_ID, GTM_PREVIEW } from 'utils/credentials.ts'
+import { ErrorWrapper } from 'lib/ErrorWrapper.tsx'
 import App from './App.tsx'
-import ErrorWrapper from './ErrorWrapper'
 
 const tagManagerArgs = {
   gtmId: GTM_ID,

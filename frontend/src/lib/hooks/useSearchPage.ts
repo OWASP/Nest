@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import logger from 'utils/logger'
-
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchAlgoliaData } from 'lib/api'
+import { handleAppError } from 'lib/ErrorWrapper'
 import { AlgoliaResponseType } from 'lib/types'
 
 interface UseSearchPageOptions {
@@ -26,6 +25,7 @@ export function useSearchPage<T>({
   indexName,
   pageTitle,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState<T[]>([])
   const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1'))
@@ -54,13 +54,13 @@ export function useSearchPage<T>({
         setItems(data.hits)
         setTotalPages(data.totalPages)
       } catch (error) {
-        logger.error(error)
+        handleAppError(error)
       }
       setIsLoaded(true)
     }
 
     fetchData()
-  }, [currentPage, searchQuery, indexName, pageTitle])
+  }, [currentPage, searchQuery, indexName, pageTitle, navigate])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
