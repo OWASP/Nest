@@ -24,7 +24,7 @@ const UserDetailsPage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { hits } = await fetchAlgoliaData('users', userKey, 1)
+        const { hits } = await fetchAlgoliaData('users', userKey, 1, userKey)
         if (hits.length === 0) {
           setUser(null)
         } else {

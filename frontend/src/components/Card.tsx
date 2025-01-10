@@ -22,18 +22,15 @@ const Card = ({
   icons,
   leaders,
   topContributors,
-  topics,
+  topics = [],
   button,
   projectName,
   projectLink,
-  languages,
+  languages = [],
   social,
   tooltipLabel,
 }: CardProps) => {
-  const [visibleLanguages, setVisibleLanguages] = useState(isMobileInitial ? 4 : 18)
-  const [visibleTopics, setVisibleTopics] = useState(isMobileInitial ? 4 : 18)
-  const [toggleLanguages, setToggleLanguages] = useState(false)
-  const [toggleTopics, setToggleTopics] = useState(false)
+  const [toggleLanguagesAndTopics, setShowAll] = useState(false)
   const [isMobile, setIsMobile] = useState(isMobileInitial)
 
   // Resize listener to adjust display based on screen width
@@ -41,21 +38,23 @@ const Card = ({
     const checkMobile = () => {
       const mobile = window.innerWidth < 768
       setIsMobile(mobile)
-      setVisibleLanguages(mobile ? 4 : 18)
-      setVisibleTopics(mobile ? 4 : 18)
     }
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const loadMoreLanguages = () => {
-    setVisibleLanguages(toggleLanguages ? (isMobile ? 4 : 18) : languages?.length || 0)
-    setToggleLanguages(!toggleLanguages)
-  }
+  const visibleCount = isMobile ? 4 : 18
 
-  const loadMoreTopics = () => {
-    setVisibleTopics(toggleTopics ? (isMobile ? 4 : 18) : topics?.length || 0)
-    setToggleTopics(!toggleTopics)
+  // Sliced arrays for languages and topics based on the toggleLanguagesAndTopics flag
+  const displayedLanguages = toggleLanguagesAndTopics ? languages : languages.slice(0, visibleCount)
+  const displayedTopics = toggleLanguagesAndTopics ? topics : topics.slice(0, visibleCount)
+
+  // Determine if at least one array is larger than its visible count
+  const shouldShowToggleButton = languages.length > visibleCount || topics.length > visibleCount
+
+  // Toggle the display for both languages and topics
+  const handleToggle = () => {
+    setShowAll(!toggleLanguagesAndTopics)
   }
 
   return (
@@ -138,19 +137,19 @@ const Card = ({
         <div
           className={cn(
             'flex w-full items-center justify-between gap-6',
-            isMobile && (toggleLanguages || toggleTopics) && 'flex-col items-start'
+            isMobile && toggleLanguagesAndTopics && 'flex-col items-start'
           )}
         >
           {/* Render languages and topics with load more functionality */}
           <div
             className={cn(
               'flex flex-wrap items-center gap-4',
-              isMobile && (toggleLanguages || toggleTopics) && 'w-full'
+              isMobile && toggleLanguagesAndTopics && 'w-full'
             )}
           >
-            {languages && (
+            {!!languages.length && (
               <div id="languages" className="flex flex-wrap items-center gap-3">
-                {languages.slice(0, visibleLanguages).map((language, index) => (
+                {displayedLanguages.map((language, index) => (
                   <TopicBadge
                     key={language || `language-${index}`}
                     topic={language}
@@ -158,19 +157,11 @@ const Card = ({
                     type="language"
                   />
                 ))}
-                {languages.length > 8 && (
-                  <button
-                    onClick={loadMoreLanguages}
-                    className="mt-2 text-gray-600 dark:text-gray-300"
-                  >
-                    {toggleLanguages ? 'Show less' : 'Show more'}
-                  </button>
-                )}
               </div>
             )}
-            {topics && topics.length > 0 && (
+            {!!topics.length && (
               <div id="topics" className="flex flex-wrap items-center gap-3">
-                {topics.slice(0, visibleTopics).map((topic, index) => (
+                {displayedTopics.map((topic, index) => (
                   <TopicBadge
                     key={topic || `topic-${index}`}
                     topic={topic}
@@ -178,12 +169,10 @@ const Card = ({
                     type="topic"
                   />
                 ))}
-                {topics.length > 18 && (
-                  <button
-                    onClick={loadMoreTopics}
-                    className="mt-2 text-gray-600 dark:text-gray-300"
-                  >
-                    {toggleTopics ? 'Show less' : 'Show more'}
+                {/* Toggling both languages and topics */}
+                {shouldShowToggleButton && (
+                  <button onClick={handleToggle} className="mt-2 text-gray-600 dark:text-gray-300">
+                    {toggleLanguagesAndTopics ? 'Show less' : 'Show more'}
                   </button>
                 )}
               </div>
@@ -209,7 +198,7 @@ const Card = ({
           <div
             className={cn(
               'flex items-center',
-              isMobile && (toggleLanguages || toggleTopics) && 'mt-4 w-full justify-end'
+              isMobile && toggleLanguagesAndTopics && 'mt-4 w-full justify-end'
             )}
           >
             <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
