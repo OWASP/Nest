@@ -29,19 +29,14 @@ def handler(ack, command, client):
         markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}"),
     ]
 
-    attributes = ["idx_name", "idx_summary", "idx_url", "idx_leaders"]
+    attributes = ["idx_leaders", "idx_name", "idx_summary", "idx_url"]
 
-    if committees := get_committees(
-        search_query,
-        attributes=attributes,
-        limit=10,
-    )["hits"]:
+    if committees := get_committees(search_query, attributes=attributes, limit=10)["hits"]:
         blocks = [
             markdown(
-                f"{NL}*Here are top available committees "
-                f"that I found for* `{search_query_escaped}`:{NL}"
+                f"{NL}*OWASP committees that I found for* `{search_query_escaped}`:{NL}"
                 if search_query_escaped
-                else f"{NL}*Here are top available OWASP committees:*{NL}"
+                else f"{NL}*OWASP committees:*{NL}"
             ),
         ]
 
@@ -49,9 +44,9 @@ def handler(ack, command, client):
             leaders = committee.get("idx_leaders", [])
             blocks.append(
                 markdown(
-                    f"{NL}*{idx + 1}.*"
+                    f"{NL}*{idx + 1}. *"
                     f"<{committee['idx_url']}|*{escape(committee['idx_name'])}*>{NL}"
-                    f"Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}{NL}"
+                    f"_Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}_{NL}"
                     f"{escape(committee['idx_summary'])}{NL}"
                 )
             )

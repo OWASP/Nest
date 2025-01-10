@@ -36,7 +36,7 @@ class TestCommitteesHandler:
         [
             (False, True, None),
             (True, False, "No results found for"),
-            (True, True, "Here are top available OWASP committees"),
+            (True, True, "OWASP committees"),
         ],
     )
     @patch("apps.owasp.models.committee.Committee.active_committees_count")
