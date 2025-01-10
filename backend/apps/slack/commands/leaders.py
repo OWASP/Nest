@@ -70,9 +70,9 @@ def handler(ack, command, client):
                 if project_leaders := project["idx_leaders"]:
                     project_url = get_absolute_url(f"projects/{project['idx_key']}")
                     leaders = "".join(
-                        f"indent `{leader}`{NL}"
+                        f"{indent} `{leader}`{NL}"
                         if search_query.lower() in leader.lower()
-                        else f"indent {leader}{NL}"
+                        else f"{indent} {leader}{NL}"
                         for leader in project_leaders
                     )
 
