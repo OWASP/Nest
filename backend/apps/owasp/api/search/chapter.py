@@ -5,7 +5,7 @@ from algoliasearch_django import raw_search
 from apps.owasp.models.chapter import Chapter
 
 
-def get_chapters(query, attributes=None, limit=25, page=1):
+def get_chapters(query, attributes=None, limit=25, page=1, restrict_attributes=None):
     """Return chapters relevant to a search query."""
     params = {
         "attributesToHighlight": [],
@@ -25,5 +25,6 @@ def get_chapters(query, attributes=None, limit=25, page=1):
         "page": page - 1,
         "typoTolerance": "min",
     }
-
+    if restrict_attributes:
+        params["restrictSearchableAttributes"] = restrict_attributes
     return raw_search(Chapter, query, params)
