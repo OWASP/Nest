@@ -6,8 +6,8 @@ import { twMerge } from 'tailwind-merge'
 import { CommitteeType } from 'types/committee'
 import { IssueType } from 'types/issue'
 import { project } from 'types/project'
+import { IconKeys, Icons, urlMappings } from 'utils/data'
 import { IconType } from 'lib/constants'
-import { IconKeys, Icons, urlMappings } from 'components/data'
 
 dayjs.extend(relativeTime)
 
