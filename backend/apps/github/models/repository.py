@@ -204,7 +204,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             }
 
         # License.
-        self.license = gh_repository.license.name if gh_repository.license else ""
+        self.license = gh_repository.license.spdx_id if gh_repository.license else ""
 
         # Fetch project metadata from funding.yml file.
         try:

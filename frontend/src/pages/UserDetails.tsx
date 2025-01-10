@@ -24,7 +24,7 @@ const UserDetailsPage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { hits } = await fetchAlgoliaData('users', userKey, 1)
+        const { hits } = await fetchAlgoliaData('users', userKey, 1, userKey)
         if (hits.length === 0) {
           setUser(null)
         } else {
@@ -153,7 +153,7 @@ const UserDetailsPage: React.FC = () => {
           </div>
           <div className="border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
             Joined{' '}
-            {new Date(user.created_at).toLocaleDateString('en-US', {
+            {new Date(Number(user.created_at) * 1000).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
               year: 'numeric',

@@ -41,6 +41,11 @@ class Organization(
                 setattr(self, model_field, value)
 
     @staticmethod
+    def get_logins():
+        """Retrieve all organization logins."""
+        return set(Organization.objects.values_list("login", flat=True))
+
+    @staticmethod
     def bulk_save(organizations):
         """Bulk save organizations."""
         BulkSaveModel.bulk_save(Organization, organizations)

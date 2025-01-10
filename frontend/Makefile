@@ -1,3 +1,7 @@
+check-frontend: \
+	format-frontend-code \
+	lint-frontend-code
+
 exec-frontend-command:
 	@docker exec -t nest-frontend $(CMD)
 
