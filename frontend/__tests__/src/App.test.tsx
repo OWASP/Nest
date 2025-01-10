@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import App from 'App'
+import { useToast } from 'hooks/useToast'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
-import { useToast } from 'lib/hooks/useToast'
 import { Toaster } from 'components/ui/Toaster'
 
 jest.mock('pages', () => ({

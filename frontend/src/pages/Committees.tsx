@@ -1,7 +1,7 @@
+import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { CommitteeType } from 'types/committee'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { useSearchPage } from 'lib/hooks/useSearchPage'
 import { getFilteredIcons, handleSocialUrls } from 'lib/utils'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'

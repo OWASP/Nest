@@ -1,8 +1,8 @@
+import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
 import { IssueType } from 'types/issue'
 import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { useSearchPage } from 'lib/hooks/useSearchPage'
 import { getFilteredIcons } from 'lib/utils'
 
 import Card from 'components/Card'
