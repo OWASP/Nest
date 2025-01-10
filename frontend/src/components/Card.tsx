@@ -69,7 +69,7 @@ const Card = ({
               data-tooltip-content={`${level.level} project`}
               className={cn('flex h-8 w-8 items-center justify-center rounded-full text-xs shadow')}
               style={{ backgroundColor: level.color }}
-            > 
+            >
               <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
             </span>
           )}
