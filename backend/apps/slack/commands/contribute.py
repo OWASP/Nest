@@ -79,7 +79,7 @@ def handler(ack, command, client):
             blocks.append(
                 markdown(
                     f"⚠️ *Extended search over {Issue.open_issues_count()} open issues "
-                    f"is available at <{get_absolute_url('projects/issues')}"
+                    f"is available at <{get_absolute_url('projects/contribute')}"
                     f"?q={command_text}|{settings.SITE_NAME}>*\n"
                     f"{FEEDBACK_CHANNEL_MESSAGE}"
                 ),

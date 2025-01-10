@@ -10,7 +10,7 @@ from apps.slack.constants import (
     OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID,
 )
 
-project_issues_url = get_absolute_url("project/issues")
+project_issues_url = get_absolute_url("projects/contribute")
 projects_url = get_absolute_url("projects")
 
 CONTRIBUTE_GENERAL_INFORMATION_BLOCKS = (
