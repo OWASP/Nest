@@ -1,11 +1,11 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fetchAlgoliaData } from 'helpers/api'
+import { render } from 'helpers/wrappers/test-util'
 import { useNavigate } from 'react-router-dom'
-import { fetchAlgoliaData } from 'lib/api'
-import { render } from 'lib/test-util'
 import UsersPage from 'pages/Users'
 import { mockUserData } from '@tests/data/mockUserData'
 
-jest.mock('lib/api', () => ({
+jest.mock('helpers/api', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
@@ -22,7 +22,7 @@ jest.mock('components/Pagination', () =>
   ))
 )
 
-jest.mock('lib/FontAwesomeIconWrapper', () => ({
+jest.mock('helpers/wrappers/FontAwesomeIconWrapper', () => ({
   __esModule: true,
   default: () => <span data-testid="mock-icon" />,
 }))

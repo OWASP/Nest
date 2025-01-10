@@ -5,7 +5,7 @@ export default {
     '!src/**/*.d.ts',
     '!src/components/**',
     '!src/**/index.ts',
-    '!src/lib/**',
+    '!src/helpers/**',
     '!src/main.tsx',
     '!src/reportWebVitals.ts',
     '!src/setupTests.ts',

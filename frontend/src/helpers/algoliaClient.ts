@@ -1,6 +1,6 @@
 import { algoliasearch } from 'algoliasearch'
+import { AppError, handleAppError } from 'helpers/wrappers/ErrorWrapper'
 import { ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY } from 'utils/credentials'
-import { AppError, handleAppError } from 'lib/ErrorWrapper'
 
 export const createAlgoliaClient = () => {
   if (!ALGOLIA_APP_ID || !ALGOLIA_SEARCH_API_KEY) {

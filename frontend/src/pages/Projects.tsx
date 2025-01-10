@@ -1,9 +1,9 @@
+import FontAwesomeIconWrapper from 'helpers/wrappers/FontAwesomeIconWrapper'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { project } from 'types/project'
 import { level } from 'utils/data'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { getFilteredIcons } from 'lib/utils'
+import { getFilteredIcons } from 'utils/utils'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 

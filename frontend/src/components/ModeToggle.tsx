@@ -2,7 +2,7 @@ import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect } from 'react'
 
-import { cn } from 'lib/utils'
+import { cn } from 'utils/utils'
 
 function ModeToggle({ className }: { className?: string }) {
   const [dark, setDark] = useState(() => {

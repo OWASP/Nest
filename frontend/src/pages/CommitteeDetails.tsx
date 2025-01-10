@@ -1,8 +1,8 @@
+import { fetchAlgoliaData } from 'helpers/api'
+import FontAwesomeIconWrapper from 'helpers/wrappers/FontAwesomeIconWrapper'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { fetchAlgoliaData } from 'lib/api'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { getFilteredIcons, handleSocialUrls } from 'lib/utils'
+import { getFilteredIcons, handleSocialUrls } from 'utils/utils'
 import Card from 'components/Card'
 import LoadingSpinner from 'components/LoadingSpinner'
 

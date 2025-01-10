@@ -1,7 +1,7 @@
+import FontAwesomeIconWrapper from 'helpers/wrappers/FontAwesomeIconWrapper'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { user } from 'types/user'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 

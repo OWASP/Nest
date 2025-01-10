@@ -5,11 +5,11 @@ import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
 
 // Mock the Algolia-related modules
-jest.mock('lib/algoliaClient', () => ({
+jest.mock('helpers/algoliaClient', () => ({
   createAlgoliaClient: jest.fn(),
 }))
 
-jest.mock('lib/api', () => ({
+jest.mock('helpers/api', () => ({
   fetchAlgoliaData: jest.fn(),
   removeIdxPrefix: (obj: unknown) => obj,
 }))
@@ -45,7 +45,7 @@ const renderWithRouter = (ui: React.ReactElement) => {
 }
 
 describe('UserDetailsPage', () => {
-  const { fetchAlgoliaData } = require('lib/api')
+  const { fetchAlgoliaData } = require('helpers/api')
 
   beforeEach(() => {
     fetchAlgoliaData.mockReset()

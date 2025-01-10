@@ -1,3 +1,4 @@
+import { ErrorDisplay, ERROR_CONFIGS } from 'helpers/wrappers/ErrorWrapper'
 import {
   Home,
   ProjectsPage,
@@ -13,7 +14,6 @@ import {
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 
-import { ErrorDisplay, ERROR_CONFIGS } from 'lib/ErrorWrapper'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
 import { Toaster } from 'components/ui/Toaster'

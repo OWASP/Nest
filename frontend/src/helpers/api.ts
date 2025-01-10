@@ -1,12 +1,11 @@
 import { SearchResponse } from 'algoliasearch'
+import { client } from 'helpers/algoliaClient'
+import { AppError } from 'helpers/wrappers/ErrorWrapper'
 import { AlgoliaRequestType, AlgoliaResponseType } from 'types/algolia'
 import { API_URL } from 'utils/credentials'
 import { ENVIRONMENT } from 'utils/credentials'
 
 import { getParamsForIndexName } from 'utils/paramsMapping'
-
-import { client } from 'lib/algoliaClient'
-import { AppError } from 'lib/ErrorWrapper'
 
 export const loadData = async <T>(
   endpoint: string,

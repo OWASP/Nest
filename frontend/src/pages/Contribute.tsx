@@ -1,9 +1,9 @@
+import FontAwesomeIconWrapper from 'helpers/wrappers/FontAwesomeIconWrapper'
 import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
 import { IssueType } from 'types/issue'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { getFilteredIcons } from 'lib/utils'
+import { getFilteredIcons } from 'utils/utils'
 
 import Card from 'components/Card'
 import { Modal } from 'components/Modal'
