@@ -1,8 +1,9 @@
-"""Slack bot owasp command."""
+"""Slack bot leaders command."""
 
 from django.conf import settings
 
 from apps.common.constants import NL
+from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.utils import escape
@@ -20,54 +21,64 @@ def handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    search_query_escaped = escape(command["text"])
+    search_query = command["text"].strip()
+    search_query_escaped = escape(search_query)
 
-    blocks = [markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}")]
     attributes = [
+        "idx_key",
         "idx_leaders",
         "idx_name",
     ]
-    restrict_attributes = ["idx_leaders", "idx_name"]
+    searchable_attributes = ["idx_leaders", "idx_name"]
+    limit = 5
     chapters = get_chapters(
         query=search_query_escaped,
         attributes=attributes,
-        limit=10,
+        limit=limit,
         page=1,
-        restrict_attributes=restrict_attributes,
+        searchable_attributes=searchable_attributes,
     )["hits"]
 
     projects = get_projects(
         query=search_query_escaped,
         attributes=attributes,
-        limit=10,
+        limit=limit,
         page=1,
-        restrict_attributes=restrict_attributes,
+        searchable_attributes=searchable_attributes,
     )["hits"]
 
+    blocks = []
+    indent = "    •"
     if chapters or projects:
-        blocks = [markdown(f"{NL}Here are the results for `{search_query_escaped}`:{NL}")]
-
+        blocks.append(markdown(f"{NL}`{COMMAND} {search_query_escaped}`{NL}"))
         if chapters:
-            blocks.append(markdown("*Chapter Leaders:*"))
-            for chapter in chapters[:10]:
-                chapter_leaders = chapter["idx_leaders"]
-                if isinstance(chapter_leaders, list):
-                    chapter_leaders = ", ".join(chapter_leaders)
-
-                blocks.append(
-                    markdown(f"• *{escape(chapter['idx_name'])}*: {escape(chapter_leaders)}{NL}")
-                )
+            blocks.append(markdown("*Chapters*"))
+            for chapter in chapters:
+                if chapter_leaders := chapter["idx_leaders"]:
+                    chapter_url = get_absolute_url(f"chapters/{chapter['idx_key']}")
+                    leaders = "".join(
+                        f"{indent} `{leader}`{NL}"
+                        if search_query.lower() in leader.lower()
+                        else f"{indent} {leader}{NL}"
+                        for leader in chapter_leaders
+                    )
+                    blocks.append(markdown(f"<{chapter_url}|{chapter['idx_name']}>:{NL}{leaders}"))
 
         if projects:
-            blocks.append(markdown("*Project Leaders:*"))
-            for project in projects[:10]:
-                project_leaders = project["idx_leaders"]
-                if isinstance(project_leaders, list):
-                    project_leaders = ", ".join(project_leaders)
+            blocks.append(markdown("*Projects*"))
+            for project in projects:
+                if project_leaders := project["idx_leaders"]:
+                    project_url = get_absolute_url(f"projects/{project['idx_key']}")
+                    leaders = "".join(
+                        f"indent `{leader}`{NL}"
+                        if search_query.lower() in leader.lower()
+                        else f"indent {leader}{NL}"
+                        for leader in project_leaders
+                    )
 
-                blocks.append(
-                    markdown(f"• *{escape(project['idx_name'])}*: {escape(project_leaders)}{NL}")
-                )
+                    blocks.append(markdown(f"<{project_url}|{project['idx_name']}>:{NL}{leaders}"))
+    else:
+        blocks.append(markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}"))
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)

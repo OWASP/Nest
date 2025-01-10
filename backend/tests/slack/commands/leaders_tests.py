@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
+from apps.common.constants import NL
 from apps.slack.commands.leaders import handler
 
 
@@ -23,15 +24,17 @@ class TestLeadersHandler:
     @pytest.fixture()
     def mock_chapter(self):
         return {
-            "idx_name": "Test Chapter",
+            "idx_key": "test-chapter",
             "idx_leaders": ["Leader A", "Leader B"],
+            "idx_name": "Test Chapter",
         }
 
     @pytest.fixture()
     def mock_project(self):
         return {
-            "idx_name": "Test Project",
+            "idx_key": "test-project",
             "idx_leaders": ["Leader C"],
+            "idx_name": "Test Project",
         }
 
     @pytest.mark.parametrize(
@@ -39,7 +42,8 @@ class TestLeadersHandler:
         [
             (False, True, None),
             (True, False, "No results found for"),
-            (True, True, "Here are the results for"),
+            (True, True, "Chapters"),
+            (True, True, "Projects"),
         ],
     )
     @patch("apps.owasp.api.search.chapter.get_chapters")
@@ -109,7 +113,7 @@ class TestLeadersHandler:
     @pytest.mark.parametrize(
         ("leaders_list", "expected_text"),
         [
-            (["Leader A", "Leader B"], "Leader A, Leader B"),
+            (["Leader A", "Leader B"], f"• Leader A{NL}    • Leader B{NL}"),
             (["Leader C"], "Leader C"),
             ([], ""),
         ],
@@ -128,13 +132,15 @@ class TestLeadersHandler:
         settings.SLACK_COMMANDS_ENABLED = True
 
         mock_chapter = {
-            "idx_name": "Test Chapter",
+            "idx_key": "test-chapter",
             "idx_leaders": leaders_list,
+            "idx_name": "Test Chapter",
         }
 
         mock_project = {
-            "idx_name": "Test Project",
+            "idx_key": "test-project",
             "idx_leaders": ["Leader D"],
+            "idx_name": "Test Project",
         }
 
         mock_get_chapters.return_value = {"hits": [mock_chapter]}
@@ -143,5 +149,7 @@ class TestLeadersHandler:
         handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-
-        assert any(expected_text in str(block) for block in blocks)
+        block_texts = [
+            block.get("text", {}).get("text", "") for block in blocks if "text" in block
+        ]
+        assert any(expected_text in str(block) for block in block_texts)
