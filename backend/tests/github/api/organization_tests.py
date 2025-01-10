@@ -51,5 +51,5 @@ class TestOrganizationSerializer:
     def test_get_logins(self, mock_values_list):
         mock_values_list.return_value = ["github", "microsoft"]
         logins = Organization.get_logins()
-        assert logins == ["github", "microsoft"]
-        mock_values_list.assert_called_once_with("name", flat=True)
+        assert logins == {"github", "microsoft"}
+        mock_values_list.assert_called_once_with("login", flat=True)
