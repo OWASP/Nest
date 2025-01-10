@@ -18,8 +18,8 @@
     "watch": "jest --watch"
   },
   "dependencies": {
-    "@algolia/autocomplete-js": "^1.17.8",
-    "@algolia/autocomplete-plugin-query-suggestions": "^1.17.8",
+    "@algolia/autocomplete-js": "^1.17.9",
+    "@algolia/autocomplete-plugin-query-suggestions": "^1.17.9",
     "@algolia/autocomplete-theme-classic": "^1.17.8",
     "@fortawesome/fontawesome-svg-core": "^6.7.0",
     "@fortawesome/free-brands-svg-icons": "^6.7.0",
@@ -62,7 +62,7 @@
     "@types/jest": "^29.5.14",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.3",
-    "@types/react": "^19.0.3",
+    "@types/react": "^19.0.4",
     "@types/react-dom": "^19.0.2",
     "@types/react-gtm-module": "^2.0.4",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
@@ -92,7 +92,7 @@
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "~5.7.2",
+    "typescript": "~5.7.3",
     "typescript-eslint": "^8.19.1",
     "util": "^0.12.5",
     "vite": "^6.0.7",
