@@ -4,10 +4,8 @@ from algoliasearch_django import raw_search
 
 from apps.owasp.models.project import Project
 
-PROJECT_CACHE_PREFIX = "project:"
 
-
-def get_projects(query, attributes=None, limit=25, page=1):
+def get_projects(query, attributes=None, limit=25, page=1, searchable_attributes=None):
     """Return projects relevant to a search query."""
     params = {
         "attributesToHighlight": [],
@@ -31,5 +29,8 @@ def get_projects(query, attributes=None, limit=25, page=1):
         "page": page - 1,
         "typoTolerance": "min",
     }
+
+    if searchable_attributes:
+        params["restrictSearchableAttributes"] = searchable_attributes
 
     return raw_search(Project, query, params)
