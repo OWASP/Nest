@@ -101,12 +101,7 @@ const Card = ({
       </div>
       {/* Link to project name if provided */}
       {projectName && (
-        <a
-          href={projectLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 font-medium"
-        >
+        <a href={projectLink} rel="noopener noreferrer" className="mt-2 font-medium">
           {projectName}
         </a>
       )}

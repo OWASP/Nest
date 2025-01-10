@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from apps.github.api.organization import OrganizationSerializer
+from apps.github.models.organization import Organization
 
 
 class TestOrganizationSerializer:
@@ -45,3 +46,10 @@ class TestOrganizationSerializer:
             validated_data["updated_at"].isoformat().replace("+00:00", "Z")
         )
         assert validated_data == organization_data
+
+    @patch("apps.github.models.organization.Organization.objects.values_list")
+    def test_get_logins(self, mock_values_list):
+        mock_values_list.return_value = ["github", "microsoft"]
+        logins = Organization.get_logins()
+        assert logins == {"github", "microsoft"}
+        mock_values_list.assert_called_once_with("login", flat=True)

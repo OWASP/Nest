@@ -13,7 +13,7 @@ COMMAND = "/owasp"
 
 def handler(ack, command, client):
     """Slack /owasp command handler."""
-    from apps.slack.commands import committees, contribute, gsoc, projects
+    from apps.slack.commands import committees, contribute, gsoc, leaders, projects
 
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
@@ -23,10 +23,11 @@ def handler(ack, command, client):
     if not command_tokens or command_tokens[0] in COMMAND_HELP:
         blocks = [
             markdown(
+                f"• `{COMMAND} committees` -- Explore OWASP committees{NL}"
                 f"• `{COMMAND} contribute` -- OWASP projects contribution opportunities{NL}"
                 f"• `{COMMAND} gsoc` -- Google Summer of Code participants information{NL}"
+                f"• `{COMMAND} leaders` -- Chapter and project leaders search{NL}"
                 f"• `{COMMAND} projects` -- Explore OWASP projects{NL}"
-                f"• `{COMMAND} committees` -- Explore OWASP committees{NL}"
             ),
         ]
         conversation = client.conversations_open(users=command["user_id"])
@@ -35,14 +36,16 @@ def handler(ack, command, client):
         handler = command_tokens[0].strip().lower()
         command["text"] = " ".join(command_tokens[1:]).strip()
         match handler:
+            case "committees":
+                committees.handler(ack, command, client)
             case "contribute":
                 contribute.handler(ack, command, client)
             case "gsoc":
                 gsoc.handler(ack, command, client)
+            case "leaders":
+                leaders.handler(ack, command, client)
             case "projects":
                 projects.handler(ack, command, client)
-            case "committees":
-                committees.handler(ack, command, client)
             case _:
                 blocks = [
                     markdown(f"*`{COMMAND} {escape(handler)}` is not supported*{NL}"),

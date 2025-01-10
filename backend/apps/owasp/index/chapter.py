@@ -55,7 +55,8 @@ class ChapterIndex(AlgoliaIndex):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_leaders, idx_top_contributors.login, idx_top_contributors.name)",
+            "unordered(idx_leaders)",
+            "unordered(idx_top_contributors.login, idx_top_contributors.name)",
             "unordered(idx_suggested_location, idx_country, idx_region, idx_postal_code)",
             "unordered(idx_tags)",
         ],
