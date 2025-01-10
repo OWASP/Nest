@@ -1,12 +1,17 @@
 import pytest
 
-from apps.slack.common.contribute import project_issues_url, projects_url, get_absolute_url
+from apps.slack.common.contribute import (
+    get_absolute_url,
+    project_issues_url,
+    projects_url,
+)
+
 
 class TestProjectURLs:
     @pytest.mark.parametrize(
-        ("expected_project_issues_url","expected_projects_url"),
+        ("expected_project_issues_url", "expected_projects_url"),
         [
-            ("projects/contribute","projects"),
+            ("projects/contribute", "projects"),
         ],
     )
     def test_url(self, expected_project_issues_url, expected_projects_url):
