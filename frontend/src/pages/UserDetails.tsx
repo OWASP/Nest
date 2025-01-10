@@ -24,13 +24,12 @@ const UserDetailsPage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { hits } = await fetchAlgoliaData('users', userKey, 1)
-        const userData = hits.find((user) => user.idx_key == userKey)
-        if (!userData) {
+        const { hits } = await fetchAlgoliaData('users', userKey, 1, userKey)
+        if (hits.length === 0) {
           setUser(null)
         } else {
-          const UserToDisplay = removeIdxPrefix(userData as IndexedObject)
-          setUser(UserToDisplay as unknown as UserDetailsProps)
+          const userData = removeIdxPrefix(hits[0] as IndexedObject)
+          setUser(userData as unknown as UserDetailsProps)
         }
       } catch (error) {
         logger.error(error)
