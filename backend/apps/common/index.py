@@ -24,7 +24,7 @@ class IndexBase:
 
     @staticmethod
     def _parse_synonyms_file(file_path, index_name):
-        """Parse synonyms from txt file."""
+        """Parse synonyms file."""
         try:
             with Path(file_path).open("r", encoding="utf-8") as f:
                 file_content = f.read()

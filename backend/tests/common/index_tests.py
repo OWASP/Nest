@@ -16,6 +16,9 @@ class TestIndexBase:
         ("file_content", "expected_synonyms"),
         [
             (
+                """laptop: notebook, portable computer
+desktop, workstation, pc
+tablet: ipad, slate""",
                 [
                     {
                         "objectID": "test_index-synonym-1",
@@ -37,6 +40,10 @@ class TestIndexBase:
                 ],
             ),
             (
+                """# Comment line
+word1, word2
+
+key: value1, value2""",
                 [
                     {
                         "objectID": "test_index-synonym-2",
@@ -52,6 +59,8 @@ class TestIndexBase:
                 ],
             ),
             (
+                """main: synonym1, synonym2
+key: value1, value2""",
                 [
                     {
                         "objectID": "test_index-synonym-1",
@@ -70,7 +79,6 @@ class TestIndexBase:
         ],
     )
     def test_reindex_synonyms(self, file_content, expected_synonyms):
-        """Test successful reindexing of synonyms with different file contents."""
         app_name = "test_app"
         index_name = "test_index"
 
@@ -102,7 +110,6 @@ class TestIndexBase:
             mock_logger.exception.assert_not_called()
 
     def test_reindex_synonyms_save_error(self):
-        """Test handling of Algolia save error."""
         app_name = "test_app"
         index_name = "test_index"
         file_content = "word1, word2"
@@ -130,7 +137,6 @@ class TestIndexBase:
             )
 
     def test_get_total_count_success(self):
-        """Test successful retrieval of total record count."""
         index_name = "test_index"
         expected_hits = 42
 
@@ -155,7 +161,6 @@ class TestIndexBase:
             )
 
     def test_get_total_count_error(self):
-        """Test handling of count retrieval error."""
         index_name = "test_index"
 
         with (
@@ -179,7 +184,6 @@ class TestIndexBase:
             mock_logger.exception.assert_called_once_with(
                 "Error retrieving index count for '%s'", index_name
             )
-
             mock_client.search_single_index.assert_called_once_with(
                 index_name="testenv_test_index",
                 search_params={"query": "", "hitsPerPage": 0, "analytics": False},
