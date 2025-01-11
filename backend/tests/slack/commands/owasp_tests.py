@@ -71,6 +71,16 @@ class TestOwaspHandler:
         mock_ack.assert_called_once()
         mock_gsoc_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
 
+    @patch("apps.slack.commands.chapters.handler")
+    def test_chapters_handler(self, mock_chapters_handler, mock_ack, mock_client, mock_command):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "chapters"
+
+        handler(mock_ack, mock_command, mock_client)
+
+        mock_ack.assert_called_once()
+        mock_chapters_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
+
     @patch("apps.slack.commands.projects.handler")
     def test_projects_handler(self, mock_projects_handler, mock_ack, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
