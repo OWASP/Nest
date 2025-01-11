@@ -21,18 +21,18 @@ desktop, workstation, pc
 tablet: ipad, slate""",
                 [
                     {
-                        "objectID": "test_index-synonym-1",
+                        "objectID": "1",
                         "type": "oneWaySynonym",
                         "input": "laptop",
                         "synonyms": ["notebook", "portable computer"],
                     },
                     {
-                        "objectID": "test_index-synonym-2",
+                        "objectID": "2",
                         "type": "synonym",
                         "synonyms": ["desktop", "workstation", "pc"],
                     },
                     {
-                        "objectID": "test_index-synonym-3",
+                        "objectID": "3",
                         "type": "oneWaySynonym",
                         "input": "tablet",
                         "synonyms": ["ipad", "slate"],
@@ -46,12 +46,12 @@ word1, word2
 key: value1, value2""",
                 [
                     {
-                        "objectID": "test_index-synonym-2",
+                        "objectID": "2",
                         "type": "synonym",
                         "synonyms": ["word1", "word2"],
                     },
                     {
-                        "objectID": "test_index-synonym-4",
+                        "objectID": "4",
                         "type": "oneWaySynonym",
                         "input": "key",
                         "synonyms": ["value1", "value2"],
@@ -63,13 +63,13 @@ key: value1, value2""",
 key: value1, value2""",
                 [
                     {
-                        "objectID": "test_index-synonym-1",
+                        "objectID": "1",
                         "type": "oneWaySynonym",
                         "input": "main",
                         "synonyms": ["synonym1", "synonym2"],
                     },
                     {
-                        "objectID": "test_index-synonym-2",
+                        "objectID": "2",
                         "type": "oneWaySynonym",
                         "input": "key",
                         "synonyms": ["value1", "value2"],

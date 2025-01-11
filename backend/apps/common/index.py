@@ -8,6 +8,8 @@ from algoliasearch.http.exceptions import AlgoliaException
 from algoliasearch.search.client import SearchClientSync
 from django.conf import settings
 
+from apps.common.constants import NL
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +25,7 @@ class IndexBase:
         )
 
     @staticmethod
-    def _parse_synonyms_file(file_path, index_name):
+    def _parse_synonyms_file(file_path):
         """Parse synonyms file."""
         try:
             with Path(file_path).open("r", encoding="utf-8") as f:
@@ -33,30 +35,28 @@ class IndexBase:
             return None
 
         synonyms = []
-        for idx, original_line in enumerate(file_content.strip().split("\n"), 1):
-            cleaned_line = original_line.strip()
+        for idx, line in enumerate(file_content.strip().split(NL), 1):
+            cleaned_line = line.strip()
             if not cleaned_line or cleaned_line.startswith("#"):
                 continue
 
-            if ":" in cleaned_line:
+            if ":" in cleaned_line:  # one-way synonym
                 input_term, synonyms_str = cleaned_line.split(":", 1)
                 input_term = input_term.strip()
-                synonym_terms = [term.strip() for term in synonyms_str.split(",")]
                 synonyms.append(
                     {
-                        "objectID": f"{index_name}-synonym-{idx}",
+                        "objectID": f"{idx}",
                         "type": "oneWaySynonym",
                         "input": input_term,
-                        "synonyms": [term for term in synonym_terms if term],
+                        "synonyms": [t for term in synonyms_str.split(",") if (t := term.strip())],
                     }
                 )
-            else:
-                terms = [term.strip() for term in cleaned_line.split(",") if term.strip()]
+            else:  # regular two-way synonym
                 synonyms.append(
                     {
-                        "objectID": f"{index_name}-synonym-{idx}",
+                        "objectID": f"{idx}",
                         "type": "synonym",
-                        "synonyms": [term for term in terms if term],
+                        "synonyms": [t for term in cleaned_line.split(",") if (t := term.strip())],
                     }
                 )
 
@@ -67,8 +67,7 @@ class IndexBase:
         """Reindex synonyms."""
         file_path = Path(f"{settings.BASE_DIR}/apps/{app_name}/index/synonyms/{index_name}.txt")
 
-        synonyms = IndexBase._parse_synonyms_file(file_path, index_name)
-        if not synonyms:
+        if not (synonyms := IndexBase._parse_synonyms_file(file_path)):
             return None
 
         client = IndexBase._get_client()
