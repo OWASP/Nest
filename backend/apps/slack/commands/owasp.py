@@ -13,7 +13,14 @@ COMMAND = "/owasp"
 
 def handler(ack, command, client):
     """Slack /owasp command handler."""
-    from apps.slack.commands import chapters, committees, contribute, gsoc, leaders, projects
+    from apps.slack.commands import (
+        chapters,
+        committees,
+        contribute,
+        gsoc,
+        leaders,
+        projects,
+    )
 
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
