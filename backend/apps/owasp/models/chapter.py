@@ -102,9 +102,11 @@ class Chapter(
 
     def generate_geo_location(self):
         """Add latitude and longitude data."""
-        location = get_location_coordinates(self.suggested_location) or get_location_coordinates(
-            self.get_geo_string()
-        )
+        location = None
+        if self.suggested_location and self.suggested_location != "None":
+            location = get_location_coordinates(self.suggested_location)
+        if location is None:
+            location = get_location_coordinates(self.get_geo_string())
 
         if location:
             self.latitude = location.latitude
@@ -121,7 +123,10 @@ class Chapter(
         open_ai = open_ai or OpenAi()
         open_ai.set_input(self.get_geo_string())
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
-        self.suggested_location = open_ai.complete() or ""
+        suggested_location = open_ai.complete()
+        self.suggested_location = (
+            suggested_location if suggested_location and suggested_location != "None" else ""
+        )
 
     def get_geo_string(self, include_name=True):
         """Return geo string."""
