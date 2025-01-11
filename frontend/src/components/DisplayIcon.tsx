@@ -17,7 +17,7 @@ export default function DisplayIcon({
     <div
       data-tooltip-id={`icon-tooltip-${item}`}
       data-tooltip-content={`${Icons[item as keyof typeof Icons]?.label}`}
-      className={`flex flex-col items-center justify-center gap-1 border-b border-l border-border px-4 pb-1 ${idx === 0 || (idx === -1 && Object.keys(icons).length === 1) ? 'rounded-bl-none sm:rounded-bl-md' : ''} ${idx === -1 ? 'border-r sm:border-r-0' : ''} border-t sm:border-t-0`}
+      className={`flex flex-col items-center justify-center gap-1 border-b border-l border-t border-border px-4 pb-1 sm:border-t-0 ${idx === 0 || (idx === -1 && Object.keys(icons).length === 1) ? 'rounded-bl-none sm:rounded-bl-md' : ''} ${idx === -1 ? 'border-r sm:border-r-0' : ''} ${item === 'idx_updated_at' || item === 'idx_stars_count' ? 'rotate-container' : ''} ${item === 'idx_forks_count' || item === 'idx_contributors_count' ? 'flip-container' : ''}`}
     >
       {/* Display formatted number if the value is a number */}
       <span className="text-gray-600 dark:text-gray-300">
@@ -27,7 +27,8 @@ export default function DisplayIcon({
       </span>
       <span>
         <FontAwesomeIconWrapper
-          className="text-gray-600 dark:text-gray-300"
+          className={`text-gray-600 dark:text-gray-300 ${item === 'idx_updated_at' || item === 'idx_stars_count' ? 'icon-rotate' : ''} ${item === 'idx_forks_count' || item === 'idx_contributors_count' ? 'icon-flip' : ''}`}
+          // Ensure smooth transition for icon
           icon={Icons[item as IconKeys]?.icon} // Display corresponding icon
         />
       </span>
