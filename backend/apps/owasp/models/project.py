@@ -140,7 +140,7 @@ class Project(
     @property
     def is_indexable(self):
         """Projects to index."""
-        return self.is_active and self.has_active_repositories
+        return self.has_active_repositories
 
     @property
     def nest_key(self):

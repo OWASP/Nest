@@ -104,12 +104,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @property
     def is_indexable(self):
         """Repositories to index."""
-        return (
-            not self.is_archived
-            and not self.is_empty
-            and not self.is_template
-            and self.project_set.exists()
-        )
+        return not self.is_empty and not self.is_template and self.project_set.exists()
 
     @property
     def latest_release(self):
