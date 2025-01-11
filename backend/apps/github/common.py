@@ -46,7 +46,12 @@ def sync_repository(gh_repository, organization=None, user=None):
     )
 
     # GitHub repository issues.
-    if repository.track_issues and repository.project and repository.project.track_issues:
+    if (
+        not repository.is_archived
+        and repository.track_issues
+        and repository.project
+        and repository.project.track_issues
+    ):
         # Sync open issues for the first run.
         kwargs = {
             "direction": "asc",

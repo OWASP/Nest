@@ -110,9 +110,7 @@ class Chapter(
 
     def generate_suggested_location(self, open_ai=None, max_tokens=100):
         """Generate project summary."""
-        # if not self.is_active:
-        #     return
-
+        
         if not (prompt := Prompt.get_owasp_chapter_suggested_location()):
             return
 
