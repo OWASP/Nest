@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 from algoliasearch.http.exceptions import AlgoliaException
@@ -13,118 +13,174 @@ class MockSearchResponse:
 
 class TestIndexBase:
     @pytest.mark.parametrize(
-        ("synonyms_data", "expected_enriched_synonyms"),
+        ("file_content", "expected_synonyms"),
         [
             (
-                [{"type": "synonym", "synonyms": ["word1", "word2"]}],
                 [
                     {
-                        "type": "synonym",
-                        "synonyms": ["word1", "word2"],
                         "objectID": "test_index-synonym-1",
-                    }
+                        "type": "oneWaySynonym",
+                        "input": "laptop",
+                        "synonyms": ["notebook", "portable computer"],
+                    },
+                    {
+                        "objectID": "test_index-synonym-2",
+                        "type": "synonym",
+                        "synonyms": ["desktop", "workstation", "pc"],
+                    },
+                    {
+                        "objectID": "test_index-synonym-3",
+                        "type": "oneWaySynonym",
+                        "input": "tablet",
+                        "synonyms": ["ipad", "slate"],
+                    },
                 ],
             ),
             (
                 [
-                    {"type": "synonym", "synonyms": ["word1", "word2"]},
-                    {"synonyms": ["term1", "term2"]},
-                ],
-                [
                     {
+                        "objectID": "test_index-synonym-2",
                         "type": "synonym",
                         "synonyms": ["word1", "word2"],
-                        "objectID": "test_index-synonym-1",
                     },
                     {
-                        "type": "synonym",
-                        "synonyms": ["term1", "term2"],
+                        "objectID": "test_index-synonym-4",
+                        "type": "oneWaySynonym",
+                        "input": "key",
+                        "synonyms": ["value1", "value2"],
+                    },
+                ],
+            ),
+            (
+                [
+                    {
+                        "objectID": "test_index-synonym-1",
+                        "type": "oneWaySynonym",
+                        "input": "main",
+                        "synonyms": ["synonym1", "synonym2"],
+                    },
+                    {
                         "objectID": "test_index-synonym-2",
+                        "type": "oneWaySynonym",
+                        "input": "key",
+                        "synonyms": ["value1", "value2"],
                     },
                 ],
             ),
         ],
     )
-    @patch("apps.common.index.json.load")
-    @patch("apps.common.index.Path.open")
-    @patch("apps.common.index.IndexBase._get_client")
-    @patch("apps.common.index.logger")
-    @patch("apps.common.index.settings")
-    def test_reindex_synonyms(
-        self,
-        mock_settings,
-        mock_logger,
-        mock_get_client,
-        mock_open_path,
-        mock_json_load,
-        synonyms_data,
-        expected_enriched_synonyms,
-    ):
+    def test_reindex_synonyms(self, file_content, expected_synonyms):
+        """Test successful reindexing of synonyms with different file contents."""
         app_name = "test_app"
         index_name = "test_index"
-        file_path = f"/apps/{app_name}/index/synonyms/{index_name}.json"
 
-        mock_settings.BASE_DIR = "/base/dir"
-        mock_settings.ENVIRONMENT.lower.return_value = "testenv"
+        with (
+            patch("apps.common.index.settings") as mock_settings,
+            patch("apps.common.index.logger") as mock_logger,
+            patch("apps.common.index.SearchClientSync") as mock_search_client,
+            patch("pathlib.Path.open", mock_open(read_data=file_content)),
+        ):
+            mock_settings.BASE_DIR = "/base/dir"
+            mock_settings.ENVIRONMENT = "testenv"
+            mock_settings.ALGOLIA_APPLICATION_ID = "test_app_id"
+            mock_settings.ALGOLIA_WRITE_API_KEY = "test_api_key"
 
-        mock_open_path.return_value.__enter__.return_value = MagicMock()
-        mock_json_load.return_value = synonyms_data
+            mock_client = MagicMock()
+            mock_search_client.return_value = mock_client
 
-        mock_client = MagicMock()
-        mock_get_client.return_value = mock_client
+            result = IndexBase.reindex_synonyms(app_name, index_name)
 
-        IndexBase.reindex_synonyms(app_name, index_name)
+            mock_client.clear_synonyms.assert_called_once_with(index_name="testenv_test_index")
 
-        mock_open_path.assert_called_once_with(f"/base/dir{file_path}")
+            mock_client.save_synonyms.assert_called_once()
+            call_args = mock_client.save_synonyms.call_args
+            assert call_args.kwargs["index_name"] == "testenv_test_index"
+            assert call_args.kwargs["synonym_hit"] == expected_synonyms
+            assert call_args.kwargs["replace_existing_synonyms"] is True
 
-        mock_client.clear_synonyms.assert_called_once_with(index_name="testenv_test_index")
-        mock_client.save_synonyms.assert_called_once_with(
-            index_name="testenv_test_index",
-            synonym_hit=expected_enriched_synonyms,
-            replace_existing_synonyms=True,
-        )
+            assert result == len(expected_synonyms)
+            mock_logger.exception.assert_not_called()
 
-        mock_logger.exception.assert_not_called()
+    def test_reindex_synonyms_save_error(self):
+        """Test handling of Algolia save error."""
+        app_name = "test_app"
+        index_name = "test_index"
+        file_content = "word1, word2"
 
-    @pytest.mark.parametrize(
-        ("index_name", "search_response", "expected_count"),
-        [
-            ("index1", MockSearchResponse(5), 5),
-            ("index2", AlgoliaException("Error"), 0),
-        ],
-    )
-    @patch("apps.common.index.IndexBase._get_client")
-    @patch("apps.common.index.logger")
-    @patch("apps.common.index.settings")
-    def test_get_total_count(
-        self,
-        mock_settings,
-        mock_logger,
-        mock_get_client,
-        index_name,
-        search_response,
-        expected_count,
-    ):
-        mock_settings.ENVIRONMENT.lower.return_value = "testenv"
+        with (
+            patch("apps.common.index.settings") as mock_settings,
+            patch("apps.common.index.logger") as mock_logger,
+            patch("apps.common.index.SearchClientSync") as mock_search_client,
+            patch("pathlib.Path.open", mock_open(read_data=file_content)),
+        ):
+            mock_settings.BASE_DIR = "/base/dir"
+            mock_settings.ENVIRONMENT = "testenv"
+            mock_settings.ALGOLIA_APPLICATION_ID = "test_app_id"
+            mock_settings.ALGOLIA_WRITE_API_KEY = "test_api_key"
 
-        mock_client = MagicMock()
-        mock_get_client.return_value = mock_client
+            mock_client = MagicMock()
+            mock_client.save_synonyms.side_effect = AlgoliaException("API Error")
+            mock_search_client.return_value = mock_client
 
-        if isinstance(search_response, MockSearchResponse):
-            mock_client.search_single_index.return_value = search_response
-        else:
-            mock_client.search_single_index.side_effect = search_response
+            result = IndexBase.reindex_synonyms(app_name, index_name)
 
-        count = IndexBase.get_total_count(index_name)
+            assert result is None
+            mock_logger.exception.assert_called_once_with(
+                "Error saving synonyms for '%s'", "testenv_test_index"
+            )
 
-        assert count == expected_count
-        if isinstance(search_response, MockSearchResponse):
+    def test_get_total_count_success(self):
+        """Test successful retrieval of total record count."""
+        index_name = "test_index"
+        expected_hits = 42
+
+        with (
+            patch("apps.common.index.settings") as mock_settings,
+            patch("apps.common.index.SearchClientSync") as mock_search_client,
+        ):
+            mock_settings.ENVIRONMENT = "testenv"
+            mock_settings.ALGOLIA_APPLICATION_ID = "test_app_id"
+            mock_settings.ALGOLIA_WRITE_API_KEY = "test_api_key"
+
+            mock_client = MagicMock()
+            mock_client.search_single_index.return_value = MockSearchResponse(expected_hits)
+            mock_search_client.return_value = mock_client
+
+            result = IndexBase.get_total_count(index_name)
+
+            assert result == expected_hits
             mock_client.search_single_index.assert_called_once_with(
-                index_name=f"testenv_{index_name}",
+                index_name="testenv_test_index",
                 search_params={"query": "", "hitsPerPage": 0, "analytics": False},
             )
-            mock_logger.exception.assert_not_called()
-        else:
+
+    def test_get_total_count_error(self):
+        """Test handling of count retrieval error."""
+        index_name = "test_index"
+
+        with (
+            patch("apps.common.index.settings") as mock_settings,
+            patch("apps.common.index.logger") as mock_logger,
+            patch("apps.common.index.SearchClientSync") as mock_search_client,
+        ):
+            mock_settings.ENVIRONMENT = "testenv"
+            mock_settings.ALGOLIA_APPLICATION_ID = "test_app_id"
+            mock_settings.ALGOLIA_WRITE_API_KEY = "test_api_key"
+
+            mock_client = MagicMock()
+            mock_client.search_single_index.side_effect = AlgoliaException("API Error")
+            mock_search_client.return_value = mock_client
+
+            IndexBase.get_total_count.cache_clear()
+
+            result = IndexBase.get_total_count(index_name)
+
+            assert result == 0
             mock_logger.exception.assert_called_once_with(
                 "Error retrieving index count for '%s'", index_name
+            )
+
+            mock_client.search_single_index.assert_called_once_with(
+                index_name="testenv_test_index",
+                search_params={"query": "", "hitsPerPage": 0, "analytics": False},
             )
