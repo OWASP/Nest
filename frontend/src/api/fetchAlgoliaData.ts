@@ -1,32 +1,10 @@
 import { SearchResponse } from 'algoliasearch'
-import { client } from 'helpers/algoliaClient'
-import { AppError } from 'helpers/wrappers/ErrorWrapper'
 import { AlgoliaRequestType, AlgoliaResponseType } from 'types/algolia'
-import { API_URL } from 'utils/credentials'
 import { ENVIRONMENT } from 'utils/credentials'
+import { client } from 'utils/helpers/algoliaClient'
 
 import { getParamsForIndexName } from 'utils/paramsMapping'
-
-export const loadData = async <T>(
-  endpoint: string,
-  query: string,
-  currentPage: number
-): Promise<T> => {
-  const response = await fetch(
-    `${API_URL}/${endpoint}?` +
-      new URLSearchParams({
-        q: query,
-        page: currentPage.toString(),
-      }).toString()
-  )
-  if (!response.ok) {
-    throw new AppError(
-      response.status === 404 ? 404 : 500,
-      response.status === 404 ? 'Resource not found' : 'Server error occurred'
-    )
-  }
-  return await response.json()
-}
+import { AppError } from 'wrappers/ErrorWrapper'
 
 export const fetchAlgoliaData = async <T>(
   indexName: string,

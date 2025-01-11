@@ -1,13 +1,13 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
-import { fetchAlgoliaData } from 'helpers/api'
-import { render } from 'helpers/wrappers/test-util'
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useNavigate } from 'react-router-dom'
+import { render } from 'wrappers/testUtil'
 
 import ProjectsPage from 'pages/Projects'
 import { mockProjectData } from '@tests/data/mockProjectData'
 
-jest.mock('helpers/api', () => ({
+jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 jest.mock('react-router-dom', () => ({

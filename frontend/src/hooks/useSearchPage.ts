@@ -1,8 +1,8 @@
-import { fetchAlgoliaData } from 'helpers/api'
-import { handleAppError } from 'helpers/wrappers/ErrorWrapper'
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AlgoliaResponseType } from 'types/algolia'
+import { handleAppError } from 'wrappers/ErrorWrapper'
 
 interface UseSearchPageOptions {
   indexName: string

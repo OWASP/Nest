@@ -1,4 +1,3 @@
-import { ErrorDisplay, ERROR_CONFIGS } from 'helpers/wrappers/ErrorWrapper'
 import {
   Home,
   ProjectsPage,
@@ -13,6 +12,7 @@ import {
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { ErrorDisplay, ERROR_CONFIGS } from 'wrappers/ErrorWrapper'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'

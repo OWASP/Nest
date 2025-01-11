@@ -1,10 +1,10 @@
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { headerLinks } from 'helpers/constants'
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { headerLinks } from 'utils/constants'
 
-import { cn } from 'utils/utils'
+import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
 
 export default function Header() {

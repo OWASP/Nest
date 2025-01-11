@@ -1,5 +1,5 @@
-import { tooltipStyle } from 'helpers/constants'
 import { Tooltip } from 'react-tooltip'
+import { tooltipStyle } from 'utils/constants'
 
 const TopicBadge = ({
   topic,

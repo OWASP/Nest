@@ -1,11 +1,11 @@
 import { autocomplete } from '@algolia/autocomplete-js'
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
 import '@algolia/autocomplete-theme-classic'
-import { client } from 'helpers/algoliaClient'
 import { debounce } from 'lodash'
 import React from 'react'
 import { useEffect, useRef } from 'react'
 import { ENVIRONMENT } from 'utils/credentials'
+import { client } from 'utils/helpers/algoliaClient'
 import 'styles/Autosuggestion.css'
 
 interface SearchProps {

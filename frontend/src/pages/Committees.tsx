@@ -1,8 +1,8 @@
-import FontAwesomeIconWrapper from 'helpers/wrappers/FontAwesomeIconWrapper'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { CommitteeType } from 'types/committee'
-import { getFilteredIcons, handleSocialUrls } from 'utils/utils'
+import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 
