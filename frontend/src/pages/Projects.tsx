@@ -1,10 +1,10 @@
+import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { useSearchPage } from 'lib/hooks/useSearchPage'
-import { project } from 'lib/types'
-import { getFilteredIcons } from 'lib/utils'
+import { project } from 'types/project'
+import { level } from 'utils/data'
+import { getFilteredIcons } from 'utils/utility'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
-import { level } from 'components/data'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ProjectsPage = () => {

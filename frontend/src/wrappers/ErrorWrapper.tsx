@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react'
+import { toast } from 'hooks/useToast'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'lib/hooks/useToast'
 
 interface ErrorDisplayProps {
   statusCode: number

@@ -20,9 +20,12 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      api: path.resolve(__dirname, 'src/api'),
       components: path.resolve(__dirname, 'src/components'),
-      lib: path.resolve(__dirname, 'src/lib'),
+      hooks: path.resolve(__dirname, 'src/hooks'),
       pages: path.resolve(__dirname, 'src/pages'),
+      styles: path.resolve(__dirname, 'src/styles'),
+      wrappers: path.resolve(__dirname, 'src/wrappers'),
       utils: path.resolve(__dirname, 'src/utils'),
       'sentry.config': path.resolve(__dirname, 'src/sentry.config.ts'),
       '@tests': path.resolve(__dirname, '__tests__'),

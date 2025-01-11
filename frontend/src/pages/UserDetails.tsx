@@ -8,12 +8,12 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { UserDetailsProps } from 'types/user'
 import logger from 'utils/logger'
-import { fetchAlgoliaData } from 'lib/api'
-import { UserDetailsProps } from 'lib/types'
-import { IndexedObject, removeIdxPrefix } from 'lib/utils'
+import { IndexedObject, removeIdxPrefix } from 'utils/utility'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {

@@ -1,28 +1,7 @@
-import type { JSX } from 'react'
-
-export type IconType = {
-  [key: string]: string | number
-}
-
-export interface Level {
-  color: string
-  icon: string
-  level?: string
-}
-
-export type topContributorsType = {
-  avatar_url: string
-  contributions_count: number
-  login: string
-  name: string
-}
-
-export type ButtonType = {
-  label: string
-  icon?: JSX.Element
-  onclick?: () => void
-  url?: string
-}
+import { ButtonType } from './button'
+import { topContributorsType } from './contributor'
+import { IconType } from './icon'
+import { Level } from './level'
 
 export interface UserCardProps {
   avatar: string
@@ -46,9 +25,4 @@ export interface CardProps {
   languages?: string[]
   social?: { title: string; icon: string; url: string }[]
   tooltipLabel?: string
-}
-
-export const tooltipStyle = {
-  borderRadius: '8px',
-  zIndex: 100,
 }
