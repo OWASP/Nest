@@ -41,44 +41,38 @@ def handler(ack, command, client):
         ]
 
         attributes = [
-            "idx_name",
-            "idx_summary",
-            "idx_url",
             "idx_leaders",
+            "idx_name",
+            "idx_suggested_location",
+            "idx_summary",
             "idx_region",
             "idx_country",
             "idx_updated_at",
+            "idx_url",
         ]
 
-        if chapters := get_chapters(
-            search_query,
-            attributes=attributes,
-            limit=10,
-        )["hits"]:
+        if chapters := get_chapters(search_query, attributes=attributes, limit=10)["hits"]:
             blocks = [
                 markdown(
-                    (
-                        f"{NL}*Here are top 10 OWASP chapters "
-                        f"that I found for* `{search_query_escaped}` query:{NL}"
-                    )
+                    f"{NL}*OWASP chapters that I found for* `{search_query_escaped}` query:{NL}"
                     if search_query_escaped
-                    else (f"{NL}*Here are top 10 OWASP chapters:*{NL}")
+                    else f"{NL}*OWASP chapters:*{NL}"
                 ),
             ]
 
             for idx, chapter in enumerate(chapters):
-                location = (
-                    f"{chapter['idx_region']}, {chapter['idx_country']}"
-                    if chapter["idx_region"] and chapter["idx_country"]
-                    else chapter["idx_country"]
-                )
+                location = chapter["idx_suggested_location"] or chapter["idx_country"]
                 leaders = chapter.get("idx_leaders", [])
+                leaders = (
+                    f"_Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}_{NL}"
+                    if leaders
+                    else ""
+                )
                 blocks.append(
                     markdown(
-                        f"{NL}*{idx + 1}.*"
-                        f"<{chapter['idx_url']}|*{escape(chapter['idx_name'])}*>{NL}"
-                        f"_{location}_"
-                        f"{NL}Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}{NL}"
+                        f"<{chapter['idx_url']}|*{idx + 1}. {chapter['idx_name']}*>{NL}"
+                        f"_{location}_{NL}"
+                        f"{leaders}"
                         f"{escape(chapter['idx_summary'])}{NL}"
                     )
                 )

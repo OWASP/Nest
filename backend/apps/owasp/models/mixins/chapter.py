@@ -49,7 +49,7 @@ class ChapterIndexMixin(GenericEntityMixin):
     @property
     def idx_suggested_location(self):
         """Return suggested location for indexing."""
-        return self.suggested_location
+        return self.suggested_location if self.suggested_location != "None" else ""
 
     @property
     def idx_top_contributors(self):

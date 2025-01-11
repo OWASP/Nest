@@ -25,12 +25,13 @@ class TestChaptersHandler:
     @pytest.fixture()
     def mock_chapter(self):
         return {
+            "idx_country": "Test Country",
+            "idx_leaders": ["Leader A", "Leader B"],
             "idx_name": "Test Chapter",
+            "idx_region": "Test Region",
+            "idx_suggested_location": "Suggested Location",
             "idx_summary": "Test chapter summary",
             "idx_url": "http://example.com/chapter/1",
-            "idx_leaders": ["Leader A", "Leader B"],
-            "idx_region": "Test Region",
-            "idx_country": "Test Country",
         }
 
     @pytest.mark.parametrize(
@@ -38,7 +39,7 @@ class TestChaptersHandler:
         [
             (False, True, None),
             (True, False, "No results found for"),
-            (True, True, "Here are top 10 OWASP chapters"),
+            (True, True, "OWASP chapters"),
         ],
     )
     @patch("apps.owasp.models.chapter.Chapter.active_chapters_count")
