@@ -126,16 +126,16 @@ jobs:
       - name: Build backend test image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           context: backend
           file: backend/Dockerfile.test
           load: true
           platforms: linux/amd64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
       - name: Run backend tests
         run: |
-          docker run -e DJANGO_CONFIGURATION=Test ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest poetry run pytest
+          docker run -e DJANGO_CONFIGURATION=Test ${{ vars.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest poetry run pytest
 
   run-frontend-tests:
     name: Run frontend tests
@@ -152,16 +152,16 @@ jobs:
       - name: Build frontend test image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
+          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
           context: frontend
           file: frontend/Dockerfile.test
           load: true
           platforms: linux/amd64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
 
       - name: Run frontend tests
         run: |
-          docker run --env-file frontend/.env.example ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest npm run test
+          docker run --env-file frontend/.env.example ${{ vars.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest npm run test
 
   build-docker-staging-images:
     name: Build Docker Staging Images
