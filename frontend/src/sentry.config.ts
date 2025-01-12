@@ -8,6 +8,7 @@ Sentry.init({
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
+  release: process.env.SENTRY_RELEASE,
 })
 
 export const logException = (error: Error) => Sentry.captureException(error)

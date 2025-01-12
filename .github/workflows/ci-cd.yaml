@@ -230,6 +230,8 @@ jobs:
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.staging
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
+          echo "VITE_SENTRY_RELEASE=$(echo ${{ github.sha }} | cut -c1-7)" >> frontend/.env.staging
+          echo "VITE_SENTRY_ENVIRONMENT=staging" >> frontend/.env.staging
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
@@ -283,6 +285,8 @@ jobs:
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
+          echo "DJANGO_SENTRY_RELEASE=$(echo ${{ github.sha }} | cut -c1-7)" >> .env.backend
+          echo "DJANGO_SENTRY_ENVIRONMENT=staging" >> .env.backend
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
@@ -342,6 +346,13 @@ jobs:
           echo "VITE_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
           echo "VITE_ENVIRONMENT=production" >> frontend/.env.production
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
+          echo "VITE_SENTRY_RELEASE=${{ github.event.release.tag_name }}" >> frontend/.env.production
+          echo "VITE_SENTRY_ENVIRONMENT=production" >> frontend/.env.production
+
+      - name: Prepare backend environment
+        run: |
+          echo "DJANGO_SENTRY_ENVIRONMENT=production" >> .env.backend
+          echo "DJANGO_SENTRY_RELEASE=${{ github.event.release.tag_name }}" >> .env.backend
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
