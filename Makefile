@@ -6,8 +6,7 @@ build:
 
 check: \
 	pre-commit \
-	format-frontend-code \
-	lint-frontend-code
+	check-frontend
 
 pre-commit:
 	@pre-commit run -a

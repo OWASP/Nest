@@ -25,6 +25,7 @@ concurrency:
   group: ${{ github.repository }}-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
 
 env:
+  DOCKERHUB_USERNAME: arkid15r
   FORCE_COLOR: 1
 
 jobs:
@@ -120,19 +121,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install Poetry
-        run: pipx install poetry
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build backend test image
+        uses: docker/build-push-action@v6
         with:
-          cache: poetry
-          cache-dependency-path: backend/poetry.lock
-          python-version: '3.13'
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+          context: backend
+          file: backend/Dockerfile.test
+          load: true
+          platforms: linux/amd64
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
       - name: Run backend tests
         run: |
-          make test-backend
+          docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest poetry run pytest
 
   run-frontend-tests:
     name: Run frontend tests
@@ -143,20 +147,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm install
+      - name: Build frontend test image
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
+          context: frontend
+          file: frontend/Dockerfile.test
+          load: true
+          platforms: linux/amd64
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
 
       - name: Run frontend tests
         run: |
-          make test-frontend
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest npm run test
 
   build-docker-staging-images:
     name: Build Docker Staging Images
@@ -182,19 +188,19 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
           context: backend
           file: backend/Dockerfile.staging
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
       - name: Prepare frontend environment
         run: |
@@ -207,13 +213,13 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
           context: frontend
           file: frontend/Dockerfile.staging
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
   deploy-nest-staging:
     name: Deploy Nest Staging
@@ -242,6 +248,7 @@ jobs:
         run: |
           # Backend
           echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" > .env.backend
+          echo "DJANGO_ALGOLIA_APPLICATION_REGION=${{ secrets.DJANGO_ALGOLIA_APPLICATION_REGION }}" >> .env.backend
           echo "DJANGO_ALGOLIA_WRITE_API_KEY=${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}" >> .env.backend
           echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env.backend
           echo "DJANGO_AWS_ACCESS_KEY_ID=${{ secrets.DJANGO_AWS_ACCESS_KEY_ID }}" >> .env.backend
@@ -293,19 +300,19 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
           context: backend
           file: backend/Dockerfile.production
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
 
       - name: Prepare frontend environment
         run: |
@@ -318,13 +325,13 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
           context: frontend
           file: frontend/Dockerfile.production
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
   deploy-nest-production:
     name: Deploy Nest Production

@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from django.conf import settings
 from django.template.defaultfilters import pluralize
+from django.utils.text import Truncator
 from humanize import intword, naturaltime
 
 
@@ -35,3 +36,8 @@ def natural_number(value, unit=None):
     """Return humanized version of a number."""
     number = intword(value)
     return f"{number} {unit}{pluralize(value)}" if unit else number
+
+
+def truncate(text, limit, truncate="..."):
+    """Truncate text to the given limit."""
+    return Truncator(text).chars(limit, truncate=truncate)

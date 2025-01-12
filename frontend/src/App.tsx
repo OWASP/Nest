@@ -7,12 +7,16 @@ import {
   ProjectDetailsPage,
   CommitteeDetailsPage,
   ChapterDetailsPage,
+  UsersPage,
+  UserDetailsPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { ErrorDisplay, ERROR_CONFIGS } from 'wrappers/ErrorWrapper'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
+import { Toaster } from 'components/ui/Toaster'
 
 function App() {
   const location = useLocation()
@@ -23,6 +27,7 @@ function App() {
 
   return (
     <main className="flex min-h-screen w-full flex-col">
+      <Toaster />
       <Header />
       <Routes>
         <Route path="/" element={<Home />}></Route>
@@ -33,6 +38,9 @@ function App() {
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
+        <Route path="/community/users" element={<UsersPage />}></Route>
+        <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
+        <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />
     </main>

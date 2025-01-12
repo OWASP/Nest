@@ -43,10 +43,8 @@ class Command(BaseCommand):
             print(f"{prefix:<10} {project.owasp_url}")
 
             # Generate summary
-            if update_summary:
-                project.generate_summary(
-                    prompt=Prompt.get_owasp_project_summary(), open_ai=open_ai
-                )
+            if update_summary and (prompt := Prompt.get_owasp_project_summary()):
+                project.generate_summary(prompt=prompt, open_ai=open_ai)
 
             projects.append(project)
 

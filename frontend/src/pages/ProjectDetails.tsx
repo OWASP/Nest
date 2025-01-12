@@ -1,10 +1,10 @@
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { fetchAlgoliaData } from 'lib/api'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { getFilteredIcons } from 'lib/utils'
+import { level } from 'utils/data'
+import { getFilteredIcons } from 'utils/utility'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
-import { level } from 'components/data'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
@@ -35,14 +35,14 @@ const ProjectDetailsPage = () => {
   if (!project)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-muted-foreground text-lg font-medium">No project details found.</p>
+        <p className="text-lg font-medium text-muted-foreground">No project details found.</p>
       </div>
     )
   const params = ['idx_updated_at', 'idx_forks_count', 'idx_stars_count', 'idx_contributors_count']
   const filteredIcons = getFilteredIcons(project, params)
 
   const handleButtonClick = () => {
-    window.open(`/projects/contribute?q=${project.idx_name}`, '_blank')
+    window.open(`/projects/contribute?q=${project.idx_name}`)
   }
 
   const SubmitButton = {

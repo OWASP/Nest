@@ -99,7 +99,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
 
     def __str__(self):
         """Repository human readable representation."""
-        return f"{self.owner.login}/{self.name}"
+        return self.path
 
     @property
     def is_indexable(self):
@@ -115,6 +115,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def latest_release(self):
         """Repository latest release."""
         return self.releases.order_by("-created_at").first()
+
+    @property
+    def path(self):
+        """Return repository path."""
+        return f"{self.owner.login}/{self.name}"
 
     @property
     def project(self):
@@ -199,7 +204,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             }
 
         # License.
-        self.license = gh_repository.license.name if gh_repository.license else ""
+        self.license = gh_repository.license.spdx_id if gh_repository.license else ""
 
         # Fetch project metadata from funding.yml file.
         try:

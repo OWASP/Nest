@@ -1,13 +1,14 @@
 """Algolia index synonyms support and record count."""
 
-import json
 import logging
 from functools import lru_cache
 from pathlib import Path
 
-from algoliasearch.exceptions import AlgoliaException
-from algoliasearch.search_client import SearchClient
+from algoliasearch.http.exceptions import AlgoliaException
+from algoliasearch.search.client import SearchClientSync
 from django.conf import settings
+
+from apps.common.constants import NL
 
 logger = logging.getLogger(__name__)
 
@@ -18,44 +19,81 @@ class IndexBase:
     @staticmethod
     def _get_client():
         """Get the Algolia client."""
-        return SearchClient.create(
+        return SearchClientSync(
             settings.ALGOLIA_APPLICATION_ID,
             settings.ALGOLIA_WRITE_API_KEY,
         )
 
     @staticmethod
-    def reindex_synonyms(app_name, index_name):
-        """Reindex synonyms."""
-        index = IndexBase._get_client().init_index(f"{settings.ENVIRONMENT.lower()}_{index_name}")
-
-        file_path = Path.open(
-            f"{settings.BASE_DIR}/apps/{app_name}/index/synonyms/{index_name}.json"
-        )
+    def _parse_synonyms_file(file_path):
+        """Parse synonyms file."""
         try:
-            synonyms = json.load(file_path)
+            with Path(file_path).open("r", encoding="utf-8") as f:
+                file_content = f.read()
         except FileNotFoundError:
             logger.exception("Synonyms file not found", extra={"file_path": file_path})
-            return
+            return None
 
-        for idx, synonym in enumerate(synonyms, 1):
-            synonym["objectID"] = f"{index_name}-synonym-{idx}"
-            # Set default type to regular (two-way) synonym.
-            if "type" not in synonym:
-                synonym["type"] = "synonym"
+        synonyms = []
+        for idx, line in enumerate(file_content.strip().split(NL), 1):
+            cleaned_line = line.strip()
+            if not cleaned_line or cleaned_line.startswith("#"):
+                continue
 
-        index.clear_synonyms()
-        index.save_synonyms(synonyms, {"replaceExistingSynonyms": True})
+            if ":" in cleaned_line:  # one-way synonym
+                input_term, synonyms_str = cleaned_line.split(":", 1)
+                input_term = input_term.strip()
+                synonyms.append(
+                    {
+                        "objectID": f"{idx}",
+                        "type": "oneWaySynonym",
+                        "input": input_term,
+                        "synonyms": [t for term in synonyms_str.split(",") if (t := term.strip())],
+                    }
+                )
+            else:  # regular two-way synonym
+                synonyms.append(
+                    {
+                        "objectID": f"{idx}",
+                        "type": "synonym",
+                        "synonyms": [t for term in cleaned_line.split(",") if (t := term.strip())],
+                    }
+                )
+
+        return synonyms
+
+    @staticmethod
+    def reindex_synonyms(app_name, index_name):
+        """Reindex synonyms."""
+        file_path = Path(f"{settings.BASE_DIR}/apps/{app_name}/index/synonyms/{index_name}.txt")
+
+        if not (synonyms := IndexBase._parse_synonyms_file(file_path)):
+            return None
+
+        client = IndexBase._get_client()
+        index_name = f"{settings.ENVIRONMENT.lower()}_{index_name}"
+
+        try:
+            client.clear_synonyms(index_name=index_name)
+            client.save_synonyms(
+                index_name=index_name, synonym_hit=synonyms, replace_existing_synonyms=True
+            )
+        except AlgoliaException:
+            logger.exception("Error saving synonyms for '%s'", index_name)
+            return None
+
+        return len(synonyms)
 
     @staticmethod
     @lru_cache(maxsize=1024)
     def get_total_count(index_name):
         """Get total count of records in index."""
+        client = IndexBase._get_client()
         try:
-            index = IndexBase._get_client().init_index(
-                f"{settings.ENVIRONMENT.lower()}_{index_name}"
-            )
-            return index.search("", {"hitsPerPage": 0, "analytics": False})["nbHits"]
-
+            return client.search_single_index(
+                index_name=f"{settings.ENVIRONMENT.lower()}_{index_name}",
+                search_params={"query": "", "hitsPerPage": 0, "analytics": False},
+            ).nb_hits
         except AlgoliaException:
             logger.exception("Error retrieving index count for '%s'", index_name)
             return 0

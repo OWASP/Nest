@@ -45,10 +45,8 @@ class Command(BaseCommand):
             print(f"{prefix:<10} {committee.owasp_url}")
 
             # Generate summary
-            if update_summary:
-                committee.generate_summary(
-                    prompt=Prompt.get_owasp_committee_summary(), open_ai=open_ai
-                )
+            if update_summary and (prompt := Prompt.get_owasp_committee_summary()):
+                committee.generate_summary(prompt=prompt, open_ai=open_ai)
 
             committees.append(committee)
 

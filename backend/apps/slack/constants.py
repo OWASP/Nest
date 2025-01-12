@@ -1,5 +1,7 @@
 """Slack app constants."""
 
+from apps.common.constants import NL
+
 NEST_BOT_NAME = "NestBot"
 
 OWASP_APPSEC_CHANNEL_ID = "C0F7D6DFH"
@@ -19,8 +21,10 @@ OWASP_PROJECT_NETTACKER_CHANNEL_ID = "CQZGG24FQ"
 OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID = "CURE8PQ68"
 OWASP_THREAT_MODELING_CHANNEL_ID = "C1CS3C6AF"
 
-NL = "\n"
-NLNL = 2 * NL
+VIEW_PROJECTS_ACTION = "view_projects_action"
+VIEW_COMMITTEES_ACTION = "view_committees_action"
+VIEW_CHAPTERS_ACTION = "view_chapters_action"
+
 
 FEEDBACK_CHANNEL_MESSAGE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "

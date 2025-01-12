@@ -1,13 +1,13 @@
 import { Tooltip } from 'react-tooltip'
-
-import { tooltipStyle, topContributorsType } from 'lib/constants'
+import { topContributorsType } from 'types/contributor'
+import { tooltipStyle } from 'utils/constants'
 
 const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }) => {
   return (
     <a
       data-tooltip-id={`avatar-tooltip-${contributor.login}`}
       data-tooltip-content={`${contributor.contributions_count} contributions by ${contributor.name}`}
-      href={`https://github.com/${contributor.login}`}
+      href={`/community/users/${contributor.login}`}
       target="_blank"
     >
       <img

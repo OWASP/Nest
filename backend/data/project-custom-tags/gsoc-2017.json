@@ -1,0 +1,16 @@
+{
+  "projects": [
+    "www-project-appsensor",
+    "www-project-bug-logging-tool",
+    "www-project-defectdojo",
+    "www-project-hackademic-challenges",
+    "www-project-juice-shop",
+    "www-project-mastg-hacking-playground",
+    "www-project-owtf",
+    "www-project-security-knowledge-framework",
+    "www-project-seraphimdroid",
+    "www-project-zap",
+    "www-project-zsc-tool"
+  ],
+  "tags": ["gsoc2017"]
+}

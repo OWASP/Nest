@@ -71,6 +71,16 @@ class TestOwaspHandler:
         mock_ack.assert_called_once()
         mock_gsoc_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
 
+    @patch("apps.slack.commands.chapters.handler")
+    def test_chapters_handler(self, mock_chapters_handler, mock_ack, mock_client, mock_command):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "chapters"
+
+        handler(mock_ack, mock_command, mock_client)
+
+        mock_ack.assert_called_once()
+        mock_chapters_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
+
     @patch("apps.slack.commands.projects.handler")
     def test_projects_handler(self, mock_projects_handler, mock_ack, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
@@ -80,6 +90,18 @@ class TestOwaspHandler:
 
         mock_ack.assert_called_once()
         mock_projects_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
+
+    @patch("apps.slack.commands.committees.handler")
+    def test_committees_handler(
+        self, mock_committees_handler, mock_ack, mock_client, mock_command
+    ):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "committees"
+
+        handler(mock_ack, mock_command, mock_client)
+
+        mock_ack.assert_called_once()
+        mock_committees_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
 
     @patch("apps.slack.commands.owasp.markdown")
     def test_unsupported_command(self, mock_markdown, mock_ack, mock_client, mock_command):

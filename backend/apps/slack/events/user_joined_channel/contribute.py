@@ -5,13 +5,13 @@ import logging
 from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
+from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
     NEST_BOT_NAME,
-    NL,
     OWASP_CONTRIBUTE_CHANNEL_ID,
 )
 
@@ -59,8 +59,8 @@ def contribute_handler(event, client, ack):
                 "You can easily find opportunities for contributing right here in this chat using "
                 "`/contribute --start` command. It's a quick and convenient way to get involved! "
                 "Alternatively, you can check out "
-                f"<{get_absolute_url('project/issues')}|*OWASP Nest Issues*> where you'll find "
-                "a comprehensive list of OWASP contribution opportunities and ways to make a "
+                f"<{get_absolute_url('projects/contribute')}|*OWASP Nest Issues*> where you'll "
+                "find a comprehensive list of OWASP contribution opportunities and ways to make a "
                 "difference. It also offers guidance on possible first steps to approach the "
                 "issues within OWASP projects."
             ),
