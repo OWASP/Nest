@@ -12,7 +12,7 @@ env:
 jobs:
   update-nest-test-images:
     name: Update Nest test image
-    if: ${{ github.repository == 'vacanza/holidays' }}
+    if: ${{ github.repository == 'OWASP/Nest' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
