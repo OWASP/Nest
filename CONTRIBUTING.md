@@ -25,12 +25,17 @@ Before contributing, ensure you have the following installed:
     1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
     1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
 
+## Starring the Project
+
+[![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
+
+## Forking the Repository
+
+[![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
+
 ## Setting up the Project
 
 Follow these steps to set up the OWASP Nest application:
-
-1. **Fork the Repository**:
-    - Fork <https://github.com/OWASP/Nest> repository using "Fork" button
 
 1. **Clone the Repository**:
     - Clone the repository code from your GitHub account using the following command:
