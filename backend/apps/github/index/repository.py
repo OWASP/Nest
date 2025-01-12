@@ -32,11 +32,13 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
         "idx_subscribers_count",
         "idx_top_contributors",
         "idx_topics",
+        "idx_is_archived",
     )
 
     settings = {
         "minProximity": 4,
         "customRanking": [
+            "asc(idx_is_archived)",
             "desc(idx_stars_count)",
             "desc(idx_forks_count)",
             "desc(idx_pushed_at)",
@@ -61,7 +63,7 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return Repository.objects.filter(is_archived=False, is_template=False).prefetch_related(
+        return Repository.objects.filter(is_template=False).prefetch_related(
             "repositorycontributor_set"
         )
 

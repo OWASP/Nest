@@ -104,3 +104,8 @@ class ProjectIndexMixin(GenericEntityMixin):
         if not self.updated_at:
             return None
         return self.updated_at.timestamp()
+
+    @property
+    def idx_is_active(self):
+        """Return URL for indexing."""
+        return self.is_active
