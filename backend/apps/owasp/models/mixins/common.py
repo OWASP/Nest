@@ -66,3 +66,18 @@ class GenericEntityMixin:
     def idx_url(self):
         """Return URL for indexing."""
         return self.owasp_url
+
+    @property
+    def is_indexable(self):
+        """Entities to index."""
+        return self.is_active and self.has_active_repositories
+
+    @property
+    def github_url(self):
+        """Get GitHub URL."""
+        return f"https://github.com/owasp/{self.key}"
+
+    @property
+    def owasp_url(self):
+        """Get OWASP URL."""
+        return f"https://owasp.org/{self.key}"
