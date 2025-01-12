@@ -70,7 +70,7 @@ def handler(ack, command, client):
                 )
                 blocks.append(
                     markdown(
-                        f"<{chapter['idx_url']}|*{idx + 1}. {chapter['idx_name']}*>{NL}"
+                        f"{idx + 1}. <{chapter['idx_url']}|*{chapter['idx_name']}*>{NL}"
                         f"_{location}_{NL}"
                         f"{leaders}"
                         f"{escape(chapter['idx_summary'])}{NL}"

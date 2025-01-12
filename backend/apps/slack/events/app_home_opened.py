@@ -33,10 +33,13 @@ def handler(event, client, ack):
                     f"events.{2*NL}"
                     "I'm OWASP @nestbot, your friendly neighborhood bot. Please use one of the "
                     f"following commands:{NL}"
-                    f"{TAB}• /contribute --help{NL}"
-                    f"{TAB}• /gsoc --help{NL}"
-                    f"{TAB}• /projects --help{NL}"
-                    f"{TAB}• /owasp --help{NL}"
+                    f"{TAB}• /chapters{NL}"
+                    f"{TAB}• /committees{NL}"
+                    f"{TAB}• /contribute{NL}"
+                    f"{TAB}• /gsoc{NL}"
+                    f"{TAB}• /leaders{NL}"
+                    f"{TAB}• /projects{NL}"
+                    f"{TAB}• /owasp{NL}"
                 ),
             ],
         }

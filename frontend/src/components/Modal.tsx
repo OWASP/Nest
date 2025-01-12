@@ -1,11 +1,11 @@
 import { faBolt, faX } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useModal } from 'hooks/useModal'
 import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
+import { ModalProps } from 'types/modal'
 import Markdown from 'components/MarkdownWrapper'
-import { ModalProps } from 'components/Modal/types'
-import { useModal } from 'components/Modal/useModal'
 
 export const Modal: React.FC<ModalProps> = ({
   title,

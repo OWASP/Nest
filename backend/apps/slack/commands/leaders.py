@@ -50,7 +50,6 @@ def handler(ack, command, client):
     blocks = []
     indent = "    •"
     if chapters or projects:
-        blocks.append(markdown(f"{NL}`{COMMAND} {search_query_escaped}`{NL}"))
         if chapters:
             blocks.append(markdown("*Chapters*"))
             for chapter in chapters:
@@ -58,7 +57,7 @@ def handler(ack, command, client):
                     chapter_url = get_absolute_url(f"chapters/{chapter['idx_key']}")
                     leaders = "".join(
                         f"{indent} `{leader}`{NL}"
-                        if search_query.lower() in leader.lower()
+                        if search_query and search_query.lower() in leader.lower()
                         else f"{indent} {leader}{NL}"
                         for leader in chapter_leaders
                     )
@@ -71,7 +70,7 @@ def handler(ack, command, client):
                     project_url = get_absolute_url(f"projects/{project['idx_key']}")
                     leaders = "".join(
                         f"{indent} `{leader}`{NL}"
-                        if search_query.lower() in leader.lower()
+                        if search_query and search_query.lower() in leader.lower()
                         else f"{indent} {leader}{NL}"
                         for leader in project_leaders
                     )

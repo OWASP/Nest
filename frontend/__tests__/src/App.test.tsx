@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import App from 'App'
+import { useToast } from 'hooks/useToast'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
-import { useToast } from 'lib/hooks/useToast'
 import { Toaster } from 'components/ui/Toaster'
 
 jest.mock('pages', () => ({
@@ -17,7 +17,7 @@ jest.mock('pages', () => ({
   UserDetailsPage: () => <div data-testid="userdetails-page">UserDetails Page</div>,
   UsersPage: () => <div data-testid="users-page">Users Page</div>,
 }))
-jest.mock('lib/hooks/useToast', () => ({
+jest.mock('hooks/useToast', () => ({
   useToast: jest.fn(() => ({
     toasts: [],
     toast: jest.fn(),
