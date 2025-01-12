@@ -5,8 +5,8 @@ import { debounce } from 'lodash'
 import React from 'react'
 import { useEffect, useRef } from 'react'
 import { ENVIRONMENT } from 'utils/credentials'
-import { client } from 'lib/algoliaClient'
-import 'components/Autosuggestion.css'
+import { client } from 'utils/helpers/algoliaClient'
+import 'styles/Autosuggestion.css'
 
 interface SearchProps {
   onChange: (query: string) => void

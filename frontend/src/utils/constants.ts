@@ -1,8 +1,5 @@
-export interface Link {
-  text: string
-  href: string
-  isSpan?: boolean
-}
+import { Link } from 'types/link'
+import { Section } from 'types/section'
 
 export const headerLinks: Link[] = [
   {
@@ -22,11 +19,6 @@ export const headerLinks: Link[] = [
     href: '/community/users',
   },
 ]
-
-export interface Section {
-  title: string
-  links: Link[]
-}
 
 export const footerSections: Section[] = [
   {
@@ -80,3 +72,8 @@ export const footerSections: Section[] = [
     ],
   },
 ]
+
+export const tooltipStyle = {
+  borderRadius: '8px',
+  zIndex: 100,
+}

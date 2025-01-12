@@ -1,12 +1,12 @@
 import { screen, waitFor } from '@testing-library/react'
 
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { CommitteeDetailsPage } from 'pages'
-import { fetchAlgoliaData } from 'lib/api'
-import { render } from 'lib/test-util'
+import { render } from 'wrappers/testUtil'
 
 import { mockCommitteeData } from '@tests/data/mockCommitteeData'
 
-jest.mock('lib/api', () => ({
+jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 jest.mock('react-router-dom', () => ({
