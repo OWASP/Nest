@@ -36,7 +36,7 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
-  
+
       - name: Build frontend test image
         uses: docker/build-push-action@v6
         with:
