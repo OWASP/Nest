@@ -2,7 +2,9 @@ import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
+import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+
 import Card from 'components/Card'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -33,9 +35,11 @@ const ChapterDetailsPage = () => {
 
   if (!chapter)
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-lg font-medium text-muted-foreground">No chapter details found.</p>
-      </div>
+      <ErrorDisplay
+        statusCode={404}
+        title="Chapter Not Found"
+        message="The Chapter you're looking for doesn't exist"
+      />
     )
 
   const params = ['idx_updated_at']
