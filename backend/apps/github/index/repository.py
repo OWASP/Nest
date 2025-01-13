@@ -1,12 +1,13 @@
 """GitHub repository Algolia index configuration."""
 
 from algoliasearch_django import AlgoliaIndex
+from algoliasearch_django.decorators import register
 
 from apps.common.index import IndexBase
 from apps.github.models.repository import Repository
 
 
-# @register(Repository)
+@register(Repository)
 class RepositoryIndex(AlgoliaIndex, IndexBase):
     """Repository index."""
 
