@@ -14,6 +14,7 @@ import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
 import logger from 'utils/logger'
 import { IndexedObject, removeIdxPrefix } from 'utils/utility'
+import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
@@ -50,9 +51,11 @@ const UserDetailsPage: React.FC = () => {
 
   if (!isLoading && user == null) {
     return (
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">User not found</h1>
-      </div>
+      <ErrorDisplay
+        statusCode={404}
+        title="User Not Found"
+        message="The user you're looking for doesn't exist"
+      />
     )
   }
 
