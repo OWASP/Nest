@@ -60,4 +60,4 @@ class CommitteeIndex(AlgoliaIndex):
         """Get queryset."""
         return Committee.active_committees.select_related(
             "owasp_repository",
-        )
+        )[:1000]

@@ -87,7 +87,7 @@ class IssueIndex(AlgoliaIndex, IndexBase):
             "assignees",
             "labels",
             "repository__project_set",
-        )
+        )[:1000]
 
     @staticmethod
     def update_synonyms():

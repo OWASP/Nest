@@ -68,4 +68,4 @@ class ChapterIndex(AlgoliaIndex):
         """Get queryset."""
         return Chapter.active_chapters.select_related(
             "owasp_repository",
-        )
+        )[:1000]

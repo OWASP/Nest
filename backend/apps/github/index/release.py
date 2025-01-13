@@ -58,7 +58,7 @@ class ReleaseIndex(AlgoliaIndex, IndexBase):
         return Release.objects.filter(
             is_draft=False,
             published_at__isnull=False,
-        )
+        )[:1000]
 
     @staticmethod
     def update_synonyms():

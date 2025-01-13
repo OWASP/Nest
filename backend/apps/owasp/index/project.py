@@ -85,7 +85,7 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         return Project.objects.prefetch_related(
             "organizations",
             "repositories",
-        )
+        )[:1000]
 
     @staticmethod
     def update_synonyms():

@@ -61,9 +61,9 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return Repository.objects.filter(is_archived=False, is_template=False).prefetch_related(
+        return Repository.objects.filter(is_template=False).prefetch_related(
             "repositorycontributor_set"
-        )
+        )[:1000]
 
     @staticmethod
     def update_synonyms():

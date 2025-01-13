@@ -69,7 +69,7 @@ class UserIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return User.objects.exclude(login__in=Organization.get_logins())
+        return User.objects.exclude(login__in=Organization.get_logins())[:1000]
 
     @staticmethod
     def update_synonyms():
