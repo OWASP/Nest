@@ -35,7 +35,7 @@ const CommitteeDetailsPage = () => {
     return (
       <ErrorDisplay
         statusCode={404}
-        title="Committee details Not Found"
+        title="No committee details found."
         message="The Committee you're looking for doesn't exist"
       />
     )
