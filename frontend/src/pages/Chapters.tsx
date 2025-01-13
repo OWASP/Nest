@@ -1,12 +1,18 @@
+import { fetchAlgoliaGeoLoc } from 'api/fetchAlgoliaGeoLoc'
 import { useSearchPage } from 'hooks/useSearchPage'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChapterType } from 'types/chapter'
+import { AlgoliaResponseType } from 'types/algolia'
+import { ChapterGeoLocType, ChapterType } from 'types/chapter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
+import { AppError } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
+import ChapterMap from 'components/ChapterMap'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
+  const [geoLocData, setGeoLocData] = useState<ChapterGeoLocType[]>([])
   const {
     items: chapters,
     isLoaded,
@@ -19,6 +25,22 @@ const ChaptersPage = () => {
     indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
   })
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data: AlgoliaResponseType<ChapterGeoLocType> = await fetchAlgoliaGeoLoc()
+        setGeoLocData(data.hits)
+      } catch (error) {
+        if (error instanceof AppError) {
+          throw error
+        }
+        throw new AppError(500, 'Map service error')
+      }
+    }
+    fetchData()
+  }, [])
+
   const navigate = useNavigate()
   const renderChapterCard = (chapter: ChapterType, index: number) => {
     const params: string[] = ['idx_updated_at']
@@ -62,6 +84,7 @@ const ChaptersPage = () => {
       searchPlaceholder="Search for OWASP chapters..."
       empty="No chapters found"
     >
+      {geoLocData && <ChapterMap geoLocData={geoLocData} />}
       {chapters && chapters.map(renderChapterCard)}
     </SearchPageLayout>
   )

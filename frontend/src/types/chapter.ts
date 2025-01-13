@@ -16,6 +16,10 @@ export interface ChapterType {
   objectID: string
 }
 
+export interface ChapterGeoLocType {
+  _geoloc?: { lat: number; lng: number }
+}
+
 export interface ChapterDataType {
   active_committees_count: number
   chapters: ChapterType[]
