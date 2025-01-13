@@ -13,7 +13,8 @@ class Staging(Base):
         dsn=values.SecretValue(environ_name="SENTRY_DSN"),
         traces_sample_rate=0.5,
         profiles_sample_rate=0.5,
-        environment=values.SecretValue(environ_name="SENTRY_ENVIRONMENT"),
+        environment=values.SecretValue(environ_name="CONFIGURATION"),
+        release=values.SecretValue(environ_name="RELEASE_VERSION"),
     )
 
     AWS_ACCESS_KEY_ID = values.SecretValue()
