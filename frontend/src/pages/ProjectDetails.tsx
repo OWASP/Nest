@@ -37,7 +37,7 @@ const ProjectDetailsPage = () => {
     return (
       <ErrorDisplay
         statusCode={404}
-        title="Project Not Found"
+        title="No project details found."
         message="The Project you're looking for doesn't exist"
       />
     )
