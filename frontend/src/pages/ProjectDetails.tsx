@@ -37,8 +37,8 @@ const ProjectDetailsPage = () => {
     return (
       <ErrorDisplay
         statusCode={404}
-        title="No project details found."
-        message="The Project you're looking for doesn't exist"
+        title="Project not found"
+        message="Sorry, the project you're looking for doesn't exist"
       />
     )
   const params = ['idx_updated_at', 'idx_forks_count', 'idx_stars_count', 'idx_contributors_count']

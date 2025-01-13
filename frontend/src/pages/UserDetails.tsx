@@ -54,7 +54,7 @@ const UserDetailsPage: React.FC = () => {
       <ErrorDisplay
         statusCode={404}
         title="User not found"
-        message="The user you're looking for doesn't exist"
+        message="Sorry, the user you're looking for doesn't exist"
       />
     )
   }
