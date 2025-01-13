@@ -26,7 +26,13 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     published_at = models.DateTimeField(verbose_name="Published at")
 
     # FKs.
-    author = models.ForeignKey("github.User", on_delete=models.SET_NULL, blank=True, null=True)
+    author = models.ForeignKey(
+        "github.User",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="created_releases",
+    )
     repository = models.ForeignKey(
         "github.Repository",
         on_delete=models.SET_NULL,
@@ -38,6 +44,11 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     def __str__(self):
         """User human readable representation."""
         return f"{self.name} by {self.author}"
+
+    @property
+    def summary(self):
+        """Return release summary."""
+        return f"{self.tag_name} on {self.published_at.strftime('%b %d, %Y')}"
 
     @property
     def is_indexable(self):

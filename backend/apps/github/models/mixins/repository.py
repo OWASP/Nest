@@ -43,7 +43,7 @@ class RepositoryIndexMixin:
     @property
     def idx_key(self):
         """Return key for indexing."""
-        return self.path.lower()
+        return self.nest_key
 
     @property
     def idx_languages(self):
@@ -66,9 +66,9 @@ class RepositoryIndexMixin:
         return self.open_issues_count
 
     @property
-    def idx_project(self):
-        """Return project for indexing."""
-        return self.project.nest_key if self.project else None
+    def idx_project_key(self):
+        """Return project key for indexing."""
+        return self.project.nest_key if self.project else ""
 
     @property
     def idx_pushed_at(self):

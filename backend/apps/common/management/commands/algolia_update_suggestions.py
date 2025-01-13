@@ -64,13 +64,13 @@ class Command(BaseCommand):
                 "facets": [
                     {"attribute": "idx_key"},
                     {"attribute": "idx_name"},
-                    {"attribute": "idx_repository_names"},
+                    {"attribute": "idx_repositories.name"},
                     {"attribute": "idx_tags"},
                 ],
                 "generate": [
                     ["idx_name"],
                     ["idx_tags"],
-                    ["idx_repository_names"],
+                    ["idx_repositories.name"],
                 ],
             },
             "users": {

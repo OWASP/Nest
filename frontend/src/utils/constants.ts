@@ -65,7 +65,7 @@ export const footerSections: Section[] = [
     title: 'OWASP',
     links: [
       { text: 'About', href: 'https://owasp.org/about/' },
-      { text: 'Contact', href: 'https://owasp.glueup.com/organization/6727/contact/' },
+      { text: 'Contact', href: 'https://owasp.org/contact/' },
       { text: 'Events', href: 'https://owasp.glueup.com/organization/6727/events/' },
       { text: 'Membership', href: 'https://owasp.glueup.com/organization/6727/memberships/' },
       { text: 'Team', href: 'https://owasp.org/corporate/' },

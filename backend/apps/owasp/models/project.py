@@ -8,6 +8,8 @@ from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
+from apps.github.models.issue import Issue
+from apps.github.models.release import Release
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
@@ -151,6 +153,20 @@ class Project(
     def nest_url(self):
         """Get Nest URL for project."""
         return get_absolute_url(f"projects/{self.nest_key}")
+
+    @property
+    def open_issues(self):
+        """Return open issues."""
+        return Issue.open_issues.filter(repository__in=self.repositories.all())
+
+    @property
+    def published_releases(self):
+        """Return project releases."""
+        return Release.objects.filter(
+            is_draft=False,
+            published_at__isnull=False,
+            repository__in=self.repositories.all(),
+        )
 
     def deactivate(self):
         """Deactivate project."""

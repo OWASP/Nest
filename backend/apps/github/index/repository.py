@@ -25,7 +25,7 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
         "idx_license",
         "idx_name",
         "idx_open_issues_count",
-        "idx_project",
+        "idx_project_key",
         "idx_pushed_at",
         "idx_size",
         "idx_stars_count",
