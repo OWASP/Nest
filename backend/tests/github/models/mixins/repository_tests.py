@@ -1,3 +1,5 @@
+import pytest
+
 from apps.github.models.mixins.repository import RepositoryIndexMixin
 
 CONTRIBUTORS_COUNT = 5
@@ -7,7 +9,21 @@ STARS_COUNT = 5
 
 
 class TestRepositoryIndexMixin:
-    def test_repository_index(self):
+    @pytest.mark.parametrize(
+        ("attr", "expected"),
+        [
+            ("idx_contributors_count", CONTRIBUTORS_COUNT),
+            ("idx_description", "Description"),
+            ("idx_forks_count", FORKS_COUNT),
+            ("idx_languages", ["Python", "JavaScript"]),
+            ("idx_name", "Name"),
+            ("idx_open_issues_count", OPEN_ISSUES_COUNT),
+            ("idx_pushed_at", "2021-01-01"),
+            ("idx_stars_count", STARS_COUNT),
+            ("idx_topics", ["Topic1", "Topic2"]),
+        ],
+    )
+    def test_repository_index(self, attr, expected):
         class MockModel(RepositoryIndexMixin):
             def __init__(self):
                 self.contributors_count = 5
@@ -22,14 +38,4 @@ class TestRepositoryIndexMixin:
 
         mock_instance = MockModel()
 
-        assert isinstance(mock_instance, RepositoryIndexMixin)
-
-        assert mock_instance.idx_contributors_count == CONTRIBUTORS_COUNT
-        assert mock_instance.idx_description == "Description"
-        assert mock_instance.idx_forks_count == FORKS_COUNT
-        assert mock_instance.idx_languages == ["Python", "JavaScript"]
-        assert mock_instance.idx_name == "Name"
-        assert mock_instance.idx_open_issues_count == OPEN_ISSUES_COUNT
-        assert mock_instance.idx_pushed_at == "2021-01-01"
-        assert mock_instance.idx_stars_count == STARS_COUNT
-        assert mock_instance.idx_topics == ["Topic1", "Topic2"]
+        assert getattr(mock_instance, attr) == expected

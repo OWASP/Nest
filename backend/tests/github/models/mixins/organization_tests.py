@@ -1,11 +1,18 @@
+import pytest
+
 from apps.github.models.organization import Organization
 
 
 class TestOrganizationIndexMixin:
-    def test_organization_index(self):
+    @pytest.mark.parametrize(
+        ("attr", "expected"),
+        [
+            ("idx_name", "Organization Name login"),
+            ("idx_company", "Company Location"),
+        ],
+    )
+    def test_organization_index(self, attr, expected):
         organization = Organization(
             name="Organization Name", login="login", company="Company", location="Location"
         )
-
-        assert organization.idx_name == "Organization Name login"
-        assert organization.idx_company == "Company Location"
+        assert getattr(organization, attr) == expected
