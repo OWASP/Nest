@@ -6,6 +6,7 @@ import { headerLinks } from 'utils/constants'
 
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
+import SponserButton from './SponsorButton'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -52,6 +53,7 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">
+          <SponserButton />
           <ModeToggle />
           <div className="md:hidden">
             <button
