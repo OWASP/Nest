@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import pytest
 
 from apps.github.models.mixins.repository import RepositoryIndexMixin
@@ -8,7 +10,27 @@ OPEN_ISSUES_COUNT = 5
 STARS_COUNT = 5
 
 
-class TestRepositoryIndexMixin:
+class MockModel(RepositoryIndexMixin):
+    def __init__(self):
+        self.contributors_count = CONTRIBUTORS_COUNT
+        self.description = "Description"
+        self.forks_count = FORKS_COUNT
+        self.languages = ["Python", "JavaScript"]
+        self.name = "Name"
+        self.open_issues_count = OPEN_ISSUES_COUNT
+        self.pushed_at = datetime(2021, 1, 1, tzinfo=timezone.utc)
+        self.stars_count = STARS_COUNT
+        self.topics = ["Topic1", "Topic2"]
+        self.created_at = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        self.size = 1024
+        self.has_funding_yml = True
+        self.license = "MIT"
+        self.project = None
+
+
+class TestRepositoryIndex:
+    """Test suite for RepositoryIndexMixin."""
+
     @pytest.mark.parametrize(
         ("attr", "expected"),
         [
@@ -18,24 +40,11 @@ class TestRepositoryIndexMixin:
             ("idx_languages", ["Python", "JavaScript"]),
             ("idx_name", "Name"),
             ("idx_open_issues_count", OPEN_ISSUES_COUNT),
-            ("idx_pushed_at", "2021-01-01"),
+            ("idx_pushed_at", datetime(2021, 1, 1, tzinfo=timezone.utc).timestamp()),
             ("idx_stars_count", STARS_COUNT),
             ("idx_topics", ["Topic1", "Topic2"]),
         ],
     )
     def test_repository_index(self, attr, expected):
-        class MockModel(RepositoryIndexMixin):
-            def __init__(self):
-                self.contributors_count = 5
-                self.description = "Description"
-                self.forks_count = 5
-                self.top_languages = ["Python", "JavaScript"]
-                self.name = "Name"
-                self.open_issues_count = 5
-                self.pushed_at = "2021-01-01"
-                self.stars_count = 5
-                self.topics = ["Topic1", "Topic2"]
-
         mock_instance = MockModel()
-
         assert getattr(mock_instance, attr) == expected

@@ -57,7 +57,7 @@ class TestRepositoryModel:
         mock_gh_repository.is_indexable = False
         assert not mock_gh_repository.is_indexable
 
-    def test_from_github_with_missing_funding(self, mock_gh_repository, mocker):
+    def test_from_github_with_missing_funding(self, mock_gh_repository):
         mock_gh_repository.get_contents.side_effect = GithubException(
             data={"status": "404"}, status=404
         )
@@ -68,7 +68,7 @@ class TestRepositoryModel:
         assert not repository.has_funding_yml
         assert repository.is_funding_policy_compliant
 
-    def test_from_github_with_funding(self, mock_gh_repository, mocker):
+    def test_from_github_with_funding(self, mock_gh_repository):
         mock_gh_repository.get_contents.return_value = MagicMock(
             content=b64encode(b"test: test").decode()
         )

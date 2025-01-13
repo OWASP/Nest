@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch
+
 import pytest
 
 from apps.github.models.user import User
@@ -24,12 +26,15 @@ class TestUserModel:
             ("ghost", False),
         ],
     )
-    def test_is_indexable(self, login, expected_indexable):
+    @patch(
+        "apps.github.models.organization.Organization.get_logins", return_value=["org1", "org2"]
+    )
+    def test_is_indexable(self, mock_get_logins, login, expected_indexable):
         user = User(login=login)
-        assert user.is_indexable is expected_indexable
+        assert user.is_indexable == expected_indexable
 
-    def test_from_github(self, mocker):
-        gh_user_mock = mocker.Mock(
+    def test_from_github(self):
+        gh_user_mock = Mock(
             bio="Bio",
             hireable=True,
             twitter_username="twitter",
@@ -42,18 +47,36 @@ class TestUserModel:
         assert user.is_hireable
         assert user.twitter_username == "twitter"
 
-    def test_update_data(self, mocker):
-        gh_user_mock = mocker.Mock()
+    @patch("apps.github.models.user.User.objects.get")
+    @patch("apps.github.models.user.User.save")
+    def test_update_data(self, mock_save, mock_get):
+        gh_user_mock = Mock()
         gh_user_mock.raw_data = {"node_id": "12345"}
+        gh_user_mock.bio = "Bio"
+        gh_user_mock.hireable = True
+        gh_user_mock.twitter_username = "twitter"
 
-        mock_user = mocker.Mock(spec=User)
+        mock_user = Mock(spec=User)
         mock_user.node_id = "12345"
-        mocker.patch("apps.github.models.user.User.objects.get", return_value=mock_user)
+        mock_get.return_value = mock_user
 
-        user = User()
-        user.from_github = mocker.Mock()
+        updated_user = User.update_data(gh_user_mock, save=True)
 
-        updated_user = User.update_data(gh_user_mock)
+        mock_get.assert_called_once_with(node_id="12345")
+        assert updated_user.node_id == "12345"
 
-        assert updated_user.node_id == mock_user.node_id
-        assert updated_user.from_github.call_count == 1
+    @patch("apps.github.models.user.User.objects.get")
+    @patch("apps.github.models.user.User.save")
+    def test_update_data_user_does_not_exist(self, mock_save, mock_get):
+        gh_user_mock = Mock()
+        gh_user_mock.raw_data = {"node_id": "67890"}
+        gh_user_mock.bio = "New Bio"
+        gh_user_mock.hireable = False
+        gh_user_mock.twitter_username = "new_twitter"
+
+        mock_get.side_effect = User.DoesNotExist
+
+        updated_user = User.update_data(gh_user_mock, save=True)
+
+        mock_get.assert_called_once_with(node_id="67890")
+        assert updated_user.node_id == "67890"

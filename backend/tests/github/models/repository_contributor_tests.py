@@ -7,8 +7,8 @@ class TestRepositoryContributor:
     def test_from_github(self):
         default_contribution_value = 5
         repository_contributor = RepositoryContributor()
-        gh_contributions = Mock(contributions=default_contribution_value)
-        repository_contributor.from_github(gh_contributions)
+        gh_contributions_mock = Mock(contributions=default_contribution_value)
+        repository_contributor.from_github(gh_contributions_mock)
 
         assert repository_contributor.contributions_count == default_contribution_value
 
