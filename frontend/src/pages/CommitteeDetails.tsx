@@ -2,6 +2,7 @@ import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
+import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -32,9 +33,11 @@ const CommitteeDetailsPage = () => {
 
   if (!committee)
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-lg font-medium text-muted-foreground">No committee details found.</p>
-      </div>
+      <ErrorDisplay
+        statusCode={404}
+        title="Committee details Not Found"
+        message="The Committee you're looking for doesn't exist"
+      />
     )
 
   const SubmitButton = {
