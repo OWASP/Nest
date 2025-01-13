@@ -41,6 +41,7 @@
     "dompurify": "^3.2.3",
     "dotenv": "^16.4.7",
     "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.21",
     "lucide-react": "^0.469.0",
     "markdown-it": "^14.1.0",
