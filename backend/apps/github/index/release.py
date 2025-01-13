@@ -1,13 +1,12 @@
 """GitHub release Algolia index configuration."""
 
 from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
 
 from apps.common.index import IndexBase
 from apps.github.models.release import Release
 
 
-@register(Release)
+# @register(Release)
 class ReleaseIndex(AlgoliaIndex, IndexBase):
     """Release index."""
 
