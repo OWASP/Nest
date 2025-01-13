@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { level } from 'utils/data'
 import { getFilteredIcons } from 'utils/utility'
+import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -34,9 +35,11 @@ const ProjectDetailsPage = () => {
 
   if (!project)
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-lg font-medium text-muted-foreground">No project details found.</p>
-      </div>
+      <ErrorDisplay
+        statusCode={404}
+        title="Project Not Found"
+        message="The Project you're looking for doesn't exist"
+      />
     )
   const params = ['idx_updated_at', 'idx_forks_count', 'idx_stars_count', 'idx_contributors_count']
   const filteredIcons = getFilteredIcons(project, params)
