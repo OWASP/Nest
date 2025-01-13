@@ -61,11 +61,19 @@ oauth_config:
       - users:read
       - groups:write
       - channels:manage
+    user:
+      - channels:read
+      - groups:read
+      - mpim:read
+      - users:read
 settings:
   event_subscriptions:
     request_url: https://nest.owasp.dev/integrations/slack/events/
     bot_events:
       - app_home_opened
+      - member_joined_channel
+      - team_join
+    user_events:
       - member_joined_channel
       - team_join
   interactivity:

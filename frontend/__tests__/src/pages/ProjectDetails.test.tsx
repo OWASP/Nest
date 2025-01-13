@@ -56,14 +56,14 @@ describe('ProjectPage Component', () => {
     expect(viewButton).toBeInTheDocument()
   })
 
-  test('displays "No projects found" when there are no projects', async () => {
+  test('displays "Project not found" when there are no projects', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [],
       totalPages: 0,
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('No project details found.')).toBeInTheDocument()
+      expect(screen.getByText('Project not found')).toBeInTheDocument()
     })
   })
 })
