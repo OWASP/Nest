@@ -5,7 +5,7 @@ from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 
-TOP_CONTRIBUTORS_LIMIT = 25
+TOP_CONTRIBUTORS_LIMIT = 15
 
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):

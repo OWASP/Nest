@@ -27,8 +27,19 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def is_indexable(self):
         """Users to index."""
         return (
-            self.login != "ghost" and self.login not in Organization.get_logins()
-        )  # See https://github.com/ghost for more info.
+            self.login != "ghost"  # See https://github.com/ghost for more info.
+            and self.login not in Organization.get_logins()
+        )
+
+    @property
+    def issues(self):
+        """Return user issues."""
+        return self.created_issues.all()
+
+    @property
+    def releases(self):
+        """Return user releases."""
+        return self.created_releases.all()
 
     def from_github(self, gh_user):
         """Update instance based on GitHub user data."""
