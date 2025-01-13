@@ -35,7 +35,6 @@ const ChaptersPage = () => {
         if (error instanceof AppError) {
           throw error
         }
-        throw new AppError(500, 'Map service error')
       }
     }
     fetchData()
