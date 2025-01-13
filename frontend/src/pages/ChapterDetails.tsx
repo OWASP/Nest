@@ -37,7 +37,7 @@ const ChapterDetailsPage = () => {
     return (
       <ErrorDisplay
         statusCode={404}
-        title="Chapter Not Found"
+        title="No chapter details found."
         message="The Chapter you're looking for doesn't exist"
       />
     )
