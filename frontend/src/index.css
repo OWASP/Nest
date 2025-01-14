@@ -188,7 +188,8 @@ a {
 
 .leaflet-control-attribution {
   display: none !important;
-=======
+}
+
 .icon-rotate {
   transition: transform 2.5s ease;
 }

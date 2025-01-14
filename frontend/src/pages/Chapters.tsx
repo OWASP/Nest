@@ -1,9 +1,9 @@
-import { fetchAlgoliaGeoLoc } from 'api/fetchAlgoliaGeoLoc'
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlgoliaResponseType } from 'types/algolia'
-import { ChapterGeoLocType, ChapterType } from 'types/chapter'
+import { ChapterType } from 'types/chapter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import { AppError } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
@@ -12,7 +12,7 @@ import ChapterMap from 'components/ChapterMap'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
-  const [geoLocData, setGeoLocData] = useState<ChapterGeoLocType[]>([])
+  const [geoLocData, setGeoLocData] = useState<ChapterType[]>([])
   const {
     items: chapters,
     isLoaded,
@@ -29,7 +29,13 @@ const ChaptersPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data: AlgoliaResponseType<ChapterGeoLocType> = await fetchAlgoliaGeoLoc()
+        const data: AlgoliaResponseType<ChapterType> = await fetchAlgoliaData(
+          'chapters',
+          '',
+          1,
+          '',
+          1000
+        )
         setGeoLocData(data.hits)
       } catch (error) {
         if (error instanceof AppError) {
