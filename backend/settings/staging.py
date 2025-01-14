@@ -11,8 +11,10 @@ class Staging(Base):
 
     sentry_sdk.init(
         dsn=values.SecretValue(environ_name="SENTRY_DSN"),
-        traces_sample_rate=0.5,
+        environment=Base.ENVIRONMENT,
         profiles_sample_rate=0.5,
+        release=Base.RELEASE_VERSION,
+        traces_sample_rate=0.5,
     )
 
     AWS_ACCESS_KEY_ID = values.SecretValue()
