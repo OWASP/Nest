@@ -27,6 +27,6 @@ jobs:
           echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
           chmod 400 ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
 
-      - name: Run make sync
+      - name: Run make sync-data
         working-directory: .github/ansible
-        run: ansible-playbook -i inventory.yaml staging/sync.yaml
+        run: ansible-playbook -i inventory.yaml staging/sync-data.yaml

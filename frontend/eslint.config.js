@@ -16,6 +16,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 export default [
+  react.configs.flat['jsx-runtime'],
   {
     ignores: ['node_modules', 'build', 'dist', '.cache'],
   },
@@ -45,7 +46,7 @@ export default [
       'import/resolver': {
         alias: {
           map: [
-            ['@tests', path.resolve(__dirname, '__tests__/src')],
+            ['@tests', path.resolve(__dirname, '__tests__')],
             ['@', path.resolve(__dirname, 'src')],
           ],
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -63,7 +64,7 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-unused-expressions': 'error',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'prettier/prettier': ['error'],
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',
@@ -82,10 +83,11 @@ export default [
             { pattern: '@tests/**', group: 'internal', position: 'after' },
           ],
           pathGroupsExcludedImportTypes: ['builtin'],
-          // 'newlines-between': 'always',
         },
       ],
       'no-console': 'error',
+      'no-unused-vars': 'off',
+      'import/no-relative-parent-imports': 'error',
     },
     ignores: ['src/utils/logger.ts'],
   },

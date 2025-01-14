@@ -1,0 +1,72 @@
+- name: Deploy Nest to Production
+  hosts: nest_production
+  tasks:
+    - name: Ensure nginx directory exists
+      ansible.builtin.file:
+        path: ~/nginx
+        state: directory
+        mode: '0755'
+
+    - name: Copy Nginx configuration file
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/nginx/production.conf'
+        dest: ~/nginx/nginx.conf
+        mode: '0644'
+
+    - name: Copy docker-compose.yaml
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/docker-compose-production.yaml'
+        dest: ~/docker-compose.yaml
+        mode: '0644'
+
+    - name: Ensure backend directory exists
+      ansible.builtin.file:
+        path: ~/backend
+        state: directory
+        mode: '0755'
+
+    - name: Copy Backend Makefile
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/backend/Makefile'
+        dest: ~/backend/Makefile
+        mode: '0644'
+
+    - name: Update Makefile for the production environment
+      shell:
+        cmd: "sed -i 's/\\bnest-backend\\b/production-nest-backend/' ~/backend/Makefile"
+
+    - name: Ensure frontend directory exists
+      ansible.builtin.file:
+        path: ~/frontend
+        state: directory
+        mode: '0755'
+
+    - name: Copy Frontend Makefile
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/frontend/Makefile'
+        dest: ~/frontend/Makefile
+        mode: '0644'
+
+    - name: Copy Makefile
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/Makefile'
+        dest: ~/Makefile
+        mode: '0644'
+
+    - name: Copy directory recursively
+      copy:
+        src: '{{ github_workspace }}/backend/data'
+        dest: ~/
+        mode: '0755'
+
+    - name: Prune docker images
+      shell:
+        cmd: docker image prune -f
+
+    - name: Update Docker images
+      shell:
+        cmd: docker compose pull
+
+    - name: Retart services
+      shell:
+        cmd: docker compose up -d
