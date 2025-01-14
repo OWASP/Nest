@@ -4,9 +4,15 @@ import pytest
 
 from apps.github.models.issue import Issue
 from apps.github.models.repository import Repository
+from apps.github.models.user import User
 
 
 class TestIssueModel:
+    def test_str(self):
+        author = User(name="Author", login="author")
+        issue = Issue(title="Test Issue", author=author)
+        assert str(issue) == "Test Issue by Author"
+
     def test_open_issues_count(self):
         with patch("apps.github.models.issue.IndexBase.get_total_count") as mock_get_total_count:
             Issue.open_issues_count()
