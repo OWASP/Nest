@@ -1,8 +1,11 @@
 """OWASP app chapter index."""
 
+import os
+
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
+from apps.common.constants import LOCAL_INDEX_LIMIT
 from apps.owasp.models.chapter import Chapter
 
 
@@ -66,6 +69,9 @@ class ChapterIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        return Chapter.active_chapters.select_related(
+        queryset = Chapter.active_chapters.select_related(
             "owasp_repository",
-        )[:1000]
+        )
+        if os.environ.get("DJANGO_CONFIGURATION", "Local") == "Local":
+            return queryset[:LOCAL_INDEX_LIMIT]
+        return queryset

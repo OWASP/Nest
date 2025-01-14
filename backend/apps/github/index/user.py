@@ -1,8 +1,11 @@
 """GitHub user Algolia index configuration."""
 
+import os
+
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
+from apps.common.constants import LOCAL_INDEX_LIMIT
 from apps.common.index import IndexBase
 from apps.github.models.organization import Organization
 from apps.github.models.user import User
@@ -69,7 +72,10 @@ class UserIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return User.objects.exclude(login__in=Organization.get_logins())[:1000]
+        queryset = User.objects.exclude(login__in=Organization.get_logins())
+        if os.environ.get("DJANGO_CONFIGURATION", "Local") == "Local":
+            return queryset[:LOCAL_INDEX_LIMIT]
+        return queryset
 
     @staticmethod
     def update_synonyms():
