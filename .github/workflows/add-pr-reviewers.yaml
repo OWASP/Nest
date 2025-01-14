@@ -1,0 +1,25 @@
+name: Add reviewers to PR
+
+on:
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  add-reviewers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Add reviewers
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                pull_number: context.payload.pull_request.number,
+                repo: context.repo.repo,
+                reviewers: ['aramattamara', 'arkid15r', 'kasya'],
+            });

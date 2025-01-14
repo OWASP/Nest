@@ -47,11 +47,11 @@ describe('ChapterDetailsPage Component', () => {
     expect(viewButton).toBeInTheDocument()
   })
 
-  test('displays "No chapters found" when there are no chapters', async () => {
+  test('displays "Chapter not found" when there are no chapters', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('No chapter details found.')).toBeInTheDocument()
+      expect(screen.getByText('Chapter not found')).toBeInTheDocument()
     })
   })
 })
