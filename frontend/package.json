@@ -83,7 +83,6 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "lint-staged": "^15.2.11",
     "open": "^10.1.0",
     "postcss": "^8.4.47",
     "prettier": "^3.4.2",
@@ -99,17 +98,6 @@
   },
   "engines": {
     "node": "22"
-  },
-  "lint-staged": {
-    ".ts": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.tsx": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "/node_modules/*": "echo 'Skipping node_modules/'"
   },
   "postcss": {
     "plugins": {
