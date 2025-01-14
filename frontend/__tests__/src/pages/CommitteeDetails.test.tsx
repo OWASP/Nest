@@ -57,14 +57,14 @@ describe('Committees Component', () => {
     expect(viewButton).toBeInTheDocument()
   })
 
-  test('displays "No committees found" when there are no committees', async () => {
+  test('displays "Committee not found" when there are no committees', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [],
       totalPages: 0,
     })
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('No committee details found.')).toBeInTheDocument()
+      expect(screen.getByText('Committee not found')).toBeInTheDocument()
     })
   })
 })
