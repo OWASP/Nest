@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
+
 import pytest
 
 from apps.github.models.mixins.release import ReleaseIndexMixin
@@ -9,17 +10,17 @@ class MockModel(ReleaseIndexMixin):
     def __init__(self):
         self.author = MagicMock()
 
-        self.author.avatar_url="https://example.com/avatar.png"
-        self.author.login="test_user"
-        self.author.name="Test User"
-        
+        self.author.avatar_url = "https://example.com/avatar.png"
+        self.author.login = "test_user"
+        self.author.name = "Test User"
+
         self.repository = MagicMock(
             path="mock/repository",
             project=MagicMock(nest_key="mock/project"),
         )
         self.created_at = datetime(2023, 1, 1, tzinfo=timezone.utc)
         self.published_at = datetime(2023, 6, 1, tzinfo=timezone.utc)
-        self.description = "This is a long description that should be truncated for indexing purposes."
+        self.description = "This is a long description"
         self.is_pre_release = True
         self.name = "Release v1.0.0"
         self.tag_name = "v1.0.0"
@@ -28,9 +29,21 @@ class MockModel(ReleaseIndexMixin):
 @pytest.mark.parametrize(
     ("attr", "expected"),
     [
-        ("idx_author", [{"avatar_url": "https://example.com/avatar.png", "login": "test_user", "name": "Test User"}]),
+        (
+            "idx_author",
+            [
+                {
+                    "avatar_url": "https://example.com/avatar.png",
+                    "login": "test_user",
+                    "name": "Test User",
+                }
+            ],
+        ),
         ("idx_created_at", datetime(2023, 1, 1, tzinfo=timezone.utc).timestamp()),
-        ("idx_description", "This is a long description that should be truncated for indexing purposes."),
+        (
+            "idx_description",
+            "This is a long description",
+        ),
         ("idx_is_pre_release", True),
         ("idx_name", "Release v1.0.0"),
         ("idx_project", "mock/project"),
