@@ -1,24 +1,27 @@
-import pytest
-from unittest.mock import Mock, patch
-import requests
-from requests import codes
-from lxml import etree, html
 import logging
+from unittest.mock import Mock, patch
+
+import pytest
+import requests
+from lxml import etree
+from requests import codes
+
 from apps.owasp.scraper import OwaspScraper
 
+
 class TestOwaspScraper:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_session(self):
         """Fixture to provide a mock session."""
-        with patch('requests.Session') as mock:
+        with patch("requests.Session") as mock:
             session = Mock()
             mock.return_value = session
             yield session
 
-    @pytest.fixture
+    @pytest.fixture()
     def sample_html(self):
         """Fixture to provide sample HTML content."""
-        return """
+        return b"""
             <div class="sidebar">
                 <div id="leaders"></div>
                 <ul>
@@ -30,9 +33,9 @@ class TestOwaspScraper:
                 <a href="https://example.com/url2">URL 2</a>
                 <a href="https://owasp.org/url3">URL 3</a>
             </div>
-        """.encode('utf-8')
+        """
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_response(self, sample_html):
         """Fixture to provide a mock response."""
         response = Mock()
@@ -47,8 +50,8 @@ class TestOwaspScraper:
         response.content = b"<completely invalid>> html"
         mock_session.get.return_value = response
         mock_parser = Mock(side_effect=etree.ParserError("Parser error"))
-        
-        with patch('lxml.html.fromstring', mock_parser):
+
+        with patch("lxml.html.fromstring", mock_parser):
             scraper = OwaspScraper("https://test.org")
             assert scraper.page_tree is None
 
@@ -57,39 +60,42 @@ class TestOwaspScraper:
         mock_session.get.return_value = mock_response
         scraper = OwaspScraper("https://test.org")
         mock_session.get.reset_mock()
-        
+
         redirect_response = Mock()
         redirect_response.status_code = codes.moved_permanently
         redirect_response.headers = {"Location": "https://new-url.org"}
-        
+
         final_response = Mock()
         final_response.status_code = codes.ok
         mock_session.get.side_effect = [redirect_response, final_response]
-        
+
         result = scraper.verify_url("https://old-url.org")
         assert result == "https://new-url.org"
 
-    @pytest.mark.parametrize("status_code", [
-        codes.moved_permanently,  # 301
-        codes.found,  # 302
-        codes.see_other,  # 303
-        codes.temporary_redirect,  # 307
-        codes.permanent_redirect,  # 308
-    ])
+    @pytest.mark.parametrize(
+        "status_code",
+        [
+            codes.moved_permanently,  # 301
+            codes.found,  # 302
+            codes.see_other,  # 303
+            codes.temporary_redirect,  # 307
+            codes.permanent_redirect,  # 308
+        ],
+    )
     def test_verify_url_redirect_status_codes(self, mock_session, mock_response, status_code):
         """Test URL verification with different redirect status codes."""
         mock_session.get.return_value = mock_response
         scraper = OwaspScraper("https://test.org")
         mock_session.get.reset_mock()
-        
+
         redirect_response = Mock()
         redirect_response.status_code = status_code
         redirect_response.headers = {"Location": "https://new-url.org"}
-        
+
         final_response = Mock()
         final_response.status_code = codes.ok
         mock_session.get.side_effect = [redirect_response, final_response]
-        
+
         result = scraper.verify_url("https://old-url.org")
         assert result == "https://new-url.org"
         assert mock_session.get.call_count >= 1
@@ -151,9 +157,11 @@ class TestOwaspScraper:
         scraper = OwaspScraper("https://test.org")
         urls = scraper.get_urls(domain="owasp.org")
         assert urls == {
-            "https://owasp.org/link1", "https://owasp.org/link2", 
-            "https://owasp.org/link3", "https://owasp.org/url1", 
-            "https://owasp.org/url3"
+            "https://owasp.org/link1",
+            "https://owasp.org/link2",
+            "https://owasp.org/link3",
+            "https://owasp.org/url1",
+            "https://owasp.org/url3",
         }
 
     def test_initialization_request_exception(self, mock_session):
@@ -171,9 +179,12 @@ class TestOwaspScraper:
         scraper = OwaspScraper("https://test.org")
         urls = scraper.get_urls()
         assert urls == {
-            "https://owasp.org/link1", "https://owasp.org/link2", 
-            "https://owasp.org/link3", "https://owasp.org/url1", 
-            "https://example.com/url2", "https://owasp.org/url3"
+            "https://owasp.org/link1",
+            "https://owasp.org/link2",
+            "https://owasp.org/link3",
+            "https://owasp.org/url1",
+            "https://example.com/url2",
+            "https://owasp.org/url3",
         }
 
     def test_verify_url_supported_domain(self, mock_session):
