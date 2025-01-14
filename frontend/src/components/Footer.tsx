@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { useState, useCallback } from 'react'
 import { Section } from 'types/section'
 import { footerSections } from 'utils/constants'
@@ -30,17 +31,16 @@ export default function Footer() {
                 {/* Icon to indicate open/close state */}
                 <span className="transition-transform duration-200 lg:hidden">
                   {openSection === section.title ? (
-                    <ChevronUp className="h-5 w-5" />
+                    <FontAwesomeIcon icon={faChevronUp} className='h-4 w-4' />
                   ) : (
-                    <ChevronDown className="h-5 w-5" />
+                    <FontAwesomeIcon icon={faChevronDown} className='h-4 w-4' />
                   )}
                 </span>
               </button>
               <ul
                 id={`footer-section-${section.title}`}
-                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
-                  openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
-                }`}
+                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
+                  }`}
               >
                 {/* Iterate through section links */}
                 {section.links.map((link, index) => (
