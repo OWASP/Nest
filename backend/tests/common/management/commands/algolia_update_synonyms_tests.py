@@ -1,123 +1,83 @@
-from unittest.mock import MagicMock, patch
+"""Test cases for the algolia_update_synonyms command."""
+
+from io import StringIO
+from unittest.mock import patch
 
 import pytest
+from algoliasearch.http.exceptions import AlgoliaException
+from django.core.management import call_command
 
-from apps.common.management.commands.algolia_update_suggestions import Command
 
+class TestUpdateSynonymsCommand:
+    """Test cases for the update_synonyms command."""
 
-class TestUpdateSuggestionsCommand:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        """Set up test environment."""
+        self.stdout = StringIO()
+        with (
+            patch("apps.github.index.issue.IssueIndex.update_synonyms") as issue_patch,
+            patch("apps.owasp.index.project.ProjectIndex.update_synonyms") as project_patch,
+        ):
+            self.mock_issue_update = issue_patch
+            self.mock_project_update = project_patch
+            yield
+
     @pytest.mark.parametrize(
-        ("entity", "facets", "generate"),
+        ("issue_count", "project_count", "expected_output"),
         [
             (
-                "chapters",
-                [
-                    {"attribute": "idx_key"},
-                    {"attribute": "idx_name"},
-                    {"attribute": "idx_tags"},
-                    {"attribute": "idx_country"},
-                    {"attribute": "idx_region"},
-                    {"attribute": "idx_suggested_location"},
-                ],
-                [
-                    ["idx_name"],
-                    ["idx_tags"],
-                    ["idx_country"],
-                    ["idx_region"],
-                    ["idx_suggested_location"],
-                ],
+                3,
+                2,
+                "\nThe following models synonyms were reindexed:\n"
+                "        * Issues --> 3\n"
+                "        * Projects --> 2\n",
             ),
             (
-                "committees",
-                [
-                    {"attribute": "idx_key"},
-                    {"attribute": "idx_name"},
-                    {"attribute": "idx_tags"},
-                ],
-                [
-                    ["idx_name"],
-                    ["idx_tags"],
-                ],
+                0,
+                0,
+                "\nThe following models synonyms were reindexed:\n",
             ),
             (
-                "issues",
-                [
-                    {"attribute": "idx_title"},
-                    {"attribute": "idx_project_name"},
-                    {"attribute": "idx_repository_name"},
-                    {"attribute": "idx_project_tags"},
-                    {"attribute": "idx_repository_topics"},
-                ],
-                [
-                    ["idx_title"],
-                    ["idx_project_name"],
-                    ["idx_repository_name"],
-                    ["idx_project_tags"],
-                    ["idx_repository_topics"],
-                ],
+                3,
+                0,
+                "\nThe following models synonyms were reindexed:\n        * Issues --> 3\n",
             ),
             (
-                "projects",
-                [
-                    {"attribute": "idx_key"},
-                    {"attribute": "idx_name"},
-                    {"attribute": "idx_repository_names"},
-                    {"attribute": "idx_tags"},
-                ],
-                [
-                    ["idx_name"],
-                    ["idx_tags"],
-                    ["idx_repository_names"],
-                ],
-            ),
-            (
-                "users",
-                [
-                    {"attribute": "idx_key"},
-                    {"attribute": "idx_name"},
-                    {"attribute": "idx_title"},
-                ],
-                [
-                    ["idx_name"],
-                    ["idx_title"],
-                ],
+                0,
+                2,
+                "\nThe following models synonyms were reindexed:\n        * Projects --> 2\n",
             ),
         ],
     )
-    @patch("apps.common.management.commands.algolia_update_suggestions.settings")
-    @patch("apps.common.management.commands.algolia_update_suggestions.QuerySuggestionsClientSync")
-    def test_handle(self, mock_query_suggestions_client, mock_settings, entity, facets, generate):
-        # mocks
-        mock_settings.ENVIRONMENT = "testenv"
-        mock_settings.ALGOLIA_APPLICATION_ID = "mock_app_id"
-        mock_settings.ALGOLIA_WRITE_API_KEY = "mock_api_key"
-        mock_settings.ALGOLIA_APPLICATION_REGION = "eu"
+    def test_handle_various_updates(self, issue_count, project_count, expected_output):
+        """Test command output with different update scenarios."""
+        self.mock_issue_update.return_value = issue_count
+        self.mock_project_update.return_value = project_count
 
-        mock_client = MagicMock()
-        mock_query_suggestions_client.return_value = mock_client
+        with patch("sys.stdout", new=StringIO()) as fake_out:
+            call_command("algolia_update_synonyms")
+            assert fake_out.getvalue() == expected_output
 
-        mock_client.update_config.return_value = None
+    def test_handle_exception(self):
+        """Test handling of exceptions during update."""
+        error_message = "API Error"
+        self.mock_issue_update.side_effect = AlgoliaException(error_message)
 
-        expected_call_count = 5
-        # Act
+        with pytest.raises(AlgoliaException) as exc_info:
+            call_command("algolia_update_synonyms")
 
-        command = Command()
-        command.handle()
+        assert str(exc_info.value) == error_message
+        self.mock_issue_update.assert_called_once()
+        self.mock_project_update.assert_not_called()
 
-        mock_query_suggestions_client.assert_called_once_with("mock_app_id", "mock_api_key", "eu")
+    def test_handle_mixed_results(self):
+        """Test when one index returns None and other returns count."""
+        self.mock_issue_update.return_value = None
+        self.mock_project_update.return_value = 5
 
-        mock_client.update_config.assert_any_call(
-            index_name=f"testenv_{entity}_suggestions",
-            configuration={
-                "sourceIndices": [
-                    {
-                        "indexName": f"testenv_{entity}",
-                        "facets": facets,
-                        "generate": generate,
-                    }
-                ]
-            },
-        )
-
-        # Use constant for the expected call count
-        assert mock_client.update_config.call_count == expected_call_count
+        with patch("sys.stdout", new=StringIO()) as fake_out:
+            call_command("algolia_update_synonyms")
+            assert fake_out.getvalue() == (
+                "\nThe following models synonyms were reindexed:\n        * Projects --> 5\n"
+            )

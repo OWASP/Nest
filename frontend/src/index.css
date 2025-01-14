@@ -188,4 +188,19 @@ a {
 
 .leaflet-control-attribution {
   display: none !important;
+=======
+.icon-rotate {
+  transition: transform 2.5s ease;
+}
+
+.rotate-container:hover .icon-rotate {
+  transform: rotate(360deg);
+}
+
+.icon-flip {
+  transition: transform 1s ease;
+}
+
+.flip-container:hover .icon-flip {
+  transform: rotateY(180deg);
 }

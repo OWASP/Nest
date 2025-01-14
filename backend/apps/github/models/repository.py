@@ -114,7 +114,12 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @property
     def latest_release(self):
         """Repository latest release."""
-        return self.releases.order_by("-created_at").first()
+        return self.published_releases.order_by("-published_at").first()
+
+    @property
+    def nest_key(self):
+        """Return repository Nest key."""
+        return f"{self.owner.login}-{self.name}"
 
     @property
     def path(self):
@@ -125,6 +130,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def project(self):
         """Return project."""
         return self.project_set.first()
+
+    @property
+    def published_releases(self):
+        """Return published releases."""
+        return self.releases.filter(is_draft=False, published_at__isnull=False)
 
     @property
     def top_languages(self):
