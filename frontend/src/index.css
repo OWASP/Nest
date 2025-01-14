@@ -174,3 +174,18 @@ a {
     @apply bg-background text-foreground;
   }
 }
+
+:root {
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3)
+    brightness(0.7);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dark .map-tiles {
+    filter: var(--map-tiles-filter, none);
+  }
+}
+
+.leaflet-control-attribution {
+  display: none !important;
+}

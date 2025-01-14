@@ -10,7 +10,7 @@ export const fetchAlgoliaGeoLoc = async <T>(): Promise<AlgoliaResponseType<T>> =
       attributesToHighlight: [],
       indexName: `${ENVIRONMENT}_${indexName}`,
       hitsPerPage: 1000,
-      attributesToRetrieve: ['_geoloc'],
+      attributesToRetrieve: ['_geoloc', 'idx_name'],
     }
 
     const { results } = await client.search({

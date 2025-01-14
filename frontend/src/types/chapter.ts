@@ -18,6 +18,7 @@ export interface ChapterType {
 
 export interface ChapterGeoLocType {
   _geoloc?: { lat: number; lng: number }
+  idx_name: string
 }
 
 export interface ChapterDataType {
