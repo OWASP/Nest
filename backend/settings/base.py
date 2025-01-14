@@ -19,7 +19,7 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
-
+    RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
