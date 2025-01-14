@@ -27,7 +27,7 @@ function ModeToggle({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center space-x-2', className)}>
       <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-        <FontAwesomeIcon icon={dark ? faMoon : faSun} className="h-2 w-2" fixedWidth />
+        <FontAwesomeIcon icon={dark ? faMoon : faSun} className="h-4 w-4" fixedWidth />
       </span>
       <label className="relative inline-flex cursor-pointer items-center">
         <input
