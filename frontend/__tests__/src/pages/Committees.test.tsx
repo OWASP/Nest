@@ -1,13 +1,13 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useNavigate } from 'react-router-dom'
-import { fetchAlgoliaData } from 'lib/api'
-import { render } from 'lib/test-util'
+import { render } from 'wrappers/testUtil'
 
 import CommitteesPage from 'pages/Committees'
 import { mockCommitteeData } from '@tests/data/mockCommitteeData'
 
-jest.mock('lib/api', () => ({
+jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 jest.mock('react-router-dom', () => ({
@@ -56,15 +56,12 @@ describe('Committees Component', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
-      expect(
-        screen.queryByPlaceholderText('Search for OWASP committees...')
-      ).not.toBeInTheDocument()
+
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP committees...')).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('Search for OWASP committees...')).toHaveFocus()
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

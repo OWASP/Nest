@@ -19,6 +19,8 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         "idx_custom_tags",
         "idx_description",
         "idx_forks_count",
+        "idx_issues",
+        "idx_issues_count",
         "idx_key",
         "idx_languages",
         "idx_leaders",
@@ -26,8 +28,10 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         "idx_level",
         "idx_name",
         "idx_organizations",
-        "idx_repository_descriptions",
-        "idx_repository_names",
+        "idx_releases",
+        "idx_releases_count",
+        "idx_repositories",
+        "idx_repositories_count",
         "idx_stars_count",
         "idx_summary",
         "idx_tags",
@@ -41,6 +45,9 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     settings = {
         "attributesForFaceting": [
             "filterOnly(idx_key)",
+            "idx_name",
+            "idx_tags",
+            "idx_repositories.name",
         ],
         "indexLanguages": ["en"],
         "customRanking": [
@@ -61,11 +68,12 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_repository_descriptions, idx_repository_names)",
+            "unordered(idx_repositories.description, idx_repositories.name)",
             "unordered(idx_custom_tags, idx_languages, idx_tags, idx_topics)",
             "unordered(idx_description)",
             "unordered(idx_companies, idx_organizations)",
-            "unordered(idx_leaders, idx_top_contributors.login, idx_top_contributors.name)",
+            "unordered(idx_leaders)",
+            "unordered(idx_top_contributors.login, idx_top_contributors.name)",
             "unordered(idx_level)",
         ],
     }
@@ -82,4 +90,4 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
-        ProjectIndex.reindex_synonyms("owasp", "projects")
+        return ProjectIndex.reindex_synonyms("owasp", "projects")

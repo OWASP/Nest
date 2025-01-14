@@ -10,6 +10,8 @@ class Command(BaseCommand):
     help = "Update OWASP Nest index synonyms."
 
     def handle(self, *_args, **_options):
+        print("\nThe following models synonyms were reindexed:")
         for index in (IssueIndex, ProjectIndex):
-            index.update_synonyms()
-            print(f"Updated {index.index_name.capitalize()} synonyms")
+            count = index.update_synonyms()
+            if count:
+                print(f"{7*' '} * {index.index_name.capitalize()} --> {count}")

@@ -4,6 +4,7 @@ from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
 from apps.common.index import IndexBase
+from apps.github.models.organization import Organization
 from apps.github.models.user import User
 
 
@@ -17,21 +18,31 @@ class UserIndex(AlgoliaIndex, IndexBase):
         "idx_avatar_url",
         "idx_bio",
         "idx_company",
+        "idx_contributions",
         "idx_created_at",
         "idx_email",
         "idx_followers_count",
         "idx_following_count",
+        "idx_issues_count",
+        "idx_issues",
         "idx_key",
         "idx_location",
         "idx_login",
         "idx_name",
         "idx_public_repositories_count",
+        "idx_releases_count",
+        "idx_releases",
         "idx_title",
         "idx_updated_at",
         "idx_url",
     )
 
     settings = {
+        "attributesForFaceting": [
+            "idx_key",
+            "idx_name",
+            "idx_title",
+        ],
         "attributeForDistinct": "idx_login",
         "minProximity": 4,
         "customRanking": [
@@ -58,7 +69,7 @@ class UserIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return User.objects.all()
+        return User.objects.exclude(login__in=Organization.get_logins())
 
     @staticmethod
     def update_synonyms():

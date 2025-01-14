@@ -2,7 +2,7 @@ import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect } from 'react'
 
-import { cn } from 'lib/utils'
+import { cn } from 'utils/utility'
 
 function ModeToggle({ className }: { className?: string }) {
   const [dark, setDark] = useState(() => {
@@ -27,7 +27,7 @@ function ModeToggle({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center space-x-2', className)}>
       <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-        <FontAwesomeIcon icon={dark ? faMoon : faSun} />
+        <FontAwesomeIcon icon={dark ? faMoon : faSun} className="h-4 w-4" fixedWidth />
       </span>
       <label className="relative inline-flex cursor-pointer items-center">
         <input

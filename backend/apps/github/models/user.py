@@ -5,6 +5,7 @@ from django.db import models
 from apps.common.models import TimestampedModel
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
+from apps.github.models.organization import Organization
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
@@ -25,7 +26,20 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     @property
     def is_indexable(self):
         """Users to index."""
-        return self.login != "ghost"  # See https://github.com/ghost for more info.
+        return (
+            self.login != "ghost"  # See https://github.com/ghost for more info.
+            and self.login not in Organization.get_logins()
+        )
+
+    @property
+    def issues(self):
+        """Return user issues."""
+        return self.created_issues.all()
+
+    @property
+    def releases(self):
+        """Return user releases."""
+        return self.created_releases.all()
 
     def from_github(self, gh_user):
         """Update instance based on GitHub user data."""

@@ -1,12 +1,12 @@
+import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { useSearchPage } from 'lib/hooks/useSearchPage'
-import { IssueType } from 'lib/types'
-import { getFilteredIcons } from 'lib/utils'
+import { IssueType } from 'types/issue'
+import { getFilteredIcons } from 'utils/utility'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 
 import Card from 'components/Card'
-import { Modal } from 'components/Modal/Modal'
+import { Modal } from 'components/Modal'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ContributePage = () => {
@@ -64,6 +64,7 @@ const ContributePage = () => {
   return (
     <SearchPageLayout
       isLoaded={isLoaded}
+      indexName="issues"
       totalPages={totalPages}
       currentPage={currentPage}
       searchQuery={searchQuery}

@@ -1,12 +1,12 @@
 import { screen, waitFor } from '@testing-library/react'
 
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ProjectDetailsPage } from 'pages'
-import { fetchAlgoliaData } from 'lib/api'
-import { render } from 'lib/test-util'
+import { render } from 'wrappers/testUtil'
 
 import { mockProjectData } from '@tests/data/mockProjectData'
 
-jest.mock('lib/api', () => ({
+jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 jest.mock('react-router-dom', () => ({
@@ -56,14 +56,14 @@ describe('ProjectPage Component', () => {
     expect(viewButton).toBeInTheDocument()
   })
 
-  test('displays "No projects found" when there are no projects', async () => {
+  test('displays "Project not found" when there are no projects', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [],
       totalPages: 0,
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('No project details found.')).toBeInTheDocument()
+      expect(screen.getByText('Project not found')).toBeInTheDocument()
     })
   })
 })

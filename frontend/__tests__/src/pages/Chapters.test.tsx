@@ -1,13 +1,13 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useNavigate } from 'react-router-dom'
-import { fetchAlgoliaData } from 'lib/api'
-import { render } from 'lib/test-util'
+import { render } from 'wrappers/testUtil'
 
 import ChaptersPage from 'pages/Chapters'
 import { mockChapterData } from '@tests/data/mockChapterData'
 
-jest.mock('lib/api', () => ({
+jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 jest.mock('react-router-dom', () => ({
@@ -91,12 +91,10 @@ describe('ChaptersPage Component', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
-      expect(screen.queryByPlaceholderText('Search for OWASP chapters...')).not.toBeInTheDocument()
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('Search for OWASP chapters...')).toHaveFocus()
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

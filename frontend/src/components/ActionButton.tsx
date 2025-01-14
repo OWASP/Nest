@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react'
 import { Tooltip } from 'react-tooltip'
-
-import { tooltipStyle } from 'lib/constants'
+import { tooltipStyle } from 'utils/constants'
 
 interface ActionButtonProps {
   url?: string
@@ -12,7 +11,7 @@ interface ActionButtonProps {
 
 const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel, children }) => {
   const baseStyles =
-    'flex flex-nowrap text-nowrap justify-center self-end items-center gap-2 p-1 px-2 rounded-md bg-transparent hover:bg-[#0D6EFD] text-[#0D6EFD] hover:text-white border border-[#0D6EFD] dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-600'
+    'flex flex-nowrap text-nowrap justify-center self-end items-center gap-2 p-1 px-2 rounded-md bg-transparent hover:bg-[#0D6EFD] text-[#0D6EFD] hover:text-white border border-[#0D6EFD] dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100'
 
   return url ? (
     <a

@@ -28,6 +28,8 @@ class CommitteeIndex(AlgoliaIndex):
     settings = {
         "attributesForFaceting": [
             "filterOnly(idx_key)",
+            "idx_name",
+            "idx_tags",
         ],
         "indexLanguages": ["en"],
         "customRanking": [
@@ -46,7 +48,8 @@ class CommitteeIndex(AlgoliaIndex):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_leaders, idx_top_contributors.login, idx_top_contributors.name)",
+            "unordered(idx_leaders)"
+            "unordered(idx_top_contributors.login, idx_top_contributors.name)",
             "unordered(idx_tags)",
         ],
     }
@@ -55,6 +58,6 @@ class CommitteeIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        return Committee.active_committees.prefetch_related(
+        return Committee.active_committees.select_related(
             "owasp_repository",
         )

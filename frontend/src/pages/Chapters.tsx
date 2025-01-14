@@ -1,8 +1,8 @@
+import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
-import FontAwesomeIconWrapper from 'lib/FontAwesomeIconWrapper'
-import { useSearchPage } from 'lib/hooks/useSearchPage'
-import { ChapterType } from 'lib/types'
-import { getFilteredIcons, handleSocialUrls } from 'lib/utils'
+import { ChapterType } from 'types/chapter'
+import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 
@@ -34,6 +34,7 @@ const ChaptersPage = () => {
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket " />,
       onclick: handleButtonClick,
     }
+
     return (
       <Card
         key={chapter.objectID || `chapter-${index}`}
@@ -55,6 +56,7 @@ const ChaptersPage = () => {
       totalPages={totalPages}
       currentPage={currentPage}
       searchQuery={searchQuery}
+      indexName="chapters"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       searchPlaceholder="Search for OWASP chapters..."

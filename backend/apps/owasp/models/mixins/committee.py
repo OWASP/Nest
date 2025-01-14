@@ -9,7 +9,7 @@ class CommitteeIndexMixin(GenericEntityMixin):
     @property
     def idx_created_at(self):
         """Return created at for indexing."""
-        return self.created_at
+        return self.created_at.timestamp()
 
     @property
     def idx_key(self):
@@ -29,4 +29,4 @@ class CommitteeIndexMixin(GenericEntityMixin):
     @property
     def idx_updated_at(self):
         """Return updated at for indexing."""
-        return self.updated_at
+        return self.updated_at.timestamp()

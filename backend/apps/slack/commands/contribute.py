@@ -3,11 +3,12 @@
 from django.conf import settings
 from django.utils.text import Truncator
 
+from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.commands.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, NL
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 COMMAND = "/contribute"
@@ -78,7 +79,7 @@ def handler(ack, command, client):
             blocks.append(
                 markdown(
                     f"⚠️ *Extended search over {Issue.open_issues_count()} open issues "
-                    f"is available at <{get_absolute_url('projects/issues')}"
+                    f"is available at <{get_absolute_url('projects/contribute')}"
                     f"?q={command_text}|{settings.SITE_NAME}>*\n"
                     f"{FEEDBACK_CHANNEL_MESSAGE}"
                 ),

@@ -1,8 +1,5 @@
-export interface Link {
-  text: string
-  href: string
-  isSpan?: boolean
-}
+import { Link } from 'types/link'
+import { Section } from 'types/section'
 
 export const headerLinks: Link[] = [
   {
@@ -18,15 +15,10 @@ export const headerLinks: Link[] = [
     href: '/chapters',
   },
   {
-    text: 'Committees',
-    href: '/committees',
+    text: 'Community',
+    href: '/community/users',
   },
 ]
-
-export interface Section {
-  title: string
-  links: Link[]
-}
 
 export const footerSections: Section[] = [
   {
@@ -73,10 +65,15 @@ export const footerSections: Section[] = [
     title: 'OWASP',
     links: [
       { text: 'About', href: 'https://owasp.org/about/' },
-      { text: 'Contact', href: 'https://owasp.glueup.com/organization/6727/contact/' },
+      { text: 'Contact', href: 'https://owasp.org/contact/' },
       { text: 'Events', href: 'https://owasp.glueup.com/organization/6727/events/' },
       { text: 'Membership', href: 'https://owasp.glueup.com/organization/6727/memberships/' },
       { text: 'Team', href: 'https://owasp.org/corporate/' },
     ],
   },
 ]
+
+export const tooltipStyle = {
+  borderRadius: '8px',
+  zIndex: 100,
+}

@@ -1,7 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import App from 'App'
+import { useToast } from 'hooks/useToast'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom'
+import { Toaster } from 'components/ui/Toaster'
 
 jest.mock('pages', () => ({
   Home: () => <div data-testid="home-page">Home Page</div>,
@@ -9,9 +11,18 @@ jest.mock('pages', () => ({
   CommitteesPage: () => <div data-testid="committees-page">Committees Page</div>,
   ChaptersPage: () => <div data-testid="chapters-page">Chapters Page</div>,
   ContributePage: () => <div data-testid="contribute-page">Contribute Page</div>,
-  ChapterDetailsPage: () => <div data-testid="contribute-page">ChapterDetailsPage Page</div>,
-  CommitteeDetailsPage: () => <div data-testid="contribute-page">CommitteeDetails Page</div>,
-  ProjectDetailsPage: () => <div data-testid="contribute-page">ProjectDetails Page</div>,
+  ChapterDetailsPage: () => <div data-testid="chapterdetails-page">ChapterDetailsPage Page</div>,
+  CommitteeDetailsPage: () => <div data-testid="committeedetails-page">CommitteeDetails Page</div>,
+  ProjectDetailsPage: () => <div data-testid="projectdetails-page">ProjectDetails Page</div>,
+  UserDetailsPage: () => <div data-testid="userdetails-page">UserDetails Page</div>,
+  UsersPage: () => <div data-testid="users-page">Users Page</div>,
+}))
+jest.mock('hooks/useToast', () => ({
+  useToast: jest.fn(() => ({
+    toasts: [],
+    toast: jest.fn(),
+    dismiss: jest.fn(),
+  })),
 }))
 
 jest.mock('components/Header', () => {
@@ -44,6 +55,11 @@ jest.mock('components/Footer', () => {
 describe('App Component', () => {
   beforeEach(() => {
     window.scrollTo = jest.fn()
+    ;(useToast as jest.Mock).mockImplementation(() => ({
+      toasts: [],
+      toast: jest.fn(),
+      dismiss: jest.fn(),
+    }))
   })
 
   afterEach(() => {
@@ -140,5 +156,28 @@ describe('App Component', () => {
 
       expect(window.scrollTo).toHaveBeenLastCalledWith(0, 0)
     })
+  })
+})
+describe('Toaster Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('renders toast with title and description', () => {
+    const mockToast = {
+      id: '1',
+      title: 'Test Title',
+      description: 'Test Description',
+      open: true,
+    }
+
+    ;(useToast as jest.Mock).mockReturnValue({
+      toasts: [mockToast],
+    })
+
+    render(<Toaster />)
+
+    expect(screen.getByText('Test Title')).toBeInTheDocument()
+    expect(screen.getByText('Test Description')).toBeInTheDocument()
   })
 })

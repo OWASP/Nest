@@ -1,12 +1,12 @@
 import { screen, waitFor } from '@testing-library/react'
 
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ChapterDetailsPage } from 'pages'
-import { fetchAlgoliaData } from 'lib/api'
-import { render } from 'lib/test-util'
+import { render } from 'wrappers/testUtil'
 
 import { mockChapterData } from '@tests/data/mockChapterData'
 
-jest.mock('lib/api', () => ({
+jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 jest.mock('react-router-dom', () => ({
@@ -47,11 +47,11 @@ describe('ChapterDetailsPage Component', () => {
     expect(viewButton).toBeInTheDocument()
   })
 
-  test('displays "No chapters found" when there are no chapters', async () => {
+  test('displays "Chapter not found" when there are no chapters', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('No chapter details found.')).toBeInTheDocument()
+      expect(screen.getByText('Chapter not found')).toBeInTheDocument()
     })
   })
 })

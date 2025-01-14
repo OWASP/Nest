@@ -4,9 +4,10 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
+from apps.github.models.mixins.release import ReleaseIndexMixin
 
 
-class Release(BulkSaveModel, NodeModel, TimestampedModel):
+class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     """Release model."""
 
     class Meta:
@@ -25,7 +26,13 @@ class Release(BulkSaveModel, NodeModel, TimestampedModel):
     published_at = models.DateTimeField(verbose_name="Published at")
 
     # FKs.
-    author = models.ForeignKey("github.User", on_delete=models.SET_NULL, blank=True, null=True)
+    author = models.ForeignKey(
+        "github.User",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="created_releases",
+    )
     repository = models.ForeignKey(
         "github.Repository",
         on_delete=models.SET_NULL,
@@ -37,6 +44,16 @@ class Release(BulkSaveModel, NodeModel, TimestampedModel):
     def __str__(self):
         """User human readable representation."""
         return f"{self.name} by {self.author}"
+
+    @property
+    def summary(self):
+        """Return release summary."""
+        return f"{self.tag_name} on {self.published_at.strftime('%b %d, %Y')}"
+
+    @property
+    def is_indexable(self):
+        """Releases to index."""
+        return not self.is_draft
 
     def from_github(self, gh_release, author=None, repository=None):
         """Update instance based on GitHub release data."""

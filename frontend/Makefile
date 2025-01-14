@@ -1,3 +1,7 @@
+check-frontend: \
+	format-frontend-code \
+	lint-frontend-code
+
 exec-frontend-command:
 	@docker exec -t nest-frontend $(CMD)
 
@@ -17,5 +21,5 @@ shell-frontend:
 	@CMD="/bin/bash" $(MAKE) exec-frontend-command-it
 
 test-frontend:
-	@docker build -f frontend/Dockerfile.test frontend -t nest-frontend-test 2>/dev/null
-	@docker run nest-frontend-test npm run test
+	@docker build -f frontend/Dockerfile.test frontend -t nest-test-frontend
+	@docker run --env-file frontend/.env.example nest-test-frontend npm run test
