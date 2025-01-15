@@ -1,4 +1,5 @@
 include backend/Makefile
+include cspell/Makefile
 include frontend/Makefile
 
 build:

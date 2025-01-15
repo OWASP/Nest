@@ -1,0 +1,58 @@
+{
+  "allowCompoundWords": true,
+  "caseSensitive": false,
+  "language": "en",
+  "minWordLength": 3,
+  "dictionaryDefinitions": [
+    {
+      "addWords": true,
+      "name": "custom-dict",
+      "path": "custom-dict.txt"
+    }
+  ],
+  "dictionaries": [
+    "aws",
+    "bash",
+    "companies",
+    "cpp",
+    "css",
+    "custom-dict",
+    "data-science",
+    "docker",
+    "dotnet",
+    "en_US",
+    "en-common-misspelling",
+    "fonts",
+    "fullstack",
+    "golang",
+    "html",
+    "k8s",
+    "makefile",
+    "misc",
+    "npm",
+    "people-names",
+    "python",
+    "rust",
+    "software-terms",
+    "win32"
+  ],
+  "enabled": true,
+  "files": ["**/*"],
+  "ignorePaths": ["backend/static/*"],
+  "ignoreRegExpList": [
+    "#\\w+" // Slack channel names
+  ],
+  "import": [
+    "@cspell/dict-aws/cspell-ext.json",
+    "@cspell/dict-companies/cspell-ext.json",
+    "@cspell/dict-data-science/cspell-ext.json",
+    "@cspell/dict-en_us/cspell-ext.json",
+    "@cspell/dict-fullstack/cspell-ext.json",
+    "@cspell/dict-golang/cspell-ext.json",
+    "@cspell/dict-k8s/cspell-ext.json",
+    "@cspell/dict-people-names/cspell-ext.json",
+    "@cspell/dict-software-terms/cspell-ext.json",
+    "@cspell/dict-win32/cspell-ext.json"
+  ],
+  "useGitignore": true
+}
