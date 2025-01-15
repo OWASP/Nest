@@ -1,12 +1,9 @@
 """GitHub release Algolia index configuration."""
 
-import os
-
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
-from apps.common.constants import LOCAL_INDEX_LIMIT
-from apps.common.index import IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
 from apps.github.models.release import Release
 
 
@@ -58,13 +55,11 @@ class ReleaseIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        queryset = Release.objects.filter(
+        qs = Release.objects.filter(
             is_draft=False,
             published_at__isnull=False,
         )
-        if os.environ.get("DJANGO_CONFIGURATION", "Local") == "Local":
-            return queryset[:LOCAL_INDEX_LIMIT]
-        return queryset
+        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
 
     @staticmethod
     def update_synonyms():
