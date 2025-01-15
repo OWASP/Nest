@@ -27,13 +27,20 @@ def handle_home_actions(ack, body, client):
 
     action_id = body["actions"][0]["action_id"]
     user_id = body["user"]["id"]
+    payload = body.get("actions", [])[0]
+    value = payload.get("value", "1")
 
     try:
+        page = int(value) if value.isdigit() else 1
         blocks = []
 
         match action_id:
-            case "view_projects_action":
-                details = get_projects(query="", limit=10, page=1)
+            case (
+                "view_projects_action"
+                | "view_projects_action_prev"
+                | "view_projects_action_next"
+            ):
+                details = get_projects(query="", limit=10, page=page)
                 blocks = (
                     [
                         {
@@ -49,7 +56,7 @@ def handle_home_actions(ack, body, client):
                                 ),
                             },
                         }
-                        for idx, project in enumerate(details["hits"], 1)
+                        for idx, project in enumerate(details["hits"], start=(page - 1) * 10 + 1)
                     ]
                     if details["hits"]
                     else [
@@ -63,8 +70,20 @@ def handle_home_actions(ack, body, client):
                     ]
                 )
 
-            case "view_committees_action":
-                details = get_committees(query="", limit=10, page=1)
+                add_pagination_buttons(
+                    blocks,
+                    page,
+                    details["nbPages"],
+                    "view_projects_action_prev",
+                    "view_projects_action_next",
+                )
+
+            case (
+                "view_committees_action"
+                | "view_committees_action_prev"
+                | "view_committees_action_next"
+            ):
+                details = get_committees(query="", limit=10, page=page)
                 blocks = (
                     [
                         {
@@ -77,7 +96,7 @@ def handle_home_actions(ack, body, client):
                                 ),
                             },
                         }
-                        for idx, committee in enumerate(details["hits"], 1)
+                        for idx, committee in enumerate(details["hits"], start=(page - 1) * 10 + 1)
                     ]
                     if details["hits"]
                     else [
@@ -91,8 +110,20 @@ def handle_home_actions(ack, body, client):
                     ]
                 )
 
-            case "view_chapters_action":
-                details = get_chapters(query="", limit=10, page=1)
+                add_pagination_buttons(
+                    blocks,
+                    page,
+                    details["nbPages"],
+                    "view_committees_action_prev",
+                    "view_committees_action_next",
+                )
+
+            case (
+                "view_chapters_action"
+                | "view_chapters_action_prev"
+                | "view_chapters_action_next"
+            ):
+                details = get_chapters(query="", limit=10, page=page)
                 blocks = (
                     [
                         {
@@ -105,7 +136,7 @@ def handle_home_actions(ack, body, client):
                                 ),
                             },
                         }
-                        for idx, chapter in enumerate(details["hits"], 1)
+                        for idx, chapter in enumerate(details["hits"], start=(page - 1) * 10 + 1)
                     ]
                     if details["hits"]
                     else [
@@ -117,6 +148,14 @@ def handle_home_actions(ack, body, client):
                             },
                         }
                     ]
+                )
+
+                add_pagination_buttons(
+                    blocks,
+                    page,
+                    details["nbPages"],
+                    "view_chapters_action_prev",
+                    "view_chapters_action_next",
                 )
 
             case _:
@@ -141,8 +180,53 @@ def handle_home_actions(ack, body, client):
         logger.exception("Error publishing Home Tab for user %s: %s", user_id, e.response["error"])
 
 
+def add_pagination_buttons(blocks, page, total_pages, action_id_prev, action_id_next):
+    """Add pagination buttons to the blocks."""
+    pagination_buttons = []
+
+    if page > 1:
+        pagination_buttons.append(
+            {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Previous"},
+                "action_id": action_id_prev,
+                "value": str(page - 1),
+                "style": "primary"
+            }
+        )
+
+    if total_pages > page:
+        pagination_buttons.append(
+            {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Next"},
+                "action_id": action_id_next,
+                "value": str(page + 1),
+                "style": "primary"
+            }
+        )
+
+    if pagination_buttons:
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": pagination_buttons,
+            }
+        )
+
+
 # Register the actions
 if SlackConfig.app:
-    SlackConfig.app.action(VIEW_PROJECTS_ACTION)(handle_home_actions)
-    SlackConfig.app.action(VIEW_COMMITTEES_ACTION)(handle_home_actions)
-    SlackConfig.app.action(VIEW_CHAPTERS_ACTION)(handle_home_actions)
+    actions = [
+        VIEW_PROJECTS_ACTION,
+        VIEW_CHAPTERS_ACTION,
+        VIEW_COMMITTEES_ACTION,
+        "view_projects_action_prev",
+        "view_projects_action_next",
+        "view_committees_action_prev",
+        "view_committees_action_next",
+        "view_chapters_action_prev",
+        "view_chapters_action_next",
+    ]
+    for action in actions:
+        SlackConfig.app.action(action)(handle_home_actions)
