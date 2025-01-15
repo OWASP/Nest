@@ -5,7 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.commands.constants import COMMAND_HELP
+from apps.slack.common.constants import COMMAND_HELP
 from apps.slack.utils import escape
 
 COMMAND = "/owasp"
