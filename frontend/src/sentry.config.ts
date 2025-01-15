@@ -4,7 +4,12 @@ import { SENTRY_DSN, ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
 Sentry.init({
   dsn: SENTRY_DSN,
   environment: ENVIRONMENT,
-  integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: false,
+    }),
+  ],
   tracesSampleRate: 0.5,
   replaysSessionSampleRate: 0.5,
   replaysOnErrorSampleRate: 0.5,
