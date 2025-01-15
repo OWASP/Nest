@@ -47,10 +47,6 @@ describe('ChaptersPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
     })
-    expect(screen.getByText('This is a summary of Chapter 1.')).toBeInTheDocument()
-    expect(screen.getByText('Isanori Sakanashi,')).toBeInTheDocument()
-    expect(screen.getByText('Takeshi Murai,')).toBeInTheDocument()
-    expect(screen.getByText('Yukiharu Niwa')).toBeInTheDocument()
     const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
   })

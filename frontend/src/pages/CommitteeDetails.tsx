@@ -58,7 +58,6 @@ const CommitteeDetailsPage = () => {
           url={committee.idx_url}
           summary={committee.idx_summary}
           icons={filteredIcons}
-          leaders={committee.idx_leaders}
           topContributors={committee.idx_top_contributors}
           button={SubmitButton}
           social={formattedUrls}
