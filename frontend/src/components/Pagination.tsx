@@ -1,4 +1,5 @@
-import { MoreHorizontal } from 'lucide-react'
+import { faEllipsisH } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 
 interface PaginationProps {
@@ -69,7 +70,7 @@ const Pagination: React.FC<PaginationProps> = ({
           <React.Fragment key={index}>
             {number === '...' ? (
               <span className="flex h-10 w-10 items-center justify-center text-gray-600 dark:text-gray-400">
-                <MoreHorizontal className="h-5 w-5" />
+                <FontAwesomeIcon icon={faEllipsisH} className="h-5 w-5"></FontAwesomeIcon>
               </span>
             ) : (
               <button

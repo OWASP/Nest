@@ -3,7 +3,7 @@
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
-from apps.common.index import IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
 from apps.github.models.issue import Issue
 
 
@@ -81,13 +81,15 @@ class IssueIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset."""
-        return Issue.open_issues.assignable.select_related(
+        qs = Issue.open_issues.assignable.select_related(
             "repository",
         ).prefetch_related(
             "assignees",
             "labels",
             "repository__project_set",
         )
+
+        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
 
     @staticmethod
     def update_synonyms():
