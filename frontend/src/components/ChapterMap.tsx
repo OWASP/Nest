@@ -7,17 +7,17 @@ import 'leaflet.markercluster'
 
 const ChapterMap = ({ geoLocData }) => {
   const mapRef = useRef<L.Map | null>(null)
-
+  //for reference: https://leafletjs.com/reference.html#map-example
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
-        worldCopyJump: false,
+        worldCopyJump: false, // Prevents the map from wrapping around the world
         maxBounds: [
-          [-90, -180],
-          [90, 180],
+          [-90, -180], // Southwest corner of the map bounds (latitude, longitude)
+          [90, 180], // Northeast corner of the map bounds (latitude, longitude)
         ],
-        maxBoundsViscosity: 1.0,
-      }).setView([20, 0], 2)
+        maxBoundsViscosity: 1.0, // How smoothly the map bounces back when the user tries to pan outside the max bounds
+      }).setView([20, 0], 2) // Initial view of the map: [latitude, longitude], zoom level
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         className: 'map-tiles',
