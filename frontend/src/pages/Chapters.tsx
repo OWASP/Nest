@@ -29,12 +29,19 @@ const ChaptersPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const searchParams = {
+          indexName: 'chapters',
+          query: '',
+          currentPage: 1,
+          filterKey: '',
+          hitsPerPage: 1000,
+        }
         const data: AlgoliaResponseType<ChapterType> = await fetchAlgoliaData(
-          'chapters',
-          '',
-          1,
-          '',
-          1000
+          searchParams.indexName,
+          searchParams.query,
+          searchParams.currentPage,
+          searchParams.filterKey,
+          searchParams.hitsPerPage
         )
         setGeoLocData(data.hits)
       } catch (error) {
