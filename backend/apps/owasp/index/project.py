@@ -3,7 +3,7 @@
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
-from apps.common.index import IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
 from apps.owasp.models.project import Project
 
 
@@ -84,10 +84,11 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset."""
-        return Project.objects.prefetch_related(
+        qs = Project.objects.prefetch_related(
             "organizations",
             "repositories",
         )
+        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
 
     @staticmethod
     def update_synonyms():
