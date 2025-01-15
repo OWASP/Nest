@@ -9,7 +9,6 @@ import {
   faTag,
   faChevronDown,
   faChevronUp,
-  faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -68,9 +67,9 @@ const ProjectDetailsPage = () => {
   const toggleTopics = () => setShowAllTopics(!showAllTopics)
 
   return (
-    <div className="mt-20 min-h-screen bg-white p-8 text-gray-900 dark:bg-[#212529] dark:text-white">
+    <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 text-4xl font-bold">{project.idx_name}</h1>
+        <h1 className="mb-6 mt-4 text-4xl font-bold">{project.idx_name}</h1>
         <p className="mb-6 text-xl">{project.idx_description}</p>
 
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -87,19 +86,7 @@ const ProjectDetailsPage = () => {
             </p>
             <div>
               <p>
-                {' '}
-                <strong>Project Leaders:</strong>
-                <span className="ml-2 gap-2">
-                  {project.idx_leaders.map((leader, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center rounded-full bg-blue-200 px-3 py-0.5 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                    >
-                      <FontAwesomeIcon icon={faUser} className="mr-1.5 h-3 w-3" />
-                      {leader}
-                    </span>
-                  ))}
-                </span>
+                <strong>Project Leaders:</strong> {project.idx_leaders.join(', ')}
               </p>
             </div>
             <p>
@@ -107,10 +94,7 @@ const ProjectDetailsPage = () => {
             </p>
             <p>
               <strong>URL:</strong>{' '}
-              <a
-                href={project.idx_url}
-                className="text-blue-600 hover:underline dark:text-blue-400"
-              >
+              <a href={project.idx_url} className="hover:underline dark:text-sky-600">
                 {project.idx_url}
               </a>
             </p>
@@ -154,7 +138,7 @@ const ProjectDetailsPage = () => {
                 (lang, index) => (
                   <span
                     key={index}
-                    className="rounded-full bg-blue-500 px-2 py-1 text-sm text-white"
+                    className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
                   >
                     {lang}
                   </span>
@@ -164,7 +148,7 @@ const ProjectDetailsPage = () => {
             {project.idx_languages.length > 10 && (
               <button
                 onClick={toggleLanguages}
-                className="mt-4 flex items-center text-blue-600 hover:underline dark:text-blue-400"
+                className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
               >
                 {showAllLanguages ? (
                   <>
@@ -186,7 +170,7 @@ const ProjectDetailsPage = () => {
                 (topic, index) => (
                   <span
                     key={index}
-                    className="rounded-full border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
+                    className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
                   >
                     {topic}
                   </span>
@@ -196,7 +180,7 @@ const ProjectDetailsPage = () => {
             {project.idx_topics.length > 10 && (
               <button
                 onClick={toggleTopics}
-                className="mt-4 flex items-center text-blue-600 hover:underline dark:text-blue-400"
+                className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
               >
                 {showAllTopics ? (
                   <>
@@ -237,7 +221,7 @@ const ProjectDetailsPage = () => {
           {project.idx_top_contributors.length > 5 && (
             <button
               onClick={toggleContributors}
-              className="mt-4 flex items-center text-blue-600 hover:underline dark:text-blue-400"
+              className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
             >
               {showAllContributors ? (
                 <>
