@@ -3,7 +3,7 @@
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
-from apps.common.index import IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
 from apps.github.models.release import Release
 
 
@@ -55,10 +55,11 @@ class ReleaseIndex(AlgoliaIndex, IndexBase):
 
     def get_queryset(self):
         """Get queryset for indexing."""
-        return Release.objects.filter(
+        qs = Release.objects.filter(
             is_draft=False,
             published_at__isnull=False,
         )
+        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
 
     @staticmethod
     def update_synonyms():
