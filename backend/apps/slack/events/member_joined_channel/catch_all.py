@@ -3,7 +3,7 @@
 from apps.slack.apps import SlackConfig
 
 
-def catch_all_handler(_event, _client, ack):
+def catch_all_handler(event, client, ack):  # noqa: ARG001
     """Slack new member cache all handler."""
     ack()
 
