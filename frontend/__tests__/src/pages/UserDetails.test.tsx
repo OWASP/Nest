@@ -83,7 +83,7 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText(`Joined September 18, 2008`)).toBeInTheDocument()
   })
 
-  test('renders error message when user does not exist', async () => {
+  test('renders "User not found" message when user does not exist', async () => {
     fetchAlgoliaData.mockResolvedValue({ hits: [] })
 
     await act(async () => {

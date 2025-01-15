@@ -208,6 +208,7 @@ jobs:
           echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.staging
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
+          echo "VITE_RELEASE_VERSION=${GITHUB_SHA:0:7}" >> frontend/.env.staging
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
 
       - name: Build frontend image
@@ -260,6 +261,7 @@ jobs:
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_RELEASE_VERSION=${GITHUB_SHA:0:7}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
@@ -320,6 +322,7 @@ jobs:
           echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
           echo "VITE_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
           echo "VITE_ENVIRONMENT=production" >> frontend/.env.production
+          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env.production
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
 
       - name: Build frontend image
