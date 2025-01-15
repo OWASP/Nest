@@ -191,7 +191,7 @@ def add_pagination_buttons(blocks, page, total_pages, action_id_prev, action_id_
                 "text": {"type": "plain_text", "text": "Previous"},
                 "action_id": action_id_prev,
                 "value": str(page - 1),
-                "style": "primary"
+                "style": "primary",
             }
         )
 
@@ -202,7 +202,7 @@ def add_pagination_buttons(blocks, page, total_pages, action_id_prev, action_id_
                 "text": {"type": "plain_text", "text": "Next"},
                 "action_id": action_id_next,
                 "value": str(page + 1),
-                "style": "primary"
+                "style": "primary",
             }
         )
 
