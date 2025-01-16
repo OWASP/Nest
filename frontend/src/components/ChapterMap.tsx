@@ -37,7 +37,16 @@ const ChapterMap = ({ geoLocData }) => {
     const bounds: [number, number][] = []
     geoLocData.forEach((chapter) => {
       if (chapter._geoloc) {
-        const marker = L.marker([chapter._geoloc.lat, chapter._geoloc.lng])
+        const customIcon = new L.Icon({
+          iconUrl: '/img/marker-icon.png',
+          iconRetinaUrl: '/img/marker-icon-2x.png',
+          shadowUrl: '/img/marker-shadow.png',
+          iconSize: [25, 41], // Default size for Leaflet markers
+          iconAnchor: [12, 41], // Anchor point
+          popupAnchor: [1, -34], // Popup position relative to marker
+          shadowSize: [41, 41], // Shadow size
+        })
+        const marker = L.marker([chapter._geoloc.lat, chapter._geoloc.lng], { icon: customIcon })
         const popup = L.popup()
         const popupContent = document.createElement('div')
         popupContent.className = 'popup-content'
