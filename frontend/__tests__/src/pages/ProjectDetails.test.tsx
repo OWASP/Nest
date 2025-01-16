@@ -1,69 +1,119 @@
 import { screen, waitFor } from '@testing-library/react'
-
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { ProjectDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
+import ProjectDetailsPage from 'pages/ProjectDetails'
 
-import { mockProjectData } from '@tests/data/mockProjectData'
+jest.mock('api/fetchAlgoliaData')
 
-jest.mock('api/fetchAlgoliaData', () => ({
-  fetchAlgoliaData: jest.fn(),
-}))
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+  useParams: () => ({
+    projectKey: 'test-project',
+  }),
 }))
 
-jest.mock('components/Pagination', () =>
-  jest.fn(({ currentPage, onPageChange }) => (
-    <div>
-      <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
-    </div>
-  ))
-)
+const mockProjectData = {
+  idx_name: 'Test Project',
+  idx_description: 'This is a test project description',
+  idx_type: 'Tool',
+  idx_level: 'Flagship',
+  idx_organizations: 'OWASP',
+  idx_leaders: ['Leader 1', 'Leader 2'],
+  idx_updated_at: 1625097600,
+  idx_url: 'https://example.com',
+  idx_contributors_count: 50,
+  idx_forks_count: 20,
+  idx_stars_count: 100,
+  idx_issues_count: 10,
+  idx_repositories_count: 2,
+  idx_summary: 'This is a summary of the test project.',
+  idx_languages: Array.from({ length: 15 }, (_, i) => `Language ${i + 1}`),
+  idx_topics: Array.from({ length: 15 }, (_, i) => `Topic ${i + 1}`),
+  idx_top_contributors: Array.from({ length: 15 }, (_, i) => ({
+    name: `Contributor ${i + 1}`,
+    login: `contributor${i + 1}`,
+    avatar_url: `https://example.com/avatar${i + 1}.jpg`,
+    contributions_count: 30 - i,
+  })),
+  idx_issues: [
+    {
+      title: 'Issue 1',
+      author: { name: 'Author 1', avatar_url: 'https://example.com/author1.jpg' },
+      created_at: 1625097600,
+      comments_count: 5,
+    },
+  ],
+  idx_releases: [
+    {
+      name: 'Release 1.0',
+      author: { name: 'Author 1', avatar_url: 'https://example.com/author1.jpg' },
+      published_at: 1625097600,
+      tag_name: 'v1.0',
+    },
+  ],
+}
 
-describe('ProjectPage Component', () => {
+describe('ProjectDetailsPage Component', () => {
   beforeEach(() => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockProjectData.projects,
-      totalPages: 2,
-    })
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        hits: [mockProjectData],
+      })
+    )
   })
 
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  test('renders loading spinner initially', async () => {
+  test('topics visibility check', async () => {
     render(<ProjectDetailsPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByText('Topic 1')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Topic 11')).not.toBeInTheDocument()
+  })
+
+  test('contributors visibility check', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Contributor 6')).not.toBeInTheDocument()
+  })
+
+  test('handles contributors with missing names gracefully', async () => {
+    const projectDataWithIncompleteContributors = {
+      ...mockProjectData,
+      idx_top_contributors: [
+        {
+          login: 'user1',
+          avatar_url: 'https://example.com/avatar1.jpg',
+          contributions_count: 30,
+        },
+      ],
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        hits: [projectDataWithIncompleteContributors],
+      })
+    )
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument()
     })
   })
 
-  test('renders project data correctly', async () => {
+  test('renders project URL as clickable link', async () => {
     render(<ProjectDetailsPage />)
+
     await waitFor(() => {
-      expect(screen.getByText('Project 1')).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('This is a summary of Project 1.')).toBeInTheDocument()
-
-    expect(screen.getByText('Leader 1')).toBeInTheDocument()
-
-    const viewButton = screen.getByText('Contribute')
-    expect(viewButton).toBeInTheDocument()
-  })
-
-  test('displays "Project not found" when there are no projects', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [],
-      totalPages: 0,
-    })
-    render(<ProjectDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Project not found')).toBeInTheDocument()
+      const link = screen.getByText('https://example.com')
+      expect(link.tagName).toBe('A')
+      expect(link).toHaveAttribute('href', 'https://example.com')
     })
   })
 })
