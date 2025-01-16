@@ -1,4 +1,5 @@
 include backend/Makefile
+include cspell/Makefile
 include frontend/Makefile
 
 build:
@@ -6,7 +7,8 @@ build:
 
 check: \
 	pre-commit \
-	check-frontend
+	check-frontend \
+	spellcheck
 
 pre-commit:
 	@pre-commit run -a
