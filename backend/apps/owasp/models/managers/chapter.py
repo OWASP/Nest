@@ -12,10 +12,8 @@ class ActiveChaptertManager(models.Manager):
         return (
             super()
             .get_queryset()
-            .filter(is_active=True)
             .select_related("owasp_repository")
             .filter(
-                owasp_repository__is_archived=False,
                 owasp_repository__is_empty=False,
             )
         )

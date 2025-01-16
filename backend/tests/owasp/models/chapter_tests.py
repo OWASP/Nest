@@ -85,16 +85,10 @@ class TestChapterModel:
 
         assert chapter.suggested_location == (expected_location or "")
 
-        if is_active:
-            mock_open_ai.set_input.assert_called_once_with(geo_string)
-            mock_open_ai.set_max_tokens.assert_called_once_with(100)
-            mock_open_ai.set_prompt.assert_called_once_with("Tell me the location")
-            mock_open_ai.complete.assert_called_once()
-        else:
-            mock_open_ai.set_input.assert_not_called()
-            mock_open_ai.set_max_tokens.assert_not_called()
-            mock_open_ai.set_prompt.assert_not_called()
-            mock_open_ai.complete.assert_not_called()
+        mock_open_ai.set_input.assert_called_once_with(geo_string)
+        mock_open_ai.set_max_tokens.assert_called_once_with(100)
+        mock_open_ai.set_prompt.assert_called_once_with("Tell me the location")
+        mock_open_ai.complete.assert_called_once()
 
     @pytest.mark.parametrize(
         ("name", "key", "expected_str"),

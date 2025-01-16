@@ -60,3 +60,13 @@ class ChapterIndexMixin(GenericEntityMixin):
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return (self.updated_at or self.owasp_repository.updated_at).timestamp()
+
+    @property
+    def idx_is_active(self):
+        """Return URL for indexing."""
+        return self.is_active
+
+    @property
+    def idx_is_chapter_archived(self):
+        """Return URL for indexing."""
+        return self.owasp_repository.is_archived
