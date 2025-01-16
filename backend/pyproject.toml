@@ -35,12 +35,12 @@ humanize = "^4.11.0"
 lxml = "^5.3.0"
 markdown = "^3.7"
 openai = "^1.59.7"
-psycopg = "^3.2.3"
+psycopg = "^3.2.4"
 pygithub = "^2.5.0"
 python = "^3.13"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-sentry-sdk = {extras = ["django"], version = "^2.19.2"}
+sentry-sdk = {extras = ["django"], version = "^2.20.0"}
 slack-bolt = "^1.22.0"
 
 

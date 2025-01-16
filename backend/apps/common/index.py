@@ -12,6 +12,9 @@ from apps.common.constants import NL
 
 logger = logging.getLogger(__name__)
 
+IS_LOCAL_BUILD = settings.ENVIRONMENT == "Local"
+LOCAL_INDEX_LIMIT = 1000
+
 
 class IndexBase:
     """Nest index synonyms mixin and record count."""
