@@ -90,7 +90,13 @@ const Card = ({
       {/* Render project summary using Markdown */}
       <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
 
-      <div className="flex w-full flex-col gap-4 pr-4">
+      <div
+        className={
+          social && social.length > 0
+            ? 'flex w-full flex-col gap-4 pr-4'
+            : 'flex w-full items-center justify-between'
+        }
+      >
         {/* Render top contributors as avatars */}
         <div className="mt-3 flex w-full flex-wrap items-center gap-2">
           {topContributors?.map((contributor, index) => (
@@ -100,38 +106,52 @@ const Card = ({
             />
           ))}
         </div>
-        <div
-          className={cn(
-            'flex w-full items-center justify-between gap-6',
-            isMobile && 'flex-col items-start'
-          )}
-        >
-          <div className={cn('flex flex-wrap items-center', isMobile && 'w-full')}>
-            {/* Render social links if available */}
-            {social && social.length > 0 && (
-              <div id="social" className="mt-2 flex items-center gap-3">
-                {social.map((item) => (
-                  <a
-                    key={`${item.title}-${item.url}`}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
-                  </a>
-                ))}
-              </div>
+        {!social || social.length === 0 ? (
+          <div
+            className={cn(
+              'mr-2 mt-3 flex items-center',
+              isMobile && 'mr-3 mt-4 w-full justify-end'
             )}
-          </div>
-          {/* Action button */}
-          <div className={cn('flex items-center', isMobile && 'mt-4 w-full justify-end')}>
+          >
             <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
               {button.icon}
               {button.label}
             </ActionButton>
           </div>
-        </div>
+        ) : (
+          <div
+            className={cn(
+              'flex w-full items-center justify-between gap-6',
+              isMobile && 'flex-col items-start'
+            )}
+          >
+            <div className={cn('flex flex-wrap items-center', isMobile && 'w-full')}>
+              {/* Render social links if available */}
+              {social && social.length > 0 && (
+                <div id="social" className="mt-2 flex items-center gap-3">
+                  {social.map((item) => (
+                    <a
+                      key={`${item.title}-${item.url}`}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2"
+                    >
+                      <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Action button */}
+            <div className={cn('flex items-center', isMobile && 'mt-4 w-full justify-end')}>
+              <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
+                {button.icon}
+                {button.label}
+              </ActionButton>
+            </div>
+          </div>
+        )}
       </div>
       <Tooltip id="level-tooltip" style={tooltipStyle} />
     </div>
