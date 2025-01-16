@@ -52,7 +52,8 @@ class TestHandleHomeActions:
                         "idx_stars_count": 100,
                         "idx_summary": "Summary of project 1",
                     }
-                ]
+                ],
+                "nbPages": 1,
             },
             "chapter": {
                 "hits": [
@@ -61,7 +62,8 @@ class TestHandleHomeActions:
                         "idx_name": "Chapter 1",
                         "idx_summary": "Summary of chapter 1",
                     }
-                ]
+                ],
+                "nbPages": 1,
             },
             "committee": {
                 "hits": [
@@ -70,10 +72,11 @@ class TestHandleHomeActions:
                         "idx_name": "Committee 1",
                         "idx_summary": "Summary of committee 1",
                     }
-                ]
+                ],
+                "nbPages": 1,
             },
         }
-        return data_mapping.get(action_type, {})
+        return data_mapping[action_type]
 
     def test_handle_home_actions(
         self, mock_get_functions, mock_ack, mock_client, mock_action_body, action_type, mock_data
