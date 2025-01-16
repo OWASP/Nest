@@ -3,6 +3,7 @@
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
 
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT
 from apps.owasp.models.committee import Committee
 
 
@@ -58,6 +59,7 @@ class CommitteeIndex(AlgoliaIndex):
 
     def get_queryset(self):
         """Get queryset."""
-        return Committee.active_committees.select_related(
+        qs = Committee.active_committees.select_related(
             "owasp_repository",
         )
+        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs

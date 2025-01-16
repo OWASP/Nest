@@ -8,7 +8,7 @@ from apps.slack.constants import (
     NEST_BOT_NAME,
     OWASP_CONTRIBUTE_CHANNEL_ID,
 )
-from apps.slack.events.user_joined_channel.contribute import contribute_handler
+from apps.slack.events.member_joined_channel.contribute import contribute_handler
 
 
 class TestContributeEventHandler:
@@ -81,7 +81,7 @@ class TestContributeEventHandler:
     )
     def test_check_contribute_handler(self, channel_id, expected_result):
         contribute_module = __import__(
-            "apps.slack.events.user_joined_channel.contribute",
+            "apps.slack.events.member_joined_channel.contribute",
             fromlist=["contribute_handler"],
         )
         check_contribute_handler = getattr(
