@@ -38,7 +38,15 @@ const ChapterMap = ({ geoLocData }) => {
     geoLocData.forEach((chapter) => {
       if (chapter._geoloc) {
         const marker = L.marker([chapter._geoloc.lat, chapter._geoloc.lng])
-        marker.bindPopup(chapter.idx_name)
+        const popup = L.popup()
+        const popupContent = document.createElement('div')
+        popupContent.className = 'popup-content'
+        popupContent.textContent = chapter.idx_name
+        popupContent.addEventListener('click', () => {
+          window.location.href = `/chapters/${chapter.idx_key}`
+        })
+        popup.setContent(popupContent)
+        marker.bindPopup(popup)
         markerClusterGroup.addLayer(marker)
         bounds.push([chapter._geoloc.lat, chapter._geoloc.lng])
       }

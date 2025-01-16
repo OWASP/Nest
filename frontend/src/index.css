@@ -214,3 +214,20 @@ a {
 .flip-container:hover .icon-flip {
   transform: rotateY(180deg);
 }
+
+.popup-content {
+  cursor: pointer;
+  color: black;
+}
+
+.dark .popup-content {
+  color: white;
+}
+
+.popup-content:hover {
+  text-decoration: underline;
+}
+
+.dark .leaflet-popup-tip {
+  background-color: #2c3e50;
+}
