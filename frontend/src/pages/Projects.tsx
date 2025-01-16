@@ -48,9 +48,7 @@ const ProjectsPage = () => {
         summary={project.idx_summary}
         level={level[`${project.idx_level as keyof typeof level}`]}
         icons={filteredIcons}
-        leaders={project.idx_leaders}
         topContributors={project.idx_top_contributors}
-        topics={project.idx_topics}
         button={SubmitButton}
       />
     )
