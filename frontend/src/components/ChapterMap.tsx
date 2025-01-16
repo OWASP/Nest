@@ -5,6 +5,14 @@ import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 
+// Fix for Leaflet's default icon paths
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+})
+
 const ChapterMap = ({ geoLocData }) => {
   const mapRef = useRef<L.Map | null>(null)
   //for reference: https://leafletjs.com/reference.html#map-example
