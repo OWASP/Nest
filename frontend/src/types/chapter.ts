@@ -14,6 +14,7 @@ export interface ChapterType {
   idx_updated_at: number
   idx_url: string
   objectID: string
+  _geoloc: { lat: number; lng: number }
 }
 
 export interface ChapterDataType {
