@@ -7,7 +7,8 @@ build:
 
 check: \
 	pre-commit \
-	check-frontend
+	check-frontend \
+	spellcheck
 
 pre-commit:
 	@pre-commit run -a

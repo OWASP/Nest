@@ -38,7 +38,7 @@
   ],
   "enabled": true,
   "files": ["**/*"],
-  "ignorePaths": ["backend/static/*"],
+  "ignorePaths": ["backend/static/**"],
   "ignoreRegExpList": [
     "#\\w+" // Slack channel names
   ],
