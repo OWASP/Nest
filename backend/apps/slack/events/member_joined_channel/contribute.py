@@ -1,4 +1,4 @@
-"""Slack bot user joined #contribute channel handler."""
+"""Slack member joined #contribute channel handler."""
 
 import logging
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def contribute_handler(event, client, ack):
-    """Slack #contribute new user handler."""
+    """Slack #contribute new member handler."""
     from apps.github.models.issue import Issue
     from apps.owasp.models.project import Project
 

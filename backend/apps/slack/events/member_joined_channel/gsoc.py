@@ -1,4 +1,4 @@
-"""Slack bot user joined #gsoc channel handler."""
+"""Slack member joined #gsoc channel handler."""
 
 import logging
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def gsoc_handler(event, client, ack):
-    """Slack #gsoc new user handler."""
+    """Slack #gsoc new member handler."""
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
 
     ack()

@@ -46,8 +46,8 @@ class UserIndex(AlgoliaIndex, IndexBase):
         "attributeForDistinct": "idx_login",
         "minProximity": 4,
         "customRanking": [
-            "desc(idx_followers_count)",
             "desc(idx_created_at)",
+            "desc(idx_followers_count)",
         ],
         "ranking": [
             "typo",
