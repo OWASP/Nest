@@ -1,4 +1,4 @@
-"""Slack bot URL verification event handler."""
+"""Slack URL verification event handler."""
 
 from apps.slack.apps import SlackConfig
 
