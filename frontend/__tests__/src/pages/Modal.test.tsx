@@ -26,7 +26,7 @@ describe('Modal Component', () => {
     hint: 'Test Hint',
     isOpen: true,
     onClose: jest.fn(),
-    url: 'https://example.com/issue/123'
+    url: 'https://example.com/issue/123',
   }
 
   it('renders nothing when isOpen is false', () => {
@@ -48,15 +48,11 @@ describe('Modal Component', () => {
     it('opens URL in new window when View issue button is clicked', () => {
       const windowSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
       render(<Modal {...defaultProps} />)
-      
+
       const viewIssueButton = screen.getByRole('button', { name: /view issue/i })
       fireEvent.click(viewIssueButton)
-      
-      expect(windowSpy).toHaveBeenCalledWith(
-        defaultProps.url, 
-        '_blank', 
-        'noopener,noreferrer'
-      )
+
+      expect(windowSpy).toHaveBeenCalledWith(defaultProps.url, '_blank', 'noopener,noreferrer')
       windowSpy.mockRestore()
     })
 

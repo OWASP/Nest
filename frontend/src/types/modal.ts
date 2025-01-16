@@ -7,5 +7,5 @@ export interface ModalProps {
   isOpen: boolean
   onClose: () => void
   children?: React.ReactNode
-  url : string
+  url: string
 }

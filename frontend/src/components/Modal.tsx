@@ -14,7 +14,7 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   children,
-  url
+  url,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null)
 
@@ -105,7 +105,7 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
         <hr className="inset-0 -mx-6 border-gray-200 dark:border-gray-700" />
         {/* Actions */}
-        <div className="mt-6 flex gap-4 justify-end">
+        <div className="mt-6 flex justify-end gap-4">
           <button
             onClick={onClose}
             className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
