@@ -5,7 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.commands.constants import COMMAND_START
+from apps.slack.common.constants import COMMAND_START
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
 COMMAND = "/gsoc"

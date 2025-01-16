@@ -4,10 +4,14 @@ import logging
 
 from slack_sdk.errors import SlackApiError
 
-from apps.common.constants import NL
-from apps.common.utils import truncate
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import get_header
+from apps.slack.blocks import get_header, markdown
+from apps.slack.common.handlers import (
+    EntityPresentation,
+    chapters_blocks,
+    committees_blocks,
+    projects_blocks,
+)
 from apps.slack.constants import (
     VIEW_CHAPTERS_ACTION,
     VIEW_COMMITTEES_ACTION,
@@ -18,114 +22,37 @@ logger = logging.getLogger(__name__)
 
 
 def handle_home_actions(ack, body, client):
-    """Handle actions triggered for Projects, Committees, and Chapters."""
-    from apps.owasp.api.search.chapter import get_chapters
-    from apps.owasp.api.search.committee import get_committees
-    from apps.owasp.api.search.project import get_projects
-
+    """Handle actions triggered in the home view."""
     ack()
 
     action_id = body["actions"][0]["action_id"]
     user_id = body["user"]["id"]
 
     try:
+        home_presentation = EntityPresentation(
+            name_truncation=80,
+            summary_truncation=200,
+            include_feedback=False,
+            include_timestamps=False,
+            include_metadata=True,
+        )
+
         blocks = []
 
         match action_id:
             case "view_projects_action":
-                details = get_projects(query="", limit=10, page=1)
-                blocks = (
-                    [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": (
-                                    f"*<{project['idx_url']}|{idx}. {project['idx_name']}>*{NL}"
-                                    f"Contributors: {project['idx_contributors_count']} | "
-                                    f"Forks: {project['idx_forks_count']} | "
-                                    f"Stars: {project['idx_stars_count']}{NL}"
-                                    f"{truncate(project['idx_summary'], 300)}"
-                                ),
-                            },
-                        }
-                        for idx, project in enumerate(details["hits"], 1)
-                    ]
-                    if details["hits"]
-                    else [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "No projects found based on your search query.",
-                            },
-                        }
-                    ]
-                )
+                blocks = projects_blocks(search_query="", limit=10, presentation=home_presentation)
 
             case "view_committees_action":
-                details = get_committees(query="", limit=10, page=1)
-                blocks = (
-                    [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": (
-                                    f"*<{committee['idx_url']}|{idx}. {committee['idx_name']}>*\n"
-                                    f"{truncate(committee['idx_summary'], 300)}{NL}"
-                                ),
-                            },
-                        }
-                        for idx, committee in enumerate(details["hits"], 1)
-                    ]
-                    if details["hits"]
-                    else [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "No committees found based on your search query.",
-                            },
-                        }
-                    ]
+                blocks = committees_blocks(
+                    search_query="", limit=10, presentation=home_presentation
                 )
 
             case "view_chapters_action":
-                details = get_chapters(query="", limit=10, page=1)
-                blocks = (
-                    [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": (
-                                    f"*<{chapter['idx_url']}|{idx}. {chapter['idx_name']}>*\n"
-                                    f"{truncate(chapter['idx_summary'], 300)}{NL}"
-                                ),
-                            },
-                        }
-                        for idx, chapter in enumerate(details["hits"], 1)
-                    ]
-                    if details["hits"]
-                    else [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "No chapters found based on your search query.",
-                            },
-                        }
-                    ]
-                )
+                blocks = chapters_blocks(search_query="", limit=10, presentation=home_presentation)
 
             case _:
-                blocks.append(
-                    {
-                        "type": "section",
-                        "text": {"type": "mrkdwn", "text": "Invalid action, please try again."},
-                    }
-                )
+                blocks = [markdown("Invalid action, please try again.")]
 
         new_home_view = {
             "type": "home",
