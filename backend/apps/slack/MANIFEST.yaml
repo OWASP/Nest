@@ -11,43 +11,48 @@ features:
     display_name: NestBot
     always_online: true
   slash_commands:
-    - command: /chapters
-      url: https://nest.owasp.dev/integrations/slack/events/
-      description: chapters
-      usage_hint: --help
-      should_escape: false
-    - command: /committees
-      url: https://nest.owasp.dev/integrations/slack/events/
-      description: committees
-      usage_hint: <name>
-      should_escape: false
-    - command: /contribute
-      url: https://nest.owasp.dev/integrations/slack/events/
-      description: contributor's guide
-      usage_hint: --start
-      should_escape: false
-    - command: /gsoc
-      url: https://nest.owasp.dev/integrations/slack/events/
-      description: get started with GSoC program
-      usage_hint: --start
-      should_escape: false
-    - command: /leaders
-      url: https://nest.owasp.dev/integrations/slack/events/
-      description: chapter and project leaders
-      usage_hint: <name/project>
-      should_escape: false
     - command: /owasp
-      url: https://nest.owasp.dev/integrations/slack/events/
+      url: https://nest.owasp.dev/integrations/slack/commands/
       description: your gateway to OWASP
       usage_hint: --help
       should_escape: false
     - command: /projects
-      url: https://nest.owasp.dev/integrations/slack/events/
+      url: https://nest.owasp.dev/integrations/slack/commands/
       description: project directory
       usage_hint: <search query>
       should_escape: false
+    - command: /leaders
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: chapter and project leaders
+      usage_hint: <name/chapter/project>
+      should_escape: false
+    - command: /committees
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: committees
+      usage_hint: <name>
+      should_escape: false
+    - command: /chapters
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: chapters
+      usage_hint: --help
+      should_escape: false
+    - command: /contribute
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: contributor's guide
+      usage_hint: --help
+      should_escape: false
+    - command: /gsoc
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: get started with GSoC program
+      usage_hint: --start
+      should_escape: false
 oauth_config:
   scopes:
+    user:
+      - channels:read
+      - groups:read
+      - mpim:read
+      - users:read
     bot:
       - channels:read
       - chat:write
@@ -61,24 +66,19 @@ oauth_config:
       - users:read
       - groups:write
       - channels:manage
-    user:
-      - channels:read
-      - groups:read
-      - mpim:read
-      - users:read
 settings:
   event_subscriptions:
     request_url: https://nest.owasp.dev/integrations/slack/events/
+    user_events:
+      - member_joined_channel
+      - team_join
     bot_events:
       - app_home_opened
       - member_joined_channel
       - team_join
-    user_events:
-      - member_joined_channel
-      - team_join
   interactivity:
     is_enabled: true
-    request_url: https://nest.owasp.dev/integrations/slack/events/
+    request_url: https://nest.owasp.dev/integrations/slack/interactivity/
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false
