@@ -65,8 +65,3 @@ class ChapterIndexMixin(GenericEntityMixin):
     def idx_is_active(self):
         """Return URL for indexing."""
         return self.is_active
-
-    @property
-    def idx_is_chapter_archived(self):
-        """Return URL for indexing."""
-        return self.owasp_repository.is_archived

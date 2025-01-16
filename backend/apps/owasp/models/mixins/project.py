@@ -160,9 +160,7 @@ class ProjectIndexMixin(GenericEntityMixin):
     @property
     def idx_updated_at(self):
         """Return updated at for indexing."""
-        if not self.updated_at:
-            return None
-        return self.updated_at.timestamp()
+        return self.updated_at.timestamp() if self.updated_at else ""
 
     @property
     def idx_is_active(self):

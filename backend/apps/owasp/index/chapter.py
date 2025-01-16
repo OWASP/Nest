@@ -29,7 +29,6 @@ class ChapterIndex(AlgoliaIndex):
         "idx_updated_at",
         "idx_url",
         "idx_is_active",
-        "idx_is_chapter_archived",
     )
 
     geo_field = "idx_geo_location"
@@ -44,7 +43,6 @@ class ChapterIndex(AlgoliaIndex):
         "indexLanguages": ["en"],
         "customRanking": [
             "desc(idx_is_active)",
-            "asc(idx_is_chapter_archived)",
             "asc(idx_created_at)",
             "desc(idx_updated_at)",
         ],

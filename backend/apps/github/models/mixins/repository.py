@@ -117,6 +117,6 @@ class RepositoryIndexMixin:
         return self.topics
 
     @property
-    def idx_is_archived(self):
+    def idx_is_active(self):
         """Return URL for indexing."""
-        return self.is_archived
+        return self.is_active

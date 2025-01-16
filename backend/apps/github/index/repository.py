@@ -32,13 +32,13 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
         "idx_subscribers_count",
         "idx_top_contributors",
         "idx_topics",
-        "idx_is_archived",
+        "idx_is_active",
     )
 
     settings = {
         "minProximity": 4,
         "customRanking": [
-            "asc(idx_is_archived)",
+            "desc(idx_is_active)",
             "desc(idx_stars_count)",
             "desc(idx_forks_count)",
             "desc(idx_pushed_at)",
