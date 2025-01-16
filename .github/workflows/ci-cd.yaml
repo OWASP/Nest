@@ -112,6 +112,17 @@ jobs:
         with:
           category: '/language:${{ matrix.language }}'
 
+  spellcheck:
+    name: Run spell check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run cspell
+        run: |
+          make spellcheck
+
   run-backend-tests:
     name: Run backend tests
     needs:

@@ -11,7 +11,7 @@ from apps.github.models.release import Release
 class ReleaseIndex(AlgoliaIndex, IndexBase):
     """Release index."""
 
-    index_name = "releaeses"
+    index_name = "releases"
 
     fields = (
         "idx_author",

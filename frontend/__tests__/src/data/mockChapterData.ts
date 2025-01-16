@@ -14,7 +14,7 @@ export const mockChapterData = {
         {
           avatar_url: 'https://avatars.githubusercontent.com/u/58754211?v=4',
           contributions_count: 286,
-          login: 'isanori-sakanashi-owasp',
+          login: 'Isanori-Sakanashi',
           name: 'Isanori Sakanashi',
         },
       ],

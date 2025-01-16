@@ -35,7 +35,7 @@ def gsoc_handler(event, client, ack):
         channel=conversation["channel"]["id"],
         blocks=[
             markdown(
-                f"Hello <@{user_id}> and welcome to <#{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
+                f"Hello <@{user_id}> and welcome to <{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
                 "Here's how you can start your journey toward contributing to OWASP projects and "
                 "making the most of Google Summer of Code:"
             ),

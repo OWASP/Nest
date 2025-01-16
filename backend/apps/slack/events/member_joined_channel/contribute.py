@@ -41,7 +41,7 @@ def contribute_handler(event, client, ack):
         channel=conversation["channel"]["id"],
         blocks=[
             markdown(
-                f"Hello <@{user_id}> and welcome to <#{OWASP_CONTRIBUTE_CHANNEL_ID}> channel!{NL}"
+                f"Hello <@{user_id}> and welcome to <{OWASP_CONTRIBUTE_CHANNEL_ID}> channel!{NL}"
                 "We're happy to have you here as part of the OWASP community! "
                 "Your eagerness to contribute is what makes our community strong. "
                 f"With *{Project.active_projects_count()} active OWASP projects*, there are "

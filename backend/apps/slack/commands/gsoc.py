@@ -36,13 +36,13 @@ def handler(ack, command, client):
         year = int(command_text)
         if year in SUPPORTED_YEARS:
             gsoc_projects = Project.get_gsoc_projects(year)
-            gsoc_projects_markwown = f"{NL}".join(
+            gsoc_projects_markdown = f"{NL}".join(
                 f"  • <{gp.nest_url}|{gp.owasp_name}>"
                 for gp in sorted(gsoc_projects, key=lambda p: p.owasp_name)
             )
             additional_info = []
             blocks = [
-                markdown(f"*GSoC {year} projects:*{2*NL}{gsoc_projects_markwown}"),
+                markdown(f"*GSoC {year} projects:*{2*NL}{gsoc_projects_markdown}"),
             ]
             if year in SUPPORTED_ANNOUNCEMENT_YEARS:
                 additional_info.append(
