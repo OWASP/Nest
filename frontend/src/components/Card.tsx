@@ -58,6 +58,14 @@ const Card = ({
     setShowAll(!toggleLanguagesAndTopics)
   }
 
+  const handleHeadingColor = (e, isMouseEnter) => {
+    if (isMouseEnter) {
+      e.currentTarget.style.color = level?.color || ''
+    } else {
+      e.currentTarget.style.color = ''
+    }
+  }
+
   return (
     <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 transition-colors duration-300 ease-linear dark:bg-[#212529] md:max-w-6xl">
       <div className="flex w-full flex-col items-start gap-4 pt-2 sm:flex-row sm:items-center sm:gap-6 md:pt-0">
@@ -75,7 +83,14 @@ const Card = ({
           )}
           {/* Project title and link */}
           <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
-            <h1 className="max-w-full break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl">
+            <h1
+              className="max-w-full break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl"
+              style={{
+                transition: 'color 0.3s ease',
+              }}
+              onMouseEnter={(e) => handleHeadingColor(e, true)}
+              onMouseLeave={(e) => handleHeadingColor(e, false)}
+            >
               {title}
             </h1>
           </a>
