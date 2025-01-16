@@ -4,7 +4,7 @@ import { tooltipStyle } from 'utils/constants';
 
 const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }) => {
   // Fallback to username if name is unavailable
-  const displayName = contributor.name || contributor.login || 'Anonymous';
+  const displayName = contributor.name || contributor.login
 
   return (
     <a
