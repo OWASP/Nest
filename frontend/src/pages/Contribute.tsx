@@ -56,6 +56,7 @@ const ContributePage = () => {
           title={issue.idx_title}
           summary={issue.idx_summary}
           hint={issue.idx_hint}
+          url={issue.idx_url}
         ></Modal>
       </React.Fragment>
     )
