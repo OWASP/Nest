@@ -37,7 +37,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             f"contribution{pluralize(self.contributions_count)} to {self.repository}"
         )
 
-    def from_github(self, gh_label):
+    def from_github(self, gh_contributions):
         """Update instance based on GitHub contributor data."""
         field_mapping = {
             "contributions_count": "contributions",
@@ -45,7 +45,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         # Direct fields.
         for model_field, gh_field in field_mapping.items():
-            value = getattr(gh_label, gh_field)
+            value = getattr(gh_contributions, gh_field)
             if value is not None:
                 setattr(self, model_field, value)
 
