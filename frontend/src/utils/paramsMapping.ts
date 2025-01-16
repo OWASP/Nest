@@ -30,6 +30,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_top_contributors',
           'idx_updated_at',
           'idx_url',
+          '_geoloc',
         ],
         aroundLatLngViaIP: true,
         minProximity: 4,

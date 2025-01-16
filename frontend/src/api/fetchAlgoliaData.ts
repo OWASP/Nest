@@ -10,7 +10,8 @@ export const fetchAlgoliaData = async <T>(
   indexName: string,
   query = '',
   currentPage = 0,
-  filterKey?: string
+  filterKey?: string,
+  hitsPerPage = 25
 ): Promise<AlgoliaResponseType<T>> => {
   if (!client) {
     throw new AppError(500, 'Search client not initialized')
@@ -19,7 +20,7 @@ export const fetchAlgoliaData = async <T>(
     const params = getParamsForIndexName(indexName)
     const request: AlgoliaRequestType = {
       attributesToHighlight: [],
-      hitsPerPage: 25,
+      hitsPerPage: hitsPerPage,
       indexName: `${ENVIRONMENT}_${indexName}`,
       page: currentPage - 1,
       query: query,

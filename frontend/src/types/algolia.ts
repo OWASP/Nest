@@ -1,6 +1,6 @@
 export interface AlgoliaResponseType<T> {
   hits: T[]
-  totalPages: number
+  totalPages?: number
 }
 
 export interface AlgoliaRequestType {
