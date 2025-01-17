@@ -1,7 +1,6 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-from django.conf import settings
 from django.utils.text import Truncator
 
 from apps.slack.common.handlers import (
@@ -12,12 +11,17 @@ from apps.slack.common.handlers import (
 )
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
+DEFAULT_NAME_TRUNCATION = 80
+DEFAULT_SUMMARY_TRUNCATION = 300
+CUSTOM_NAME_TRUNCATION = 50
+CUSTOM_SUMMARY_TRUNCATION = 200
+
 
 class TestEntityPresentation:
     def test_default_values(self):
         presentation = EntityPresentation()
-        assert presentation.name_truncation == 80
-        assert presentation.summary_truncation == 300
+        assert presentation.name_truncation == DEFAULT_NAME_TRUNCATION
+        assert presentation.summary_truncation == DEFAULT_SUMMARY_TRUNCATION
         assert presentation.include_feedback is True
         assert presentation.include_timestamps is True
         assert presentation.include_metadata is True
@@ -30,15 +34,15 @@ class TestEntityPresentation:
             include_timestamps=False,
             include_metadata=False,
         )
-        assert presentation.name_truncation == 50
-        assert presentation.summary_truncation == 200
+        assert presentation.name_truncation == CUSTOM_NAME_TRUNCATION
+        assert presentation.summary_truncation == CUSTOM_SUMMARY_TRUNCATION
         assert presentation.include_feedback is False
         assert presentation.include_timestamps is False
         assert presentation.include_metadata is False
 
 
 class TestChaptersBlocks:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_chapter(self):
         return {
             "idx_name": "Test Chapter",
@@ -74,10 +78,10 @@ class TestChaptersBlocks:
         mock_active_count.return_value = 42
 
         blocks = chapters_blocks(search_query=search_query)
-        
+
         assert len(blocks) > 0
         assert any(expected_text in str(block) for block in blocks)
-        
+
         if has_results:
             assert any(mock_chapter["idx_name"] in str(block) for block in blocks)
             assert any(mock_chapter["idx_summary"] in str(block) for block in blocks)
@@ -89,7 +93,7 @@ class TestChaptersBlocks:
     ):
         mock_get_chapters.return_value = {"hits": [mock_chapter]}
         mock_active_count.return_value = 42
-        
+
         presentation = EntityPresentation(
             name_truncation=10,
             summary_truncation=20,
@@ -97,19 +101,19 @@ class TestChaptersBlocks:
             include_timestamps=False,
             include_metadata=False,
         )
-        
+
         blocks = chapters_blocks(presentation=presentation)
-        
+
         truncated_name = Truncator(mock_chapter["idx_name"]).chars(10, truncate="...")
         truncated_summary = Truncator(mock_chapter["idx_summary"]).chars(20, truncate="...")
-        
+
         assert any(truncated_name in str(block) for block in blocks)
         assert any(truncated_summary in str(block) for block in blocks)
         assert not any(FEEDBACK_CHANNEL_MESSAGE in str(block) for block in blocks)
 
 
 class TestProjectsBlocks:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_project(self):
         return {
             "idx_name": "Test Project",
@@ -147,17 +151,19 @@ class TestProjectsBlocks:
         mock_active_count.return_value = 42
 
         blocks = projects_blocks(search_query=search_query)
-        
+
         assert len(blocks) > 0
         assert any(expected_text in str(block) for block in blocks)
-        
+
         if has_results:
             assert any(mock_project["idx_name"] in str(block) for block in blocks)
-            assert any(str(mock_project["idx_contributors_count"]) in str(block) for block in blocks)
+            assert any(
+                str(mock_project["idx_contributors_count"]) in str(block) for block in blocks
+            )
 
 
 class TestCommitteesBlocks:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_committee(self):
         return {
             "idx_name": "Test Committee",
@@ -190,10 +196,10 @@ class TestCommitteesBlocks:
         mock_active_count.return_value = 42
 
         blocks = committees_blocks(search_query=search_query)
-        
+
         assert len(blocks) > 0
         assert any(expected_text in str(block) for block in blocks)
-        
+
         if has_results:
             assert any(mock_committee["idx_name"] in str(block) for block in blocks)
             assert any(mock_committee["idx_summary"] in str(block) for block in blocks)
@@ -205,7 +211,7 @@ class TestCommitteesBlocks:
     ):
         mock_get_committees.return_value = {"hits": [mock_committee]}
         mock_active_count.return_value = 42
-        
+
         presentation = EntityPresentation(
             name_truncation=10,
             summary_truncation=20,
@@ -213,12 +219,12 @@ class TestCommitteesBlocks:
             include_timestamps=False,
             include_metadata=False,
         )
-        
+
         blocks = committees_blocks(presentation=presentation)
-        
+
         truncated_name = Truncator(mock_committee["idx_name"]).chars(10, truncate="...")
         truncated_summary = Truncator(mock_committee["idx_summary"]).chars(20, truncate="...")
-        
+
         assert any(truncated_name in str(block) for block in blocks)
         assert any(truncated_summary in str(block) for block in blocks)
         assert not any(FEEDBACK_CHANNEL_MESSAGE in str(block) for block in blocks)
