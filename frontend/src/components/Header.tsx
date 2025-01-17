@@ -12,18 +12,6 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setMobileMenuOpen(false)
-      }
-    }
-    window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
