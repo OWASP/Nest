@@ -69,15 +69,15 @@ export const Icons = {
     icon: 'fa-solid fa-arrows-rotate',
   },
   idx_forks_count: {
-    label: 'GitHub forks count',
+    label: 'Total GitHub forks count',
     icon: 'fa-solid fa-code-fork',
   },
   idx_stars_count: {
-    label: 'GitHub stars count',
+    label: 'Total GitHub stars count',
     icon: 'fa-regular fa-star',
   },
   idx_contributors_count: {
-    label: 'GitHub contributors count',
+    label: 'Total GitHub contributors count',
     icon: 'fa-regular fa-user',
   },
   idx_created_at: {

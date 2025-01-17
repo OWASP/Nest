@@ -22,7 +22,7 @@ permissions:
 
 concurrency:
   cancel-in-progress: true
-  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
 
 env:
   DOCKERHUB_USERNAME: arkid15r
@@ -111,6 +111,17 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:${{ matrix.language }}'
+
+  spellcheck:
+    name: Run spell check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run cspell
+        run: |
+          make spellcheck
 
   run-backend-tests:
     name: Run backend tests
@@ -208,7 +219,7 @@ jobs:
           echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.staging
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
-          echo "VITE_RELEASE_VERSION=${GITHUB_SHA:0:7}" >> frontend/.env.staging
+          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env.staging
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
 
       - name: Build frontend image
@@ -261,7 +272,7 @@ jobs:
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
-          echo "DJANGO_RELEASE_VERSION=${GITHUB_SHA:0:7}" >> .env.backend
+          echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
