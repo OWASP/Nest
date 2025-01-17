@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom'
 
 import { ModalProps } from 'types/modal'
 import Markdown from 'components/MarkdownWrapper'
+import ActionButton from './ActionButton'
 
 export const Modal: React.FC<ModalProps> = ({
   title,
@@ -13,8 +14,8 @@ export const Modal: React.FC<ModalProps> = ({
   hint,
   isOpen,
   onClose,
+  button,
   children,
-  url,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null)
 
@@ -35,10 +36,6 @@ export const Modal: React.FC<ModalProps> = ({
       document.body.style.paddingRight = '' // Cleanup on unmount
     }
   }, [isOpen])
-
-  const handleIssueClick = () => {
-    window.open(url, '_blank', 'noopener,noreferrer') //opens github issue page in new tab
-  }
 
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -106,17 +103,15 @@ export const Modal: React.FC<ModalProps> = ({
         <hr className="inset-0 -mx-6 border-gray-200 dark:border-gray-700" />
         {/* Actions */}
         <div className="mt-6 flex justify-end gap-4">
+          <ActionButton url={button.url} onClick={button.onclick}>
+            {button.icon}
+            {button.label}
+          </ActionButton>
           <button
             onClick={onClose}
             className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             Close
-          </button>
-          <button
-            onClick={handleIssueClick}
-            className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
-          >
-            View issue
           </button>
         </div>
       </div>

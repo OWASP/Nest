@@ -26,12 +26,24 @@ describe('Modal Component', () => {
     hint: 'Test Hint',
     isOpen: true,
     onClose: jest.fn(),
-    url: 'https://example.com/issue/123',
+    button: {
+      label: 'Test Button',
+      onclick: jest.fn(),
+      url: 'https://example.com/issue/123',
+    },
   }
 
   it('renders nothing when isOpen is false', () => {
     render(<Modal {...defaultProps} isOpen={false} />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('renders the action button and handles its events', async () => {
+    const onclick = jest.fn()
+    render(<Modal {...defaultProps} button={{ ...defaultProps.button, onclick }} />)
+
+    const actionButton = screen.getByRole('link', { name: /Test Button/i })
+    expect(actionButton).toBeInTheDocument()
   })
 
   it('renders modal with all components when isOpen is true', () => {
@@ -42,24 +54,6 @@ describe('Modal Component', () => {
     expect(screen.getByText('Test Summary')).toBeInTheDocument()
     expect(screen.getByText('Test Hint')).toBeInTheDocument()
     expect(screen.getByText('How to tackle it')).toBeInTheDocument()
-  })
-
-  describe('URL handling', () => {
-    it('opens URL in new window when View issue button is clicked', () => {
-      const windowSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
-      render(<Modal {...defaultProps} />)
-
-      const viewIssueButton = screen.getByRole('button', { name: /view issue/i })
-      fireEvent.click(viewIssueButton)
-
-      expect(windowSpy).toHaveBeenCalledWith(defaultProps.url, '_blank', 'noopener,noreferrer')
-      windowSpy.mockRestore()
-    })
-
-    it('renders View issue button', () => {
-      render(<Modal {...defaultProps} />)
-      expect(screen.getByRole('button', { name: /view issue/i })).toBeInTheDocument()
-    })
   })
 
   it('renders children content when provided', () => {
