@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { headerLinks } from 'utils/constants'
+import { desktopViewWidth } from 'utils/utility'
 
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
@@ -14,7 +15,7 @@ export default function Header() {
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= desktopViewWidth) {
         setMobileMenuOpen(false)
       }
     }

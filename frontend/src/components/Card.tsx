@@ -4,7 +4,7 @@ import { Tooltip } from 'react-tooltip'
 import { CardProps } from 'types/card'
 import { tooltipStyle } from 'utils/constants'
 import { Icons } from 'utils/data'
-import { cn } from 'utils/utility'
+import { cn, desktopViewWidth } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
@@ -13,7 +13,7 @@ import Markdown from 'components/MarkdownWrapper'
 import TopicBadge from 'components/TopicBadge'
 
 // Initial check for mobile screen size
-const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < 768
+const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < desktopViewWidth
 
 const Card = ({
   title,
@@ -37,7 +37,7 @@ const Card = ({
   // Resize listener to adjust display based on screen width
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768
+      const mobile = window.innerWidth < desktopViewWidth
       setIsMobile(mobile)
     }
     window.addEventListener('resize', checkMobile)
