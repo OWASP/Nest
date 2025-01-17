@@ -25,4 +25,5 @@ export interface CardProps {
   languages?: string[]
   social?: { title: string; icon: string; url: string }[]
   tooltipLabel?: string
+  isActive?: boolean
 }

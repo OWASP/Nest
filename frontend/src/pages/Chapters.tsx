@@ -80,6 +80,7 @@ const ChaptersPage = () => {
         topContributors={chapter.idx_top_contributors}
         button={SubmitButton}
         social={formattedUrls}
+        isActive={chapter.idx_is_active}
       />
     )
   }

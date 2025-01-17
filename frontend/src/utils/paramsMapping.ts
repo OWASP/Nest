@@ -22,6 +22,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
       return {
         attributesToRetrieve: [
           'idx_created_at',
+          'idx_is_active',
           'idx_key',
           'idx_leaders',
           'idx_name',
@@ -53,6 +54,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_type',
           'idx_updated_at',
           'idx_url',
+          'idx_is_active',
         ],
         minProximity: 4,
         typoTolerance: 'min',

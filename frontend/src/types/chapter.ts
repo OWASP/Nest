@@ -1,5 +1,6 @@
 export interface ChapterType {
   idx_created_at: number
+  idx_is_active: boolean
   idx_key: string
   idx_leaders: string[]
   idx_name: string

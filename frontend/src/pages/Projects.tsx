@@ -52,6 +52,7 @@ const ProjectsPage = () => {
         topContributors={project.idx_top_contributors}
         topics={project.idx_topics}
         button={SubmitButton}
+        isActive={project.idx_is_active}
       />
     )
   }

@@ -30,6 +30,7 @@ const Card = ({
   languages = [],
   social,
   tooltipLabel,
+  isActive,
 }: CardProps) => {
   const [toggleLanguagesAndTopics, setShowAll] = useState(false)
   const [isMobile, setIsMobile] = useState(isMobileInitial)
@@ -79,6 +80,16 @@ const Card = ({
               {title}
             </h1>
           </a>
+          {/* Display active or inactive status */}
+          {typeof isActive === 'boolean' && (
+            <span
+              className={`ml-2 rounded px-2 py-1 text-sm ${
+                isActive ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
+              }`}
+            >
+              {isActive ? 'Active' : 'Inactive'}
+            </span>
+          )}
         </div>
         {/* Icons associated with the project */}
         <div className="flex min-w-[30%] flex-grow flex-row items-center justify-end overflow-auto">

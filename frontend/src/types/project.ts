@@ -7,6 +7,7 @@ export type project = {
   }[]
   idx_contributors_count: number
   idx_forks_count: number
+  idx_is_active: boolean
   idx_leaders: string[]
   idx_level: string
   idx_name: string
