@@ -281,16 +281,29 @@ describe('Contribute Component', () => {
     fireEvent.click(readMoreButtons[0])
 
     // Verify first modal is open
-    expect(screen.getByText('Hint 1')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Hint 1')).toBeInTheDocument()
+    })
+
+    //verify first issue button
+    await waitFor(() => {
+      const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
+      expect(viewIssueButton).toBeInTheDocument()
+      fireEvent.click(viewIssueButton)
+    })
 
     // Click close button
-    const closeButton = screen.getByText('Close')
-    fireEvent.click(closeButton)
+    await waitFor(() => {
+      const closeButton = screen.getByText('Close')
+      fireEvent.click(closeButton)
+    })
 
     // Click second card's Read More button
     fireEvent.click(readMoreButtons[1])
 
     // Verify second modal is open
-    expect(screen.getByText('Hint 2')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Hint 2')).toBeInTheDocument()
+    })
   })
 })
