@@ -12,7 +12,7 @@ COMMAND = "/chapters"
 
 
 def chapters_handler(ack, command, client):
-    """Refactored Slack /chapters command handler."""
+    """Slack /chapters command handler."""
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
         return
@@ -46,5 +46,6 @@ def chapters_handler(ack, command, client):
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
+handler = chapters_handler
 if SlackConfig.app:
     handler = SlackConfig.app.command(COMMAND)(chapters_handler)

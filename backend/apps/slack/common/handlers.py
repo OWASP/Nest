@@ -10,6 +10,7 @@ from django.utils.text import Truncator
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url, natural_date
 from apps.slack.blocks import markdown
+from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
@@ -28,7 +29,7 @@ class EntityPresentation:
 def chapters_blocks(
     search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
-    """Chapter block for both commands and app home."""
+    """Chapters block for both commands and app home."""
     from apps.owasp.api.search.chapter import get_chapters
     from apps.owasp.models.chapter import Chapter
 
@@ -74,10 +75,10 @@ def chapters_blocks(
         )
 
         name = Truncator(escape(chapter["idx_name"])).chars(
-            presentation.name_truncation, truncate="..."
+            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
         summary = Truncator(chapter["idx_summary"]).chars(
-            presentation.summary_truncation, truncate="..."
+            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
         blocks.append(
@@ -144,10 +145,10 @@ def projects_blocks(
 
     for idx, project in enumerate(projects):
         name = Truncator(escape(project["idx_name"])).chars(
-            presentation.name_truncation, truncate="..."
+            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
         summary = Truncator(project["idx_summary"]).chars(
-            presentation.summary_truncation, truncate="..."
+            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
         metadata = []
@@ -229,10 +230,10 @@ def committees_blocks(
 
     for idx, committee in enumerate(committees):
         name = Truncator(escape(committee["idx_name"])).chars(
-            presentation.name_truncation, truncate="..."
+            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
         summary = Truncator(committee["idx_summary"]).chars(
-            presentation.summary_truncation, truncate="..."
+            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
         leaders = committee.get("idx_leaders", [])

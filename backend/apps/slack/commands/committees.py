@@ -9,7 +9,7 @@ COMMAND = "/committees"
 
 
 def committees_handler(ack, command, client):
-    """Refactored Slack /committees command handler."""
+    """Slack /committees command handler."""
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
         return
@@ -31,5 +31,6 @@ def committees_handler(ack, command, client):
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
+handler = committees_handler
 if SlackConfig.app:
     handler = SlackConfig.app.command(COMMAND)(committees_handler)

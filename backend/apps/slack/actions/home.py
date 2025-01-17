@@ -41,15 +41,13 @@ def handle_home_actions(ack, body, client):
 
         match action_id:
             case "view_projects_action":
-                blocks = projects_blocks(search_query="", limit=10, presentation=home_presentation)
+                blocks = projects_blocks(limit=10, presentation=home_presentation)
 
             case "view_committees_action":
-                blocks = committees_blocks(
-                    search_query="", limit=10, presentation=home_presentation
-                )
+                blocks = committees_blocks(limit=10, presentation=home_presentation)
 
             case "view_chapters_action":
-                blocks = chapters_blocks(search_query="", limit=10, presentation=home_presentation)
+                blocks = chapters_blocks(limit=10, presentation=home_presentation)
 
             case _:
                 blocks = [markdown("Invalid action, please try again.")]

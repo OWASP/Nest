@@ -9,7 +9,7 @@ COMMAND = "/projects"
 
 
 def projects_handler(ack, command, client):
-    """Refactored Slack /projects command handler."""
+    """Slack /projects command handler."""
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
         return
@@ -31,5 +31,6 @@ def projects_handler(ack, command, client):
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
+handler = projects_handler
 if SlackConfig.app:
     handler = SlackConfig.app.command(COMMAND)(projects_handler)
