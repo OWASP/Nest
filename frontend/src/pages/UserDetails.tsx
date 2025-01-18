@@ -13,7 +13,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
 import logger from 'utils/logger'
-import { IndexedObject, removeIdxPrefix } from 'utils/utility'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -29,8 +28,7 @@ const UserDetailsPage: React.FC = () => {
         if (hits.length === 0) {
           setUser(null)
         } else {
-          const userData = removeIdxPrefix(hits[0] as IndexedObject)
-          setUser(userData as unknown as UserDetailsProps)
+          setUser(hits[0] as unknown as UserDetailsProps)
         }
       } catch (error) {
         logger.error(error)
@@ -76,7 +74,7 @@ const UserDetailsPage: React.FC = () => {
                     />
                   </div>
                   <div className="mt-6 sm:mt-0 sm:pb-4">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-nowrap text-3xl font-bold text-gray-900 dark:text-white">
                       {user.name}
                     </h1>
                     <a
@@ -93,7 +91,7 @@ const UserDetailsPage: React.FC = () => {
                   href={user.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group mt-4 inline-flex items-center space-x-2 rounded-full bg-gray-200 px-4 py-2 align-top text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-600/60 dark:text-white dark:hover:bg-gray-600 dark:hover:text-gray-200"
+                  className="group mt-4 inline-flex flex-nowrap items-center space-x-2 text-nowrap rounded-full bg-gray-200 px-4 py-2 align-top text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-600/60 dark:text-white dark:hover:bg-gray-600 dark:hover:text-gray-200"
                 >
                   <FontAwesomeIcon icon={faGithub} className="text-sm" />
                   <span>Visit GitHub Profile</span>

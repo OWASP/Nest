@@ -5,16 +5,16 @@ export interface IssuesDataType {
 }
 
 export interface IssueType {
-  idx_comments_count: number
-  idx_created_at: number
-  idx_hint: string
-  idx_labels: string[]
-  idx_project_name: string
-  idx_project_url: string
-  idx_repository_languages: string[]
-  idx_summary: string
-  idx_title: string
-  idx_updated_at: number
-  idx_url: string
+  comments_count: number
+  created_at: number
+  hint: string
+  labels: string[]
+  project_name: string
+  project_url: string
+  repository_languages: string[]
+  summary: string
+  title: string
+  updated_at: number
+  url: string
   objectID: string
 }

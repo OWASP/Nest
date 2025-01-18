@@ -20,6 +20,7 @@ class Base(Configuration):
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
+    SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
@@ -48,6 +49,24 @@ class Base(Configuration):
     )
 
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+            },
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+        },
+    }
 
     MIDDLEWARE = [
         "corsheaders.middleware.CorsMiddleware",
