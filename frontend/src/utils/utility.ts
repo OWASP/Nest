@@ -58,4 +58,3 @@ export const removeIdxPrefix = (obj: IndexedObject): IndexedObject => {
   }
   return newObj
 }
-export const desktopViewWidth = 768
