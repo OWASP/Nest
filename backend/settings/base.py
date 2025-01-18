@@ -20,6 +20,7 @@ class Base(Configuration):
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
+    SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
