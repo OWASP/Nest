@@ -290,7 +290,7 @@ git checkout -b feature/my-feature-name
 - Once approved, your PR will be merged into the main branch.
 
 
-### Troubleshooting
+### Troubleshooting Section 
 
 - This section provides solutions to common problems contributors might face.
 
