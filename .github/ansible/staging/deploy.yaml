@@ -61,7 +61,7 @@
 
     - name: Update frontend makefile for the staging environment
       shell:
-        cmd: "sed -i 's/\\bnest-backend\\b/staging-nest-frontend/' ~/frontend/Makefile"
+        cmd: "sed -i 's/\\bnest-frontend\\b/staging-nest-frontend/' ~/frontend/Makefile"
 
     - name: Copy main makefile
       ansible.builtin.copy:
