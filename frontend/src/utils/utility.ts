@@ -20,9 +20,9 @@ type projectType = project | IssueType | CommitteeType
 export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
   const filteredIcons = params.reduce((acc: IconType, key) => {
     if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
-      if (key === 'idx_updated_at') {
+      if (key === 'updated_at') {
         acc[key] = dayjs.unix(project[key] as number).fromNow()
-      } else if (key === 'idx_created_at') {
+      } else if (key === 'created_at') {
         acc[key] = dayjs.unix(project[key as keyof projectType] as number).fromNow()
       } else {
         acc[key] = project[key as keyof typeof project] as number
@@ -46,15 +46,4 @@ export const handleSocialUrls = (related_urls: string[]) => {
 
 export type IndexedObject = {
   [key: string]: unknown
-}
-
-export const removeIdxPrefix = (obj: IndexedObject): IndexedObject => {
-  const newObj: IndexedObject = {}
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const newKey = key.startsWith('idx_') ? key.slice(4) : key
-      newObj[newKey] = obj[key]
-    }
-  }
-  return newObj
 }

@@ -22,16 +22,11 @@ const ProjectsPage = () => {
   })
   const navigate = useNavigate()
   const renderProjectCard = (project: project, index: number) => {
-    const params: string[] = [
-      'idx_updated_at',
-      'idx_forks_count',
-      'idx_stars_count',
-      'idx_contributors_count',
-    ]
+    const params: string[] = ['updated_at', 'forks_count', 'stars_count', 'contributors_count']
     const filteredIcons = getFilteredIcons(project, params)
 
     const handleButtonClick = () => {
-      navigate(`/projects/${project.idx_key}`)
+      navigate(`/projects/${project.key}`)
     }
 
     const SubmitButton = {
@@ -43,12 +38,12 @@ const ProjectsPage = () => {
     return (
       <Card
         key={project.objectID || `project-${index}`}
-        title={project.idx_name}
-        url={`projects/${project.idx_key}`}
-        summary={project.idx_summary}
-        level={level[`${project.idx_level as keyof typeof level}`]}
+        title={project.name}
+        url={`projects/${project.key}`}
+        summary={project.summary}
+        level={level[`${project.level as keyof typeof level}`]}
         icons={filteredIcons}
-        topContributors={project.idx_top_contributors}
+        topContributors={project.top_contributors}
         button={SubmitButton}
       />
     )
