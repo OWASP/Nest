@@ -72,14 +72,15 @@ const ProjectDetailsPage = () => {
         <h1 className="mb-6 mt-4 text-4xl font-bold">{project.idx_name}</h1>
         <p className="mb-6 text-xl">{project.idx_description}</p>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 md:col-span-2">
             <h2 className="mb-4 text-2xl font-semibold">Project Details</h2>
             <p>
-              <strong>Type:</strong> {project.idx_type}
+              <strong>Type:</strong> {project.idx_type[0].toUpperCase() + project.idx_type.slice(1)}
             </p>
             <p>
-              <strong>Level:</strong> {project.idx_level}
+              <strong>Level:</strong>{' '}
+              {project.idx_level[0].toUpperCase() + project.idx_level.slice(1)}
             </p>
             <p>
               <strong>Organization:</strong> {project.idx_organizations}
