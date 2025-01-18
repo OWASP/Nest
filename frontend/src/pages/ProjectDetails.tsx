@@ -69,34 +69,33 @@ const ProjectDetailsPage = () => {
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 mt-4 text-4xl font-bold">{project.idx_name}</h1>
-        <p className="mb-6 text-xl">{project.idx_description}</p>
+        <h1 className="mb-6 mt-4 text-4xl font-bold">{project.name}</h1>
+        <p className="mb-6 text-xl">{project.description}</p>
 
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 md:col-span-2">
             <h2 className="mb-4 text-2xl font-semibold">Project Details</h2>
             <p>
-              <strong>Type:</strong> {project.idx_type[0].toUpperCase() + project.idx_type.slice(1)}
+              <strong>Type:</strong> {project.type[0].toUpperCase() + project.type.slice(1)}
             </p>
             <p>
-              <strong>Level:</strong>{' '}
-              {project.idx_level[0].toUpperCase() + project.idx_level.slice(1)}
+              <strong>Level:</strong> {project.level[0].toUpperCase() + project.level.slice(1)}
             </p>
             <p>
-              <strong>Organization:</strong> {project.idx_organizations}
+              <strong>Organization:</strong> {project.organizations}
             </p>
             <div>
               <p>
-                <strong>Project Leaders:</strong> {project.idx_leaders.join(', ')}
+                <strong>Project Leaders:</strong> {project.leaders.join(', ')}
               </p>
             </div>
             <p>
-              <strong>Last Updated:</strong> {formatDate(project.idx_updated_at)}
+              <strong>Last Updated:</strong> {formatDate(project.updated_at)}
             </p>
             <p>
               <strong>URL:</strong>{' '}
-              <a href={project.idx_url} className="hover:underline dark:text-sky-600">
-                {project.idx_url}
+              <a href={project.url} className="hover:underline dark:text-sky-600">
+                {project.url}
               </a>
             </p>
           </div>
@@ -105,37 +104,37 @@ const ProjectDetailsPage = () => {
             <h2 className="mb-4 text-2xl font-semibold">Statistics</h2>
             <div className="mb-2 flex items-center">
               <FontAwesomeIcon icon={faUsers} className="mr-2" />{' '}
-              <span>{project.idx_contributors_count} Contributors</span>
+              <span>{project.contributors_count} Contributors</span>
             </div>
             <div className="mb-2 flex items-center">
               <FontAwesomeIcon icon={faCodeFork} className="mr-2" />{' '}
-              <span>{project.idx_forks_count} Forks</span>
+              <span>{project.forks_count} Forks</span>
             </div>
             <div className="mb-2 flex items-center">
               <FontAwesomeIcon icon={faStar} className="mr-2" />{' '}
-              <span>{project.idx_stars_count} Stars</span>
+              <span>{project.stars_count} Stars</span>
             </div>
             <div className="mb-2 flex items-center">
               <FontAwesomeIcon icon={faBook} className="mr-2" />{' '}
-              <span>{project.idx_issues_count} Issues</span>
+              <span>{project.issues_count} Issues</span>
             </div>
             <div className="flex items-center">
               <FontAwesomeIcon icon={faCode} className="mr-2" />{' '}
-              <span>{project.idx_repositories_count} Repositories</span>
+              <span>{project.repositories_count} Repositories</span>
             </div>
           </div>
         </div>
 
         <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
-          <p>{project.idx_summary}</p>
+          <p>{project.summary}</p>
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 text-2xl font-semibold">Languages</h2>
             <div className="flex flex-wrap gap-2">
-              {(showAllLanguages ? project.idx_languages : project.idx_languages.slice(0, 10)).map(
+              {(showAllLanguages ? project.languages : project.languages.slice(0, 10)).map(
                 (lang, index) => (
                   <span
                     key={index}
@@ -146,7 +145,7 @@ const ProjectDetailsPage = () => {
                 )
               )}
             </div>
-            {project.idx_languages.length > 10 && (
+            {project.languages.length > 10 && (
               <button
                 onClick={toggleLanguages}
                 className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
@@ -167,7 +166,7 @@ const ProjectDetailsPage = () => {
           <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 text-2xl font-semibold">Topics</h2>
             <div className="flex flex-wrap gap-2">
-              {(showAllTopics ? project.idx_topics : project.idx_topics.slice(0, 10)).map(
+              {(showAllTopics ? project.topics : project.topics.slice(0, 10)).map(
                 (topic, index) => (
                   <span
                     key={index}
@@ -178,7 +177,7 @@ const ProjectDetailsPage = () => {
                 )
               )}
             </div>
-            {project.idx_topics.length > 10 && (
+            {project.topics.length > 10 && (
               <button
                 onClick={toggleTopics}
                 className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
@@ -201,8 +200,8 @@ const ProjectDetailsPage = () => {
           <h2 className="mb-4 text-2xl font-semibold">Top Contributors</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {(showAllContributors
-              ? project.idx_top_contributors
-              : project.idx_top_contributors.slice(0, 5)
+              ? project.top_contributors
+              : project.top_contributors.slice(0, 5)
             ).map((contributor, index) => (
               <div key={index} className="flex items-center">
                 <img
@@ -219,7 +218,7 @@ const ProjectDetailsPage = () => {
               </div>
             ))}
           </div>
-          {project.idx_top_contributors.length > 5 && (
+          {project.top_contributors.length > 5 && (
             <button
               onClick={toggleContributors}
               className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
@@ -239,9 +238,9 @@ const ProjectDetailsPage = () => {
 
         <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-semibold">Recent Issues</h2>
-          {project.idx_issues && project.idx_issues.length > 0 ? (
+          {project.issues && project.issues.length > 0 ? (
             <div className="h-64 overflow-y-auto pr-2">
-              {project.idx_issues.map((issue, index) => (
+              {project.issues.map((issue, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="font-semibold">{issue.title}</h3>
                   <div className="mt-2 flex items-center">
@@ -268,9 +267,9 @@ const ProjectDetailsPage = () => {
 
         <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-semibold">Recent Releases</h2>
-          {project.idx_releases && project.idx_releases.length > 0 ? (
+          {project.releases && project.releases.length > 0 ? (
             <div className="h-64 overflow-y-auto pr-2">
-              {project.idx_releases.map((release, index) => (
+              {project.releases.map((release, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="font-semibold">{release.name}</h3>
                   <div className="mt-2 flex items-center">
