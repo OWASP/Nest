@@ -16,7 +16,7 @@ SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))  # 20
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
 
-def handler(ack, command, client):
+def gsoc_handler(ack, command, client):
     """Slack /gsoc command handler."""
     from apps.owasp.models.project import Project
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
@@ -81,4 +81,4 @@ def handler(ack, command, client):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(handler)
+    gsoc_handler = SlackConfig.app.command(COMMAND)(gsoc_handler)

@@ -3,7 +3,7 @@
 from django.conf import settings
 
 from apps.slack.apps import SlackConfig
-from apps.slack.common.handlers.committees import committees_blocks
+from apps.slack.common.handlers.committees import get_blocks
 from apps.slack.common.presentation import EntityPresentation
 
 COMMAND = "/committees"
@@ -16,7 +16,7 @@ def committees_handler(ack, command, client):
         return
 
     search_query = command["text"].strip()
-    blocks = committees_blocks(
+    blocks = get_blocks(
         search_query=search_query,
         limit=10,
         presentation=EntityPresentation(
@@ -33,4 +33,4 @@ def committees_handler(ack, command, client):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(committees_handler)
+    committees_handler = SlackConfig.app.command(COMMAND)(committees_handler)

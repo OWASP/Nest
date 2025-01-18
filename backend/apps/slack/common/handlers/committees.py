@@ -14,17 +14,22 @@ from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 
-def committees_blocks(
+def get_blocks(
     search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
-    """Committee block for both commands and app home."""
+    """Get committees blocks."""
     from apps.owasp.api.search.committee import get_committees
     from apps.owasp.models.committee import Committee
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
 
-    attributes = ["idx_leaders", "idx_name", "idx_summary", "idx_url"]
+    attributes = [
+        "idx_leaders",
+        "idx_name",
+        "idx_summary",
+        "idx_url",
+    ]
 
     committees = get_committees(search_query, attributes=attributes, limit=limit)["hits"]
     if not committees:

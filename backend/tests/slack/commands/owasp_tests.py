@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.owasp import handler
+from apps.slack.commands.owasp import owasp_handler
 
 
 class TestOwaspHandler:
@@ -73,7 +73,7 @@ class TestOwaspHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
 
-        handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        owasp_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
         if commands_enabled:
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
@@ -89,9 +89,9 @@ class TestOwaspHandler:
         [
             ("chapters", "apps.slack.commands.chapters.chapters_handler"),
             ("committees", "apps.slack.commands.committees.committees_handler"),
-            ("contribute", "apps.slack.commands.contribute.handler"),
-            ("gsoc", "apps.slack.commands.gsoc.handler"),
-            ("leaders", "apps.slack.commands.leaders.handler"),
+            ("contribute", "apps.slack.commands.contribute.contribute_handler"),
+            ("gsoc", "apps.slack.commands.gsoc.gsoc_handler"),
+            ("leaders", "apps.slack.commands.leaders.leaders_handler"),
             ("projects", "apps.slack.commands.projects.projects_handler"),
         ],
     )
@@ -119,5 +119,5 @@ class TestOwaspHandler:
             if subcommand in ["chapters", "committees", "projects"]:
                 mock_handler.side_effect = side_effect
 
-            handler(ack=MagicMock(), command=mock_command, client=mock_client)
+            owasp_handler(ack=MagicMock(), command=mock_command, client=mock_client)
             mock_handler.assert_called_once()

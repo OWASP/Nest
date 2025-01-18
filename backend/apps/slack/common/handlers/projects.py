@@ -14,10 +14,10 @@ from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 
-def projects_blocks(
+def get_blocks(
     search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
-    """Project block for both commands and app home."""
+    """Get projects blocks."""
     from apps.owasp.api.search.project import get_projects
     from apps.owasp.models.project import Project
 
@@ -65,7 +65,7 @@ def projects_blocks(
         metadata = []
         if presentation.include_metadata:
             if project["idx_contributors_count"]:
-                metadata.append(f"Contributors: {project['idx_contributors_count']} ")
+                metadata.append(f"Contributors: {project['idx_contributors_count']}")
             if project["idx_forks_count"]:
                 metadata.append(f"Forks: {project['idx_forks_count']}")
             if project["idx_stars_count"]:
@@ -81,7 +81,7 @@ def projects_blocks(
         )
 
         updated_text = (
-            f"_Updated {natural_date(project['idx_updated_at'])}_{NL}"
+            f"_Updated {natural_date(int(project['idx_updated_at']))}_{NL}"
             if presentation.include_timestamps
             else ""
         )

@@ -14,10 +14,10 @@ from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 
-def chapters_blocks(
+def get_blocks(
     search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
-    """Chapters block for both commands and app home."""
+    """Get chapters blocks."""
     from apps.owasp.api.search.chapter import get_chapters
     from apps.owasp.models.chapter import Chapter
 

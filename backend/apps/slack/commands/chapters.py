@@ -1,4 +1,4 @@
-"""Slack bot chapter command."""
+"""Slack bot chapters command."""
 
 from django.conf import settings
 
@@ -6,7 +6,7 @@ from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
-from apps.slack.common.handlers.chapters import chapters_blocks
+from apps.slack.common.handlers.chapters import get_blocks
 from apps.slack.common.presentation import EntityPresentation
 
 COMMAND = "/chapters"
@@ -31,7 +31,7 @@ def chapters_handler(ack, command, client):
         ]
     else:
         search_query = "" if command_text in COMMAND_START else command_text
-        blocks = chapters_blocks(
+        blocks = get_blocks(
             search_query=search_query,
             limit=10,
             presentation=EntityPresentation(
@@ -48,4 +48,4 @@ def chapters_handler(ack, command, client):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(chapters_handler)
+    chapters_handler = SlackConfig.app.command(COMMAND)(chapters_handler)

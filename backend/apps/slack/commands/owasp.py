@@ -11,7 +11,7 @@ from apps.slack.utils import escape
 COMMAND = "/owasp"
 
 
-def handler(ack, command, client):
+def owasp_handler(ack, command, client):
     """Slack /owasp command handler."""
     from apps.slack.commands import (
         chapters,
@@ -49,11 +49,11 @@ def handler(ack, command, client):
             case "committees":
                 committees.committees_handler(ack, command, client)
             case "contribute":
-                contribute.handler(ack, command, client)
+                contribute.contribute_handler(ack, command, client)
             case "gsoc":
-                gsoc.handler(ack, command, client)
+                gsoc.gsoc_handler(ack, command, client)
             case "leaders":
-                leaders.handler(ack, command, client)
+                leaders.leaders_handler(ack, command, client)
             case "projects":
                 projects.projects_handler(ack, command, client)
             case _:
@@ -65,4 +65,4 @@ def handler(ack, command, client):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(handler)
+    owasp_handler = SlackConfig.app.command(COMMAND)(owasp_handler)

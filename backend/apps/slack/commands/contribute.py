@@ -16,7 +16,7 @@ SUMMARY_TRUNCATION_LIMIT = 255
 TITLE_TRUNCATION_LIMIT = 80
 
 
-def handler(ack, command, client):
+def contribute_handler(ack, command, client):
     """Slack /contribute command handler."""
     from apps.github.models.issue import Issue
     from apps.owasp.api.search.issue import get_issues
@@ -90,4 +90,4 @@ def handler(ack, command, client):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(handler)
+    contribute_handler = SlackConfig.app.command(COMMAND)(contribute_handler)
