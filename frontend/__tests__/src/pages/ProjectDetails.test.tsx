@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ProjectDetailsPage } from 'pages'
@@ -65,5 +65,20 @@ describe('ProjectPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Project not found')).toBeInTheDocument()
     })
+  })
+
+  test('opens /projects/contribute link on "Contribute" button click', async () => {
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => ({}) as Window)
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Contribute'))
+
+    expect(openSpy).toHaveBeenCalledWith('/projects/contribute?q=Project 1')
+    openSpy.mockRestore()
   })
 })

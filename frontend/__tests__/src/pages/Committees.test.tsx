@@ -134,8 +134,27 @@ describe('Committees Component', () => {
     })
     //suppose index_key is committee_1
     expect(navigateMock).toHaveBeenCalledWith('/committees/committee_1')
+  })
 
-    // Clean up the mock
-    jest.restoreAllMocks()
+  test('uses fallback key when committee lacks objectID', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [
+        {
+          key: 'committee_2',
+          name: 'Committee 2',
+          summary: 'No objectID committee',
+          leaders: ['Leader A'],
+          top_contributors: ['Contributor A'],
+          related_urls: [],
+        },
+      ],
+      totalPages: 1,
+    })
+
+    render(<CommitteesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Committee 2')).toBeInTheDocument()
+    })
   })
 })
