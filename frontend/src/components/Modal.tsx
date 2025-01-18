@@ -25,21 +25,27 @@ export const Modal: React.FC<ModalProps> = ({
     if (isOpen) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       document.body.style.overflow = 'hidden'
-      document.body.style.paddingRight = `${scrollbarWidth}px` // Add padding to offset scrollbar width
+      document.body.style.paddingRight = `${scrollbarWidth}px`
     } else {
       document.body.style.overflow = ''
-      document.body.style.paddingRight = '' // Reset padding
+      document.body.style.paddingRight = ''
     }
 
     return () => {
       document.body.style.overflow = ''
-      document.body.style.paddingRight = '' // Cleanup on unmount
+      document.body.style.paddingRight = ''
     }
   }, [isOpen])
 
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-      onClose() // Close modal if click is outside modal content
+      onClose()
+    }
+  }
+
+  const handleOverlayKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      handleOverlayClick(event as unknown as React.MouseEvent<HTMLDivElement>)
     }
   }
 
@@ -55,6 +61,10 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         className="animate-fadeIn fixed inset-0 bg-black/30 transition-opacity"
         onClick={handleOverlayClick}
+        onKeyDown={handleOverlayKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label="Close modal overlay"
       />
 
       {/* Modal */}
