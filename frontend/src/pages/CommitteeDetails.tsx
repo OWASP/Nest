@@ -43,26 +43,26 @@ const CommitteeDetailsPage = () => {
   const SubmitButton = {
     label: 'Learn More',
     icon: <FontAwesomeIconWrapper icon="fa-solid fa-people-group" />,
-    url: committee.idx_url,
+    url: committee.url,
   }
 
-  const params: string[] = ['idx_updated_at']
+  const params: string[] = ['updated_at']
   const filteredIcons = getFilteredIcons(committee, params)
-  const formattedUrls = handleSocialUrls(committee.idx_related_urls)
+  const formattedUrls = handleSocialUrls(committee.related_urls)
   return (
     <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
       <div className="flex justify-center">
         <Card
           key={committee.objectID}
-          title={committee.idx_name}
-          url={committee.idx_url}
-          summary={committee.idx_summary}
+          title={committee.name}
+          url={committee.url}
+          summary={committee.summary}
           icons={filteredIcons}
-          leaders={committee.idx_leaders}
-          topContributors={committee.idx_top_contributors}
+          leaders={committee.leaders}
+          topContributors={committee.top_contributors}
           button={SubmitButton}
           social={formattedUrls}
-          tooltipLabel={`Learn more about ${committee.idx_name}`}
+          tooltipLabel={`Learn more about ${committee.name}`}
         />
       </div>
     </div>

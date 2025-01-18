@@ -11,36 +11,37 @@ FORKS_COUNT = 3
 STARS_COUNT = 100
 
 
-class MockModel(IssueIndexMixin):
-    def __init__(self):
-        self.author = MagicMock()
-        self.author.login = "test_user"
-        self.author.name = "Test User"
+@pytest.fixture()
+def issue_index_mixin_instance():
+    instance = IssueIndexMixin()
+    instance.author = MagicMock()
+    instance.author.login = "test_user"
+    instance.author.name = "Test User"
 
-        self.project = MagicMock()
-        self.project.idx_description = "Project description"
-        self.project.idx_level = "High"
-        self.project.idx_tags = ["tag1", "tag2"]
-        self.project.idx_topics = ["topic1", "topic2"]
-        self.project.idx_name = "Project Name"
-        self.project.idx_url = "https://example.com/project"
+    instance.project = MagicMock()
+    instance.project.idx_description = "Project description"
+    instance.project.idx_level = "High"
+    instance.project.idx_tags = ["tag1", "tag2"]
+    instance.project.idx_topics = ["topic1", "topic2"]
+    instance.project.idx_name = "Project Name"
+    instance.project.idx_url = "https://example.com/project"
 
-        self.repository = MagicMock()
-        self.repository.idx_contributors_count = FOLLOWERS_COUNT
-        self.repository.idx_description = "Repository description"
-        self.repository.idx_forks_count = FORKS_COUNT
-        self.repository.idx_name = "Repository Name"
-        self.repository.idx_stars_count = STARS_COUNT
-        self.repository.idx_topics = ["repo_topic1", "repo_topic2"]
+    instance.repository = MagicMock()
+    instance.repository.idx_contributors_count = FOLLOWERS_COUNT
+    instance.repository.idx_description = "Repository description"
+    instance.repository.idx_forks_count = FORKS_COUNT
+    instance.repository.idx_name = "Repository Name"
+    instance.repository.idx_stars_count = STARS_COUNT
+    instance.repository.idx_topics = ["repo_topic1", "repo_topic2"]
 
-        self.comments_count = COMMENTS_COUNT
-        self.created_at = datetime(2021, 9, 1, tzinfo=timezone.utc)
-        self.updated_at = datetime(2021, 9, 2, tzinfo=timezone.utc)
-        self.url = "https://example.com/issue"
-        self.title = "Issue Title"
-        self.summary = "Issue Summary"
-        self.hint = "Issue Hint"
-        self.labels = MagicMock(all=lambda: [MagicMock(name="bug"), MagicMock(name="feature")])
+    instance.comments_count = COMMENTS_COUNT
+    instance.created_at = datetime(2021, 9, 1, tzinfo=timezone.utc)
+    instance.updated_at = datetime(2021, 9, 2, tzinfo=timezone.utc)
+    instance.url = "https://example.com/issue"
+    instance.title = "Issue Title"
+    instance.summary = "Issue Summary"
+    instance.hint = "Issue Hint"
+    return instance
 
 
 class TestIssueIndexMixin:
@@ -72,6 +73,5 @@ class TestIssueIndexMixin:
             ("idx_hint", "Issue Hint"),
         ],
     )
-    def test_issue_index(self, attr, expected):
-        mock_instance = MockModel()
-        assert getattr(mock_instance, attr) == expected
+    def test_issue_index(self, issue_index_mixin_instance, attr, expected):
+        assert getattr(issue_index_mixin_instance, attr) == expected

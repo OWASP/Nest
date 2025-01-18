@@ -166,9 +166,9 @@ describe('Contribute Component', () => {
       ...mockContributeData,
       issues: [
         {
-          idx_title: null,
-          idx_summary: undefined,
-          idx_hint: '',
+          title: null,
+          summary: undefined,
+          hint: '',
         },
       ],
     }
@@ -249,7 +249,7 @@ describe('Contribute Component', () => {
     })
 
     await waitFor(() => {
-      const modalTitle = screen.queryByText(mockContributeData.issues[0].idx_title)
+      const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
       expect(modalTitle).toBeInTheDocument()
     })
   })
@@ -258,8 +258,8 @@ describe('Contribute Component', () => {
     const mockMultipleIssues = {
       ...mockContributeData,
       hits: [
-        { idx_title: 'Issue 1', idx_summary: 'Summary 1', idx_hint: 'Hint 1' },
-        { idx_title: 'Issue 2', idx_summary: 'Summary 2', idx_hint: 'Hint 2' },
+        { title: 'Issue 1', summary: 'Summary 1', hint: 'Hint 1' },
+        { title: 'Issue 2', summary: 'Summary 2', hint: 'Hint 2' },
       ],
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockMultipleIssues)
@@ -281,16 +281,29 @@ describe('Contribute Component', () => {
     fireEvent.click(readMoreButtons[0])
 
     // Verify first modal is open
-    expect(screen.getByText('Hint 1')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Hint 1')).toBeInTheDocument()
+    })
+
+    //verify first issue button
+    await waitFor(() => {
+      const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
+      expect(viewIssueButton).toBeInTheDocument()
+      fireEvent.click(viewIssueButton)
+    })
 
     // Click close button
-    const closeButton = screen.getByText('Close')
-    fireEvent.click(closeButton)
+    await waitFor(() => {
+      const closeButton = screen.getByText('Close')
+      fireEvent.click(closeButton)
+    })
 
     // Click second card's Read More button
     fireEvent.click(readMoreButtons[1])
 
     // Verify second modal is open
-    expect(screen.getByText('Hint 2')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Hint 2')).toBeInTheDocument()
+    })
   })
 })
