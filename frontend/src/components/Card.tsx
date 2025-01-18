@@ -93,7 +93,7 @@ const Card = ({
       <div
         className={
           social && social.length > 0
-            ? 'flex w-full flex-col gap-4 pr-4'
+            ? 'flex w-full flex-col gap-2 pr-4'
             : 'flex w-full items-center justify-between'
         }
       >
@@ -109,8 +109,8 @@ const Card = ({
         {!social || social.length === 0 ? (
           <div
             className={cn(
-              'mr-2 mt-3 flex items-center',
-              isMobile && 'mr-3 mt-4 w-full justify-end'
+              'mt-3 flex items-center pr-4',
+              isMobile && 'mt-4 w-full justify-end pr-4'
             )}
           >
             <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
@@ -121,11 +121,13 @@ const Card = ({
         ) : (
           <div
             className={cn(
-              'flex w-full items-center justify-between gap-6',
-              isMobile && 'flex-col items-start'
+              'flex w-full flex-wrap items-center justify-between gap-6',
+              isMobile && 'items-start'
             )}
           >
-            <div className={cn('flex flex-wrap items-center', isMobile && 'w-full')}>
+            <div
+              className={cn('flex w-full items-center justify-between', isMobile && 'flex-wrap')}
+            >
               {/* Render social links if available */}
               {social && social.length > 0 && (
                 <div id="social" className="mt-2 flex items-center gap-3">
@@ -142,13 +144,14 @@ const Card = ({
                   ))}
                 </div>
               )}
-            </div>
-            {/* Action button */}
-            <div className={cn('flex items-center', isMobile && 'mt-4 w-full justify-end')}>
-              <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
-                {button.icon}
-                {button.label}
-              </ActionButton>
+
+              {/* Action Button */}
+              <div className="flex items-center">
+                <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
+                  {button.icon}
+                  {button.label}
+                </ActionButton>
+              </div>
             </div>
           </div>
         )}
