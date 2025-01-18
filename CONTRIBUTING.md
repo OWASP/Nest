@@ -289,6 +289,47 @@ git checkout -b feature/my-feature-name
 - Address feedback from maintainers during code review.
 - Once approved, your PR will be merged into the main branch.
 
+
+### Troubleshooting
+
+- This section provides solutions to common problems contributors might face.
+
+
+**Problem:** "Unexpected character" error during application execution or Docker image building.
+
+**Solution:**
+
+This error often occurs due to incorrect encoding of the .env files (used to store environment variables).
+
+1. **Check File Encoding:**
+   * Open the .env files (frontend and backend) in a text editor that allows encoding selection (e.g., Notepad++, VS Code).
+   * Save each file as "UTF-8 without BOM".
+
+2. **Rebuild Docker Images (if applicable):**
+   * In your terminal, navigate to the project root directory.
+   * Run the following command:
+     ```bash
+     docker-compose build
+     ```
+
+3. **Test:**
+   * Run your application using `make run` and verify if the error is resolved.
+
+**Possible Causes:**
+
+*   The .env files were created or edited using a text editor that saved them with an incorrect encoding (e.g., UTF-16, ANSI).
+*   The operating system or terminal environment might have issues with encoding.
+
+**Additional Tips:**
+
+*   Consider using a linter or code formatter to ensure consistent file encoding across your project.
+*   If the issue persists, check the Dockerfile and Docker Compose files for any potential encoding-related issues.
+
+
+**Additional Resources:**
+
+* If you encounter an issue specific to the NEST project, refer to the project's documentation or search the project's issue tracker for solutions.
+
 ## Code of Conduct
 
 Please follow the [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md) when interacting with other contributors.
