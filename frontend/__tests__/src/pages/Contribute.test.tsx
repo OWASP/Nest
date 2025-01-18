@@ -166,9 +166,9 @@ describe('Contribute Component', () => {
       ...mockContributeData,
       issues: [
         {
-          idx_title: null,
-          idx_summary: undefined,
-          idx_hint: '',
+          title: null,
+          summary: undefined,
+          hint: '',
         },
       ],
     }
@@ -249,7 +249,7 @@ describe('Contribute Component', () => {
     })
 
     await waitFor(() => {
-      const modalTitle = screen.queryByText(mockContributeData.issues[0].idx_title)
+      const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
       expect(modalTitle).toBeInTheDocument()
     })
   })
@@ -258,8 +258,8 @@ describe('Contribute Component', () => {
     const mockMultipleIssues = {
       ...mockContributeData,
       hits: [
-        { idx_title: 'Issue 1', idx_summary: 'Summary 1', idx_hint: 'Hint 1' },
-        { idx_title: 'Issue 2', idx_summary: 'Summary 2', idx_hint: 'Hint 2' },
+        { title: 'Issue 1', summary: 'Summary 1', hint: 'Hint 1' },
+        { title: 'Issue 2', summary: 'Summary 2', hint: 'Hint 2' },
       ],
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockMultipleIssues)

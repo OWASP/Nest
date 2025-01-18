@@ -41,11 +41,11 @@ const ProjectDetailsPage = () => {
         message="Sorry, the project you're looking for doesn't exist"
       />
     )
-  const params = ['idx_updated_at', 'idx_forks_count', 'idx_stars_count', 'idx_contributors_count']
+  const params = ['updated_at', 'forks_count', 'stars_count', 'contributors_count']
   const filteredIcons = getFilteredIcons(project, params)
 
   const handleButtonClick = () => {
-    window.open(`/projects/contribute?q=${project.idx_name}`)
+    window.open(`/projects/contribute?q=${project.name}`)
   }
 
   const SubmitButton = {
@@ -59,14 +59,14 @@ const ProjectDetailsPage = () => {
       <div className="flex justify-center">
         <Card
           key={project.objectID}
-          title={project.idx_name}
-          url={project.idx_url}
-          summary={project.idx_summary}
-          level={level[`${project.idx_level as keyof typeof level}`]}
+          title={project.name}
+          url={project.url}
+          summary={project.summary}
+          level={level[`${project.level as keyof typeof level}`]}
           icons={filteredIcons}
-          leaders={project.idx_leaders}
-          topContributors={project.idx_top_contributors}
-          topics={project.idx_topics}
+          leaders={project.leaders}
+          topContributors={project.top_contributors}
+          topics={project.topics}
           button={SubmitButton}
         />
       </div>

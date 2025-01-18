@@ -13,7 +13,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
 import logger from 'utils/logger'
-import { IndexedObject, removeIdxPrefix } from 'utils/utility'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -29,8 +28,7 @@ const UserDetailsPage: React.FC = () => {
         if (hits.length === 0) {
           setUser(null)
         } else {
-          const userData = removeIdxPrefix(hits[0] as IndexedObject)
-          setUser(userData as unknown as UserDetailsProps)
+          setUser(hits[0] as unknown as UserDetailsProps)
         }
       } catch (error) {
         logger.error(error)
