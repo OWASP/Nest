@@ -1,3 +1,4 @@
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
@@ -35,6 +36,12 @@ const ContributePage = () => {
       onclick: () => setModalOpenIndex(index),
     }
 
+    const viewIssueButton = {
+      label: 'View Issue',
+      icon: <FontAwesomeIconWrapper icon={faGithub} />,
+      url: issue.url,
+    }
+
     return (
       <React.Fragment key={issue.objectID || `issue-${index}`}>
         <Card
@@ -56,6 +63,7 @@ const ContributePage = () => {
           title={issue.title}
           summary={issue.summary}
           hint={issue.hint}
+          button={viewIssueButton}
         ></Modal>
       </React.Fragment>
     )
