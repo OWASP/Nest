@@ -1,4 +1,6 @@
-import { StrictMode } from 'react'
+import axe from '@axe-core/react'
+import React, { StrictMode } from 'react'
+import ReactDOM from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import TagManager from 'react-gtm-module'
@@ -15,6 +17,10 @@ const tagManagerArgs = {
 }
 
 TagManager.initialize(tagManagerArgs)
+
+if (process.env.NODE_ENV !== 'development') {
+  axe(React, ReactDOM, 1000)
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
