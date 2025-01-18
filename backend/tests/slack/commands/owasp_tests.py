@@ -87,12 +87,12 @@ class TestOwaspHandler:
     @pytest.mark.parametrize(
         ("subcommand", "module_path"),
         [
-            ("chapters", "apps.slack.commands.chapters.handler"),
-            ("committees", "apps.slack.commands.committees.handler"),
+            ("chapters", "apps.slack.commands.chapters.chapters_handler"),
+            ("committees", "apps.slack.commands.committees.committees_handler"),
             ("contribute", "apps.slack.commands.contribute.handler"),
             ("gsoc", "apps.slack.commands.gsoc.handler"),
             ("leaders", "apps.slack.commands.leaders.handler"),
-            ("projects", "apps.slack.commands.projects.handler"),
+            ("projects", "apps.slack.commands.projects.projects_handler"),
         ],
     )
     def test_owasp_subcommands(

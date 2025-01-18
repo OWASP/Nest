@@ -6,7 +6,8 @@ from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
-from apps.slack.common.handlers import EntityPresentation, chapters_blocks
+from apps.slack.common.handlers.chapters import chapters_blocks
+from apps.slack.common.presentation import EntityPresentation
 
 COMMAND = "/chapters"
 
@@ -34,11 +35,11 @@ def chapters_handler(ack, command, client):
             search_query=search_query,
             limit=10,
             presentation=EntityPresentation(
+                include_feedback=True,
+                include_metadata=True,
+                include_timestamps=True,
                 name_truncation=80,
                 summary_truncation=300,
-                include_feedback=True,
-                include_timestamps=True,
-                include_metadata=True,
             ),
         )
 
@@ -46,6 +47,5 @@ def chapters_handler(ack, command, client):
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
-handler = chapters_handler
 if SlackConfig.app:
     handler = SlackConfig.app.command(COMMAND)(chapters_handler)

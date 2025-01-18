@@ -6,12 +6,8 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
-from apps.slack.common.handlers import (
-    EntityPresentation,
-    chapters_blocks,
-    committees_blocks,
-    projects_blocks,
-)
+from apps.slack.common.handlers import chapters, committees, projects
+from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import (
     VIEW_CHAPTERS_ACTION,
     VIEW_COMMITTEES_ACTION,
@@ -30,25 +26,24 @@ def handle_home_actions(ack, body, client):
 
     try:
         home_presentation = EntityPresentation(
+            include_feedback=False,
+            include_metadata=True,
+            include_timestamps=False,
             name_truncation=80,
             summary_truncation=200,
-            include_feedback=False,
-            include_timestamps=False,
-            include_metadata=True,
         )
 
         blocks = []
 
         match action_id:
-            case "view_projects_action":
-                blocks = projects_blocks(limit=10, presentation=home_presentation)
+            case "view_chapters_action":
+                blocks = chapters.chapters_blocks(limit=10, presentation=home_presentation)
 
             case "view_committees_action":
-                blocks = committees_blocks(limit=10, presentation=home_presentation)
+                blocks = committees.committees_blocks(limit=10, presentation=home_presentation)
 
-            case "view_chapters_action":
-                blocks = chapters_blocks(limit=10, presentation=home_presentation)
-
+            case "view_projects_action":
+                blocks = projects.projects_blocks(limit=10, presentation=home_presentation)
             case _:
                 blocks = [markdown("Invalid action, please try again.")]
 
@@ -68,6 +63,6 @@ def handle_home_actions(ack, body, client):
 
 # Register the actions
 if SlackConfig.app:
-    SlackConfig.app.action(VIEW_PROJECTS_ACTION)(handle_home_actions)
-    SlackConfig.app.action(VIEW_COMMITTEES_ACTION)(handle_home_actions)
     SlackConfig.app.action(VIEW_CHAPTERS_ACTION)(handle_home_actions)
+    SlackConfig.app.action(VIEW_COMMITTEES_ACTION)(handle_home_actions)
+    SlackConfig.app.action(VIEW_PROJECTS_ACTION)(handle_home_actions)

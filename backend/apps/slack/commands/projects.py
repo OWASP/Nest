@@ -3,7 +3,8 @@
 from django.conf import settings
 
 from apps.slack.apps import SlackConfig
-from apps.slack.common.handlers import EntityPresentation, projects_blocks
+from apps.slack.common.handlers.projects import projects_blocks
+from apps.slack.common.presentation import EntityPresentation
 
 COMMAND = "/projects"
 
@@ -19,11 +20,11 @@ def projects_handler(ack, command, client):
         search_query=search_query,
         limit=10,
         presentation=EntityPresentation(
+            include_feedback=True,
+            include_metadata=True,
+            include_timestamps=True,
             name_truncation=80,
             summary_truncation=300,
-            include_feedback=True,
-            include_timestamps=True,
-            include_metadata=True,
         ),
     )
 
@@ -31,6 +32,5 @@ def projects_handler(ack, command, client):
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
-handler = projects_handler
 if SlackConfig.app:
     handler = SlackConfig.app.command(COMMAND)(projects_handler)

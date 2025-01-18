@@ -44,8 +44,10 @@ def handler(ack, command, client):
         handler = command_tokens[0].strip().lower()
         command["text"] = " ".join(command_tokens[1:]).strip()
         match handler:
+            case "chapters":
+                chapters.chapters_handler(ack, command, client)
             case "committees":
-                committees.handler(ack, command, client)
+                committees.committees_handler(ack, command, client)
             case "contribute":
                 contribute.handler(ack, command, client)
             case "gsoc":
@@ -53,9 +55,7 @@ def handler(ack, command, client):
             case "leaders":
                 leaders.handler(ack, command, client)
             case "projects":
-                projects.handler(ack, command, client)
-            case "chapters":
-                chapters.handler(ack, command, client)
+                projects.projects_handler(ack, command, client)
             case _:
                 blocks = [
                     markdown(f"*`{COMMAND} {escape(handler)}` is not supported*{NL}"),
