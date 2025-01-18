@@ -7,7 +7,7 @@
         state: directory
         mode: '0755'
 
-    - name: Copy Nginx configuration file
+    - name: Copy nginx configuration file
       ansible.builtin.copy:
         src: '{{ github_workspace }}/nginx/staging.conf'
         dest: ~/nginx/nginx.conf
@@ -25,29 +25,45 @@
         state: directory
         mode: '0755'
 
-    - name: Copy Backend Makefile
+    - name: Copy backend Makefile
       ansible.builtin.copy:
         src: '{{ github_workspace }}/backend/Makefile'
         dest: ~/backend/Makefile
         mode: '0644'
 
-    - name: Update Makefile for the staging environment
+    - name: Update backend makefile for the staging environment
       shell:
         cmd: "sed -i 's/\\bnest-backend\\b/staging-nest-backend/' ~/backend/Makefile"
 
-    - name: Ensure backend directory exists
+    - name: Ensure cspell directory exists
+      ansible.builtin.file:
+        path: ~/cspell
+        state: directory
+        mode: '0755'
+
+    - name: Copy cspell makefile
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/cspell/Makefile'
+        dest: ~/cspell/Makefile
+        mode: '0644'
+
+    - name: Ensure frontend directory exists
       ansible.builtin.file:
         path: ~/frontend
         state: directory
         mode: '0755'
 
-    - name: Copy Frontend Makefile
+    - name: Copy frontend makefile
       ansible.builtin.copy:
         src: '{{ github_workspace }}/frontend/Makefile'
         dest: ~/frontend/Makefile
         mode: '0644'
 
-    - name: Copy Makefile
+    - name: Update frontend makefile for the staging environment
+      shell:
+        cmd: "sed -i 's/\\bnest-frontend\\b/staging-nest-frontend/' ~/frontend/Makefile"
+
+    - name: Copy main makefile
       ansible.builtin.copy:
         src: '{{ github_workspace }}/Makefile'
         dest: ~/Makefile

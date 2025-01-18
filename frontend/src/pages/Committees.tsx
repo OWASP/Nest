@@ -21,11 +21,11 @@ const CommitteesPage = () => {
   })
   const navigate = useNavigate()
   const renderCommitteeCard = (committee: CommitteeType, index: number) => {
-    const params: string[] = ['idx_updated_at']
+    const params: string[] = ['updated_at']
     const filteredIcons = getFilteredIcons(committee, params)
-    const formattedUrls = handleSocialUrls(committee.idx_related_urls)
+    const formattedUrls = handleSocialUrls(committee.related_urls)
     const handleButtonClick = () => {
-      navigate(`/committees/${committee.idx_key}`)
+      navigate(`/committees/${committee.key}`)
     }
 
     const SubmitButton = {
@@ -37,15 +37,15 @@ const CommitteesPage = () => {
     return (
       <Card
         key={committee.objectID || `committee-${index}`}
-        title={committee.idx_name}
-        url={`committees/${committee.idx_key}`}
-        summary={committee.idx_summary}
+        title={committee.name}
+        url={`committees/${committee.key}`}
+        summary={committee.summary}
         icons={filteredIcons}
-        leaders={committee.idx_leaders}
-        topContributors={committee.idx_top_contributors}
+        leaders={committee.leaders}
+        topContributors={committee.top_contributors}
         button={SubmitButton}
         social={formattedUrls}
-        tooltipLabel={`Learn more about ${committee.idx_name}`}
+        tooltipLabel={`Learn more about ${committee.name}`}
       />
     )
   }

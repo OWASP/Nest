@@ -1,9 +1,10 @@
+import { IconDefinition } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
 
 type IconProp = FontAwesomeIconProps['icon']
 
 interface MyIconProps extends Omit<FontAwesomeIconProps, 'icon'> {
-  icon: string
+  icon: string | IconDefinition
 }
 
 const FontAwesomeIconWrapper = ({ icon, ...props }: MyIconProps) => (
