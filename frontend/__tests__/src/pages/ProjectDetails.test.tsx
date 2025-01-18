@@ -1,69 +1,78 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { ProjectDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
+import ProjectDetailsPage from 'pages/ProjectDetails'
+import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
+jest.mock('api/fetchAlgoliaData')
 
-import { mockProjectData } from '@tests/data/mockProjectData'
-
-jest.mock('api/fetchAlgoliaData', () => ({
-  fetchAlgoliaData: jest.fn(),
-}))
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+  useParams: () => ({
+    projectKey: 'test-project',
+  }),
 }))
 
-jest.mock('components/Pagination', () =>
-  jest.fn(({ currentPage, onPageChange }) => (
-    <div>
-      <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
-    </div>
-  ))
-)
-
-describe('ProjectPage Component', () => {
+describe('ProjectDetailsPage Component', () => {
   beforeEach(() => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockProjectData.projects,
-      totalPages: 2,
-    })
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        hits: [mockProjectDetailsData],
+      })
+    )
   })
 
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  test('renders loading spinner initially', async () => {
+  test('topics visibility check', async () => {
     render(<ProjectDetailsPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByText('Topic 1')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Topic 11')).not.toBeInTheDocument()
+  })
+
+  test('contributors visibility check', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Contributor 6')).not.toBeInTheDocument()
+  })
+
+  test('handles contributors with missing names gracefully', async () => {
+    const projectDataWithIncompleteContributors = {
+      ...mockProjectDetailsData,
+      top_contributors: [
+        {
+          login: 'user1',
+          avatar_url: 'https://example.com/avatar1.jpg',
+          contributions_count: 30,
+        },
+      ],
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        hits: [projectDataWithIncompleteContributors],
+      })
+    )
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument()
     })
   })
 
-  test('renders project data correctly', async () => {
+  test('renders project URL as clickable link', async () => {
     render(<ProjectDetailsPage />)
+
     await waitFor(() => {
-      expect(screen.getByText('Project 1')).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('This is a summary of Project 1.')).toBeInTheDocument()
-
-    expect(screen.getByText('Leader 1')).toBeInTheDocument()
-
-    const viewButton = screen.getByText('Contribute')
-    expect(viewButton).toBeInTheDocument()
-  })
-
-  test('displays "Project not found" when there are no projects', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [],
-      totalPages: 0,
-    })
-    render(<ProjectDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Project not found')).toBeInTheDocument()
+      const link = screen.getByText('https://example.com')
+      expect(link.tagName).toBe('A')
+      expect(link).toHaveAttribute('href', 'https://example.com')
     })
   })
 
