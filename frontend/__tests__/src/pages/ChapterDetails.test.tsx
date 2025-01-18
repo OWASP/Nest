@@ -1,5 +1,4 @@
 import { screen, waitFor } from '@testing-library/react'
-
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'

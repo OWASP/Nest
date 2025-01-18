@@ -16,14 +16,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
-
-export const formatDate = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
+import { formatDate } from 'utils/dateFormatter'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -201,7 +194,7 @@ const ProjectDetailsPage = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {(showAllContributors
               ? project.top_contributors
-              : project.top_contributors.slice(0, 5)
+              : project.top_contributors.slice(0, 6)
             ).map((contributor, index) => (
               <div key={index} className="flex items-center">
                 <img
