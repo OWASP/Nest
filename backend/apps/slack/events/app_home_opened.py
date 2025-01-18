@@ -12,7 +12,7 @@ from apps.slack.blocks import get_header, markdown
 logger = logging.getLogger(__name__)
 
 
-def handler(event, client, ack):
+def app_home_opened_handler(event, client, ack):
     """Handle the app_home_opened event."""
     ack()
 
@@ -51,5 +51,4 @@ def handler(event, client, ack):
 
 
 if SlackConfig.app:
-    # Register the app home opened event handler
-    SlackConfig.app.event("app_home_opened")(handler)
+    app_home_opened_handler = SlackConfig.app.event("app_home_opened")(app_home_opened_handler)

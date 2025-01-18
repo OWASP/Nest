@@ -77,7 +77,7 @@ if SlackConfig.app:
 
     def check_contribute_handler(event):
         """Check if the event is a member_joined_channel in #contribute."""
-        return event["channel"] == OWASP_CONTRIBUTE_CHANNEL_ID
+        return f"#{event['channel']}" == OWASP_CONTRIBUTE_CHANNEL_ID
 
     SlackConfig.app.event("member_joined_channel", matchers=[check_contribute_handler])(
         contribute_handler
