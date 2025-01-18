@@ -55,12 +55,12 @@ const ChaptersPage = () => {
 
   const navigate = useNavigate()
   const renderChapterCard = (chapter: ChapterType, index: number) => {
-    const params: string[] = ['idx_updated_at']
+    const params: string[] = ['updated_at']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.idx_related_urls)
+    const formattedUrls = handleSocialUrls(chapter.related_urls)
 
     const handleButtonClick = () => {
-      navigate(`/chapters/${chapter.idx_key}`)
+      navigate(`/chapters/${chapter.key}`)
     }
 
     const SubmitButton = {
@@ -72,12 +72,11 @@ const ChaptersPage = () => {
     return (
       <Card
         key={chapter.objectID || `chapter-${index}`}
-        title={chapter.idx_name}
-        url={`chapters/${chapter.idx_key}`}
-        summary={chapter.idx_summary}
+        title={chapter.name}
+        url={`chapters/${chapter.key}`}
+        summary={chapter.summary}
         icons={filteredIcons}
-        leaders={chapter.idx_leaders}
-        topContributors={chapter.idx_top_contributors}
+        topContributors={chapter.top_contributors}
         button={SubmitButton}
         social={formattedUrls}
       />

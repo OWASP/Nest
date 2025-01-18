@@ -18,7 +18,7 @@ npm-update:
 	@CMD="npm update" $(MAKE) exec-frontend-command-it
 
 shell-frontend:
-	@CMD="/bin/bash" $(MAKE) exec-frontend-command-it
+	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
 test-frontend:
 	@docker build -f frontend/Dockerfile.test frontend -t nest-test-frontend
