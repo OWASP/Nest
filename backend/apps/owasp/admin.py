@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
+from apps.owasp.models.feedback import Feedback
 from apps.owasp.models.project import Project
 
 
@@ -101,7 +102,15 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     custom_field_name.short_description = "Name"
 
 
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ("name", "email", "isAnonymous", "isNestbot", "created_at", "s3_file_path")
+    search_fields = ("name", "email", "isAnonymous", "isNestbot", "created_at", "s3_file_path")
+    readonly_fields = ("created_at", "s3_file_path")
+    ordering = ("-created_at",)
+
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommetteeAdmin)
 admin.site.register(Event, EventAdmin)
+admin.site.register(Feedback, FeedbackAdmin)
 admin.site.register(Project, ProjectAdmin)
