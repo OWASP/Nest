@@ -50,22 +50,21 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     def _get_or_create_tsv(self, s3_client):
         """Get the existing TSV file or creates a new one if it doesn't exist."""
         tsv_key = "feedbacks.tsv"
+        output = StringIO()
+        writer = csv.writer(output, delimiter="\t")
+
         try:
             response = s3_client.get_object(
                 Bucket=settings.AWS_STORAGE_BUCKET_NAME,
                 Key=tsv_key,
             )
             existing_content = response["Body"].read().decode("utf-8")
-            output = StringIO(existing_content)
+            output.write(existing_content)
+            output.seek(0, 2)
         except s3_client.exceptions.NoSuchKey:
-            output = StringIO()
-            writer = csv.writer(output, delimiter="\t")
             writer.writerow(
                 ["Name", "Email", "Message", "is_anonymous", "is_nestbot", "created_at"]
             )
-        else:
-            writer = csv.writer(output, delimiter="\t")
-
         return output, writer
 
     def _write_feedback_to_tsv(self, writer, feedback_data):
@@ -83,6 +82,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
     def _upload_tsv_to_s3(self, s3_client, output):
         """Upload the updated TSV file back to S3."""
+        output.seek(0)
         s3_client.put_object(
             Bucket=settings.AWS_STORAGE_BUCKET_NAME,
             Key="feedbacks.tsv",
