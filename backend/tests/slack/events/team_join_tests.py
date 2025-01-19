@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.slack.events.team_join import handler
+from apps.slack.events.team_join import team_join_handler
 
 
 class TestSlackHandler:
@@ -19,7 +19,7 @@ class TestSlackHandler:
         mock_client.conversations_open.return_value = mock_conversation
 
         with patch("time.sleep", return_value=None):
-            handler({"user": {"id": "U12345"}}, mock_client, mock_ack)
+            team_join_handler({"user": {"id": "U12345"}}, mock_client, mock_ack)
 
         mock_ack.assert_called_once()
         mock_client.conversations_open.assert_called_once_with(users="U12345")

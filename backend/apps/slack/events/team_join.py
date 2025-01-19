@@ -29,7 +29,7 @@ from apps.slack.constants import (
 logger = logging.getLogger(__name__)
 
 
-def handler(event, client, ack):
+def team_join_handler(event, client, ack):
     """Slack new team user handler."""
     ack()
     if not settings.SLACK_EVENTS_ENABLED:
@@ -99,4 +99,4 @@ def handler(event, client, ack):
 
 
 if SlackConfig.app:
-    SlackConfig.app.event("team_join")(handler)
+    team_join_handler = SlackConfig.app.event("team_join")(team_join_handler)
