@@ -85,3 +85,5 @@ export const themeToggleTooltip = {
   borderRadius: '6px',
   padding: '3px 7px',
 }
+
+export const desktopViewMinWidth = 768
