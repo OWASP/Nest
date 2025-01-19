@@ -51,9 +51,7 @@ def gsoc_handler(event, client, ack):
 
 
 if SlackConfig.app:
-
-    def check_gsoc_handler(event):
-        """Check if the event is a member_joined_channel in #gsoc."""
-        return f"#{event['channel']}" == OWASP_GSOC_CHANNEL_ID
-
-    SlackConfig.app.event("member_joined_channel", matchers=[check_gsoc_handler])(gsoc_handler)
+    SlackConfig.app.event(
+        "member_joined_channel",
+        matchers=[lambda event: f"#{event['channel']}" == OWASP_GSOC_CHANNEL_ID],
+    )(gsoc_handler)
