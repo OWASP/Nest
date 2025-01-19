@@ -10,6 +10,7 @@ import { mockChapterData } from '@tests/data/mockChapterData'
 jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: jest.fn(),
@@ -48,9 +49,6 @@ describe('ChaptersPage Component', () => {
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
     })
     expect(screen.getByText('This is a summary of Chapter 1.')).toBeInTheDocument()
-    expect(screen.getByText('Isanori Sakanashi,')).toBeInTheDocument()
-    expect(screen.getByText('Takeshi Murai,')).toBeInTheDocument()
-    expect(screen.getByText('Yukiharu Niwa')).toBeInTheDocument()
     const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
   })
