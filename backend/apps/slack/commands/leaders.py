@@ -11,7 +11,7 @@ from apps.slack.utils import escape
 COMMAND = "/leaders"
 
 
-def handler(ack, command, client):
+def leaders_handler(ack, command, client):
     """Slack /leaders command handler."""
     from apps.owasp.api.search.chapter import get_chapters
     from apps.owasp.api.search.project import get_projects
@@ -84,4 +84,4 @@ def handler(ack, command, client):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(handler)
+    leaders_handler = SlackConfig.app.command(COMMAND)(leaders_handler)

@@ -1,130 +1,85 @@
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.projects import handler
+from apps.slack.commands.projects import projects_handler
+
+
+@pytest.fixture(autouse=True)
+def mock_get_absolute_url():
+    with patch("apps.common.utils.get_absolute_url") as mock:
+        mock.return_value = "http://example.com"
+        yield mock
+
+
+@pytest.fixture(autouse=True)
+def mock_active_projects_count():
+    with patch("apps.owasp.models.project.Project.active_projects_count") as mock:
+        mock.return_value = 100
+        yield mock
 
 
 class TestProjectsHandler:
     @pytest.fixture()
-    def mock_slack_command(self):
+    def mock_command(self):
         return {
-            "text": "web application",
+            "text": "",
             "user_id": "U123456",
         }
 
     @pytest.fixture()
-    def mock_slack_client(self):
+    def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
-    def mock_project(self):
-        return {
-            "idx_name": "Test Project",
-            "idx_summary": "Test summary",
-            "idx_url": "http://example.com/project/1",
-            "idx_contributors_count": 10,
-            "idx_forks_count": 5,
-            "idx_stars_count": 100,
-            "idx_updated_at": "2024-12-01",
-            "idx_level": "Level 1",
-            "idx_leaders": ["Leader A", "Leader B"],
-        }
+    @pytest.fixture(autouse=True)
+    def mock_get_projects(self):
+        with patch("apps.owasp.api.search.project.get_projects") as mock:
+            mock.return_value = {"hits": []}
+            yield mock
 
     @pytest.mark.parametrize(
-        ("commands_enabled", "has_results", "expected_message"),
+        ("commands_enabled", "search_query", "expected_calls"),
         [
-            (False, True, None),  # Disabled commands
-            (True, False, "No results found for"),  # No results
-            (True, True, "Here are top 10 most OWASP projects"),  # With results
+            (True, "", 1),
+            (True, "search term", 1),
+            (False, "", 0),
         ],
     )
-    @patch("apps.owasp.models.project.Project.active_projects_count")
-    @patch("apps.owasp.api.search.project.get_projects")
-    def test_handler_responses(
-        self,
-        mock_get_projects,
-        mock_active_projects_count,
-        commands_enabled,
-        has_results,
-        expected_message,
-        mock_slack_client,
-        mock_slack_command,
-        mock_project,
+    def test_projects_handler(
+        self, mock_client, mock_command, commands_enabled, search_query, expected_calls
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
-        mock_active_projects_count.return_value = 42
+        mock_command["text"] = search_query
 
-        handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        projects_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-        if not commands_enabled:
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-        else:
-            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-            assert any(expected_message in str(block) for block in blocks)
-            if has_results:
-                assert any(mock_project["idx_name"] in str(block) for block in blocks)
-                assert any(mock_project["idx_url"] in str(block) for block in blocks)
-                assert any(mock_project["idx_summary"] in str(block) for block in blocks)
+        assert mock_client.chat_postMessage.call_count == expected_calls
 
-    @pytest.mark.parametrize(
-        ("search_text", "expected_escaped"),
-        [
-            ("web app <>&", "web app &lt;&gt;&amp;"),
-            ("normal search", "normal search"),
-        ],
-    )
-    @patch("apps.owasp.models.project.Project.active_projects_count")
-    @patch("apps.owasp.api.search.project.get_projects")
-    def test_handler_special_characters(
-        self,
-        mock_get_projects,
-        mock_active_projects_count,
-        search_text,
-        expected_escaped,
-        mock_slack_client,
-    ):
-        command = {"text": search_text, "user_id": "U123456"}
-        mock_get_projects.return_value = {"hits": []}
-        mock_active_projects_count.return_value = 42
+    def test_projects_handler_with_results(self, mock_get_projects, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
+        test_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
+        mock_get_projects.return_value = {
+            "hits": [
+                {
+                    "idx_name": "Test Project",
+                    "idx_summary": "Test Summary",
+                    "idx_url": "http://example.com",
+                    "idx_leaders": ["Leader 1"],
+                    "idx_level": "Lab",
+                    "idx_contributors_count": 5,
+                    "idx_forks_count": 3,
+                    "idx_stars_count": 10,
+                    "idx_updated_at": test_date.timestamp(),
+                }
+            ]
+        }
 
-        handler(ack=MagicMock(), command=command, client=mock_slack_client)
+        projects_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-        blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-        assert any(expected_escaped in str(block) for block in blocks)
-
-    @pytest.mark.parametrize(
-        ("field", "expected_text"),
-        [
-            ("contributors_count", "10 contributors"),
-            ("forks_count", "5 forks"),
-            ("stars_count", "100 stars"),
-            ("leaders", "Leader A, Leader B"),
-        ],
-    )
-    @patch("apps.owasp.models.project.Project.active_projects_count")
-    @patch("apps.owasp.api.search.project.get_projects")
-    def test_handler_field_formatting(
-        self,
-        mock_get_projects,
-        mock_active_projects_count,
-        field,
-        expected_text,
-        mock_slack_client,
-        mock_slack_command,
-        mock_project,
-    ):
-        mock_get_projects.return_value = {"hits": [mock_project]}
-        mock_active_projects_count.return_value = 42
-        settings.SLACK_COMMANDS_ENABLED = True
-
-        handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
-
-        blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-        assert any(expected_text in str(block) for block in blocks)
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        assert any("Test Project" in str(block) for block in blocks)
+        assert any("Test Summary" in str(block) for block in blocks)

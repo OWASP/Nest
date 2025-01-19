@@ -9,4 +9,4 @@ def url_verification_handler(event, *_args, **_kwargs):
 
 
 if SlackConfig.app:
-    SlackConfig.app.event("url_verification")(url_verification_handler)
+    url_verification_handler = SlackConfig.app.event("url_verification")(url_verification_handler)
