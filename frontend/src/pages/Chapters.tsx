@@ -76,7 +76,6 @@ const ChaptersPage = () => {
         url={`chapters/${chapter.key}`}
         summary={chapter.summary}
         icons={filteredIcons}
-        leaders={chapter.leaders}
         topContributors={chapter.top_contributors}
         button={SubmitButton}
         social={formattedUrls}

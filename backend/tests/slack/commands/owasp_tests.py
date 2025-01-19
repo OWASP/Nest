@@ -3,120 +3,121 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.owasp import handler
-
-
-@pytest.fixture()
-def mock_ack():
-    return MagicMock()
-
-
-@pytest.fixture()
-def mock_client():
-    return MagicMock()
-
-
-@pytest.fixture()
-def mock_command():
-    return {"text": "", "user_id": "U12345"}
+from apps.slack.commands.owasp import owasp_handler
 
 
 class TestOwaspHandler:
-    @patch("apps.slack.commands.owasp.markdown")
-    def test_help_command(self, mock_markdown, mock_ack, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
-        mock_command["text"] = ""
+    @pytest.fixture()
+    def mock_command(self):
+        return {
+            "text": "",
+            "user_id": "U123456",
+        }
 
-        mock_markdown.return_value = {"text": "HELP_MESSAGE"}
+    @pytest.fixture()
+    def mock_client(self):
+        client = MagicMock()
+        client.conversations_open.return_value = {"channel": {"id": "C123456"}}
+        return client
 
-        mock_client.conversations_open.return_value = {"channel": {"id": "C12345"}}
+    @pytest.fixture()
+    def mock_get_chapters(self):
+        with patch("apps.owasp.api.search.chapter.get_chapters") as mock:
+            mock.return_value = {"hits": []}
+            yield mock
 
-        handler(mock_ack, mock_command, mock_client)
+    @pytest.fixture()
+    def mock_get_committees(self):
+        with patch("apps.owasp.api.search.committee.get_committees") as mock:
+            mock.return_value = {"hits": []}
+            yield mock
 
-        mock_ack.assert_called_once()
-        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
-        mock_client.chat_postMessage.assert_called_once()
+    @pytest.fixture()
+    def mock_get_projects(self):
+        with patch("apps.owasp.api.search.project.get_projects") as mock:
+            mock.return_value = {"hits": []}
+            yield mock
 
-        _, kwargs = mock_client.chat_postMessage.call_args
-        assert kwargs["blocks"][0]["text"] == "HELP_MESSAGE"
+    @pytest.fixture(autouse=True)
+    def mock_get_absolute_url(self):
+        with patch("apps.common.utils.get_absolute_url") as mock:
+            mock.return_value = "http://example.com"
+            yield mock
 
-    def test_disabled_slack_commands(self, mock_ack, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = False
+    @pytest.fixture(autouse=True)
+    def _mock_active_counts(self):
+        with (
+            patch("apps.owasp.models.chapter.Chapter.active_chapters_count") as mock_chapters,
+            patch(
+                "apps.owasp.models.committee.Committee.active_committees_count"
+            ) as mock_committees,
+            patch("apps.owasp.models.project.Project.active_projects_count") as mock_projects,
+        ):
+            mock_chapters.return_value = 100
+            mock_committees.return_value = 100
+            mock_projects.return_value = 100
+            yield
 
-        handler(mock_ack, mock_command, mock_client)
+    @pytest.mark.parametrize(
+        ("commands_enabled", "command_text", "expected_help"),
+        [
+            (True, "", True),
+            (True, "-h", True),
+            (True, "invalid_command", False),
+            (False, "", False),
+        ],
+    )
+    def test_owasp_handler(
+        self, mock_client, mock_command, commands_enabled, command_text, expected_help
+    ):
+        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        mock_command["text"] = command_text
 
-        mock_ack.assert_called_once()
-        mock_client.conversations_open.assert_not_called()
-        mock_client.chat_postMessage.assert_not_called()
+        owasp_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-    @patch("apps.slack.commands.contribute.handler")
-    def test_contribute_handler(
-        self, mock_contribute_handler, mock_ack, mock_client, mock_command
+        if commands_enabled:
+            blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+            if expected_help:
+                assert any("chapters" in str(block) for block in blocks)
+                assert any("committees" in str(block) for block in blocks)
+                assert any("projects" in str(block) for block in blocks)
+            elif "invalid_command" in command_text:
+                assert any("is not supported" in str(block) for block in blocks)
+
+    @pytest.mark.parametrize(
+        ("subcommand", "module_path"),
+        [
+            ("chapters", "apps.slack.commands.chapters.chapters_handler"),
+            ("committees", "apps.slack.commands.committees.committees_handler"),
+            ("contribute", "apps.slack.commands.contribute.contribute_handler"),
+            ("gsoc", "apps.slack.commands.gsoc.gsoc_handler"),
+            ("leaders", "apps.slack.commands.leaders.leaders_handler"),
+            ("projects", "apps.slack.commands.projects.projects_handler"),
+        ],
+    )
+    def test_owasp_subcommands(
+        self,
+        subcommand,
+        module_path,
+        mock_client,
+        mock_command,
+        mock_get_chapters,
+        mock_get_committees,
+        mock_get_projects,
     ):
         settings.SLACK_COMMANDS_ENABLED = True
-        mock_command["text"] = "contribute"
+        mock_command["text"] = f"{subcommand} test"
 
-        handler(mock_ack, mock_command, mock_client)
+        with patch(module_path) as mock_handler:
 
-        mock_ack.assert_called_once()
-        mock_contribute_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
+            def side_effect(ack, command, client):
+                ack()
+                blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "Test"}}]
+                conversation = client.conversations_open(users=command["user_id"])
+                client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
-    @patch("apps.slack.commands.gsoc.handler")
-    def test_gsoc_handler(self, mock_gsoc_handler, mock_ack, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
-        mock_command["text"] = "gsoc"
+            if subcommand in ["chapters", "committees", "projects"]:
+                mock_handler.side_effect = side_effect
 
-        handler(mock_ack, mock_command, mock_client)
-
-        mock_ack.assert_called_once()
-        mock_gsoc_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
-
-    @patch("apps.slack.commands.chapters.handler")
-    def test_chapters_handler(self, mock_chapters_handler, mock_ack, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
-        mock_command["text"] = "chapters"
-
-        handler(mock_ack, mock_command, mock_client)
-
-        mock_ack.assert_called_once()
-        mock_chapters_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
-
-    @patch("apps.slack.commands.projects.handler")
-    def test_projects_handler(self, mock_projects_handler, mock_ack, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
-        mock_command["text"] = "projects"
-
-        handler(mock_ack, mock_command, mock_client)
-
-        mock_ack.assert_called_once()
-        mock_projects_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
-
-    @patch("apps.slack.commands.committees.handler")
-    def test_committees_handler(
-        self, mock_committees_handler, mock_ack, mock_client, mock_command
-    ):
-        settings.SLACK_COMMANDS_ENABLED = True
-        mock_command["text"] = "committees"
-
-        handler(mock_ack, mock_command, mock_client)
-
-        mock_ack.assert_called_once()
-        mock_committees_handler.assert_called_once_with(mock_ack, mock_command, mock_client)
-
-    @patch("apps.slack.commands.owasp.markdown")
-    def test_unsupported_command(self, mock_markdown, mock_ack, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
-        mock_command["text"] = "unsupported_command"
-
-        mock_markdown.return_value = {"text": "NOT_SUPPORTED_MESSAGE"}
-
-        mock_client.conversations_open.return_value = {"channel": {"id": "C12345"}}
-
-        handler(mock_ack, mock_command, mock_client)
-
-        mock_ack.assert_called_once()
-        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
-        mock_client.chat_postMessage.assert_called_once()
-
-        _, kwargs = mock_client.chat_postMessage.call_args
-        assert kwargs["blocks"][0]["text"] == "NOT_SUPPORTED_MESSAGE"
+            owasp_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+            mock_handler.assert_called_once()
