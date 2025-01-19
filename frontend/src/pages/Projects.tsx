@@ -8,7 +8,7 @@ import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
-import SortBy from 'components/sortBy'
+import SortBy from 'components/SortBy'
 const ProjectsPage = () => {
   const [sortBy, setSortBy] = useState('projects')
 
