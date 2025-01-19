@@ -147,7 +147,7 @@ const ProjectDetailsPage = () => {
             </div>
             {project.languages.length > 10 && (
               <button
-              data-testid="show-more-languages"
+                data-testid="show-more-languages"
                 onClick={toggleLanguages}
                 className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
               >

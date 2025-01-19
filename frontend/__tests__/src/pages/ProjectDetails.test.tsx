@@ -15,10 +15,10 @@ jest.mock('react-router-dom', () => ({
 
 describe('ProjectDetailsPage Component', () => {
   beforeEach(() => {
-    (fetchAlgoliaData as jest.Mock).mockImplementation(() =>
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
       Promise.resolve({
         hits: [mockProjectDetailsData],
-      }),
+      })
     )
   })
 
@@ -61,7 +61,7 @@ describe('ProjectDetailsPage Component', () => {
     ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
       Promise.resolve({
         hits: [projectDataWithIncompleteContributors],
-      }),
+      })
     )
 
     render(<ProjectDetailsPage />)
@@ -169,7 +169,7 @@ describe('ProjectDetailsPage Component', () => {
   })
   test('renders recent issues if project.issues is not empty', async () => {
     // Modify mock data so issues is non-empty
-    (fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
       hits: [
         {
           ...mockProjectDetailsData,
@@ -184,17 +184,17 @@ describe('ProjectDetailsPage Component', () => {
         },
       ],
     })
-  
+
     render(<ProjectDetailsPage />)
-  
+
     // Confirm the "Issue 1" text appears in the DOM
     await waitFor(() => {
       expect(screen.getByText('Issue 1')).toBeInTheDocument()
     })
   })
-  
+
   test('renders "No recent issues." when issues array is empty', async () => {
-    (fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
       hits: [
         {
           ...mockProjectDetailsData,
@@ -202,17 +202,17 @@ describe('ProjectDetailsPage Component', () => {
         },
       ],
     })
-  
+
     render(<ProjectDetailsPage />)
-  
+
     await waitFor(() => {
       expect(screen.getByText('No recent issues.')).toBeInTheDocument()
     })
   })
-  
+
   test('renders recent releases if project.releases is not empty', async () => {
     // Modify mock data so releases is non-empty
-    (fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
       hits: [
         {
           ...mockProjectDetailsData,
@@ -227,17 +227,17 @@ describe('ProjectDetailsPage Component', () => {
         },
       ],
     })
-  
+
     render(<ProjectDetailsPage />)
-  
+
     // Confirm the "Release 1.0" text appears in the DOM
     await waitFor(() => {
       expect(screen.getByText('Release 1.0')).toBeInTheDocument()
     })
   })
-  
+
   test('renders "No recent releases." when releases array is empty', async () => {
-    (fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
       hits: [
         {
           ...mockProjectDetailsData,
@@ -245,9 +245,9 @@ describe('ProjectDetailsPage Component', () => {
         },
       ],
     })
-  
+
     render(<ProjectDetailsPage />)
-  
+
     await waitFor(() => {
       expect(screen.getByText('No recent releases.')).toBeInTheDocument()
     })
