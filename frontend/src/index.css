@@ -7,8 +7,10 @@
     --background: #f4f6fc;
     --text: #000;
     --border: #0000002d;
-    --rt-color-white: #222; /* customizing tooltip colors*/
-    --rt-color-dark: #fff; /* customizing tooltip colors*/
+    --rt-color-white: #222;
+    /* customizing tooltip colors*/
+    --rt-color-dark: #fff;
+    /* customizing tooltip colors*/
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -38,8 +40,10 @@
     --background: #212529;
     --text: #fff;
     --border: #ffffff26;
-    --rt-color-white: #222; /* customizing tooltip colors*/
-    --rt-color-dark: #fff; /* customizing tooltip colors*/
+    --rt-color-white: #222;
+    /* customizing tooltip colors*/
+    --rt-color-dark: #fff;
+    /* customizing tooltip colors*/
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -77,6 +81,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -87,6 +92,7 @@
   100% {
     opacity: 0;
   }
+
   50% {
     opacity: 1;
   }
@@ -118,6 +124,7 @@ a {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -128,6 +135,7 @@ a {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -138,6 +146,7 @@ a {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -148,6 +157,7 @@ a {
     opacity: 1;
     transform: scale(1);
   }
+
   to {
     opacity: 0;
     transform: scale(0.9);
@@ -170,9 +180,34 @@ a {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+:root {
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3)
+    brightness(0.7);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dark .map-tiles {
+    filter: var(--map-tiles-filter, none);
+  }
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background-color: #2c3e50;
+  color: white;
+}
+
+.dark .leaflet-popup-close-button span {
+  color: white !important;
+}
+
+.leaflet-control-attribution {
+  display: none !important;
 }
 
 .icon-rotate {
@@ -189,4 +224,46 @@ a {
 
 .flip-container:hover .icon-flip {
   transform: rotateY(180deg);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #7689ad;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3d4554;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4a5568;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+.popup-content {
+  cursor: pointer;
+  color: black;
+}
+
+.dark .popup-content {
+  color: white;
+}
+
+.popup-content:hover {
+  text-decoration: underline;
+}
+
+.dark .leaflet-popup-tip {
+  background-color: #2c3e50;
 }

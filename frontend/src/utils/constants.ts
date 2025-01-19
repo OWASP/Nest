@@ -3,20 +3,20 @@ import { Section } from 'types/section'
 
 export const headerLinks: Link[] = [
   {
-    text: 'Contribute',
-    href: '/projects/contribute',
-  },
-  {
     text: 'Projects',
     href: '/projects',
   },
   {
-    text: 'Chapters',
-    href: '/chapters',
+    text: 'Contribute',
+    href: '/projects/contribute',
   },
   {
     text: 'Community',
     href: '/community/users',
+  },
+  {
+    text: 'Chapters',
+    href: '/chapters',
   },
 ]
 
@@ -25,7 +25,7 @@ export const footerSections: Section[] = [
     title: 'OWASP Nest',
     links: [
       { text: 'About', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#owasp-nest' },
-      { text: 'Contact', href: 'https://owasp.slack.com/messages/project-nest' },
+      { text: 'Contact', href: 'https://owasp.slack.com/archives/project-nest' },
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
       { text: 'Leaders', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#leaders' },
       {
@@ -77,3 +77,5 @@ export const tooltipStyle = {
   borderRadius: '8px',
   zIndex: 100,
 }
+
+export const desktopViewMinWidth = 768

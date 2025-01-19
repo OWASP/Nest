@@ -26,11 +26,24 @@ describe('Modal Component', () => {
     hint: 'Test Hint',
     isOpen: true,
     onClose: jest.fn(),
+    button: {
+      label: 'Test Button',
+      onclick: jest.fn(),
+      url: 'https://example.com/issue/123',
+    },
   }
 
   it('renders nothing when isOpen is false', () => {
     render(<Modal {...defaultProps} isOpen={false} />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('renders the action button and handles its events', async () => {
+    const onclick = jest.fn()
+    render(<Modal {...defaultProps} button={{ ...defaultProps.button, onclick }} />)
+
+    const actionButton = screen.getByRole('link', { name: /Test Button/i })
+    expect(actionButton).toBeInTheDocument()
   })
 
   it('renders modal with all components when isOpen is true', () => {
