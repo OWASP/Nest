@@ -147,6 +147,7 @@ const ProjectDetailsPage = () => {
             </div>
             {project.languages.length > 10 && (
               <button
+              data-testid="show-more-languages"
                 onClick={toggleLanguages}
                 className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
               >
@@ -179,6 +180,7 @@ const ProjectDetailsPage = () => {
             </div>
             {project.topics.length > 10 && (
               <button
+                data-testid="show-more-topics"
                 onClick={toggleTopics}
                 className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
               >
@@ -220,6 +222,7 @@ const ProjectDetailsPage = () => {
           </div>
           {project.top_contributors.length > 5 && (
             <button
+              data-testid="show-more-contributors"
               onClick={toggleContributors}
               className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
             >
