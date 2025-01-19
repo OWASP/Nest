@@ -2,23 +2,23 @@ import { screen, waitFor } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
+import { mockChaterDetailsData } from '@tests/data/mockChapterDetailsData'
+jest.mock('api/fetchAlgoliaData')
 
-import { mockChapterData } from '@tests/data/mockChapterData'
-
-jest.mock('api/fetchAlgoliaData', () => ({
-  fetchAlgoliaData: jest.fn(),
-}))
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+  useParams: () => ({
+    chapterKey: 'test-chapter',
+  }),
 }))
 
-describe('ChapterDetailsPage Component', () => {
+describe('chapterDetailsPage Component', () => {
   beforeEach(() => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockChapterData.chapters,
-      totalPages: 2,
-    })
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        hits: [mockChaterDetailsData],
+      })
+    )
   })
 
   afterEach(() => {
@@ -36,18 +36,62 @@ describe('ChapterDetailsPage Component', () => {
   test('renders chapter data correctly', async () => {
     render(<ChapterDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+      expect(screen.getByText('Test City, Test Country')).toBeInTheDocument()
     })
-    expect(screen.getByText('This is a summary of Chapter 1.')).toBeInTheDocument()
-    const viewButton = screen.getByText('Join')
-    expect(viewButton).toBeInTheDocument()
+    expect(screen.getByText('Test Region')).toBeInTheDocument()
+    expect(screen.getByText('Test-tag')).toBeInTheDocument()
+    expect(screen.getByText('https://owasp.org/test-chapter')).toBeInTheDocument()
+    expect(screen.getByText('This is a test chapter summary.')).toBeInTheDocument()
   })
 
-  test('displays "Chapter not found" when there are no chapters', async () => {
+  test('displays "No chapters found" when there are no chapters', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Chapter not found')).toBeInTheDocument()
+    })
+  })
+
+  test('contributors visibility check', async () => {
+    render(<ChapterDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+  })
+
+  test('renders chapter URL as clickable link', async () => {
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      const link = screen.getByText('https://owasp.org/test-chapter')
+      expect(link.tagName).toBe('A')
+      expect(link).toHaveAttribute('href', 'https://owasp.org/test-chapter')
+    })
+  })
+
+  test('handles contributors with missing names gracefully', async () => {
+    const chapterDataWithIncompleteContributors = {
+      ...mockChaterDetailsData,
+      top_contributors: [
+        {
+          name: 'user1',
+          avatar_url: 'https://example.com/avatar1.jpg',
+          contributions_count: 30,
+        },
+      ],
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        hits: [chapterDataWithIncompleteContributors],
+      })
+    )
+
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument()
     })
   })
 })

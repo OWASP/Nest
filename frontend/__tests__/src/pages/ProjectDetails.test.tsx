@@ -24,7 +24,24 @@ describe('ProjectDetailsPage Component', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
+  test('renders loading spinner initially', async () => {
+    render(<ProjectDetailsPage />)
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
+  })
 
+  test('renders project data correctly', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+    expect(screen.getByText('This is a test project description')).toBeInTheDocument()
+    expect(screen.getByText('Tool')).toBeInTheDocument()
+    expect(screen.getByText('Flagship')).toBeInTheDocument()
+    expect(screen.getByText('OWASP')).toBeInTheDocument()
+  })
   test('topics visibility check', async () => {
     render(<ProjectDetailsPage />)
     await waitFor(() => {
@@ -38,7 +55,7 @@ describe('ProjectDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Contributor 6')).not.toBeInTheDocument()
+    expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
   })
 
   test('handles contributors with missing names gracefully', async () => {

@@ -68,7 +68,7 @@ export default function ChapterDetailsPage() {
 
   return (
     <div className="mt-16 min-h-screen bg-white p-4 text-gray-600 dark:bg-[#212529] dark:text-gray-300 md:p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 text-3xl font-bold md:text-4xl">{chapter.name}</h1>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -95,7 +95,9 @@ export default function ChapterDetailsPage() {
                 <FontAwesomeIcon icon={faTags} className="mr-3 mt-1 w-5" />
                 <div>
                   <div className="text-sm font-medium">Tags</div>
-                  <div className="text-sm md:text-base">{chapter.tags}</div>
+                  <div className="text-sm md:text-base">
+                    {chapter.tags[0].toUpperCase() + chapter.tags.slice(1)}
+                  </div>
                 </div>
               </div>
 
@@ -151,13 +153,15 @@ export default function ChapterDetailsPage() {
             ).map((contributor, index) => (
               <div key={index} className="flex items-center space-x-3">
                 <img
-                  src={contributor.avatar_url || '/placeholder.svg'}
-                  alt={contributor.name}
-                  className="h-10 w-10 rounded-full"
+                  src={contributor.avatar_url}
+                  alt={contributor.name || contributor.login}
+                  className="mr-3 h-10 w-10 rounded-full"
                 />
                 <div>
-                  <p className="font-medium">{contributor.name}</p>
-                  <p className="text-sm">{contributor.contributions_count} contributions</p>
+                  <p className="font-semibold">{contributor.name || contributor.login}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {contributor.contributions_count} contributions
+                  </p>
                 </div>
               </div>
             ))}
