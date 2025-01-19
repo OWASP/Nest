@@ -10,8 +10,14 @@ from apps.slack.common.handlers import chapters, committees, projects
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import (
     VIEW_CHAPTERS_ACTION,
+    VIEW_CHAPTERS_ACTION_NEXT,
+    VIEW_CHAPTERS_ACTION_PREV,
     VIEW_COMMITTEES_ACTION,
+    VIEW_COMMITTEES_ACTION_NEXT,
+    VIEW_COMMITTEES_ACTION_PREV,
     VIEW_PROJECTS_ACTION,
+    VIEW_PROJECTS_ACTION_NEXT,
+    VIEW_PROJECTS_ACTION_PREV,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,17 +41,31 @@ def handle_home_actions(ack, body, client):
             summary_truncation=200,
         )
 
+        page = int(value) if value.isdigit() else 1
+
         blocks = []
 
         match action_id:
-            case "view_chapters_action":
-                blocks = chapters.get_blocks(limit=10, presentation=home_presentation)
+            case (
+                "view_chapters_action"
+                | "view_chapters_action_prev"
+                | "view_chapters_action_next"
+            ):
+                blocks = chapters.get_blocks(page=page, limit=10, presentation=home_presentation)
 
-            case "view_committees_action":
-                blocks = committees.get_blocks(limit=10, presentation=home_presentation)
+            case (
+                "view_committees_action"
+                | "view_committees_action_prev"
+                | "view_committees_action_next"
+            ):
+                blocks = committees.get_blocks(page=page, limit=10, presentation=home_presentation)
 
-            case "view_projects_action":
-                blocks = projects.get_blocks(limit=10, presentation=home_presentation)
+            case (
+                "view_projects_action"
+                | "view_projects_action_prev"
+                | "view_projects_action_next"
+            ):
+                blocks = projects.get_blocks(page=page, limit=10, presentation=home_presentation)
             case _:
                 blocks = [markdown("Invalid action, please try again.")]
 
@@ -63,43 +83,18 @@ def handle_home_actions(ack, body, client):
         logger.exception("Error publishing Home Tab for user %s: %s", user_id, e.response["error"])
 
 
-def add_pagination_buttons(blocks, page, total_pages, action_id_prev, action_id_next):
-    """Add pagination buttons to the blocks."""
-    pagination_buttons = []
-
-    if page > 1:
-        pagination_buttons.append(
-            {
-                "type": "button",
-                "text": {"type": "plain_text", "text": "Previous"},
-                "action_id": action_id_prev,
-                "value": str(page - 1),
-                "style": "primary",
-            }
-        )
-
-    if total_pages > page:
-        pagination_buttons.append(
-            {
-                "type": "button",
-                "text": {"type": "plain_text", "text": "Next"},
-                "action_id": action_id_next,
-                "value": str(page + 1),
-                "style": "primary",
-            }
-        )
-
-    if pagination_buttons:
-        blocks.append(
-            {
-                "type": "actions",
-                "elements": pagination_buttons,
-            }
-        )
-
-
 # Register the actions
 if SlackConfig.app:
-    SlackConfig.app.action(VIEW_CHAPTERS_ACTION)(handle_home_actions)
-    SlackConfig.app.action(VIEW_COMMITTEES_ACTION)(handle_home_actions)
-    SlackConfig.app.action(VIEW_PROJECTS_ACTION)(handle_home_actions)
+    actions = [
+        VIEW_CHAPTERS_ACTION,
+        VIEW_CHAPTERS_ACTION_NEXT,
+        VIEW_CHAPTERS_ACTION_PREV,
+        VIEW_COMMITTEES_ACTION,
+        VIEW_COMMITTEES_ACTION_NEXT,
+        VIEW_COMMITTEES_ACTION_PREV,
+        VIEW_PROJECTS_ACTION,
+        VIEW_PROJECTS_ACTION_NEXT,
+        VIEW_PROJECTS_ACTION_PREV,
+    ]
+    for action in actions:
+        SlackConfig.app.action(action)(handle_home_actions)

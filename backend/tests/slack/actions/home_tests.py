@@ -31,9 +31,9 @@ class TestHomeActions:
             patch("apps.owasp.api.search.chapter.get_chapters") as mock_chapters,
             patch("apps.owasp.api.search.committee.get_committees") as mock_committees,
         ):
-            mock_projects.return_value = {"hits": []}
-            mock_chapters.return_value = {"hits": []}
-            mock_committees.return_value = {"hits": []}
+            mock_projects.return_value = {"hits": [], "nbPages": 1}
+            mock_chapters.return_value = {"hits": [], "nbPages": 1}
+            mock_committees.return_value = {"hits": [], "nbPages": 1}
             yield
 
     @pytest.mark.parametrize(

@@ -7,15 +7,19 @@ from django.utils.text import Truncator
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
-from apps.slack.blocks import markdown
+from apps.slack.blocks import add_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import (
+    FEEDBACK_CHANNEL_MESSAGE,
+    VIEW_CHAPTERS_ACTION_NEXT,
+    VIEW_CHAPTERS_ACTION_PREV,
+)
 from apps.slack.utils import escape
 
 
 def get_blocks(
-    search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
+    page, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
     """Get chapters blocks."""
     from apps.owasp.api.search.chapter import get_chapters
@@ -35,7 +39,11 @@ def get_blocks(
         "idx_url",
     ]
 
-    chapters = get_chapters(search_query, attributes=attributes, limit=limit)["hits"]
+    offset = (page - 1) * limit
+    chapters_data = get_chapters(search_query, attributes=attributes, limit=limit, page=page)
+    chapters = chapters_data["hits"]
+    total_pages = chapters_data["nbPages"]
+
     if not chapters:
         return [
             markdown(
@@ -71,7 +79,7 @@ def get_blocks(
 
         blocks.append(
             markdown(
-                f"{idx + 1}. <{chapter['idx_url']}|*{name}*>{NL}"
+                f"{offset + idx + 1}. <{chapter['idx_url']}|*{name}*>{NL}"
                 f"_{location}_{NL}"
                 f"{leaders_text}"
                 f"{escape(summary)}{NL}"
@@ -87,5 +95,19 @@ def get_blocks(
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
         )
+
+    pagination_block = add_pagination_buttons(
+        page,
+        total_pages - 1,
+        VIEW_CHAPTERS_ACTION_PREV,
+        VIEW_CHAPTERS_ACTION_NEXT,
+    )
+
+    blocks.append(
+        {
+            "type": "actions",
+            "elements": pagination_block,
+        }
+    )
 
     return blocks

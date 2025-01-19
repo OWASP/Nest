@@ -17,6 +17,7 @@ def projects_handler(ack, command, client):
 
     search_query = command["text"].strip()
     blocks = get_blocks(
+        page=1,
         search_query=search_query,
         limit=10,
         presentation=EntityPresentation(
@@ -27,6 +28,7 @@ def projects_handler(ack, command, client):
             summary_truncation=300,
         ),
     )
+    blocks.pop()  # Remove the buttons
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)

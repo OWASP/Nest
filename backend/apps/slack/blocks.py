@@ -53,3 +53,32 @@ def get_header():
             ],
         },
     ]
+
+
+def add_pagination_buttons(page, total_pages, action_id_prev, action_id_next):
+    """Add pagination buttons to the blocks."""
+    pagination_buttons = []
+
+    if page > 1:
+        pagination_buttons.append(
+            {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Previous"},
+                "action_id": action_id_prev,
+                "value": str(page - 1),
+                "style": "primary",
+            }
+        )
+
+    if total_pages > page:
+        pagination_buttons.append(
+            {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Next"},
+                "action_id": action_id_next,
+                "value": str(page + 1),
+                "style": "primary",
+            }
+        )
+
+    return pagination_buttons

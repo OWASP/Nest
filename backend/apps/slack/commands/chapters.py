@@ -32,6 +32,7 @@ def chapters_handler(ack, command, client):
     else:
         search_query = "" if command_text in COMMAND_START else command_text
         blocks = get_blocks(
+            page=1,
             search_query=search_query,
             limit=10,
             presentation=EntityPresentation(
@@ -42,6 +43,7 @@ def chapters_handler(ack, command, client):
                 summary_truncation=300,
             ),
         )
+        blocks.pop()  # remove the buttons
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
