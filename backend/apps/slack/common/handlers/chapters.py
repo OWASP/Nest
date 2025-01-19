@@ -102,12 +102,12 @@ def get_blocks(
         VIEW_CHAPTERS_ACTION_PREV,
         VIEW_CHAPTERS_ACTION_NEXT,
     )
-
-    blocks.append(
-        {
-            "type": "actions",
-            "elements": pagination_block,
-        }
-    )
+    if pagination_block:
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": pagination_block,
+            }
+        )
 
     return blocks

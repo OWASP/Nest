@@ -91,13 +91,17 @@ def get_blocks(
         )
 
     pagination_block = add_pagination_buttons(
-        page, total_pages - 1, VIEW_COMMITTEES_ACTION_PREV, VIEW_COMMITTEES_ACTION_NEXT
+        page,
+        total_pages - 1,
+        VIEW_COMMITTEES_ACTION_PREV,
+        VIEW_COMMITTEES_ACTION_NEXT,
     )
-    blocks.append(
-        {
-            "type": "actions",
-            "elements": pagination_block,
-        }
-    )
+    if pagination_block:
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": pagination_block,
+            }
+        )
 
     return blocks
