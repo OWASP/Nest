@@ -39,6 +39,7 @@ def handle_home_actions(ack, body, client):
             include_timestamps=False,
             name_truncation=80,
             summary_truncation=200,
+            include_buttons=True,
         )
 
         page = int(value) if value.isdigit() else 1
@@ -46,25 +47,25 @@ def handle_home_actions(ack, body, client):
         blocks = []
 
         match action_id:
-            case (
-                "view_chapters_action"
-                | "view_chapters_action_prev"
-                | "view_chapters_action_next"
-            ):
+            case action if action in {
+                VIEW_CHAPTERS_ACTION,
+                VIEW_CHAPTERS_ACTION_PREV,
+                VIEW_CHAPTERS_ACTION_NEXT,
+            }:
                 blocks = chapters.get_blocks(page=page, limit=10, presentation=home_presentation)
 
-            case (
-                "view_committees_action"
-                | "view_committees_action_prev"
-                | "view_committees_action_next"
-            ):
+            case action if action in {
+                VIEW_COMMITTEES_ACTION,
+                VIEW_COMMITTEES_ACTION_PREV,
+                VIEW_COMMITTEES_ACTION_NEXT,
+            }:
                 blocks = committees.get_blocks(page=page, limit=10, presentation=home_presentation)
 
-            case (
-                "view_projects_action"
-                | "view_projects_action_prev"
-                | "view_projects_action_next"
-            ):
+            case action if action in {
+                VIEW_PROJECTS_ACTION,
+                VIEW_PROJECTS_ACTION_PREV,
+                VIEW_PROJECTS_ACTION_NEXT,
+            }:
                 blocks = projects.get_blocks(page=page, limit=10, presentation=home_presentation)
             case _:
                 blocks = [markdown("Invalid action, please try again.")]

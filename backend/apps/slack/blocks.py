@@ -55,10 +55,12 @@ def get_header():
     ]
 
 
-def add_pagination_buttons(page, total_pages, action_id_prev, action_id_next):
+def get_pagination_buttons(page, total_pages, entity_name):
     """Add pagination buttons to the blocks."""
     pagination_buttons = []
 
+    action_id_prev = f"{entity_name}_action_prev"
+    action_id_next = f"{entity_name}_action_next"
     if page > 1:
         pagination_buttons.append(
             {

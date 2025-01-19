@@ -38,12 +38,12 @@ def chapters_handler(ack, command, client):
             presentation=EntityPresentation(
                 include_feedback=True,
                 include_metadata=True,
+                include_buttons=False,
                 include_timestamps=True,
                 name_truncation=80,
                 summary_truncation=300,
             ),
         )
-        blocks.pop()  # remove the buttons
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)

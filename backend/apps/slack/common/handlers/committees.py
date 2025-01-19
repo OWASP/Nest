@@ -7,19 +7,15 @@ from django.utils.text import Truncator
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
-from apps.slack.blocks import add_pagination_buttons, markdown
+from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.constants import (
-    FEEDBACK_CHANNEL_MESSAGE,
-    VIEW_COMMITTEES_ACTION_NEXT,
-    VIEW_COMMITTEES_ACTION_PREV,
-)
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 from apps.slack.utils import escape
 
 
 def get_blocks(
-    page, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
+    page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
     """Get committees blocks."""
     from apps.owasp.api.search.committee import get_committees
@@ -89,19 +85,18 @@ def get_blocks(
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
         )
-
-    pagination_block = add_pagination_buttons(
-        page,
-        total_pages - 1,
-        VIEW_COMMITTEES_ACTION_PREV,
-        VIEW_COMMITTEES_ACTION_NEXT,
-    )
-    if pagination_block:
-        blocks.append(
-            {
-                "type": "actions",
-                "elements": pagination_block,
-            }
+    if presentation.include_buttons:
+        pagination_block = get_pagination_buttons(
+            page,
+            total_pages - 1,
+            "view_committees",
         )
+        if pagination_block:
+            blocks.append(
+                {
+                    "type": "actions",
+                    "elements": pagination_block,
+                }
+            )
 
     return blocks
