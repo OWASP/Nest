@@ -1,8 +1,8 @@
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { headerLinks } from 'utils/constants'
+import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
@@ -12,6 +12,17 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= desktopViewMinWidth) {
+        setMobileMenuOpen(false)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">

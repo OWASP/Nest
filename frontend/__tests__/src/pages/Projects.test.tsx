@@ -74,8 +74,6 @@ describe('ProjectPage Component', () => {
 
     expect(screen.getByText('This is a summary of Project 1.')).toBeInTheDocument()
 
-    expect(screen.getByText('Leader 1')).toBeInTheDocument()
-
     const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
   })

@@ -28,5 +28,5 @@ VIEW_CHAPTERS_ACTION = "view_chapters_action"
 
 FEEDBACK_CHANNEL_MESSAGE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "
-    f"in the <#{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel.{NL}"
+    f"in the <{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel.{NL}"
 )

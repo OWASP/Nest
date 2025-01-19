@@ -6,11 +6,9 @@ from settings.base import Base
 class Local(Base):
     """Local configuration."""
 
+    APP_NAME = "OWASP Nest Local"
+    CORS_ALLOWED_ORIGINS = ("http://localhost:3000",)
     DEBUG = True
-
+    LOGGING = {}
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-
-    APP_NAME = "OWASP Nest Local"
-
-    CORS_ALLOWED_ORIGINS = ("http://localhost:3000",)

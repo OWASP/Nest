@@ -41,7 +41,6 @@ const CommitteesPage = () => {
         url={`committees/${committee.key}`}
         summary={committee.summary}
         icons={filteredIcons}
-        leaders={committee.leaders}
         topContributors={committee.top_contributors}
         button={SubmitButton}
         social={formattedUrls}

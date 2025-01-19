@@ -1,0 +1,14 @@
+"""default entities presentation for chapters, committees, project,."""
+
+from dataclasses import dataclass
+
+
+@dataclass
+class EntityPresentation:
+    """Configuration for entities presentation."""
+
+    include_feedback: bool = True
+    include_metadata: bool = True
+    include_timestamps: bool = True
+    name_truncation: int = 80
+    summary_truncation: int = 300
