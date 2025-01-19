@@ -2,6 +2,7 @@
 
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register
+from django.conf import settings
 
 from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
 from apps.owasp.models.project import Project
@@ -91,4 +92,26 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
+        ProjectIndex.configure_project_replicas()
         return ProjectIndex.reindex_synonyms("owasp", "projects")
+
+    @staticmethod
+    def configure_project_replicas():
+        """Configure the settings for project replicas."""
+        env = settings.ENVIRONMENT.lower()
+        client = IndexBase.get_client()
+        replicas = {
+            f"{env}_projects_name_asc": ["asc(idx_name)"],
+            f"{env}_projects_name_desc": ["desc(idx_name)"],
+            f"{env}_projects_stars_asc": ["asc(idx_stars_count)"],
+            f"{env}_projects_stars_desc": ["desc(idx_stars_count)"],
+            f"{env}_projects_contributors_asc": ["asc(idx_contributors_count)"],
+            f"{env}_projects_contributors_desc": ["desc(idx_contributors_count)"],
+            f"{env}_projects_forks_asc": ["asc(idx_forks_count)"],
+            f"{env}_projects_forks_desc": ["desc(idx_forks_count)"],
+        }
+
+        client.set_settings(f"{env}_projects", {"replicas": list(replicas.keys())})
+
+        for replica_name, ranking in replicas.items():
+            client.set_settings(replica_name, {"ranking": ranking})

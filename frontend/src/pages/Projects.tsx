@@ -1,13 +1,21 @@
 import { useSearchPage } from 'hooks/useSearchPage'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { project } from 'types/project'
 import { level } from 'utils/data'
+import { sortOptionsProject } from 'utils/sortingoptions'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
-
+import SortBy from 'components/sortBy'
 const ProjectsPage = () => {
+  const [sortBy, setSortBy] = useState('projects')
+
+  const handleSortChange = (val: string) => {
+    setSortBy(val)
+  }
+
   const {
     items: projects,
     isLoaded,
@@ -17,7 +25,7 @@ const ProjectsPage = () => {
     handleSearch,
     handlePageChange,
   } = useSearchPage<project>({
-    indexName: 'projects',
+    indexName: sortBy,
     pageTitle: 'OWASP Projects',
   })
   const navigate = useNavigate()
@@ -62,6 +70,13 @@ const ProjectsPage = () => {
       onPageChange={handlePageChange}
       empty="No projects found"
       searchPlaceholder="Search for OWASP projects..."
+      sortChildren={
+        <SortBy
+          options={sortOptionsProject}
+          selectedOption={sortBy}
+          onSortChange={handleSortChange}
+        />
+      }
     >
       {projects && projects.map(renderProjectCard)}
     </SearchPageLayout>
