@@ -50,9 +50,9 @@ const ChapterMap = ({ geoLocData }) => {
         const popup = L.popup()
         const popupContent = document.createElement('div')
         popupContent.className = 'popup-content'
-        popupContent.textContent = chapter.idx_name
+        popupContent.textContent = chapter.name
         popupContent.addEventListener('click', () => {
-          window.location.href = `/chapters/${chapter.idx_key}`
+          window.location.href = `/chapters/${chapter.key}`
         })
         popup.setContent(popupContent)
         marker.bindPopup(popup)

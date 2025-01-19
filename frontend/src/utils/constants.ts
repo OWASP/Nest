@@ -77,3 +77,5 @@ export const tooltipStyle = {
   borderRadius: '8px',
   zIndex: 100,
 }
+
+export const desktopViewMinWidth = 768

@@ -5,7 +5,7 @@ from django.conf import settings
 
 from apps.common.constants import NL
 from apps.slack.blocks import markdown
-from apps.slack.commands.gsoc import COMMAND, handler
+from apps.slack.commands.gsoc import COMMAND, gsoc_handler
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
 
@@ -46,7 +46,7 @@ class TestGsocHandler:
             "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
             new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
         ):
-            handler(ack=MagicMock(), command=command, client=mock_slack_client)
+            gsoc_handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
             if not commands_enabled:
                 mock_slack_client.conversations_open.assert_not_called()
@@ -80,7 +80,7 @@ class TestGsocHandler:
             "apps.owasp.models.project.Project.get_gsoc_projects",
             return_value=mock_projects,
         ):
-            handler(ack=MagicMock(), command=command, client=mock_slack_client)
+            gsoc_handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
             blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
             project_block = str(blocks[0])

@@ -21,8 +21,8 @@ export default function DisplayIcon({
       ? 'rounded-bl-none sm:rounded-bl-md'
       : '',
     idx === -1 ? 'border-r sm:border-r-0' : '',
-    item === 'idx_updated_at' || item === 'idx_stars_count' ? 'rotate-container' : '',
-    item === 'idx_forks_count' || item === 'idx_contributors_count' ? 'flip-container' : '',
+    item === 'updated_at' || item === 'stars_count' ? 'rotate-container' : '',
+    item === 'forks_count' || item === 'contributors_count' ? 'flip-container' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -30,8 +30,8 @@ export default function DisplayIcon({
   // className for the FontAwesome icon
   const iconClassName = [
     'text-gray-600 dark:text-gray-300',
-    item === 'idx_updated_at' || item === 'idx_stars_count' ? 'icon-rotate' : '',
-    item === 'idx_forks_count' || item === 'idx_contributors_count' ? 'icon-flip' : '',
+    item === 'updated_at' || item === 'stars_count' ? 'icon-rotate' : '',
+    item === 'forks_count' || item === 'contributors_count' ? 'icon-flip' : '',
   ]
     .filter(Boolean)
     .join(' ')

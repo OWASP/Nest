@@ -42,7 +42,7 @@ CONTRIBUTE_GENERAL_INFORMATION_BLOCKS = (
         "  • Check the Leaders section on the official <https://owasp.org/projects|OWASP site> "
         f"or <{projects_url}|OWASP Nest Projects> page to identify project leaders. Normally, "
         "a project has at least two leaders. Having multiple project leaders who are not all "
-        "employed by the same company is a good practice.>{2*NL}"
+        f"employed by the same company is a good practice.>{2*NL}"
         "  • Review the project's codebase commit history on GitHub to find active contributors "
         f"who can also provide valuable guidance and insights.{2*NL}"
         "  • Review the project's channel history to get understanding of recent and ongoing "
