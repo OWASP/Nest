@@ -65,7 +65,6 @@ export default [
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-unused-expressions': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'prettier/prettier': ['error'],
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',
       'react/prop-types': 'off',

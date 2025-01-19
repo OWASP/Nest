@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.slack.commands.leaders import handler
+from apps.slack.commands.leaders import leaders_handler
 
 
 class TestLeadersHandler:
@@ -65,7 +65,7 @@ class TestLeadersHandler:
         mock_get_chapters.return_value = {"hits": [mock_chapter] if has_results else []}
         mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
 
-        handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        leaders_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()
@@ -104,7 +104,7 @@ class TestLeadersHandler:
         mock_get_chapters.return_value = {"hits": []}
         mock_get_projects.return_value = {"hits": []}
 
-        handler(ack=MagicMock(), command=command, client=mock_slack_client)
+        leaders_handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
 
@@ -146,7 +146,7 @@ class TestLeadersHandler:
         mock_get_chapters.return_value = {"hits": [mock_chapter]}
         mock_get_projects.return_value = {"hits": [mock_project]}
 
-        handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        leaders_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         block_texts = [

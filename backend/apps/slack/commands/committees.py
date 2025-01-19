@@ -2,67 +2,35 @@
 
 from django.conf import settings
 
-from apps.common.constants import NL
-from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
-from apps.slack.commands.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
-from apps.slack.utils import escape
+from apps.slack.common.handlers.committees import get_blocks
+from apps.slack.common.presentation import EntityPresentation
 
 COMMAND = "/committees"
 
 
-def handler(ack, command, client):
+def committees_handler(ack, command, client):
     """Slack /committees command handler."""
-    from apps.owasp.api.search.committee import get_committees
-    from apps.owasp.models.committee import Committee
-
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    command_text = command["text"].strip()
-    search_query = "" if command_text in COMMAND_START else command_text
-    search_query_escaped = escape(search_query)
-    blocks = [
-        markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}"),
-    ]
-
-    attributes = ["idx_leaders", "idx_name", "idx_summary", "idx_url"]
-
-    if committees := get_committees(search_query, attributes=attributes, limit=10)["hits"]:
-        blocks = [
-            markdown(
-                f"{NL}*OWASP committees that I found for* `{search_query_escaped}`:{NL}"
-                if search_query_escaped
-                else f"{NL}*OWASP committees:*{NL}"
-            ),
-        ]
-
-        for idx, committee in enumerate(committees):
-            leaders = committee.get("idx_leaders", [])
-            blocks.append(
-                markdown(
-                    f"{NL}*{idx + 1}. *"
-                    f"<{committee['idx_url']}|*{escape(committee['idx_name'])}*>{NL}"
-                    f"_Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}_{NL}"
-                    f"{escape(committee['idx_summary'])}{NL}"
-                )
-            )
-
-        blocks.append(
-            markdown(
-                f"⚠️ *Extended search over {Committee.active_committees_count()} OWASP committees"
-                f"is available at <{get_absolute_url('committees')}"
-                f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
-                f"{FEEDBACK_CHANNEL_MESSAGE}"
-            ),
-        )
+    search_query = command["text"].strip()
+    blocks = get_blocks(
+        search_query=search_query,
+        limit=10,
+        presentation=EntityPresentation(
+            include_feedback=True,
+            include_metadata=True,
+            include_timestamps=True,
+            name_truncation=80,
+            summary_truncation=300,
+        ),
+    )
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(handler)
+    committees_handler = SlackConfig.app.command(COMMAND)(committees_handler)

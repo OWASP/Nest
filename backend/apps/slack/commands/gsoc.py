@@ -5,7 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.commands.constants import COMMAND_START
+from apps.slack.common.constants import COMMAND_START
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
 COMMAND = "/gsoc"
@@ -16,7 +16,7 @@ SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))  # 20
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
 
-def handler(ack, command, client):
+def gsoc_handler(ack, command, client):
     """Slack /gsoc command handler."""
     from apps.owasp.models.project import Project
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
@@ -36,13 +36,13 @@ def handler(ack, command, client):
         year = int(command_text)
         if year in SUPPORTED_YEARS:
             gsoc_projects = Project.get_gsoc_projects(year)
-            gsoc_projects_markwown = f"{NL}".join(
+            gsoc_projects_markdown = f"{NL}".join(
                 f"  • <{gp.nest_url}|{gp.owasp_name}>"
                 for gp in sorted(gsoc_projects, key=lambda p: p.owasp_name)
             )
             additional_info = []
             blocks = [
-                markdown(f"*GSoC {year} projects:*{2*NL}{gsoc_projects_markwown}"),
+                markdown(f"*GSoC {year} projects:*{2*NL}{gsoc_projects_markdown}"),
             ]
             if year in SUPPORTED_ANNOUNCEMENT_YEARS:
                 additional_info.append(
@@ -81,4 +81,4 @@ def handler(ack, command, client):
 
 
 if SlackConfig.app:
-    handler = SlackConfig.app.command(COMMAND)(handler)
+    gsoc_handler = SlackConfig.app.command(COMMAND)(gsoc_handler)

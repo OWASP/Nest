@@ -1,4 +1,4 @@
-"""Slack bot URL verification event handler."""
+"""Slack URL verification event handler."""
 
 from apps.slack.apps import SlackConfig
 
@@ -9,4 +9,4 @@ def url_verification_handler(event, *_args, **_kwargs):
 
 
 if SlackConfig.app:
-    SlackConfig.app.event("url_verification")(url_verification_handler)
+    url_verification_handler = SlackConfig.app.event("url_verification")(url_verification_handler)
