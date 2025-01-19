@@ -11,6 +11,7 @@ export const mockChaterDetailsData = {
     'https://www.linkedin.com/test',
     'https://www.youtube.com/test',
     'https://twitter.com/test',
+    'https://meetup.com/test',
   ],
   summary: 'This is a test chapter summary.',
   top_contributors: [

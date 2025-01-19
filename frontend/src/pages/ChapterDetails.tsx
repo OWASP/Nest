@@ -4,6 +4,7 @@ import {
   faLinkedin,
   faYoutube,
   faTwitter,
+  faMeetup,
 } from '@fortawesome/free-brands-svg-icons'
 import {
   faGlobe,
@@ -23,11 +24,19 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const getSocialIcon = (url: string) => {
-  if (url.includes('discord')) return faDiscord
-  if (url.includes('instagram')) return faInstagram
-  if (url.includes('linkedin')) return faLinkedin
-  if (url.includes('youtube')) return faYoutube
-  if (url.includes('twitter') || url.includes('x.com')) return faTwitter
+  if (!/^https?:\/\//i.test(url)) {
+    url = 'http://' + url
+  }
+
+  const hostname = new URL(url).hostname.toLowerCase()
+
+  if (hostname === 'discord.com' || hostname.endsWith('.discord.com')) return faDiscord
+  if (hostname === 'instagram.com' || hostname.endsWith('.instagram.com')) return faInstagram
+  if (hostname === 'linkedin.com' || hostname.endsWith('.linkedin.com')) return faLinkedin
+  if (hostname === 'youtube.com' || hostname.endsWith('.youtube.com')) return faYoutube
+  if (hostname === 'twitter.com' || hostname === 'x.com' || hostname.endsWith('.x.com'))
+    return faTwitter
+  if (hostname === 'meetup.com' || hostname.endsWith('.meetup.com')) return faMeetup
   return faGlobe
 }
 
@@ -151,19 +160,27 @@ export default function ChapterDetailsPage() {
               ? chapter.top_contributors
               : chapter.top_contributors.slice(0, 6)
             ).map((contributor, index) => (
-              <div key={index} className="flex items-center space-x-3">
+              <a
+                key={index}
+                href={`https://github.com/${contributor.login}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
                 <img
                   src={contributor.avatar_url}
                   alt={contributor.name || contributor.login}
                   className="mr-3 h-10 w-10 rounded-full"
                 />
                 <div>
-                  <p className="font-semibold">{contributor.name || contributor.login}</p>
+                  <p className="font-semibold text-blue-600 hover:underline dark:text-sky-400">
+                    {contributor.name || contributor.login}
+                  </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {contributor.contributions_count} contributions
                   </p>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
           {chapter.top_contributors.length > 6 && (
