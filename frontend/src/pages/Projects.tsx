@@ -45,7 +45,7 @@ const ProjectsPage = () => {
         icons={filteredIcons}
         topContributors={project.top_contributors}
         button={SubmitButton}
-        isActive={project.idx_is_active}
+        isActive={project.is_active}
       />
     )
   }

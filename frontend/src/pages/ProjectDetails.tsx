@@ -82,6 +82,9 @@ const ProjectDetailsPage = () => {
               <strong>Level:</strong> {project.level[0].toUpperCase() + project.level.slice(1)}
             </p>
             <p>
+              <strong>Status:</strong> {project.is_active ? 'Active' : 'Inactive'}
+            </p>
+            <p>
               <strong>Organization:</strong> {project.organizations}
             </p>
             <div>
