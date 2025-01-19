@@ -2,7 +2,7 @@ import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontaw
 import { useState, useEffect } from 'react'
 import { Tooltip } from 'react-tooltip'
 import { CardProps } from 'types/card'
-import { tooltipStyle } from 'utils/constants'
+import { desktopViewMinWidth, tooltipStyle } from 'utils/constants'
 import { Icons } from 'utils/data'
 import { cn } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
@@ -12,7 +12,7 @@ import DisplayIcon from 'components/DisplayIcon'
 import Markdown from 'components/MarkdownWrapper'
 
 // Initial check for mobile screen size
-const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < 768
+const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < desktopViewMinWidth
 
 const Card = ({
   title,
@@ -32,7 +32,7 @@ const Card = ({
   // Resize listener to adjust display based on screen width
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768
+      const mobile = window.innerWidth < desktopViewMinWidth
       setIsMobile(mobile)
     }
     window.addEventListener('resize', checkMobile)
