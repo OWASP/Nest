@@ -1,23 +1,15 @@
 """Handle feedback submission, saving to local DB and uploading to S3."""
 
 import csv
-import logging
 from datetime import datetime, timezone
 from io import StringIO
 
 import boto3
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()],  # Ensures logs go to stdout/stderr
-)
-logger = logging.getLogger(__name__)
 
 
 class FeedbackViewSet(viewsets.ModelViewSet):
@@ -27,10 +19,8 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         """Handle POST request for feedback submission."""
-        logger.info("Processing new feedback submission")
         try:
             feedback_data = request.data
-            logger.debug("Received feedback data: %s", feedback_data)
 
             # Initialize S3 client
             s3_client = self._get_s3_client()
@@ -44,19 +34,12 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             # Upload the updated TSV file back to S3
             self._upload_tsv_to_s3(s3_client, output)
 
-            logger.info("Feedback successfully saved to %s", "feedbacks.tsv")
-
             return Response(status=status.HTTP_201_CREATED)
-        except Exception:
-            logger.exception("Error processing feedback submission: %s")
-            return Response(
-                {"error": "An error occurred while processing feedback"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def _get_s3_client(self):
         """Initialize and returns the S3 client."""
-        logger.debug("Initializing S3 client")
         return boto3.client(
             "s3",
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -68,16 +51,13 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         """Get the existing TSV file or creates a new one if it doesn't exist."""
         tsv_key = "feedbacks.tsv"
         try:
-            logger.debug("Attempting to read existing TSV file: %s", tsv_key)
             response = s3_client.get_object(
                 Bucket=settings.AWS_STORAGE_BUCKET_NAME,
                 Key=tsv_key,
             )
             existing_content = response["Body"].read().decode("utf-8")
             output = StringIO(existing_content)
-            logger.debug("Successfully read existing TSV file")
         except s3_client.exceptions.NoSuchKey:
-            logger.info("No existing TSV file found, creating a new one")
             output = StringIO()
             writer = csv.writer(output, delimiter="\t")
             writer.writerow(
@@ -100,7 +80,6 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                 datetime.now(timezone.utc).isoformat(),
             ]
         )
-        logger.debug("New feedback data written to TSV")
 
     def _upload_tsv_to_s3(self, s3_client, output):
         """Upload the updated TSV file back to S3."""
@@ -110,4 +89,3 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             Body=output.getvalue(),
             ContentType="text/tab-separated-values",
         )
-        logger.debug("TSV file uploaded to S3 successfully")
