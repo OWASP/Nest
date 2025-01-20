@@ -20,6 +20,7 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
         "idx_description",
         "idx_forks_count",
         "idx_has_funding_yml",
+        "idx_is_active",
         "idx_key",
         "idx_languages",
         "idx_license",
@@ -32,7 +33,6 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
         "idx_subscribers_count",
         "idx_top_contributors",
         "idx_topics",
-        "idx_is_active",
     )
 
     settings = {

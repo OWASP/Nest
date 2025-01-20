@@ -16,6 +16,7 @@ class ChapterIndex(AlgoliaIndex):
     fields = (
         "idx_country",
         "idx_created_at",
+        "idx_is_active",
         "idx_key",
         "idx_leaders",
         "idx_name",
@@ -28,7 +29,6 @@ class ChapterIndex(AlgoliaIndex):
         "idx_tags",
         "idx_updated_at",
         "idx_url",
-        "idx_is_active",
     )
 
     geo_field = "idx_geo_location"

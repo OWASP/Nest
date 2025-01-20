@@ -41,6 +41,11 @@ class RepositoryIndexMixin:
         return self.has_funding_yml
 
     @property
+    def idx_is_active(self):
+        """Return active status."""
+        return not self.is_archived
+
+    @property
     def idx_key(self):
         """Return key for indexing."""
         return self.nest_key
@@ -115,8 +120,3 @@ class RepositoryIndexMixin:
     def idx_topics(self):
         """Return topics for indexing."""
         return self.topics
-
-    @property
-    def idx_is_active(self):
-        """Return URL for indexing."""
-        return not self.is_archived

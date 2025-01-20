@@ -21,6 +21,7 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         "idx_forks_count",
         "idx_issues",
         "idx_issues_count",
+        "idx_is_active",
         "idx_key",
         "idx_languages",
         "idx_leaders",
@@ -40,7 +41,6 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         "idx_type",
         "idx_updated_at",
         "idx_url",
-        "idx_is_active",
     )
 
     settings = {

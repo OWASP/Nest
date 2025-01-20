@@ -61,6 +61,11 @@ class ProjectIndexMixin(GenericEntityMixin):
         return self.open_issues.count()
 
     @property
+    def idx_is_active(self):
+        """Return active status."""
+        return self.is_active
+
+    @property
     def idx_key(self):
         """Return key for indexing."""
         return self.key.replace("www-project-", "")
@@ -161,8 +166,3 @@ class ProjectIndexMixin(GenericEntityMixin):
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return self.updated_at.timestamp() if self.updated_at else ""
-
-    @property
-    def idx_is_active(self):
-        """Return URL for indexing."""
-        return self.is_active
