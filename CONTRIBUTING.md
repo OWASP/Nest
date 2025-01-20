@@ -293,46 +293,17 @@ git checkout -b feature/my-feature-name
 - Address feedback from maintainers during code review.
 - Once approved, your PR will be merged into the main branch.
 
+## Troubleshooting
 
-### Troubleshooting Section 
+- **"Unexpected character" error during application execution or Docker image building**
+  This error is usually caused by incorrect encoding of `.env` files.
 
-- This section provides solutions to common problems contributors might face.
+  - Open the `.env` files in a text editor (e.g., VS Code) and save them as "UTF-8 without BOM."
+  - Restart the application with `make run` and verify the error is resolved.
 
-
-**Problem:** "Unexpected character" error during application execution or Docker image building.
-
-**Solution:**
-
-This error often occurs due to incorrect encoding of the .env files (used to store environment variables).
-
-1. **Check File Encoding:**
-   * Open the .env files (frontend and backend) in a text editor that allows encoding selection (e.g., Notepad++, VS Code).
-   * Save each file as "UTF-8 without BOM".
-
-2. **Rebuild Docker Images (if applicable):**
-   * In your terminal, navigate to the project root directory.
-   * Run the following command:
-     ```bash
-     docker-compose build
-     ```
-
-3. **Test:**
-   * Run your application using `make run` and verify if the error is resolved.
-
-**Possible Causes:**
-
-*   The .env files were created or edited using a text editor that saved them with an incorrect encoding (e.g., UTF-16, ANSI).
-*   The operating system or terminal environment might have issues with encoding.
-
-**Additional Tips:**
-
-*   Consider using a linter or code formatter to ensure consistent file encoding across your project.
-*   If the issue persists, check the Dockerfile and Docker Compose files for any potential encoding-related issues.
-
-
-**Additional Resources:**
-
-* If you encounter an issue specific to the NEST project, refer to the project's documentation or search the project's issue tracker for solutions.
+  Tips:
+  - Ensure consistent file encoding using a code editor or linter.
+  - If the issue persists, check the project's documentation or issue tracker.
 
 ## Code of Conduct
 
