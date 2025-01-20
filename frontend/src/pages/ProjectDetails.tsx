@@ -66,6 +66,9 @@ const ProjectDetailsPage = () => {
   const toggleLanguages = () => setShowAllLanguages(!showAllLanguages)
   const toggleTopics = () => setShowAllTopics(!showAllTopics)
 
+  const hasIssues = project.issues && project.issues.length > 0
+  const hasReleases = project.releases && project.releases.length > 0
+
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -236,9 +239,9 @@ const ProjectDetailsPage = () => {
           )}
         </div>
 
-        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Recent Issues</h2>
-          {project.issues && project.issues.length > 0 ? (
+        {hasIssues && (
+          <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold">Recent Issues</h2>
             <div className="h-64 overflow-y-auto pr-2">
               {project.issues.map((issue, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -260,14 +263,12 @@ const ProjectDetailsPage = () => {
                 </div>
               ))}
             </div>
-          ) : (
-            <p>No recent issues.</p>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Recent Releases</h2>
-          {project.releases && project.releases.length > 0 ? (
+        {hasReleases && (
+          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold">Recent Releases</h2>
             <div className="h-64 overflow-y-auto pr-2">
               {project.releases.map((release, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -289,10 +290,8 @@ const ProjectDetailsPage = () => {
                 </div>
               ))}
             </div>
-          ) : (
-            <p>No recent releases.</p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
