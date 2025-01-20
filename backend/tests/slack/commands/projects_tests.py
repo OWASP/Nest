@@ -38,7 +38,7 @@ class TestProjectsHandler:
     @pytest.fixture(autouse=True)
     def mock_get_projects(self):
         with patch("apps.owasp.api.search.project.get_projects") as mock:
-            mock.return_value = {"hits": []}
+            mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 
     @pytest.mark.parametrize(
@@ -75,7 +75,8 @@ class TestProjectsHandler:
                     "idx_stars_count": 10,
                     "idx_updated_at": test_date.timestamp(),
                 }
-            ]
+            ],
+            "nbPages": 1,
         }
 
         projects_handler(ack=MagicMock(), command=mock_command, client=mock_client)

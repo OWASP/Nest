@@ -37,7 +37,7 @@ class TestChaptersHandler:
     @pytest.fixture(autouse=True)
     def mock_get_chapters(self):
         with patch("apps.owasp.api.search.chapter.get_chapters") as mock:
-            mock.return_value = {"hits": []}
+            mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 
     @pytest.mark.parametrize(
@@ -73,7 +73,8 @@ class TestChaptersHandler:
                     "idx_region": "Test Region",
                     "idx_updated_at": "2024-01-01",
                 }
-            ]
+            ],
+            "nbPages": 1,
         }
 
         chapters_handler(ack=MagicMock(), command=mock_command, client=mock_client)
