@@ -22,11 +22,19 @@ OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID = "#CURE8PQ68"
 OWASP_THREAT_MODELING_CHANNEL_ID = "#C1CS3C6AF"
 
 VIEW_PROJECTS_ACTION = "view_projects_action"
+VIEW_PROJECTS_ACTION_NEXT = "view_projects_action_next"
+VIEW_PROJECTS_ACTION_PREV = "view_projects_action_prev"
+
 VIEW_COMMITTEES_ACTION = "view_committees_action"
+VIEW_COMMITTEES_ACTION_NEXT = "view_committees_action_next"
+VIEW_COMMITTEES_ACTION_PREV = "view_committees_action_prev"
+
 VIEW_CHAPTERS_ACTION = "view_chapters_action"
+VIEW_CHAPTERS_ACTION_NEXT = "view_chapters_action_next"
+VIEW_CHAPTERS_ACTION_PREV = "view_chapters_action_prev"
 
 
 FEEDBACK_CHANNEL_MESSAGE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "
-    f"in the <#{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel.{NL}"
+    f"in the <{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel.{NL}"
 )

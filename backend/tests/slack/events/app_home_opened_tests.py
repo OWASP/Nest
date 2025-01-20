@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.slack.events.app_home_opened import handler
+from apps.slack.events.app_home_opened import app_home_opened_handler
 
 
 class TestSlackHandler:
@@ -39,7 +39,7 @@ class TestSlackHandler:
                 },
             }
 
-            handler(mock_event, mock_client, mock_ack)
+            app_home_opened_handler(mock_event, mock_client, mock_ack)
 
             mock_ack.assert_called_once()
 
