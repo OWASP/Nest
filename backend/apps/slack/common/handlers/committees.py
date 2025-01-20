@@ -7,7 +7,7 @@ from django.utils.text import Truncator
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
-from apps.slack.blocks import markdown
+from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
@@ -15,7 +15,7 @@ from apps.slack.utils import escape
 
 
 def get_blocks(
-    search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
+    page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
     """Get committees blocks."""
     from apps.owasp.api.search.committee import get_committees
@@ -31,7 +31,11 @@ def get_blocks(
         "idx_url",
     ]
 
-    committees = get_committees(search_query, attributes=attributes, limit=limit)["hits"]
+    offset = (page - 1) * limit
+    committees_data = get_committees(search_query, attributes=attributes, limit=limit, page=page)
+    committees = committees_data["hits"]
+    total_pages = committees_data["nbPages"]
+
     if not committees:
         return [
             markdown(
@@ -66,7 +70,7 @@ def get_blocks(
 
         blocks.append(
             markdown(
-                f"{idx + 1}. <{committee['idx_url']}|*{name}*>{NL}"
+                f"{offset + idx + 1}. <{committee['idx_url']}|*{name}*>{NL}"
                 f"{leaders_text}"
                 f"{escape(summary)}{NL}"
             )
@@ -80,6 +84,19 @@ def get_blocks(
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
+        )
+    if presentation.include_pagination and (
+        pagination_block := get_pagination_buttons(
+            "committees",
+            page,
+            total_pages - 1,
+        )
+    ):
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": pagination_block,
+            }
         )
 
     return blocks
