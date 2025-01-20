@@ -7,7 +7,7 @@ from django.utils.text import Truncator
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url, natural_date
-from apps.slack.blocks import markdown
+from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
@@ -15,7 +15,7 @@ from apps.slack.utils import escape
 
 
 def get_blocks(
-    search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
+    page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
     """Get projects blocks."""
     from apps.owasp.api.search.project import get_projects
@@ -36,7 +36,11 @@ def get_blocks(
         "idx_url",
     ]
 
-    projects = get_projects(search_query, attributes=attributes, limit=limit)["hits"]
+    offset = (page - 1) * limit
+    projects_data = get_projects(search_query, attributes=attributes, limit=limit, page=page)
+    projects = projects_data["hits"]
+    total_pages = projects_data["nbPages"]
+
     if not projects:
         return [
             markdown(
@@ -88,7 +92,7 @@ def get_blocks(
 
         blocks.append(
             markdown(
-                f"{idx + 1}. <{project['idx_url']}|*{name}*>{NL}"
+                f"{offset + idx + 1}. <{project['idx_url']}|*{name}*>{NL}"
                 f"{updated_text}"
                 f"{metadata_text}"
                 f"{leader_text}"
@@ -104,6 +108,20 @@ def get_blocks(
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
+        )
+
+    if presentation.include_pagination and (
+        pagination_block := get_pagination_buttons(
+            "projects",
+            page,
+            total_pages - 1,
+        )
+    ):
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": pagination_block,
+            }
         )
 
     return blocks

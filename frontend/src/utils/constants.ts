@@ -77,3 +77,13 @@ export const tooltipStyle = {
   borderRadius: '8px',
   zIndex: 100,
 }
+
+export const themeToggleTooltip = {
+  backgroundColor: '#28282B',
+  color: 'white',
+  fontSize: '0.7rem',
+  borderRadius: '6px',
+  padding: '3px 7px',
+}
+
+export const desktopViewMinWidth = 768
