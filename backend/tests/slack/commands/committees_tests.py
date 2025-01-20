@@ -37,7 +37,7 @@ class TestCommitteesHandler:
     @pytest.fixture(autouse=True)
     def mock_get_committees(self):
         with patch("apps.owasp.api.search.committee.get_committees") as mock:
-            mock.return_value = {"hits": []}
+            mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 
     @pytest.mark.parametrize(
@@ -68,7 +68,8 @@ class TestCommitteesHandler:
                     "idx_url": "http://example.com",
                     "idx_leaders": ["Leader 1"],
                 }
-            ]
+            ],
+            "nbPages": 1,
         }
 
         committees_handler(ack=MagicMock(), command=mock_command, client=mock_client)
