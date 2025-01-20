@@ -206,9 +206,7 @@ const ProjectDetailsPage = () => {
               : project.top_contributors.slice(0, 6)
             ).map((contributor, index) => (
               <div key={index} className="flex items-center cursor-pointer"
-              onClick={() => {
-                navigate(`/community/users/${contributor.login}`)
-              }}
+              onClick={() => { navigate(`/community/users/${contributor.login}`)}}
               >
                 <img
                   src={contributor.avatar_url}
