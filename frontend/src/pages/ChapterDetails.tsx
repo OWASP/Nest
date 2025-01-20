@@ -3,8 +3,8 @@ import {
   faInstagram,
   faLinkedin,
   faYoutube,
-  faTwitter,
   faMeetup,
+  faXTwitter,
 } from '@fortawesome/free-brands-svg-icons'
 import {
   faGlobe,
@@ -35,7 +35,7 @@ const getSocialIcon = (url: string) => {
   if (hostname === 'linkedin.com' || hostname.endsWith('.linkedin.com')) return faLinkedin
   if (hostname === 'youtube.com' || hostname.endsWith('.youtube.com')) return faYoutube
   if (hostname === 'twitter.com' || hostname === 'x.com' || hostname.endsWith('.x.com'))
-    return faTwitter
+    return faXTwitter
   if (hostname === 'meetup.com' || hostname.endsWith('.meetup.com')) return faMeetup
   return faGlobe
 }
@@ -130,7 +130,7 @@ export default function ChapterDetailsPage() {
 
               <div>
                 <div className="text-sm font-medium">Social Links</div>
-                <div className="mt-2 flex space-x-4">
+                <div className="mt-2 flex flex-wrap gap-3">
                   {chapter.related_urls.map((url, index) => (
                     <a
                       key={index}
