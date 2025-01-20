@@ -13,7 +13,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -45,6 +45,8 @@ const ProjectDetailsPage = () => {
 
     fetchProjectData()
   }, [projectKey])
+
+  const navigate = useNavigate()
 
   if (isLoading)
     return (
@@ -203,7 +205,11 @@ const ProjectDetailsPage = () => {
               ? project.top_contributors
               : project.top_contributors.slice(0, 6)
             ).map((contributor, index) => (
-              <div key={index} className="flex items-center">
+              <div key={index} className="flex items-center cursor-pointer" 
+              onClick={() => { 
+                navigate(`/community/users/${contributor.login}`) 
+              }}
+              >
                 <img
                   src={contributor.avatar_url}
                   alt={contributor.name || contributor.login}
