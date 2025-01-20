@@ -91,4 +91,4 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
-        return ProjectIndex.reindex_synonyms("owasp", "projects")
+        return ProjectIndex.reindex_synonyms("owasp", "project")
