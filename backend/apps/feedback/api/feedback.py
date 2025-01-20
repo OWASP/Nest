@@ -22,16 +22,12 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         try:
             feedback_data = request.data
 
-            # Initialize S3 client
             s3_client = self._get_s3_client()
 
-            # Get or create the TSV file
             output, writer = self._get_or_create_tsv(s3_client)
 
-            # Write new feedback data
             self._write_feedback_to_tsv(writer, feedback_data)
 
-            # Upload the updated TSV file back to S3
             self._upload_tsv_to_s3(s3_client, output)
 
             return Response(status=status.HTTP_201_CREATED)

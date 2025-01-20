@@ -1,23 +1,25 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { postFeedback } from 'api/postFeedbackData'
 import { useToast } from 'hooks/useToast'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import ReCAPTCHA from 'react-google-recaptcha'
 import { useForm } from 'react-hook-form'
-import { API_URL } from 'utils/credentials'
+import { RECAPTCHA_SITE_KEY } from 'utils/credentials'
 import {
   anonymousFeedbackFormSchema,
   feedbackFormSchema,
   type FeedbackFormValues,
 } from 'utils/helpers/schema'
-import logger from 'utils/logger'
-import { Button } from 'components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from 'components/ui/form'
-import { Input } from 'components/ui/input'
-import { Switch } from 'components/ui/switch'
-import { Textarea } from 'components/ui/textarea'
+import { Button } from 'components/ui/Button'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from 'components/ui/Form'
+import { Input } from 'components/ui/Input'
+import { Switch } from 'components/ui/Switch'
+import { Textarea } from 'components/ui/Textarea'
 
 export function FeedbackForm() {
   const [isAnonymous, setIsAnonymous] = useState(false)
   const { toast } = useToast()
+  const captchaRef = useRef(null)
 
   const form = useForm<FeedbackFormValues>({
     resolver: zodResolver(isAnonymous ? anonymousFeedbackFormSchema : feedbackFormSchema),
@@ -30,48 +32,38 @@ export function FeedbackForm() {
     },
   })
 
-  const postFeedback = async (data: FeedbackFormValues) => {
-    const url = `${API_URL}/owasp/feedback/`
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to submit feedback: ${response.statusText}`)
-      }
-
-      return response
-    } catch (error) {
-      logger.error('Failed to submit feedback', error)
+  async function onSubmit(data: FeedbackFormValues) {
+    if (isAnonymous) data.email = ''
+    const token = captchaRef.current.getValue()
+    if (!token) {
       toast({
         variant: 'destructive',
         title: 'Failed to submit feedback',
-        description: 'Please try again later.',
+        description: 'Please complete the reCAPTCHA.',
       })
+    } else {
+      const responseData = await postFeedback(data)
+      if (responseData.ok) {
+        toast({
+          title: 'Feedback Submitted',
+          description: 'Thank you for your feedback!',
+        })
+        captchaRef.current.reset()
+        form.reset({
+          name: '',
+          email: '',
+          message: '',
+          is_anonymous: isAnonymous,
+          is_nestbot: false,
+        })
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to submit feedback',
+          description: 'Please try again later.',
+        })
+      }
     }
-  }
-
-  async function onSubmit(data: FeedbackFormValues) {
-    if (isAnonymous) data.email = ''
-
-    const responseData = await postFeedback(data)
-    logger.log('Feedback submitted', responseData)
-    toast({
-      title: 'Feedback Submitted',
-      description: 'Thank you for your feedback!',
-    })
-    form.reset({
-      name: '',
-      email: '',
-      message: '',
-      is_anonymous: isAnonymous,
-      is_nestbot: false,
-    })
   }
 
   return (
@@ -157,6 +149,7 @@ export function FeedbackForm() {
             </FormItem>
           )}
         />
+        <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} ref={captchaRef} />
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Submitting...' : 'Submit Feedback'}
         </Button>
