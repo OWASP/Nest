@@ -201,7 +201,7 @@ const ProjectDetailsPage = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {(showAllContributors
               ? project.top_contributors
-              : project.top_contributors.slice(0, 5)
+              : project.top_contributors.slice(0, 6)
             ).map((contributor, index) => (
               <div key={index} className="flex items-center">
                 <img
