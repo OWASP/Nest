@@ -53,3 +53,32 @@ def get_header():
             ],
         },
     ]
+
+
+def get_pagination_buttons(entity_type, page, total_pages):
+    """Get pagination buttons for the blocks."""
+    pagination_buttons = []
+
+    if page > 1:
+        pagination_buttons.append(
+            {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Previous"},
+                "action_id": f"view_{entity_type}_action_prev",
+                "value": str(page - 1),
+                "style": "primary",
+            }
+        )
+
+    if total_pages > page:
+        pagination_buttons.append(
+            {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Next"},
+                "action_id": f"view_{entity_type}_action_next",
+                "value": str(page + 1),
+                "style": "primary",
+            }
+        )
+
+    return pagination_buttons
