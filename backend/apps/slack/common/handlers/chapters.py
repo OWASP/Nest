@@ -92,18 +92,18 @@ def get_blocks(
             )
         )
 
-    if presentation.include_buttons:
-        pagination_block = get_pagination_buttons(
+    if presentation.include_pagination and (
+        pagination_block := get_pagination_buttons(
+            "chapters",
             page,
             total_pages - 1,
-            "view_chapters",
         )
-        if pagination_block:
-            blocks.append(
-                {
-                    "type": "actions",
-                    "elements": pagination_block,
-                }
-            )
+    ):
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": pagination_block,
+            }
+        )
 
     return blocks

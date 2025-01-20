@@ -17,13 +17,12 @@ def committees_handler(ack, command, client):
 
     search_query = command["text"].strip()
     blocks = get_blocks(
-        page=1,
         search_query=search_query,
         limit=10,
         presentation=EntityPresentation(
             include_feedback=True,
             include_metadata=True,
-            include_buttons=False,
+            include_pagination=False,
             include_timestamps=True,
             name_truncation=80,
             summary_truncation=300,

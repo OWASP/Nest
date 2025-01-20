@@ -9,7 +9,7 @@ class EntityPresentation:
 
     include_feedback: bool = True
     include_metadata: bool = True
-    include_buttons: bool = True
+    include_pagination: bool = True
     include_timestamps: bool = True
     name_truncation: int = 80
     summary_truncation: int = 300

@@ -32,13 +32,12 @@ def chapters_handler(ack, command, client):
     else:
         search_query = "" if command_text in COMMAND_START else command_text
         blocks = get_blocks(
-            page=1,
             search_query=search_query,
             limit=10,
             presentation=EntityPresentation(
                 include_feedback=True,
                 include_metadata=True,
-                include_buttons=False,
+                include_pagination=False,
                 include_timestamps=True,
                 name_truncation=80,
                 summary_truncation=300,

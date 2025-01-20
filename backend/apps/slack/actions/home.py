@@ -36,10 +36,10 @@ def handle_home_actions(ack, body, client):
         home_presentation = EntityPresentation(
             include_feedback=False,
             include_metadata=True,
+            include_pagination=True,
             include_timestamps=False,
             name_truncation=80,
             summary_truncation=200,
-            include_buttons=True,
         )
 
         page = int(value) if value.isdigit() else 1
@@ -86,16 +86,16 @@ def handle_home_actions(ack, body, client):
 
 # Register the actions
 if SlackConfig.app:
-    actions = [
-        VIEW_CHAPTERS_ACTION,
+    actions = (
         VIEW_CHAPTERS_ACTION_NEXT,
         VIEW_CHAPTERS_ACTION_PREV,
-        VIEW_COMMITTEES_ACTION,
+        VIEW_CHAPTERS_ACTION,
         VIEW_COMMITTEES_ACTION_NEXT,
         VIEW_COMMITTEES_ACTION_PREV,
-        VIEW_PROJECTS_ACTION,
+        VIEW_COMMITTEES_ACTION,
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
-    ]
+        VIEW_PROJECTS_ACTION,
+    )
     for action in actions:
         SlackConfig.app.action(action)(handle_home_actions)

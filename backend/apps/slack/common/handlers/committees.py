@@ -85,18 +85,18 @@ def get_blocks(
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
         )
-    if presentation.include_buttons:
-        pagination_block = get_pagination_buttons(
+    if presentation.include_pagination and (
+        pagination_block := get_pagination_buttons(
+            "committees",
             page,
             total_pages - 1,
-            "view_committees",
         )
-        if pagination_block:
-            blocks.append(
-                {
-                    "type": "actions",
-                    "elements": pagination_block,
-                }
-            )
+    ):
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": pagination_block,
+            }
+        )
 
     return blocks
