@@ -293,6 +293,18 @@ git checkout -b feature/my-feature-name
 - Address feedback from maintainers during code review.
 - Once approved, your PR will be merged into the main branch.
 
+## Troubleshooting
+
+- **"Unexpected character" error during application execution or Docker image building**
+  This error is usually caused by incorrect encoding of `.env` files.
+
+  - Open the `.env` files in a text editor (e.g., VS Code) and save them as "UTF-8 without BOM."
+  - Restart the application with `make run` and verify the error is resolved.
+
+  Tips:
+  - Ensure consistent file encoding using a code editor or linter.
+  - If the issue persists, check the project's documentation or issue tracker.
+
 ## Code of Conduct
 
 Please follow the [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md) when interacting with other contributors.
