@@ -23,7 +23,7 @@ export default function Footer() {
             <div key={section.title} className="space-y-4">
               <button
                 onClick={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between text-left text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 lg:cursor-default lg:focus:ring-0"
+                className="flex w-full items-center justify-between text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
