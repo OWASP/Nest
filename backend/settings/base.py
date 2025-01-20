@@ -65,6 +65,11 @@ class Base(Configuration):
                 "level": "INFO",
                 "propagate": True,
             },
+            "slack_bolt": {
+                "handlers": ["console"],
+                "level": "DEBUG",
+                "propagate": True,
+            },
         },
     }
 
