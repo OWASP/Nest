@@ -62,15 +62,6 @@ const ProjectDetailsPage = () => {
       />
     )
 
-  if (!project.is_active)
-    return (
-      <ErrorDisplay
-        statusCode={410}
-        title="This Project is Inactive"
-        message="We are sorry, but the project you are trying to access is inactive. Please explore other projects."
-      />
-    )
-
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
   const toggleLanguages = () => setShowAllLanguages(!showAllLanguages)
   const toggleTopics = () => setShowAllTopics(!showAllTopics)
@@ -79,6 +70,10 @@ const ProjectDetailsPage = () => {
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">{project.name}</h1>
+        {/* Display if inactive status*/}
+        {project.is_active === false && (
+          <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
+        )}
         <p className="mb-6 text-xl">{project.description}</p>
 
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
