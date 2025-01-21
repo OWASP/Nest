@@ -13,7 +13,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -38,6 +38,8 @@ const ProjectDetailsPage = () => {
 
     fetchProjectData()
   }, [projectKey])
+
+  const navigate = useNavigate()
 
   if (isLoading)
     return (
@@ -64,7 +66,10 @@ const ProjectDetailsPage = () => {
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">{project.name}</h1>
         <p className="mb-6 text-xl">{project.description}</p>
-
+        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
+          <p>{project.summary}</p>
+        </div>
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 md:col-span-2">
             <h2 className="mb-4 text-2xl font-semibold">Project Details</h2>
@@ -117,12 +122,6 @@ const ProjectDetailsPage = () => {
             </div>
           </div>
         </div>
-
-        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
-          <p>{project.summary}</p>
-        </div>
-
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 text-2xl font-semibold">Languages</h2>
@@ -196,7 +195,13 @@ const ProjectDetailsPage = () => {
               ? project.top_contributors
               : project.top_contributors.slice(0, 6)
             ).map((contributor, index) => (
-              <div key={index} className="flex items-center">
+              <div
+                key={index}
+                className="flex cursor-pointer items-center"
+                onClick={() => {
+                  navigate(`/community/users/${contributor.login}`)
+                }}
+              >
                 <img
                   src={contributor.avatar_url}
                   alt={contributor.name || contributor.login}
