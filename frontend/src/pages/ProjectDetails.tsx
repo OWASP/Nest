@@ -239,15 +239,14 @@ const ProjectDetailsPage = () => {
             <div className="h-64 overflow-y-auto pr-2">
               {project.issues.map((issue, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <h3 className="font-semibold"><a 
-                      href= {issue.url}
+                  <h3 className="font-semibold">
+                  <a href= {issue.url}
                       target='_blank'
                       rel='none'
-                      className="hover:underline text-[#1d7bd7] dark:text-sky-600"
-                      >
+                      className="hover:underline text-[#1d7bd7] dark:text-sky-600">
                     {issue.title}</a></h3>
-                  <div className="mt-2 flex items-center"><a
-                      href={`https://github.com/${issue.author.login}`}
+                  <div className="mt-2 flex items-center">
+                    <a href={`https://github.com/${issue.author.login}`}
                       target="_blank"
                       rel='none'
                       className="flex items-center">
