@@ -7,6 +7,7 @@ import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
 import SponsorButton from './SponsorButton'
+import StarRepoButton from './StarRepoButton'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -64,6 +65,7 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">
+          <StarRepoButton />
           <SponsorButton />
           <ModeToggle />
           <div className="md:hidden">
