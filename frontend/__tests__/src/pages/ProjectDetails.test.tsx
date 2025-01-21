@@ -38,7 +38,7 @@ describe('ProjectDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Contributor 6')).not.toBeInTheDocument()
+    expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
   })
 
   test('handles contributors with missing names gracefully', async () => {
