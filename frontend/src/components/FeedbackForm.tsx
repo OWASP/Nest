@@ -19,7 +19,7 @@ import { Textarea } from 'components/ui/Textarea'
 export function FeedbackForm() {
   const [isAnonymous, setIsAnonymous] = useState(false)
   const { toast } = useToast()
-  const captchaRef = useRef(null)
+  const captchaRef = useRef<ReCAPTCHA>(null)
 
   const form = useForm<FeedbackFormValues>({
     resolver: zodResolver(isAnonymous ? anonymousFeedbackFormSchema : feedbackFormSchema),
@@ -34,7 +34,7 @@ export function FeedbackForm() {
 
   async function onSubmit(data: FeedbackFormValues) {
     if (isAnonymous) data.email = ''
-    const token = captchaRef.current.getValue()
+    const token = captchaRef.current?.getValue()
     if (!token) {
       toast({
         variant: 'destructive',
@@ -150,7 +150,7 @@ export function FeedbackForm() {
           )}
         />
         <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} ref={captchaRef} />
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <Button type="submit" aria-label="Submit Feedback" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Submitting...' : 'Submit Feedback'}
         </Button>
       </form>

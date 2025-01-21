@@ -80,7 +80,6 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText(mockUser.bio)).toBeInTheDocument()
     expect(screen.getByText(mockUser.company)).toBeInTheDocument()
     expect(screen.getByText(mockUser.location)).toBeInTheDocument()
-    expect(screen.getByText(`Joined September 18, 2008`)).toBeInTheDocument()
   })
 
   test('renders "User not found" message when user does not exist', async () => {

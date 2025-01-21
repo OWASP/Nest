@@ -1,7 +1,7 @@
-import { FeedbackForm } from './FeedbackForm'
-import { Toaster } from './ui/Toaster'
+import { FeedbackForm } from 'components/FeedbackForm'
+import { Toaster } from 'components/ui/Toaster'
 
-export default function Feedback() {
+export default function FeedbackPage() {
   return (
     <>
       <main className="mx-auto my-16 h-full min-h-screen w-full max-w-lg p-4">

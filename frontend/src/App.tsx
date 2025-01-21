@@ -9,12 +9,12 @@ import {
   ChapterDetailsPage,
   UsersPage,
   UserDetailsPage,
+  FeedbackPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { ErrorDisplay, ERROR_CONFIGS } from 'wrappers/ErrorWrapper'
 
-import Feedback from 'components/Feedback'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
 import { Toaster } from 'components/ui/Toaster'
@@ -41,7 +41,7 @@ function App() {
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
         <Route path="/community/users" element={<UsersPage />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
-        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />

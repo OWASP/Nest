@@ -7,6 +7,11 @@ dotenv.config()
 
 global.React = React
 global.TextEncoder = TextEncoder
+global.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
