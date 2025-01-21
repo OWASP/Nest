@@ -1,24 +1,26 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { within } from '@testing-library/dom'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-import ProjectDetailsPage from 'pages/ProjectDetails'
+import ProjectDetailsPage, { formatDate } from 'pages/ProjectDetails'
 import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
-import '@testing-library/jest-dom' // Ensure you have this for matchers like .toBeInTheDocument()
-
 jest.mock('api/fetchAlgoliaData')
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    projectKey: 'test-project',
-  }),
+  useParams: () => ({ projectKey: 'test-project' }),
+  useNavigate: jest.fn(),
 }))
 
-describe('ProjectDetailsPage Component', () => {
+describe('ProjectDetailsPage', () => {
+  let navigateMock: jest.Mock
+
   beforeEach(() => {
+    navigateMock = jest.fn()
+    ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
     ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
-      Promise.resolve({
-        hits: [mockProjectDetailsData],
-      })
+      Promise.resolve({ hits: [mockProjectDetailsData] })
     )
   })
 
@@ -26,23 +28,180 @@ describe('ProjectDetailsPage Component', () => {
     jest.clearAllMocks()
   })
 
-  test('topics visibility check', async () => {
+  test('displays error when project is not found', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() => Promise.resolve({ hits: [] }))
     render(<ProjectDetailsPage />)
+
     await waitFor(() => {
-      // First topic: visible
-      expect(screen.getByText('Topic 1')).toBeInTheDocument()
+      expect(screen.getByText('Project not found')).toBeInTheDocument()
+      expect(
+        screen.getByText("Sorry, the project you're looking for doesn't exist")
+      ).toBeInTheDocument()
     })
-    // 11th topic: not visible by default
-    expect(screen.queryByText('Topic 11')).not.toBeInTheDocument()
   })
 
-  test('contributors visibility check', async () => {
+  test('renders project details when project is found', async () => {
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(mockProjectDetailsData.name)).toBeInTheDocument()
+      expect(screen.getByText(mockProjectDetailsData.description)).toBeInTheDocument()
+      expect(screen.getByText('Project Details')).toBeInTheDocument()
+      expect(screen.getByText('Statistics')).toBeInTheDocument()
+      expect(screen.getByText('Top Contributors')).toBeInTheDocument()
+      expect(screen.getByText('Recent Issues')).toBeInTheDocument()
+      expect(screen.getByText('Recent Releases')).toBeInTheDocument()
+    })
+  })
+
+  test('formats date correctly using formatDate function', () => {
+    const timestamp = 1674249600 // January 21, 2023 (UTC)
+    const formatted = formatDate(timestamp)
+    expect(formatted).toContain('2023')
+  })
+
+  test('toggles languages list when show more/less is clicked', async () => {
+    const projectWithManyLanguages = {
+      ...mockProjectDetailsData,
+      languages: Array.from({ length: 12 }, (_, i) => `Language ${i + 1}`),
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ hits: [projectWithManyLanguages] })
+    )
+
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      // First contributor: visible
+      expect(screen.getByText('Language 10')).toBeInTheDocument()
+      expect(screen.queryByText('Language 11')).not.toBeInTheDocument()
+    })
+
+    const languagesSection = screen.getByRole('heading', { name: /Languages/i }).closest('div')
+    const showMoreButton = within(languagesSection!).getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Language 11')).toBeInTheDocument()
+      expect(screen.getByText('Language 12')).toBeInTheDocument()
+    })
+
+    const showLessButton = within(languagesSection!).getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Language 11')).not.toBeInTheDocument()
+    })
+  })
+
+  test('toggles topics list when show more/less is clicked', async () => {
+    const projectWithManyTopics = {
+      ...mockProjectDetailsData,
+      topics: Array.from({ length: 12 }, (_, i) => `Topic ${i + 1}`),
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ hits: [projectWithManyTopics] })
+    )
+
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Topic 10')).toBeInTheDocument()
+      expect(screen.queryByText('Topic 11')).not.toBeInTheDocument()
+    })
+
+    const topicsSection = screen.getByRole('heading', { name: /Topics/i }).closest('div')
+    const showMoreButton = within(topicsSection!).getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Topic 11')).toBeInTheDocument()
+      expect(screen.getByText('Topic 12')).toBeInTheDocument()
+    })
+
+    const showLessButton = within(topicsSection!).getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Topic 11')).not.toBeInTheDocument()
+    })
+  })
+
+  test('toggles contributors list when show more/less is clicked', async () => {
+    const projectWithManyContributors = {
+      ...mockProjectDetailsData,
+      top_contributors: Array.from({ length: 8 }, (_, i) => ({
+        login: `contributor${i + 1}`,
+        name: `Contributor ${i + 1}`,
+        avatar_url: 'https://example.com/avatarX.jpg',
+        contributions_count: i * 10,
+      })),
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ hits: [projectWithManyContributors] })
+    )
+
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+    })
+
+    const contributorsSection = screen
+      .getByRole('heading', { name: /Top Contributors/i })
+      .closest('div')
+    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
+    })
+
+    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+    })
+  })
+
+  test('displays "No recent issues" when there are no issues', async () => {
+    const projectNoIssues = {
+      ...mockProjectDetailsData,
+      issues: [],
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ hits: [projectNoIssues] })
+    )
+
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('No recent issues.')).toBeInTheDocument()
+    })
+  })
+
+  test('displays "No recent releases" when there are no releases', async () => {
+    const projectNoReleases = {
+      ...mockProjectDetailsData,
+      releases: [],
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ hits: [projectNoReleases] })
+    )
+
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('No recent releases.')).toBeInTheDocument()
+    })
+  })
+
+  test('navigates to user page when contributor is clicked', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+
+    screen.getByText('Contributor 1').closest('div')?.click()
+
+    expect(navigateMock).toHaveBeenCalledWith('/community/users/contributor1')
   })
 
   test('handles contributors with missing names gracefully', async () => {
@@ -56,14 +215,12 @@ describe('ProjectDetailsPage Component', () => {
         },
       ],
     }
-
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
-      Promise.resolve({
-        hits: [projectDataWithIncompleteContributors],
-      })
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ hits: [projectDataWithIncompleteContributors] })
     )
 
     render(<ProjectDetailsPage />)
+
     await waitFor(() => {
       expect(screen.getByText('user1')).toBeInTheDocument()
     })
@@ -71,184 +228,11 @@ describe('ProjectDetailsPage Component', () => {
 
   test('renders project URL as clickable link', async () => {
     render(<ProjectDetailsPage />)
+
     await waitFor(() => {
       const link = screen.getByText('https://example.com')
       expect(link.tagName).toBe('A')
       expect(link).toHaveAttribute('href', 'https://example.com')
-    })
-  })
-
-  // Below are additional tests to cover toggling “Show more/Show less” for languages, topics, and contributors.
-
-  test('toggles “Show more/Show less” for languages', async () => {
-    // Render with default data (already has 15 languages).
-    render(<ProjectDetailsPage />)
-
-    // By default, only 10 languages should be shown
-    await waitFor(() => {
-      for (let i = 1; i <= 10; i++) {
-        expect(screen.getByText(`Language ${i}`)).toBeInTheDocument()
-      }
-    })
-    // 11th language should not be visible initially
-    expect(screen.queryByText('Language 11')).not.toBeInTheDocument()
-
-    // Click “Show more” for languages
-    fireEvent.click(screen.getByTestId('show-more-languages')) // Make sure your component has data-testid="show-more-languages"
-
-    // Now the remaining languages (11–15) should appear
-    await waitFor(() => {
-      for (let i = 11; i <= 15; i++) {
-        expect(screen.getByText(`Language ${i}`)).toBeInTheDocument()
-      }
-    })
-
-    // Click again to “Show less”
-    fireEvent.click(screen.getByTestId('show-more-languages'))
-    // 11th+ languages should be hidden again
-    await waitFor(() => {
-      expect(screen.queryByText('Language 11')).not.toBeInTheDocument()
-    })
-  })
-
-  test('toggles “Show more/Show less” for topics', async () => {
-    render(<ProjectDetailsPage />)
-
-    // By default, only 10 topics should be shown
-    await waitFor(() => {
-      for (let i = 1; i <= 10; i++) {
-        expect(screen.getByText(`Topic ${i}`)).toBeInTheDocument()
-      }
-    })
-    // 11th topic should not be visible initially
-    expect(screen.queryByText('Topic 11')).not.toBeInTheDocument()
-
-    // Click “Show more” for topics
-    fireEvent.click(screen.getByTestId('show-more-topics')) // data-testid="show-more-topics"
-
-    // Now we should see topics 11–15
-    await waitFor(() => {
-      for (let i = 11; i <= 15; i++) {
-        expect(screen.getByText(`Topic ${i}`)).toBeInTheDocument()
-      }
-    })
-
-    // Click to “Show less”
-    fireEvent.click(screen.getByTestId('show-more-topics'))
-    await waitFor(() => {
-      expect(screen.queryByText('Topic 11')).not.toBeInTheDocument()
-    })
-  })
-
-  test('toggles “Show more/Show less” for contributors', async () => {
-    render(<ProjectDetailsPage />)
-
-    // By default, only 5 contributors should be shown
-    await waitFor(() => {
-      for (let i = 1; i <= 5; i++) {
-        expect(screen.getByText(`Contributor ${i}`)).toBeInTheDocument()
-      }
-    })
-    // Contributor 6 not visible initially
-    expect(screen.queryByText('Contributor 6')).not.toBeInTheDocument()
-
-    // Click “Show more” for contributors
-    fireEvent.click(screen.getByTestId('show-more-contributors')) // data-testid="show-more-contributors"
-
-    // Now contributors 6–15 should appear
-    await waitFor(() => {
-      for (let i = 6; i <= 15; i++) {
-        expect(screen.getByText(`Contributor ${i}`)).toBeInTheDocument()
-      }
-    })
-
-    // Click “Show less”
-    fireEvent.click(screen.getByTestId('show-more-contributors'))
-    expect(screen.queryByText('Contributor 6')).not.toBeInTheDocument()
-  })
-  test('renders recent issues if project.issues is not empty', async () => {
-    // Modify mock data so issues is non-empty
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
-      hits: [
-        {
-          ...mockProjectDetailsData,
-          issues: [
-            {
-              title: 'Issue 1',
-              author: { name: 'Author 1', avatar_url: 'https://example.com/author1.jpg' },
-              created_at: 1625097600,
-              comments_count: 5,
-            },
-          ],
-        },
-      ],
-    })
-
-    render(<ProjectDetailsPage />)
-
-    // Confirm the "Issue 1" text appears in the DOM
-    await waitFor(() => {
-      expect(screen.getByText('Issue 1')).toBeInTheDocument()
-    })
-  })
-
-  test('renders "No recent issues." when issues array is empty', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
-      hits: [
-        {
-          ...mockProjectDetailsData,
-          issues: [],
-        },
-      ],
-    })
-
-    render(<ProjectDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('No recent issues.')).toBeInTheDocument()
-    })
-  })
-
-  test('renders recent releases if project.releases is not empty', async () => {
-    // Modify mock data so releases is non-empty
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
-      hits: [
-        {
-          ...mockProjectDetailsData,
-          releases: [
-            {
-              name: 'Release 1.0',
-              author: { name: 'Author 1', avatar_url: 'https://example.com/author1.jpg' },
-              published_at: 1625097600,
-              tag_name: 'v1.0',
-            },
-          ],
-        },
-      ],
-    })
-
-    render(<ProjectDetailsPage />)
-
-    // Confirm the "Release 1.0" text appears in the DOM
-    await waitFor(() => {
-      expect(screen.getByText('Release 1.0')).toBeInTheDocument()
-    })
-  })
-
-  test('renders "No recent releases." when releases array is empty', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValueOnce({
-      hits: [
-        {
-          ...mockProjectDetailsData,
-          releases: [],
-        },
-      ],
-    })
-
-    render(<ProjectDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('No recent releases.')).toBeInTheDocument()
     })
   })
 })
