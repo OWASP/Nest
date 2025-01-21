@@ -62,6 +62,15 @@ const ProjectDetailsPage = () => {
       />
     )
 
+  if (!project.is_active)
+    return (
+      <ErrorDisplay
+        statusCode={410}
+        title="This Project is Inactive"
+        message="We are sorry, but the project you are trying to access is inactive. Please explore other projects."
+      />
+    )
+
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
   const toggleLanguages = () => setShowAllLanguages(!showAllLanguages)
   const toggleTopics = () => setShowAllTopics(!showAllTopics)
@@ -80,9 +89,6 @@ const ProjectDetailsPage = () => {
             </p>
             <p>
               <strong>Level:</strong> {project.level[0].toUpperCase() + project.level.slice(1)}
-            </p>
-            <p>
-              <strong>Status:</strong> {project.is_active ? 'Active' : 'Inactive'}
             </p>
             <p>
               <strong>Organization:</strong> {project.organizations}

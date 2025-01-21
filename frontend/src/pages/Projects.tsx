@@ -45,7 +45,6 @@ const ProjectsPage = () => {
         icons={filteredIcons}
         topContributors={project.top_contributors}
         button={SubmitButton}
-        isActive={project.is_active}
       />
     )
   }
@@ -62,7 +61,7 @@ const ProjectsPage = () => {
       empty="No projects found"
       searchPlaceholder="Search for OWASP projects..."
     >
-      {projects && projects.map(renderProjectCard)}
+      {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
     </SearchPageLayout>
   )
 }

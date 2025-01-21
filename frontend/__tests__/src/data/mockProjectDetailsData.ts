@@ -11,6 +11,7 @@ export const mockProjectDetailsData = {
   forks_count: 20,
   stars_count: 100,
   issues_count: 10,
+  is_active: true,
   repositories_count: 2,
   summary: 'This is a summary of the test project.',
   languages: Array.from({ length: 15 }, (_, i) => `Language ${i + 1}`),
