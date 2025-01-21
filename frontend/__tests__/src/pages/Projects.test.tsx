@@ -123,26 +123,4 @@ describe('ProjectPage Component', () => {
     // Clean up the mock
     jest.restoreAllMocks()
   })
-
-  test('uses fallback key when objectID is missing', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [
-        {
-          key: 'project_2',
-          name: 'Project 2',
-          summary: 'Sample project without objectID',
-          leaders: ['Leader B'],
-          top_contributors: ['Contributor B'],
-          // Deliberately no objectID here
-        },
-      ],
-      totalPages: 1,
-    })
-
-    render(<ProjectsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Project 2')).toBeInTheDocument()
-    })
-  })
 })

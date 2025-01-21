@@ -21,7 +21,7 @@ const ProjectsPage = () => {
     pageTitle: 'OWASP Projects',
   })
   const navigate = useNavigate()
-  const renderProjectCard = (project: project, index: number) => {
+  const renderProjectCard = (project: project) => {
     const params: string[] = ['updated_at', 'forks_count', 'stars_count', 'contributors_count']
     const filteredIcons = getFilteredIcons(project, params)
 
@@ -37,7 +37,7 @@ const ProjectsPage = () => {
 
     return (
       <Card
-        key={project.objectID || `project-${index}`}
+        key={project.objectID}
         title={project.name}
         url={`projects/${project.key}`}
         summary={project.summary}
