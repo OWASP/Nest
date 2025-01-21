@@ -241,7 +241,7 @@ const ProjectDetailsPage = () => {
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="font-semibold">
                     <a
-                      href={issue.url}
+                      href={`https://github.com/OWASP/${issue.repository.key}/issues/${issue.number}`}
                       target="_blank"
                       rel="none"
                       className="text-[#1d7bd7] hover:underline dark:text-sky-600"
@@ -251,7 +251,7 @@ const ProjectDetailsPage = () => {
                   </h3>
                   <div className="mt-2 flex items-center">
                     <a
-                      href={`https://github.com/${issue.author.login}`}
+                      href={`https://github.com/${issue.author.key}`}
                       target="_blank"
                       rel="none"
                       className="flex items-center"
