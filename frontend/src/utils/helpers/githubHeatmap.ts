@@ -1,4 +1,9 @@
 import { drawContributions as draw } from 'github-contributions-canvas'
+
+export interface HeatmapData {
+  years: number[]
+}
+
 export const drawContributions = (canvas, { data, username, theme }) => {
   draw(canvas, {
     data,
