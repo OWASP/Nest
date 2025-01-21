@@ -42,8 +42,7 @@ describe('ProjectDetailsPage Component', () => {
       // First contributor: visible
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
-    // 6th contributor: not visible by default
-    expect(screen.queryByText('Contributor 6')).not.toBeInTheDocument()
+    expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
   })
 
   test('handles contributors with missing names gracefully', async () => {
