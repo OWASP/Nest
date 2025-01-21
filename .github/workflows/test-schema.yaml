@@ -22,6 +22,7 @@ concurrency:
   group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
 
 env:
+  DOCKERHUB_USERNAME: arkid15r
   FORCE_COLOR: 1
 
 jobs:
