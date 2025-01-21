@@ -72,6 +72,11 @@ const ProjectDetailsPage = () => {
         <h1 className="mb-6 mt-4 text-4xl font-bold">{project.name}</h1>
         <p className="mb-6 text-xl">{project.description}</p>
 
+        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
+          <p>{project.summary}</p>
+        </div>
+        
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 md:col-span-2">
             <h2 className="mb-4 text-2xl font-semibold">Project Details</h2>
@@ -125,10 +130,6 @@ const ProjectDetailsPage = () => {
           </div>
         </div>
 
-        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
-          <p>{project.summary}</p>
-        </div>
 
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
