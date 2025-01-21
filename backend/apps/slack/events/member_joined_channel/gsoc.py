@@ -1,4 +1,4 @@
-"""Slack bot user joined #gsoc channel handler."""
+"""Slack member joined #gsoc channel handler."""
 
 import logging
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def gsoc_handler(event, client, ack):
-    """Slack #gsoc new user handler."""
+    """Slack #gsoc new member handler."""
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
 
     ack()
@@ -35,7 +35,7 @@ def gsoc_handler(event, client, ack):
         channel=conversation["channel"]["id"],
         blocks=[
             markdown(
-                f"Hello <@{user_id}> and welcome to <#{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
+                f"Hello <@{user_id}> and welcome to <{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
                 "Here's how you can start your journey toward contributing to OWASP projects and "
                 "making the most of Google Summer of Code:"
             ),
@@ -51,9 +51,7 @@ def gsoc_handler(event, client, ack):
 
 
 if SlackConfig.app:
-
-    def check_gsoc_handler(event):
-        """Check if the event is a member_joined_channel in #gsoc."""
-        return event["channel"] == OWASP_GSOC_CHANNEL_ID
-
-    SlackConfig.app.event("member_joined_channel", matchers=[check_gsoc_handler])(gsoc_handler)
+    SlackConfig.app.event(
+        "member_joined_channel",
+        matchers=[lambda event: f"#{event['channel']}" == OWASP_GSOC_CHANNEL_ID],
+    )(gsoc_handler)
