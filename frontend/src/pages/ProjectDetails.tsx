@@ -205,8 +205,12 @@ const ProjectDetailsPage = () => {
               ? project.top_contributors
               : project.top_contributors.slice(0, 6)
             ).map((contributor, index) => (
-              <div key={index} className="flex items-center cursor-pointer"
-              onClick={() => { navigate(`/community/users/${contributor.login}`)}}
+              <div
+                key={index}
+                className="flex cursor-pointer items-center"
+                onClick={() => {
+                  navigate(`/community/users/${contributor.login}`)
+                }}
               >
                 <img
                   src={contributor.avatar_url}
