@@ -1,5 +1,6 @@
-import { faArrowDown, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faCaretDown, faCaretUp, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,17 +20,22 @@ interface SortByProps {
 }
 
 const SortBy = ({ options, selectedOption, onSortChange }: SortByProps) => {
+  const [open, setOpen] = useState<boolean>(false)
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+  }
+
   if (!options || options.length === 0) return null
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           className="h-10 w-[100px] justify-between border-2 bg-white text-[#292e36] dark:bg-[#3C3C3C] dark:text-[#D1D5DB]"
         >
           <span>Sort By </span>
-          <FontAwesomeIcon icon={faArrowDown} />
+          <FontAwesomeIcon icon={open ? faCaretUp : faCaretDown} className="pl-2" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[180px] bg-white text-[#4B5563] dark:bg-[#3C3C3C] dark:text-[#D1D5DB]">
