@@ -31,8 +31,8 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             self._upload_tsv_to_s3(s3_client, output)
 
             return Response(status=status.HTTP_201_CREATED)
-        except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ValidationError:
+            return Response({"error": "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
     def _get_s3_client(self):
         """Initialize and returns the S3 client."""
