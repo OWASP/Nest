@@ -258,8 +258,8 @@ describe('Contribute Component', () => {
     const mockMultipleIssues = {
       ...mockContributeData,
       hits: [
-        { title: 'Issue 1', summary: 'Summary 1', hint: 'Hint 1' },
-        { title: 'Issue 2', summary: 'Summary 2', hint: 'Hint 2' },
+        { title: 'Issue 1', summary: 'Summary 1', hint: 'Hint 1', objectID: '1' },
+        { title: 'Issue 2', summary: 'Summary 2', hint: 'Hint 2', objectID: '2' },
       ],
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockMultipleIssues)

@@ -20,7 +20,7 @@ const CommitteesPage = () => {
     pageTitle: 'OWASP Committees',
   })
   const navigate = useNavigate()
-  const renderCommitteeCard = (committee: CommitteeType, index: number) => {
+  const renderCommitteeCard = (committee: CommitteeType) => {
     const params: string[] = ['updated_at']
     const filteredIcons = getFilteredIcons(committee, params)
     const formattedUrls = handleSocialUrls(committee.related_urls)
@@ -36,7 +36,7 @@ const CommitteesPage = () => {
 
     return (
       <Card
-        key={committee.objectID || `committee-${index}`}
+        key={committee.objectID}
         title={committee.name}
         url={`committees/${committee.key}`}
         summary={committee.summary}
