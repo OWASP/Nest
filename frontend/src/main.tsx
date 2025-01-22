@@ -1,3 +1,4 @@
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -20,7 +21,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ErrorWrapper>
-        <App />
+        <ChakraProvider value={defaultSystem}>
+          <App />
+        </ChakraProvider>
       </ErrorWrapper>
     </BrowserRouter>
   </StrictMode>
