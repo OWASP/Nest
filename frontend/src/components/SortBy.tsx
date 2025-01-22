@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from 'components/ui/dropdown-menu'
+} from 'components/ui/dropdownMenu'
 
 interface SortOption {
   value: string

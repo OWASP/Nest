@@ -1,34 +1,33 @@
 import { useSearchPage } from 'hooks/useSearchPage'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { project } from 'types/project'
 import { level } from 'utils/data'
-import { sortOptionsProject } from 'utils/sortingoptions'
+import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
+
 const ProjectsPage = () => {
-  const [sortBy, setSortBy] = useState('projects')
-
-  const handleSortChange = (val: string) => {
-    setSortBy(val)
-  }
-
   const {
     items: projects,
     isLoaded,
     currentPage,
     totalPages,
     searchQuery,
+    sortBy,
     handleSearch,
     handlePageChange,
+    handleSortChange,
   } = useSearchPage<project>({
-    indexName: sortBy,
+    indexName: 'projects',
     pageTitle: 'OWASP Projects',
+    defaultSortBy: '',
   })
+
   const navigate = useNavigate()
+
   const renderProjectCard = (project: project, index: number) => {
     const params: string[] = ['updated_at', 'forks_count', 'stars_count', 'contributors_count']
     const filteredIcons = getFilteredIcons(project, params)
