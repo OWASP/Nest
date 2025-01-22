@@ -125,4 +125,23 @@ describe('UsersPage Component', () => {
 
     expect(navigateMock).toHaveBeenCalledWith('/community/users/user_1')
   })
+  test('renders fallback username if user name is missing', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [
+        {
+          key: 'user_3',
+          login: 'fallback_login',
+          avatar_url: 'https://example.com/avatar.jpg',
+          company: 'Some Company',
+        },
+      ],
+      totalPages: 1,
+    })
+
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('@fallback_login')).toBeInTheDocument()
+    })
+  })
 })
