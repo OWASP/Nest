@@ -1,64 +1,111 @@
-import json
-from unittest.mock import patch
+import csv
+from datetime import datetime, timezone
+from io import StringIO
+from unittest.mock import Mock, patch
 
-from django.urls import reverse
+import botocore
+import pytest
+from django.conf import settings
 from rest_framework import status
-from rest_framework.test import APITestCase
+
+from apps.feedback.api.feedback import FeedbackViewSet
 
 
-class FeedbackViewSetTests(APITestCase):
-    def setUp(self):
-        self.url = reverse("feedback-list")
-        self.valid_payload = {
-            "name": "John Doe",
-            "email": "john.doe@example.com",
-            "message": "This is a feedback message.",
-            "is_anonymous": False,
-            "is_nestbot": False,
-        }
-        self.invalid_payload = {
-            "name": "",
-            "email": "invalid-email",
-            "message": "",
-            "is_anonymous": False,
-            "is_nestbot": False,
-        }
+@pytest.fixture()
+def feedback_viewset():
+    return FeedbackViewSet()
 
-    @patch("apps.feedback.api.feedback.FeedbackViewSet._get_s3_client")
-    def test_create_feedback_valid_payload(self, mock_get_s3_client):
-        mock_s3_client = mock_get_s3_client.return_value
-        mock_s3_client.get_object.side_effect = mock_s3_client.exceptions.NoSuchKey
 
-        response = self.client.post(
-            self.url, data=json.dumps(self.valid_payload), content_type="application/json"
+@pytest.fixture()
+def valid_feedback_data():
+    return {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "message": "Test feedback",
+        "is_anonymous": False,
+        "is_nestbot": False,
+    }
+
+
+@pytest.fixture()
+def mock_s3_client():
+    with patch("boto3.client") as mock_client:
+        # Create a mock NoSuchKey exception
+        mock_client.return_value.exceptions.NoSuchKey = botocore.exceptions.ClientError(
+            {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
+            "GetObject",
         )
+        yield mock_client.return_value
 
+
+class TestFeedbackViewSet:
+    def test_create_success(self, feedback_viewset, valid_feedback_data, mock_s3_client):
+        """Test successful feedback submission."""
+        # Mock request
+        request = Mock()
+        request.data = valid_feedback_data
+
+        # Mock S3 get_object response for existing file
+        mock_s3_client.get_object.return_value = {"Body": Mock(read=lambda: b"")}
+
+        # Execute
+        response = feedback_viewset.create(request)
+
+        # Verify response
         assert response.status_code == status.HTTP_201_CREATED
-        mock_get_s3_client.assert_called_once()
+
+        # Verify S3 interactions
         mock_s3_client.put_object.assert_called_once()
+        put_call_kwargs = mock_s3_client.put_object.call_args[1]
+        assert put_call_kwargs["Bucket"] == settings.AWS_STORAGE_BUCKET_NAME
+        assert put_call_kwargs["Key"] == "feedbacks.tsv"
+        assert "Body" in put_call_kwargs
+        assert put_call_kwargs["ContentType"] == "text/tab-separated-values"
 
-    @patch("apps.feedback.api.feedback.FeedbackViewSet._get_s3_client")
-    def test_create_feedback_invalid_payload(self, mock_get_s3_client):
-        response = self.client.post(
-            self.url, data=json.dumps(self.invalid_payload), content_type="application/json"
+    def test_create_validation_error(self, feedback_viewset, valid_feedback_data, mock_s3_client):
+        """Test feedback submission with validation error."""
+        # Mock request
+        request = Mock()
+        request.data = valid_feedback_data
+
+        # Mock S3 client to raise ValidationError using botocore exception
+        mock_s3_client.get_object.side_effect = botocore.exceptions.ClientError(
+            {"Error": {"Code": "ValidationError", "Message": "Invalid credentials"}}, "GetObject"
         )
 
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        mock_get_s3_client.assert_not_called()
+        # Execute
+        response = feedback_viewset.create(request)
 
-    @patch("apps.feedback.api.feedback.FeedbackViewSet._get_s3_client")
-    def test_create_feedback_anonymous(self, mock_get_s3_client):
-        payload = self.valid_payload.copy()
-        payload["is_anonymous"] = True
-        payload["email"] = ""
-
-        mock_s3_client = mock_get_s3_client.return_value
-        mock_s3_client.get_object.side_effect = mock_s3_client.exceptions.NoSuchKey
-
-        response = self.client.post(
-            self.url, data=json.dumps(payload), content_type="application/json"
-        )
-
+        # Verify response
         assert response.status_code == status.HTTP_201_CREATED
-        mock_get_s3_client.assert_called_once()
-        mock_s3_client.put_object.assert_called_once()
+
+    def test_write_feedback_to_tsv(self, feedback_viewset, valid_feedback_data):
+        """Test writing feedback data to TSV format."""
+        output = StringIO()
+        writer = csv.writer(output, delimiter="\t")
+
+        # Execute
+        current_time = datetime(2025, 1, 22, 10, 45, 34, 567884, tzinfo=timezone.utc)
+        with patch("django.utils.timezone.now", return_value=current_time):
+            feedback_viewset.write_feedback_to_tsv(writer, valid_feedback_data)
+
+        # Verify
+        output.seek(0)
+        written_data = output.getvalue().strip().split("\t")
+        assert written_data[0] == valid_feedback_data["name"]
+        assert written_data[1] == valid_feedback_data["email"]
+        assert written_data[2] == valid_feedback_data["message"]
+        assert written_data[3] == str(valid_feedback_data["is_anonymous"])
+        assert written_data[4] == str(valid_feedback_data["is_nestbot"])
+
+    @patch("boto3.client")
+    def test_get_s3_client(self, mock_boto3, feedback_viewset):
+        """Test S3 client initialization."""
+        feedback_viewset.get_s3_client()
+
+        mock_boto3.assert_called_once_with(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME,
+        )

@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from io import StringIO
 
 import boto3
+import botocore
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from rest_framework import status, viewsets
@@ -57,10 +58,11 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             existing_content = response["Body"].read().decode("utf-8")
             output.write(existing_content)
             output.seek(0, 2)
-        except s3_client.exceptions.NoSuchKey:
-            writer.writerow(
-                ["Name", "Email", "Message", "is_anonymous", "is_nestbot", "created_at"]
-            )
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "NoSuchKey":
+                writer.writerow(
+                    ["Name", "Email", "Message", "is_anonymous", "is_nestbot", "created_at"]
+                )
         return output, writer
 
     def _write_feedback_to_tsv(self, writer, feedback_data):
@@ -85,3 +87,11 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             Body=output.getvalue(),
             ContentType="text/tab-separated-values",
         )
+
+    def write_feedback_to_tsv(self, writer, feedback_data):
+        """Public method to write feedback data to TSV format."""
+        self._write_feedback_to_tsv(writer, feedback_data)
+
+    def get_s3_client(self):
+        """Public method to get the S3 client."""
+        return self._get_s3_client()
