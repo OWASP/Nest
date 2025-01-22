@@ -2,8 +2,9 @@ import { within } from '@testing-library/dom'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useNavigate } from 'react-router-dom'
+import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
-import ProjectDetailsPage, { formatDate } from 'pages/ProjectDetails'
+import ProjectDetailsPage from 'pages/ProjectDetails'
 import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
 jest.mock('api/fetchAlgoliaData')
 
