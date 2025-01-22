@@ -1,19 +1,19 @@
 export type user = {
-  idx_email: string
-  idx_login: string
-  idx_name: string
-  idx_company: string
-  idx_location: string
-  idx_bio: string
-  idx_followers_count: number
-  idx_created_at: number
-  idx_avatar_url: string
-  idx_following_count: number
-  idx_key: string
-  idx_public_repositories_count: number
-  idx_title: string
-  idx_updated_at: number
-  idx_url: string
+  email: string
+  login: string
+  name: string
+  company: string
+  location: string
+  bio: string
+  followers_count: number
+  created_at: number
+  avatar_url: string
+  following_count: number
+  key: string
+  public_repositories_count: number
+  title: string
+  updated_at: number
+  url: string
   objectID: string
 }
 

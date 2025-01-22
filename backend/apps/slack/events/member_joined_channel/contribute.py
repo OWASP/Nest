@@ -41,7 +41,7 @@ def contribute_handler(event, client, ack):
         channel=conversation["channel"]["id"],
         blocks=[
             markdown(
-                f"Hello <@{user_id}> and welcome to <#{OWASP_CONTRIBUTE_CHANNEL_ID}> channel!{NL}"
+                f"Hello <@{user_id}> and welcome to <{OWASP_CONTRIBUTE_CHANNEL_ID}> channel!{NL}"
                 "We're happy to have you here as part of the OWASP community! "
                 "Your eagerness to contribute is what makes our community strong. "
                 f"With *{Project.active_projects_count()} active OWASP projects*, there are "
@@ -74,11 +74,7 @@ def contribute_handler(event, client, ack):
 
 
 if SlackConfig.app:
-
-    def check_contribute_handler(event):
-        """Check if the event is a member_joined_channel in #contribute."""
-        return event["channel"] == OWASP_CONTRIBUTE_CHANNEL_ID
-
-    SlackConfig.app.event("member_joined_channel", matchers=[check_contribute_handler])(
-        contribute_handler
-    )
+    SlackConfig.app.event(
+        "member_joined_channel",
+        matchers=[lambda event: f"#{event['channel']}" == OWASP_CONTRIBUTE_CHANNEL_ID],
+    )(contribute_handler)

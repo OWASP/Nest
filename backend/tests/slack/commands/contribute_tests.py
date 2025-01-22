@@ -8,7 +8,7 @@ from apps.slack.commands.contribute import (
     COMMAND_START,
     SUMMARY_TRUNCATION_LIMIT,
     TITLE_TRUNCATION_LIMIT,
-    handler,
+    contribute_handler,
 )
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
@@ -61,7 +61,7 @@ class TestContributeHandler:
         mock_get_issues.return_value = {"hits": [mock_issue] if has_results else []}
         mock_open_issues_count.return_value = 42
 
-        handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        contribute_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
         if command_enabled:
             blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
@@ -104,7 +104,7 @@ class TestContributeHandler:
         mock_open_issues_count.return_value = 42
         settings.SLACK_COMMANDS_ENABLED = True
 
-        handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        contribute_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         truncated_title = Truncator(long_title).chars(TITLE_TRUNCATION_LIMIT, truncate="...")
@@ -144,7 +144,7 @@ class TestContributeHandler:
         mock_open_issues_count.return_value = 42
         settings.SLACK_COMMANDS_ENABLED = True
 
-        handler(ack=MagicMock(), command=command, client=mock_slack_client)
+        contribute_handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
         mock_get_issues.assert_called_with(
             expected_search,
@@ -172,7 +172,7 @@ class TestContributeHandler:
         mock_open_issues_count.return_value = 42
         settings.SLACK_COMMANDS_ENABLED = True
 
-        handler(ack=MagicMock(), command=command, client=mock_slack_client)
+        contribute_handler(ack=MagicMock(), command=command, client=mock_slack_client)
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         assert len(blocks) > 0

@@ -9,6 +9,6 @@ slack_handler = SlackRequestHandler(SlackConfig.app)
 
 
 @csrf_exempt
-def slack_events_handler(request):
-    """Slack events handler view."""
+def slack_request_handler(request):
+    """Slack request handler."""
     return slack_handler.handle(request)

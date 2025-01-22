@@ -34,13 +34,13 @@ gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 lxml = "^5.3.0"
 markdown = "^3.7"
-openai = "^1.59.7"
-psycopg = "^3.2.3"
+openai = "^1.59.9"
+psycopg = "^3.2.4"
 pygithub = "^2.5.0"
 python = "^3.13"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-sentry-sdk = {extras = ["django"], version = "^2.19.2"}
+sentry-sdk = {extras = ["django"], version = "^2.20.0"}
 slack-bolt = "^1.22.0"
 boto3 = "^1.36.1"
 django-ratelimit = "^4.1.0"
@@ -51,8 +51,8 @@ psycopg2-binary = "^2.9.10"
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 isort = "^5.13.2"
-pre-commit = "^4.0.0"
-ruff = "^0.9.1"
+pre-commit = "^4.1.0"
+ruff = "^0.9.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"

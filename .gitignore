@@ -10,6 +10,7 @@ __pycache__
 .mypy_cache
 .pytest_cache
 .python_history
+.python-version
 .ruff_cache
 .vscode
 *.code-workspace

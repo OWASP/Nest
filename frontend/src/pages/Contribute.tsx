@@ -1,3 +1,4 @@
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
@@ -26,7 +27,7 @@ const ContributePage = () => {
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   const renderContributeCard = (issue: IssueType, index: number) => {
-    const params: string[] = ['idx_created_at', 'idx_comments_count']
+    const params: string[] = ['created_at', 'comments_count']
     const filteredIcons = getFilteredIcons(issue, params)
 
     const SubmitButton = {
@@ -35,17 +36,21 @@ const ContributePage = () => {
       onclick: () => setModalOpenIndex(index),
     }
 
+    const viewIssueButton = {
+      label: 'View Issue',
+      icon: <FontAwesomeIconWrapper icon={faGithub} />,
+      url: issue.url,
+    }
+
     return (
-      <React.Fragment key={issue.objectID || `issue-${index}`}>
+      <React.Fragment key={issue.objectID}>
         <Card
-          key={issue.objectID || `issue-${index}`}
-          title={issue.idx_title}
-          url={issue.idx_url}
-          projectName={issue.idx_project_name}
-          projectLink={issue.idx_project_url}
-          summary={issue.idx_summary}
-          languages={issue.idx_repository_languages}
-          topics={issue.idx_labels}
+          key={issue.objectID}
+          title={issue.title}
+          url={issue.url}
+          projectName={issue.project_name}
+          projectLink={issue.project_url}
+          summary={issue.summary}
           icons={filteredIcons}
           button={SubmitButton}
         />
@@ -53,9 +58,10 @@ const ContributePage = () => {
           key={`modal-${index}`}
           isOpen={modalOpenIndex === index}
           onClose={() => setModalOpenIndex(null)}
-          title={issue.idx_title}
-          summary={issue.idx_summary}
-          hint={issue.idx_hint}
+          title={issue.title}
+          summary={issue.summary}
+          hint={issue.hint}
+          button={viewIssueButton}
         ></Modal>
       </React.Fragment>
     )

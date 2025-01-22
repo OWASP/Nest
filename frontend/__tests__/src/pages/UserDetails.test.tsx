@@ -93,4 +93,19 @@ describe('UserDetailsPage', () => {
       expect(screen.getByText('User not found')).toBeInTheDocument()
     })
   })
+  test('logs error to logger when fetchUserData fails', async () => {
+    const { fetchAlgoliaData } = require('api/fetchAlgoliaData')
+    const logger = require('utils/logger')
+    logger.error.mockClear()
+
+    fetchAlgoliaData.mockRejectedValueOnce(new Error('Test fetch error'))
+
+    await act(async () => {
+      renderWithRouter(<UserDetailsPage />)
+    })
+
+    await waitFor(() => {
+      expect(logger.error).toHaveBeenCalledWith(expect.any(Error))
+    })
+  })
 })

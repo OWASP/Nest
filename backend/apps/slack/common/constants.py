@@ -2,3 +2,4 @@
 
 COMMAND_HELP = {"-h", "--help"}
 COMMAND_START = {"-s", "--start"}
+TRUNCATION_INDICATOR = "..."
