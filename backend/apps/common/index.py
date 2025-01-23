@@ -20,7 +20,7 @@ class IndexBase:
     """Nest index synonyms mixin and record count."""
 
     @staticmethod
-    def _get_client():
+    def get_client():
         """Get the Algolia client."""
         return SearchClientSync(
             settings.ALGOLIA_APPLICATION_ID,
@@ -73,7 +73,7 @@ class IndexBase:
         if not (synonyms := IndexBase._parse_synonyms_file(file_path)):
             return None
 
-        client = IndexBase._get_client()
+        client = IndexBase.get_client()
         index_name = f"{settings.ENVIRONMENT.lower()}_{index_name}"
 
         try:
@@ -91,7 +91,7 @@ class IndexBase:
     @lru_cache(maxsize=1024)
     def get_total_count(index_name):
         """Get total count of records in index."""
-        client = IndexBase._get_client()
+        client = IndexBase.get_client()
         try:
             return client.search_single_index(
                 index_name=f"{settings.ENVIRONMENT.lower()}_{index_name}",
