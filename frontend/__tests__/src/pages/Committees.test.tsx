@@ -131,8 +131,5 @@ describe('Committees Component', () => {
     })
     //suppose index_key is committee_1
     expect(navigateMock).toHaveBeenCalledWith('/committees/committee_1')
-
-    // Clean up the mock
-    jest.restoreAllMocks()
   })
 })
