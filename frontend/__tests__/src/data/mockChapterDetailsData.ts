@@ -2,6 +2,7 @@ export const mockChaterDetailsData = {
   name: 'OWASP Test Chapter',
   suggested_location: 'Test City, Test Country',
   region: 'Test Region',
+  is_active: true,
   tags: 'test-tag',
   updated_at: 1652129718,
   url: 'https://owasp.org/test-chapter',
