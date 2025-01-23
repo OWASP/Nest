@@ -7,3 +7,4 @@ export const GTM_ID = process.env.VITE_GTM_ID
 export const GTM_PREVIEW = process.env.VITE_GTM_PREVIEW
 export const RELEASE_VERSION = process.env.VITE_RELEASE_VERSION
 export const SENTRY_DSN = process.env.VITE_SENTRY_DSN
+export const GRAPHQL_URI = process.env.VITE_GRAPHQL_URI

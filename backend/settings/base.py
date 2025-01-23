@@ -38,6 +38,7 @@ class Base(Configuration):
         "corsheaders",
         "rest_framework",
         "storages",
+        "graphene_django",
     )
 
     LOCAL_APPS = (
@@ -190,3 +191,7 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
+
+    GRAPHENE = {
+        "SCHEMA": "apps.graphql.schema.schema",
+    }

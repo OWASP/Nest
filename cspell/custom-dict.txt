@@ -6,6 +6,7 @@ csrfguard
 csrfprotector
 cva
 dsn
+graphiql
 GSOC
 GTM
 hsl

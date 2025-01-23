@@ -1,3 +1,4 @@
+import { useQuery } from '@apollo/client'
 import {
   faCodeFork,
   faStar,
@@ -12,13 +13,23 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { GET_PROJECT_BY_KEY } from 'api/queries/projectQueries'
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
-export const formatDate = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+export const formatDate = (input: number | string) => {
+  const date =
+    typeof input === 'number'
+      ? new Date(input * 1000) // Unix timestamp in seconds
+      : new Date(input) // ISO date string
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date')
+  }
+
+  return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -32,6 +43,13 @@ const ProjectDetailsPage = () => {
   const [showAllContributors, setShowAllContributors] = useState(false)
   const [showAllLanguages, setShowAllLanguages] = useState(false)
   const [showAllTopics, setShowAllTopics] = useState(false)
+  const [recentReleases, setRecentReleases] = useState([])
+  const [recentIssues, setRecentIssues] = useState([])
+
+  const { data, loading } = useQuery(GET_PROJECT_BY_KEY, {
+    variables: { key: 'www-project-' + projectKey },
+    skip: !projectKey,
+  })
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -46,9 +64,16 @@ const ProjectDetailsPage = () => {
     fetchProjectData()
   }, [projectKey])
 
+  useEffect(() => {
+    if (data) {
+      setRecentReleases(data?.project?.recentReleases)
+      setRecentIssues(data?.project?.recentIssues)
+    }
+  }, [data])
+
   const navigate = useNavigate()
 
-  if (isLoading)
+  if (isLoading || loading)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
@@ -243,24 +268,24 @@ const ProjectDetailsPage = () => {
 
         <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-semibold">Recent Issues</h2>
-          {project.issues && project.issues.length > 0 ? (
+          {recentIssues && recentIssues.length > 0 ? (
             <div className="h-64 overflow-y-auto pr-2">
-              {project.issues.map((issue, index) => (
+              {recentIssues.map((issue, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="font-semibold">{issue.title}</h3>
                   <div className="mt-2 flex items-center">
                     <img
-                      src={issue.author.avatar_url}
-                      alt={issue.author.name}
+                      src={issue?.author?.avatarUrl}
+                      alt={issue?.author?.name}
                       className="mr-2 h-6 w-6 rounded-full"
                     />
-                    <span className="text-sm">{issue.author.name}</span>
+                    <span className="text-sm">{issue?.author?.name}</span>
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                    <span>{formatDate(issue.created_at)}</span>
+                    <span>{formatDate(issue.createdAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{issue.comments_count} comments</span>
+                    <span>{issue.commentsCount} comments</span>
                   </div>
                 </div>
               ))}
@@ -272,24 +297,24 @@ const ProjectDetailsPage = () => {
 
         <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-semibold">Recent Releases</h2>
-          {project.releases && project.releases.length > 0 ? (
+          {recentReleases && recentReleases.length > 0 ? (
             <div className="h-64 overflow-y-auto pr-2">
-              {project.releases.map((release, index) => (
+              {recentReleases.map((release, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="font-semibold">{release.name}</h3>
                   <div className="mt-2 flex items-center">
                     <img
-                      src={release.author.avatar_url}
-                      alt={release.author.name}
+                      src={release?.author?.avatarUrl}
+                      alt={release?.author?.name}
                       className="mr-2 h-6 w-6 rounded-full"
                     />
-                    <span className="text-sm">{release.author.name}</span>
+                    <span className="text-sm">{release?.author?.name}</span>
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                    <span>{formatDate(release.published_at)}</span>
+                    <span>{formatDate(release.publishedAt)}</span>
                     <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{release.tag_name}</span>
+                    <span>{release.tagName}</span>
                   </div>
                 </div>
               ))}
