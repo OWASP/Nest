@@ -14,15 +14,18 @@ from apps.github.api.urls import router as github_router
 from apps.owasp.api.urls import router as owasp_router
 from apps.slack.apps import SlackConfig
 
+# Combine routers from GitHub and OWASP APIs
 router = routers.DefaultRouter()
 router.registry.extend(github_router.registry)
 router.registry.extend(owasp_router.registry)
 
+# URL patterns
 urlpatterns = [
     path("api/v1/", include(router.urls)),
     path("a/", admin.site.urls),
 ]
 
+# Add Slack integration URLs if the app is enabled
 if SlackConfig.app:
     from apps.slack.views import slack_request_handler
 
@@ -32,5 +35,6 @@ if SlackConfig.app:
         path("integrations/slack/interactivity/", slack_request_handler),
     ]
 
+# Serve static files during development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -72,6 +72,11 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("owasp-committee-summary")
 
     @staticmethod
+    def get_owasp_contribute_summary():
+        """Return OWASP contribute summary prompt."""
+        return Prompt.get_text("owasp-contribute-summary")
+
+    @staticmethod
     def get_owasp_project_summary():
         """Return OWASP project summary prompt."""
         return Prompt.get_text("owasp-project-summary")

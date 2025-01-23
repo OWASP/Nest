@@ -50,6 +50,16 @@ def get_header():
                     "value": "view_committees",
                     "action_id": "view_committees_action",
                 },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Contribute",
+                        "emoji": True,
+                    },
+                    "value": "view_contribute",
+                    "action_id": "view_contribute_action",
+                },
             ],
         },
     ]

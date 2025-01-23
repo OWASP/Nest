@@ -33,6 +33,26 @@ class GenericEntityMixin:
         ]
 
     @property
+    def idx_title(self):
+        """Return the title for indexing."""
+        return self.title
+
+    @property
+    def idx_project(self):
+        """Return the project name for indexing."""
+        return self.project.name if self.project else None
+
+    @property
+    def idx_project_url(self):
+        """Return the project URL for indexing."""
+        return self.project.url if self.project else None
+
+    @property
+    def idx_url(self):
+        """Return the URL for indexing."""
+        return self.url
+
+    @property
     def idx_description(self):
         """Return description for indexing."""
         return self.description
@@ -61,8 +81,3 @@ class GenericEntityMixin:
     def idx_topics(self):
         """Return topics for indexing."""
         return self.topics
-
-    @property
-    def idx_url(self):
-        """Return URL for indexing."""
-        return self.owasp_url
