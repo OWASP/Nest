@@ -13,17 +13,14 @@ class EntityModel(RepositoryBasedEntityModel):
 
 class TestRepositoryBasedEntityModel:
     @pytest.mark.parametrize(
-        ("is_active", "has_active_repositories", "expected"),
+        ("has_active_repositories", "expected"),
         [
-            (True, True, True),
-            (True, False, False),
-            (False, True, False),
-            (False, False, False),
+            (True, True),
+            (False, False),
         ],
     )
-    def test_is_indexable(self, is_active, has_active_repositories, expected):
+    def test_is_indexable(self, has_active_repositories, expected):
         model = EntityModel()
-        model.is_active = is_active
         model.has_active_repositories = has_active_repositories
 
         assert model.is_indexable == expected
