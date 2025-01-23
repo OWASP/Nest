@@ -38,7 +38,7 @@
     "@sentry/tracing": "^7.120.3",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.14",
-    "algoliasearch": "^5.19.0",
+    "algoliasearch": "^5.20.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
