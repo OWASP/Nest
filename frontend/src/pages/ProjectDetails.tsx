@@ -241,7 +241,10 @@ const ProjectDetailsPage = () => {
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="font-semibold">
                     <a
-                      href={`https://github.com/OWASP/${issue.repository.key}/issues/${issue.number}`}
+                      href={
+                        issue.repository &&
+                        `https://github.com/OWASP/${issue.repository.key}/issues/${issue.number}`
+                      }
                       target="_blank"
                       rel="none"
                       className="text-[#1d7bd7] hover:underline dark:text-sky-600"
@@ -277,7 +280,6 @@ const ProjectDetailsPage = () => {
             <p>No recent issues.</p>
           )}
         </div>
-
         <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-semibold">Recent Releases</h2>
           {project.releases && project.releases.length > 0 ? (
