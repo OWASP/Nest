@@ -33,7 +33,7 @@ const ChapterDetailsPage = () => {
       </div>
     )
 
-  if (!chapter)
+  if (!chapter || !chapter.is_active)
     return (
       <ErrorDisplay
         statusCode={404}
@@ -42,14 +42,6 @@ const ChapterDetailsPage = () => {
       />
     )
 
-  if (!chapter.is_active)
-    return (
-      <ErrorDisplay
-        statusCode={410}
-        title="This Chapter is Inactive"
-        message="We are sorry, but the chapter you are trying to access is inactive. Please explore other chapters."
-      />
-    )
   const params = ['updated_at']
   const filteredIcons = getFilteredIcons(chapter, params)
   const formattedUrls = handleSocialUrls(chapter.related_urls)

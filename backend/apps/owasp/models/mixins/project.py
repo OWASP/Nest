@@ -62,7 +62,7 @@ class ProjectIndexMixin(GenericEntityMixin):
 
     @property
     def idx_is_active(self):
-        """Return active status."""
+        """Return active status for indexing."""
         return self.is_active
 
     @property

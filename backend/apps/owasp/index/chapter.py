@@ -42,7 +42,6 @@ class ChapterIndex(AlgoliaIndex):
         ],
         "indexLanguages": ["en"],
         "customRanking": [
-            "desc(idx_is_active)",
             "asc(idx_created_at)",
             "desc(idx_updated_at)",
         ],

@@ -20,7 +20,6 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
         "idx_description",
         "idx_forks_count",
         "idx_has_funding_yml",
-        "idx_is_active",
         "idx_key",
         "idx_languages",
         "idx_license",
@@ -38,7 +37,6 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
     settings = {
         "minProximity": 4,
         "customRanking": [
-            "desc(idx_is_active)",
             "desc(idx_stars_count)",
             "desc(idx_forks_count)",
             "desc(idx_pushed_at)",

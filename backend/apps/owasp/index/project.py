@@ -52,7 +52,6 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         ],
         "indexLanguages": ["en"],
         "customRanking": [
-            "desc(idx_is_active)",
             "desc(idx_level_raw)",
             "desc(idx_stars_count)",
             "desc(idx_contributors_count)",

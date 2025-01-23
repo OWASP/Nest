@@ -72,8 +72,7 @@ const ProjectDetailsPage = () => {
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">{project.name}</h1>
-        {/* Display if inactive status*/}
-        {project.is_active === false && (
+        {!project.is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         <p className="mb-6 text-xl">{project.description}</p>
