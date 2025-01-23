@@ -1,5 +1,6 @@
 export interface ChapterType {
   created_at: number
+  is_active: boolean
   key: string
   leaders: string[]
   name: string
