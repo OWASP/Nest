@@ -1,4 +1,8 @@
+import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
+import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
+import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
@@ -6,7 +10,7 @@ import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
-import SponsorButton from './SponsorButton'
+import NavButton from './NavButton'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -64,7 +68,24 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">
-          <SponsorButton />
+          <NavButton
+            href="https://github.com/OWASP/Nest"
+            defaultIcon={faRegularStar}
+            hoverIcon={faSolidStar}
+            defaultIconColor="text-white"
+            hoverIconColor="text-yellow-400"
+            text="Star"
+            className="hidden"
+          />
+
+          <NavButton
+            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+            defaultIcon={faRegularHeart}
+            hoverIcon={faSolidHeart}
+            defaultIconColor="#b55f95"
+            hoverIconColor="#d9156c"
+            text="Sponsor"
+          />
           <ModeToggle />
           <div className="md:hidden">
             <button

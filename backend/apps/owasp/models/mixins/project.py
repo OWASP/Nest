@@ -61,6 +61,11 @@ class ProjectIndexMixin(GenericEntityMixin):
         return self.open_issues.count()
 
     @property
+    def idx_is_active(self):
+        """Return active status for indexing."""
+        return self.is_active
+
+    @property
     def idx_key(self):
         """Return key for indexing."""
         return self.key.replace("www-project-", "")
