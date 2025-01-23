@@ -86,3 +86,7 @@
     - name: Retart services
       shell:
         cmd: docker compose up -d
+
+    - name: Index data
+      shell:
+        cmd: make index-data

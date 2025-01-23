@@ -124,13 +124,13 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.12.0"
+version = "4.13.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 files = [
-    {file = "algoliasearch-4.12.0-py3-none-any.whl", hash = "sha256:73c315f54604598720e6b209f25e7026a4dcdb92cc3f44ba65d9245ebd84317a"},
-    {file = "algoliasearch-4.12.0.tar.gz", hash = "sha256:c2a7c5dda60562f493d55e351a796c8b66bb99e86a1813dab2038ba45e532204"},
+    {file = "algoliasearch-4.13.0-py3-none-any.whl", hash = "sha256:9cbcf2f829b1badb9c855f18eeb125358faab80e3f13947b8c7add27350e7022"},
+    {file = "algoliasearch-4.13.0.tar.gz", hash = "sha256:d929306623ae505ef58289b0951fe190c8262076df5e90c29fdb5c61644e9d36"},
 ]
 
 [package.dependencies]
@@ -1549,13 +1549,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.59.9"
+version = "1.60.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openai-1.59.9-py3-none-any.whl", hash = "sha256:61a0608a1313c08ddf92fe793b6dbd1630675a1fe3866b2f96447ce30050c448"},
-    {file = "openai-1.59.9.tar.gz", hash = "sha256:ec1a20b0351b4c3e65c6292db71d8233515437c6065efd4fd50edeb55df5f5d2"},
+    {file = "openai-1.60.0-py3-none-any.whl", hash = "sha256:df06c43be8018274980ac363da07d4b417bd835ead1c66e14396f6f15a0d5dda"},
+    {file = "openai-1.60.0.tar.gz", hash = "sha256:7fa536cd4b644718645b874d2706e36dbbef38b327e42ca0623275da347ee1a9"},
 ]
 
 [package.dependencies]
@@ -2703,4 +2703,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "53b2959d42a5e4d7302a6e5dafa227d359ea9347765f1c9a969eb229f50dbcf5"
+content-hash = "b67799c5b7b9c2a971560bdd33034749274ea76bebf71566b00cf1ae457c0b94"

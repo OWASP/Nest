@@ -66,7 +66,7 @@ export default function ChapterDetailsPage() {
       </div>
     )
 
-  if (!chapter)
+  if (!chapter || !chapter.is_active)
     return (
       <ErrorDisplay
         statusCode={404}
