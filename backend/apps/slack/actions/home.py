@@ -6,7 +6,7 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
-from apps.slack.common.handlers import chapters, committees, projects
+from apps.slack.common.handlers import chapters, committees, contribute, projects
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import (
     VIEW_CHAPTERS_ACTION,
@@ -15,6 +15,9 @@ from apps.slack.constants import (
     VIEW_COMMITTEES_ACTION,
     VIEW_COMMITTEES_ACTION_NEXT,
     VIEW_COMMITTEES_ACTION_PREV,
+    VIEW_CONTRIBUTE_ACTION,
+    VIEW_CONTRIBUTE_ACTION_NEXT,
+    VIEW_CONTRIBUTE_ACTION_PREV,
     VIEW_PROJECTS_ACTION,
     VIEW_PROJECTS_ACTION_NEXT,
     VIEW_PROJECTS_ACTION_PREV,
@@ -67,6 +70,13 @@ def handle_home_actions(ack, body, client):
                 VIEW_PROJECTS_ACTION_NEXT,
             }:
                 blocks = projects.get_blocks(page=page, limit=10, presentation=home_presentation)
+
+            case action if action in {
+                VIEW_CONTRIBUTE_ACTION,
+                VIEW_CONTRIBUTE_ACTION_PREV,
+                VIEW_CONTRIBUTE_ACTION_NEXT,
+            }:
+                blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
             case _:
                 blocks = [markdown("Invalid action, please try again.")]
 
@@ -96,6 +106,9 @@ if SlackConfig.app:
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
         VIEW_PROJECTS_ACTION,
+        VIEW_CONTRIBUTE_ACTION,
+        VIEW_CONTRIBUTE_ACTION_PREV,
+        VIEW_CONTRIBUTE_ACTION_NEXT,
     )
     for action in actions:
         SlackConfig.app.action(action)(handle_home_actions)
