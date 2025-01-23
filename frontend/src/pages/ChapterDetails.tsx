@@ -33,7 +33,7 @@ const ChapterDetailsPage = () => {
       </div>
     )
 
-  if (!chapter)
+  if (!chapter || !chapter.is_active)
     return (
       <ErrorDisplay
         statusCode={404}
@@ -64,6 +64,7 @@ const ChapterDetailsPage = () => {
           topContributors={chapter.top_contributors}
           button={SubmitButton}
           social={formattedUrls}
+          isActive={chapter.is_active}
         />
       </div>
     </div>

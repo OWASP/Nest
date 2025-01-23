@@ -23,6 +23,7 @@ export const mockChapterData = {
       key: 'chapter_1',
       url: 'https://owasp.org/www-chapter-nagoya',
       objectID: '539',
+      is_active: true,
     },
   ],
 }
