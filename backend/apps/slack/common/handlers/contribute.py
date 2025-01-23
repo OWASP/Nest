@@ -74,8 +74,7 @@ def get_blocks(
     if presentation.include_feedback:
         blocks.append(
             markdown(
-                f"⚠️ *Extended search over {Contribute.active_contribute_count()} OWASP contributions "
-                f"is available at <{get_absolute_url('contribute')}?q={search_query}|{settings.SITE_NAME}>*{NL}"
+                f"Extended search over {Contribute.active_contribute_count()} OWASP contributions"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
         )
