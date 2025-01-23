@@ -1,12 +1,11 @@
-import { faCaretDown, faCaretUp, faCheck } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState } from 'react'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from 'components/ui/dropdownMenu'
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+} from 'components/ui/select'
 
 interface SortOption {
   value: string
@@ -14,43 +13,38 @@ interface SortOption {
 }
 
 interface SortByProps {
-  options: SortOption[]
+  options: any
   selectedOption: string
   onSortChange: (value: string) => void
 }
 
 const SortBy = ({ options, selectedOption, onSortChange }: SortByProps) => {
-  const [open, setOpen] = useState<boolean>(false)
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen)
-  }
-
+  console.log(selectedOption)
   if (!options || options.length === 0) return null
-
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="h-10 w-[100px] justify-between border-2 bg-white text-[#292e36] dark:bg-[#3C3C3C] dark:text-[#D1D5DB]"
-        >
-          <span>Sort By </span>
-          <FontAwesomeIcon icon={open ? faCaretUp : faCaretDown} className="pl-2" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[180px] bg-white text-[#4B5563] dark:bg-[#3C3C3C] dark:text-[#D1D5DB]">
-        {options.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onSelect={() => onSortChange(option.value)}
-            className="justify-between"
+    <SelectRoot
+      collection={options}
+      size="sm"
+      className="w-56"
+      onValueChange={(e) => {
+        onSortChange(e.value[0])
+      }}
+    >
+      <SelectTrigger>
+        <SelectValueText placeholder={`Sort by : ${selectedOption || 'Default'}`} />
+      </SelectTrigger>
+      <SelectContent className="w-80 p-1 dark:bg-[#323232]">
+        {options.items.map((sortAttribute) => (
+          <SelectItem
+            className="hover p-2 hover:bg-[#D1DBE6] dark:hover:bg-[#454545]"
+            item={sortAttribute}
+            key={sortAttribute.value}
           >
-            {option.label}
-            {option.value === selectedOption && <FontAwesomeIcon icon={faCheck} />}
-          </DropdownMenuItem>
+            {sortAttribute.label}
+          </SelectItem>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </SelectContent>
+    </SelectRoot>
   )
 }
 
