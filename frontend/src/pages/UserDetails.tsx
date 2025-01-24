@@ -93,13 +93,13 @@ const UserDetailsPage: React.FC = () => {
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-gray-800">
           <div className="relative">
             {privateContributor ? (
-              <div className="bg-owasp-blue h-32"></div>
+              <div className="h-32 bg-owasp-blue"></div>
             ) : imageLink ? (
-              <div className="bg-owasp-blue h-32">
+              <div className="h-32 bg-owasp-blue">
                 <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
               </div>
             ) : (
-              <div className="bg-owasp-blue relative h-32 items-center justify-center">
+              <div className="relative h-32 items-center justify-center bg-owasp-blue">
                 <img
                   src={heatmapLoaderLink}
                   className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
@@ -109,7 +109,7 @@ const UserDetailsPage: React.FC = () => {
             )}
             <div className="relative px-6">
               <div className="flex flex-col items-start justify-between sm:flex-row sm:space-x-6">
-                <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-6">
+                <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-center sm:space-x-6 sm:space-y-0">
                   <div className="-mt-24 flex-shrink-0">
                     <img
                       className="h-40 w-40 rounded-full border-4 border-white object-cover shadow-lg dark:border-gray-800"
@@ -118,7 +118,7 @@ const UserDetailsPage: React.FC = () => {
                     />
                   </div>
                   <div className="mt-6 sm:mt-0 sm:pb-4">
-                    <h1 className="text-3xl font-bold text-nowrap text-gray-900 dark:text-white">
+                    <h1 className="text-nowrap text-3xl font-bold text-gray-900 dark:text-white">
                       {user.name}
                     </h1>
                     <a
@@ -135,7 +135,7 @@ const UserDetailsPage: React.FC = () => {
                   href={user.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group mt-4 inline-flex flex-nowrap items-center space-x-2 rounded-full bg-gray-200 px-4 py-2 align-top text-nowrap text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-600/60 dark:text-white dark:hover:bg-gray-600 dark:hover:text-gray-200"
+                  className="group mt-4 inline-flex flex-nowrap items-center space-x-2 text-nowrap rounded-full bg-gray-200 px-4 py-2 align-top text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-600/60 dark:text-white dark:hover:bg-gray-600 dark:hover:text-gray-200"
                 >
                   <FontAwesomeIcon icon={faGithub} className="text-sm" />
                   <span>Visit GitHub Profile</span>
@@ -171,7 +171,7 @@ const UserDetailsPage: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 bg-gray-200 p-6 sm:grid-cols-3 dark:bg-gray-900">
+          <div className="grid grid-cols-3 gap-4 bg-gray-200 p-6 dark:bg-gray-900 sm:grid-cols-3">
             {[
               { icon: faUser, label: 'Followers', value: user.followers_count },
               { icon: faUserPlus, label: 'Following', value: user.following_count },

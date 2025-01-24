@@ -29,7 +29,7 @@ export default function Header() {
   }, [])
 
   return (
-    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] shadow-md dark:bg-slate-800">
+    <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
         <NavLink to="/">
@@ -104,11 +104,11 @@ export default function Header() {
       </div>
       <div
         className={cn(
-          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
+          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="space-y-1 px-2 pt-2 pb-3">
+        <div className="space-y-1 px-2 pb-3 pt-2">
           {/* Logo */}
           <NavLink to="/">
             <div className="flex h-full items-center">
