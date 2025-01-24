@@ -12,7 +12,6 @@ import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
-import { heatmapLoaderLink } from 'utils/constants'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
@@ -101,7 +100,7 @@ const UserDetailsPage: React.FC = () => {
             ) : (
               <div className="relative h-32 items-center justify-center bg-owasp-blue">
                 <img
-                  src={heatmapLoaderLink}
+                  src="../../public/img/heatmapBackground.png"
                   className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
                 />
                 <div className="heatmap-loader"></div>
