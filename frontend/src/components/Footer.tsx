@@ -15,15 +15,15 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
-      <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
+    <footer className="mt-auto w-full border-t bg-slate-200 xl:max-w-full dark:bg-slate-800">
+      <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
         <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
           {/* Iterate over footerSections to render each section */}
           {footerSections.map((section: Section) => (
             <div key={section.title} className="space-y-4">
               <button
                 onClick={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
+                className="flex w-full items-center justify-between text-left text-lg font-semibold focus:ring-slate-400 focus:outline-none lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >

@@ -57,7 +57,7 @@ const ProjectDetailsPage = () => {
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 mt-4 text-4xl font-bold">{project.name}</h1>
+        <h1 className="mt-4 mb-6 text-4xl font-bold">{project.name}</h1>
         {!project.is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
@@ -129,7 +129,7 @@ const ProjectDetailsPage = () => {
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(issue.created_at)}</span>
-                    <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+                    <FontAwesomeIcon icon={faFileCode} className="mr-2 ml-4 h-4 w-4" />
                     <span>{issue.comments_count} comments</span>
                   </div>
                 </div>
@@ -157,7 +157,7 @@ const ProjectDetailsPage = () => {
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(release.published_at)}</span>
-                    <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
+                    <FontAwesomeIcon icon={faTag} className="mr-2 ml-4 h-4 w-4" />
                     <span>{release.tag_name}</span>
                   </div>
                 </div>
