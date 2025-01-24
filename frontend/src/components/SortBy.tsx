@@ -1,3 +1,5 @@
+import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   SelectContent,
   SelectItem,
@@ -13,7 +15,6 @@ const SortBy = ({
   selectedOrder,
   onSortChange,
   onOrderChange,
-  sortOrderOptions,
 }: any) => {
   if (!sortOptions || sortOptions.length === 0) return null
 
@@ -32,8 +33,14 @@ const SortBy = ({
             <SelectLabel className="font-small text-sm text-gray-600 dark:text-gray-300">
               Sort By:
             </SelectLabel>
-            <SelectTrigger className="min-w-20 text-sm">
-              <SelectValueText placeholder={selectedSortOption} />
+            <SelectTrigger className="w-auto min-w-[8rem] text-sm">
+              <SelectValueText
+                placeholder={
+                  selectedSortOption === 'default'
+                    ? 'Default'
+                    : sortOptions.items.find((item) => item.value === selectedSortOption)?.label
+                }
+              />
             </SelectTrigger>
           </div>
           <SelectContent className="text-md text-md min-w-36 dark:bg-[#323232]">
@@ -52,34 +59,23 @@ const SortBy = ({
 
       {/* Sort Order Dropdown */}
       {selectedSortOption !== 'default' && (
-        <div className="rounded-xl bg-gray-200 px-2 shadow-sm dark:bg-[#323232]">
-          <SelectRoot
-            collection={sortOrderOptions}
-            size="md"
-            onValueChange={(e) => {
-              onOrderChange(e.value)
-            }}
+        <div className="flex items-center rounded-lg bg-gray-200 shadow-sm dark:bg-[#323232]">
+          <button
+            onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
+            className="flex items-center justify-center rounded-lg p-2 hover:bg-gray-300 dark:text-gray-300 dark:hover:bg-[#454545]"
           >
-            <div className="flex items-center gap-2">
-              <SelectLabel className="font-small text-sm text-gray-600 dark:text-gray-300">
-                Order:
-              </SelectLabel>
-              <SelectTrigger className="min-w-12 text-sm">
-                <SelectValueText placeholder={selectedOrder} />
-              </SelectTrigger>
-            </div>
-            <SelectContent className="text-md min-w-24 dark:bg-[#323232]">
-              {sortOrderOptions.items.map((order) => (
-                <SelectItem
-                  item={order}
-                  key={order.value}
-                  className="p-1 hover:bg-[#D1DBE6] dark:hover:bg-[#454545]"
-                >
-                  {order.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectRoot>
+            {selectedOrder === 'asc' ? (
+              <FontAwesomeIcon
+                icon={faArrowUpWideShort}
+                className="h-5 w-5 text-gray-600 dark:text-gray-200"
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faArrowDownWideShort}
+                className="h-5 w-5 text-gray-600 dark:text-gray-200"
+              />
+            )}
+          </button>
         </div>
       )}
     </div>

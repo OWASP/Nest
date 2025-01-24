@@ -40,13 +40,19 @@ export function useSearchPage<T>({
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
-
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
     if (currentPage > 1) params.set('page', currentPage.toString())
-    if (sortBy && sortBy !== 'projects') params.set('sortBy', sortBy)
-    if (order && order !== '') params.set('order', order)
+
+    if (sortBy && sortBy !== 'default' && sortBy[0] !== 'default' && sortBy !== '') {
+      params.set('sortBy', sortBy)
+    }
+
+    if (sortBy !== 'default' && sortBy[0] !== 'default' && order && order !== '') {
+      params.set('order', order)
+    }
+
     setSearchParams(params)
   }, [searchQuery, order, currentPage, sortBy, setSearchParams])
 
@@ -57,8 +63,8 @@ export function useSearchPage<T>({
     const fetchData = async () => {
       try {
         const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
-          sortBy && sortBy !== 'default'
-            ? `${indexName}_${sortBy}${order ? `_${order}` : ''}`
+          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
+            ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
             : indexName,
           searchQuery,
           currentPage

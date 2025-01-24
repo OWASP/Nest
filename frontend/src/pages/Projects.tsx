@@ -2,7 +2,7 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { project } from 'types/project'
 import { level } from 'utils/data'
-import { sortOptionsProject, sortOrderOptions } from 'utils/sortingOptions'
+import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
@@ -73,7 +73,6 @@ const ProjectsPage = () => {
           sortOptions={sortOptionsProject}
           selectedSortOption={sortBy}
           onSortChange={handleSortChange}
-          sortOrderOptions={sortOrderOptions}
           selectedOrder={order}
           onOrderChange={handleOrderChange}
         />
