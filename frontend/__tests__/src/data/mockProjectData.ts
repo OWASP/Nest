@@ -14,6 +14,7 @@ export const mockProjectData = {
       key: 'project_1',
       stars_count: 20,
       contributors_count: 5,
+      is_active: true,
     },
   ],
 }

@@ -104,3 +104,9 @@
     - name: Retart services
       shell:
         cmd: docker compose up -d
+
+    - name: Index data
+      async: 1800 # 30 minutes
+      poll: 0
+      shell: |
+        make index-data > /var/log/nest/index-data.log 2>&1

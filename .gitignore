@@ -13,6 +13,7 @@ __pycache__
 .python-version
 .ruff_cache
 .vscode
+venv/
 *.code-workspace
 *.local
 *.log
