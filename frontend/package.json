@@ -111,7 +111,7 @@
   "postcss": {
     "plugins": {
       "autoprefixer": {},
-      "@tailwindcss/postcss": {}
+      "tailwindcss": {}
     }
   },
   "prettier": {
