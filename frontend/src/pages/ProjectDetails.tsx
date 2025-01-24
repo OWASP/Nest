@@ -1,23 +1,26 @@
 import { useQuery } from '@apollo/client'
 import {
-  faCodeFork,
-  faStar,
-  faUsers,
   faBook,
-  faCode,
-  faFileCode,
   faCalendar,
+  faCode,
+  faCodeFork,
+  faFileCode,
+  faStar,
   faTag,
-  faChevronDown,
-  faChevronUp,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_PROJECT_BY_KEY } from 'api/queries/projectQueries'
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
+import SecondaryCard from 'components/SecondaryCard'
+import TopContributors from 'components/ToggleContributors'
+import ToggleableList from 'components/ToogleList'
 
 export const formatDate = (input: number | string) => {
   const date =
@@ -36,13 +39,11 @@ export const formatDate = (input: number | string) => {
   })
 }
 
+
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [project, setProject] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [showAllContributors, setShowAllContributors] = useState(false)
-  const [showAllLanguages, setShowAllLanguages] = useState(false)
-  const [showAllTopics, setShowAllTopics] = useState(false)
   const [recentReleases, setRecentReleases] = useState([])
   const [recentIssues, setRecentIssues] = useState([])
 
@@ -89,10 +90,6 @@ const ProjectDetailsPage = () => {
       />
     )
 
-  const toggleContributors = () => setShowAllContributors(!showAllContributors)
-  const toggleLanguages = () => setShowAllLanguages(!showAllLanguages)
-  const toggleTopics = () => setShowAllTopics(!showAllTopics)
-
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -101,13 +98,11 @@ const ProjectDetailsPage = () => {
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         <p className="mb-6 text-xl">{project.description}</p>
-        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
+        <SecondaryCard title="Summary">
           <p>{project.summary}</p>
-        </div>
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 md:col-span-2">
-            <h2 className="mb-4 text-2xl font-semibold">Project Details</h2>
+        </SecondaryCard>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <SecondaryCard title="Project Details" className="gap-2 md:col-span-2">
             <p>
               <strong>Type:</strong> {project.type[0].toUpperCase() + project.type.slice(1)}
             </p>
@@ -117,11 +112,9 @@ const ProjectDetailsPage = () => {
             <p>
               <strong>Organization:</strong> {project.organizations}
             </p>
-            <div>
-              <p>
-                <strong>Project Leaders:</strong> {project.leaders.join(', ')}
-              </p>
-            </div>
+            <p>
+              <strong>Project Leaders:</strong> {project.leaders.join(', ')}
+            </p>
             <p>
               <strong>Last Updated:</strong> {formatDate(project.updated_at)}
             </p>
@@ -131,146 +124,30 @@ const ProjectDetailsPage = () => {
                 {project.url}
               </a>
             </p>
-          </div>
-
-          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 text-2xl font-semibold">Statistics</h2>
-            <div className="mb-2 flex items-center">
-              <FontAwesomeIcon icon={faUsers} className="mr-2" />{' '}
-              <span>{project.contributors_count} Contributors</span>
-            </div>
-            <div className="mb-2 flex items-center">
-              <FontAwesomeIcon icon={faCodeFork} className="mr-2" />{' '}
-              <span>{project.forks_count} Forks</span>
-            </div>
-            <div className="mb-2 flex items-center">
-              <FontAwesomeIcon icon={faStar} className="mr-2" />{' '}
-              <span>{project.stars_count} Stars</span>
-            </div>
-            <div className="mb-2 flex items-center">
-              <FontAwesomeIcon icon={faBook} className="mr-2" />{' '}
-              <span>{project.issues_count} Issues</span>
-            </div>
-            <div className="flex items-center">
-              <FontAwesomeIcon icon={faCode} className="mr-2" />{' '}
-              <span>{project.repositories_count} Repositories</span>
-            </div>
-          </div>
+          </SecondaryCard>
+          <SecondaryCard title="Statistics">
+            <InfoBlock
+              className="pb-1"
+              icon={faUsers}
+              value={`${project.contributors_count} Contributors`}
+            />
+            <InfoBlock className="pb-1" icon={faCodeFork} value={`${project.forks_count} Forks`} />
+            <InfoBlock className="pb-1" icon={faStar} value={`${project.stars_count} Stars`} />
+            <InfoBlock className="pb-1" icon={faBook} value={`${project.issues_count} Issues`} />
+            <InfoBlock
+              className="pb-1"
+              icon={faCode}
+              value={`${project.repositories_count} Repositories`}
+            />
+          </SecondaryCard>
         </div>
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 text-2xl font-semibold">Languages</h2>
-            <div className="flex flex-wrap gap-2">
-              {(showAllLanguages ? project.languages : project.languages.slice(0, 10)).map(
-                (lang, index) => (
-                  <span
-                    key={index}
-                    className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
-                  >
-                    {lang}
-                  </span>
-                )
-              )}
-            </div>
-            {project.languages.length > 10 && (
-              <button
-                onClick={toggleLanguages}
-                className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
-              >
-                {showAllLanguages ? (
-                  <>
-                    Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-                  </>
-                ) : (
-                  <>
-                    Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-
-          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 text-2xl font-semibold">Topics</h2>
-            <div className="flex flex-wrap gap-2">
-              {(showAllTopics ? project.topics : project.topics.slice(0, 10)).map(
-                (topic, index) => (
-                  <span
-                    key={index}
-                    className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
-                  >
-                    {topic}
-                  </span>
-                )
-              )}
-            </div>
-            {project.topics.length > 10 && (
-              <button
-                onClick={toggleTopics}
-                className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
-              >
-                {showAllTopics ? (
-                  <>
-                    Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-                  </>
-                ) : (
-                  <>
-                    Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
+          <ToggleableList items={project.languages} label="Languages" />
+          <ToggleableList items={project.topics} label="Topics" />
         </div>
 
-        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Top Contributors</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {(showAllContributors
-              ? project.top_contributors
-              : project.top_contributors.slice(0, 6)
-            ).map((contributor, index) => (
-              <div
-                key={index}
-                className="flex cursor-pointer items-center"
-                onClick={() => {
-                  navigate(`/community/users/${contributor.login}`)
-                }}
-              >
-                <img
-                  src={contributor.avatar_url}
-                  alt={contributor.name || contributor.login}
-                  className="mr-3 h-10 w-10 rounded-full"
-                />
-                <div>
-                  <p className="font-semibold">{contributor.name || contributor.login}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {contributor.contributions_count} contributions
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-          {project.top_contributors.length > 5 && (
-            <button
-              onClick={toggleContributors}
-              className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
-            >
-              {showAllContributors ? (
-                <>
-                  Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-                </>
-              ) : (
-                <>
-                  Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-                </>
-              )}
-            </button>
-          )}
-        </div>
-
-        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Recent Issues</h2>
+        <TopContributors contributors={project.top_contributors} maxInitialDisplay={6} />
+        <SecondaryCard title="Recent Issues">
           {recentIssues && recentIssues.length > 0 ? (
             <div className="h-64 overflow-y-auto pr-2">
               {recentIssues.map((issue, index) => (
@@ -296,10 +173,8 @@ const ProjectDetailsPage = () => {
           ) : (
             <p>No recent issues.</p>
           )}
-        </div>
-
-        <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">Recent Releases</h2>
+        </SecondaryCard>
+        <SecondaryCard title="Recent Releases">
           {recentReleases && recentReleases.length > 0 ? (
             <div className="h-64 overflow-y-auto pr-2">
               {recentReleases.map((release, index) => (
@@ -325,7 +200,7 @@ const ProjectDetailsPage = () => {
           ) : (
             <p>No recent releases.</p>
           )}
-        </div>
+        </SecondaryCard>
       </div>
     </div>
   )

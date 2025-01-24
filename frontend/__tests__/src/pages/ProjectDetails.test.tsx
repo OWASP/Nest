@@ -3,8 +3,9 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_PROJECT_BY_KEY } from 'api/queries/projectQueries'
 import { useNavigate } from 'react-router-dom'
+import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
-import ProjectDetailsPage, { formatDate } from 'pages/ProjectDetails'
+import ProjectDetailsPage from 'pages/ProjectDetails'
 import {
   mockProjectDetailsData,
   mockProjectDetailsDataGQL,
@@ -46,6 +47,24 @@ describe('ProjectDetailsPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
+  })
+  test('renders loading spinner initially', async () => {
+    render(<ProjectDetailsPage />)
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('renders project data correctly', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+    expect(screen.getByText('This is a test project description')).toBeInTheDocument()
+    expect(screen.getByText('Tool')).toBeInTheDocument()
+    expect(screen.getByText('Flagship')).toBeInTheDocument()
+    expect(screen.getByText('OWASP')).toBeInTheDocument()
   })
 
   test('displays error when project is not found', async () => {
