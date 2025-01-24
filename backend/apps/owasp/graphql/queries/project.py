@@ -9,12 +9,10 @@ from apps.owasp.models.project import Project
 class ProjectQueries(graphene.ObjectType):
     """GraphQL queries for OWASP projects."""
 
-    project = graphene.Field(ProjectType, project_id=graphene.ID(), key=graphene.String())
+    project = graphene.Field(ProjectType, key=graphene.String())
 
-    def resolve_project(self, info, project_id=None, key=None):
-        """Resolve a project by its ID or key."""
-        if id:
-            return Project.objects.get(id=id)
+    def resolve_project(self, info, key=None):
+        """Resolve a project by its key."""
         if key:
             return Project.objects.get(key=key)
         return None
