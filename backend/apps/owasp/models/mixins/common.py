@@ -66,3 +66,8 @@ class GenericEntityMixin:
     def idx_url(self):
         """Return URL for indexing."""
         return self.owasp_url
+
+    @property
+    def is_indexable(self):
+        """Entities to index."""
+        return self.is_active and self.has_active_repositories

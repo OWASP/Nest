@@ -161,3 +161,23 @@ class ProjectIndexMixin(GenericEntityMixin):
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return self.updated_at.timestamp()
+
+    @property
+    def is_code_type(self):
+        """Indicate whether project has CODE type."""
+        return self.type == self.ProjectType.CODE
+
+    @property
+    def is_documentation_type(self):
+        """Indicate whether project has DOCUMENTATION type."""
+        return self.type == self.ProjectType.DOCUMENTATION
+
+    @property
+    def is_tool_type(self):
+        """Indicate whether project has TOOL type."""
+        return self.type == self.ProjectType.TOOL
+
+    @property
+    def is_indexable(self):
+        """Projects to index."""
+        return self.is_active and self.has_active_repositories
