@@ -139,7 +139,10 @@ class Project(
         """Indicate whether project has TOOL type."""
         return self.type == self.ProjectType.TOOL
 
-
+    @property
+    def is_indexable(self):
+        """Projects to index."""
+        return self.is_active and self.has_active_repositories
 
     @property
     def nest_key(self):

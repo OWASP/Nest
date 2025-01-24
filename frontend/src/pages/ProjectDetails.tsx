@@ -1,17 +1,30 @@
+import {
+  faCodeFork,
+  faStar,
+  faUsers,
+  faBook,
+  faCode,
+  faFileCode,
+  faCalendar,
+  faTag,
+  faChevronDown,
+  faChevronUp,
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { level } from 'utils/data'
-import { getFilteredIcons } from 'utils/utility'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import Card from 'components/Card'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [project, setProject] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showAllContributors, setShowAllContributors] = useState(false)
+  const [showAllLanguages, setShowAllLanguages] = useState(false)
+  const [showAllTopics, setShowAllTopics] = useState(false)
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -25,6 +38,8 @@ const ProjectDetailsPage = () => {
 
     fetchProjectData()
   }, [projectKey])
+
+  const navigate = useNavigate()
 
   if (isLoading)
     return (
@@ -41,36 +56,247 @@ const ProjectDetailsPage = () => {
         message="Sorry, the project you're looking for doesn't exist"
       />
     )
-  const params = ['idx_updated_at', 'idx_forks_count', 'idx_stars_count', 'idx_contributors_count']
-  const filteredIcons = getFilteredIcons(project, params)
 
-  const handleButtonClick = () => {
-    window.open(`/projects/contribute?q=${project.idx_name}`)
-  }
-
-  const SubmitButton = {
-    label: 'Contribute',
-    icon: <FontAwesomeIconWrapper icon="fa-solid fa-code-fork" />,
-    onclick: handleButtonClick,
-  }
+  const toggleContributors = () => setShowAllContributors(!showAllContributors)
+  const toggleLanguages = () => setShowAllLanguages(!showAllLanguages)
+  const toggleTopics = () => setShowAllTopics(!showAllTopics)
 
   return (
-    <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
-      <div className="flex justify-center">
-        <Card
-          key={project.objectID}
-          title={project.idx_name}
-          url={project.idx_url}
-          summary={project.idx_summary}
-          level={level[`${project.idx_level as keyof typeof level}`]}
-          icons={filteredIcons}
-          leaders={project.idx_leaders}
-          topContributors={project.idx_top_contributors}
-          topics={project.idx_topics}
-          button={SubmitButton}
-        />
+    <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="mb-6 mt-4 text-4xl font-bold">{project.name}</h1>
+        {!project.is_active && (
+          <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
+        )}
+        <p className="mb-6 text-xl">{project.description}</p>
+        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
+          <p>{project.summary}</p>
+        </div>
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 md:col-span-2">
+            <h2 className="mb-4 text-2xl font-semibold">Project Details</h2>
+            <p>
+              <strong>Type:</strong> {project.type[0].toUpperCase() + project.type.slice(1)}
+            </p>
+            <p>
+              <strong>Level:</strong> {project.level[0].toUpperCase() + project.level.slice(1)}
+            </p>
+            <p>
+              <strong>Organization:</strong> {project.organizations}
+            </p>
+            <div>
+              <p>
+                <strong>Project Leaders:</strong> {project.leaders.join(', ')}
+              </p>
+            </div>
+            <p>
+              <strong>Last Updated:</strong> {formatDate(project.updated_at)}
+            </p>
+            <p>
+              <strong>URL:</strong>{' '}
+              <a href={project.url} className="hover:underline dark:text-sky-600">
+                {project.url}
+              </a>
+            </p>
+          </div>
+
+          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold">Statistics</h2>
+            <div className="mb-2 flex items-center">
+              <FontAwesomeIcon icon={faUsers} className="mr-2" />{' '}
+              <span>{project.contributors_count} Contributors</span>
+            </div>
+            <div className="mb-2 flex items-center">
+              <FontAwesomeIcon icon={faCodeFork} className="mr-2" />{' '}
+              <span>{project.forks_count} Forks</span>
+            </div>
+            <div className="mb-2 flex items-center">
+              <FontAwesomeIcon icon={faStar} className="mr-2" />{' '}
+              <span>{project.stars_count} Stars</span>
+            </div>
+            <div className="mb-2 flex items-center">
+              <FontAwesomeIcon icon={faBook} className="mr-2" />{' '}
+              <span>{project.issues_count} Issues</span>
+            </div>
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faCode} className="mr-2" />{' '}
+              <span>{project.repositories_count} Repositories</span>
+            </div>
+          </div>
+        </div>
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold">Languages</h2>
+            <div className="flex flex-wrap gap-2">
+              {(showAllLanguages ? project.languages : project.languages.slice(0, 10)).map(
+                (lang, index) => (
+                  <span
+                    key={index}
+                    className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
+                  >
+                    {lang}
+                  </span>
+                )
+              )}
+            </div>
+            {project.languages.length > 10 && (
+              <button
+                onClick={toggleLanguages}
+                className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+              >
+                {showAllLanguages ? (
+                  <>
+                    Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
+                  </>
+                ) : (
+                  <>
+                    Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
+          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold">Topics</h2>
+            <div className="flex flex-wrap gap-2">
+              {(showAllTopics ? project.topics : project.topics.slice(0, 10)).map(
+                (topic, index) => (
+                  <span
+                    key={index}
+                    className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
+                  >
+                    {topic}
+                  </span>
+                )
+              )}
+            </div>
+            {project.topics.length > 10 && (
+              <button
+                onClick={toggleTopics}
+                className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+              >
+                {showAllTopics ? (
+                  <>
+                    Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
+                  </>
+                ) : (
+                  <>
+                    Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold">Top Contributors</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {(showAllContributors
+              ? project.top_contributors
+              : project.top_contributors.slice(0, 6)
+            ).map((contributor, index) => (
+              <div
+                key={index}
+                className="flex cursor-pointer items-center"
+                onClick={() => {
+                  navigate(`/community/users/${contributor.login}`)
+                }}
+              >
+                <img
+                  src={contributor.avatar_url}
+                  alt={contributor.name || contributor.login}
+                  className="mr-3 h-10 w-10 rounded-full"
+                />
+                <div>
+                  <p className="font-semibold">{contributor.name || contributor.login}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {contributor.contributions_count} contributions
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {project.top_contributors.length > 5 && (
+            <button
+              onClick={toggleContributors}
+              className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+            >
+              {showAllContributors ? (
+                <>
+                  Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
+                </>
+              ) : (
+                <>
+                  Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold">Recent Issues</h2>
+          {project.issues && project.issues.length > 0 ? (
+            <div className="h-64 overflow-y-auto pr-2">
+              {project.issues.map((issue, index) => (
+                <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                  <h3 className="font-semibold">{issue.title}</h3>
+                  <div className="mt-2 flex items-center">
+                    <img
+                      src={issue.author.avatar_url}
+                      alt={issue.author.name}
+                      className="mr-2 h-6 w-6 rounded-full"
+                    />
+                    <span className="text-sm">{issue.author.name}</span>
+                  </div>
+                  <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(issue.created_at)}</span>
+                    <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+                    <span>{issue.comments_count} comments</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No recent issues.</p>
+          )}
+        </div>
+
+        <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold">Recent Releases</h2>
+          {project.releases && project.releases.length > 0 ? (
+            <div className="h-64 overflow-y-auto pr-2">
+              {project.releases.map((release, index) => (
+                <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                  <h3 className="font-semibold">{release.name}</h3>
+                  <div className="mt-2 flex items-center">
+                    <img
+                      src={release.author.avatar_url}
+                      alt={release.author.name}
+                      className="mr-2 h-6 w-6 rounded-full"
+                    />
+                    <span className="text-sm">{release.author.name}</span>
+                  </div>
+                  <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(release.published_at)}</span>
+                    <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
+                    <span>{release.tag_name}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No recent releases.</p>
+          )}
+        </div>
       </div>
     </div>
   )
 }
+
 export default ProjectDetailsPage

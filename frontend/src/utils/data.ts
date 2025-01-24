@@ -64,27 +64,27 @@ library.add(
 )
 
 export const Icons = {
-  idx_updated_at: {
+  updated_at: {
     label: 'Last update date',
     icon: 'fa-solid fa-arrows-rotate',
   },
-  idx_forks_count: {
+  forks_count: {
     label: 'Total GitHub forks count',
     icon: 'fa-solid fa-code-fork',
   },
-  idx_stars_count: {
+  stars_count: {
     label: 'Total GitHub stars count',
     icon: 'fa-regular fa-star',
   },
-  idx_contributors_count: {
+  contributors_count: {
     label: 'Total GitHub contributors count',
     icon: 'fa-regular fa-user',
   },
-  idx_created_at: {
+  created_at: {
     label: 'Creation date',
     icon: 'fa-regular fa-clock',
   },
-  idx_comments_count: {
+  comments_count: {
     label: 'Comments count',
     icon: 'fa-regular fa-comment',
   },

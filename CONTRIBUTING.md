@@ -159,6 +159,10 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 
 #### NestBot Development
 
+:exclamation: **Never install your development Slack application in the OWASP Slack workspace.
+:exclamation: Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.
+:exclamation: Always use a different workspace (create your own if needed).**
+
 To setup NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
@@ -288,6 +292,18 @@ git checkout -b feature/my-feature-name
 
 - Address feedback from maintainers during code review.
 - Once approved, your PR will be merged into the main branch.
+
+## Troubleshooting
+
+- **"Unexpected character" error during application execution or Docker image building**
+  This error is usually caused by incorrect encoding of `.env` files.
+
+  - Open the `.env` files in a text editor (e.g., VS Code) and save them as "UTF-8 without BOM."
+  - Restart the application with `make run` and verify the error is resolved.
+
+  Tips:
+  - Ensure consistent file encoding using a code editor or linter.
+  - If the issue persists, check the project's documentation or issue tracker.
 
 ## Code of Conduct
 

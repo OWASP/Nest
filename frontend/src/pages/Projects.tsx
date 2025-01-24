@@ -2,10 +2,12 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { project } from 'types/project'
 import { level } from 'utils/data'
+import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
+import SortBy from 'components/SortBy'
 
 const ProjectsPage = () => {
   const {
@@ -14,24 +16,23 @@ const ProjectsPage = () => {
     currentPage,
     totalPages,
     searchQuery,
+    sortBy,
     handleSearch,
     handlePageChange,
+    handleSortChange,
   } = useSearchPage<project>({
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
+    defaultSortBy: '',
   })
+
   const navigate = useNavigate()
-  const renderProjectCard = (project: project, index: number) => {
-    const params: string[] = [
-      'idx_updated_at',
-      'idx_forks_count',
-      'idx_stars_count',
-      'idx_contributors_count',
-    ]
+  const renderProjectCard = (project: project) => {
+    const params: string[] = ['updated_at', 'forks_count', 'stars_count', 'contributors_count']
     const filteredIcons = getFilteredIcons(project, params)
 
     const handleButtonClick = () => {
-      navigate(`/projects/${project.idx_key}`)
+      navigate(`/projects/${project.key}`)
     }
 
     const SubmitButton = {
@@ -42,15 +43,13 @@ const ProjectsPage = () => {
 
     return (
       <Card
-        key={project.objectID || `project-${index}`}
-        title={project.idx_name}
-        url={`projects/${project.idx_key}`}
-        summary={project.idx_summary}
-        level={level[`${project.idx_level as keyof typeof level}`]}
+        key={project.objectID}
+        title={project.name}
+        url={`/projects/${project.key}`}
+        summary={project.summary}
+        level={level[`${project.level as keyof typeof level}`]}
         icons={filteredIcons}
-        leaders={project.idx_leaders}
-        topContributors={project.idx_top_contributors}
-        topics={project.idx_topics}
+        topContributors={project.top_contributors}
         button={SubmitButton}
       />
     )
@@ -67,8 +66,15 @@ const ProjectsPage = () => {
       onPageChange={handlePageChange}
       empty="No projects found"
       searchPlaceholder="Search for OWASP projects..."
+      sortChildren={
+        <SortBy
+          options={sortOptionsProject}
+          selectedOption={sortBy}
+          onSortChange={handleSortChange}
+        />
+      }
     >
-      {projects && projects.map(renderProjectCard)}
+      {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
     </SearchPageLayout>
   )
 }

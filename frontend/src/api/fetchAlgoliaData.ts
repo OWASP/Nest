@@ -5,6 +5,7 @@ import { client } from 'utils/helpers/algoliaClient'
 
 import { getParamsForIndexName } from 'utils/paramsMapping'
 import { AppError } from 'wrappers/ErrorWrapper'
+import { removeIdxPrefix } from './utility'
 
 export const fetchAlgoliaData = async <T>(
   indexName: string,
@@ -17,7 +18,7 @@ export const fetchAlgoliaData = async <T>(
     throw new AppError(500, 'Search client not initialized')
   }
   try {
-    const params = getParamsForIndexName(indexName)
+    const params = getParamsForIndexName(indexName.split('_')[0])
     const request: AlgoliaRequestType = {
       attributesToHighlight: [],
       hitsPerPage: hitsPerPage,
@@ -39,8 +40,10 @@ export const fetchAlgoliaData = async <T>(
     }
     if (results && results.length > 0) {
       const { hits, nbPages } = results[0] as SearchResponse<T>
+      const cleanedHits = hits.map((hit) => removeIdxPrefix(hit)) as T[]
+
       return {
-        hits: hits as T[],
+        hits: cleanedHits,
         totalPages: nbPages || 0,
       }
     } else {

@@ -1,17 +1,32 @@
+import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
+import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
+import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { headerLinks } from 'utils/constants'
+import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
-import SponsorButton from './SponsorButton'
+import NavButton from './NavButton'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= desktopViewMinWidth) {
+        setMobileMenuOpen(false)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
@@ -53,7 +68,24 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">
-          <SponsorButton />
+          <NavButton
+            href="https://github.com/OWASP/Nest"
+            defaultIcon={faRegularStar}
+            hoverIcon={faSolidStar}
+            defaultIconColor="text-white"
+            hoverIconColor="text-yellow-400"
+            text="Star"
+            className="hidden"
+          />
+
+          <NavButton
+            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+            defaultIcon={faRegularHeart}
+            hoverIcon={faSolidHeart}
+            defaultIconColor="#b55f95"
+            hoverIconColor="#d9156c"
+            text="Sponsor"
+          />
           <ModeToggle />
           <div className="md:hidden">
             <button

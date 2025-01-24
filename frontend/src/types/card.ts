@@ -16,13 +16,11 @@ export interface CardProps {
   summary: string
   level?: Level
   icons?: IconType
-  leaders?: string[]
   topContributors?: topContributorsType[]
-  topics?: string[]
   button: ButtonType
   projectName?: string
   projectLink?: string
-  languages?: string[]
   social?: { title: string; icon: string; url: string }[]
   tooltipLabel?: string
+  isActive?: boolean
 }
