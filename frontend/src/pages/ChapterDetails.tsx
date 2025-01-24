@@ -1,62 +1,38 @@
 import {
-  faDiscord,
-  faInstagram,
-  faLinkedin,
-  faYoutube,
-  faMeetup,
-  faXTwitter,
-} from '@fortawesome/free-brands-svg-icons'
-import {
-  faGlobe,
-  faCalendarAlt,
   faMapMarkerAlt,
-  faChevronDown,
-  faChevronUp,
-  faLink,
   faTags,
+  faCalendarAlt,
+  faLink,
+  faGlobe,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
+import { getSocialIcon } from 'utils/urlIconMappings'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
-
-const getSocialIcon = (url: string) => {
-  if (!/^https?:\/\//i.test(url)) {
-    url = 'http://' + url
-  }
-
-  const hostname = new URL(url).hostname.toLowerCase()
-
-  if (hostname === 'discord.com' || hostname.endsWith('.discord.com')) return faDiscord
-  if (hostname === 'instagram.com' || hostname.endsWith('.instagram.com')) return faInstagram
-  if (hostname === 'linkedin.com' || hostname.endsWith('.linkedin.com')) return faLinkedin
-  if (hostname === 'youtube.com' || hostname.endsWith('.youtube.com')) return faYoutube
-  if (hostname === 'twitter.com' || hostname === 'x.com' || hostname.endsWith('.x.com'))
-    return faXTwitter
-  if (hostname === 'meetup.com' || hostname.endsWith('.meetup.com')) return faMeetup
-  return faGlobe
-}
+import SecondaryCard from 'components/SecondaryCard'
+import TopContributors from 'components/ToggleContributors'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
-  const [chapter, setchapter] = useState(null)
+  const [chapter, setChapter] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [showAllContributors, setShowAllContributors] = useState(false)
 
   useEffect(() => {
-    const fetchchapterData = async () => {
+    const fetchChapterData = async () => {
       setIsLoading(true)
       const { hits } = await fetchAlgoliaData('chapters', chapterKey, 1, chapterKey)
       if (hits && hits.length > 0) {
-        setchapter(hits[0])
+        setChapter(hits[0])
       }
       setIsLoading(false)
     }
 
-    fetchchapterData()
+    fetchChapterData()
   }, [chapterKey])
 
   if (isLoading)
@@ -81,122 +57,55 @@ export default function ChapterDetailsPage() {
         <h1 className="mb-6 text-3xl font-bold md:text-4xl">{chapter.name}</h1>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-lg bg-gray-100 p-4 shadow-lg dark:bg-gray-800 md:p-6">
-            <h2 className="mb-4 text-xl font-semibold md:text-2xl">Chapter Details</h2>
-            <div className="space-y-3">
-              <div className="flex items-start">
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-3 mt-1 w-5" />
-                <div>
-                  <div className="text-sm font-medium">Location</div>
-                  <div className="text-sm md:text-base">{chapter.suggested_location}</div>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <FontAwesomeIcon icon={faGlobe} className="mr-3 mt-1 w-5" />
-                <div>
-                  <div className="text-sm font-medium">Region</div>
-                  <div className="text-sm md:text-base">{chapter.region}</div>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <FontAwesomeIcon icon={faTags} className="mr-3 mt-1 w-5" />
-                <div>
-                  <div className="text-sm font-medium">Tags</div>
-                  <div className="text-sm md:text-base">
-                    {chapter.tags[0].toUpperCase() + chapter.tags.slice(1)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <FontAwesomeIcon icon={faCalendarAlt} className="mr-3 mt-1 w-5" />
-                <div>
-                  <div className="text-sm font-medium">Last Updated</div>
-                  <div className="text-sm md:text-base">{formatDate(chapter.updated_at)}</div>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <FontAwesomeIcon icon={faLink} className="mr-3 mt-1 w-5" />
-                <div>
-                  <div className="text-sm font-medium">URL</div>
-                  <a href={chapter.url} className="hover:underline dark:text-sky-600">
-                    {chapter.url}
-                  </a>
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm font-medium">Social Links</div>
-                <div className="mt-2 flex flex-wrap gap-3">
-                  {chapter.related_urls.map((url, index) => (
-                    <a
-                      key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-                    >
-                      <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg bg-gray-100 p-4 shadow-md dark:bg-gray-800 md:p-6">
-            <h2 className="mb-4 text-xl font-semibold md:text-2xl">Summary</h2>
-            <p className="text-sm leading-relaxed md:text-base">{chapter.summary}</p>
-          </div>
+          <SecondaryCard title="Chapter Details">
+            <InfoBlock
+              className="pb-1"
+              icon={faMapMarkerAlt}
+              label="Location"
+              value={chapter.suggested_location}
+            />
+            <InfoBlock className="pb-1" icon={faGlobe} label="Region" value={chapter.region} />
+            <InfoBlock
+              className="pb-1"
+              icon={faTags}
+              label="Tags"
+              value={chapter.tags[0].toUpperCase() + chapter.tags.slice(1)}
+            />
+            <InfoBlock
+              className="pb-1"
+              icon={faCalendarAlt}
+              label="Last Updated"
+              value={formatDate(chapter.updated_at)}
+            />
+            <InfoBlock className="pb-1" icon={faLink} label="URL" value={chapter.url} isLink />
+            <SocialLinks urls={chapter.related_urls} />
+          </SecondaryCard>
+          <SecondaryCard title="Summary">
+            <div className="text-sm leading-relaxed md:text-base">{chapter.summary}</div>
+          </SecondaryCard>
         </div>
 
-        <div className="mt-6 rounded-lg bg-gray-100 p-4 shadow-md dark:bg-gray-800 md:p-6">
-          <h2 className="mb-4 text-xl font-semibold md:text-2xl">Top Contributors</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {(showAllContributors
-              ? chapter.top_contributors
-              : chapter.top_contributors.slice(0, 6)
-            ).map((contributor, index) => (
-              <a
-                key={index}
-                href={`https://github.com/${contributor.login}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                <img
-                  src={contributor.avatar_url}
-                  alt={contributor.name || contributor.login}
-                  className="mr-3 h-10 w-10 rounded-full"
-                />
-                <div>
-                  <p className="font-semibold text-blue-600 hover:underline dark:text-sky-400">
-                    {contributor.name || contributor.login}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {contributor.contributions_count} contributions
-                  </p>
-                </div>
-              </a>
-            ))}
-          </div>
-          {chapter.top_contributors.length > 6 && (
-            <button
-              onClick={() => setShowAllContributors(!showAllContributors)}
-              className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
-            >
-              {showAllContributors ? 'Show Less' : 'Show All'}
-              <FontAwesomeIcon
-                icon={showAllContributors ? faChevronUp : faChevronDown}
-                className="ml-2"
-              />
-            </button>
-          )}
-        </div>
+        <TopContributors contributors={chapter.top_contributors} maxInitialDisplay={6} />
       </div>
     </div>
   )
 }
+
+const SocialLinks = ({ urls }) => (
+  <div>
+    <div className="text-sm font-medium">Social Links</div>
+    <div className="mt-2 flex flex-wrap gap-3">
+      {urls.map((url, index) => (
+        <a
+          key={index}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
+        </a>
+      ))}
+    </div>
+  </div>
+)
