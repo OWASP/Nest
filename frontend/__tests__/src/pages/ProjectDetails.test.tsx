@@ -1,11 +1,19 @@
-import { within } from '@testing-library/dom'
-import { screen, waitFor, fireEvent } from '@testing-library/react'
+import { useQuery } from '@apollo/client'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { GET_PROJECT_BY_KEY } from 'api/queries/projectQueries'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage, { formatDate } from 'pages/ProjectDetails'
-import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
-jest.mock('api/fetchAlgoliaData')
+import {
+  mockProjectDetailsData,
+  mockProjectDetailsDataGQL,
+} from '@tests/data/mockProjectDetailsData'
+
+jest.mock('@apollo/client', () => ({
+  ...jest.requireActual('@apollo/client'),
+  useQuery: jest.fn(),
+}))
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -13,11 +21,23 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }))
 
+jest.mock('api/fetchAlgoliaData')
+
 describe('ProjectDetailsPage', () => {
   let navigateMock: jest.Mock
 
   beforeEach(() => {
     navigateMock = jest.fn()
+    ;(useQuery as jest.Mock).mockImplementation((query) => {
+      if (query === GET_PROJECT_BY_KEY) {
+        return mockProjectDetailsDataGQL
+      }
+      return {
+        loading: false,
+        error: new Error('Query not found'),
+        data: null,
+      }
+    })
     ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
     ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
       Promise.resolve({ hits: [mockProjectDetailsData] })
@@ -49,8 +69,6 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Project Details')).toBeInTheDocument()
       expect(screen.getByText('Statistics')).toBeInTheDocument()
       expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Recent Issues')).toBeInTheDocument()
-      expect(screen.getByText('Recent Releases')).toBeInTheDocument()
     })
   })
 

@@ -46,7 +46,7 @@ const ProjectDetailsPage = () => {
   const [recentReleases, setRecentReleases] = useState([])
   const [recentIssues, setRecentIssues] = useState([])
 
-  const { data, loading } = useQuery(GET_PROJECT_BY_KEY, {
+  const { data, loading, error } = useQuery(GET_PROJECT_BY_KEY, {
     variables: { key: 'www-project-' + projectKey },
     skip: !projectKey,
   })
@@ -80,7 +80,7 @@ const ProjectDetailsPage = () => {
       </div>
     )
 
-  if (!project)
+  if (!project || error)
     return (
       <ErrorDisplay
         statusCode={404}

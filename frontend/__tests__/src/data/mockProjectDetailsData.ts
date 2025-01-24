@@ -39,3 +39,50 @@ export const mockProjectDetailsData = {
     },
   ],
 }
+export const mockProjectDetailsDataGQL = {
+  project: {
+    name: 'Test Project',
+    recentReleases: [
+      {
+        name: 'Release 1.0',
+        tagName: 'v1.0',
+        isPreRelease: false,
+        publishedAt: '2023-01-01T00:00:00Z',
+        author: {
+          avatarUrl: 'https://example.com/avatar1.png',
+          name: 'Author 1',
+        },
+      },
+      {
+        name: 'Release 2.0',
+        tagName: 'v2.0',
+        isPreRelease: true,
+        publishedAt: '2023-06-01T00:00:00Z',
+        author: {
+          avatarUrl: 'https://example.com/avatar2.png',
+          name: 'Author 2',
+        },
+      },
+    ],
+    recentIssues: [
+      {
+        title: 'Issue 1',
+        commentsCount: 5,
+        createdAt: '2023-05-01T12:00:00Z',
+        author: {
+          avatarUrl: 'https://example.com/avatar3.png',
+          name: 'Author 3',
+        },
+      },
+      {
+        title: 'Issue 2',
+        commentsCount: 2,
+        createdAt: '2023-07-01T14:30:00Z',
+        author: {
+          avatarUrl: 'https://example.com/avatar4.png',
+          name: 'Author 4',
+        },
+      },
+    ],
+  },
+}

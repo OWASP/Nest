@@ -1,4 +1,3 @@
-
 import { ApolloProvider } from '@apollo/client'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { StrictMode } from 'react'
@@ -25,8 +24,8 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <ErrorWrapper>
         <ApolloProvider client={apolloClient}>
-         <ChakraProvider value={defaultSystem}>
-           <App />
+          <ChakraProvider value={defaultSystem}>
+            <App />
           </ChakraProvider>
         </ApolloProvider>
       </ErrorWrapper>

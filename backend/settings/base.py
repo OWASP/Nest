@@ -193,5 +193,5 @@ class Base(Configuration):
     SLACK_SIGNING_SECRET = values.SecretValue()
 
     GRAPHENE = {
-        "SCHEMA": "apps.graphql.schema.schema",
+        "SCHEMA": "settings.graphql.schema",
     }
