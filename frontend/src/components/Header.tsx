@@ -15,18 +15,31 @@ import NavButton from './NavButton'
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
+
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= desktopViewMinWidth) {
         setMobileMenuOpen(false)
       }
     }
+
+    const handleOutsideClick = (event) => {
+      const navbar = document.getElementById('navbar-sticky')
+      if (mobileMenuOpen && navbar && !navbar.contains(event.target)) {
+        setMobileMenuOpen(false)
+      }
+    }
+
     window.addEventListener('resize', handleResize)
+    window.addEventListener('click', handleOutsideClick)
+
     return () => {
       window.removeEventListener('resize', handleResize)
+      window.removeEventListener('click', handleOutsideClick)
     }
-  }, [])
+  }, [mobileMenuOpen])
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
