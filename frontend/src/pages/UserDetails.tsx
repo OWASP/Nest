@@ -12,6 +12,7 @@ import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
+import { heatmapLoaderLink } from 'utils/constants'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
@@ -24,8 +25,9 @@ const UserDetailsPage: React.FC = () => {
   const [data, setData] = useState<HeatmapData | null>(null)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
+  const [privateContributor, setPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const theme = 'githubDark'
+  const theme = 'blue'
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -49,9 +51,11 @@ const UserDetailsPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const result = await fetchHeatmapData(userKey)
-      if (result) {
+      if (result && result.contributions) {
         setUsername(userKey)
         setData(result)
+      } else {
+        setPrivateContributor(true)
       }
     }
     fetchData()
@@ -88,11 +92,21 @@ const UserDetailsPage: React.FC = () => {
       <div className="mx-auto md:max-w-3xl">
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-gray-800">
           <div className="relative">
-            <div className="h-32 bg-gray-800 dark:bg-black">
-              {imageLink && (
-                <img src={imageLink} className="h-full w-full object-cover object-[25%_75%]" />
-              )}
-            </div>
+            {privateContributor ? (
+              <div className="h-32 bg-owasp-blue"></div>
+            ) : imageLink ? (
+              <div className="h-32 bg-owasp-blue">
+                <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
+              </div>
+            ) : (
+              <div className="relative h-32 items-center justify-center bg-owasp-blue">
+                <img
+                  src={heatmapLoaderLink}
+                  className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                />
+                <div className="heatmap-loader"></div>
+              </div>
+            )}
             <div className="relative px-6">
               <div className="flex flex-col items-start justify-between sm:flex-row sm:space-x-6">
                 <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-center sm:space-x-6 sm:space-y-0">
