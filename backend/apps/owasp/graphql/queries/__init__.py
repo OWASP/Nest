@@ -1,7 +1,5 @@
-import graphene
-
 from apps.owasp.graphql.queries.project import ProjectQueries
 
 
 class OWASPQuery(ProjectQueries):
-    pass
+    """GraphQL query class for OWASP-related queries."""
