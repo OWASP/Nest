@@ -254,7 +254,7 @@ const ProjectDetailsPage = () => {
                   </h3>
                   <div className="mt-2 flex items-center">
                     <a
-                      href={`https://github.com/${issue.author.key}`}
+                      href={`https://nest.owasp.dev/community/users/${issue.author.key}`}
                       target="_blank"
                       rel="none"
                       className="flex items-center"
@@ -262,7 +262,7 @@ const ProjectDetailsPage = () => {
                       <img
                         src={issue.author.avatar_url}
                         alt={issue.author.name}
-                        className="mr-2 h-6 w-6 rounded-full"
+                        className="w-[[6 mr-2 h-6 rounded-full"
                       />
                       <span className="text-sm">{issue.author.name}</span>
                     </a>
