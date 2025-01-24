@@ -66,7 +66,7 @@ const ChaptersPage = () => {
       <Card
         key={chapter.objectID}
         title={chapter.name}
-        url={`chapters/${chapter.key}`}
+        url={`/chapters/${chapter.key}`}
         summary={chapter.summary}
         icons={filteredIcons}
         topContributors={chapter.top_contributors}
