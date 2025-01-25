@@ -18,7 +18,7 @@ export const fetchAlgoliaData = async <T>(
     throw new AppError(500, 'Search client not initialized')
   }
   try {
-    const params = getParamsForIndexName(indexName)
+    const params = getParamsForIndexName(indexName.split('_')[0])
     const request: AlgoliaRequestType = {
       attributesToHighlight: [],
       hitsPerPage: hitsPerPage,

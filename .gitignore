@@ -10,14 +10,15 @@ __pycache__
 .mypy_cache
 .pytest_cache
 .python_history
+.python-version
 .ruff_cache
 .vscode
+venv/
 *.code-workspace
 *.local
 *.log
 backend/.venv
 backend/staticfiles
-backend/venv
 frontend/.npm
 frontend/coverage
 frontend/dist
@@ -26,5 +27,6 @@ frontend/npm-debug.log*
 frontend/pnpm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+schema/.venv
 logs
 TODO

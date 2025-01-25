@@ -1,4 +1,4 @@
-name: 'Pull Request Labeler'
+name: Label Pull Requests
 
 on:
   - pull_request_target
@@ -13,3 +13,4 @@ jobs:
       - uses: actions/labeler@v5
         with:
           configuration-path: .github/labeler.yml
+          sync-labels: true
