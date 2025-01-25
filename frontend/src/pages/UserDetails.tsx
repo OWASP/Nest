@@ -100,8 +100,8 @@ const UserDetailsPage: React.FC = () => {
             ) : (
               <div className="relative h-32 items-center justify-center bg-owasp-blue">
                 <img
-                  src="../../public/img/heatmapBackground.png"
-                  className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                  src="/img/heatmapBackground.png"
+                  className="heatmap-background-loader h-full w-full border-none object-cover object-[20%_60%]"
                 />
                 <div className="heatmap-loader"></div>
               </div>
