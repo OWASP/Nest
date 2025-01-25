@@ -47,7 +47,7 @@ const ProjectsPage = () => {
       <Card
         key={project.objectID}
         title={project.name}
-        url={`projects/${project.key}`}
+        url={`/projects/${project.key}`}
         summary={project.summary}
         level={level[`${project.level as keyof typeof level}`]}
         icons={filteredIcons}
