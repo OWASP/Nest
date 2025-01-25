@@ -51,7 +51,7 @@ export default function Header() {
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <NavLink to="/">
+        <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
           <div className="flex h-full items-center">
             <img
               src={'/img/owasp_icon_white_sm.png'}
@@ -129,7 +129,7 @@ export default function Header() {
       >
         <div className="space-y-1 px-2 pb-3 pt-2">
           {/* Logo */}
-          <NavLink to="/">
+          <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
             <div className="flex h-full items-center">
               <img
                 src={'/img/owasp_icon_white_sm.png'}
