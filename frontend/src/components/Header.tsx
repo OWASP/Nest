@@ -19,14 +19,33 @@ export default function Header() {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= desktopViewMinWidth) {
-        setMobileMenuOpen(false)
+        setMobileMenuOpen(false);
       }
-    }
-    window.addEventListener('resize', handleResize)
+    };
+  
+    const handleOutsideClick = (event) => {
+      const navbar = document.getElementById('navbar-sticky');
+      const sidebar = document.querySelector('.fixed.inset-y-0');
+      if (
+        mobileMenuOpen &&
+        navbar &&
+        !navbar.contains(event.target) &&
+        sidebar &&
+        !sidebar.contains(event.target)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+  
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('click', handleOutsideClick);
+  
     return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('click', handleOutsideClick);
+    };
+  }, [mobileMenuOpen]);
+  
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
