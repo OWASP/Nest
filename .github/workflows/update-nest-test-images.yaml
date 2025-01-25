@@ -11,7 +11,7 @@ env:
 
 jobs:
   update-nest-test-images:
-    name: Update Nest test image
+    name: Update Nest test images
     if: ${{ github.repository == 'OWASP/Nest' }}
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +26,7 @@ jobs:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build backend test image
+      - name: Update backend test image
         uses: docker/build-push-action@v6
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
@@ -37,7 +37,7 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
-      - name: Build frontend test image
+      - name: Update frontend test image
         uses: docker/build-push-action@v6
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
@@ -47,3 +47,14 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
+
+      - name: Update schema test image
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache,mode=max
+          context: schema
+          file: schema/Dockerfile.test
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest
