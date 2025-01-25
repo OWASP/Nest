@@ -1,13 +1,12 @@
-"""Defines the GraphQL schema for the application."""
+"""Nest GraphQL schema."""
 
 import graphene
 
-from apps.common.schema import BaseQuery
-from apps.owasp.graphql.queries import OWASPQuery
+from apps.owasp.graphql.queries import OwaspQuery
 
 
-class Query(BaseQuery, OWASPQuery):
-    """Combines base and OWASP queries."""
+class Query(OwaspQuery):
+    """Schema queries."""
 
 
 schema = graphene.Schema(query=Query)

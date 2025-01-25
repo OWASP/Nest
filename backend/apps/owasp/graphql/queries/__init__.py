@@ -1,5 +1,5 @@
-from apps.owasp.graphql.queries.project import ProjectQueries
+from apps.owasp.graphql.queries.project import ProjectQuery
 
 
-class OWASPQuery(ProjectQueries):
-    """GraphQL query class for OWASP-related queries."""
+class OwaspQuery(ProjectQuery):
+    """GraphQL query class for owasp app queries."""

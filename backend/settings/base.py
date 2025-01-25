@@ -36,9 +36,9 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
+        "graphene_django",
         "rest_framework",
         "storages",
-        "graphene_django",
     )
 
     LOCAL_APPS = (
@@ -138,6 +138,10 @@ class Base(Configuration):
         },
     }
 
+    GRAPHENE = {
+        "SCHEMA": "settings.graphql.schema",
+    }
+
     # Password validation
     # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
     AUTH_PASSWORD_VALIDATORS = [
@@ -191,7 +195,3 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
-
-    GRAPHENE = {
-        "SCHEMA": "settings.graphql.schema",
-    }

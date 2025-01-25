@@ -21,9 +21,9 @@ router.registry.extend(github_router.registry)
 router.registry.extend(owasp_router.registry)
 
 urlpatterns = [
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path("api/v1/", include(router.urls)),
     path("a/", admin.site.urls),
-    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]
 
 if SlackConfig.app:

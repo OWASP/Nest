@@ -1,46 +1,28 @@
-"""Defines the GraphQL types for OWASP projects."""
+"""GraphQL types for OWASP projects."""
 
 import graphene
 
-from apps.common.schema import BaseModelType
-from apps.github.graphql.types.issue import IssueType
-from apps.github.graphql.types.release import ReleaseType
+from apps.common.graphql.nodes import BaseNode
+from apps.github.graphql.nodes.issue import IssueNode
+from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.models.issue import Issue
 from apps.github.models.release import Release
 from apps.owasp.models.project import Project
 
 
-class ProjectType(BaseModelType):
-    """GraphQL type for OWASP projects."""
+class ProjectNode(BaseNode):
+    """Project node."""
 
     recent_issues = graphene.List(
-        IssueType,
+        IssueNode,
         limit=graphene.Int(default_value=10),
         state=graphene.String(default_value="open"),
     )
-    recent_releases = graphene.List(ReleaseType, limit=graphene.Int(default_value=10))
+    recent_releases = graphene.List(ReleaseNode, limit=graphene.Int(default_value=10))
 
     class Meta:
-        """Meta options for the ProjectType."""
-
         model = Project
-        fields = (
-            "id",
-            "name",
-            "key",
-            "level",
-            "type",
-            "description",
-            "leaders_raw",
-            "contributors_count",
-            "custom_tags",
-            "forks_count",
-            "stars_count",
-            "open_issues_count",
-            "languages",
-            "created_at",
-            "updated_at",
-        )
+        fields = ()
 
     def resolve_recent_issues(self, info, limit=10, state="open"):
         """Resolve recent issues for the project."""
