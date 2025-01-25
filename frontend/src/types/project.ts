@@ -7,6 +7,7 @@ export type project = {
   }[]
   contributors_count: number
   forks_count: number
+  is_active: boolean
   leaders: string[]
   level: string
   name: string
