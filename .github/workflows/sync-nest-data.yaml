@@ -1,4 +1,4 @@
-name: Sync data
+name: Sync Nest data
 
 on:
   schedule:
