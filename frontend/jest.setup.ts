@@ -7,7 +7,7 @@ dotenv.config()
 
 global.React = React
 global.TextEncoder = TextEncoder
-
+global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
     throw new Error(`Console error: ${args.join(' ')}`)

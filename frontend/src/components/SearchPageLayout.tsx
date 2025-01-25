@@ -58,7 +58,7 @@ const SearchPageLayout = ({
       ) : (
         <>
           <div>
-            <div className="flex justify-end">{sortChildren}</div>
+            {totalPages !== 0 && <div className="flex justify-end">{sortChildren}</div>}
             {totalPages === 0 && <div className="text bg:text-white m-4 text-xl">{empty}</div>}
             {children}
           </div>

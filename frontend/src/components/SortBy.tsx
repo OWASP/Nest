@@ -1,5 +1,7 @@
-import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
+import { faArrowDownShortWide, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from 'react-tooltip'
+import { SortByProps } from 'types/sortBy'
 import {
   SelectContent,
   SelectItem,
@@ -8,15 +10,14 @@ import {
   SelectTrigger,
   SelectValueText,
 } from 'components/ui/select'
-
 const SortBy = ({
   sortOptions,
   selectedSortOption,
   selectedOrder,
   onSortChange,
   onOrderChange,
-}: any) => {
-  if (!sortOptions || sortOptions.length === 0) return null
+}: SortByProps) => {
+  if (!sortOptions || sortOptions.items.length === 0) return null
 
   return (
     <div className="flex items-center gap-4">
@@ -26,7 +27,7 @@ const SortBy = ({
           collection={sortOptions}
           size="sm"
           onValueChange={(e) => {
-            onSortChange(e.value)
+            onSortChange(e.value[0])
           }}
         >
           <div className="flex items-center gap-2">
@@ -36,9 +37,7 @@ const SortBy = ({
             <SelectTrigger className="w-auto min-w-[8rem] text-sm">
               <SelectValueText
                 placeholder={
-                  selectedSortOption === 'default'
-                    ? 'Default'
-                    : sortOptions.items.find((item) => item.value === selectedSortOption)?.label
+                  sortOptions.items.find((item) => item.value === selectedSortOption)?.label
                 }
               />
             </SelectTrigger>
@@ -59,23 +58,29 @@ const SortBy = ({
 
       {/* Sort Order Dropdown */}
       {selectedSortOption !== 'default' && (
-        <div className="flex items-center rounded-lg bg-gray-200 shadow-sm dark:bg-[#323232]">
+        <div className="relative flex items-center">
           <button
+            data-tooltip-id="sort-order-tooltip"
+            data-tooltip-content={selectedOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
-            className="flex items-center justify-center rounded-lg p-2 hover:bg-gray-300 dark:text-gray-300 dark:hover:bg-[#454545]"
+            className="flex items-center justify-center rounded-lg bg-gray-200 p-2 shadow-sm hover:bg-gray-300 dark:bg-[#323232] dark:text-gray-300 dark:hover:bg-[#454545]"
           >
             {selectedOrder === 'asc' ? (
               <FontAwesomeIcon
-                icon={faArrowUpWideShort}
+                icon={faArrowDownShortWide}
                 className="h-5 w-5 text-gray-600 dark:text-gray-200"
               />
             ) : (
               <FontAwesomeIcon
-                icon={faArrowDownWideShort}
+                icon={faArrowUpWideShort}
                 className="h-5 w-5 text-gray-600 dark:text-gray-200"
               />
             )}
           </button>
+          <Tooltip
+            id="sort-order-tooltip"
+            className="rounded-lg bg-white px-1 py-0 text-sm text-gray-600 shadow-md"
+          />
         </div>
       )}
     </div>
