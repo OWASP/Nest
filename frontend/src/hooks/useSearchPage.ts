@@ -22,7 +22,7 @@ interface UseSearchPageReturn<T> {
   handleSortChange: (sort: string) => void
 }
 
-export function useSearchPage<T>({
+export function useSearchPage<T extends object>({
   indexName,
   pageTitle,
   defaultSortBy = '',
@@ -55,7 +55,13 @@ export function useSearchPage<T>({
           searchQuery,
           currentPage
         )
-        setItems(data.hits)
+        const filteredItems = data.hits.filter((hit) => {
+          if ('is_active' in hit) {
+            return hit.is_active === true
+          }
+          return true
+        })
+        setItems(filteredItems)
         setTotalPages(data.totalPages)
       } catch (error) {
         handleAppError(error)

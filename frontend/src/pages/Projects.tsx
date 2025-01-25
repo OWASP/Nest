@@ -74,7 +74,7 @@ const ProjectsPage = () => {
         />
       }
     >
-      {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
+      {projects && projects.map(renderProjectCard)}
     </SearchPageLayout>
   )
 }

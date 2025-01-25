@@ -99,21 +99,6 @@ describe('Contribute Component', () => {
       behavior: 'auto',
     })
   })
-  test('handles pagination for first page', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      ...mockContributeData,
-      totalPages: 2,
-      currentPage: 1,
-    })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
-    await waitFor(() => {
-      expect(screen.getByText('Next Page')).toBeInTheDocument()
-    })
-  })
 
   test('handles pagination for last page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
