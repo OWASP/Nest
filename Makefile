@@ -1,6 +1,7 @@
 include backend/Makefile
 include cspell/Makefile
 include frontend/Makefile
+include schema/Makefile
 
 build:
 	@docker compose build
