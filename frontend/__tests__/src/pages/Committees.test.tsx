@@ -36,11 +36,11 @@ describe('Committees Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders loading spinner initially', async () => {
+  test('renders skeleton initially', async () => {
     render(<CommitteesPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+      expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
 
@@ -53,11 +53,8 @@ describe('Committees Component', () => {
 
     render(<CommitteesPage />)
 
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
-
-      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('skeleton-loader')).not.toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -65,7 +62,7 @@ describe('Committees Component', () => {
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
-    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('skeleton-loader')).not.toBeInTheDocument()
   })
 
   test('renders committee data correctly', async () => {

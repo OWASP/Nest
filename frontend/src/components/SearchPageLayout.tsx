@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
 import SearchBar from 'components/Search'
+import SkeletonBase from 'components/SkeletonsBase'
 
 interface SearchPageLayoutProps {
   isLoaded: boolean
@@ -53,9 +53,7 @@ const SearchPageLayout = ({
         <div>{sortChildren}</div>
       </div>
       {!isSearchBarReady || !isLoaded ? (
-        <div className="mt-20 flex h-64 w-full items-center justify-center">
-          <LoadingSpinner imageUrl={loadingImageUrl} />
-        </div>
+        <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
       ) : (
         <>
           <div>

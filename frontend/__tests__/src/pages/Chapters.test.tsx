@@ -35,11 +35,11 @@ describe('ChaptersPage Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders loading spinner initially', async () => {
+  test('renders skeleton initially', async () => {
     render(<ChaptersPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+      expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
 
@@ -86,9 +86,9 @@ describe('ChaptersPage Component', () => {
     })
     render(<ChaptersPage />)
 
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
@@ -97,7 +97,7 @@ describe('ChaptersPage Component', () => {
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
 
-    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('skeleton-loader')).not.toBeInTheDocument()
   })
   test('opens  window on View Details button click', async () => {
     const navigateMock = jest.fn()
