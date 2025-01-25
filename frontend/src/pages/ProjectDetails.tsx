@@ -29,11 +29,7 @@ const ProjectDetailsPage = () => {
   const [recentReleases, setRecentReleases] = useState([])
   const [recentIssues, setRecentIssues] = useState([])
 
-  const {
-    data,
-    loading: isGraphQlDataLoading,
-    error,
-  } = useQuery(GET_PROJECT_DATA, {
+  const { data, loading: isGraphQlDataLoading } = useQuery(GET_PROJECT_DATA, {
     variables: { key: 'www-project-' + projectKey },
   })
 
@@ -72,16 +68,6 @@ const ProjectDetailsPage = () => {
         message="Sorry, the project you're looking for doesn't exist"
       />
     )
-
-  if (error) {
-    return (
-      <ErrorDisplay
-        statusCode={404}
-        title="Error in fetching data from GraphQL API"
-        message="Sorry, there was an error fetching the project data"
-      />
-    )
-  }
 
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
