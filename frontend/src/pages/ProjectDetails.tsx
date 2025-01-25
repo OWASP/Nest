@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { GET_PROJECT_BY_KEY } from 'api/queries/projectQueries'
+import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
@@ -29,9 +29,8 @@ const ProjectDetailsPage = () => {
   const [recentReleases, setRecentReleases] = useState([])
   const [recentIssues, setRecentIssues] = useState([])
 
-  const { data, loading, error } = useQuery(GET_PROJECT_BY_KEY, {
+  const { data, loading, error } = useQuery(GET_PROJECT_DATA, {
     variables: { key: 'www-project-' + projectKey },
-    skip: !projectKey,
   })
 
   useEffect(() => {

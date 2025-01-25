@@ -8,7 +8,7 @@ from apps.owasp.models.project import Project
 
 
 class ProjectQuery(BaseQuery):
-    """Project GraphQL queries."""
+    """Project queries."""
 
     project = graphene.Field(ProjectNode, key=graphene.String(required=True))
 

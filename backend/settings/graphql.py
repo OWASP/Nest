@@ -1,4 +1,4 @@
-"""Nest GraphQL schema."""
+"""GraphQL schema."""
 
 import graphene
 

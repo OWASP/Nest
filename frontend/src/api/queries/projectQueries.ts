@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client'
 
-export const GET_PROJECT_BY_KEY = gql`
+export const GET_PROJECT_DATA = gql`
   query GetProject($key: String!) {
     project(key: $key) {
       recentReleases {

@@ -1,4 +1,4 @@
-"""Common GraphQL types."""
+"""Common GraphQL nodes."""
 
 from graphene_django import DjangoObjectType
 

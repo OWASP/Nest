@@ -1,4 +1,4 @@
-"""GitHub release GraphQL types."""
+"""GitHub release GraphQL node."""
 
 from graphene import Field
 
@@ -8,7 +8,7 @@ from apps.github.models.release import Release
 
 
 class ReleaseNode(BaseNode):
-    """GitHub release."""
+    """GitHub release node."""
 
     author = Field(UserNode)
 
