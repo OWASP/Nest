@@ -80,8 +80,8 @@ const ProjectDetailsPage = () => {
         <SecondaryCard title="Summary">
           <p>{project.summary}</p>
         </SecondaryCard>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <SecondaryCard title="Project Details" className="gap-2 md:col-span-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <SecondaryCard title="Project Details" className="gap-2 flex flex-col justify-between p-4">
             <p>
               <strong>Type:</strong> {project.type[0].toUpperCase() + project.type.slice(1)}
             </p>
@@ -104,12 +104,9 @@ const ProjectDetailsPage = () => {
               </a>
             </p>
           </SecondaryCard>
-          <SecondaryCard title="Statistics">
-            <InfoBlock
-              className="pb-1"
-              icon={faUsers}
-              value={`${project.contributors_count} Contributors`}
-            />
+
+          <SecondaryCard title="Statistics" className="flex flex-col justify-between p-4">
+            <InfoBlock className="pb-1" icon={faUsers}  value={`${project.contributors_count} Contributors`}/>
             <InfoBlock className="pb-1" icon={faCodeFork} value={`${project.forks_count} Forks`} />
             <InfoBlock className="pb-1" icon={faStar} value={`${project.stars_count} Stars`} />
             <InfoBlock className="pb-1" icon={faBook} value={`${project.issues_count} Issues`} />
