@@ -1,17 +1,7 @@
 import { Box, Flex } from '@chakra-ui/react'
 import type React from 'react'
+import { CardSkeletonProps } from 'types/skeleton'
 import { Skeleton, SkeletonCircle, SkeletonText } from 'components/ui/skeleton'
-
-interface CardSkeletonProps {
-  showLevel?: boolean
-  showIcons?: number
-  showProjectName?: boolean
-  showSummary?: boolean
-  showLink?: boolean
-  showContributors?: boolean
-  showSocial?: boolean
-  showActionButton?: boolean
-}
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({
   showLevel = true,

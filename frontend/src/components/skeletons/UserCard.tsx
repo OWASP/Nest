@@ -1,12 +1,7 @@
 import { Box, Flex } from '@chakra-ui/react'
 import type React from 'react'
+import { UserCardSkeletonProps } from 'types/skeleton'
 import { Skeleton, SkeletonCircle } from 'components/ui/skeleton'
-
-interface UserCardSkeletonProps {
-  showAvatar?: boolean
-  showName?: boolean
-  showViewProfile?: boolean
-}
 
 const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
   showAvatar = true,
