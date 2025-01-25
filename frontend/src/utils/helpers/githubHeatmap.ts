@@ -259,7 +259,6 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   ctx.moveTo(canvasMargin, 55 + 10)
   ctx.lineTo(width - canvasMargin, 55 + 10)
   ctx.strokeStyle = theme.grade0
-  ctx.stroke()
 }
 
 export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
