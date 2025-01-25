@@ -1,62 +1,68 @@
-import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
-import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
-import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
-import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
-import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useEffect, useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
-import { desktopViewMinWidth, headerLinks } from 'utils/constants'
+import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'; // Outline Heart
+import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons';
+import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons';
+import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { desktopViewMinWidth, headerLinks } from 'utils/constants';
 
-import { cn } from 'utils/utility'
-import ModeToggle from './ModeToggle'
-import NavButton from './NavButton'
+import { cn } from 'utils/utility';
+import ModeToggle from './ModeToggle';
+import NavButton from './NavButton';
 
 export default function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const location = useLocation()
-
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= desktopViewMinWidth) {
-        setMobileMenuOpen(false)
+        setMobileMenuOpen(false);
       }
-    }
+    };
 
     const handleOutsideClick = (event) => {
-      const navbar = document.getElementById('navbar-sticky')
-      if (mobileMenuOpen && navbar && !navbar.contains(event.target)) {
-        setMobileMenuOpen(false)
+      const navbar = document.getElementById('navbar-sticky');
+      const sidebar = document.querySelector('.fixed.inset-y-0');
+      if (
+        mobileMenuOpen &&
+        navbar &&
+        !navbar.contains(event.target) &&
+        sidebar &&
+        !sidebar.contains(event.target)
+      ) {
+        setMobileMenuOpen(false);
       }
-    }
+    };
 
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('click', handleOutsideClick)
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('click', handleOutsideClick);
 
     return () => {
-      window.removeEventListener('resize', handleResize)
-      window.removeEventListener('click', handleOutsideClick)
-    }
-  }, [mobileMenuOpen])
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('click', handleOutsideClick);
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <NavLink to="/">
+        <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
           <div className="flex h-full items-center">
             <img
               src={'/img/owasp_icon_white_sm.png'}
               className="hidden h-16 dark:block"
               alt="OWASP Logo"
-            ></img>
+            />
             <img
               src={'/img/owasp_icon_black_sm.png'}
               className="block h-16 dark:hidden"
               alt="OWASP Logo"
-            ></img>
+            />
             <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
               Nest
             </div>
@@ -123,18 +129,18 @@ export default function Header() {
       >
         <div className="space-y-1 px-2 pb-3 pt-2">
           {/* Logo */}
-          <NavLink to="/">
+          <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
             <div className="flex h-full items-center">
               <img
                 src={'/img/owasp_icon_white_sm.png'}
                 className="hidden h-16 dark:block"
                 alt="OWASP Logo"
-              ></img>
+              />
               <img
                 src={'/img/owasp_icon_black_sm.png'}
                 className="block h-16 dark:hidden"
                 alt="OWASP Logo"
-              ></img>
+              />
               <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
                 Nest
               </div>
@@ -156,5 +162,5 @@ export default function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
