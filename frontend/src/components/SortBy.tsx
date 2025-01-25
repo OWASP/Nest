@@ -9,7 +9,7 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValueText,
-} from 'components/ui/select'
+} from 'components/ui/Select'
 const SortBy = ({
   sortOptions,
   selectedSortOption,
@@ -34,8 +34,11 @@ const SortBy = ({
             <SelectLabel className="font-small text-sm text-gray-600 dark:text-gray-300">
               Sort By:
             </SelectLabel>
-            <SelectTrigger className="w-auto min-w-[8rem] text-sm">
+            <SelectTrigger className="width-auto text-sm">
               <SelectValueText
+                paddingRight={'1.4rem'}
+                width={'auto'}
+                textWrap="nowrap"
                 placeholder={
                   sortOptions.items.find((item) => item.value === selectedSortOption)?.label
                 }
