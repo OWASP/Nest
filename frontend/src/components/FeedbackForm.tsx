@@ -12,7 +12,7 @@ import {
   type FeedbackFormValues,
 } from 'utils/helpers/schema'
 import { Switch } from 'components/ui/Switch'
-import { Field } from './ui/field'
+import { Field } from './ui/Field'
 
 export function FeedbackForm() {
   const [isAnonymous, setIsAnonymous] = useState(false)
@@ -73,7 +73,7 @@ export function FeedbackForm() {
       {!isAnonymous && (
         <div className="flex w-full items-start justify-between gap-4">
           <div className="">
-            <Field label="Name" >
+            <Field label="Name">
               <Input
                 placeholder="Your name"
                 id="name"
@@ -81,12 +81,12 @@ export function FeedbackForm() {
                 {...form.register('name')}
               />
               {form.formState.errors.name && (
-              <p className="mt-1 text-xs text-red-500">{form.formState.errors.name.message}</p>
-            )}
+                <p className="mt-1 text-xs text-red-500">{form.formState.errors.name.message}</p>
+              )}
             </Field>
           </div>
           <div>
-            <Field label="Email" >
+            <Field label="Email">
               <Input
                 placeholder="email@example.com"
                 id="email"
@@ -94,14 +94,14 @@ export function FeedbackForm() {
                 {...form.register('email')}
               />
               {form.formState.errors.email && (
-              <p className="mt-1 text-xs text-red-500">{form.formState.errors.email.message}</p>
-            )}
+                <p className="mt-1 text-xs text-red-500">{form.formState.errors.email.message}</p>
+              )}
             </Field>
           </div>
         </div>
       )}
       <div>
-        <Field label="Feedback" >
+        <Field label="Feedback">
           <Textarea
             placeholder="Your feedback here..."
             id="message"
@@ -109,8 +109,8 @@ export function FeedbackForm() {
             {...form.register('message')}
           />
           {form.formState.errors.message && (
-          <p className="mt-1 text-xs text-red-500">{form.formState.errors.message.message}</p>
-        )}
+            <p className="mt-1 text-xs text-red-500">{form.formState.errors.message.message}</p>
+          )}
         </Field>
       </div>
 
