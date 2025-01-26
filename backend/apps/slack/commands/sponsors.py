@@ -18,7 +18,7 @@ def sponsors_handler(ack, command, client):
 
     blocks = [
         markdown(
-            f"Please visit <https://owasp.org/supporters/list/|current sponsors list> page{NL}"
+            f"Please visit <https://owasp.org/supporters/list|current sponsors list> page{NL}"
         ),
     ]
 
