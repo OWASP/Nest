@@ -1,9 +1,15 @@
 from apps.slack.commands import (
+    board,
     chapters,
     committees,
     contribute,
+    donate,
     gsoc,
+    jobs,
     leaders,
     owasp,
+    policies,
     projects,
+    sponsors,
+    staff,
 )
