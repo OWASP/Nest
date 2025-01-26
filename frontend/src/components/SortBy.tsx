@@ -22,7 +22,7 @@ const SortBy = ({
   return (
     <div className="flex items-center gap-4">
       {/* Sort Attribute Dropdown */}
-      <div className="rounded-xl bg-gray-200 px-2 shadow-sm dark:bg-[#323232]">
+      <div className="rounded-xl bg-gray-200 px-3 shadow-sm dark:bg-[#323232]">
         <SelectRoot
           collection={sortOptions}
           size="sm"
