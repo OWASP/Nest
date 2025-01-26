@@ -1,4 +1,8 @@
-import { faArrowDownShortWide, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
+import {
+  faArrowDownShortWide,
+  faArrowUpWideShort,
+  faCheck,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from 'react-tooltip'
 import { SortByProps } from 'types/sortBy'
@@ -24,6 +28,7 @@ const SortBy = ({
       {/* Sort Attribute Dropdown */}
       <div className="rounded-xl bg-gray-200 px-3 shadow-sm dark:bg-[#323232]">
         <SelectRoot
+          key={selectedSortOption}
           collection={sortOptions}
           size="sm"
           onValueChange={(e) => {
@@ -53,6 +58,12 @@ const SortBy = ({
                 className="p-1 hover:bg-[#D1DBE6] dark:hover:bg-[#454545]"
               >
                 {attribute.label}
+                {attribute.value === selectedSortOption && (
+                  <FontAwesomeIcon
+                    icon={faCheck}
+                    className="text-sm text-blue-500 dark:text-sky-600"
+                  />
+                )}
               </SelectItem>
             ))}
           </SelectContent>
