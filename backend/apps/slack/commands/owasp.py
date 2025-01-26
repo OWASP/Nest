@@ -14,12 +14,17 @@ COMMAND = "/owasp"
 def owasp_handler(ack, command, client):
     """Slack /owasp command handler."""
     from apps.slack.commands import (
+        board,
         chapters,
         committees,
         contribute,
+        donate,
         gsoc,
+        jobs,
         leaders,
         projects,
+        sponsors,
+        staff,
     )
 
     ack()
@@ -30,12 +35,17 @@ def owasp_handler(ack, command, client):
     if not command_tokens or command_tokens[0] in COMMAND_HELP:
         blocks = [
             markdown(
+                f"• `{COMMAND} board` -- OWASP Global Board information{NL}"
                 f"• `{COMMAND} chapters` -- Explore OWASP chapters{NL}"
                 f"• `{COMMAND} committees` -- Explore OWASP committees{NL}"
                 f"• `{COMMAND} contribute` -- OWASP projects contribution opportunities{NL}"
+                f"• `{COMMAND} donate` -- Support OWASP with a donation{NL}"
                 f"• `{COMMAND} gsoc` -- Google Summer of Code participants information{NL}"
+                f"• `{COMMAND} jobs` -- Check out available job opportunities{NL}"
                 f"• `{COMMAND} leaders` -- Chapter and project leaders search{NL}"
                 f"• `{COMMAND} projects` -- Explore OWASP projects{NL}"
+                f"• `{COMMAND} sponsors` -- Get a list of OWASP sponsors{NL}"
+                f"• `{COMMAND} staff` -- OWASP corporate structure{NL}"
             ),
         ]
         conversation = client.conversations_open(users=command["user_id"])
@@ -44,18 +54,28 @@ def owasp_handler(ack, command, client):
         handler = command_tokens[0].strip().lower()
         command["text"] = " ".join(command_tokens[1:]).strip()
         match handler:
+            case "board":
+                board.board_handler(ack, command, client)
             case "chapters":
                 chapters.chapters_handler(ack, command, client)
             case "committees":
                 committees.committees_handler(ack, command, client)
             case "contribute":
                 contribute.contribute_handler(ack, command, client)
+            case "donate":
+                donate.donate_handler(ack, command, client)
             case "gsoc":
                 gsoc.gsoc_handler(ack, command, client)
+            case "jobs":
+                jobs.jobs_handler(ack, command, client)
             case "leaders":
                 leaders.leaders_handler(ack, command, client)
             case "projects":
                 projects.projects_handler(ack, command, client)
+            case "sponsors":
+                sponsors.sponsors_handler(ack, command, client)
+            case "staff":
+                staff.staff_handler(ack, command, client)
             case _:
                 blocks = [
                     markdown(f"*`{COMMAND} {escape(handler)}` is not supported*{NL}"),
