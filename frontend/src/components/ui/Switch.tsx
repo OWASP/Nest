@@ -1,35 +1,39 @@
-import * as SwitchPrimitives from '@radix-ui/react-switch'
-import * as React from 'react'
+import { Switch as ChakraSwitch } from "@chakra-ui/react"
+import * as React from "react"
 
-import { cn } from 'utils/utility'
+export interface SwitchProps extends ChakraSwitch.RootProps {
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>
+  rootRef?: React.Ref<HTMLLabelElement>
+  trackLabel?: { on: React.ReactNode; off: React.ReactNode }
+  thumbLabel?: { on: React.ReactNode; off: React.ReactNode }
+}
 
-const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => (
-  <SwitchPrimitives.Root
-    className={cn(
-      'peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-      'disabled:cursor-not-allowed disabled:opacity-50',
-      'data-[state=checked]:bg-primary data-[state=unchecked]:bg-gray-200',
-      'dark:data-[state=unchecked]:bg-gray-700',
-      className
-    )}
-    {...props}
-    ref={ref}
-  >
-    <SwitchPrimitives.Thumb
-      className={cn(
-        'pointer-events-none block h-5 w-5 rounded-full shadow-lg ring-0 transition-transform',
-        'border border-gray-300 bg-white',
-        'data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0',
-        'data-[state=checked]:border-white',
-        'dark:border-gray-600'
-      )}
-    />
-  </SwitchPrimitives.Root>
-))
-Switch.displayName = SwitchPrimitives.Root.displayName
+export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
+  function Switch(props, ref) {
+    const { inputProps, children, rootRef, trackLabel, thumbLabel, ...rest } =
+      props
 
-export { Switch }
+    return (
+      <ChakraSwitch.Root ref={rootRef} {...rest}>
+        <ChakraSwitch.HiddenInput ref={ref} {...inputProps} />
+        <ChakraSwitch.Control>
+          <ChakraSwitch.Thumb>
+            {thumbLabel && (
+              <ChakraSwitch.ThumbIndicator fallback={thumbLabel?.off}>
+                {thumbLabel?.on}
+              </ChakraSwitch.ThumbIndicator>
+            )}
+          </ChakraSwitch.Thumb>
+          {trackLabel && (
+            <ChakraSwitch.Indicator fallback={trackLabel.off}>
+              {trackLabel.on}
+            </ChakraSwitch.Indicator>
+          )}
+        </ChakraSwitch.Control>
+        {children != null && (
+          <ChakraSwitch.Label>{children}</ChakraSwitch.Label>
+        )}
+      </ChakraSwitch.Root>
+    )
+  },
+)

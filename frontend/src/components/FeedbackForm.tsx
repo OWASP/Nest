@@ -1,3 +1,4 @@
+import { Textarea, Input, Button } from "@chakra-ui/react"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { postFeedback } from 'api/postFeedbackData'
 import { useToast } from 'hooks/useToast'
@@ -10,11 +11,8 @@ import {
   feedbackFormSchema,
   type FeedbackFormValues,
 } from 'utils/helpers/schema'
-import { Button } from 'components/ui/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from 'components/ui/Form'
-import { Input } from 'components/ui/Input'
-import { Switch } from 'components/ui/Switch'
-import { Textarea } from 'components/ui/Textarea'
+import { Switch } from 'components/ui/switch'
 
 export function FeedbackForm() {
   const [isAnonymous, setIsAnonymous] = useState(false)
@@ -70,11 +68,11 @@ export function FeedbackForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 rounded-lg border border-border bg-owasp-blue p-8 dark:bg-slate-800"
+        className="space-y-8 rounded-lg border p-4 py-8 w-full max-w-screen-lg mx-auto"
       >
         <h1 className="w-full text-center font-bold">Feedback form</h1>
         {!isAnonymous && (
-          <>
+          <div className="w-full flex justify-between items-center gap-4">
             <FormField
               control={form.control}
               name="name"
@@ -84,8 +82,8 @@ export function FeedbackForm() {
                   <FormControl>
                     <Input
                       placeholder="Your name"
+                      className="border border-border rounded-lg p-4"
                       {...field}
-                      className="border-gray-300 placeholder-gray-300 dark:border-gray-600 dark:placeholder-gray-400"
                     />
                   </FormControl>
                   <FormMessage />
@@ -101,15 +99,15 @@ export function FeedbackForm() {
                   <FormControl>
                     <Input
                       placeholder="email@example.com"
+                      className="border border-border rounded-lg p-4"
                       {...field}
-                      className="border-gray-300 placeholder-gray-300 dark:border-gray-600 dark:placeholder-gray-400"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </>
+          </div>
         )}
         <FormField
           control={form.control}
@@ -120,7 +118,7 @@ export function FeedbackForm() {
               <FormControl>
                 <Textarea
                   placeholder="Your feedback here..."
-                  className="border-gray-300 placeholder-gray-300 dark:border-gray-600 dark:placeholder-gray-400"
+                  className="border border-border rounded-lg p-4"
                   {...field}
                 />
               </FormControl>
@@ -139,18 +137,17 @@ export function FeedbackForm() {
               <FormControl>
                 <Switch
                   checked={field.value}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={({ checked }: { checked: boolean }) => {
                     field.onChange(checked)
                     setIsAnonymous(checked)
                   }}
-                  className="bg-gray-300 dark:bg-gray-600"
                 />
               </FormControl>
             </FormItem>
           )}
         />
         <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} ref={captchaRef} />
-        <Button type="submit" aria-label="Submit Feedback" disabled={form.formState.isSubmitting}>
+        <Button className="p-2 px-4 bg-primary text-white dark:text-gray-800" variant='solid' type="submit" aria-label="Submit Feedback" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Submitting...' : 'Submit Feedback'}
         </Button>
       </form>
