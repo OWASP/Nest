@@ -12,7 +12,7 @@ import {
   type FeedbackFormValues,
 } from 'utils/helpers/schema'
 import { Switch } from 'components/ui/Switch'
-import { Label } from './ui/Label'
+import { Field } from './ui/field'
 
 export function FeedbackForm() {
   const [isAnonymous, setIsAnonymous] = useState(false)
@@ -71,52 +71,50 @@ export function FeedbackForm() {
     >
       <h1 className="w-full text-center font-bold">Feedback form</h1>
       {!isAnonymous && (
-        <div className="flex w-full items-center justify-between gap-4">
+        <div className="flex w-full items-start justify-between gap-4">
           <div className="">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              placeholder="Your name"
-              id="name"
-              className="rounded-lg border border-border p-4"
-              {...form.register('name')}
-            />
-            {form.formState.errors.name && (
+            <Field label="Name" >
+              <Input
+                placeholder="Your name"
+                id="name"
+                className="rounded-lg border border-border p-4"
+                {...form.register('name')}
+              />
+              {form.formState.errors.name && (
               <p className="mt-1 text-xs text-red-500">{form.formState.errors.name.message}</p>
             )}
+            </Field>
           </div>
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              placeholder="email@example.com"
-              id="email"
-              className="rounded-lg border border-border p-4"
-              {...form.register('email')}
-            />
-            {form.formState.errors.email && (
+            <Field label="Email" >
+              <Input
+                placeholder="email@example.com"
+                id="email"
+                className="rounded-lg border border-border p-4"
+                {...form.register('email')}
+              />
+              {form.formState.errors.email && (
               <p className="mt-1 text-xs text-red-500">{form.formState.errors.email.message}</p>
             )}
+            </Field>
           </div>
         </div>
       )}
       <div>
-        <Label htmlFor="message">Message</Label>
-        <Textarea
-          placeholder="Your feedback here..."
-          id="message"
-          className="rounded-lg border border-border p-4"
-          {...form.register('message')}
-        />
-        {form.formState.errors.message && (
+        <Field label="Feedback" >
+          <Textarea
+            placeholder="Your feedback here..."
+            id="message"
+            className="rounded-lg border border-border p-4"
+            {...form.register('message')}
+          />
+          {form.formState.errors.message && (
           <p className="mt-1 text-xs text-red-500">{form.formState.errors.message.message}</p>
         )}
+        </Field>
       </div>
 
       <div className="flex flex-row items-center justify-between gap-4 rounded-lg border border-border p-4">
-        <div className="space-y-0.5">
-          <Label htmlFor="is_anonymous" className="text-base">
-            Anonymous Feedback
-          </Label>
-        </div>
         <Controller
           name="is_anonymous"
           control={form.control}
@@ -127,7 +125,9 @@ export function FeedbackForm() {
                 onChange(checked)
                 setIsAnonymous(checked)
               }}
-            />
+            >
+              Anonymous Feedback
+            </Switch>
           )}
         />
       </div>
