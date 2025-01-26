@@ -55,7 +55,7 @@ const SortBy = ({
               <SelectItem
                 item={attribute}
                 key={attribute.value}
-                className="p-1 hover:bg-[#D1DBE6] dark:hover:bg-[#454545]"
+                className="p-1 px-3 hover:bg-[#D1DBE6] dark:hover:bg-[#454545]"
               >
                 {attribute.label}
                 {attribute.value === selectedSortOption && (
