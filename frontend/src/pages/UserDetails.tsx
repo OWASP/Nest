@@ -94,11 +94,11 @@ const UserDetailsPage: React.FC = () => {
             {privateContributor ? (
               <div className="h-32 bg-owasp-blue"></div>
             ) : imageLink ? (
-              <div className="h-32 bg-owasp-blue">
+              <div className="bg-#10151c h-32">
                 <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
               </div>
             ) : (
-              <div className="relative h-32 items-center justify-center bg-owasp-blue">
+              <div className="bg-#10151c relative h-32 items-center justify-center">
                 <img
                   src="/img/heatmapBackground.png"
                   className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
