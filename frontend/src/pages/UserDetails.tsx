@@ -9,9 +9,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
+import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -20,6 +21,12 @@ const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [isLoading, setIsLoading] = useState(true)
+  const [data, setData] = useState<HeatmapData | null>(null)
+  const [username, setUsername] = useState('')
+  const [imageLink, setImageLink] = useState('')
+  const [privateContributor, setPrivateContributor] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const theme = 'blue'
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -40,6 +47,27 @@ const UserDetailsPage: React.FC = () => {
     fetchUserData()
   }, [userKey])
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await fetchHeatmapData(userKey)
+      if (result && result.contributions) {
+        setUsername(userKey)
+        setData(result)
+      } else {
+        setPrivateContributor(true)
+      }
+    }
+    fetchData()
+  }, [userKey, user])
+
+  useEffect(() => {
+    if (canvasRef.current && data && data.years && data.years.length > 0) {
+      drawContributions(canvasRef.current, { data, username, theme })
+      const imageURL = canvasRef.current.toDataURL()
+      setImageLink(imageURL)
+    }
+  }, [username, data])
+
   if (isLoading)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -59,10 +87,25 @@ const UserDetailsPage: React.FC = () => {
 
   return (
     <div className="mt-24 min-h-screen w-full p-4">
+      <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
       <div className="mx-auto md:max-w-3xl">
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-gray-800">
           <div className="relative">
-            <div className="h-32 bg-owasp-blue"></div>
+            {privateContributor ? (
+              <div className="h-32 bg-owasp-blue"></div>
+            ) : imageLink ? (
+              <div className="bg-#10151c h-32">
+                <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
+              </div>
+            ) : (
+              <div className="bg-#10151c relative h-32 items-center justify-center">
+                <img
+                  src="/img/heatmapBackground.png"
+                  className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                />
+                <div className="heatmap-loader"></div>
+              </div>
+            )}
             <div className="relative px-6">
               <div className="flex flex-col items-start justify-between sm:flex-row sm:space-x-6">
                 <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-center sm:space-x-6 sm:space-y-0">
