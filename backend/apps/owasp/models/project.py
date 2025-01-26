@@ -145,6 +145,11 @@ class Project(
         return self.has_active_repositories
 
     @property
+    def issues(self):
+        """Return issues."""
+        return Issue.objects.filter(repository__in=self.repositories.all())
+
+    @property
     def nest_key(self):
         """Get Nest key."""
         return self.key.replace("www-project-", "")

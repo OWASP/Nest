@@ -1,11 +1,20 @@
-import { within } from '@testing-library/dom'
-import { screen, waitFor, fireEvent } from '@testing-library/react'
+import { useQuery } from '@apollo/client'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { act } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
-import ProjectDetailsPage, { formatDate } from 'pages/ProjectDetails'
-import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
-jest.mock('api/fetchAlgoliaData')
+import ProjectDetailsPage from 'pages/ProjectDetails'
+import {
+  mockProjectDetailsData,
+  mockProjectDetailsDataGQL,
+} from '@tests/data/mockProjectDetailsData'
+
+jest.mock('@apollo/client', () => ({
+  ...jest.requireActual('@apollo/client'),
+  useQuery: jest.fn(),
+}))
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -13,11 +22,18 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }))
 
+jest.mock('api/fetchAlgoliaData')
+
 describe('ProjectDetailsPage', () => {
   let navigateMock: jest.Mock
 
   beforeEach(() => {
     navigateMock = jest.fn()
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsDataGQL,
+      loading: false,
+      error: null,
+    })
     ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
     ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
       Promise.resolve({ hits: [mockProjectDetailsData] })
@@ -26,6 +42,24 @@ describe('ProjectDetailsPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
+  })
+  test('renders loading spinner initially', async () => {
+    render(<ProjectDetailsPage />)
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('renders project data correctly', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+    expect(screen.getByText('This is a test project description')).toBeInTheDocument()
+    expect(screen.getByText('Tool')).toBeInTheDocument()
+    expect(screen.getByText('Flagship')).toBeInTheDocument()
+    expect(screen.getByText('OWASP')).toBeInTheDocument()
   })
 
   test('displays error when project is not found', async () => {
@@ -49,8 +83,6 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Project Details')).toBeInTheDocument()
       expect(screen.getByText('Statistics')).toBeInTheDocument()
       expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Recent Issues')).toBeInTheDocument()
-      expect(screen.getByText('Recent Releases')).toBeInTheDocument()
     })
   })
 
@@ -163,36 +195,6 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
-  test('displays "No recent issues" when there are no issues', async () => {
-    const projectNoIssues = {
-      ...mockProjectDetailsData,
-      issues: [],
-    }
-    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({ hits: [projectNoIssues] })
-    )
-
-    render(<ProjectDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('No recent issues.')).toBeInTheDocument()
-    })
-  })
-
-  test('displays "No recent releases" when there are no releases', async () => {
-    const projectNoReleases = {
-      ...mockProjectDetailsData,
-      releases: [],
-    }
-    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({ hits: [projectNoReleases] })
-    )
-
-    render(<ProjectDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('No recent releases.')).toBeInTheDocument()
-    })
-  })
-
   test('navigates to user page when contributor is clicked', async () => {
     render(<ProjectDetailsPage />)
     await waitFor(() => {
@@ -235,4 +237,102 @@ describe('ProjectDetailsPage', () => {
       expect(link).toHaveAttribute('href', 'https://example.com')
     })
   })
+})
+
+test('renders data state for GraphQL query', async () => {
+  render(<ProjectDetailsPage />)
+
+  await waitFor(() => {
+    expect(screen.getByText('Test Project')).toBeInTheDocument()
+    expect(screen.getByText('This is a test project description')).toBeInTheDocument()
+    expect(screen.getByText('Tool')).toBeInTheDocument()
+    expect(screen.getByText('Flagship')).toBeInTheDocument()
+    expect(screen.getByText('OWASP')).toBeInTheDocument()
+  })
+})
+
+test('Recent issues are rendered correctly', async () => {
+  render(<ProjectDetailsPage />)
+
+  await waitFor(() => {
+    const issues = mockProjectDetailsDataGQL.project.recentIssues
+
+    issues.forEach((issue) => {
+      expect(screen.getByText(issue.title)).toBeInTheDocument()
+
+      expect(screen.getByText(issue.author.name)).toBeInTheDocument()
+
+      expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
+    })
+  })
+})
+
+test('No recent issues message is displayed when issues array is empty', async () => {
+  const emptyIssuesData = {
+    ...mockProjectDetailsDataGQL,
+    project: {
+      ...mockProjectDetailsDataGQL.project,
+      recentIssues: [],
+    },
+  }
+
+  ;(useQuery as jest.Mock).mockReturnValue({
+    data: emptyIssuesData,
+    loading: false,
+    error: null,
+  })
+
+  render(<ProjectDetailsPage />)
+
+  await waitFor(() => {
+    expect(screen.getByText('No recent issues.')).toBeInTheDocument()
+  })
+})
+
+test('Handles case when no data is available', async () => {
+  ;(useQuery as jest.Mock).mockReturnValue({
+    data: null,
+    loading: false,
+    error: null,
+  })
+  ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [] })
+
+  render(<ProjectDetailsPage />)
+
+  await waitFor(() => {
+    expect(screen.getByText('Project not found')).toBeInTheDocument()
+  })
+})
+
+test('sets recent releases and issues correctly from GraphQL data', () => {
+  const setRecentReleasesMock = jest.fn()
+  const setRecentIssuesMock = jest.fn()
+
+  act(() => {
+    const data = mockProjectDetailsDataGQL
+
+    setRecentReleasesMock(data?.project?.recentReleases)
+    setRecentIssuesMock(data?.project?.recentIssues)
+  })
+
+  expect(setRecentReleasesMock).toHaveBeenCalledWith(
+    mockProjectDetailsDataGQL.project.recentReleases
+  )
+
+  expect(setRecentIssuesMock).toHaveBeenCalledWith(mockProjectDetailsDataGQL.project.recentIssues)
+})
+
+test('handles undefined data gracefully', () => {
+  const setRecentReleasesMock = jest.fn()
+  const setRecentIssuesMock = jest.fn()
+
+  act(() => {
+    const data = undefined
+
+    setRecentReleasesMock(data?.project?.recentReleases)
+    setRecentIssuesMock(data?.project?.recentIssues)
+  })
+
+  expect(setRecentReleasesMock).toHaveBeenCalledWith(undefined)
+  expect(setRecentIssuesMock).toHaveBeenCalledWith(undefined)
 })
