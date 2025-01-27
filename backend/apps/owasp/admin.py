@@ -5,7 +5,6 @@ from django.utils.safestring import mark_safe
 
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
-from apps.owasp.models.contribute import Contribute
 from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 
@@ -50,11 +49,6 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
 
 
 class CommetteeAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("owasp_repository",)
-    search_fields = ("name",)
-
-
-class ContributeAdmin(admin.ModelAdmin):
     autocomplete_fields = ("owasp_repository",)
     search_fields = ("name",)
 
@@ -109,6 +103,5 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
 
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommetteeAdmin)
-admin.site.register(Contribute, ContributeAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Project, ProjectAdmin)

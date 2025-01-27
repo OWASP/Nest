@@ -16,8 +16,8 @@ def get_blocks(
     page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
 ):
     """Get contribute blocks."""
+    from apps.github.models.issue import Issue
     from apps.owasp.api.search.issue import get_issues
-    from apps.owasp.models.contribute import Contribute
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
@@ -73,7 +73,7 @@ def get_blocks(
     if presentation.include_feedback:
         blocks.append(
             markdown(
-                f"Extended search over {Contribute.active_contribute_count()} OWASP contributions"
+                f"Extended search over {Issue.open_issues_count()} OWASP contributions"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
         )
