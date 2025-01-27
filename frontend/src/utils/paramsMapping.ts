@@ -99,6 +99,8 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_location',
           'idx_login',
           'idx_name',
+          'idx_issues',
+          'idx_releases',
           'idx_public_repositories_count',
           'idx_title',
           'idx_updated_at',
