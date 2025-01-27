@@ -1,36 +1,63 @@
-export type user = {
-  email: string
-  login: string
-  name: string
-  company: string
-  location: string
-  bio: string
-  followers_count: number
-  created_at: number
-  avatar_url: string
-  following_count: number
+export type RepositoryDetails = {
   key: string
-  public_repositories_count: number
-  title: string
-  updated_at: number
-  url: string
-  objectID: string
-}
+  owner_key: string
+};
+
+export type Issue = {
+  created_at: number; 
+  comments_count: number;
+  number: number;
+  title: string;
+  repository: RepositoryDetails;
+};
+
+export type Release = {
+  is_pre_release: boolean;
+  name: string;
+  published_at: number; 
+  tag_name: string;
+  repository: RepositoryDetails;
+};
+
+export type User = {
+  email: string;
+  login: string;
+  name: string;
+  company: string;
+  location: string;
+  bio: string;
+  followers_count: number;
+  following_count: number;
+  avatar_url: string;
+  public_repositories_count: number;
+  title: string;
+  twitter_username: string; 
+  url: string;
+  created_at: number; 
+  updated_at: number; 
+  objectID: string;
+  issues?: Issue[]; 
+  releases?: Release[]; 
+};
+
 
 export interface UserDetailsProps {
-  avatar_url: string
-  bio: string
-  company: string
-  email: string
-  followers_count: number
-  following_count: number
-  location: string
-  login: string
-  name: string
-  public_repositories_count: number
-  title: string
-  twitter_username: string
-  url: string
-  created_at: string
-  updated_at: string
-}
+  email: string;
+  login: string;
+  name: string;
+  company: string;
+  location: string;
+  bio: string;
+  followers_count: number;
+  following_count: number;
+  avatar_url: string;
+  public_repositories_count: number;
+  title: string;
+  twitter_username: string; 
+  url: string;
+  created_at: number; 
+  updated_at: number; 
+  objectID: string;
+  issues?: Issue[]; 
+  releases?: Release[]; 
+};

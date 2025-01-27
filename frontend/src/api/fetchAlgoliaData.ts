@@ -39,6 +39,7 @@ export const fetchAlgoliaData = async <T>(
       throw new AppError(404, 'No results found')
     }
     if (results && results.length > 0) {
+      console.log("results ",results)
       const { hits, nbPages } = results[0] as SearchResponse<T>
       const cleanedHits = hits.map((hit) => removeIdxPrefix(hit)) as T[]
 
