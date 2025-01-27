@@ -142,15 +142,10 @@ const ProjectDetailsPage = () => {
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-<<<<<<< HEAD
                     <span>{formatDate(issue.createdAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
                     <span>{issue.commentsCount} comments</span>
-=======
-                    <span>{formatDate(issue.created_at)}</span>
-                    <FontAwesomeIcon icon={faFileCode} className="mr-2 ml-4 h-4 w-4" />
-                    <span>{issue.comments_count} comments</span>
->>>>>>> 0dd38c2 (Bump tailwindcss from v3.4.17 to v4.0.0)
+
                   </div>
                 </div>
               ))}
@@ -175,15 +170,10 @@ const ProjectDetailsPage = () => {
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-<<<<<<< HEAD
                     <span>{formatDate(release.publishedAt)}</span>
                     <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
                     <span>{release.tagName}</span>
-=======
-                    <span>{formatDate(release.published_at)}</span>
-                    <FontAwesomeIcon icon={faTag} className="mr-2 ml-4 h-4 w-4" />
-                    <span>{release.tag_name}</span>
->>>>>>> 0dd38c2 (Bump tailwindcss from v3.4.17 to v4.0.0)
+
                   </div>
                 </div>
               ))}
