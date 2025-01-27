@@ -221,6 +221,7 @@ jobs:
           echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.staging
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.staging
           echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env.staging
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
 
@@ -335,6 +336,7 @@ jobs:
           echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
           echo "VITE_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
           echo "VITE_ENVIRONMENT=production" >> frontend/.env.production
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.staging
           echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env.production
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
 

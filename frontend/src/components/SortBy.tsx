@@ -1,56 +1,103 @@
-import { faCaretDown, faCaretUp, faCheck } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState } from 'react'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from 'components/ui/dropdownMenu'
-
-interface SortOption {
-  value: string
-  label: string
-}
-
-interface SortByProps {
-  options: SortOption[]
-  selectedOption: string
-  onSortChange: (value: string) => void
-}
-
-const SortBy = ({ options, selectedOption, onSortChange }: SortByProps) => {
-  const [open, setOpen] = useState<boolean>(false)
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen)
-  }
-
-  if (!options || options.length === 0) return null
+  faArrowDownShortWide,
+  faArrowUpWideShort,
+  faCheck,
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from 'react-tooltip'
+import { SortByProps } from 'types/sortBy'
+import {
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+} from 'components/ui/Select'
+const SortBy = ({
+  sortOptions,
+  selectedSortOption,
+  selectedOrder,
+  onSortChange,
+  onOrderChange,
+}: SortByProps) => {
+  if (!sortOptions || sortOptions.items.length === 0) return null
 
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="h-10 w-[100px] justify-between border-2 bg-white text-[#292e36] dark:bg-[#3C3C3C] dark:text-[#D1D5DB]"
+    <div className="flex items-center gap-4">
+      {/* Sort Attribute Dropdown */}
+      <div className="rounded-xl bg-gray-200 px-3 shadow-sm dark:bg-[#323232]">
+        <SelectRoot
+          key={selectedSortOption}
+          collection={sortOptions}
+          size="sm"
+          onValueChange={(e) => {
+            onSortChange(e.value[0])
+          }}
         >
-          <span>Sort By </span>
-          <FontAwesomeIcon icon={open ? faCaretUp : faCaretDown} className="pl-2" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[180px] bg-white text-[#4B5563] dark:bg-[#3C3C3C] dark:text-[#D1D5DB]">
-        {options.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onSelect={() => onSortChange(option.value)}
-            className="justify-between"
+          <div className="flex items-center gap-2">
+            <SelectLabel className="font-small text-sm text-gray-600 dark:text-gray-300">
+              Sort By:
+            </SelectLabel>
+            <SelectTrigger className="width-auto text-sm">
+              <SelectValueText
+                paddingRight={'1.4rem'}
+                width={'auto'}
+                textWrap="nowrap"
+                placeholder={
+                  sortOptions.items.find((item) => item.value === selectedSortOption)?.label
+                }
+              />
+            </SelectTrigger>
+          </div>
+          <SelectContent className="text-md text-md min-w-36 dark:bg-[#323232]">
+            {sortOptions.items.map((attribute) => (
+              <SelectItem
+                item={attribute}
+                key={attribute.value}
+                className="p-1 px-3 hover:bg-[#D1DBE6] dark:hover:bg-[#454545]"
+              >
+                {attribute.label}
+                {attribute.value === selectedSortOption && (
+                  <FontAwesomeIcon
+                    icon={faCheck}
+                    className="text-sm text-blue-500 dark:text-sky-600"
+                  />
+                )}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
+      </div>
+
+      {/* Sort Order Dropdown */}
+      {selectedSortOption !== 'default' && (
+        <div className="relative flex items-center">
+          <button
+            data-tooltip-id="sort-order-tooltip"
+            data-tooltip-content={selectedOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
+            onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
+            className="flex items-center justify-center rounded-lg bg-gray-200 p-2 shadow-sm hover:bg-gray-300 dark:bg-[#323232] dark:text-gray-300 dark:hover:bg-[#454545]"
           >
-            {option.label}
-            {option.value === selectedOption && <FontAwesomeIcon icon={faCheck} />}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            {selectedOrder === 'asc' ? (
+              <FontAwesomeIcon
+                icon={faArrowDownShortWide}
+                className="h-5 w-5 text-gray-600 dark:text-gray-200"
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faArrowUpWideShort}
+                className="h-5 w-5 text-gray-600 dark:text-gray-200"
+              />
+            )}
+          </button>
+          <Tooltip
+            id="sort-order-tooltip"
+            className="rounded-lg bg-white px-1 py-0 text-sm text-gray-600 shadow-md"
+          />
+        </div>
+      )}
+    </div>
   )
 }
 
