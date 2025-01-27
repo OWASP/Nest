@@ -55,14 +55,13 @@ const ProjectDetailsPage = () => {
     if (data) {
       setRecentReleases(data?.project?.recentReleases)
       setRecentIssues(data?.project?.recentIssues)
-    } else if (graphQLRequestError) {
-      if (!isLoading) {
-        toast({
-          variant: 'destructive',
-          title: 'GraphQL Request Failed',
-          description: 'Unable to complete the requested operation.',
-        })
-      }
+    }
+    if (graphQLRequestError && !isLoading) {
+      toast({
+        variant: 'destructive',
+        title: 'GraphQL Request Failed',
+        description: 'Unable to complete the requested operation.',
+      })
     }
   }, [data, graphQLRequestError, isLoading])
 
