@@ -1,7 +1,7 @@
 import { Box, Flex } from '@chakra-ui/react'
 import type React from 'react'
 import { CardSkeletonProps } from 'types/skeleton'
-import { Skeleton, SkeletonCircle, SkeletonText } from 'components/ui/skeleton'
+import { Skeleton, SkeletonCircle, SkeletonText } from 'components/ui/Skeleton'
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({
   showLevel = true,
@@ -16,7 +16,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   const NUM_CONTRIBUTORS = 8
 
   return (
-    <div data-testid="skeleton-loader" className="flex w-full justify-center">
+    <div role="status" className="flex w-full justify-center">
       <Box className="mb-6 w-full rounded-lg border border-border bg-card p-6 transition-colors duration-300 ease-linear hover:bg-accent/10 md:max-w-6xl">
         <Flex direction="column" className="flex flex-col sm:flex-row" gap={6}>
           {/* Header Section */}

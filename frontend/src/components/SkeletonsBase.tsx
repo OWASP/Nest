@@ -1,7 +1,7 @@
 import LoadingSpinner from 'components/LoadingSpinner'
 import CardSkeleton from 'components/skeletons/Card'
 import UserCardSkeleton from 'components/skeletons/UserCard'
-import { Skeleton } from 'components/ui/skeleton'
+import { Skeleton } from 'components/ui/Skeleton'
 
 function userCardRender() {
   const cardCount = 12

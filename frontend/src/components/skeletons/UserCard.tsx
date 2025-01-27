@@ -1,7 +1,7 @@
 import { Box, Flex } from '@chakra-ui/react'
 import type React from 'react'
 import { UserCardSkeletonProps } from 'types/skeleton'
-import { Skeleton, SkeletonCircle } from 'components/ui/skeleton'
+import { Skeleton, SkeletonCircle } from 'components/ui/Skeleton'
 
 const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
   showAvatar = true,
@@ -10,7 +10,7 @@ const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
 }) => {
   return (
     <Box
-      data-testid="skeleton-loader"
+      role="status"
       className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <Flex direction="column" className="w-full items-center space-y-4">

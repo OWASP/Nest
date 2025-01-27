@@ -38,7 +38,7 @@ describe('ProjectPage Component', () => {
   test('renders skeleton initially', async () => {
     render(<ProjectsPage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+      const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
@@ -52,7 +52,7 @@ describe('ProjectPage Component', () => {
 
     render(<ProjectsPage />)
 
-    const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+    const skeletonLoaders = screen.getAllByRole('status')
     await waitFor(() => {
       expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
@@ -63,7 +63,7 @@ describe('ProjectPage Component', () => {
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
 
-    expect(screen.queryByTestId('skeleton-loader')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('status')).not.toBeInTheDocument()
   })
 
   test('renders project data correctly', async () => {

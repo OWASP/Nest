@@ -38,7 +38,7 @@ describe('ChaptersPage Component', () => {
   test('renders skeleton initially', async () => {
     render(<ChaptersPage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+      const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
@@ -86,7 +86,7 @@ describe('ChaptersPage Component', () => {
     })
     render(<ChaptersPage />)
 
-    const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+    const skeletonLoaders = screen.getAllByRole('status')
     await waitFor(() => {
       expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
@@ -97,7 +97,7 @@ describe('ChaptersPage Component', () => {
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
 
-    expect(screen.queryByTestId('skeleton-loader')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('status')).not.toBeInTheDocument()
   })
   test('opens  window on View Details button click', async () => {
     const navigateMock = jest.fn()

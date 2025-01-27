@@ -42,7 +42,7 @@ describe('UsersPage Component', () => {
   test('renders skeleton initially', async () => {
     render(<UsersPage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+      const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
@@ -52,7 +52,7 @@ describe('UsersPage Component', () => {
     render(<UsersPage />)
 
     // Check loading state
-    const skeletonLoaders = screen.getAllByTestId('skeleton-loader')
+    const skeletonLoaders = screen.getAllByRole('status')
     await waitFor(() => {
       expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
@@ -65,7 +65,7 @@ describe('UsersPage Component', () => {
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
 
-    expect(screen.queryByTestId('skeleton-loader')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('status')).not.toBeInTheDocument()
   })
 
   test('renders user cards correctly', async () => {
