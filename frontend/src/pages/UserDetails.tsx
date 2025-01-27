@@ -15,8 +15,8 @@ import { UserDetailsProps } from 'types/user'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
-import LoadingSpinner from 'components/LoadingSpinner'
 import { IssueCard } from 'components/IssueCard'
+import LoadingSpinner from 'components/LoadingSpinner'
 import { ReleaseCard } from 'components/ReleaseCard'
 
 const UserDetailsPage: React.FC = () => {
@@ -34,7 +34,6 @@ const UserDetailsPage: React.FC = () => {
     const fetchUserData = async () => {
       try {
         const { hits } = await fetchAlgoliaData('users', userKey, 1, userKey)
-        console.log("hits ", hits)
         if (hits.length === 0) {
           setUser(null)
         } else {
