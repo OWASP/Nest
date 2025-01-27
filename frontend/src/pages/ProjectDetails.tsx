@@ -32,6 +32,12 @@ const ProjectDetailsPage = () => {
   const { data, loading: isGraphQlDataLoading } = useQuery(GET_PROJECT_DATA, {
     variables: { key: 'www-project-' + projectKey },
   })
+  useEffect(() => {
+    if (data) {
+      setRecentReleases(data?.project?.recentReleases)
+      setRecentIssues(data?.project?.recentIssues)
+    }
+  }, [data])
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -46,12 +52,6 @@ const ProjectDetailsPage = () => {
     fetchProjectData()
   }, [projectKey])
 
-  useEffect(() => {
-    if (data) {
-      setRecentReleases(data?.project?.recentReleases)
-      setRecentIssues(data?.project?.recentIssues)
-    }
-  }, [data])
 
   if (isLoading || isGraphQlDataLoading)
     return (
