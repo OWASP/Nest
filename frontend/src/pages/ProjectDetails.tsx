@@ -88,7 +88,6 @@ const ProjectDetailsPage = () => {
             <p className="pb-1" >
               <strong>Level:</strong> {project.level[0].toUpperCase() + project.level.slice(1)}
             </p>
-          
             <p className="pb-1" >
               <strong>Project Leaders:</strong> {project.leaders.join(', ')}
             </p>
@@ -103,7 +102,6 @@ const ProjectDetailsPage = () => {
             </p>
           </SecondaryCard>
           <SecondaryCard title="Statistics">
-
             <InfoBlock className="pb-1"  icon={faUsers} value={`${project.contributors_count} Contributors`}/>
             <InfoBlock className="pb-1" icon={faCodeFork} value={`${project.forks_count} Forks`} />
             <InfoBlock className="pb-1" icon={faStar} value={`${project.stars_count} Stars`} />
