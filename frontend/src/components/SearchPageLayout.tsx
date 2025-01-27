@@ -50,7 +50,6 @@ const SearchPageLayout = ({
           initialValue={searchQuery}
           onReady={handleSearchBarReady}
         />
-        <div>{sortChildren}</div>
       </div>
       {!isSearchBarReady || !isLoaded ? (
         <div className="mt-20 flex h-64 w-full items-center justify-center">
@@ -59,6 +58,7 @@ const SearchPageLayout = ({
       ) : (
         <>
           <div>
+            {totalPages !== 0 && <div className="flex justify-end">{sortChildren}</div>}
             {totalPages === 0 && <div className="text bg:text-white m-4 text-xl">{empty}</div>}
             {children}
           </div>
