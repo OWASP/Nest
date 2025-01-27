@@ -4,7 +4,7 @@ export type RepositoryDetails = {
 };
 
 export type Issue = {
-  created_at: number; 
+  created_at: number;
   comments_count: number;
   number: number;
   title: string;
@@ -14,7 +14,7 @@ export type Issue = {
 export type Release = {
   is_pre_release: boolean;
   name: string;
-  published_at: number; 
+  published_at: number;
   tag_name: string;
   repository: RepositoryDetails;
 };
@@ -31,13 +31,13 @@ export type User = {
   avatar_url: string;
   public_repositories_count: number;
   title: string;
-  twitter_username: string; 
+  twitter_username: string;
   url: string;
-  created_at: number; 
-  updated_at: number; 
+  created_at: number;
+  updated_at: number;
   objectID: string;
-  issues?: Issue[]; 
-  releases?: Release[]; 
+  issues?: Issue[];
+  releases?: Release[];
 };
 
 
@@ -53,11 +53,11 @@ export interface UserDetailsProps {
   avatar_url: string;
   public_repositories_count: number;
   title: string;
-  twitter_username: string; 
+  twitter_username: string;
   url: string;
-  created_at: number; 
-  updated_at: number; 
+  created_at: number;
+  updated_at: number;
   objectID: string;
-  issues?: Issue[]; 
-  releases?: Release[]; 
+  issues?: Issue[];
+  releases?: Release[];
 };

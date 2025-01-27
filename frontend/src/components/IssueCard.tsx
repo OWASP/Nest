@@ -1,19 +1,11 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
+import { Issue } from "types/user";
 
-interface IssueProps {
-  title: string;
-  number: number;
-  created_at: number;
-  comments_count: number;
-  repository: {
-    key: string;
-    owner_key: string;
-  };
-}
 
-export function IssueCard({ issue }: { issue: IssueProps }) {
+
+export function IssueCard({ issue }: { issue: Issue }) {
   return (
     <div
       style={{

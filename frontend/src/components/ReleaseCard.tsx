@@ -1,18 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendarAlt, faTag } from '@fortawesome/free-solid-svg-icons'
+import { Release } from 'types/user';
 
-export type RepositoryDetails = {
-  key: string;
-  owner_key: string;
-};
 
-export type Release = {
-  name: string;
-  tag_name: string;
-  is_pre_release: boolean;
-  published_at: number; // Timestamp for consistency
-  repository: RepositoryDetails;
-};
 
 export function ReleaseCard({ release }: { release: Release }) {
   return (
