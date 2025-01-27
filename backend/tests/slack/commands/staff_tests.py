@@ -2,10 +2,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
-from requests.exceptions import RequestException
 
+from apps.common.constants import OWASP_WEBSITE_URL
 from apps.slack.commands.staff import staff_handler
-from apps.slack.constants import OWASP_WEBSITE_URL
+
+FAILED_STAFF_DATA_ERROR_MESSAGE = "Failed to get OWASP Foundation staff data."
 
 
 class TestStaffHandler:
@@ -25,14 +26,16 @@ class TestStaffHandler:
     def mock_staff(self):
         return [
             {
-                "name": "John Doe",
-                "title": "Executive Director",
-                "description": "Leadership and strategic direction",
-            },
-            {
+                "description": "Daily operations and team management",
+                "location": "WA, USA",
                 "name": "Jane Smith",
                 "title": "Operations Manager",
-                "description": "Daily operations and team management",
+            },
+            {
+                "description": "Leadership and strategic direction",
+                "location": "CA, USA",
+                "name": "John Doe",
+                "title": "Executive Director",
             },
         ]
 
@@ -40,14 +43,14 @@ class TestStaffHandler:
         ("commands_enabled", "has_staff_data", "expected_message"),
         [
             (False, True, None),
-            (True, True, "Here are the OWASP staff members:"),
-            (True, False, "Failed to get staff data."),
+            (True, True, "OWASP Foundation Staff:"),
+            (True, False, FAILED_STAFF_DATA_ERROR_MESSAGE),
         ],
     )
     @patch("apps.slack.commands.staff.get_staff_data")
     def test_handler_responses(
         self,
-        mock_get_staff,
+        mock_get_staff_data,
         commands_enabled,
         has_staff_data,
         expected_message,
@@ -57,10 +60,7 @@ class TestStaffHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
 
-        if has_staff_data:
-            mock_get_staff.return_value = mock_staff
-        else:
-            mock_get_staff.side_effect = RequestException
+        mock_get_staff_data.return_value = mock_staff if has_staff_data else []
 
         staff_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
@@ -75,11 +75,12 @@ class TestStaffHandler:
             assert blocks[0]["text"]["text"] == expected_message
             for idx, staff in enumerate(mock_staff, start=1):
                 staff_block = blocks[idx]["text"]["text"]
-                assert f"*{idx}.* *Name:* *{staff['name']}*" in staff_block
-                assert f"*Title:* _{staff['title']}_" in staff_block
-                assert f"*Description:* {staff['description']}" in staff_block
+                assert f"*{idx}. {staff['name']}, {staff['title']}*" in staff_block
+                assert f"_{staff['location']}_" in staff_block
+                assert f"{staff['description']}" in staff_block
             assert OWASP_WEBSITE_URL in blocks[-1]["text"]["text"]
         else:
             mock_slack_client.chat_postMessage.assert_called_once_with(
-                channel=mock_slack_command["user_id"], text="Failed to get staff data."
+                channel=mock_slack_command["user_id"],
+                text=FAILED_STAFF_DATA_ERROR_MESSAGE,
             )
