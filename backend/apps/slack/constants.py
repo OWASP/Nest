@@ -20,6 +20,10 @@ OWASP_PROJECT_NEST_CHANNEL_ID = "#C07JLLG2GFQ"
 OWASP_PROJECT_NETTACKER_CHANNEL_ID = "#CQZGG24FQ"
 OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID = "#CURE8PQ68"
 OWASP_THREAT_MODELING_CHANNEL_ID = "#C1CS3C6AF"
+OWASP_STAFF_DATA_URL = (
+    "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
+)
+OWASP_WEBSITE_URL = "https://owasp.org"
 
 VIEW_PROJECTS_ACTION = "view_projects_action"
 VIEW_PROJECTS_ACTION_NEXT = "view_projects_action_next"
