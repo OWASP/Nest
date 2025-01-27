@@ -19,6 +19,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import ToggleableList from 'components/ToogleList'
+import fs from 'fs'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
