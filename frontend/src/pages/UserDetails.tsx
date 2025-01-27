@@ -91,7 +91,6 @@ const UserDetailsPage: React.FC = () => {
       <div className="mx-auto md:max-w-3xl">
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-gray-800">
           <div className="relative">
-<<<<<<< HEAD
             {privateContributor ? (
               <div className="h-32 bg-owasp-blue"></div>
             ) : imageLink ? (
@@ -107,9 +106,6 @@ const UserDetailsPage: React.FC = () => {
                 <div className="heatmap-loader"></div>
               </div>
             )}
-=======
-            <div className="bg-owasp-blue h-32"></div>
->>>>>>> 0dd38c2 (Bump tailwindcss from v3.4.17 to v4.0.0)
             <div className="relative px-6">
               <div className="flex flex-col items-start justify-between sm:flex-row sm:space-x-6">
                 <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-6">
