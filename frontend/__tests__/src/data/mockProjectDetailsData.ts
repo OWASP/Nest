@@ -3,7 +3,6 @@ export const mockProjectDetailsData = {
   description: 'This is a test project description',
   type: 'Tool',
   level: 'Flagship',
-  organizations: 'OWASP',
   leaders: ['Leader 1', 'Leader 2'],
   updated_at: 1625097600,
   url: 'https://example.com',
