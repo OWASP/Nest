@@ -1,3 +1,4 @@
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { postFeedback } from 'api/postFeedbackData'
 import { ToastProvider } from 'components/ui/Toast'
@@ -24,9 +25,11 @@ describe('FeedbackPage', () => {
 
   test('renders FeedbackPage with FeedbackForm', () => {
     render(
-      <ToastProvider>
-        <FeedbackPage />
-      </ToastProvider>
+      <ChakraProvider value={defaultSystem}>
+        <ToastProvider>
+          <FeedbackPage />
+        </ToastProvider>
+      </ChakraProvider>
     )
 
     expect(screen.getByText('Feedback form')).toBeInTheDocument()
@@ -36,9 +39,11 @@ describe('FeedbackPage', () => {
     mockPostFeedback.mockResolvedValueOnce({ ok: true })
 
     render(
-      <ToastProvider>
-        <FeedbackPage />
-      </ToastProvider>
+      <ChakraProvider value={defaultSystem}>
+        <ToastProvider>
+          <FeedbackPage />
+        </ToastProvider>
+      </ChakraProvider>
     )
 
     fireEvent.change(screen.getByPlaceholderText('Your name'), {
@@ -66,9 +71,11 @@ describe('FeedbackPage', () => {
     mockPostFeedback.mockResolvedValueOnce({ ok: false })
 
     render(
-      <ToastProvider>
-        <FeedbackPage />
-      </ToastProvider>
+      <ChakraProvider value={defaultSystem}>
+        <ToastProvider>
+          <FeedbackPage />
+        </ToastProvider>
+      </ChakraProvider>
     )
 
     fireEvent.change(screen.getByPlaceholderText('Your name'), {
@@ -92,9 +99,11 @@ describe('FeedbackPage', () => {
 
   test('shows error when submitting without verifying ReCAPTCHA', async () => {
     render(
-      <ToastProvider>
-        <FeedbackPage />
-      </ToastProvider>
+      <ChakraProvider value={defaultSystem}>
+        <ToastProvider>
+          <FeedbackPage />
+        </ToastProvider>
+      </ChakraProvider>
     )
 
     fireEvent.change(screen.getByPlaceholderText('Your name'), {
@@ -116,12 +125,14 @@ describe('FeedbackPage', () => {
 
   test('toggles anonymous feedback mode', async () => {
     render(
-      <ToastProvider>
-        <FeedbackPage />
-      </ToastProvider>
+      <ChakraProvider value={defaultSystem}>
+        <ToastProvider>
+          <FeedbackPage />
+        </ToastProvider>
+      </ChakraProvider>
     )
 
-    fireEvent.click(screen.getByRole('switch', { name: /anonymous feedback/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /anonymous feedback/i }))
 
     await waitFor(() => {
       expect(screen.queryByPlaceholderText('Your name')).not.toBeInTheDocument()
@@ -133,9 +144,11 @@ describe('FeedbackPage', () => {
     mockPostFeedback.mockResolvedValueOnce({ ok: true })
 
     render(
-      <ToastProvider>
-        <FeedbackPage />
-      </ToastProvider>
+      <ChakraProvider value={defaultSystem}>
+        <ToastProvider>
+          <FeedbackPage />
+        </ToastProvider>
+      </ChakraProvider>
     )
 
     fireEvent.change(screen.getByPlaceholderText('Your name'), {
