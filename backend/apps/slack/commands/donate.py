@@ -3,6 +3,7 @@
 from django.conf import settings
 
 from apps.common.constants import NL
+from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 
@@ -18,8 +19,16 @@ def donate_handler(ack, command, client):
 
     blocks = [
         markdown(
-            f"Please visit <https://owasp.org/donate/|donate to the OWASP Foundation> page{NL}"
+        "The *OWASP Foundation* is a nonprofit organization committed to improving software security globally. "
+        "Donations can be unrestricted, supporting the foundation's mission broadly, or restricted for contributions, allocated to specific projects or chapters. "
+        "Donors may receive public acknowledgment for their support, lasting at least one year or until the next major project release. "
+        "The foundation also welcomes substantial grants from corporations and major foundations. " 
+           
         ),
+       {"type": "divider"},
+        markdown(
+             f"Please Visit <{OWASP_WEBSITE_URL}/donate/| OWASP Foundation> Page to *Donate*.{NL}"
+        )
     ]
 
     conversation = client.conversations_open(users=command["user_id"])
