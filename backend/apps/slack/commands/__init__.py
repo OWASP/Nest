@@ -4,6 +4,7 @@ from apps.slack.commands import (
     committees,
     contribute,
     donate,
+    events,
     gsoc,
     jobs,
     leaders,
