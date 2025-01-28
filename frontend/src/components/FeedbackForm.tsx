@@ -85,7 +85,7 @@ export function FeedbackForm() {
               )}
             </Field>
           </div>
-          <div className='w-full'>
+          <div className="w-full">
             <Field label="Email">
               <Input
                 placeholder="email@example.com"
