@@ -9,9 +9,9 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 
 import { cn } from 'utils/utility'
+import { FeedbackFormModal } from './FeedbackFormModal'
 import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
-import { FeedbackFormModal } from './FeedbackFormModal'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

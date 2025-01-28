@@ -131,7 +131,7 @@ export function FeedbackForm() {
           )}
         />
       </div>
-      <ReCAPTCHA sitekey={'6LeS7sMqAAAAAB_O_sv0DLjKkNZ4yNIcKqoHPhx6'} ref={captchaRef} />
+      <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} ref={captchaRef} />
       <Button
         className="bg-primary p-2 px-4 text-white dark:text-gray-800"
         variant="solid"
