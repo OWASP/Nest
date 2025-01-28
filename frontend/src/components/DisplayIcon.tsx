@@ -47,8 +47,6 @@ export default function DisplayIcon({
       positioning={{ placement: 'top' }}
     >
       <div
-        // data-tooltip-id={`icon-tooltip-${item}`}
-        // data-tooltip-content={`${Icons[item as keyof typeof Icons]?.label}`}
         className={containerClassName}
       >
         {/* Display formatted number if the value is a number */}
