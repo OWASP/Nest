@@ -21,16 +21,10 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     def create(self, request):
         """Handle POST request for feedback submission."""
         try:
-            feedback_data = request.data
-
             s3_client = self._get_s3_client()
-
             output, writer = self._get_or_create_tsv(s3_client)
-
-            self._write_feedback_to_tsv(writer, feedback_data)
-
+            self._write_feedback_to_tsv(writer, request.data)
             self._upload_tsv_to_s3(s3_client, output)
-
             return Response(status=status.HTTP_201_CREATED)
         except ValidationError:
             return Response({"error": "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
