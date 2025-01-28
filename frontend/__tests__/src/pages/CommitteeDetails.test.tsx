@@ -6,6 +6,8 @@ import { render } from 'wrappers/testUtil'
 
 import { mockCommitteeData } from '@tests/data/mockCommitteeData'
 
+global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
+
 jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))

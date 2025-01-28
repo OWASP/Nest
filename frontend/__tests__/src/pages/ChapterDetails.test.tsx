@@ -3,6 +3,8 @@ import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
 import { mockChaterDetailsData } from '@tests/data/mockChapterDetailsData'
+global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
+
 jest.mock('api/fetchAlgoliaData')
 
 jest.mock('react-router-dom', () => ({
