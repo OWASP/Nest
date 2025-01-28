@@ -44,10 +44,10 @@ class Base(Configuration):
     LOCAL_APPS = (
         "apps.common",
         "apps.core",
+        "apps.feedback",
         "apps.github",
         "apps.owasp",
         "apps.slack",
-        "apps.feedback",
     )
 
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

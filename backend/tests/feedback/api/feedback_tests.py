@@ -30,7 +30,6 @@ def valid_feedback_data():
 @pytest.fixture()
 def mock_s3_client():
     with patch("boto3.client") as mock_client:
-        # Create a mock NoSuchKey exception
         mock_client.return_value.exceptions.NoSuchKey = botocore.exceptions.ClientError(
             {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
             "GetObject",
@@ -41,20 +40,15 @@ def mock_s3_client():
 class TestFeedbackViewSet:
     def test_create_success(self, feedback_viewset, valid_feedback_data, mock_s3_client):
         """Test successful feedback submission."""
-        # Mock request
         request = Mock()
         request.data = valid_feedback_data
 
-        # Mock S3 get_object response for existing file
         mock_s3_client.get_object.return_value = {"Body": Mock(read=lambda: b"")}
 
-        # Execute
         response = feedback_viewset.create(request)
 
-        # Verify response
         assert response.status_code == status.HTTP_201_CREATED
 
-        # Verify S3 interactions
         mock_s3_client.put_object.assert_called_once()
         put_call_kwargs = mock_s3_client.put_object.call_args[1]
         assert put_call_kwargs["Bucket"] == settings.AWS_STORAGE_BUCKET_NAME
@@ -64,19 +58,15 @@ class TestFeedbackViewSet:
 
     def test_create_validation_error(self, feedback_viewset, valid_feedback_data, mock_s3_client):
         """Test feedback submission with validation error."""
-        # Mock request
         request = Mock()
         request.data = valid_feedback_data
 
-        # Mock S3 client to raise ValidationError using botocore exception
         mock_s3_client.get_object.side_effect = botocore.exceptions.ClientError(
             {"Error": {"Code": "ValidationError", "Message": "Invalid credentials"}}, "GetObject"
         )
 
-        # Execute
         response = feedback_viewset.create(request)
 
-        # Verify response
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_write_feedback_to_tsv(self, feedback_viewset, valid_feedback_data):
@@ -84,12 +74,10 @@ class TestFeedbackViewSet:
         output = StringIO()
         writer = csv.writer(output, delimiter="\t")
 
-        # Execute
         current_time = datetime(2025, 1, 22, 10, 45, 34, 567884, tzinfo=timezone.utc)
         with patch("django.utils.timezone.now", return_value=current_time):
             feedback_viewset.write_feedback_to_tsv(writer, valid_feedback_data)
 
-        # Verify
         output.seek(0)
         written_data = output.getvalue().strip().split("\t")
         assert written_data[0] == valid_feedback_data["name"]

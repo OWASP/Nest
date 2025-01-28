@@ -44,9 +44,8 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             region_name=settings.AWS_S3_REGION_NAME,
         )
 
-    def _get_or_create_tsv(self, s3_client):
+    def _get_or_create_tsv(self, s3_client, tsv_key="feedbacks.tsv"):
         """Get the existing TSV file or creates a new one if it doesn't exist."""
-        tsv_key = "feedbacks.tsv"
         output = StringIO()
         writer = csv.writer(output, delimiter="\t")
 
@@ -55,8 +54,13 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                 Bucket=settings.AWS_STORAGE_BUCKET_NAME,
                 Key=tsv_key,
             )
-            existing_content = response["Body"].read().decode("utf-8")
-            output.write(existing_content)
+            # read the content from the body of the response
+            existing_content = response["Body"].read()
+            # decode the content to utf-8 format
+            decoded_content = existing_content.decode("utf-8")
+            # write the decoded content to the output file
+            output.write(decoded_content)
+            # move the cursor to the end of the file
             output.seek(0, 2)
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "NoSuchKey":
@@ -68,14 +72,14 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     def _write_feedback_to_tsv(self, writer, feedback_data):
         """Write the new feedback data to the TSV file."""
         writer.writerow(
-            [
+            (
                 feedback_data["name"],
                 feedback_data["email"],
                 feedback_data["message"],
                 feedback_data["is_anonymous"],
                 feedback_data["is_nestbot"],
                 datetime.now(timezone.utc).isoformat(),
-            ]
+            )
         )
 
     def _upload_tsv_to_s3(self, s3_client, output):

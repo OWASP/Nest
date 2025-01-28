@@ -72,7 +72,7 @@ export function FeedbackForm() {
       <h1 className="w-full text-center font-bold">Feedback form</h1>
       {!isAnonymous && (
         <div className="flex w-full items-start justify-between gap-4">
-          <div className="">
+          <div className="w-full">
             <Field label="Name">
               <Input
                 placeholder="Your name"
@@ -85,7 +85,7 @@ export function FeedbackForm() {
               )}
             </Field>
           </div>
-          <div>
+          <div className='w-full'>
             <Field label="Email">
               <Input
                 placeholder="email@example.com"
@@ -131,7 +131,7 @@ export function FeedbackForm() {
           )}
         />
       </div>
-      <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} ref={captchaRef} />
+      <ReCAPTCHA sitekey={'6LeS7sMqAAAAAB_O_sv0DLjKkNZ4yNIcKqoHPhx6'} ref={captchaRef} />
       <Button
         className="bg-primary p-2 px-4 text-white dark:text-gray-800"
         variant="solid"

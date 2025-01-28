@@ -44,9 +44,6 @@ requests = "^2.32.3"
 sentry-sdk = {extras = ["django"], version = "^2.20.0"}
 slack-bolt = "^1.22.0"
 boto3 = "^1.36.1"
-django-ratelimit = "^4.1.0"
-slack-sdk = "^3.34.0"
-psycopg2-binary = "^2.9.10"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -11,6 +11,7 @@ import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
+import { FeedbackFormModal } from './FeedbackFormModal'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -86,6 +87,7 @@ export default function Header() {
             hoverIconColor="#d9156c"
             text="Sponsor"
           />
+          <FeedbackFormModal />
           <ModeToggle />
           <div className="md:hidden">
             <button
