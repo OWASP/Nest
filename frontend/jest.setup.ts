@@ -12,6 +12,7 @@ global.ResizeObserver = class {
   unobserve() {}
   disconnect() {}
 }
+global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
