@@ -46,9 +46,7 @@ export default function DisplayIcon({
       showArrow
       positioning={{ placement: 'top' }}
     >
-      <div
-        className={containerClassName}
-      >
+      <div className={containerClassName}>
         {/* Display formatted number if the value is a number */}
         <span className="text-gray-600 dark:text-gray-300">
           {typeof icons[item] === 'number'
