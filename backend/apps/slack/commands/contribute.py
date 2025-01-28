@@ -24,7 +24,7 @@ def contribute_handler(ack, command, client):
         blocks = [
             markdown(
                 f"*Available Commands for Contributing:*{NL}"
-                f"•`/contribute` - View all available projects.{NL}"
+                f"•`/contribute` - View all available issues.{NL}"
                 f"•`/contribute <search term>` - Search for contribution opportunities.{NL}"
             ),
         ]
