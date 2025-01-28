@@ -19,6 +19,7 @@ def owasp_handler(ack, command, client):
         committees,
         contribute,
         donate,
+        events,
         gsoc,
         jobs,
         leaders,
@@ -40,6 +41,7 @@ def owasp_handler(ack, command, client):
                 f"• `{COMMAND} committees` -- Explore OWASP committees{NL}"
                 f"• `{COMMAND} contribute` -- OWASP projects contribution opportunities{NL}"
                 f"• `{COMMAND} donate` -- Support OWASP with a donation{NL}"
+                f"• `{COMMAND} events` -- Browse OWASP events{NL}"
                 f"• `{COMMAND} gsoc` -- Google Summer of Code participants information{NL}"
                 f"• `{COMMAND} jobs` -- Check out available job opportunities{NL}"
                 f"• `{COMMAND} leaders` -- Chapter and project leaders search{NL}"
@@ -64,6 +66,8 @@ def owasp_handler(ack, command, client):
                 contribute.contribute_handler(ack, command, client)
             case "donate":
                 donate.donate_handler(ack, command, client)
+            case "events":
+                events.events_handler(ack, command, client)
             case "gsoc":
                 gsoc.gsoc_handler(ack, command, client)
             case "jobs":
