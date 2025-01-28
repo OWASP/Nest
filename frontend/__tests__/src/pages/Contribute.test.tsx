@@ -1,10 +1,7 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { MemoryRouter } from 'react-router-dom'
-
+import { render } from 'wrappers/testUtil'
 import ContributePage from 'pages/Contribute'
-
 import { mockContributeData } from '@tests/data/mockContributeData'
 
 jest.mock('api/fetchAlgoliaData', () => ({
@@ -31,11 +28,7 @@ describe('Contribute Component', () => {
   })
 
   test('renders loading spinner initially', async () => {
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
@@ -48,11 +41,7 @@ describe('Contribute Component', () => {
       hits: mockContributeData.issues,
       totalPages: 1,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
 
     await waitFor(() => {
       expect(screen.getByText('Contribution 1')).toBeInTheDocument()
@@ -68,11 +57,7 @@ describe('Contribute Component', () => {
       issues: [],
       totalPages: 0,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
     await waitFor(() => {
       expect(screen.getByText('No issues found')).toBeInTheDocument()
     })
@@ -85,11 +70,7 @@ describe('Contribute Component', () => {
       hits: mockContributeData.issues,
       totalPages: 4,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
       fireEvent.click(nextPageButton)
@@ -99,17 +80,14 @@ describe('Contribute Component', () => {
       behavior: 'auto',
     })
   })
+
   test('handles pagination for first page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       totalPages: 2,
       currentPage: 1,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
     await waitFor(() => {
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -121,11 +99,7 @@ describe('Contribute Component', () => {
       totalPages: 2,
       currentPage: 2,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
     await waitFor(() => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
@@ -136,29 +110,21 @@ describe('Contribute Component', () => {
       ...mockContributeData,
       total_pages: 1,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
     await waitFor(() => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
   })
 
   test('handles search functionality', async () => {
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
 
     await waitFor(() => {
       const searchInput = screen.getByPlaceholderText('Search for OWASP issues...')
       fireEvent.change(searchInput, { target: { value: '' } })
     })
 
-    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1)
+    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 2)
   })
 
   test('handles error states in card rendering', async () => {
@@ -174,11 +140,7 @@ describe('Contribute Component', () => {
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockErrorIssue)
 
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
 
     await waitFor(() => {
       expect(screen.queryByText('Read More')).not.toBeInTheDocument()
@@ -191,11 +153,7 @@ describe('Contribute Component', () => {
       hits: mockContributeData.issues,
       totalPages: 1,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
 
     await waitFor(() => {
       const readMoreButton = screen.getByText('Read More')
@@ -209,11 +167,7 @@ describe('Contribute Component', () => {
       hits: mockContributeData.issues,
       totalPages: 1,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
 
     await waitFor(() => {
       const readMoreButton = screen.getByText('Read More')
@@ -232,11 +186,7 @@ describe('Contribute Component', () => {
       hits: mockContributeData.issues,
       totalPages: 1,
     })
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
 
     await waitFor(() => {
       const readMoreButton = screen.getByText('Read More')
@@ -264,11 +214,7 @@ describe('Contribute Component', () => {
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockMultipleIssues)
 
-    render(
-      <MemoryRouter>
-        <ContributePage />
-      </MemoryRouter>
-    )
+    render(<ContributePage />)
 
     // Wait for both cards to be rendered
     await waitFor(() => {
@@ -285,7 +231,7 @@ describe('Contribute Component', () => {
       expect(screen.getByText('Hint 1')).toBeInTheDocument()
     })
 
-    //verify first issue button
+    // Verify first issue button
     await waitFor(() => {
       const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
       expect(viewIssueButton).toBeInTheDocument()

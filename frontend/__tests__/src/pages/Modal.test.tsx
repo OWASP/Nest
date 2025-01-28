@@ -1,5 +1,8 @@
+import { ChakraProvider } from '@chakra-ui/react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
+import { system } from 'utils/theme'
 
 import { Modal } from 'components/Modal'
 
@@ -31,23 +34,32 @@ describe('Modal Component', () => {
       onclick: jest.fn(),
       url: 'https://example.com/issue/123',
     },
+    children: undefined as React.ReactNode | undefined,
+  }
+
+  const renderModal = (props = defaultProps) => {
+    return render(
+      <ChakraProvider value={system}>
+        <Modal {...props} />
+      </ChakraProvider>
+    )
   }
 
   it('renders nothing when isOpen is false', () => {
-    render(<Modal {...defaultProps} isOpen={false} />)
+    renderModal({ ...defaultProps, isOpen: false })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('renders the action button and handles its events', async () => {
     const onclick = jest.fn()
-    render(<Modal {...defaultProps} button={{ ...defaultProps.button, onclick }} />)
+    renderModal({ ...defaultProps, button: { ...defaultProps.button, onclick } })
 
     const actionButton = screen.getByRole('link', { name: /Test Button/i })
     expect(actionButton).toBeInTheDocument()
   })
 
   it('renders modal with all components when isOpen is true', () => {
-    render(<Modal {...defaultProps} />)
+    renderModal()
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(screen.getByText('Test Modal')).toBeInTheDocument()
@@ -57,18 +69,17 @@ describe('Modal Component', () => {
   })
 
   it('renders children content when provided', () => {
-    render(
-      <Modal {...defaultProps}>
-        <div data-testid="child-content">Child Content</div>
-      </Modal>
-    )
+    renderModal({
+      ...defaultProps,
+      children: <div data-testid="child-content">Child Content</div>,
+    })
 
     expect(screen.getByTestId('child-content')).toBeInTheDocument()
   })
 
   it('calls onClose when close button is clicked', async () => {
     const onClose = jest.fn()
-    render(<Modal {...defaultProps} onClose={onClose} />)
+    renderModal({ ...defaultProps, onClose })
 
     const closeButton = screen.getByRole('button', { name: /close modal/i })
     await userEvent.click(closeButton)
@@ -78,7 +89,7 @@ describe('Modal Component', () => {
 
   it('calls onClose when clicking outside the modal', () => {
     const onClose = jest.fn()
-    render(<Modal {...defaultProps} onClose={onClose} />)
+    renderModal({ ...defaultProps, onClose })
 
     const overlay = screen.getByRole('presentation')
     fireEvent.mouseDown(overlay)
@@ -88,7 +99,7 @@ describe('Modal Component', () => {
 
   it('handles escape key press', () => {
     const onClose = jest.fn()
-    render(<Modal {...defaultProps} onClose={onClose} />)
+    renderModal({ ...defaultProps, onClose })
 
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
 
@@ -96,7 +107,7 @@ describe('Modal Component', () => {
   })
 
   it('manages body overflow style correctly', () => {
-    const { unmount } = render(<Modal {...defaultProps} />)
+    const { unmount } = renderModal()
 
     expect(document.body.style.overflow).toBe('hidden')
 
@@ -106,7 +117,7 @@ describe('Modal Component', () => {
   })
 
   it('renders with correct accessibility attributes', () => {
-    render(<Modal {...defaultProps} />)
+    renderModal()
 
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveAttribute('aria-modal', 'true')
@@ -120,7 +131,7 @@ describe('Modal Component', () => {
       hint: undefined,
     }
 
-    render(<Modal {...propsWithoutHint} />)
+    renderModal(propsWithoutHint)
 
     expect(screen.queryByText('How to tackle it')).not.toBeInTheDocument()
   })
@@ -130,7 +141,7 @@ describe('Modal Component', () => {
       const addEventListenerSpy = jest.spyOn(document, 'addEventListener')
       const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener')
 
-      const { unmount } = render(<Modal {...defaultProps} />)
+      const { unmount } = renderModal()
 
       expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
 
