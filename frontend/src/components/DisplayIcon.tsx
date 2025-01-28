@@ -1,9 +1,9 @@
 import { millify } from 'millify'
-import { Tooltip } from 'react-tooltip'
 import { IconType } from 'types/icon'
-import { tooltipStyle } from 'utils/constants'
 import { IconKeys, Icons } from 'utils/data'
+import { TooltipRecipe } from 'utils/theme'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { Tooltip } from 'components/ui/tooltip'
 
 export default function DisplayIcon({
   item,
@@ -37,25 +37,29 @@ export default function DisplayIcon({
     .join(' ')
 
   return icons[item] ? (
-    <div
-      data-tooltip-id={`icon-tooltip-${item}`}
-      data-tooltip-content={`${Icons[item as keyof typeof Icons]?.label}`}
-      className={containerClassName}
+    <Tooltip
+      id={`icon-tooltip-${item}`}
+      content={`${Icons[item as keyof typeof Icons]?.label}`}
+      recipe={TooltipRecipe}
+      openDelay={150}
+      closeDelay={100}
+      showArrow
+      positioning={{ placement: 'top' }}
     >
-      {/* Display formatted number if the value is a number */}
-      <span className="text-gray-600 dark:text-gray-300">
-        {typeof icons[item] === 'number'
-          ? millify(icons[item], { precision: 1 }) // Format large numbers using 'millify' library
-          : icons[item]}
-      </span>
-      <span>
-        <FontAwesomeIconWrapper
-          className={iconClassName}
-          icon={Icons[item as IconKeys]?.icon} // Display corresponding icon
-        />
-      </span>
-      {/* Tooltip for showing more info when hovering */}
-      <Tooltip id={`icon-tooltip-${item}`} style={tooltipStyle} />
-    </div>
+      <div className={containerClassName}>
+        {/* Display formatted number if the value is a number */}
+        <span className="text-gray-600 dark:text-gray-300">
+          {typeof icons[item] === 'number'
+            ? millify(icons[item], { precision: 1 }) // Format large numbers using 'millify' library
+            : icons[item]}
+        </span>
+        <span>
+          <FontAwesomeIconWrapper
+            className={iconClassName}
+            icon={Icons[item as IconKeys]?.icon} // Display corresponding icon
+          />
+        </span>
+      </div>
+    </Tooltip>
   ) : null
 }
