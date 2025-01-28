@@ -1,9 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-
 import ContributePage from 'pages/Contribute'
-
 import { mockContributeData } from '@tests/data/mockContributeData'
 
 jest.mock('api/fetchAlgoliaData', () => ({
@@ -82,6 +80,7 @@ describe('Contribute Component', () => {
       behavior: 'auto',
     })
   })
+
   test('handles pagination for first page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
@@ -232,7 +231,7 @@ describe('Contribute Component', () => {
       expect(screen.getByText('Hint 1')).toBeInTheDocument()
     })
 
-    //verify first issue button
+    // Verify first issue button
     await waitFor(() => {
       const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
       expect(viewIssueButton).toBeInTheDocument()
