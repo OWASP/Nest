@@ -1,9 +1,12 @@
 """OWASP app sponsor search API."""
 
 from algoliasearch_django import raw_search
+
 from apps.owasp.models.sponsor import Sponsor
 
+
 def get_sponsors(query, attributes=None, limit=25, page=1):
+    """Return sponsors relevant to a search query."""
     params = {
         "attributesToHighlight": [],
         "attributesToRetrieve": attributes
@@ -13,17 +16,16 @@ def get_sponsors(query, attributes=None, limit=25, page=1):
             "idx_description",
             "idx_url",
             "idx_job_url",
-            "idx_image",
+            "idx_image_path",
             "idx_member_type",
             "idx_sponsor_type",
-            "idx_member_level",
-            "idx_sponsor_level",
             "idx_is_member",
-            "idx_is_active_sponsor"
         ],
         "hitsPerPage": limit,
         "minProximity": 4,
         "page": page - 1,
-        "typoTolerance": "min"
+        "typoTolerance": "min",
+        "facetFilters": [],
     }
+
     return raw_search(Sponsor, query, params)

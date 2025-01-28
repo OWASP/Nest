@@ -101,49 +101,35 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
 
     custom_field_name.short_description = "Name"
 
+
 class SponsorAdmin(admin.ModelAdmin):
     """Admin configuration for Sponsor model."""
-    
-    list_display = (
-        'name',
-        'sort_name',
-        'is_active_sponsor',
-        'sponsor_type',
-        'is_member',
-        'member_type',
-    )
-    
-    search_fields = (
-        'name',
-        'sort_name',
-        'description',
-    )
-    
-    list_filter = (
-        'sponsor_type',
-        'is_member',
-        'member_type',
-    )
-    
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('name', 'sort_name', 'description')
-        }),
-        ('URLs and Images', {
-            'fields': ('url', 'job_url', 'image')
-        }),
-        ('Status', {
-            'fields': ('is_member', 'member_type', 'sponsor_type')
-        }),
-    )
-    
-    readonly_fields = ('is_active_sponsor',)
 
-    def is_active_sponsor(self, obj):
-        """Display if sponsor is active."""
-        return obj.is_active_sponsor
-    is_active_sponsor.boolean = True
-    is_active_sponsor.short_description = "Active Sponsor"
+    list_display = (
+        "name",
+        "sort_name",
+        "sponsor_type",
+        "is_member",
+        "member_type",
+    )
+
+    search_fields = (
+        "name",
+        "sort_name",
+        "description",
+    )
+
+    list_filter = (
+        "sponsor_type",
+        "is_member",
+        "member_type",
+    )
+
+    fieldsets = (
+        ("Basic Information", {"fields": ("name", "sort_name", "description")}),
+        ("URLs and Images", {"fields": ("url", "job_url", "image_path")}),
+        ("Status", {"fields": ("is_member", "member_type", "sponsor_type")}),
+    )
 
 
 admin.site.register(Chapter, ChapterAdmin)
