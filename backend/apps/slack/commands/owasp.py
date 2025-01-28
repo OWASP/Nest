@@ -17,12 +17,14 @@ def owasp_handler(ack, command, client):
         board,
         chapters,
         committees,
+        contact,
         contribute,
         donate,
         events,
         gsoc,
         jobs,
         leaders,
+        news,
         projects,
         sponsors,
         staff,
@@ -39,12 +41,14 @@ def owasp_handler(ack, command, client):
                 f"• `{COMMAND} board` -- OWASP Global Board information{NL}"
                 f"• `{COMMAND} chapters` -- Explore OWASP chapters{NL}"
                 f"• `{COMMAND} committees` -- Explore OWASP committees{NL}"
+                f"• `{COMMAND} contact` -- Contact OWASP{NL}"
                 f"• `{COMMAND} contribute` -- OWASP projects contribution opportunities{NL}"
                 f"• `{COMMAND} donate` -- Support OWASP with a donation{NL}"
                 f"• `{COMMAND} events` -- Browse OWASP events{NL}"
                 f"• `{COMMAND} gsoc` -- Google Summer of Code participants information{NL}"
                 f"• `{COMMAND} jobs` -- Check out available job opportunities{NL}"
                 f"• `{COMMAND} leaders` -- Chapter and project leaders search{NL}"
+                f"• `{COMMAND} news` -- OWASP news{NL}"
                 f"• `{COMMAND} projects` -- Explore OWASP projects{NL}"
                 f"• `{COMMAND} sponsors` -- Get a list of OWASP sponsors{NL}"
                 f"• `{COMMAND} staff` -- OWASP corporate structure{NL}"
@@ -62,6 +66,8 @@ def owasp_handler(ack, command, client):
                 chapters.chapters_handler(ack, command, client)
             case "committees":
                 committees.committees_handler(ack, command, client)
+            case "contact":
+                contact.contact_handler(ack, command, client)
             case "contribute":
                 contribute.contribute_handler(ack, command, client)
             case "donate":
@@ -74,6 +80,8 @@ def owasp_handler(ack, command, client):
                 jobs.jobs_handler(ack, command, client)
             case "leaders":
                 leaders.leaders_handler(ack, command, client)
+            case "news":
+                news.news_handler(ack, command, client)
             case "projects":
                 projects.projects_handler(ack, command, client)
             case "sponsors":

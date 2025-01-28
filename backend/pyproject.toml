@@ -48,7 +48,7 @@ boto3 = "^1.36.1"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
-isort = "^5.13.2"
+isort = "^6.0.0"
 pre-commit = "^4.1.0"
 ruff = "^0.9.3"
 
