@@ -3,11 +3,9 @@ import path from 'path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import EnvironmentPlugin from 'vite-plugin-environment'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
-  optimizeDeps: {
-    include: ['date-fns'],
-  },
   build: {
     sourcemap: true,
   },
@@ -18,9 +16,9 @@ export default defineConfig({
       VITE_ALGOLIA_SEARCH_API_KEY: process.env.VITE_ALGOLIA_SEARCH_API_KEY,
       VITE_API_URL: process.env.VITE_API_URL,
       VITE_ENVIRONMENT: process.env.VITE_ENVIRONMENT,
-      VITE_GRAPHQL_URL: process.env.VITE_GRAPHQL_URL,
       VITE_SENTRY_DSN: process.env.VITE_SENTRY_DSN || '',
     }),
+    tsconfigPaths(),
   ],
   resolve: {
     alias: {
