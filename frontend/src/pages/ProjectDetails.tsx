@@ -21,6 +21,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import ToggleableList from 'components/ToogleList'
+import fs from 'fs'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -36,38 +37,37 @@ const ProjectDetailsPage = () => {
   useEffect(() => {
     const fetchProjectData = async () => {
       setIsLoading(true)
-      const { hits } = await fetchAlgoliaData('projects', projectKey, 1, projectKey)
-      if (hits && hits.length > 0) {
-        setProject(hits[0])
+      try {
+        const { hits } = await fetchAlgoliaData('projects', projectKey, 1, projectKey)
+        if (hits && hits.length > 0) {
+          setProject(hits[0])
+        }
+      } catch (error) {
+        return error
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     fetchProjectData()
   }, [projectKey])
-
-  useEffect(() => {
-    if (data) {
-      setRecentReleases(data?.project?.recentReleases)
-      setRecentIssues(data?.project?.recentIssues)
-    }
-  }, [data])
-
-  if (isLoading || isGraphQlDataLoading)
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
+  }
 
-  if (!project)
+  if (!project) {
     return (
       <ErrorDisplay
         statusCode={404}
         title="Project not found"
-        message="Sorry, the project you're looking for doesn't exist"
+        message="Sorry, the project you're looking for doesn't exist."
       />
     )
+  }
 
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -77,11 +77,14 @@ const ProjectDetailsPage = () => {
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         <p className="mb-6 text-xl">{project.description}</p>
-        <SecondaryCard title="Summary">
+
+        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold">Summary</h2>
           <p>{project.summary}</p>
-        </SecondaryCard>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <SecondaryCard title="Project Details" className="gap-2 md:col-span-2">
+        </div>
+
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <SecondaryCard title="Project Details" className="md:col-span-2">
             <p>
               <strong>Type:</strong> {project.type[0].toUpperCase() + project.type.slice(1)}
             </p>
@@ -104,6 +107,7 @@ const ProjectDetailsPage = () => {
               </a>
             </p>
           </SecondaryCard>
+
           <SecondaryCard title="Statistics">
             <InfoBlock
               className="pb-1"
@@ -120,6 +124,7 @@ const ProjectDetailsPage = () => {
             />
           </SecondaryCard>
         </div>
+
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <ToggleableList items={project.languages} label="Languages" />
           <ToggleableList items={project.topics} label="Topics" />
@@ -131,14 +136,33 @@ const ProjectDetailsPage = () => {
             <div className="h-64 overflow-y-auto pr-2">
               {recentIssues.map((issue, index) => (
                 <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <h3 className="font-semibold">{issue.title}</h3>
+                  <h3 className="font-semibold">
+                    <a
+                      href={
+                        issue.repository &&
+                        `https://github.com/OWASP/${issue.repository.key}/issues/${issue.number}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#1d7bd7] hover:underline dark:text-sky-600"
+                    >
+                      {issue.title}
+                    </a>
+                  </h3>
                   <div className="mt-2 flex items-center">
-                    <img
-                      src={issue?.author?.avatarUrl}
-                      alt={issue?.author?.name}
-                      className="mr-2 h-6 w-6 rounded-full"
-                    />
-                    <span className="text-sm">{issue?.author?.name}</span>
+                    <a
+                      href={`https://nest.owasp.dev/community/users/${issue.author.key}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center"
+                    >
+                      <img
+                        src={issue.author.avatar_url}
+                        alt={issue.author.name}
+                        className="mr-2 h-6 w-6 rounded-full"
+                      />
+                      <span className="text-sm">{issue.author.name}</span>
+                    </a>
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
