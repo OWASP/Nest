@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogRoot,
   DialogTrigger,
-} from 'components/ui/dialog'
+} from 'components/ui/Dialog'
 import { FeedbackForm } from './FeedbackForm'
 
 export const FeedbackFormModal = () => {
