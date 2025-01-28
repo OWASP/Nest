@@ -28,7 +28,7 @@ features:
       should_escape: false
     - command: /gsoc
       url: https://nest.owasp.dev/integrations/slack/commands/
-      description: get started with GSoC program
+      description: get started with GSoC 2025
       usage_hint: --start
       should_escape: false
     - command: /owasp
@@ -69,6 +69,10 @@ features:
     - command: /policies
       url: https://nest.owasp.dev/integrations/slack/commands/
       description: Policies & Procedures
+      should_escape: false
+    - command: /events
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Browse OWASP events
       should_escape: false
 oauth_config:
   scopes:
