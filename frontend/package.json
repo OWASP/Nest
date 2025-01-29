@@ -36,7 +36,7 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.4",
     "@sentry/browser": "^8.46.0",
-    "@sentry/react": "^8.51.0",
+    "@sentry/react": "^8.52.0",
     "@sentry/tracing": "^7.120.3",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.14",
