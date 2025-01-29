@@ -74,6 +74,22 @@ features:
       url: https://nest.owasp.dev/integrations/slack/commands/
       description: Browse OWASP events
       should_escape: false
+    - command: /news
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: OWASP news
+      should_escape: false
+    - command: /contact
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Contact OWASP
+      should_escape: false
+    - command: /community
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Explore OWASP community
+      should_escape: false
+    - command: /users
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: OWASP users list
+      should_escape: false
 oauth_config:
   scopes:
     user:
