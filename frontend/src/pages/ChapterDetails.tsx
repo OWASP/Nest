@@ -1,21 +1,10 @@
-import {
-  faMapMarkerAlt,
-  faTags,
-  faCalendarAlt,
-  faLink,
-  faGlobe,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
-import { getSocialIcon } from 'utils/urlIconMappings'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
-import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
-import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/ToggleContributors'
+import GenericDetails from './CardDetailsPage'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -51,61 +40,28 @@ export default function ChapterDetailsPage() {
       />
     )
 
+  const details = [
+    { label: 'Location', value: chapter.suggested_location },
+    { label: 'Region', value: chapter.region },
+    { label: 'Last Updated', value: formatDate(chapter.updated_at) },
+    {
+      label: 'URL',
+      value: (
+        <a href={chapter.url} className="hover:underline dark:text-sky-600">
+          {chapter.url}
+        </a>
+      ),
+    },
+  ]
   return (
-    <div className="mt-16 min-h-screen bg-white p-4 text-gray-600 dark:bg-[#212529] dark:text-gray-300 md:p-8">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 text-3xl font-bold md:text-4xl">{chapter.name}</h1>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <SecondaryCard title="Chapter Details">
-            <InfoBlock
-              className="pb-1"
-              icon={faMapMarkerAlt}
-              label="Location"
-              value={chapter.suggested_location}
-            />
-            <InfoBlock className="pb-1" icon={faGlobe} label="Region" value={chapter.region} />
-            <InfoBlock
-              className="pb-1"
-              icon={faTags}
-              label="Tags"
-              value={chapter.tags[0].toUpperCase() + chapter.tags.slice(1)}
-            />
-            <InfoBlock
-              className="pb-1"
-              icon={faCalendarAlt}
-              label="Last Updated"
-              value={formatDate(chapter.updated_at)}
-            />
-            <InfoBlock className="pb-1" icon={faLink} label="URL" value={chapter.url} isLink />
-            <SocialLinks urls={chapter.related_urls} />
-          </SecondaryCard>
-          <SecondaryCard title="Summary">
-            <div className="text-sm leading-relaxed md:text-base">{chapter.summary}</div>
-          </SecondaryCard>
-        </div>
-
-        <TopContributors contributors={chapter.top_contributors} maxInitialDisplay={6} />
-      </div>
-    </div>
+    <GenericDetails
+      title={chapter.name}
+      is_active={chapter.is_active}
+      details={details}
+      summary={chapter.summary}
+      data={chapter}
+      type="chapter"
+      topContributors={chapter.top_contributors}
+    />
   )
 }
-
-const SocialLinks = ({ urls }) => (
-  <div>
-    <div className="text-sm font-medium">Social Links</div>
-    <div className="mt-2 flex flex-wrap gap-3">
-      {urls.map((url, index) => (
-        <a
-          key={index}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-        </a>
-      ))}
-    </div>
-  </div>
-)
