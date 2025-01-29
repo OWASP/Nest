@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES2023",
+    "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "types": ["node", "jest", "@testing-library/jest-dom"],
-    "moduleResolution": "bundler",
+    "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -18,7 +18,8 @@
     "baseUrl": ".",
     "paths": {
       "@tests/*": ["__tests__/src/*"],
-      "*": ["src/*"]
+      "*": ["src/*"],
+      "@/*": ["./src/*"]
     }
   },
   "include": ["__tests__", "src"]

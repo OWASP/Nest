@@ -9,6 +9,7 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import { Modal } from 'components/Modal'
 import SearchPageLayout from 'components/SearchPageLayout'
+import NewModal from 'components/NewModal'
 
 const ContributePage = () => {
   const {
@@ -54,7 +55,7 @@ const ContributePage = () => {
           icons={filteredIcons}
           button={SubmitButton}
         />
-        <Modal
+        <NewModal
           key={`modal-${index}`}
           isOpen={modalOpenIndex === index}
           onClose={() => setModalOpenIndex(null)}
@@ -62,7 +63,7 @@ const ContributePage = () => {
           summary={issue.summary}
           hint={issue.hint}
           button={viewIssueButton}
-        ></Modal>
+        ></NewModal>
       </React.Fragment>
     )
   }
