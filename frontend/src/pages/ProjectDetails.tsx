@@ -82,19 +82,19 @@ const ProjectDetailsPage = () => {
         </SecondaryCard>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <SecondaryCard title="Project Details" className="gap-2 md:col-span-2">
-            <p className="pb-1" >
+            <p className="pb-1">
               <strong>Type:</strong> {project.type[0].toUpperCase() + project.type.slice(1)}
             </p>
-            <p className="pb-1" >
+            <p className="pb-1">
               <strong>Level:</strong> {project.level[0].toUpperCase() + project.level.slice(1)}
             </p>
-            <p className="pb-1" >
+            <p className="pb-1">
               <strong>Project Leaders:</strong> {project.leaders.join(', ')}
             </p>
-            <p className="pb-1" >
+            <p className="pb-1">
               <strong>Last Updated:</strong> {formatDate(project.updated_at)}
             </p>
-            <p className="pb-1" >
+            <p className="pb-1">
               <strong>URL:</strong>{' '}
               <a href={project.url} className="hover:underline dark:text-sky-600">
                 {project.url}
@@ -102,7 +102,11 @@ const ProjectDetailsPage = () => {
             </p>
           </SecondaryCard>
           <SecondaryCard title="Statistics">
-            <InfoBlock className="pb-1"  icon={faUsers} value={`${project.contributors_count} Contributors`}/>
+            <InfoBlock
+              className="pb-1"
+              icon={faUsers}
+              value={`${project.contributors_count} Contributors`}
+            />
             <InfoBlock className="pb-1" icon={faCodeFork} value={`${project.forks_count} Forks`} />
             <InfoBlock className="pb-1" icon={faStar} value={`${project.stars_count} Stars`} />
             <InfoBlock className="pb-1" icon={faBook} value={`${project.issues_count} Issues`} />
