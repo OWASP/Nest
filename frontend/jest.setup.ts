@@ -2,6 +2,7 @@ import '@testing-library/jest-dom'
 import { TextEncoder } from 'util'
 import dotenv from 'dotenv'
 import React from 'react'
+import 'core-js/actual/structured-clone'
 
 dotenv.config()
 
