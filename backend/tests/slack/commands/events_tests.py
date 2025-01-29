@@ -78,60 +78,49 @@ class TestEventsHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_get_events_data.return_value = mock_events if has_events_data else []
 
-        events_handler(
-            ack=MagicMock(), command=mock_slack_command, client=mock_slack_client
-        )
+        events_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()
             mock_slack_client.chat_postMessage.assert_not_called()
             return
 
-        # Verify basic message structure
         mock_slack_client.conversations_open.assert_called_once_with(
             users=mock_slack_command["user_id"]
         )
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
 
-        # Check header
         assert blocks[0]["text"]["text"] == expected_header
 
         if has_events_data:
-            current_block = 2  # Skip header and divider
-            
-            # Check each category
+            current_block = 2
             for category_data in mock_events:
-                # Verify category header
                 category_block = blocks[current_block]["text"]["text"]
                 assert f"*{category_data['category']} Events:*" in category_block
                 assert category_data["description"] in category_block
                 current_block += 1
 
-                # Verify events in category
                 sorted_events = sorted(
                     category_data["events"],
                     key=lambda x: x["start-date"],
                 )
-                
+
                 for idx, event in enumerate(sorted_events, 1):
                     event_block = blocks[current_block]["text"]["text"]
-                    
-                    # Check basic event info
+
                     assert f"*{idx}. {event['name']}*" in event_block
                     assert f"{event['dates']}" in event_block
-                    
-                    # Check optional fields
+
                     if event.get("url"):
                         assert f"🔗 <{event['url']}|More Information>" in event_block
                     if event.get("optional-text"):
                         assert f"_{event['optional-text']}_" in event_block
-                    
-                    current_block += 1
-                
-                current_block += 1  # Skip divider
 
-            # Verify footer
+                    current_block += 1
+
+                current_block += 1
+
             footer_block = blocks[-1]["text"]["text"]
             assert "🔍 For more information about upcoming events" in footer_block
             assert OWASP_WEBSITE_URL in footer_block
@@ -140,7 +129,6 @@ class TestEventsHandler:
         """Test the format_event_block function independently."""
         from apps.slack.commands.events import format_event_block
 
-        # Test with minimal event data
         minimal_event = {
             "name": "Test Event",
             "dates": "Jan 1, 2025",
@@ -151,7 +139,6 @@ class TestEventsHandler:
         assert "More Information" not in result["text"]["text"]
         assert "_" not in result["text"]["text"]
 
-        # Test with full event data
         full_event = {
             "name": "Test Event",
             "dates": "Jan 1, 2025",
@@ -163,5 +150,3 @@ class TestEventsHandler:
         assert "Jan 1, 2025" in result["text"]["text"]
         assert "https://example.com" in result["text"]["text"]
         assert "Additional information" in result["text"]["text"]
-        
-        
