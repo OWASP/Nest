@@ -39,11 +39,11 @@ describe('UsersPage Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders loading spinner initially', async () => {
+  test('renders skeleton initially', async () => {
     render(<UsersPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      const skeletonLoaders = screen.getAllByRole('status')
+      expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
 
@@ -52,9 +52,9 @@ describe('UsersPage Component', () => {
     render(<UsersPage />)
 
     // Check loading state
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    const skeletonLoaders = screen.getAllByRole('status')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
 
@@ -65,7 +65,7 @@ describe('UsersPage Component', () => {
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
 
-    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('status')).not.toBeInTheDocument()
   })
 
   test('renders user cards correctly', async () => {

@@ -5,7 +5,7 @@ import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
-import LoadingSpinner from 'components/LoadingSpinner'
+import CardSkeleton from 'components/skeletons/Card'
 
 const CommitteeDetailsPage = () => {
   const { committeeKey } = useParams()
@@ -26,8 +26,10 @@ const CommitteeDetailsPage = () => {
   }, [committeeKey])
   if (isLoading)
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
+      <div className="mt-16 flex w-full flex-col items-center justify-center">
+        <div className="w-full pt-12">
+          <CardSkeleton showLink={false} showLevel={false} showIcons={1} />
+        </div>
       </div>
     )
 
