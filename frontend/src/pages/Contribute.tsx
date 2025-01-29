@@ -7,7 +7,7 @@ import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 
 import Card from 'components/Card'
-import NewModal from 'components/NewModal'
+import Dialog from 'components/Dialog'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ContributePage = () => {
@@ -54,7 +54,7 @@ const ContributePage = () => {
           icons={filteredIcons}
           button={SubmitButton}
         />
-        <NewModal
+        <Dialog
           key={`modal-${index}`}
           isOpen={modalOpenIndex === index}
           onClose={() => setModalOpenIndex(null)}
@@ -62,7 +62,7 @@ const ContributePage = () => {
           summary={issue.summary}
           hint={issue.hint}
           button={viewIssueButton}
-        ></NewModal>
+        ></Dialog>
       </React.Fragment>
     )
   }

@@ -1,19 +1,19 @@
-import { Link } from '@chakra-ui/react';
-import React, { ReactNode } from 'react';
-import { TooltipRecipe } from 'utils/theme';
-import { Button } from '@/components/ui/button';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Link } from '@chakra-ui/react'
+import React, { ReactNode } from 'react'
+import { TooltipRecipe } from 'utils/theme'
+import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
 
 interface ActionButtonProps {
-  url?: string;
-  onClick?: () => void;
-  tooltipLabel?: string;
-  children: ReactNode;
+  url?: string
+  onClick?: () => void
+  tooltipLabel?: string
+  children: ReactNode
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel, children }) => {
   const baseStyles =
-    'flex items-center gap-2 px-2 py-2 rounded-md border transition-all text-nowrap justify-center bg-transparent text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100';
+    'flex items-center gap-2 px-2 py-2 rounded-md border transition-all text-nowrap justify-center bg-transparent text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100'
 
   return url ? (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
@@ -34,10 +34,13 @@ const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel,
         {children}
       </Button>
     </TooltipWrapper>
-  );
-};
+  )
+}
 
-const TooltipWrapper: React.FC<{ tooltipLabel?: string; children: ReactNode }> = ({ tooltipLabel, children }) => (
+const TooltipWrapper: React.FC<{ tooltipLabel?: string; children: ReactNode }> = ({
+  tooltipLabel,
+  children,
+}) =>
   tooltipLabel ? (
     <Tooltip id="button-tooltip" content={tooltipLabel} recipe={TooltipRecipe}>
       {children}
@@ -45,6 +48,5 @@ const TooltipWrapper: React.FC<{ tooltipLabel?: string; children: ReactNode }> =
   ) : (
     <>{children}</>
   )
-);
 
-export default ActionButton;
+export default ActionButton
