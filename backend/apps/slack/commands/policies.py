@@ -16,53 +16,57 @@ def policies_handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
+    policies = [
+        (
+            "Awards and Scholarships Policy",
+            "Guidelines for recognizing contributions and offering scholarships.",
+        ),
+        ("Board Code of Conduct", "Ethical and professional standards for OWASP board members."),
+        ("Branding Policy", "Rules for using OWASP branding, including logos and trademarks."),
+        ("Chapters Policy", "Framework for running and managing OWASP local chapters."),
+        ("Code of Conduct Policy", "Expectations for behavior within the OWASP community."),
+        ("Committees Policy", "Structure and responsibilities of OWASP committees."),
+        (
+            "Community Review Process Policy",
+            "Process for community-driven review of policies and decisions.",
+        ),
+        (
+            "Conferences and Events Policy",
+            "Rules for organizing and participating in OWASP events.",
+        ),
+        ("Conflict Resolution Policy", "Procedures for resolving disputes within OWASP."),
+        ("Conflict of Interest Policy", "Guidelines to avoid and manage conflicts of interest."),
+        ("Election Policy", "Rules governing OWASP board and leadership elections."),
+        ("Events Policy", "General policies for OWASP events, including sponsorships."),
+        (
+            "Expense Reimbursement Policy",
+            "Guidelines for reimbursement of OWASP-related expenses.",
+        ),
+        (
+            "Force Majeure and Sanctions Policy",
+            "Handling of extraordinary events affecting OWASP operations.",
+        ),
+        ("General Disclaimer Policy", "Legal disclaimers related to OWASP projects and content."),
+    ]
+
+    formatted_policies = "\n".join(
+        f"- *<{url}|{title}>*: {description}"
+        for title, description, url in [
+            (
+                p[0],
+                p[1],
+                f"https://owasp.org/www-policy/operational/{p[0].lower().replace(' ', '-')}",
+            )
+            for p in policies
+        ]
+    )
+
     blocks = [
+        markdown("*Here are the key OWASP policies:*"),
+        markdown(formatted_policies),
         markdown(
-            "- <https://owasp.org/www-policy/operational/awards-and-scholarships|"
-            "Awards and Scholarships Policy>\n"
+            f"For more, visit *<https://owasp.org/www-policy/|Official OWASP Policies>*.{NL}"
         ),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/board-code-of-conduct|"
-            "Board Code of Conduct>\n"
-        ),
-        markdown("- <https://owasp.org/www-policy/operational/branding|Branding Policy>\n"),
-        markdown("- <https://owasp.org/www-policy/operational/chapters|Chapters Policy>\n"),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/code-of-conduct|"
-            "Code of Conduct Policy>\n"
-        ),
-        markdown("- <https://owasp.org/www-policy/operational/committees|Committees Policy>\n"),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/community-review-process|"
-            "Community Review Process Policy>\n"
-        ),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/conferences-events|"
-            "Conferences and Events Policy>\n"
-        ),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/conflict-resolution|"
-            "Conflict Resolution Policy>\n"
-        ),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/conflict-of-interest|"
-            "Conflict of Interest Policy>\n"
-        ),
-        markdown("- <https://owasp.org/www-policy/operational/election|Election Policy>\n"),
-        markdown("- <https://owasp.org/www-policy/operational/events|Events Policy>\n"),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/expense-reimbursement|"
-            "Expense Reimbursement Policy>\n"
-        ),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/force-majeure-sanctions|"
-            "Force Majeure and Sanctions Policy>\n"
-        ),
-        markdown(
-            "- <https://owasp.org/www-policy/operational/general-disclaimer|"
-            "General Disclaimer Policy>\n"
-        ),
-        markdown(f"Please visit <https://owasp.org/www-policy/|OWASP policies> page{NL}"),
     ]
 
     conversation = client.conversations_open(users=command["user_id"])
