@@ -1,7 +1,7 @@
-import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBolt } from '@fortawesome/free-solid-svg-icons'
 import { Button, Text, Box, Separator } from '@chakra-ui/react'
+import { faBolt } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import React from 'react'
 import { ModalProps } from 'types/modal'
 
 import {
@@ -13,8 +13,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 
-import Markdown from './MarkdownWrapper'
 import ActionButton from './ActionButton'
+import Markdown from './MarkdownWrapper'
 
 const NewModal: React.FC<ModalProps> = ({
   title,
