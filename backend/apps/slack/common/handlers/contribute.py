@@ -48,7 +48,7 @@ def get_blocks(
         markdown(
             f"{NL}*OWASP contributions found for* `{search_query_escaped}`:{NL}"
             if search_query_escaped
-            else f"{NL}*OWASP contributions:*{NL}"
+            else f"{NL}*Here are the top {limit} most recent issues*:{NL}"
         ),
     ]
 
@@ -65,8 +65,8 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"{offset + idx + 1}. <{contribution['idx_url']}|*{title}*>{NL}"
-                f"*Project:* <{project_url}|{project}>{NL}"
-                f"*Summary:* {summary}{NL}"
+                f"<{project_url}|{project}>{NL}"
+                f"{summary}{NL}"
             )
         )
 
