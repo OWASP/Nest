@@ -1,5 +1,9 @@
-import React from 'react';
-import { Button, Text, Box, Separator} from '@chakra-ui/react';
+import React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBolt } from '@fortawesome/free-solid-svg-icons'
+import { Button, Text, Box, Separator } from '@chakra-ui/react'
+import { ModalProps } from 'types/modal'
+
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -7,13 +11,10 @@ import {
   DialogHeader,
   DialogRoot,
   DialogFooter,
-} from '@/components/ui/dialog'; // Import Dialog components
+} from '@/components/ui/dialog'
 
-import { ModalProps } from 'types/modal';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBolt } from '@fortawesome/free-solid-svg-icons';
-import Markdown from './MarkdownWrapper';
-import ActionButton from './ActionButton';
+import Markdown from './MarkdownWrapper'
+import ActionButton from './ActionButton'
 
 const NewModal: React.FC<ModalProps> = ({
   title,

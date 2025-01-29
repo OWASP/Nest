@@ -7,8 +7,8 @@ import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 
 import Card from 'components/Card'
-import SearchPageLayout from 'components/SearchPageLayout'
 import NewModal from 'components/NewModal'
+import SearchPageLayout from 'components/SearchPageLayout'
 
 const ContributePage = () => {
   const {
