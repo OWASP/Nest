@@ -32,3 +32,21 @@ def get_staff_data(timeout=30):
         )
     except (RequestException, yaml.scanner.ScannerError):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
+
+
+@lru_cache
+def get_events_data(timeout=30):
+    """Get events data."""
+    file_path = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/events.yml"
+    try:
+        events_data = yaml.safe_load(
+            requests.get(
+                file_path,
+                timeout=timeout,
+            ).text
+        )
+    except (RequestException, yaml.scanner.ScannerError):
+        logger.exception("Unable to parse OWASP events data file", extra={"file_path": file_path})
+        return None
+    else:
+        return events_data
