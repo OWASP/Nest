@@ -12,6 +12,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
+import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
@@ -29,7 +30,11 @@ const ProjectDetailsPage = () => {
   const [recentReleases, setRecentReleases] = useState([])
   const [recentIssues, setRecentIssues] = useState([])
 
-  const { data, loading: isGraphQlDataLoading } = useQuery(GET_PROJECT_DATA, {
+  const {
+    data,
+    loading: isGraphQlDataLoading,
+    error: graphQLRequestError,
+  } = useQuery(GET_PROJECT_DATA, {
     variables: { key: 'www-project-' + projectKey },
   })
   useEffect(() => {
@@ -52,6 +57,19 @@ const ProjectDetailsPage = () => {
     fetchProjectData()
   }, [projectKey])
 
+  useEffect(() => {
+    if (data) {
+      setRecentReleases(data?.project?.recentReleases)
+      setRecentIssues(data?.project?.recentIssues)
+    }
+    if (graphQLRequestError && !isLoading) {
+      toast({
+        variant: 'destructive',
+        title: 'GraphQL Request Failed',
+        description: 'Unable to complete the requested operation.',
+      })
+    }
+  }, [data, graphQLRequestError, isLoading])
 
   if (isLoading || isGraphQlDataLoading)
     return (

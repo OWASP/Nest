@@ -213,13 +213,13 @@ files = [
 
 [[package]]
 name = "attrs"
-version = "24.3.0"
+version = "25.1.0"
 description = "Classes Without Boilerplate"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "attrs-24.3.0-py3-none-any.whl", hash = "sha256:ac96cd038792094f438ad1f6ff80837353805ac950cd2aa0e0625ef19850c308"},
-    {file = "attrs-24.3.0.tar.gz", hash = "sha256:8f5c07333d543103541ba7be0e2ce16eeee8130cb0b3f9238ab904ce1e85baff"},
+    {file = "attrs-25.1.0-py3-none-any.whl", hash = "sha256:c75a69e28a550a7e93789579c22aa26b0f5b83b75dc4e08fe092980051e1090a"},
+    {file = "attrs-25.1.0.tar.gz", hash = "sha256:1c97078a80c814273a76b2a298a932eb681c87415c11dee0a6921de7f1b02c3e"},
 ]
 
 [package.extras]
@@ -232,17 +232,17 @@ tests-mypy = ["mypy (>=1.11.1)", "pytest-mypy-plugins"]
 
 [[package]]
 name = "boto3"
-version = "1.36.5"
+version = "1.36.7"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.36.5-py3-none-any.whl", hash = "sha256:a404ad5ec94ff40c176215a991bf62f0db5514a93a3dd361b7b2ab9660f811f4"},
-    {file = "boto3-1.36.5.tar.gz", hash = "sha256:58a6b7c3d5145b3ac04d4b6caa76223b8ef88004b4237444e553041e29581a11"},
+    {file = "boto3-1.36.7-py3-none-any.whl", hash = "sha256:ab501f75557863e2d2c9fa731e4fe25c45f35e0d92ea0ee11a4eaa63929d3ede"},
+    {file = "boto3-1.36.7.tar.gz", hash = "sha256:ae98634efa7b47ced1b0d7342e2940b32639eee913f33ab406590b8ed55ee94b"},
 ]
 
 [package.dependencies]
-botocore = ">=1.36.5,<1.37.0"
+botocore = ">=1.36.7,<1.37.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.11.0,<0.12.0"
 
@@ -251,13 +251,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.36.5"
+version = "1.36.7"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.36.5-py3-none-any.whl", hash = "sha256:6d9f70afa9bf9d21407089dc22b8cc8ec6fa44866d4660858c062c74fc8555eb"},
-    {file = "botocore-1.36.5.tar.gz", hash = "sha256:234ed3d29a8954c37a551c933453bf14c6ae44a69a4f273ffef377a2612ca6a6"},
+    {file = "botocore-1.36.7-py3-none-any.whl", hash = "sha256:a6c6772d777af2957ac9975207fac1ccc4ce101408b85e9b5e3c5ba0bb949102"},
+    {file = "botocore-1.36.7.tar.gz", hash = "sha256:9abc64bde5e7d8f814ea91d6fc0a8142511fc96427c19fe9209677c20a0c9e6e"},
 ]
 
 [package.dependencies]
@@ -635,20 +635,20 @@ six = ">=1.13.0"
 
 [[package]]
 name = "deprecated"
-version = "1.2.16"
+version = "1.2.18"
 description = "Python @deprecated decorator to deprecate old python classes, functions or methods."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 files = [
-    {file = "Deprecated-1.2.16-py2.py3-none-any.whl", hash = "sha256:4c8e429ada6573698ba723f9c4ea53006e990042a45db938e412f1f9d4b9ffd9"},
-    {file = "deprecated-1.2.16.tar.gz", hash = "sha256:6ec624c168290715d56c6af7c1c1066ea5c732bd56427b1651db75ede923aa38"},
+    {file = "Deprecated-1.2.18-py2.py3-none-any.whl", hash = "sha256:bd5011788200372a32418f888e326a09ff80d0214bd961147cfed01b5c018eec"},
+    {file = "deprecated-1.2.18.tar.gz", hash = "sha256:422b6f6d859da6f2ef57857761bfb392480502a64c3028ca9bbe86085d72115d"},
 ]
 
 [package.dependencies]
 wrapt = ">=1.10,<2"
 
 [package.extras]
-dev = ["PyTest", "PyTest-Cov", "bump2version (<1)", "jinja2 (>=3.0.3,<3.1.0)", "setuptools", "sphinx (<2)", "tox"]
+dev = ["PyTest", "PyTest-Cov", "bump2version (<1)", "setuptools", "tox"]
 
 [[package]]
 name = "distlib"
@@ -1045,13 +1045,13 @@ test = ["coveralls", "django-filter (>=22.1)", "djangorestframework (>=3.6.3)", 
 
 [[package]]
 name = "graphql-core"
-version = "3.2.5"
+version = "3.2.6"
 description = "GraphQL implementation for Python, a port of GraphQL.js, the JavaScript reference implementation for GraphQL."
 optional = false
 python-versions = "<4,>=3.6"
 files = [
-    {file = "graphql_core-3.2.5-py3-none-any.whl", hash = "sha256:2f150d5096448aa4f8ab26268567bbfeef823769893b39c1a2e1409590939c8a"},
-    {file = "graphql_core-3.2.5.tar.gz", hash = "sha256:e671b90ed653c808715645e3998b7ab67d382d55467b7e2978549111bbabf8d5"},
+    {file = "graphql_core-3.2.6-py3-none-any.whl", hash = "sha256:78b016718c161a6fb20a7d97bbf107f331cd1afe53e45566c59f776ed7f0b45f"},
+    {file = "graphql_core-3.2.6.tar.gz", hash = "sha256:c08eec22f9e40f0bd61d805907e3b3b1b9a320bc606e23dc145eebca07c8fbab"},
 ]
 
 [[package]]
@@ -1200,17 +1200,18 @@ files = [
 
 [[package]]
 name = "isort"
-version = "5.13.2"
+version = "6.0.0"
 description = "A Python utility / library to sort Python imports."
 optional = false
-python-versions = ">=3.8.0"
+python-versions = ">=3.9.0"
 files = [
-    {file = "isort-5.13.2-py3-none-any.whl", hash = "sha256:8ca5e72a8d85860d5a3fa69b8745237f2939afe12dbf656afbcb47fe72d947a6"},
-    {file = "isort-5.13.2.tar.gz", hash = "sha256:48fdfcb9face5d58a4f6dde2e72a1fb8dcaf8ab26f95ab49fab84c2ddefb0109"},
+    {file = "isort-6.0.0-py3-none-any.whl", hash = "sha256:567954102bb47bb12e0fae62606570faacddd441e45683968c8d1734fb1af892"},
+    {file = "isort-6.0.0.tar.gz", hash = "sha256:75d9d8a1438a9432a7d7b54f2d3b45cad9a4a0fdba43617d9873379704a8bdf1"},
 ]
 
 [package.extras]
-colors = ["colorama (>=0.4.6)"]
+colors = ["colorama"]
+plugins = ["setuptools"]
 
 [[package]]
 name = "jiter"
@@ -1619,13 +1620,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.60.1"
+version = "1.60.2"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openai-1.60.1-py3-none-any.whl", hash = "sha256:714181ec1c452353d456f143c22db892de7b373e3165063d02a2b798ed575ba1"},
-    {file = "openai-1.60.1.tar.gz", hash = "sha256:beb1541dfc38b002bd629ab68b0d6fe35b870c5f4311d9bc4404d85af3214d5e"},
+    {file = "openai-1.60.2-py3-none-any.whl", hash = "sha256:993bd11b96900b9098179c728026f016b4982ded7ee30dfcf4555eab1171fff9"},
+    {file = "openai-1.60.2.tar.gz", hash = "sha256:a8f843e10f2855713007f491d96afb2694b11b5e02cb97c7d01a0be60bc5bb51"},
 ]
 
 [package.dependencies]
@@ -2800,4 +2801,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "b5fac607ac4a61f168c82e8ed22b35962af018a32612728e879ea488b2af0fe0"
+content-hash = "3e0231f0b4062636eb32acad3fbdf3dcc16dcf3f0db30436dbbe363b7be5e1b8"

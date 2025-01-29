@@ -33,13 +33,21 @@ def app_home_opened_handler(event, client, ack):
                     f"events.{2*NL}"
                     "I'm OWASP @nestbot, your friendly neighborhood bot. Please use one of the "
                     f"following commands:{NL}"
+                    f"{TAB}• /board{NL}"
                     f"{TAB}• /chapters{NL}"
                     f"{TAB}• /committees{NL}"
+                    f"{TAB}• /contact{NL}"
                     f"{TAB}• /contribute{NL}"
+                    f"{TAB}• /donate{NL}"
+                    f"{TAB}• /events{NL}"
                     f"{TAB}• /gsoc{NL}"
+                    f"{TAB}• /jobs{NL}"
                     f"{TAB}• /leaders{NL}"
-                    f"{TAB}• /projects{NL}"
+                    f"{TAB}• /news{NL}"
                     f"{TAB}• /owasp{NL}"
+                    f"{TAB}• /projects{NL}"
+                    f"{TAB}• /sponsors{NL}"
+                    f"{TAB}• /staff{NL}"
                 ),
             ],
         }

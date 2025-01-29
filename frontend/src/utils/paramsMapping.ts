@@ -46,8 +46,6 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
         attributesToRetrieve: [
           'idx_contributors_count',
           'idx_forks_count',
-          'idx_issues',
-          'idx_issues_count',
           'idx_is_active',
           'idx_key',
           'idx_languages',
@@ -55,7 +53,6 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_level',
           'idx_name',
           'idx_organizations',
-          'idx_releases',
           'idx_repositories',
           'idx_repositories_count',
           'idx_stars_count',
