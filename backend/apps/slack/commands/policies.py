@@ -20,45 +20,77 @@ def policies_handler(ack, command, client):
         (
             "Awards and Scholarships Policy",
             "Guidelines for recognizing contributions and offering scholarships.",
+            "https://owasp.org/www-policy/operational/awards-and-scholarships",
         ),
-        ("Board Code of Conduct", "Ethical and professional standards for OWASP board members."),
-        ("Branding Policy", "Rules for using OWASP branding, including logos and trademarks."),
-        ("Chapters Policy", "Framework for running and managing OWASP local chapters."),
-        ("Code of Conduct Policy", "Expectations for behavior within the OWASP community."),
-        ("Committees Policy", "Structure and responsibilities of OWASP committees."),
         (
-            "Community Review Process Policy",
-            "Process for community-driven review of policies and decisions.",
+            "Board Code of Conduct",
+            "Ethical and professional standards for OWASP board members.",
+            "https://owasp.org/www-policy/operational/board-code-of-conduct",
+        ),
+        (
+            "Branding Policy",
+            "Rules for using OWASP branding, including logos and trademarks.",
+            "https://owasp.org/www-policy/operational/branding",
+        ),
+        (
+            "Chapters Policy",
+            "Framework for running and managing OWASP local chapters.",
+            "https://owasp.org/www-policy/operational/chapters",
+        ),
+        (
+            "Code of Conduct Policy",
+            "Expectations for behavior within the OWASP community.",
+            "https://owasp.org/www-policy/operational/code-of-conduct",
+        ),
+        (
+            "Committees Policy",
+            "Structure and responsibilities of OWASP committees.",
+            "https://owasp.org/www-policy/operational/committees",
         ),
         (
             "Conferences and Events Policy",
             "Rules for organizing and participating in OWASP events.",
+            "https://owasp.org/www-policy/operational/conferences-events",
         ),
-        ("Conflict Resolution Policy", "Procedures for resolving disputes within OWASP."),
-        ("Conflict of Interest Policy", "Guidelines to avoid and manage conflicts of interest."),
-        ("Election Policy", "Rules governing OWASP board and leadership elections."),
-        ("Events Policy", "General policies for OWASP events, including sponsorships."),
+        (
+            "Conflict Resolution Policy",
+            "Procedures for resolving disputes within OWASP.",
+            "https://owasp.org/www-policy/operational/conflict-resolution",
+        ),
+        (
+            "Conflict of Interest Policy",
+            "Guidelines to avoid and manage conflicts of interest.",
+            "https://owasp.org/www-policy/operational/conflict-of-interest",
+        ),
+        (
+            "Election Policy",
+            "Rules governing OWASP board and leadership elections.",
+            "https://owasp.org/www-policy/operational/election",
+        ),
+        (
+            "Events Policy",
+            "General policies for OWASP events, including sponsorships.",
+            "https://owasp.org/www-policy/operational/events",
+        ),
         (
             "Expense Reimbursement Policy",
             "Guidelines for reimbursement of OWASP-related expenses.",
+            "https://owasp.org/www-policy/operational/expense-reimbursement",
         ),
         (
             "Force Majeure and Sanctions Policy",
             "Handling of extraordinary events affecting OWASP operations.",
+            "https://owasp.org/www-policy/operational/force-majeure-sanctions",
         ),
-        ("General Disclaimer Policy", "Legal disclaimers related to OWASP projects and content."),
+        (
+            "General Disclaimer Policy",
+            "Legal disclaimers related to OWASP projects and content.",
+            "https://owasp.org/www-policy/operational/general-disclaimer",
+        ),
     ]
 
     formatted_policies = "\n".join(
-        f"- *<{url}|{title}>*: {description}"
-        for title, description, url in [
-            (
-                p[0],
-                p[1],
-                f"https://owasp.org/www-policy/operational/{p[0].lower().replace(' ', '-')}",
-            )
-            for p in policies
-        ]
+        f"- *<{url}|{title}>*: {description}" for title, description, url in policies
     )
 
     blocks = [
