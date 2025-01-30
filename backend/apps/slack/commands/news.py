@@ -1,5 +1,9 @@
 """Slack bot news command."""
 
+from urllib.parse import urljoin
+
+import requests
+from bs4 import BeautifulSoup
 from django.conf import settings
 
 from apps.common.constants import NL
@@ -7,59 +11,38 @@ from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 
 COMMAND = "/news"
+NEWS_URL = "https://owasp.org/news/"
 
-NEWS_ITEMS = [
-    {
-        "url": "https://owasp.org/blog/2024/11/26/lifecycle-events-are-part-of-the-secure-supply-chain.html",
-        "title": "Lifecycle Events Are Part of the Secure Supply Chain",
-        "date": "November 26, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/11/12/more-than-a-password-day-2024.html",
-        "title": "More Than a Password Day 2024",
-        "date": "November 12, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/10/30/owaspfoundation-org-emails.html",
-        "title": "OWASP Foundation Emails Update",
-        "date": "October 30, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/10/02/Securing-React-Native-Mobile-Apps-with-OWASP-MAS.html",
-        "title": "Securing React Native Mobile Apps with OWASP MAS",
-        "date": "October 2, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/08/01/owasp-email-problems.html",
-        "title": "OWASP Email Problems and Resolution",
-        "date": "August 1, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/07/09/new-coi-and-bylaws.html",
-        "title": "New COI and Bylaws Announcement",
-        "date": "July 9, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/07/03/asvs-community-meetup.html",
-        "title": "ASVS Community Meetup Recap",
-        "date": "July 3, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/05/30/secureflag-threatcanvas-member-benefit.html",
-        "title": "SecureFlag ThreatCanvas Member Benefit",
-        "date": "May 30, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/04/22/starr-brown-hired-as-director-projects.html",
-        "title": "Starr Brown Hired as Director of Projects",
-        "date": "April 22, 2024",
-    },
-    {
-        "url": "https://owasp.org/blog/2024/04/18/codebashing-member-benefit.html",
-        "title": "Codebashing Member Benefit Announcement",
-        "date": "April 18, 2024",
-    },
-]
+
+def fetch_latest_news():
+    """Fetch the 10 latest news from OWASP using BeautifulSoup."""
+    response = requests.get(NEWS_URL, timeout=10)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    news_items = []
+
+    h2_tags = soup.find_all("h2")
+
+    for h2 in h2_tags:
+        anchor = h2.find("a", href=True)
+
+        if anchor:
+            title = anchor.get_text(strip=True)
+            relative_url = anchor["href"]
+            full_url = urljoin(NEWS_URL, relative_url)
+
+            author_tag = h2.find_next("p", class_="author")
+            author = author_tag.get_text(strip=True) if author_tag else "Unknown"
+
+            news_items.append(
+                {
+                    "url": full_url,
+                    "title": title,
+                    "author": author,
+                }
+            )
+
+    return news_items[:10]
 
 
 def news_handler(ack, command, client):
@@ -69,18 +52,21 @@ def news_handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    blocks = [
-        markdown("*:newspaper: Here are the latest OWASP news:*"),
-    ]
-    for idx, item in enumerate(NEWS_ITEMS[:10], start=1):
-        blocks.append(markdown(f"*{idx}. {item['title']}*"))
-        blocks.append(markdown(f"Published on: *{item['date']}*"))
-        blocks.append(markdown(f"<{item['url']}|Read more>"))
-    blocks.append(
-        markdown(
-            f"{NL}For more news, please visit the <https://owasp.org/news/|OWASP News Page>{NL}"
+    news_items = fetch_latest_news()
+    if not news_items:
+        blocks = [markdown(":warning: *Failed to fetch OWASP news. Please try again later.*")]
+    else:
+        blocks = [markdown("*:newspaper: Here are the latest OWASP news:*")]
+        for idx, item in enumerate(news_items, start=1):
+            blocks.append(markdown(f"*{idx}. {item['title']}* - <{item['url']}|Read more> :link:"))
+            blocks.append(markdown(f"*:memo: Published by:* {item['author']}"))
+            blocks.append(markdown("-" * 40))
+
+        blocks.append(
+            markdown(
+                f"{NL}For more, visit <{NEWS_URL}|OWASP News Page> :globe_with_meridians:{NL}"
+            )
         )
-    )
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)

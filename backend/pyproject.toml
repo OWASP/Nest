@@ -23,6 +23,7 @@ omit = [
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.0"
 algoliasearch-django = "^4.0.0"
+beautifulsoup4 = "^4.12.2"
 django = "^5.1"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.6.0"
