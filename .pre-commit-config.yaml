@@ -11,10 +11,11 @@ repos:
       - id: mixed-line-ending
         args:
           - --fix=lf
-      - id: trailing-whitespace
       - id: name-tests-test
-        args: ['--pytest']
-        files: backend/tests/.*
+        args:
+          - --pytest
+        files: backend/tests
+      - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.7
