@@ -28,7 +28,7 @@ const NavButton = ({
     >
       <FontAwesomeIcon
         icon={isHovered ? hoverIcon : defaultIcon}
-        className={cn('transition-all duration-300', {
+        className={cn({
           'scale-110 text-yellow-400': isHovered,
         })}
         style={{ color: isHovered ? hoverIconColor : defaultIconColor }}
