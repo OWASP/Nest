@@ -2,6 +2,7 @@ from apps.slack.commands import (
     board,
     chapters,
     committees,
+    community,
     contact,
     contribute,
     donate,
@@ -15,4 +16,5 @@ from apps.slack.commands import (
     projects,
     sponsors,
     staff,
+    users,
 )
