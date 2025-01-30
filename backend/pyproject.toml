@@ -91,7 +91,7 @@ filterwarnings = [
     "ignore::django.conf.RemovedInDjango60Warning:django",
 ]
 log_level = "INFO"
-python_files = ["*_tests.py"]
+python_files = ["*_test.py"]
 
 
 [tool.ruff]

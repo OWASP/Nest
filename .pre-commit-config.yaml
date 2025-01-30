@@ -12,6 +12,9 @@ repos:
         args:
           - --fix=lf
       - id: trailing-whitespace
+      - id: name-tests-test
+        args: ['--pytest']
+        files: backend/tests/.*
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.7
