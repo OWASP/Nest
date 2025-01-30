@@ -72,8 +72,8 @@
     background-color: var(--background);
     color: var(--text);
     transition:
-      background-color 0.5s,
-      color 0.5s;
+      background-color,
+      color;
   }
 }
 
