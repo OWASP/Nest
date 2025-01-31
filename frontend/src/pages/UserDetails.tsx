@@ -200,7 +200,9 @@ const UserDetailsPage: React.FC = () => {
           <div className="grid gap-6 p-6">
             {user.issues && user.issues.length > 0 && (
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Issues</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Issues
+                </h2>
                 <div className="grid gap-4">
                   {user.issues.map((issue) => (
                     <IssueCard key={`${issue.repository.key}-${issue.number}`} issue={issue} />
@@ -211,10 +213,15 @@ const UserDetailsPage: React.FC = () => {
 
             {user.releases && user.releases.length > 0 && (
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Releases</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Releases
+                </h2>
                 <div className="grid gap-4">
                   {user.releases.map((release) => (
-                    <ReleaseCard key={`${release.repository.key}-${release.tag_name}`} release={release} />
+                    <ReleaseCard
+                      key={`${release.repository.key}-${release.tag_name}`}
+                      release={release}
+                    />
                   ))}
                 </div>
               </div>

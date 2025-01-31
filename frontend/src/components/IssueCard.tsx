@@ -1,12 +1,10 @@
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Issue } from "types/user";
+import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Issue } from 'types/user'
 
 export function IssueCard({ issue }: { issue: Issue }) {
   return (
-    <div
-      className="p-4 border border-gray-300 rounded-lg transition-colors cursor-pointer hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-    >
+    <div className="cursor-pointer rounded-lg border border-gray-300 p-4 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
       <div className="flex justify-between">
         <div>
           <a
@@ -17,8 +15,8 @@ export function IssueCard({ issue }: { issue: Issue }) {
           >
             {issue.title}
           </a>
-          <div className="flex items-center gap-2 mt-1 text-gray-600 dark:text-gray-400">
-            <span className="px-2 py-1 text-sm bg-gray-200 rounded-full dark:bg-gray-700">
+          <div className="mt-1 flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <span className="rounded-full bg-gray-200 px-2 py-1 text-sm dark:bg-gray-700">
               #{issue.number}
             </span>
             <span>•</span>
@@ -33,10 +31,10 @@ export function IssueCard({ issue }: { issue: Issue }) {
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <FontAwesomeIcon icon={faCalendarAlt} className="w-4 h-4" />
+          <FontAwesomeIcon icon={faCalendarAlt} className="h-4 w-4" />
           {new Date(issue.created_at * 1000).toLocaleDateString()}
         </div>
       </div>
     </div>
-  );
+  )
 }
