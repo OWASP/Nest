@@ -80,7 +80,6 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText(mockUser.bio)).toBeInTheDocument()
     expect(screen.getByText(mockUser.company)).toBeInTheDocument()
     expect(screen.getByText(mockUser.location)).toBeInTheDocument()
-    screen.debug()
     expect(screen.getByText(`Joined August 7, 2024`)).toBeInTheDocument()
   })
 
