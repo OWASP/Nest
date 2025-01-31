@@ -20,40 +20,6 @@ class ProjectNode(BaseNode):
 
     class Meta:
         model = Project
-        fields = (
-            "id",
-            "key",
-            "name",
-            "description",
-            "summary",
-            "tags",
-            "custom_tags",
-            "level",
-            "level_raw",
-            "type",
-            "type_raw",
-            "commits_count",
-            "contributors_count",
-            "forks_count",
-            "open_issues_count",
-            "releases_count",
-            "stars_count",
-            "subscribers_count",
-            "watchers_count",
-            "languages",
-            "licenses",
-            "topics",
-            "created_at",
-            "updated_at",
-            "released_at",
-            "pushed_at",
-            "is_active",
-            "track_issues",
-            "owners",
-            "organizations",
-            "repositories",
-            "owasp_repository",
-        )
 
     def resolve_nest_url(self, info):
         """Resolve project nest URL."""
