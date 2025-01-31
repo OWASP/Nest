@@ -7,6 +7,17 @@ class ChapterIndexMixin(GenericEntityMixin):
     """Chapter index mixin."""
 
     @property
+    def is_indexable(self):
+        """Chapters to index."""
+        return (
+            self.is_active
+            and self.latitude is not None
+            and self.longitude is not None
+            and not self.owasp_repository.is_empty
+            and not self.owasp_repository.is_archived
+        )
+
+    @property
     def idx_country(self):
         """Return country for indexing."""
         return self.country
@@ -65,14 +76,3 @@ class ChapterIndexMixin(GenericEntityMixin):
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return (self.updated_at or self.owasp_repository.updated_at).timestamp()
-
-    @property
-    def is_indexable(self):
-        """Chapters to index."""
-        return (
-            self.is_active
-            and self.latitude is not None
-            and self.longitude is not None
-            and not self.owasp_repository.is_empty
-            and not self.owasp_repository.is_archived
-        )

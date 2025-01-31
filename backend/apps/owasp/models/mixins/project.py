@@ -12,6 +12,11 @@ class ProjectIndexMixin(GenericEntityMixin):
     """Project index mixin."""
 
     @property
+    def is_indexable(self):
+        """Projects to index."""
+        return self.is_active and self.has_active_repositories
+
+    @property
     def idx_companies(self):
         """Return companies for indexing."""
         return join_values(fields=(o.company for o in self.organizations.all()))
@@ -166,8 +171,3 @@ class ProjectIndexMixin(GenericEntityMixin):
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return self.updated_at.timestamp()
-
-    @property
-    def is_indexable(self):
-        """Projects to index."""
-        return self.is_active and self.has_active_repositories
