@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
@@ -84,6 +85,12 @@ export default function ChapterDetailsPage() {
             <div className="text-sm leading-relaxed md:text-base">{chapter.summary}</div>
           </SecondaryCard>
         </div>
+
+        {chapter._geoloc && (
+          <SecondaryCard title="Chapter Location">
+            <ChapterMap geoLocData={[chapter]} />
+          </SecondaryCard>
+        )}
 
         <TopContributors contributors={chapter.top_contributors} maxInitialDisplay={6} />
       </div>
