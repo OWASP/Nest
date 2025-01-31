@@ -5,7 +5,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 
-const ChapterMap = ({ geoLocData }) => {
+const ChapterMap = ({ geoLocData, style }) => {
   const mapRef = useRef<L.Map | null>(null)
   //for reference: https://leafletjs.com/reference.html#map-example
   useEffect(() => {
@@ -68,13 +68,7 @@ const ChapterMap = ({ geoLocData }) => {
     }
   }, [geoLocData])
 
-  return (
-    <div
-      id="chapter-map"
-      className="rounded-2xl"
-      style={{ height: '400px', width: '100%', zIndex: '0' }}
-    />
-  )
+  return <div id="chapter-map" className="rounded-2xl" style={style} />
 }
 
 export default ChapterMap

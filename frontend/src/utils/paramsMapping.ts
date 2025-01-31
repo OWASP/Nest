@@ -47,7 +47,6 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_contributors_count',
           'idx_forks_count',
           'idx_is_active',
-          'idx_issues_count',
           'idx_key',
           'idx_languages',
           'idx_leaders',

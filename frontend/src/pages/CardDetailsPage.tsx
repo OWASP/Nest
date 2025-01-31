@@ -2,15 +2,16 @@ import {
   faUsers,
   faCodeFork,
   faStar,
-  faBook,
   faCode,
   faCalendar,
   faFileCode,
   faTag,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
+import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import SecondaryCard from 'components/SecondaryCard'
@@ -21,15 +22,17 @@ const GenericDetails = ({
   title,
   is_active = false,
   summary,
-  data,
+  ProjectStats,
   details,
+  socialLinks,
   type,
   topContributors,
   languages,
   topics,
   recentIssues,
   recentReleases,
-}) => {
+  geolocationData = null,
+}: DetailsCardProps) => {
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -42,10 +45,10 @@ const GenericDetails = ({
           <p>{summary}</p>
         </SecondaryCard>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            title={`${type === 'project' ? 'Project' : 'Chapter'} Details`}
-            className={`${type === 'project' ? 'md:col-span-2' : 'col-span-3'} gap-2`}
+            title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+            className={`${type === 'project' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
               details.map((detail, index) => (
@@ -53,26 +56,40 @@ const GenericDetails = ({
                   <strong>{detail.label}:</strong> {detail.value}
                 </div>
               ))}
-            {type === 'chapter' && <SocialLinks urls={data.related_urls} />}
+            {socialLinks && type === 'chapter' && <SocialLinks urls={socialLinks || []} />}
           </SecondaryCard>
-
           {type === 'project' && (
-            <SecondaryCard title="Statistics">
+            <SecondaryCard title="Statistics" className="md:col-span-2">
               <>
                 <InfoBlock
                   className="pb-1"
                   icon={faUsers}
-                  value={`${data.contributors_count} Contributors`}
+                  value={`${ProjectStats.Contributors || 'No'} Contributors`}
                 />
-                <InfoBlock className="pb-1" icon={faCodeFork} value={`${data.forks_count} Forks`} />
-                <InfoBlock className="pb-1" icon={faStar} value={`${data.stars_count} Stars`} />
-                <InfoBlock className="pb-1" icon={faBook} value={`${data.issues_count} Issues`} />
+                <InfoBlock
+                  className="pb-1"
+                  icon={faCodeFork}
+                  value={`${ProjectStats.Forks || 'No'} Forks`}
+                />
+                <InfoBlock
+                  className="pb-1"
+                  icon={faStar}
+                  value={`${ProjectStats.Stars || 'No'} Stars`}
+                />
                 <InfoBlock
                   className="pb-1"
                   icon={faCode}
-                  value={`${data.repositories_count} Repositories`}
+                  value={`${ProjectStats.Repositories || 'No'} Repositories`}
                 />
               </>
+            </SecondaryCard>
+          )}
+          {type === 'chapter' && geolocationData && (
+            <SecondaryCard title="Chapter Location" className="md:col-span-4">
+              <ChapterMap
+                geoLocData={geolocationData ? [geolocationData] : []}
+                style={{ height: '200px', width: '100%', zIndex: '0' }}
+              />
             </SecondaryCard>
           )}
         </div>
