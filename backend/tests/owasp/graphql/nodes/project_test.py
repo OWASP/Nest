@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from graphene import Field, List, String
+from graphene import Field, List
 
 from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.issue import IssueNode
@@ -60,12 +60,6 @@ class TestProjectNode:
         assert isinstance(recent_releases_field, Field)
         assert recent_releases_field.type == List(ReleaseNode)
 
-    def test_nest_url_field(self):
-        """Test if nest_url field is properly configured."""
-        nest_url_field = ProjectNode._meta.fields.get("nest_url")
-        assert isinstance(nest_url_field, Field)
-        assert nest_url_field.type == String
-
     def test_resolve_recent_issues(self, mock_project):
         """Test resolution of recent issues."""
         node = ProjectNode()
@@ -94,15 +88,6 @@ class TestProjectNode:
             slice(None, RECENT_RELEASES_LIMIT)
         )
         assert result == []
-
-    def test_resolve_nest_url(self, mock_project):
-        """Test resolution of nest_url."""
-        node = ProjectNode()
-        node.nest_url = mock_project.nest_url
-
-        result = node.resolve_nest_url(None)
-
-        assert result == mock_project.nest_url
 
     def test_all_fields_exist_in_model(self):
         """Test that all fields in Meta.fields exist in the Project model."""

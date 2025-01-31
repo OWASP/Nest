@@ -16,14 +16,10 @@ class ProjectNode(BaseNode):
 
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
-    nest_url = graphene.String()
 
     class Meta:
         model = Project
-
-    def resolve_nest_url(self, info):
-        """Resolve project nest URL."""
-        return self.nest_url
+        fields = ()
 
     def resolve_recent_issues(self, info):
         """Resolve project recent issues."""
