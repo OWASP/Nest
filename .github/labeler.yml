@@ -5,6 +5,7 @@ backend:
               - 'backend/**'
           - all-globs-to-all-files:
               - '!backend/apps/slack/**'
+              - '!backend/tests/slack/**'
 
 backend-tests:
   - all:
@@ -64,3 +65,16 @@ nginx:
   - changed-files:
       - any-glob-to-any-file:
           - 'nginx/**'
+
+schema:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'schema/**'
+          - all-globs-to-all-files:
+              - '!schema/tests/**'
+
+schema-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'schema/tests/**'

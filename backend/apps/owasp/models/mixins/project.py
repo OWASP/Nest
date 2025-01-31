@@ -37,35 +37,6 @@ class ProjectIndexMixin(GenericEntityMixin):
         return self.forks_count
 
     @property
-    def idx_issues(self):
-        """Return issues for indexing."""
-        return [
-            {
-                "author": {
-                    "avatar_url": i.author.avatar_url if i.author else "",
-                    "key": i.author.login if i.author else "",
-                    "name": i.author.name if i.author else "",
-                },
-                "created_at": i.created_at.timestamp(),
-                "comments_count": i.comments_count,
-                "number": i.number,
-                "repository": {
-                    "key": i.repository.key,
-                    "owner_key": i.repository.owner.login,
-                },
-                "title": i.title,
-            }
-            for i in self.open_issues.select_related("author").order_by("-created_at")[
-                :ISSUES_LIMIT
-            ]
-        ]
-
-    @property
-    def idx_issues_count(self):
-        """Return issues count for indexing."""
-        return self.open_issues.count()
-
-    @property
     def idx_is_active(self):
         """Return active status for indexing."""
         return self.is_active
@@ -99,35 +70,6 @@ class ProjectIndexMixin(GenericEntityMixin):
     def idx_organizations(self):
         """Return organizations for indexing."""
         return join_values(fields=(o.name for o in self.organizations.all()))
-
-    @property
-    def idx_releases(self):
-        """Return releases for indexing."""
-        return [
-            {
-                "author": {
-                    "avatar_url": r.author.avatar_url if r.author else "",
-                    "key": r.author.login if r.author else "",
-                    "name": r.author.name if r.author else "",
-                },
-                "is_pre_release": r.is_pre_release,
-                "name": r.name,
-                "published_at": r.published_at.timestamp(),
-                "repository": {
-                    "key": r.repository.key,
-                    "owner_key": r.repository.owner.login,
-                },
-                "tag_name": r.tag_name,
-            }
-            for r in self.published_releases.select_related("author").order_by("-published_at")[
-                :RELEASES_LIMIT
-            ]
-        ]
-
-    @property
-    def idx_releases_count(self):
-        """Return releases count for indexing."""
-        return self.published_releases.count()
 
     @property
     def idx_repositories(self):

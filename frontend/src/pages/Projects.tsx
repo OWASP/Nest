@@ -8,7 +8,6 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
-
 const ProjectsPage = () => {
   const {
     items: projects,
@@ -17,13 +16,16 @@ const ProjectsPage = () => {
     totalPages,
     searchQuery,
     sortBy,
+    order,
     handleSearch,
     handlePageChange,
     handleSortChange,
+    handleOrderChange,
   } = useSearchPage<project>({
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
-    defaultSortBy: '',
+    defaultSortBy: 'default',
+    defaultOrder: 'asc',
   })
 
   const navigate = useNavigate()
@@ -68,9 +70,11 @@ const ProjectsPage = () => {
       searchPlaceholder="Search for OWASP projects..."
       sortChildren={
         <SortBy
-          options={sortOptionsProject}
-          selectedOption={sortBy}
+          sortOptions={sortOptionsProject}
+          selectedSortOption={sortBy}
           onSortChange={handleSortChange}
+          selectedOrder={order}
+          onOrderChange={handleOrderChange}
         />
       }
     >

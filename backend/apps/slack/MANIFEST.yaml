@@ -11,20 +11,10 @@ features:
     display_name: NestBot
     always_online: true
   slash_commands:
-    - command: /owasp
-      url: https://nest.owasp.dev/integrations/slack/commands/
-      description: your gateway to OWASP
-      usage_hint: --help
-      should_escape: false
     - command: /projects
       url: https://nest.owasp.dev/integrations/slack/commands/
       description: project directory
       usage_hint: <search query>
-      should_escape: false
-    - command: /leaders
-      url: https://nest.owasp.dev/integrations/slack/commands/
-      description: chapter and project leaders
-      usage_hint: <name/chapter/project>
       should_escape: false
     - command: /committees
       url: https://nest.owasp.dev/integrations/slack/commands/
@@ -36,15 +26,69 @@ features:
       description: chapters
       usage_hint: --help
       should_escape: false
+    - command: /gsoc
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: get started with GSoC 2025
+      usage_hint: --start
+      should_escape: false
+    - command: /owasp
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: your gateway to OWASP
+      usage_hint: --help
+      should_escape: false
+    - command: /leaders
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: chapter and project leaders
+      usage_hint: <name/chapter/project>
+      should_escape: false
     - command: /contribute
       url: https://nest.owasp.dev/integrations/slack/commands/
       description: contributor's guide
       usage_hint: --help
       should_escape: false
-    - command: /gsoc
+    - command: /board
       url: https://nest.owasp.dev/integrations/slack/commands/
-      description: get started with GSoC program
-      usage_hint: --start
+      description: OWASP Global Board information
+      should_escape: false
+    - command: /donate
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Support OWASP with a donation
+      should_escape: false
+    - command: /jobs
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Check out available job opportunities
+      should_escape: false
+    - command: /sponsors
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: et a list of OWASP sponsors
+      should_escape: false
+    - command: /staff
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: OWASP corporate structure
+      should_escape: false
+    - command: /policies
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Policies & Procedures
+      should_escape: false
+    - command: /events
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Browse OWASP events
+      should_escape: false
+    - command: /news
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: OWASP news
+      should_escape: false
+    - command: /contact
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Contact OWASP
+      should_escape: false
+    - command: /community
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: Explore OWASP community
+      should_escape: false
+    - command: /users
+      url: https://nest.owasp.dev/integrations/slack/commands/
+      description: OWASP users list
       should_escape: false
 oauth_config:
   scopes:
