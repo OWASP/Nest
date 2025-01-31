@@ -5,6 +5,7 @@ backend:
               - 'backend/**'
           - all-globs-to-all-files:
               - '!backend/apps/slack/**'
+              - '!backend/tests/slack/**'
 
 backend-tests:
   - all:

@@ -113,7 +113,7 @@ const UserDetailsPage: React.FC = () => {
                 <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-center sm:space-x-6 sm:space-y-0">
                   <div className="-mt-24 flex-shrink-0">
                     <img
-                      className="h-40 w-40 rounded-full border-4 border-white object-cover shadow-lg dark:border-gray-800"
+                      className="h-40 w-40 rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
                       src={user.avatar_url}
                       alt={user.name}
                     />
