@@ -12,6 +12,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
+import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
@@ -29,7 +30,11 @@ const ProjectDetailsPage = () => {
   const [recentReleases, setRecentReleases] = useState([])
   const [recentIssues, setRecentIssues] = useState([])
 
-  const { data, loading: isGraphQlDataLoading } = useQuery(GET_PROJECT_DATA, {
+  const {
+    data,
+    loading: isGraphQlDataLoading,
+    error: graphQLRequestError,
+  } = useQuery(GET_PROJECT_DATA, {
     variables: { key: 'www-project-' + projectKey },
   })
 
@@ -51,7 +56,14 @@ const ProjectDetailsPage = () => {
       setRecentReleases(data?.project?.recentReleases)
       setRecentIssues(data?.project?.recentIssues)
     }
-  }, [data])
+    if (graphQLRequestError && !isLoading) {
+      toast({
+        variant: 'destructive',
+        title: 'GraphQL Request Failed',
+        description: 'Unable to complete the requested operation.',
+      })
+    }
+  }, [data, graphQLRequestError, isLoading])
 
   if (isLoading || isGraphQlDataLoading)
     return (
@@ -82,22 +94,19 @@ const ProjectDetailsPage = () => {
         </SecondaryCard>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <SecondaryCard title="Project Details" className="gap-2 md:col-span-2">
-            <p>
+            <p className="pb-1">
               <strong>Type:</strong> {project.type[0].toUpperCase() + project.type.slice(1)}
             </p>
-            <p>
+            <p className="pb-1">
               <strong>Level:</strong> {project.level[0].toUpperCase() + project.level.slice(1)}
             </p>
-            <p>
-              <strong>Organization:</strong> {project.organizations}
-            </p>
-            <p>
+            <p className="pb-1">
               <strong>Project Leaders:</strong> {project.leaders.join(', ')}
             </p>
-            <p>
+            <p className="pb-1">
               <strong>Last Updated:</strong> {formatDate(project.updated_at)}
             </p>
-            <p>
+            <p className="pb-1">
               <strong>URL:</strong>{' '}
               <a href={project.url} className="hover:underline dark:text-sky-600">
                 {project.url}
