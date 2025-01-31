@@ -91,8 +91,6 @@ filterwarnings = [
     "ignore::django.conf.RemovedInDjango60Warning:django",
 ]
 log_level = "INFO"
-python_files = ["*_tests.py"]
-
 
 [tool.ruff]
 line-length = 99
