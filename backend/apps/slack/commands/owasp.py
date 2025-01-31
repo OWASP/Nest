@@ -17,6 +17,7 @@ def owasp_handler(ack, command, client):
         board,
         chapters,
         committees,
+        community,
         contact,
         contribute,
         donate,
@@ -28,6 +29,7 @@ def owasp_handler(ack, command, client):
         projects,
         sponsors,
         staff,
+        users,
     )
 
     ack()
@@ -41,6 +43,7 @@ def owasp_handler(ack, command, client):
                 f"• `{COMMAND} board` -- OWASP Global Board information{NL}"
                 f"• `{COMMAND} chapters` -- Explore OWASP chapters{NL}"
                 f"• `{COMMAND} committees` -- Explore OWASP committees{NL}"
+                f"• `{COMMAND} community` -- Explore OWASP community{NL}"
                 f"• `{COMMAND} contact` -- Contact OWASP{NL}"
                 f"• `{COMMAND} contribute` -- OWASP projects contribution opportunities{NL}"
                 f"• `{COMMAND} donate` -- Support OWASP with a donation{NL}"
@@ -52,6 +55,7 @@ def owasp_handler(ack, command, client):
                 f"• `{COMMAND} projects` -- Explore OWASP projects{NL}"
                 f"• `{COMMAND} sponsors` -- Get a list of OWASP sponsors{NL}"
                 f"• `{COMMAND} staff` -- OWASP corporate structure{NL}"
+                f"• `{COMMAND} users` -- OWASP contributors{NL}"
             ),
         ]
         conversation = client.conversations_open(users=command["user_id"])
@@ -66,6 +70,8 @@ def owasp_handler(ack, command, client):
                 chapters.chapters_handler(ack, command, client)
             case "committees":
                 committees.committees_handler(ack, command, client)
+            case "community":
+                community.community_handler(ack, command, client)
             case "contact":
                 contact.contact_handler(ack, command, client)
             case "contribute":
@@ -88,6 +94,8 @@ def owasp_handler(ack, command, client):
                 sponsors.sponsors_handler(ack, command, client)
             case "staff":
                 staff.staff_handler(ack, command, client)
+            case "users":
+                users.users_handler(ack, command, client)
             case _:
                 blocks = [
                     markdown(f"*`{COMMAND} {escape(handler)}` is not supported*{NL}"),
