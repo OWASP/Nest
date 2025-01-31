@@ -21,3 +21,4 @@ RUN poetry install --no-root
 
 COPY project.json project.json
 COPY tests tests
+COPY utils utils
