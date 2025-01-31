@@ -4,59 +4,60 @@ export type RepositoryDetails = {
 }
 
 export type Issue = {
-  created_at: number
   comments_count: number
+  created_at: number
   number: number
-  title: string
   repository: RepositoryDetails
+  title: string
 }
 
 export type Release = {
   is_pre_release: boolean
   name: string
   published_at: number
-  tag_name: string
   repository: RepositoryDetails
+  tag_name: string
 }
 
 export type User = {
-  email: string
-  login: string
-  name: string
-  company: string
-  location: string
+  avatar_url: string
   bio: string
+  company: string
+  created_at: number
+  email: string
   followers_count: number
   following_count: number
-  avatar_url: string
+  issues?: Issue[]
+  key: string
+  location: string
+  login: string
+  name: string
+  objectID: string
   public_repositories_count: number
+  releases?: Release[]
   title: string
   twitter_username: string
-  url: string
-  created_at: number
   updated_at: number
-  objectID: string
-  issues?: Issue[]
-  releases?: Release[]
+  url: string
 }
 
 export interface UserDetailsProps {
-  email: string
-  login: string
-  name: string
-  company: string
-  location: string
+  avatar_url: string
   bio: string
+  company: string
+  created_at: number
+  email: string
   followers_count: number
   following_count: number
-  avatar_url: string
+  issues?: Issue[]
+  location: string
+  login: string
+  name: string
+  objectID: string
   public_repositories_count: number
+  releases?: Release[]
   title: string
   twitter_username: string
-  url: string
-  created_at: number
   updated_at: number
-  objectID: string
-  issues?: Issue[]
-  releases?: Release[]
+  url: string
 }
