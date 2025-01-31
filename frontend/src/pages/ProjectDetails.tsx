@@ -7,8 +7,8 @@ import { useParams } from 'react-router-dom'
 import { project, ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import GenericDetails from './CardDetailsPage'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -83,19 +83,20 @@ const ProjectDetailsPage = () => {
     },
   ]
 
-  const ProjectStats = {
+  const projectStats = {
     Stars: project.stars_count,
     Forks: project.forks_count,
     Contributors: project.contributors_count,
     Repositories: project.repositories_count,
   }
   return (
-    <GenericDetails
+    <DetailsCard
       title={project.name}
+      description={project.description}
       details={projectDetails}
       is_active={project.is_active}
       summary={project.summary}
-      ProjectStats={ProjectStats}
+      projectStats={projectStats}
       type="project"
       topContributors={project.top_contributors}
       languages={project.languages}

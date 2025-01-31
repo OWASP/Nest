@@ -29,17 +29,18 @@ export interface CardProps {
 }
 
 export interface DetailsCardProps {
-  title?: string
-  is_active?: boolean
-  summary?: string
-  socialLinks?: string[]
-  ProjectStats?: ProjectStatsType
+  description?: string
   details?: { label: string; value: string | JSX.Element }[]
-  type: string
-  topContributors?: topContributorsType[]
+  geolocationData?: ChapterType
+  is_active?: boolean
   languages?: string[]
+  projectStats?: ProjectStatsType
+  socialLinks?: string[]
+  summary?: string
+  title?: string
+  topContributors?: topContributorsType[]
   topics?: string[]
+  type: string
   recentIssues?: ProjectIssuesType[]
   recentReleases?: ProjectReleaseType[]
-  geolocationData?: ChapterType
 }

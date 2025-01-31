@@ -31,7 +31,7 @@ const mockUser = {
   followers_count: 10,
   following_count: 5,
   public_repositories_count: 3,
-  created_at: '1221777448',
+  created_at: 1723002473,
 }
 
 const renderWithRouter = (ui: React.ReactElement) => {
@@ -80,7 +80,8 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText(mockUser.bio)).toBeInTheDocument()
     expect(screen.getByText(mockUser.company)).toBeInTheDocument()
     expect(screen.getByText(mockUser.location)).toBeInTheDocument()
-    expect(screen.getByText(`Joined September 18, 2008`)).toBeInTheDocument()
+    screen.debug()
+    expect(screen.getByText(`Joined August 7, 2024`)).toBeInTheDocument()
   })
 
   test('renders "User not found" message when user does not exist', async () => {

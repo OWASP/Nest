@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom'
 import { ChapterType } from 'types/chapter'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import GenericDetails from './CardDetailsPage'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -55,7 +55,7 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <GenericDetails
+    <DetailsCard
       title={chapter.name}
       socialLinks={chapter.related_urls}
       is_active={chapter.is_active}

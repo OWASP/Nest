@@ -1,8 +1,8 @@
 import { topContributorsType } from './contributor'
 
 export interface project {
-  top_contributors: topContributorsType[]
   contributors_count: number
+  description: string
   forks_count: number
   is_active: boolean
   languages: string[]
@@ -14,6 +14,7 @@ export interface project {
   stars_count: number
   summary: string
   topics: string[]
+  top_contributors: topContributorsType[]
   type: string
   updated_at: number
   url: string
@@ -29,17 +30,17 @@ export interface ProjectDataType {
 export interface ProjectStatsType {
   Contributors: number
   Forks: number
-  Stars: number
   Repositories: number
+  Stars: number
 }
 
 export interface ProjectIssuesType {
-  createdAt: string
+  author: { avatar_url: string; key: string; name: string }
   commentsCount: number
+  createdAt: string
   number: number
   repository: { key: string; owner_key: string }
   title: string
-  author: { avatar_url: string; key: string; name: string }
 }
 
 export type ProjectReleaseType = {

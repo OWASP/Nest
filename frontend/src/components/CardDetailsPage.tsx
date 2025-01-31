@@ -18,11 +18,12 @@ import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import ToggleableList from 'components/ToogleList'
 
-const GenericDetails = ({
+const DetailsCard = ({
   title,
-  is_active = false,
+  is_active = true,
   summary,
-  ProjectStats,
+  description,
+  projectStats,
   details,
   socialLinks,
   type,
@@ -37,7 +38,7 @@ const GenericDetails = ({
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">{title}</h1>
-
+        <p className="mb-6 text-xl">{description}</p>
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
@@ -64,22 +65,22 @@ const GenericDetails = ({
                 <InfoBlock
                   className="pb-1"
                   icon={faUsers}
-                  value={`${ProjectStats.Contributors || 'No'} Contributors`}
+                  value={`${projectStats.Contributors || 'No'} Contributors`}
                 />
                 <InfoBlock
                   className="pb-1"
                   icon={faCodeFork}
-                  value={`${ProjectStats.Forks || 'No'} Forks`}
+                  value={`${projectStats.Forks || 'No'} Forks`}
                 />
                 <InfoBlock
                   className="pb-1"
                   icon={faStar}
-                  value={`${ProjectStats.Stars || 'No'} Stars`}
+                  value={`${projectStats.Stars || 'No'} Stars`}
                 />
                 <InfoBlock
                   className="pb-1"
                   icon={faCode}
-                  value={`${ProjectStats.Repositories || 'No'} Repositories`}
+                  value={`${projectStats.Repositories || 'No'} Repositories`}
                 />
               </>
             </SecondaryCard>
@@ -136,7 +137,7 @@ const GenericDetails = ({
   )
 }
 
-export default GenericDetails
+export default DetailsCard
 
 const SocialLinks = ({ urls }) => (
   <div>
