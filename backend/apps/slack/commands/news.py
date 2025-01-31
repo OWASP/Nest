@@ -7,12 +7,11 @@ from django.conf import settings
 from django.core.cache import cache
 from lxml import html
 
-from apps.common.constants import NL
+from apps.common.constants import NL, OWASP_NEWS_URL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 
 COMMAND = "/news"
-NEWS_URL = "https://owasp.org/news/"
 CACHE_TIMEOUT = 600  # Cache for 10 minutes
 SUCCESS_RESPONSE = 200
 
@@ -25,7 +24,7 @@ def fetch_latest_news():
     if cached_news:
         return cached_news  # Return cached data if available
 
-    response = requests.get(NEWS_URL, timeout=10)
+    response = requests.get(OWASP_NEWS_URL, timeout=10)
     if response.status_code != SUCCESS_RESPONSE:
         return []
 
@@ -40,7 +39,7 @@ def fetch_latest_news():
         if anchor:
             title = anchor[0].text_content().strip()
             relative_url = anchor[0].get("href")
-            full_url = urljoin(NEWS_URL, relative_url)
+            full_url = urljoin(OWASP_NEWS_URL, relative_url)
 
             author_tag = h2.xpath("./following-sibling::p[@class='author']")
             author = author_tag[0].text_content().strip() if author_tag else "Unknown"
@@ -76,11 +75,7 @@ def news_handler(ack, command, client):
             blocks.append(markdown(f"*:memo: Published by:* {item['author']}"))
             blocks.append(markdown("-" * 40))
 
-        blocks.append(
-            markdown(
-                f"{NL}For more, visit <{NEWS_URL}|OWASP News Page> :globe_with_meridians:{NL}"
-            )
-        )
+        blocks.append(markdown(f"{NL}For more, visit <{OWASP_NEWS_URL}|OWASP News Page>{NL}"))
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
