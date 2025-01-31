@@ -4,7 +4,7 @@ from django.conf import settings
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.blocks import divider, markdown
 
 COMMAND = "/policies"
 
@@ -18,86 +18,66 @@ def policies_handler(ack, command, client):
 
     policies = [
         (
-            "Awards and Scholarships Policy",
-            "Guidelines for recognizing contributions and offering scholarships.",
-            "https://owasp.org/www-policy/operational/awards-and-scholarships",
-        ),
-        (
-            "Board Code of Conduct",
-            "Ethical and professional standards for OWASP board members.",
-            "https://owasp.org/www-policy/operational/board-code-of-conduct",
-        ),
-        (
-            "Branding Policy",
-            "Rules for using OWASP branding, including logos and trademarks.",
-            "https://owasp.org/www-policy/operational/branding",
-        ),
-        (
             "Chapters Policy",
-            "Framework for running and managing OWASP local chapters.",
             "https://owasp.org/www-policy/operational/chapters",
         ),
         (
-            "Code of Conduct Policy",
-            "Expectations for behavior within the OWASP community.",
+            "Code of Conduct",
             "https://owasp.org/www-policy/operational/code-of-conduct",
         ),
         (
             "Committees Policy",
-            "Structure and responsibilities of OWASP committees.",
             "https://owasp.org/www-policy/operational/committees",
         ),
         (
-            "Conferences and Events Policy",
-            "Rules for organizing and participating in OWASP events.",
-            "https://owasp.org/www-policy/operational/conferences-events",
-        ),
-        (
             "Conflict Resolution Policy",
-            "Procedures for resolving disputes within OWASP.",
             "https://owasp.org/www-policy/operational/conflict-resolution",
         ),
         (
             "Conflict of Interest Policy",
-            "Guidelines to avoid and manage conflicts of interest.",
             "https://owasp.org/www-policy/operational/conflict-of-interest",
         ),
         (
-            "Election Policy",
-            "Rules governing OWASP board and leadership elections.",
+            "Donations Policy",
+            "https://owasp.org/www-policy/operational/donations",
+        ),
+        (
+            "Elections Policy",
             "https://owasp.org/www-policy/operational/election",
         ),
         (
             "Events Policy",
-            "General policies for OWASP events, including sponsorships.",
             "https://owasp.org/www-policy/operational/events",
         ),
         (
-            "Expense Reimbursement Policy",
-            "Guidelines for reimbursement of OWASP-related expenses.",
+            "Expense Policy",
             "https://owasp.org/www-policy/operational/expense-reimbursement",
         ),
         (
-            "Force Majeure and Sanctions Policy",
-            "Handling of extraordinary events affecting OWASP operations.",
-            "https://owasp.org/www-policy/operational/force-majeure-sanctions",
+            "Grant Policy",
+            "https://owasp.org/www-policy/operational/grants",
         ),
         (
-            "General Disclaimer Policy",
-            "Legal disclaimers related to OWASP projects and content.",
-            "https://owasp.org/www-policy/operational/general-disclaimer",
+            "Membership Policy",
+            "https://owasp.org/www-policy/operational/membership",
+        ),
+        (
+            "Project Policy",
+            "https://owasp.org/www-policy/operational/projects",
+        ),
+        (
+            "Whistleblower & Anti-Retaliation Policy",
+            "https://owasp.org/www-policy/operational/whistleblower",
         ),
     ]
 
-    formatted_policies = "\n".join(
-        f"- *<{url}|{title}>*: {description}" for title, description, url in policies
-    )
-
+    policies = NL.join(f"  • <{url}|{title}>" for title, url in policies)
     blocks = [
-        markdown("*Here are the key OWASP policies:*"),
-        markdown(formatted_policies),
+        markdown(f"Important OWASP policies:{NL}{policies}"),
+        divider(),
         markdown(
-            f"For more, visit *<https://owasp.org/www-policy/|Official OWASP Policies>*.{NL}"
+            "Please visit <https://owasp.org/www-policy/|OWASP policies> page for more "
+            f"information{NL}"
         ),
     ]
 
