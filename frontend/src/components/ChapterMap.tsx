@@ -64,7 +64,7 @@ const ChapterMap = ({ geoLocData }) => {
     map.addLayer(markerClusterGroup)
 
     if (bounds.length > 0) {
-      map.fitBounds(bounds as L.LatLngBoundsExpression)
+      map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
     }
   }, [geoLocData])
 
