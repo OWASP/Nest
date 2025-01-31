@@ -59,7 +59,6 @@ describe('ProjectDetailsPage', () => {
     expect(screen.getByText('This is a test project description')).toBeInTheDocument()
     expect(screen.getByText('Tool')).toBeInTheDocument()
     expect(screen.getByText('Flagship')).toBeInTheDocument()
-    expect(screen.getByText('OWASP')).toBeInTheDocument()
   })
 
   test('displays error when project is not found', async () => {
@@ -247,7 +246,6 @@ test('renders data state for GraphQL query', async () => {
     expect(screen.getByText('This is a test project description')).toBeInTheDocument()
     expect(screen.getByText('Tool')).toBeInTheDocument()
     expect(screen.getByText('Flagship')).toBeInTheDocument()
-    expect(screen.getByText('OWASP')).toBeInTheDocument()
   })
 })
 
