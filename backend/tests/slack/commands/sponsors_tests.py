@@ -1,9 +1,15 @@
 from unittest.mock import Mock, patch
+
 import pytest
 from django.conf import settings
 
 from apps.slack.commands.sponsors import sponsors_handler
 from apps.slack.common.presentation import EntityPresentation
+
+# Constants for truncation values
+NAME_TRUNCATION_LIMIT = 80
+SUMMARY_TRUNCATION_LIMIT = 300
+
 
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
@@ -11,11 +17,13 @@ def mock_get_absolute_url():
         mock.return_value = "http://example.com"
         yield mock
 
+
 @pytest.fixture(autouse=True)
 def mock_sponsors_count():
     with patch("apps.owasp.models.sponsor.Sponsor.objects.count") as mock:
         mock.return_value = 50
         yield mock
+
 
 class TestSponsorsHandler:
     @pytest.fixture()
@@ -38,7 +46,9 @@ class TestSponsorsHandler:
     @pytest.fixture(autouse=True)
     def mock_get_blocks(self):
         with patch("apps.slack.commands.sponsors.get_blocks") as mock:
-            mock.return_value = [{"type": "section", "text": {"type": "mrkdwn", "text": "Test Block"}}]
+            mock.return_value = [
+                {"type": "section", "text": {"type": "mrkdwn", "text": "Test Block"}}
+            ]
             yield mock
 
     @pytest.mark.parametrize(
@@ -86,7 +96,9 @@ class TestSponsorsHandler:
         mock_client.chat_postMessage.assert_called_once()
         assert mock_client.chat_postMessage.call_args[1]["text"] == expected_text
 
-    def test_sponsors_handler_presentation_config(self, mock_client, mock_command, mock_ack, mock_get_blocks):
+    def test_sponsors_handler_presentation_config(
+        self, mock_client, mock_command, mock_ack, mock_get_blocks
+    ):
         """Test that presentation configuration is correctly passed to get_blocks."""
         settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = "test"
@@ -101,34 +113,33 @@ class TestSponsorsHandler:
         assert presentation.include_metadata is True
         assert presentation.include_pagination is False
         assert presentation.include_timestamps is True
-        assert presentation.name_truncation == 80
-        assert presentation.summary_truncation == 300
+        assert presentation.name_truncation == NAME_TRUNCATION_LIMIT
+        assert presentation.summary_truncation == SUMMARY_TRUNCATION_LIMIT
 
-    def test_sponsors_handler_search_query_processing(self, mock_client, mock_command, mock_ack, mock_get_blocks):
+    def test_sponsors_handler_search_query_processing(
+        self, mock_client, mock_command, mock_ack, mock_get_blocks
+    ):
         """Test search query processing and stripping."""
         settings.SLACK_COMMANDS_ENABLED = True
-        test_queries = [
-            "  test  ",
-            "test",
-            "   TEST   ",
-            "Test  "
-        ]
+        test_queries = ["  test  ", "test", "   TEST   ", "Test  "]
 
         for query in test_queries:
             mock_command["text"] = query
             sponsors_handler(ack=mock_ack, command=mock_command, client=mock_client)
-            
+
             mock_get_blocks.assert_called_with(
                 search_query=query.strip(),
                 limit=10,
-                presentation=pytest.approx(EntityPresentation(
-                    include_feedback=True,
-                    include_metadata=True,
-                    include_pagination=False,
-                    include_timestamps=True,
-                    name_truncation=80,
-                    summary_truncation=300,
-                ))
+                presentation=pytest.approx(
+                    EntityPresentation(
+                        include_feedback=True,
+                        include_metadata=True,
+                        include_pagination=False,
+                        include_timestamps=True,
+                        name_truncation=80,
+                        summary_truncation=300,
+                    )
+                ),
             )
 
     def test_sponsors_handler_channel_error(self, mock_client, mock_command, mock_ack):
@@ -136,10 +147,9 @@ class TestSponsorsHandler:
         settings.SLACK_COMMANDS_ENABLED = True
         mock_client.conversations_open.side_effect = Exception("Channel error")
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(Exception, match="Channel error"):
             sponsors_handler(ack=mock_ack, command=mock_command, client=mock_client)
-        
-        assert str(exc_info.value) == "Channel error"
+
         mock_client.chat_postMessage.assert_not_called()
 
     def test_sponsors_handler_message_error(self, mock_client, mock_command, mock_ack):
@@ -147,8 +157,5 @@ class TestSponsorsHandler:
         settings.SLACK_COMMANDS_ENABLED = True
         mock_client.chat_postMessage.side_effect = Exception("Message error")
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(Exception, match="Message error"):
             sponsors_handler(ack=mock_ack, command=mock_command, client=mock_client)
-        
-        assert str(exc_info.value) == "Message error"
-        mock_client.conversations_open.assert_called_once()

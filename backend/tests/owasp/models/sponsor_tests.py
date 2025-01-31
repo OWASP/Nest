@@ -1,6 +1,8 @@
 from unittest.mock import Mock, patch
+
 import pytest
 from django.core.exceptions import ValidationError
+
 from apps.owasp.models.sponsor import Sponsor
 
 
@@ -66,11 +68,15 @@ class TestSponsorModel:
         mock_sponsor.sponsor_type = "1"
 
         with patch("apps.owasp.models.sponsor.Sponsor.objects.get", return_value=mock_sponsor):
-            updated_sponsor = Sponsor.update_data(mock_sponsor.id, name="New Name", sponsor_type="2")
+            updated_sponsor = Sponsor.update_data(
+                mock_sponsor.id, name="New Name", sponsor_type="2"
+            )
             assert updated_sponsor.name == "New Name"
             assert updated_sponsor.sponsor_type == "2"
 
-        with patch("apps.owasp.models.sponsor.Sponsor.objects.get", side_effect=Sponsor.DoesNotExist):
+        with patch(
+            "apps.owasp.models.sponsor.Sponsor.objects.get", side_effect=Sponsor.DoesNotExist
+        ):
             non_existent_sponsor = Sponsor.update_data(9999, name="New Name")
             assert non_existent_sponsor is None
 
@@ -91,18 +97,15 @@ class TestSponsorModel:
             job_url="https://jobs.example.com",
             image_path="/images/test.png",
             is_member=True,
-            member_type="2", 
-            sponsor_type="1",  
+            member_type="2",
+            sponsor_type="1",
         )
 
         if is_valid:
-            sponsor.full_clean() 
+            sponsor.full_clean()
         else:
             with pytest.raises(ValidationError):
                 sponsor.full_clean()
-
-
-
 
     @pytest.mark.parametrize(
         ("sponsor_type", "expected_sponsor_type"),
@@ -116,5 +119,3 @@ class TestSponsorModel:
         """Test the default sponsor_type behavior."""
         sponsor = Sponsor(sponsor_type=sponsor_type)
         assert sponsor.sponsor_type == expected_sponsor_type
-
-
