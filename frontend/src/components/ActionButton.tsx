@@ -24,13 +24,15 @@ const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel,
         className={baseStyles}
         data-tooltip-id="button-tooltip"
         data-tooltip-content={tooltipLabel}
+        onClick={onClick}
+        aria-label={tooltipLabel}
       >
         {children}
       </Link>
     </TooltipWrapper>
   ) : (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
-      <Button onClick={onClick} className={baseStyles}>
+      <Button onClick={onClick} className={baseStyles} aria-label={tooltipLabel}>
         {children}
       </Button>
     </TooltipWrapper>

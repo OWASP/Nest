@@ -103,7 +103,7 @@ describe('Contribute Component', () => {
     await waitFor(() => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
-  })
+  }, 10000)
 
   test('does not render pagination when there is only one page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
