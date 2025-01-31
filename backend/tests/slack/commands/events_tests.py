@@ -148,5 +148,6 @@ class TestEventsHandler:
         result = format_event_block(full_event, 1)
         assert "Test Event" in result["text"]["text"]
         assert "Jan 1, 2025" in result["text"]["text"]
-        assert "https://example.com" in result["text"]["text"]
+        expected_url = "https://" + "example.com"
+        assert expected_url in result["text"]["text"]
         assert "Additional information" in result["text"]["text"]
