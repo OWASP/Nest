@@ -4,6 +4,7 @@ export interface project {
   contributors_count: number
   description: string
   forks_count: number
+  issues_count: number
   is_active: boolean
   languages: string[]
   leaders: string[]
@@ -32,6 +33,7 @@ export interface ProjectStatsType {
   Forks: number
   Repositories: number
   Stars: number
+  Issues: number
 }
 
 export interface ProjectIssuesType {

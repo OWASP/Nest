@@ -6,6 +6,7 @@ import {
   faCalendar,
   faFileCode,
   faTag,
+  faBook,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
@@ -61,28 +62,31 @@ const DetailsCard = ({
           </SecondaryCard>
           {type === 'project' && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
-              <>
-                <InfoBlock
-                  className="pb-1"
-                  icon={faUsers}
-                  value={`${projectStats.Contributors || 'No'} Contributors`}
-                />
-                <InfoBlock
-                  className="pb-1"
-                  icon={faCodeFork}
-                  value={`${projectStats.Forks || 'No'} Forks`}
-                />
-                <InfoBlock
-                  className="pb-1"
-                  icon={faStar}
-                  value={`${projectStats.Stars || 'No'} Stars`}
-                />
-                <InfoBlock
-                  className="pb-1"
-                  icon={faCode}
-                  value={`${projectStats.Repositories || 'No'} Repositories`}
-                />
-              </>
+              <InfoBlock
+                className="pb-1"
+                icon={faUsers}
+                value={`${projectStats.Contributors || 'No'} Contributors`}
+              />
+              <InfoBlock
+                className="pb-1"
+                icon={faCodeFork}
+                value={`${projectStats.Forks || 'No'} Forks`}
+              />
+              <InfoBlock
+                className="pb-1"
+                icon={faStar}
+                value={`${projectStats.Stars || 'No'} Stars`}
+              />
+              <InfoBlock
+                className="pb-1"
+                icon={faCode}
+                value={`${projectStats.Repositories || 'No'} Repositories`}
+              />
+              <InfoBlock
+                className="pb-1"
+                icon={faBook}
+                value={`${projectStats.Issues || 'No'} Issues`}
+              />
             </SecondaryCard>
           )}
           {type === 'chapter' && geolocationData && (

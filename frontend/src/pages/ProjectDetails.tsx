@@ -84,10 +84,11 @@ const ProjectDetailsPage = () => {
   ]
 
   const projectStats = {
-    Stars: project.stars_count,
-    Forks: project.forks_count,
     Contributors: project.contributors_count,
+    Forks: project.forks_count,
+    Issues: project.issues_count,
     Repositories: project.repositories_count,
+    Stars: project.stars_count,
   }
   return (
     <DetailsCard
