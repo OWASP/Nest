@@ -36,6 +36,7 @@ def app_home_opened_handler(event, client, ack):
                     f"{TAB}• /board{NL}"
                     f"{TAB}• /chapters{NL}"
                     f"{TAB}• /committees{NL}"
+                    f"{TAB}• /community{NL}"
                     f"{TAB}• /contact{NL}"
                     f"{TAB}• /contribute{NL}"
                     f"{TAB}• /donate{NL}"
@@ -48,6 +49,7 @@ def app_home_opened_handler(event, client, ack):
                     f"{TAB}• /projects{NL}"
                     f"{TAB}• /sponsors{NL}"
                     f"{TAB}• /staff{NL}"
+                    f"{TAB}• /users{NL}"
                 ),
             ],
         }
