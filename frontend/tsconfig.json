@@ -18,8 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@tests/*": ["__tests__/src/*"],
-      "*": ["src/*"],
-      "@/*": ["./src/*"]
+      "*": ["src/*"]
     }
   },
   "include": ["__tests__", "src"]

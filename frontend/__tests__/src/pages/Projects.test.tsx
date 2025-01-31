@@ -41,7 +41,7 @@ describe('ProjectPage Component', () => {
       const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
-  }, 10000)
+  })
 
   test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
     window.scrollTo = jest.fn()

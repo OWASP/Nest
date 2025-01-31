@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogRoot,
   DialogFooter,
-} from '@/components/ui/dialog'
+} from 'components/ui/dialog'
 
 import ActionButton from './ActionButton'
 import Markdown from './MarkdownWrapper'

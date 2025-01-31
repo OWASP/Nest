@@ -14,10 +14,10 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  cleanup() // Clean up the DOM
-  jest.clearAllTimers() // Clear any active timers
-  jest.restoreAllMocks() // Restore any mocked functions
-  document.body.innerHTML = '' // Clear the body
+  cleanup()
+  jest.clearAllTimers()
+  jest.restoreAllMocks()
+  document.body.innerHTML = ''
 })
 
 // Mock FontAwesomeIcon since we don't need to test the actual icon rendering
@@ -57,14 +57,11 @@ describe('Dialog Component', () => {
     const onclick = jest.fn()
     renderModal({ ...defaultProps, button: { ...defaultProps.button, onclick, url: undefined } })
 
-    // If the button is rendered (no URL), use role="button"
     const actionButton = await screen.findByRole('button', { name: /Test Button/i })
     expect(actionButton).toBeInTheDocument()
 
-    // Simulate a user clicking the button
     await userEvent.click(actionButton)
 
-    // Verify that the onclick function was called
     expect(onclick).toHaveBeenCalledTimes(1)
   })
 
