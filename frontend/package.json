@@ -62,7 +62,7 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.0.2",
     "react-tooltip": "^5.28.0",
-    "tailwind-merge": "^2.6.0",
+    "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
