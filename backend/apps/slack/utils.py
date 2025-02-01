@@ -1,19 +1,50 @@
 """Slack app utils."""
 
-import html
 import logging
 from functools import lru_cache
+from html import escape as escape_html
+from urllib.parse import urljoin
 
 import requests
 import yaml
+from lxml import html
 from requests.exceptions import RequestException
+
+from apps.common.constants import OWASP_NEWS_URL
 
 logger = logging.getLogger(__name__)
 
 
 def escape(content):
     """Escape HTML content."""
-    return html.escape(content, quote=False)
+    return escape_html(content, quote=False)
+
+
+@lru_cache
+def get_news_data(limit=10, timeout=30):
+    """Get news data."""
+    response = requests.get(OWASP_NEWS_URL, timeout=timeout)
+    tree = html.fromstring(response.content)
+    h2_tags = tree.xpath("//h2")
+
+    items_total = 0
+    items = []
+    for h2 in h2_tags:
+        if anchor := h2.xpath(".//a[@href]"):
+            author_tag = h2.xpath("./following-sibling::p[@class='author']")
+            items.append(
+                {
+                    "author": author_tag[0].text_content().strip() if author_tag else "",
+                    "title": anchor[0].text_content().strip(),
+                    "url": urljoin(OWASP_NEWS_URL, anchor[0].get("href")),
+                }
+            )
+            items_total += 1
+
+        if items_total == limit:
+            break
+
+    return items
 
 
 @lru_cache
