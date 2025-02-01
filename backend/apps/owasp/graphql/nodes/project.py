@@ -19,6 +19,7 @@ class ProjectNode(BaseNode):
 
     class Meta:
         model = Project
+        fields = ()
 
     def resolve_recent_issues(self, info):
         """Resolve project recent issues."""
