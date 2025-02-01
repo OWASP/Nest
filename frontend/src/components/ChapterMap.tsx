@@ -8,8 +8,8 @@ import 'leaflet.markercluster'
 const ChapterMap = ({ geoLocData }) => {
   const mapRef = useRef<L.Map | null>(null)
 
-//for reference: https://leafletjs.com/reference.html#map-example
- useEffect(() => {
+  //for reference: https://leafletjs.com/reference.html#map-example
+  useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false, // Prevents the map from wrapping around the world
