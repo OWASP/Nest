@@ -68,7 +68,7 @@ const ChapterMap = ({ geoLocData }) => {
     if (bounds.length > 0) {
       map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
     }
-  }, [geoLocData]) // Re-run when geoLocData changes
+  }, [geoLocData])
 
   return (
     <div
