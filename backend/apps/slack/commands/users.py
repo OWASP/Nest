@@ -17,7 +17,7 @@ def users_handler(ack, command, client):
         return
 
     blocks = [
-        markdown(f"Please visit <https://nest.owasp.dev/users/users/|OWASP users> page{NL}"),
+        markdown(f"Please visit <https://nest.owasp.dev/community/users/|OWASP users> page{NL}"),
     ]
 
     conversation = client.conversations_open(users=command["user_id"])

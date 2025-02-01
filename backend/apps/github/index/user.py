@@ -23,6 +23,7 @@ class UserIndex(AlgoliaIndex, IndexBase):
         "idx_email",
         "idx_followers_count",
         "idx_following_count",
+        "idx_issues_count",
         "idx_key",
         "idx_location",
         "idx_login",
