@@ -43,8 +43,8 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
 
     settings = {
         "attributesForFaceting": [
-            "filterOnly(idx_key)",
             "filterOnly(idx_is_active)",
+            "filterOnly(idx_key)",
             "idx_name",
             "idx_tags",
             "idx_repositories.name",

@@ -228,7 +228,7 @@ class Project(
     @lru_cache
     def active_projects_count():
         """Return active projects count."""
-        return IndexBase.get_total_count("projects", "idx_is_active:true")
+        return IndexBase.get_total_count("projects", search_filters="idx_is_active:true")
 
     @staticmethod
     def bulk_save(projects, fields=None):
