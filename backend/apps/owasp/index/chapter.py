@@ -36,6 +36,7 @@ class ChapterIndex(AlgoliaIndex):
     settings = {
         "attributesForFaceting": [
             "filterOnly(idx_key)",
+            "filterOnly(idx_is_active)",
             "idx_country",
             "idx_name",
             "idx_tags",

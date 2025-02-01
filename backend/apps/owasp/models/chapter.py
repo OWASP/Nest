@@ -66,7 +66,7 @@ class Chapter(
     @lru_cache
     def active_chapters_count():
         """Return active chapters count."""
-        return IndexBase.get_total_count("chapters")
+        return IndexBase.get_total_count("chapters", "idx_is_active:true")
 
     @property
     def is_indexable(self):
