@@ -88,7 +88,12 @@ const ChaptersPage = () => {
       searchPlaceholder="Search for OWASP chapters..."
       empty="No chapters found"
     >
-      {chapters.length > 0 && <ChapterMap geoLocData={searchQuery ? chapters : geoLocData} style={{ height: '400px', width: '100%', zIndex: '0' }} />}
+      {chapters.length > 0 && (
+        <ChapterMap
+          geoLocData={searchQuery ? chapters : geoLocData}
+          style={{ height: '400px', width: '100%', zIndex: '0' }}
+        />
+      )}
       {chapters && chapters.map(renderChapterCard)}
     </SearchPageLayout>
   )
