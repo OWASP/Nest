@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { system } from 'utils/theme'
 
-import Dialog from 'components/Dialog'
+import Modal from 'components/Modal'
 
 // Mock the portal container
 beforeEach(() => {
@@ -43,7 +43,7 @@ describe('Dialog Component', () => {
   const renderModal = (props = defaultProps) => {
     return render(
       <ChakraProvider value={system}>
-        <Dialog {...props} />
+        <Modal {...props} />
       </ChakraProvider>
     )
   }
@@ -125,7 +125,7 @@ describe('Dialog Component', () => {
 
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveAttribute('aria-modal', 'true')
-    expect(dialog).toHaveAttribute('aria-labelledby', 'dialog-title')
+    expect(dialog).toHaveAttribute('aria-labelledby', 'modal-title')
     expect(dialog).toHaveAttribute('tabIndex', '-1')
   })
 

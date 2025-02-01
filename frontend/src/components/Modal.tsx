@@ -11,12 +11,11 @@ import {
   DialogHeader,
   DialogRoot,
   DialogFooter,
-} from 'components/ui/dialog'
-
+} from 'components/ui/Dialog'
 import ActionButton from './ActionButton'
 import Markdown from './MarkdownWrapper'
 
-const Dialog: React.FC<ModalProps> = ({
+const Modal: React.FC<ModalProps> = ({
   title,
   summary,
   hint,
@@ -30,7 +29,7 @@ const Dialog: React.FC<ModalProps> = ({
       open={isOpen}
       onEscapeKeyDown={onClose}
       unmountOnExit={true}
-      closeOnInteractOutside={true}
+      onPointerDownOutside={onClose}
       scrollBehavior="outside"
       size="xl"
       role="dialog"
@@ -39,7 +38,7 @@ const Dialog: React.FC<ModalProps> = ({
         my={9}
         p={7}
         className="animate-scaleIn relative z-50 w-full max-w-3xl transform rounded-lg bg-white p-6 shadow-xl backdrop-blur-sm transition-all duration-300 ease-in-out dark:border dark:border-gray-800 dark:bg-[#212529]"
-        aria-labelledby="dialog-title"
+        aria-labelledby="modal-title"
       >
         <DialogCloseTrigger
           asChild={false}
@@ -49,11 +48,7 @@ const Dialog: React.FC<ModalProps> = ({
           <FontAwesomeIcon icon={faX} size="xs" onClick={onClose} />
         </DialogCloseTrigger>
 
-        <DialogHeader
-          // id="dialog-title"
-          mb={1}
-          className="text-2xl font-bold text-gray-900 dark:text-white"
-        >
+        <DialogHeader mb={1} className="text-2xl font-bold text-gray-900 dark:text-white">
           {title}
         </DialogHeader>
         <Text fontSize="xs" mb={1} className="text-gray-700 dark:text-gray-300/60">
@@ -103,4 +98,4 @@ const Dialog: React.FC<ModalProps> = ({
   )
 }
 
-export default Dialog
+export default Modal
