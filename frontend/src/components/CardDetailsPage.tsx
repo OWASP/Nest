@@ -65,32 +65,32 @@ const DetailsCard = ({
               <InfoBlock
                 className="pb-1"
                 icon={faUsers}
-                value={`${projectStats.Contributors || 'No'} Contributors`}
+                value={`${projectStats.contributors || 'No'} Contributors`}
               />
               <InfoBlock
                 className="pb-1"
                 icon={faCodeFork}
-                value={`${projectStats.Forks || 'No'} Forks`}
+                value={`${projectStats.forks || 'No'} Forks`}
               />
               <InfoBlock
                 className="pb-1"
                 icon={faStar}
-                value={`${projectStats.Stars || 'No'} Stars`}
+                value={`${projectStats.stars || 'No'} Stars`}
               />
               <InfoBlock
                 className="pb-1"
                 icon={faCode}
-                value={`${projectStats.Repositories || 'No'} Repositories`}
+                value={`${projectStats.repositories || 'No'} Repositories`}
               />
               <InfoBlock
                 className="pb-1"
                 icon={faBook}
-                value={`${projectStats.Issues || 'No'} Issues`}
+                value={`${projectStats.issues || 'No'} Issues`}
               />
             </SecondaryCard>
           )}
           {type === 'chapter' && geolocationData && (
-            <SecondaryCard title="Chapter Location" className="md:col-span-4">
+            <SecondaryCard className="md:col-span-4">
               <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
                 style={{ height: '200px', width: '100%', zIndex: '0' }}
@@ -143,21 +143,24 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-const SocialLinks = ({ urls }) => (
-  <div>
-    <strong>Social Links</strong>
-    <div className="mt-2 flex flex-wrap gap-3">
-      {urls.map((url, index) => (
-        <a
-          key={index}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-600 transition-colors hover:text-gray-800 dark:text-blue-600 dark:hover:text-gray-200"
-        >
-          <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-        </a>
-      ))}
+const SocialLinks = ({ urls }) => {
+  if (!urls || urls.length === 0) return null
+  return (
+    <div>
+      <strong>Social Links</strong>
+      <div className="mt-2 flex flex-wrap gap-3">
+        {urls.map((url, index) => (
+          <a
+            key={index}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-600 transition-colors hover:text-gray-800 dark:text-blue-600 dark:hover:text-gray-200"
+          >
+            <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
+          </a>
+        ))}
+      </div>
     </div>
-  </div>
-)
+  )
+}

@@ -70,7 +70,6 @@ const ProjectDetailsPage = () => {
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updated_at) },
     { label: 'Level', value: project.level[0].toUpperCase() + project.level.slice(1) },
-    { label: 'Organization', value: project.organizations },
     { label: 'Project Leaders', value: project.leaders.join(', ') },
     { label: 'Type', value: project.type[0].toUpperCase() + project.type.slice(1) },
     {
@@ -84,11 +83,11 @@ const ProjectDetailsPage = () => {
   ]
 
   const projectStats = {
-    Contributors: project.contributors_count,
-    Forks: project.forks_count,
-    Issues: project.issues_count,
-    Repositories: project.repositories_count,
-    Stars: project.stars_count,
+    contributors: project.contributors_count,
+    forks: project.forks_count,
+    issues: project.issues_count,
+    repositories: project.repositories_count,
+    stars: project.stars_count,
   }
   return (
     <DetailsCard

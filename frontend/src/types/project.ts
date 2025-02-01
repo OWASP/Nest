@@ -29,11 +29,11 @@ export interface ProjectDataType {
 }
 
 export interface ProjectStatsType {
-  Contributors: number
-  Forks: number
-  Repositories: number
-  Stars: number
-  Issues: number
+  contributors: number
+  forks: number
+  repositories: number
+  stars: number
+  issues: number
 }
 
 export interface ProjectIssuesType {
