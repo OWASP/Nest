@@ -50,7 +50,7 @@ export const footerSections: Section[] = [
     title: 'Community',
     links: [
       { text: 'Community Content', href: 'https://owasp.org/www-community/' },
-      { text: 'Google Summer of Code', href: 'https://owasp.org/gsoc/gsoc2024' },
+      { text: 'Google Summer of Code', href: 'https://owasp.org/gsoc' },
       {
         text: 'Start a Local Chapter',
         href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/8/group/20/create/90?src=-1419759666',
