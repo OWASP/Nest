@@ -1,20 +1,15 @@
 """OWASP app project mixins."""
 
 from apps.common.utils import join_values
-from apps.owasp.models.mixins.common import GenericEntityMixin
+from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 ISSUES_LIMIT = 6
 RELEASES_LIMIT = 4
 REPOSITORIES_LIMIT = 4
 
 
-class ProjectIndexMixin(GenericEntityMixin):
+class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     """Project index mixin."""
-
-    @property
-    def is_indexable(self):
-        """Projects to index."""
-        return self.is_active and self.has_active_repositories
 
     @property
     def idx_companies(self):
