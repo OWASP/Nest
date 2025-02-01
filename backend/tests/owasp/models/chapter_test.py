@@ -112,7 +112,7 @@ class TestChapterModel:
         with patch("apps.common.index.IndexBase.get_total_count") as mock_count:
             mock_count.return_value = value
             assert Chapter.active_chapters_count() == value
-            mock_count.assert_called_once_with("chapters")
+            mock_count.assert_called_once_with("chapters", search_filters="idx_is_active:true")
 
     @pytest.mark.parametrize(
         ("has_suggested_location", "has_coordinates"),
