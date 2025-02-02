@@ -16,6 +16,7 @@ import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/
 import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { Link } from '@chakra-ui/react'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
@@ -120,17 +121,17 @@ const UserDetailsPage: React.FC = () => {
                     <h1 className="text-nowrap text-3xl font-bold text-gray-900 dark:text-white">
                       {user.name}
                     </h1>
-                    <a
+                    <Link
                       href={`https://www.github.com/${user.login}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-lg text-gray-700 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-300"
                     >
                       @{user.login}
-                    </a>
+                    </Link>
                   </div>
                 </div>
-                <a
+                <Link
                   href={user.url}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -138,7 +139,7 @@ const UserDetailsPage: React.FC = () => {
                 >
                   <FontAwesomeIcon icon={faGithub} className="text-sm" />
                   <span>Visit GitHub Profile</span>
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -160,13 +161,13 @@ const UserDetailsPage: React.FC = () => {
               )}
 
               {user.email && (
-                <a
+                <Link
                   href={`mailto:${user.email}`}
                   className="flex w-fit items-center space-x-2 text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
                 >
                   <FontAwesomeIcon icon={faEnvelope} className="text-sm" />
                   <span>{user.email}</span>
-                </a>
+                </Link>
               )}
             </div>
           </div>

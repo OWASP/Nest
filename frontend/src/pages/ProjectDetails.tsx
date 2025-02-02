@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import { Link } from '@chakra-ui/react'
 import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
@@ -108,9 +109,9 @@ const ProjectDetailsPage = () => {
             </p>
             <p className="pb-1">
               <strong>URL:</strong>{' '}
-              <a href={project.url} className="hover:underline dark:text-sky-600">
+              <Link href={project.url} className="hover:underline dark:text-sky-600">
                 {project.url}
-              </a>
+              </Link>
             </p>
           </SecondaryCard>
           <SecondaryCard title="Statistics">

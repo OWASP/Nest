@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import { Link } from '@chakra-ui/react'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -103,7 +104,7 @@ const SocialLinks = ({ urls }) => (
     <div className="text-sm font-medium">Social Links</div>
     <div className="mt-2 flex flex-wrap gap-3">
       {urls.map((url, index) => (
-        <a
+        <Link
           key={index}
           href={url}
           target="_blank"
@@ -111,7 +112,7 @@ const SocialLinks = ({ urls }) => (
           className="text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-        </a>
+        </Link>
       ))}
     </div>
   </div>

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useCallback } from 'react'
 import { Section } from 'types/section'
 import { footerSections } from 'utils/constants'
+import { Link } from '@chakra-ui/react'
 
 export default function Footer() {
   // State to keep track of the open section in the footer
@@ -49,13 +50,13 @@ export default function Footer() {
                     {link.isSpan ? (
                       <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                     ) : (
-                      <a
+                      <Link
                         target="_blank"
                         className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                         href={link.href}
                       >
                         {link.text}
-                      </a>
+                      </Link>
                     )}
                   </li>
                 ))}

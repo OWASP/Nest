@@ -3,6 +3,8 @@ import React from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
+import { ChakraProvider } from '@chakra-ui/react'
+import { system } from 'utils/theme'
 
 // Mock the Algolia-related modules
 jest.mock('utils/helpers/algoliaClient', () => ({
@@ -37,9 +39,11 @@ const mockUser = {
 const renderWithRouter = (ui: React.ReactElement) => {
   return render(
     <MemoryRouter initialEntries={['/user/testuser']}>
-      <Routes>
-        <Route path="/user/:login" element={ui} />
-      </Routes>
+      <ChakraProvider value={system}>
+        <Routes>
+          <Route path="/user/:login" element={ui} />
+        </Routes>
+      </ChakraProvider>
     </MemoryRouter>
   )
 }
@@ -52,7 +56,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders loading spinner initially', async () => {
-    fetchAlgoliaData.mockImplementation(() => new Promise(() => {}))
+    fetchAlgoliaData.mockImplementation(() => new Promise(() => { }))
     await act(async () => {
       renderWithRouter(<UserDetailsPage />)
     })
