@@ -18,7 +18,7 @@ SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 
 
 def gsoc_handler(ack, command, client):
     """Slack /gsoc command handler."""
-    from apps.owasp.models.project import Project
+    from apps.owasp.api.search.gsoc import get_gsoc_projects
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
 
     ack()
@@ -35,7 +35,7 @@ def gsoc_handler(ack, command, client):
     elif command_text.isnumeric():
         year = int(command_text)
         if year in SUPPORTED_YEARS:
-            gsoc_projects = Project.get_gsoc_projects(year)
+            gsoc_projects = get_gsoc_projects(year)
             gsoc_projects_markdown = f"{NL}".join(
                 f"  • <{gp.nest_url}|{gp.owasp_name}>"
                 for gp in sorted(gsoc_projects, key=lambda p: p.owasp_name)
