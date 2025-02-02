@@ -1,0 +1,15 @@
+leaders:
+  - github: leader-1-github
+    name: Leader 1 Name
+  - github: leader-2-github
+    name: Leader 2 Name
+level: 2
+name: OWASP Project Missing License Name
+pitch: A project with missing license name
+tags:
+  - tag1
+  - tag2
+  - tag3
+type: code
+license:
+  spdx_id: "MIT"

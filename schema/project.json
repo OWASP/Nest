@@ -24,6 +24,40 @@
         }
       },
       "additionalProperties": false
+    },
+    "license": {
+      "type": "object",
+      "title": "License",
+      "description": "The license of the project.",
+      "required": ["name", "spdx_id"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the license."
+        },
+        "spdx_id": {
+          "type": "string",
+          "description": "The SPDX ID of the license.",
+          "enum": [
+            "Apache-2.0",
+            "BSD-2-Clause",
+            "BSD-3-Clause",
+            "CC-BY-4.0",
+            "CC-BY-SA-4.0",
+            "CC0-1.0",
+            "EUPL-1.2",
+            "AGPL-3.0",
+            "GPL-2.0",
+            "GPL-3.0",
+            "LGPL-2.1",
+            "LGPL-3.0",
+            "MIT",
+            "MPL-2.0",
+            "OTHER"
+          ]
+        }
+      },
+      "additionalProperties": false
     }
   },
 
@@ -79,6 +113,10 @@
         "Tools"
       ],
       "type": "string"
+    },
+    "license": {
+      "description": "The license of the project.",
+      "$ref": "#/$defs/license"
     }
   },
   "required": [
