@@ -14,7 +14,8 @@ repos:
       - id: name-tests-test
         args:
           - --pytest
-        files: backend/tests
+        exclude: (backend|schema)/tests/data
+        files: (backend|schema)/tests
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
