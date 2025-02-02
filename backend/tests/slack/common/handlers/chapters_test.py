@@ -2,73 +2,93 @@ from unittest.mock import patch
 
 import pytest
 
+from apps.slack.common.handlers.chapters import get_blocks
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.handlers.chapters import chapters_blocks
 
 
-class TestChaptersHandler:
+class TestChapterHandler:
     @pytest.fixture()
-    def mock_chapter(self):
+    def mock_chapter_data(self):
         return {
-            "idx_name": "Test Chapter",
-            "idx_summary": "Test Chapter Summary",
-            "idx_url": "http://example.com/chapter/1",
-            "idx_country": "Test Country",
-            "idx_suggested_location": "Test Location",
-            "idx_leaders": ["Leader 1", "Leader 2"],
-            "idx_region": "Test Region",
-            "idx_updated_at": "2024-01-01T00:00:00Z",
+            "hits": [
+                {
+                    "idx_name": "Test Chapter",
+                    "idx_country": "United States",
+                    "idx_suggested_location": "New York",
+                    "idx_leaders": ["John Doe", "Jane Smith"],
+                    "idx_summary": "This is a test chapter summary",
+                    "idx_url": "https://example.com/chapter",
+                }
+            ],
+            "nbPages": 2,
         }
 
-    @pytest.mark.parametrize(
-        ("search_query", "has_results", "expected_message"),
-        [
-            ("python", True, "OWASP chapters that I found for"),
-            ("python", False, "No chapters found for"),
-            ("", True, "OWASP chapters:"),
-            ("", False, "No chapters found"),
-        ],
-    )
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    @patch("apps.owasp.models.chapter.Chapter.active_chapters_count")
-    def test_chapters_blocks_results(
-        self,
-        mock_active_chapters_count,
-        mock_get_chapters,
-        search_query,
-        has_results,
-        expected_message,
-        mock_chapter,
-    ):
-        mock_get_chapters.return_value = {"hits": [mock_chapter] if has_results else []}
-        mock_active_chapters_count.return_value = 42
+    @pytest.fixture()
+    def mock_empty_chapter_data(self):
+        return {
+            "hits": [],
+            "nbPages": 0,
+        }
 
-        blocks = chapters_blocks(search_query=search_query)
+    @pytest.fixture(autouse=True)
+    def setup_mocks(self):
+        with patch("apps.owasp.api.search.chapter.get_chapters") as mock_get_chapters, patch(
+            "apps.owasp.models.chapter.Chapter"
+        ) as mock_chapter_model:
+            mock_chapter_model.active_chapters_count.return_value = 42
+            yield {"get_chapters": mock_get_chapters, "chapter_model": mock_chapter_model}
 
-        assert any(expected_message in str(block) for block in blocks)
-        if has_results:
-            assert any(mock_chapter["idx_name"] in str(block) for block in blocks)
+    def test_get_blocks_with_results(self, setup_mocks, mock_chapter_data):
+        setup_mocks["get_chapters"].return_value = mock_chapter_data
 
-    @pytest.mark.parametrize(
-        ("presentation_params", "expected_content"),
-        [
-            ({"include_metadata": True}, ["Leader 1", "Leader 2"]),
-            ({"include_metadata": False}, []),
-            ({"name_truncation": 5}, ["Test..."]),
-        ],
-    )
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    def test_chapters_blocks_presentation(
-        self,
-        mock_get_chapters,
-        presentation_params,
-        expected_content,
-        mock_chapter,
-    ):
-        mock_get_chapters.return_value = {"hits": [mock_chapter]}
-        presentation = EntityPresentation(**presentation_params)
+        blocks = get_blocks(search_query="test")
 
-        blocks = chapters_blocks(presentation=presentation)
+        assert "OWASP chapters that I found for" in blocks[0]["text"]["text"]
+        assert "Test Chapter" in blocks[1]["text"]["text"]
+        assert "New York" in blocks[1]["text"]["text"]
+        assert "John Doe, Jane Smith" in blocks[1]["text"]["text"]
 
-        for content in expected_content:
-            assert any(content in str(block) for block in blocks)
+    def test_get_blocks_no_results(self, setup_mocks, mock_empty_chapter_data):
+        setup_mocks["get_chapters"].return_value = mock_empty_chapter_data
+
+        blocks = get_blocks(search_query="nonexistent")
+
+        assert len(blocks) == 1
+        assert "No chapters found for" in blocks[0]["text"]["text"]
+
+    def test_get_blocks_pagination(self, setup_mocks, mock_chapter_data):
+        setup_mocks["get_chapters"].return_value = mock_chapter_data
+        presentation = EntityPresentation(include_pagination=True)
+
+        blocks = get_blocks(page=1, presentation=presentation)
+
+        assert blocks[-1]["type"] == "section"
+
+    def test_get_blocks_text_truncation(self, setup_mocks):
+        long_name = "Very Long Chapter Name That Should Be Truncated"
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": long_name,
+                    "idx_country": "Test Country",
+                    "idx_summary": "Test Summary",
+                    "idx_suggested_location": "Test Location",
+                    "idx_url": "https://example.com",
+                }
+            ],
+            "nbPages": 1,
+        }
+        setup_mocks["get_chapters"].return_value = mock_data
+
+        presentation = EntityPresentation(name_truncation=20)
+        blocks = get_blocks(presentation=presentation)
+
+        assert long_name[:17] + "..." in blocks[1]["text"]["text"]
+
+    def test_feedback_message(self, setup_mocks, mock_chapter_data):
+        setup_mocks["get_chapters"].return_value = mock_chapter_data
+        presentation = EntityPresentation(include_feedback=True)
+
+        blocks = get_blocks(presentation=presentation)
+
+        assert "Extended search over 42 OWASP chapters" in blocks[-1]["text"]["text"]

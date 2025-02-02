@@ -92,8 +92,6 @@ filterwarnings = [
     "ignore::django.conf.RemovedInDjango60Warning:django",
 ]
 log_level = "INFO"
-python_files = ["*_tests.py"]
-
 
 [tool.ruff]
 line-length = 99
@@ -115,6 +113,7 @@ ignore = [
     "PLR0913",
     "PLR0915",
     "RUF012",
+    "SLF001",
     "TD003",
 ]
 select = ["ALL"]

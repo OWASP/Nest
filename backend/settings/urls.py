@@ -23,7 +23,7 @@ router.registry.extend(owasp_router.registry)
 router.registry.extend(feedback_router.registry)
 
 urlpatterns = [
-    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=settings.DEBUG))),
     path("api/v1/", include(router.urls)),
     path("a/", admin.site.urls),
 ]
