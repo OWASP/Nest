@@ -24,6 +24,36 @@
         }
       },
       "additionalProperties": false
+    },
+    "sponsor": {
+      "type": "object",
+      "title": "Sponsor",
+      "description": "A project sponsor.",
+      "required": [
+        "name",
+        "url"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the sponsor or organization."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the sponsor.",
+          "format": "uri"
+        },
+        "logo": {
+          "type": "string",
+          "description": "The URL of the sponsor's logo.",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the sponsor."
+        }
+      },
+      "additionalProperties": false
     }
   },
 
@@ -51,6 +81,14 @@
       ],
       "title": "Project level.",
       "type": "number"
+    },
+    "sponsors": {
+      "description": "Sponsors of the project.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sponsor"
+      },
+      "minItems": 1
     },
     "name": {
       "description": "The unique name of the project.",
