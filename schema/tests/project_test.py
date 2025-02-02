@@ -26,6 +26,8 @@ def test_positive(project_schema):
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
+        ("downloads-empty.yaml", "[] is too short"),
+        ("downloads-invalid.yaml", "'not-a-url' is not a valid URL"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
