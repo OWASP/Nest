@@ -79,6 +79,11 @@
         "Tools"
       ],
       "type": "string"
+    },
+    "demo_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional URL to the project demo."
     }
   },
   "required": [
