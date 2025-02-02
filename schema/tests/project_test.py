@@ -26,7 +26,15 @@ def test_positive(project_schema):
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
-        ("downloads-empty.yaml", "None is not of type 'array'"),
+        ("downloads-empty.yaml", "[] should be non-empty"),
+        (
+            "downloads-non-unique.yaml",
+            "['https://abc.com/download', 'https://abc.com/download'] has non-unique elements",
+        ),
+        (
+            "downloads-non-uri.yaml",
+            "['example-url-1', 'example-url-2'] has non-uri elements",
+        ),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
