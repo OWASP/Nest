@@ -2,8 +2,9 @@ from pathlib import Path
 
 import pytest
 import yaml
-from tests.conftest import tests_data_dir
 from utils.validators import validate_data
+
+from tests.conftest import tests_data_dir
 
 
 def test_positive(project_schema):
