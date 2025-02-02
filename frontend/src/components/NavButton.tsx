@@ -1,8 +1,8 @@
+import { Link } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { NavButtonProps } from 'types/button'
 import { cn } from 'utils/utility'
-import { Link } from '@chakra-ui/react'
 
 const NavButton = ({
   href,

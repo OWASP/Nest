@@ -1,5 +1,5 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from '@chakra-ui/react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 const InfoBlock = ({ icon, label = '', value, isLink = false, className = '' }) => (
   <div className={`flex ${className}`}>

@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react'
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -11,7 +12,6 @@ import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
-import { Button } from '@chakra-ui/react'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

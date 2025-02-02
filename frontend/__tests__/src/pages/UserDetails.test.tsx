@@ -1,10 +1,10 @@
+import { ChakraProvider } from '@chakra-ui/react'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { system } from 'utils/theme'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
-import { ChakraProvider } from '@chakra-ui/react'
-import { system } from 'utils/theme'
 
 // Mock the Algolia-related modules
 jest.mock('utils/helpers/algoliaClient', () => ({
@@ -56,7 +56,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders loading spinner initially', async () => {
-    fetchAlgoliaData.mockImplementation(() => new Promise(() => { }))
+    fetchAlgoliaData.mockImplementation(() => new Promise(() => {}))
     await act(async () => {
       renderWithRouter(<UserDetailsPage />)
     })

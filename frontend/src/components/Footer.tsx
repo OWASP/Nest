@@ -1,9 +1,9 @@
+import { Button, Link } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useCallback } from 'react'
 import { Section } from 'types/section'
 import { footerSections } from 'utils/constants'
-import { Button, Link } from '@chakra-ui/react'
 
 export default function Footer() {
   // State to keep track of the open section in the footer

@@ -1,3 +1,4 @@
+import { Link } from '@chakra-ui/react'
 import {
   faMapMarkerAlt,
   faTags,
@@ -12,7 +13,6 @@ import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
-import { Link } from '@chakra-ui/react'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'

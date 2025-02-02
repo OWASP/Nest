@@ -1,3 +1,4 @@
+import { Link } from '@chakra-ui/react'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
 import {
@@ -16,7 +17,6 @@ import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/
 import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { Link } from '@chakra-ui/react'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()

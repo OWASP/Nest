@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client'
+import { Link } from '@chakra-ui/react'
 import {
   faBook,
   faCalendar,
@@ -17,7 +18,6 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
-import { Link } from '@chakra-ui/react'
 import InfoBlock from 'components/InfoBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
