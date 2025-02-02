@@ -11,6 +11,7 @@ import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
+import { Button } from '@chakra-ui/react'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -106,7 +107,7 @@ export default function Header() {
           />
           <ModeToggle />
           <div className="md:hidden">
-            <button
+            <Button
               onClick={toggleMobileMenu}
               className="text-slate-300 hover:text-slate-100 focus:outline-none"
             >
@@ -116,7 +117,7 @@ export default function Header() {
               ) : (
                 <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

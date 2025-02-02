@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValueText,
 } from 'components/ui/Select'
+import { Button } from '@chakra-ui/react'
 const SortBy = ({
   sortOptions,
   selectedSortOption,
@@ -73,7 +74,7 @@ const SortBy = ({
       {/* Sort Order Dropdown */}
       {selectedSortOption !== 'default' && (
         <div className="relative flex items-center">
-          <button
+          <Button
             data-tooltip-id="sort-order-tooltip"
             data-tooltip-content={selectedOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
@@ -90,7 +91,7 @@ const SortBy = ({
                 className="h-5 w-5 text-gray-600 dark:text-gray-200"
               />
             )}
-          </button>
+          </Button>
           <Tooltip
             id="sort-order-tooltip"
             className="rounded-lg bg-white px-1 py-0 text-sm text-gray-600 shadow-md"

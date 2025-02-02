@@ -1,10 +1,11 @@
+import { Button } from '@chakra-ui/react'
 import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UserCardProps } from 'types/card'
 
 const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
   return (
-    <button
+    <Button
       onClick={button.onclick}
       className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
@@ -39,7 +40,7 @@ const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
           className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1"
         />
       </div>
-    </button>
+    </Button>
   )
 }
 
