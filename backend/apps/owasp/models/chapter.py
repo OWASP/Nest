@@ -66,16 +66,7 @@ class Chapter(
     @lru_cache
     def active_chapters_count():
         """Return active chapters count."""
-        return IndexBase.get_total_count("chapters")
-
-    @property
-    def is_indexable(self):
-        """Chapters to index."""
-        return (
-            self.latitude is not None
-            and self.longitude is not None
-            and not self.owasp_repository.is_empty
-        )
+        return IndexBase.get_total_count("chapters", search_filters="idx_is_active:true")
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
