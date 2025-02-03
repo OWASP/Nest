@@ -1,10 +1,7 @@
-import { ChakraProvider } from '@chakra-ui/react'
-import { act, render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { system } from 'utils/theme'
+import { act, screen, waitFor } from '@testing-library/react'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
+import { render } from 'wrappers/testUtil'
 
 // Mock the Algolia-related modules
 jest.mock('utils/helpers/algoliaClient', () => ({
@@ -36,18 +33,6 @@ const mockUser = {
   created_at: 1723002473,
 }
 
-const renderWithRouter = (ui: React.ReactElement) => {
-  return render(
-    <MemoryRouter initialEntries={['/user/testuser']}>
-      <ChakraProvider value={system}>
-        <Routes>
-          <Route path="/user/:login" element={ui} />
-        </Routes>
-      </ChakraProvider>
-    </MemoryRouter>
-  )
-}
-
 describe('UserDetailsPage', () => {
   const { fetchAlgoliaData } = require('api/fetchAlgoliaData')
 
@@ -58,7 +43,7 @@ describe('UserDetailsPage', () => {
   test('renders loading spinner initially', async () => {
     fetchAlgoliaData.mockImplementation(() => new Promise(() => {}))
     await act(async () => {
-      renderWithRouter(<UserDetailsPage />)
+      render(<UserDetailsPage />, { route: '/user/testuser' })
     })
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
@@ -70,7 +55,7 @@ describe('UserDetailsPage', () => {
     fetchAlgoliaData.mockResolvedValue({ hits: [mockUser] })
 
     await act(async () => {
-      renderWithRouter(<UserDetailsPage />)
+      render(<UserDetailsPage />, { route: '/user/testuser' })
     })
 
     // Wait for the loading state to finish
@@ -91,13 +76,14 @@ describe('UserDetailsPage', () => {
     fetchAlgoliaData.mockResolvedValue({ hits: [] })
 
     await act(async () => {
-      renderWithRouter(<UserDetailsPage />)
+      render(<UserDetailsPage />, { route: '/user/testuser' })
     })
 
     await waitFor(() => {
       expect(screen.getByText('User not found')).toBeInTheDocument()
     })
   })
+
   test('logs error to logger when fetchUserData fails', async () => {
     const { fetchAlgoliaData } = require('api/fetchAlgoliaData')
     const logger = require('utils/logger')
@@ -106,7 +92,7 @@ describe('UserDetailsPage', () => {
     fetchAlgoliaData.mockRejectedValueOnce(new Error('Test fetch error'))
 
     await act(async () => {
-      renderWithRouter(<UserDetailsPage />)
+      render(<UserDetailsPage />, { route: '/user/testuser' })
     })
 
     await waitFor(() => {
