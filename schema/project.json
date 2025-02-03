@@ -40,6 +40,17 @@
       ],
       "type": "string"
     },
+    "downloads": {
+      "description": "Optional list of download URLs.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
+    },
     "leaders": {
       "description": "Leaders of the project.",
       "type": "array",
@@ -89,17 +100,6 @@
         "Tools"
       ],
       "type": "string"
-    },
-    "downloads": {
-      "description": "Optional list of download URLs.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri"
-      },
-      "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
     }
   },
   "required": [

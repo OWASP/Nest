@@ -1,11 +1,12 @@
-name: "Test Project"
+audience: builder
+downloads:
+  - example-url-1
+  - example-url-2
 level: 3
 leaders:
   - github: "testuser1"
   - github: "testuser2"
-downloads:
-  - example-url-1
-  - example-url-2
+name: "Test Project"
 pitch: A very brief, one-line description of your project
 tags:
   - example-tag-1
