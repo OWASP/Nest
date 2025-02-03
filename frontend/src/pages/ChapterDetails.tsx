@@ -3,16 +3,13 @@ import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ChapterType } from 'types/chapter'
-import { ChapterType } from 'types/chapter'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
-import DetailsCard from 'components/CardDetailsPage'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
-  const [chapter, setChapter] = useState<ChapterType>(null)
   const [chapter, setChapter] = useState<ChapterType>(null)
   const [isLoading, setIsLoading] = useState(true)
 
