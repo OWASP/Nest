@@ -13,6 +13,4 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
-events:
-  - "https://example.com/event1"
-  - "https://example.com/event2"
+events: []

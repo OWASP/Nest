@@ -15,4 +15,4 @@ tags:
 type: code
 events:
   - "https://example.com/event1"
-  - "https://example.com/event2"
+  - "https://example.com/event1"

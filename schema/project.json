@@ -40,6 +40,16 @@
       ],
       "type": "string"
     },
+    "events": {
+      "description": "Event URLs related to the project.",
+      "type": "array",
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
     "leaders": {
       "description": "Leaders of the project.",
       "type": "array",
@@ -53,12 +63,7 @@
       "default": 2,
       "description": "The numeric level of the project.",
       "enum": [2, 3, 3.5, 4],
-      "enumDescriptions": [
-        "Incubator",
-        "Lab",
-        "Production",
-        "Flagship"
-      ],
+      "enumDescriptions": ["Incubator", "Lab", "Production", "Flagship"],
       "title": "Project level.",
       "type": "number"
     },
@@ -91,15 +96,7 @@
       "type": "string"
     }
   },
-  "required": [
-    "audience",
-    "leaders",
-    "level",
-    "name",
-    "pitch",
-    "tags",
-    "type"
-  ],
+  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
   "title": "OWASP Project",
   "type": "object"
 }
