@@ -17,6 +17,9 @@ const TopContributors = ({
     ? contributors
     : contributors.slice(0, maxInitialDisplay)
 
+  if (contributors.length === 0) {
+    return
+  }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
       <h2 className="mb-4 text-2xl font-semibold">{label}</h2>

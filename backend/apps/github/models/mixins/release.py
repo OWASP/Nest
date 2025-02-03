@@ -7,6 +7,11 @@ class ReleaseIndexMixin:
     """Release index mixin."""
 
     @property
+    def is_indexable(self):
+        """Releases to index."""
+        return not self.is_draft
+
+    @property
     def idx_author(self):
         """Return author for indexing."""
         """Get top contributors."""
