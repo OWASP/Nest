@@ -127,6 +127,14 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.releases.filter(is_draft=False, published_at__isnull=False)
 
     @property
+    def repository_url(self):
+        """Get all relevant URLs for the repository."""
+        url = ""
+        if self.owner and self.name:
+            url = f"https://github.com/{self.owner.login}/{self.name}"
+        return url
+
+    @property
     def top_languages(self):
         """Return a list of top used languages."""
         return sorted(

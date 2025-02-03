@@ -22,6 +22,15 @@ export const GET_PROJECT_DATA = gql`
           name
         }
       }
+      relatedRepositories {
+        name
+        forksCount
+        starsCount
+        repositoryUrl
+        openIssuesCount
+        subscribersCount
+        contributorsCount
+      }
     }
   }
 `

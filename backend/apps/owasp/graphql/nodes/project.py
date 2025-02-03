@@ -5,6 +5,7 @@ import graphene
 from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.issue import IssueNode
 from apps.github.graphql.nodes.release import ReleaseNode
+from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.models.project import Project
 
 RECENT_ISSUES_LIMIT = 10
@@ -16,6 +17,7 @@ class ProjectNode(BaseNode):
 
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
+    related_repositories = graphene.List(RepositoryNode)
 
     class Meta:
         model = Project
@@ -28,3 +30,7 @@ class ProjectNode(BaseNode):
     def resolve_recent_releases(self, info):
         """Resolve project recent releases."""
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+
+    def resolve_related_repositories(self, info):
+        """Resolve related repositories."""
+        return self.repositories.all()

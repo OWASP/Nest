@@ -15,6 +15,7 @@ import { getSocialIcon } from 'utils/urlIconMappings'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
+import RelatedRepositoriesCard from 'components/RelatedRepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import ToggleableList from 'components/ToogleList'
@@ -34,6 +35,7 @@ const DetailsCard = ({
   recentIssues,
   recentReleases,
   geolocationData = null,
+  repositories = [],
 }: DetailsCardProps) => {
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -135,6 +137,11 @@ const DetailsCard = ({
               )}
             />
           </>
+        )}
+        {type === 'project' && repositories.length > 0 && (
+          <SecondaryCard title="Related Repository" className="mt-6">
+            <RelatedRepositoriesCard repositories={repositories} />
+          </SecondaryCard>
         )}
       </div>
     </div>
