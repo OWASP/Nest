@@ -1,13 +1,11 @@
 audience: breaker
-demo: https://some-demo-url.com
+demo:
 leaders:
-  - github: leader-1-github
-    name: Leader 1 Name
-  - github: leader-2-github
-    name: Leader 2 Name
-    slack: leader-2-slack
+  - github: leader-name-1
+    name: Leader Name 1
+  - github: leader-name-2
+    name: Leader Name 2
 level: 2
-license: MIT
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 tags:
