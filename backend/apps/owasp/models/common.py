@@ -6,9 +6,18 @@ from urllib.parse import urlparse
 
 import yaml
 from django.db import models
+from django.db.models import Sum
 
 from apps.common.open_ai import OpenAi
-from apps.github.constants import GITHUB_REPOSITORY_RE, GITHUB_USER_RE
+from apps.github.constants import (
+    GITHUB_REPOSITORY_RE,
+    GITHUB_USER_RE,
+    OWASP_FOUNDATION_LOGIN,
+)
+from apps.github.models.repository_contributor import (
+    TOP_CONTRIBUTORS_LIMIT,
+    RepositoryContributor,
+)
 from apps.github.utils import get_repository_file_content
 
 logger = logging.getLogger(__name__)
@@ -48,11 +57,6 @@ class RepositoryBasedEntityModel(models.Model):
         null=True,
         related_name="+",
     )
-
-    @property
-    def is_indexable(self):
-        """Entities to index."""
-        return self.has_active_repositories
 
     @property
     def github_url(self):
@@ -123,9 +127,29 @@ class RepositoryBasedEntityModel(models.Model):
             else None
         )
 
+    def get_top_contributors(self, repositories=()):
+        """Get top contributors."""
+        return [
+            {
+                "avatar_url": tc["user__avatar_url"],
+                "contributions_count": tc["total_contributions"],
+                "login": tc["user__login"],
+                "name": tc["user__name"],
+            }
+            for tc in RepositoryContributor.objects.filter(repository__in=repositories)
+            .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
+            .values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+            )
+            .annotate(total_contributions=Sum("contributions_count"))
+            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
+        ]
+
 
 class GenericEntityModel(models.Model):
-    """Generic entity model: chapter or project."""
+    """Generic entity model."""
 
     class Meta:
         abstract = True

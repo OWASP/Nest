@@ -1,14 +1,14 @@
 """OWASP app project mixins."""
 
 from apps.common.utils import join_values
-from apps.owasp.models.mixins.common import GenericEntityMixin
+from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 ISSUES_LIMIT = 6
 RELEASES_LIMIT = 4
 REPOSITORIES_LIMIT = 4
 
 
-class ProjectIndexMixin(GenericEntityMixin):
+class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     """Project index mixin."""
 
     @property
@@ -35,6 +35,11 @@ class ProjectIndexMixin(GenericEntityMixin):
     def idx_is_active(self):
         """Return active status for indexing."""
         return self.is_active
+
+    @property
+    def idx_issues_count(self):
+        """Return issues count for indexing."""
+        return self.open_issues.count()
 
     @property
     def idx_key(self):
@@ -108,8 +113,3 @@ class ProjectIndexMixin(GenericEntityMixin):
     def idx_updated_at(self):
         """Return updated at for indexing."""
         return self.updated_at.timestamp() if self.updated_at else ""
-
-    @property
-    def idx_issues_count(self):
-        """Return issues count for indexing."""
-        return self.open_issues.count()
