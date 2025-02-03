@@ -6,8 +6,13 @@
       "type": "object",
       "title": "Leader",
       "description": "A project leader.",
-      "required": ["github" , "email"],
+      "required": ["github"],
       "properties": {
+        "email": {
+          "type": ["string", "null"],
+          "description": "The leader's email address.",
+          "format": "email"
+        },
         "github": {
           "type": "string",
           "description": "The GitHub username.",
@@ -21,11 +26,6 @@
           "type": ["string", "null"],
           "description": "The Slack username.",
           "pattern": "^[a-zA-Z0-9._-]{1,21}$"
-        },
-        "email": {
-          "type": ["string", "null"],
-          "description": "The leader's email address.",
-          "format": "email"
         }
       },
       "additionalProperties": false
@@ -58,7 +58,12 @@
       "default": 2,
       "description": "The numeric level of the project.",
       "enum": [2, 3, 3.5, 4],
-      "enumDescriptions": ["Incubator", "Lab", "Production", "Flagship"],
+      "enumDescriptions": [
+        "Incubator",
+        "Lab",
+        "Production",
+        "Flagship"
+      ],
       "title": "Project level.",
       "type": "number"
     },
@@ -91,7 +96,15 @@
       "type": "string"
     }
   },
-  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
+  "required": [
+    "audience",
+    "leaders",
+    "level",
+    "name",
+    "pitch",
+    "tags",
+    "type"
+  ],
   "title": "OWASP Project",
   "type": "object"
 }
