@@ -32,9 +32,9 @@ def test_positive(project_schema):
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
+        ("sponsor-empty-list.yaml", "[] should be non-empty"),
         ("sponsor-name-missing.yaml", "'name' is a required property"),
         ("sponsor-url-missing.yaml", "'url' is a required property"),
-        ("sponsor-empty-list.yaml", "[] should be non-empty"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
