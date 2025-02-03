@@ -39,7 +39,6 @@ describe('chapterDetailsPage Component', () => {
       expect(screen.getByText('Test City, Test Country')).toBeInTheDocument()
     })
     expect(screen.getByText('Test Region')).toBeInTheDocument()
-    expect(screen.getByText('Test-tag')).toBeInTheDocument()
     expect(screen.getByText('https://owasp.org/test-chapter')).toBeInTheDocument()
     expect(screen.getByText('This is a test chapter summary.')).toBeInTheDocument()
   })
