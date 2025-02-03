@@ -1,3 +1,5 @@
+audience: breaker
+demo: ''
 leaders:
   - github: leader-name-1
     name: Leader Name 1
@@ -11,4 +13,3 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
-demo_url: not-a-valid-url

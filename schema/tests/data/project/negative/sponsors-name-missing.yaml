@@ -1,3 +1,4 @@
+audience: breaker
 leaders:
   - github: leader-name-1
     name: Leader Name 1
@@ -11,4 +12,7 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
-demo_url:
+sponsors:
+  - description: A great sponsor
+    logo: https://sponsor1.com/logo.png
+    url: https://sponsor1.com
