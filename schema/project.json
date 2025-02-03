@@ -24,6 +24,36 @@
         }
       },
       "additionalProperties": false
+    },
+    "sponsor": {
+      "type": "object",
+      "title": "Sponsor",
+      "description": "A project sponsor.",
+      "required": [
+        "name",
+        "url"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "A brief description of the sponsor."
+        },
+        "logo": {
+          "type": "string",
+          "description": "The URL of the sponsor's logo.",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the sponsor or organization."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the sponsor.",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
     }
   },
 
@@ -91,6 +121,14 @@
     "pitch": {
       "description": "The project pitch.",
       "type": "string"
+    },
+    "sponsors": {
+      "description": "Sponsors of the project.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sponsor"
+      },
+      "minItems": 1
     },
     "tags": {
       "description": "Tags for the project",
