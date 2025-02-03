@@ -1,4 +1,5 @@
 audience: breaker
+demo: https://some-demo-url.com
 events:
   - 'https://example.com/event1'
   - 'https://example.com/event2'
