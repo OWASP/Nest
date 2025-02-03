@@ -1,0 +1,12 @@
+audience: defender
+leaders:
+  - github: leader-1-github
+  - github: leader-2-github
+type: documentation
+level: 2
+name: OWASP Project Without License
+pitch: A valid project without a license field
+tags:
+  - tag1
+  - tag2
+  - tag3
