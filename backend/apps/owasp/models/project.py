@@ -140,11 +140,6 @@ class Project(
         return self.type == self.ProjectType.TOOL
 
     @property
-    def is_indexable(self):
-        """Projects to index."""
-        return self.has_active_repositories
-
-    @property
     def issues(self):
         """Return issues."""
         return Issue.objects.filter(repository__in=self.repositories.all())
