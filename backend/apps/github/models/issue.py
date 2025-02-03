@@ -92,17 +92,6 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         return f"{self.title} by {self.author}"
 
     @property
-    def is_indexable(self):
-        """Issues to index."""
-        return (
-            self.state == self.State.OPEN
-            and not self.is_locked
-            and self.repository.is_indexable
-            and self.repository.track_issues
-            and self.project.track_issues
-        )
-
-    @property
     def project(self):
         """Return project."""
         return self.repository.project

@@ -2,44 +2,147 @@ from unittest.mock import patch
 
 import pytest
 
-from apps.slack.handlers.committees import committees_blocks
+from apps.slack.common.handlers.committees import get_blocks
+from apps.slack.common.presentation import EntityPresentation
 
 
-class TestCommitteesHandler:
+class TestCommitteeHandler:
     @pytest.fixture()
-    def mock_committee(self):
+    def mock_committee_data(self):
         return {
-            "idx_name": "Test Committee",
-            "idx_summary": "Test Committee Summary",
-            "idx_url": "http://example.com/committee/1",
-            "idx_leaders": ["Leader 1", "Leader 2"],
+            "hits": [
+                {
+                    "idx_name": "Test Committee",
+                    "idx_leaders": ["John Doe", "Jane Smith"],
+                    "idx_summary": "This is a test committee summary",
+                    "idx_url": "https://example.com/committee",
+                }
+            ],
+            "nbPages": 2,
         }
 
-    @pytest.mark.parametrize(
-        ("search_query", "has_results", "expected_message"),
-        [
-            ("python", True, "OWASP committees that I found for"),
-            ("python", False, "No committees found for"),
-            ("", True, "OWASP committees:"),
-            ("", False, "No committees found"),
-        ],
-    )
-    @patch("apps.owasp.api.search.committee.get_committees")
-    @patch("apps.owasp.models.committee.Committee.active_committees_count")
-    def test_committees_blocks_results(
-        self,
-        mock_active_committees_count,
-        mock_get_committees,
-        search_query,
-        has_results,
-        expected_message,
-        mock_committee,
-    ):
-        mock_get_committees.return_value = {"hits": [mock_committee] if has_results else []}
-        mock_active_committees_count.return_value = 42
+    @pytest.fixture()
+    def mock_empty_committee_data(self):
+        return {
+            "hits": [],
+            "nbPages": 0,
+        }
 
-        blocks = committees_blocks(search_query=search_query)
+    @pytest.fixture(autouse=True)
+    def setup_mocks(self):
+        with patch("apps.owasp.api.search.committee.get_committees") as mock_get_committees, patch(
+            "apps.owasp.models.committee.Committee"
+        ) as mock_committee_model:
+            mock_committee_model.active_committees_count.return_value = 15
+            yield {"get_committees": mock_get_committees, "committee_model": mock_committee_model}
 
-        assert any(expected_message in str(block) for block in blocks)
-        if has_results:
-            assert any(mock_committee["idx_name"] in str(block) for block in blocks)
+    def test_get_blocks_with_results(self, setup_mocks, mock_committee_data):
+        setup_mocks["get_committees"].return_value = mock_committee_data
+
+        blocks = get_blocks(search_query="test")
+
+        assert "OWASP committees that I found for" in blocks[0]["text"]["text"]
+        assert "Test Committee" in blocks[1]["text"]["text"]
+        assert "Leaders: John Doe, Jane Smith" in blocks[1]["text"]["text"]
+        assert "This is a test committee summary" in blocks[1]["text"]["text"]
+
+    def test_get_blocks_no_results(self, setup_mocks, mock_empty_committee_data):
+        setup_mocks["get_committees"].return_value = mock_empty_committee_data
+
+        blocks = get_blocks(search_query="nonexistent")
+
+        assert len(blocks) == 1
+        assert "No committees found for" in blocks[0]["text"]["text"]
+
+    def test_get_blocks_without_metadata(self, setup_mocks, mock_committee_data):
+        setup_mocks["get_committees"].return_value = mock_committee_data
+        presentation = EntityPresentation(include_metadata=False)
+
+        blocks = get_blocks(presentation=presentation)
+
+        assert "Leaders:" not in blocks[1]["text"]["text"]
+
+    def test_get_blocks_single_leader(self, setup_mocks):
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "Single Leader Committee",
+                    "idx_leaders": ["John Doe"],
+                    "idx_summary": "Test Summary",
+                    "idx_url": "https://example.com",
+                }
+            ],
+            "nbPages": 1,
+        }
+        setup_mocks["get_committees"].return_value = mock_data
+        presentation = EntityPresentation(include_metadata=True)
+
+        blocks = get_blocks(presentation=presentation)
+
+        assert "Leader: John Doe" in blocks[1]["text"]["text"]  # Singular form
+        assert "Leaders:" not in blocks[1]["text"]["text"]  # Not plural
+
+    def test_get_blocks_text_truncation(self, setup_mocks):
+        long_name = "Very Long Committee Name That Should Be Truncated"
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": long_name,
+                    "idx_summary": "Test Summary",
+                    "idx_url": "https://example.com",
+                    "idx_leaders": [],
+                }
+            ],
+            "nbPages": 1,
+        }
+        setup_mocks["get_committees"].return_value = mock_data
+
+        presentation = EntityPresentation(name_truncation=20)
+        blocks = get_blocks(presentation=presentation)
+
+        assert long_name[:17] + "..." in blocks[1]["text"]["text"]
+
+    def test_feedback_message(self, setup_mocks, mock_committee_data):
+        setup_mocks["get_committees"].return_value = mock_committee_data
+        presentation = EntityPresentation(include_feedback=True)
+
+        blocks = get_blocks(presentation=presentation)
+
+        assert "Extended search over 15 OWASP committees" in blocks[-1]["text"]["text"]
+
+    def test_search_query_escaping(self, setup_mocks, mock_committee_data):
+        setup_mocks["get_committees"].return_value = mock_committee_data
+        dangerous_query = "test & <script>"
+
+        blocks = get_blocks(search_query=dangerous_query)
+
+        assert "&amp;" in blocks[0]["text"]["text"]
+        assert "&lt;script&gt;" in blocks[0]["text"]["text"]
+
+    def test_committee_without_leaders(self, setup_mocks):
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "No Leaders Committee",
+                    "idx_summary": "Test Summary",
+                    "idx_url": "https://example.com",
+                }
+            ],
+            "nbPages": 1,
+        }
+        setup_mocks["get_committees"].return_value = mock_data
+        presentation = EntityPresentation(include_metadata=True)
+
+        blocks = get_blocks(presentation=presentation)
+
+        assert "Leaders:" not in blocks[1]["text"]["text"]
+
+    def test_pagination_offset(self, setup_mocks, mock_committee_data):
+        setup_mocks["get_committees"].return_value = mock_committee_data
+        page = 2
+        limit = 10
+
+        blocks = get_blocks(page=page, limit=limit)
+
+        # First item should be numbered 11 (offset + 1)
+        assert "11. " in blocks[1]["text"]["text"]

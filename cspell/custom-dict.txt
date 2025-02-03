@@ -1,4 +1,5 @@
 a2eeef
+Agsoc
 ansa
 arkid15r
 askowasp
@@ -7,6 +8,7 @@ csrfguard
 csrfprotector
 cva
 dsn
+GBP
 graphiql
 GSOC
 GTM

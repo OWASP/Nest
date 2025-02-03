@@ -1,5 +1,6 @@
 """GitHub user model mixins for index-related functionality."""
 
+from apps.github.models.organization import Organization
 from apps.github.models.repository_contributor import RepositoryContributor
 
 ISSUES_LIMIT = 6
@@ -9,6 +10,14 @@ TOP_REPOSITORY_CONTRIBUTORS_LIMIT = 6
 
 class UserIndexMixin:
     """User index mixin."""
+
+    @property
+    def is_indexable(self):
+        """Users to index."""
+        return (
+            self.login != "ghost"  # See https://github.com/ghost for more info.
+            and self.login not in Organization.get_logins()
+        )
 
     @property
     def idx_avatar_url(self):

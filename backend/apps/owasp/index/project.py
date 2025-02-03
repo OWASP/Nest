@@ -20,6 +20,7 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
         "idx_custom_tags",
         "idx_description",
         "idx_forks_count",
+        "idx_issues_count",
         "idx_is_active",
         "idx_key",
         "idx_languages",
@@ -42,6 +43,7 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
 
     settings = {
         "attributesForFaceting": [
+            "filterOnly(idx_is_active)",
             "filterOnly(idx_key)",
             "idx_name",
             "idx_tags",
