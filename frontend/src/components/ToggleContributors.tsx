@@ -46,6 +46,8 @@ const TopContributors = ({
       </div>
       {contributors.length > maxInitialDisplay && (
         <Button
+          focusVisibleRing={'none'}
+          focusRingColor={'currentBg'}
           onClick={toggleContributors}
           className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
         >

@@ -81,6 +81,8 @@ const Modal: React.FC<ModalProps> = ({
             {button.label}
           </ActionButton>
           <Button
+            focusVisibleRing={'none'}
+            focusRingColor={'currentBg'}
             variant="ghost"
             onClick={onClose}
             aria-label="close-modal"
