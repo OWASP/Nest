@@ -7,6 +7,17 @@ class IssueIndexMixin:
     """Issue index mixin."""
 
     @property
+    def is_indexable(self):
+        """Issues to index."""
+        return (
+            self.state == self.State.OPEN
+            and not self.is_locked
+            and self.repository.is_indexable
+            and self.repository.track_issues
+            and self.project.track_issues
+        )
+
+    @property
     def idx_author_login(self):
         """Return author login for indexing."""
         return (
