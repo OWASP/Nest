@@ -1,4 +1,4 @@
-audience: builder
+audience: breaker
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -7,7 +7,7 @@ leaders:
     slack: leader-2-slack
 level: 2
 license: MIT
-name: OWASP Project With License
+name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 tags:
   - example-tag-1
