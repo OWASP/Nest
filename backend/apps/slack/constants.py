@@ -33,6 +33,10 @@ VIEW_CHAPTERS_ACTION = "view_chapters_action"
 VIEW_CHAPTERS_ACTION_NEXT = "view_chapters_action_next"
 VIEW_CHAPTERS_ACTION_PREV = "view_chapters_action_prev"
 
+VIEW_CONTRIBUTE_ACTION = "view_contribute_action"
+VIEW_CONTRIBUTE_ACTION_NEXT = "view_contribute_action_next"
+VIEW_CONTRIBUTE_ACTION_PREV = "view_contribute_action_prev"
+
 
 FEEDBACK_CHANNEL_MESSAGE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "
