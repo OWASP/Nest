@@ -23,49 +23,42 @@ def get_blocks(
     search_query_escaped = escape(search_query)
 
     attributes = [
-        "idx_title",
         "idx_project_name",
         "idx_project_url",
         "idx_summary",
+        "idx_title",
         "idx_url",
     ]
 
     offset = (page - 1) * limit
     contribute_data = get_issues(search_query, attributes=attributes, limit=limit, page=page)
-    contribute_items = contribute_data["hits"]
+    issues = contribute_data["hits"]
     total_pages = contribute_data["nbPages"]
 
-    if not contribute_items:
+    if not issues:
         return [
             markdown(
-                f"*No contributions found for `{search_query_escaped}`*{NL}"
+                f"*No issues found for `{search_query_escaped}`*{NL}"
                 if search_query
-                else "*No contributions found*{NL}"
+                else "*No issues found*{NL}"
             )
         ]
 
-    blocks = [
-        markdown(
-            f"{NL}*OWASP contributions found for* `{search_query_escaped}`:{NL}"
-            if search_query_escaped
-            else f"{NL}*Here are the top {limit} most recent issues*:{NL}"
-        ),
-    ]
-
-    for idx, contribution in enumerate(contribute_items):
-        title = Truncator(escape(contribution["idx_title"])).chars(
+    blocks = []
+    for idx, issue in enumerate(issues):
+        title = Truncator(escape(issue["idx_title"])).chars(
             presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
-        project = escape(contribution["idx_project_name"])
-        project_url = escape(contribution["idx_project_url"])
-        summary = Truncator(escape(contribution["idx_summary"])).chars(
+        project_name = escape(issue["idx_project_name"])
+        project_url = escape(issue["idx_project_url"])
+        summary = Truncator(escape(issue["idx_summary"])).chars(
             presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
         blocks.append(
             markdown(
-                f"{offset + idx + 1}. <{contribution['idx_url']}|*{title}*>{NL}"
-                f"<{project_url}|{project}>{NL}"
+                f"{offset + idx + 1}. <{issue['idx_url']}|*{title}*>{NL}"
+                f"<{project_url}|{project_name}>{NL}"
                 f"{summary}{NL}"
             )
         )
@@ -73,7 +66,7 @@ def get_blocks(
     if presentation.include_feedback:
         blocks.append(
             markdown(
-                f"Extended search over {Issue.open_issues_count()} OWASP contributions"
+                f"Extended search over {Issue.open_issues_count()} OWASP issues"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
         )

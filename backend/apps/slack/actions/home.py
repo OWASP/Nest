@@ -103,12 +103,12 @@ if SlackConfig.app:
         VIEW_COMMITTEES_ACTION_NEXT,
         VIEW_COMMITTEES_ACTION_PREV,
         VIEW_COMMITTEES_ACTION,
+        VIEW_CONTRIBUTE_ACTION_NEXT,
+        VIEW_CONTRIBUTE_ACTION_PREV,
+        VIEW_CONTRIBUTE_ACTION,
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
         VIEW_PROJECTS_ACTION,
-        VIEW_CONTRIBUTE_ACTION,
-        VIEW_CONTRIBUTE_ACTION_PREV,
-        VIEW_CONTRIBUTE_ACTION_NEXT,
     )
     for action in actions:
         SlackConfig.app.action(action)(handle_home_actions)
