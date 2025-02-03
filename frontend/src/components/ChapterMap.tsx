@@ -5,8 +5,9 @@ import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 
-const ChapterMap = ({ geoLocData }) => {
+const ChapterMap = ({ geoLocData, style }) => {
   const mapRef = useRef<L.Map | null>(null)
+
   //for reference: https://leafletjs.com/reference.html#map-example
   useEffect(() => {
     if (!mapRef.current) {
@@ -16,8 +17,9 @@ const ChapterMap = ({ geoLocData }) => {
           [-90, -180], // Southwest corner of the map bounds (latitude, longitude)
           [90, 180], // Northeast corner of the map bounds (latitude, longitude)
         ],
-        maxBoundsViscosity: 1.0, // How smoothly the map bounces back when the user tries to pan outside the max bounds
-      }).setView([20, 0], 2) // Initial view of the map: [latitude, longitude], zoom level
+        maxBoundsViscosity: 1.0,
+      }).setView([20, 0], 2)
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         className: 'map-tiles',
@@ -26,6 +28,7 @@ const ChapterMap = ({ geoLocData }) => {
 
     const map = mapRef.current
 
+    // Remove previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
         map.removeLayer(layer)
@@ -33,7 +36,6 @@ const ChapterMap = ({ geoLocData }) => {
     })
 
     const markerClusterGroup = L.markerClusterGroup()
-
     const bounds: [number, number][] = []
     geoLocData.forEach((chapter) => {
       if (chapter._geoloc) {
@@ -64,17 +66,11 @@ const ChapterMap = ({ geoLocData }) => {
     map.addLayer(markerClusterGroup)
 
     if (bounds.length > 0) {
-      map.fitBounds(bounds as L.LatLngBoundsExpression)
+      map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
     }
   }, [geoLocData])
 
-  return (
-    <div
-      id="chapter-map"
-      className="rounded-2xl"
-      style={{ height: '400px', width: '100%', zIndex: '0' }}
-    />
-  )
+  return <div id="chapter-map" className="rounded-2xl" style={style} />
 }
 
 export default ChapterMap

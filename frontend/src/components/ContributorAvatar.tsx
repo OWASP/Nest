@@ -1,24 +1,31 @@
-import { Tooltip } from 'react-tooltip'
+import { Link } from '@chakra-ui/react'
 import { topContributorsType } from 'types/contributor'
-import { tooltipStyle } from 'utils/constants'
+import { Tooltip } from 'components/ui/tooltip'
 
 const ContributorAvatar = ({ contributor }: { contributor: topContributorsType }) => {
   const displayName = contributor.name || contributor.login
 
   return (
-    <a
-      data-tooltip-id={`avatar-tooltip-${contributor.login}`}
-      data-tooltip-content={`${contributor.contributions_count} contributions by ${displayName}`}
-      href={`/community/users/${contributor.login}`}
-      target="_blank"
+    <Tooltip
+      id={`avatar-tooltip-${contributor.login}`}
+      content={`${contributor.contributions_count} contributions by ${displayName}`}
+      openDelay={100}
+      closeDelay={100}
+      showArrow
+      positioning={{ placement: 'top' }}
     >
-      <img
-        className="h-[30px] w-[30px] rounded-full grayscale hover:grayscale-0"
-        src={contributor.avatar_url}
-        alt={`${displayName}'s avatar`}
-      />
-      <Tooltip id={`avatar-tooltip-${contributor.login}`} style={tooltipStyle} />
-    </a>
+      <Link
+        href={`/community/users/${contributor.login}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          className="h-[30px] w-[30px] rounded-full grayscale hover:grayscale-0"
+          src={contributor.avatar_url}
+          alt={`${displayName}'s avatar`}
+        />
+      </Link>
+    </Tooltip>
   )
 }
 

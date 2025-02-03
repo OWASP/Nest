@@ -35,11 +35,11 @@ describe('Committees Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders loading spinner initially', async () => {
+  test('renders skeleton initially', async () => {
     render(<CommitteeDetailsPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      const skeletonLoaders = screen.getAllByRole('status')
+      expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
 

@@ -1,15 +1,17 @@
+import { HStack, Link } from '@chakra-ui/react'
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
 import { useState, useEffect } from 'react'
-import { Tooltip } from 'react-tooltip'
 import { CardProps } from 'types/card'
-import { desktopViewMinWidth, tooltipStyle } from 'utils/constants'
+import { desktopViewMinWidth } from 'utils/constants'
 import { Icons } from 'utils/data'
+import { TooltipRecipe } from 'utils/theme'
 import { cn } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
 import Markdown from 'components/MarkdownWrapper'
+import { Tooltip } from 'components/ui/tooltip'
 
 // Initial check for mobile screen size
 const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < desktopViewMinWidth
@@ -40,22 +42,31 @@ const Card = ({
   }, [])
 
   return (
-    <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 transition-colors duration-300 ease-linear dark:bg-[#212529] md:max-w-6xl">
+    <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
       <div className="flex w-full flex-col items-start gap-4 pt-2 sm:flex-row sm:items-center sm:gap-6 md:pt-0">
         <div className="flex items-center gap-3">
           {/* Display project level badge (if available) */}
           {level && (
-            <span
-              data-tooltip-id="level-tooltip"
-              data-tooltip-content={`${level.level} project`}
-              className={cn('flex h-8 w-8 items-center justify-center rounded-full text-xs shadow')}
-              style={{ backgroundColor: level.color }}
+            <Tooltip
+              id="level-tooltip"
+              content={`${level.level} project`}
+              openDelay={100}
+              closeDelay={100}
+              recipe={TooltipRecipe}
+              showArrow
             >
-              <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
-            </span>
+              <span
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-full text-xs shadow'
+                )}
+                style={{ backgroundColor: level.color }}
+              >
+                <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
+              </span>
+            </Tooltip>
           )}
           {/* Project title and link */}
-          <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
+          <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
               className="max-w-full break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl"
               style={{
@@ -64,7 +75,7 @@ const Card = ({
             >
               {title}
             </h1>
-          </a>
+          </Link>
         </div>
         {/* Icons associated with the project */}
         <div className="flex min-w-[30%] flex-grow flex-row items-center justify-end overflow-auto">
@@ -88,9 +99,9 @@ const Card = ({
       </div>
       {/* Link to project name if provided */}
       {projectName && (
-        <a href={projectLink} rel="noopener noreferrer" className="mt-2 font-medium">
+        <Link href={projectLink} rel="noopener noreferrer" className="mt-2 font-medium">
           {projectName}
-        </a>
+        </Link>
       )}
       {/* Render project summary using Markdown */}
       <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
@@ -135,19 +146,21 @@ const Card = ({
             >
               {/* Render social links if available */}
               {social && social.length > 0 && (
-                <div id="social" className="mt-2 flex items-center gap-3">
+                <HStack id="social" mt={2}>
                   {social.map((item) => (
-                    <a
+                    <Link
                       key={`${item.title}-${item.url}`}
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2"
+                      display="flex"
+                      alignItems="center"
+                      gap={2}
                     >
                       <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
-                    </a>
+                    </Link>
                   ))}
-                </div>
+                </HStack>
               )}
 
               {/* Action Button */}
@@ -161,7 +174,6 @@ const Card = ({
           </div>
         )}
       </div>
-      <Tooltip id="level-tooltip" style={tooltipStyle} />
     </div>
   )
 }

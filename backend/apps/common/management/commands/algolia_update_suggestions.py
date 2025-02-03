@@ -9,6 +9,9 @@ class Command(BaseCommand):
     help = "Create query suggestions for Algolia indices"
 
     def handle(self, *args, **kwargs):
+        if settings.ENVIRONMENT == "Local":
+            return
+
         client = QuerySuggestionsClientSync(
             settings.ALGOLIA_APPLICATION_ID,
             settings.ALGOLIA_WRITE_API_KEY,

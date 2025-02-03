@@ -9,6 +9,7 @@ from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
+from apps.slack.common.gsoc import GSOC_2025_MILESTONES
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
     NEST_BOT_NAME,
@@ -36,6 +37,12 @@ def contribute_handler(event, client, ack):
             logger.warning("Error opening conversation with bot user %s", user_id)
             return
         raise
+
+    client.chat_postEphemeral(
+        blocks=GSOC_2025_MILESTONES,
+        channel=event["channel"],
+        user=user_id,
+    )
 
     client.chat_postMessage(
         channel=conversation["channel"]["id"],

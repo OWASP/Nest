@@ -8,6 +8,7 @@ interface UseSearchPageOptions {
   indexName: string
   pageTitle: string
   defaultSortBy?: string
+  defaultOrder?: string
 }
 
 interface UseSearchPageReturn<T> {
@@ -17,15 +18,18 @@ interface UseSearchPageReturn<T> {
   totalPages: number
   searchQuery: string
   sortBy: string
+  order: string
   handleSearch: (query: string) => void
   handlePageChange: (page: number) => void
   handleSortChange: (sort: string) => void
+  handleOrderChange: (order: string) => void
 }
 
 export function useSearchPage<T extends object>({
   indexName,
   pageTitle,
   defaultSortBy = '',
+  defaultOrder = '',
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -33,16 +37,24 @@ export function useSearchPage<T extends object>({
   const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1'))
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
+  const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
-
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
     if (currentPage > 1) params.set('page', currentPage.toString())
-    if (sortBy && sortBy !== 'projects') params.set('sortBy', sortBy)
+
+    if (sortBy && sortBy !== 'default' && sortBy[0] !== 'default' && sortBy !== '') {
+      params.set('sortBy', sortBy)
+    }
+
+    if (sortBy !== 'default' && sortBy[0] !== 'default' && order && order !== '') {
+      params.set('order', order)
+    }
+
     setSearchParams(params)
-  }, [searchQuery, currentPage, sortBy, setSearchParams])
+  }, [searchQuery, order, currentPage, sortBy, setSearchParams])
 
   useEffect(() => {
     document.title = pageTitle
@@ -51,7 +63,9 @@ export function useSearchPage<T extends object>({
     const fetchData = async () => {
       try {
         const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
-          sortBy ? `${indexName}_${sortBy}` : indexName,
+          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
+            ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
+            : indexName,
           searchQuery,
           currentPage
         )
@@ -70,7 +84,7 @@ export function useSearchPage<T extends object>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, sortBy, indexName, pageTitle, navigate])
+  }, [currentPage, searchQuery, order, sortBy, indexName, pageTitle, navigate])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -89,7 +103,10 @@ export function useSearchPage<T extends object>({
     setSortBy(sort)
     setCurrentPage(1)
   }
-
+  const handleOrderChange = (order: string) => {
+    setOrder(order)
+    setCurrentPage(1)
+  }
   return {
     items,
     isLoaded,
@@ -97,8 +114,10 @@ export function useSearchPage<T extends object>({
     totalPages,
     searchQuery,
     sortBy,
+    order,
     handleSearch,
     handlePageChange,
     handleSortChange,
+    handleOrderChange,
   }
 }

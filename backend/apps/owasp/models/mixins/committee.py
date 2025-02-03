@@ -1,9 +1,9 @@
 """OWASP app committee mixins."""
 
-from apps.owasp.models.mixins.common import GenericEntityMixin
+from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 
-class CommitteeIndexMixin(GenericEntityMixin):
+class CommitteeIndexMixin(RepositoryBasedEntityModelMixin):
     """Committee index mixin."""
 
     @property
