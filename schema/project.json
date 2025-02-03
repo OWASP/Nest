@@ -30,6 +30,16 @@
   "additionalProperties": false,
   "description": "OWASP schema.",
   "properties": {
+    "audience": {
+      "description": "The intended audience for the project.",
+      "enum": ["breaker", "builder", "defender"],
+      "enumDescriptions": [
+        "Security testers and ethical hackers.",
+        "Developers and engineers.",
+        "Security professionals and defenders."
+      ],
+      "type": "string"
+    },
     "leaders": {
       "description": "Leaders of the project.",
       "type": "array",
@@ -93,6 +103,7 @@
     }
   },
   "required": [
+    "audience",
     "leaders",
     "level",
     "name",

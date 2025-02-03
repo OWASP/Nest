@@ -1,3 +1,5 @@
+import { topContributorsType } from './contributor'
+
 export interface ChapterType {
   created_at: number
   is_active: boolean
@@ -5,13 +7,10 @@ export interface ChapterType {
   leaders: string[]
   name: string
   related_urls: string[]
-  top_contributors: {
-    avatar_url: string
-    contributions_count: number
-    login: string
-    name: string
-  }[]
+  top_contributors: topContributorsType[]
+  region: string
   summary: string
+  suggested_location: string
   updated_at: number
   url: string
   objectID: string
