@@ -102,16 +102,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.path
 
     @property
-    def is_indexable(self):
-        """Repositories to index."""
-        return (
-            not self.is_archived
-            and not self.is_empty
-            and not self.is_template
-            and self.project_set.exists()
-        )
-
-    @property
     def latest_release(self):
         """Repository latest release."""
         return self.published_releases.order_by("-published_at").first()
