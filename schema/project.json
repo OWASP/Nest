@@ -6,7 +6,7 @@
       "type": "object",
       "title": "Leader",
       "description": "A project leader.",
-      "required": ["github"],
+      "required": ["github" , "email"],
       "properties": {
         "github": {
           "type": "string",
