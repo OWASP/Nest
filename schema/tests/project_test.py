@@ -29,12 +29,12 @@ def test_positive(project_schema):
         ),
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience-missing.yaml", "'audience' is a required property"),
-        ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
-        ("name-empty.yaml", "'' is too short"),
-        ("name-none.yaml", "None is not of type 'string'"),
         ("email-invalid.yaml", "'leader1' is not a 'email'"),
         ("email-missing-at.yaml", "'leader1.com' is not a 'email'"),
         ("email-invalid-domain.yaml", "'leader1@com' is not a 'email'"),
+        ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
+        ("name-empty.yaml", "'' is too short"),
+        ("name-none.yaml", "None is not of type 'string'"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
