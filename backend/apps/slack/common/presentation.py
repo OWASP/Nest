@@ -1,4 +1,4 @@
-"""default entities presentation for chapters, committees, project,."""
+"""default entities presentation for OWASP entities (project, events, etc)."""
 
 from dataclasses import dataclass
 

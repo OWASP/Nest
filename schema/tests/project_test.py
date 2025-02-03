@@ -23,6 +23,12 @@ def test_positive(project_schema):
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
+        (
+            "audience-invalid.yaml",
+            "'hacker' is not one of ['breaker', 'builder', 'defender']",
+        ),
+        ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
+        ("audience-missing.yaml", "'audience' is a required property"),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
