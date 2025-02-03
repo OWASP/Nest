@@ -30,6 +30,11 @@ def test_positive(project_schema):
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience-missing.yaml", "'audience' is a required property"),
         ("demo-none.yaml", "None is not of type 'string'"),
+        ("events-empty.yaml", "[] should be non-empty"),
+        (
+            "events-non-unique-urls.yaml",
+            "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
+        ),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         (
             "license-invalid-value.yaml",

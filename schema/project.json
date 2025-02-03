@@ -75,6 +75,16 @@
       "format": "uri",
       "type": "string"
     },
+    "events": {
+      "description": "Event URLs related to the project.",
+      "type": "array",
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
     "leaders": {
       "description": "Leaders of the project.",
       "type": "array",
