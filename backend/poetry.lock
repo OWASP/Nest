@@ -1251,22 +1251,6 @@ files = [
 ]
 
 [[package]]
-name = "isort"
-version = "6.0.0"
-description = "A Python utility / library to sort Python imports."
-optional = false
-python-versions = ">=3.9.0"
-groups = ["dev"]
-files = [
-    {file = "isort-6.0.0-py3-none-any.whl", hash = "sha256:567954102bb47bb12e0fae62606570faacddd441e45683968c8d1734fb1af892"},
-    {file = "isort-6.0.0.tar.gz", hash = "sha256:75d9d8a1438a9432a7d7b54f2d3b45cad9a4a0fdba43617d9873379704a8bdf1"},
-]
-
-[package.extras]
-colors = ["colorama"]
-plugins = ["setuptools"]
-
-[[package]]
 name = "jiter"
 version = "0.8.2"
 description = "Fast iterable JSON parser."
@@ -2904,4 +2888,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "efc8cd83044411c1d6d384f3fcd32b76ed323d9c3c7b1035348343faceb8b199"
+content-hash = "1cb1a5e09c9e70000d07a1c0bc7f77a970fba83dfbba763202cebbaff263fd68"

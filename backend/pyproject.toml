@@ -41,14 +41,13 @@ pygithub = "^2.5.0"
 python = "^3.13"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-sentry-sdk = {extras = ["django"], version = "^2.20.0"}
+sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 boto3 = "^1.36.1"
 
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
-isort = "^6.0.0"
 pre-commit = "^4.1.0"
 ruff = "^0.9.3"
 
@@ -66,11 +65,6 @@ format_css = true
 format_js = true
 indent = 4
 
-[tool.isort]
-known_first_party = ["apps"]
-known_third_party = ["django", "rest_framework"]
-multi_line_output = 3
-profile = "black"
 
 [tool.pytest.ini_options]
 DJANGO_CONFIGURATION = "Test"
@@ -97,6 +91,7 @@ log_level = "INFO"
 line-length = 99
 
 [tool.ruff.lint]
+extend-select = ["I"]
 ignore = [
     "ANN",
     "ARG002",
