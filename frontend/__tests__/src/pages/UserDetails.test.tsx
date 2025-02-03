@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from '@testing-library/react'
+import { render } from 'wrappers/testUtil'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
-import { render } from 'wrappers/testUtil'
 
 // Mock the Algolia-related modules
 jest.mock('utils/helpers/algoliaClient', () => ({
