@@ -31,7 +31,7 @@ const mockUser = {
   followers_count: 10,
   following_count: 5,
   public_repositories_count: 3,
-  created_at: '1221777448',
+  created_at: 1723002473,
 }
 
 const renderWithRouter = (ui: React.ReactElement) => {

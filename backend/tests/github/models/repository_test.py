@@ -46,17 +46,6 @@ class TestRepositoryModel:
         gh_repository.license = MagicMock(name="MIT")
         return gh_repository
 
-    def test_is_indexable(self, mock_gh_repository):
-        mock_project_set = MagicMock()
-        mock_project_set.exists.return_value = True
-        mock_gh_repository.project_set = mock_project_set
-
-        mock_gh_repository.is_indexable = True
-        assert mock_gh_repository.is_indexable
-
-        mock_gh_repository.is_indexable = False
-        assert not mock_gh_repository.is_indexable
-
     def test_from_github_with_missing_funding(self, mock_gh_repository):
         mock_gh_repository.get_contents.side_effect = GithubException(
             data={"status": "404"}, status=404
