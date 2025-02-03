@@ -2,9 +2,11 @@ audience: breaker
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
+    email: leader1@com
   - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
+    email: leader2@com
 level: 2
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
@@ -13,4 +15,3 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
-email: user@com
