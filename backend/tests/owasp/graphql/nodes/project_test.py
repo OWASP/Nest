@@ -94,7 +94,7 @@ class TestProjectNode:
         model_fields = {f.name for f in Project._meta.get_fields()}
         node_fields = set(ProjectNode._meta.fields.keys())
 
-        custom_fields = {"recent_issues", "recent_releases", "nest_url"}
+        custom_fields = {"recent_issues", "recent_releases", "related_repositories", "nest_url"}
         node_fields = node_fields - custom_fields
 
         assert all(field in model_fields for field in node_fields)
