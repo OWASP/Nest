@@ -78,7 +78,7 @@ const SortBy = ({
           <Tooltip
             content={selectedOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
             showArrow
-            positioning={{ placement: 'bottom-start' }}
+            positioning={{ placement: 'top-start' }}
             openDelay={100}
             closeDelay={100}
           >
