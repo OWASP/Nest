@@ -28,10 +28,10 @@ def test_positive(project_schema):
             "'hacker' is not one of ['breaker', 'builder', 'defender']",
         ),
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
+        ("audience-missing.yaml", "'audience' is a required property"),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
-        ("audience-missing.yaml", "'audience' is a required property"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
