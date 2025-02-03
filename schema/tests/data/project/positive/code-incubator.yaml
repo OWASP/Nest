@@ -1,3 +1,4 @@
+audience: breaker
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -12,4 +13,3 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
-audience: breaker
