@@ -13,6 +13,6 @@ tags:
   - example-tag-3
 type: code
 sponsors:
-  - name: Sponsor 1
+  - description: A great sponsor
     logo: https://sponsor1.com/logo.png
-    description: A great sponsor
+    name: Sponsor 1
