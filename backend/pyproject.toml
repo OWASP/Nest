@@ -41,7 +41,7 @@ pygithub = "^2.5.0"
 python = "^3.13"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
-sentry-sdk = {extras = ["django"], version = "^2.20.0"}
+sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 
 
@@ -88,9 +88,9 @@ log_level = "INFO"
 
 [tool.ruff]
 line-length = 99
-extend-select = ["I"]
 
 [tool.ruff.lint]
+extend-select = ["I"]
 ignore = [
     "ANN",
     "ARG002",
