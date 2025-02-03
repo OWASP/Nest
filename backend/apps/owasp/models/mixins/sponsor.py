@@ -1,9 +1,9 @@
 """OWASP app sponsor mixins."""
 
-from apps.owasp.models.mixins.common import GenericEntityMixin
+from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 
-class SponsorIndexMixin(GenericEntityMixin):
+class SponsorIndexMixin(RepositoryBasedEntityModelMixin):
     """Sponsor index mixin."""
 
     @property
