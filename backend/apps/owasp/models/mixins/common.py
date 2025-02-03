@@ -1,36 +1,13 @@
-"""OWASP app common models."""
-
-from django.db.models import Sum
-
-from apps.github.constants import OWASP_FOUNDATION_LOGIN
-from apps.github.models.repository_contributor import (
-    TOP_CONTRIBUTORS_LIMIT,
-    RepositoryContributor,
-)
+"""OWASP app common mixins."""
 
 
-class GenericEntityMixin:
-    """OWASP Entity mixin."""
+class RepositoryBasedEntityModelMixin:
+    """OWASP repository based entity model mixin."""
 
-    def get_top_contributors(self, repositories=()):
-        """Get top contributors."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["total_contributions"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.filter(repository__in=repositories)
-            .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
-            .values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-            )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
+    @property
+    def is_indexable(self):
+        """Entities to index."""
+        return self.has_active_repositories
 
     @property
     def idx_description(self):
