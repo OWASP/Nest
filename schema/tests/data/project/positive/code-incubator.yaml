@@ -1,10 +1,10 @@
 audience: breaker
 leaders:
-  - github: leader-1-github
-    email: leader1@example.com
+  - email: leader1@example.com
+    github: leader-1-github
     name: Leader 1 Name
-  - github: leader-2-github
-    email: leader2@example.org
+  - email: leader2@example.org
+    github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
 level: 2
