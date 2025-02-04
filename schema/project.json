@@ -30,6 +30,40 @@
       },
       "additionalProperties": false
     },
+    "repository": {
+      "type": "object",
+      "title": "Repository",
+      "description": "A project repository.",
+      "required": ["url"],
+      "properties": {
+        "changelog": {
+          "type": ["string", "null"],
+          "description": "Link to the changelog."
+        },
+        "code_of_conduct": {
+          "type": ["string", "null"],
+          "description": "Link to the code of conduct."
+        },
+        "contribution_guide": {
+          "type": ["string", "null"],
+          "description": "Link to the contribution guide."
+        },
+        "description": {
+          "type": ["string"],
+          "description": "Repository description."
+        },
+        "name": {
+          "type": ["string"],
+          "description": "Repository name."
+        },
+        "url": {
+          "type": "string",
+          "description": "The repository URL.",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    },
     "sponsor": {
       "type": "object",
       "title": "Sponsor",
@@ -152,6 +186,14 @@
     "pitch": {
       "description": "The project pitch.",
       "type": "string"
+    },
+    "repositories": {
+      "description": "Repositories associated with the project.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/repository"
+      },
+      "uniqueItems": true
     },
     "sponsors": {
       "description": "Sponsors of the project.",
