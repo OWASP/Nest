@@ -19,50 +19,56 @@ def events_handler(ack, command, client):
 
     events_data = get_events_data()
 
-    blocks = []
+    valid_events = [event for event in events_data if event.get("startDate")]
+    sorted_events = sorted(valid_events, key=lambda x: x["startDate"])
 
-    blocks.append(markdown("*Upcoming OWASP Events: *"))
+    categorized_events = {}
+    for event in sorted_events:
+        category = event.get("category") or "Other"
+        if category not in categorized_events:
+            categorized_events[category] = {
+                "description": event.get("categoryDescription", ""),
+                "events": [],
+            }
+        categorized_events[category]["events"].append(event)
+
+    blocks = []
+    blocks.append(markdown("*Upcoming OWASP Events:*"))
     blocks.append({"type": "divider"})
 
-    for category_data in events_data:
-        blocks.append(
-            markdown(
-                f"*{category_data['category']} Events:*{NL}{category_data['description']}{NL}"
-            )
-        )
-        stored_events = sorted(
-            category_data["events"],
-            key=lambda x: x["start-date"],
-        )
+    for category, category_data in categorized_events.items():
+        blocks.append(markdown(f"*{category} Events:*{NL}{category_data['description']}{NL}"))
 
-        for idx, events in enumerate(stored_events, 1):
-            blocks.append(format_event_block(events, idx))
+        for idx, event in enumerate(category_data["events"], 1):
+            if event.get("url"):
+                block_text = f"*{idx}. <{event['url']}|{event['name']}>*{NL}"
+            else:
+                block_text = f"*{idx}. {event['name']}*{NL}"
+
+            if event.get("startDate"):
+                block_text += f" Start Date: {event['startDate']}{NL}"
+
+            if event.get("dates"):
+                block_text += f" Duration: {event['dates']}{NL}"
+
+            if event.get("optionalText"):
+                block_text += f"_{event['optionalText']}_{NL}"
+
+            blocks.append(markdown(block_text))
 
         blocks.append({"type": "divider"})
 
     blocks.append(
         markdown(
             f"🔍 For more information about upcoming events, "
-            f"Please visit <{OWASP_WEBSITE_URL}/events/|OWASP Events>{NL}"
+            f"please visit <{OWASP_WEBSITE_URL}/events/|OWASP Events>{NL}"
         )
     )
 
     conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
-
-
-def format_event_block(event, idx):
-    """Format a single event into a Slack message block."""
-    block_text = f"*{idx}. {event['name']}*{NL}"
-    block_text += f"{event['dates']}{NL}"
-
-    if event.get("url"):
-        block_text += f"🔗 <{event['url']}|More Information>{NL}"
-
-    if event.get("optional-text"):
-        block_text += f"_{event['optional-text']}_{NL}"
-
-    return markdown(block_text)
+    client.chat_postMessage(
+        channel=conversation["channel"]["id"], text="Upcoming OWASP Events", blocks=blocks
+    )
 
 
 if SlackConfig.app:

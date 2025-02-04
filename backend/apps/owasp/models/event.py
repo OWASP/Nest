@@ -15,6 +15,13 @@ class Event(BulkSaveModel, RepositoryBasedEntityModel, TimestampedModel):
 
     level = models.CharField(verbose_name="Level", max_length=5, default="", blank=True)
     url = models.URLField(verbose_name="URL", default="", blank=True)
+    category = models.CharField(verbose_name="Category", max_length=100, default="", blank=True)
+    dates = models.CharField(verbose_name="Dates", max_length=100, default="", blank=True)
+    start_date = models.DateField(verbose_name="Start Date", null=True, blank=True)
+    optional_text = models.TextField(verbose_name="Additional Text", default="", blank=True)
+    category_description = models.TextField(
+        verbose_name="Category Description", default="", blank=True
+    )
 
     owasp_repository = models.ForeignKey(
         "github.Repository", on_delete=models.SET_NULL, blank=True, null=True

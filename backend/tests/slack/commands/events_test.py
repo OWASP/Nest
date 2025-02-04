@@ -1,14 +1,37 @@
-from datetime import date
+"""Test events command handler."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
 
-from apps.common.constants import OWASP_WEBSITE_URL
 from apps.slack.commands.events import events_handler
+
+mock_events = [
+    {
+        "name": "OWASP Snow 2025",
+        "category": "AppSec Days",
+        "startDate": "2025-03-14",
+        "dates": "March 14, 2025",
+        "url": "https://example.com/snow",
+        "optionalText": "Regional conference",
+        "categoryDescription": "Local events description",
+    },
+    {
+        "name": "OWASP Global AppSec EU 2025",
+        "category": "Global",
+        "startDate": "2025-05-26",
+        "dates": "May 26-30, 2025",
+        "url": "https://example.com/eu",
+        "optionalText": "Premier conference",
+        "categoryDescription": "Global events description",
+    },
+]
 
 
 class TestEventsHandler:
+    """Test events command handler."""
+
     @pytest.fixture()
     def mock_slack_command(self):
         return {
@@ -21,47 +44,12 @@ class TestEventsHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
-    def mock_events(self):
-        return [
-            {
-                "category": "Global",
-                "description": "Our premier events bring together our communities.",
-                "events": [
-                    {
-                        "name": "OWASP Global AppSec EU 2025",
-                        "start-date": date(2025, 5, 26),
-                        "dates": "May 26-30, 2025",
-                        "url": "https://example.com/eu2025",
-                    },
-                    {
-                        "name": "OWASP Global AppSec US 2025",
-                        "start-date": date(2025, 11, 3),
-                        "dates": "November 3-7, 2025",
-                    },
-                ],
-            },
-            {
-                "category": "AppSec Days",
-                "description": "Local OWASP volunteers organize conferences.",
-                "events": [
-                    {
-                        "name": "OWASP Snow 2025",
-                        "start-date": date(2025, 3, 14),
-                        "dates": "March 14, 2025",
-                        "url": "https://example.com/snowfroc",
-                        "optional-text": "Premier application security conference",
-                    },
-                ],
-            },
-        ]
-
     @pytest.mark.parametrize(
         ("commands_enabled", "has_events_data", "expected_header"),
         [
             (False, True, None),
-            (True, True, "*Upcoming OWASP Events: *"),
-            (True, False, "*Upcoming OWASP Events: *"),
+            (True, True, "*Upcoming OWASP Events:*"),
+            (True, False, "*Upcoming OWASP Events:*"),
         ],
     )
     @patch("apps.slack.commands.events.get_events_data")
@@ -73,8 +61,8 @@ class TestEventsHandler:
         expected_header,
         mock_slack_client,
         mock_slack_command,
-        mock_events,
     ):
+        """Test handler responses."""
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_get_events_data.return_value = mock_events if has_events_data else []
 
@@ -92,62 +80,27 @@ class TestEventsHandler:
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
 
         assert blocks[0]["text"]["text"] == expected_header
+        assert blocks[1]["type"] == "divider"
 
         if has_events_data:
             current_block = 2
-            for category_data in mock_events:
-                category_block = blocks[current_block]["text"]["text"]
-                assert f"*{category_data['category']} Events:*" in category_block
-                assert category_data["description"] in category_block
-                current_block += 1
 
-                sorted_events = sorted(
-                    category_data["events"],
-                    key=lambda x: x["start-date"],
-                )
+            assert "*AppSec Days Events:*" in blocks[current_block]["text"]["text"]
+            assert "Local events description" in blocks[current_block]["text"]["text"]
+            current_block += 1
 
-                for idx, event in enumerate(sorted_events, 1):
-                    event_block = blocks[current_block]["text"]["text"]
+            event_block = blocks[current_block]["text"]["text"]
+            assert "*1. <https://example.com/snow|OWASP Snow 2025>*" in event_block
+            assert "Start Date: 2025-03-14" in event_block
+            assert "Duration: March 14, 2025" in event_block
+            assert "_Regional conference_" in event_block
+            current_block += 1
 
-                    assert f"*{idx}. {event['name']}*" in event_block
-                    assert f"{event['dates']}" in event_block
+            assert blocks[current_block]["type"] == "divider"
+            current_block += 1
 
-                    if event.get("url"):
-                        assert f"🔗 <{event['url']}|More Information>" in event_block
-                    if event.get("optional-text"):
-                        assert f"_{event['optional-text']}_" in event_block
-
-                    current_block += 1
-
-                current_block += 1
+            assert "*Global Events:*" in blocks[current_block]["text"]["text"]
+            assert "Global events description" in blocks[current_block]["text"]["text"]
 
             footer_block = blocks[-1]["text"]["text"]
             assert "🔍 For more information about upcoming events" in footer_block
-            assert OWASP_WEBSITE_URL in footer_block
-
-    def test_format_event_block(self):
-        """Test the format_event_block function independently."""
-        from apps.slack.commands.events import format_event_block
-
-        minimal_event = {
-            "name": "Test Event",
-            "dates": "Jan 1, 2025",
-        }
-        result = format_event_block(minimal_event, 1)
-        assert "Test Event" in result["text"]["text"]
-        assert "Jan 1, 2025" in result["text"]["text"]
-        assert "More Information" not in result["text"]["text"]
-        assert "_" not in result["text"]["text"]
-
-        full_event = {
-            "name": "Test Event",
-            "dates": "Jan 1, 2025",
-            "url": "https://example.com",
-            "optional-text": "Additional information",
-        }
-        result = format_event_block(full_event, 1)
-        assert "Test Event" in result["text"]["text"]
-        assert "Jan 1, 2025" in result["text"]["text"]
-        expected_url = "https://" + "example.com"
-        assert expected_url in result["text"]["text"]
-        assert "Additional information" in result["text"]["text"]

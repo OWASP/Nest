@@ -4,6 +4,7 @@ import html
 import logging
 from functools import lru_cache
 
+import graphene
 import requests
 import yaml
 from requests.exceptions import RequestException
@@ -34,19 +35,28 @@ def get_staff_data(timeout=30):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
 
 
-@lru_cache
-def get_events_data(timeout=30):
-    """Get events data."""
-    file_path = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/events.yml"
+def get_events_data():
+    """Get raw events data via GraphQL."""
+    from apps.owasp.graphql.queries.event import EventQuery
+
+    query = """
+    query {
+        events {
+            key
+            name
+            category
+            dates
+            startDate
+            url
+            optionalText
+            description
+            categoryDescription
+        }
+    }
+    """
     try:
-        events_data = yaml.safe_load(
-            requests.get(
-                file_path,
-                timeout=timeout,
-            ).text
-        )
-    except (RequestException, yaml.scanner.ScannerError):
-        logger.exception("Unable to parse OWASP events data file", extra={"file_path": file_path})
+        result = graphene.Schema(query=EventQuery).execute(query)
+        return result.data["events"]
+    except Exception as e:
+        logger.exception("Failed to fetch events data via GraphQL", extra={"error": str(e)})
         return None
-    else:
-        return events_data

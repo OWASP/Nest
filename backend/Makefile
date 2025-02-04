@@ -42,6 +42,7 @@ index-data:
 load-data:
 	@echo "Loading Nest data"
 	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py add_events_data" $(MAKE) exec-backend-command
 
 merge-migrations:
 	@CMD="poetry run python manage.py makemigrations --merge" $(MAKE) exec-backend-command
