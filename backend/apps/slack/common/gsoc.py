@@ -64,11 +64,6 @@ GSOC_2025_MILESTONES = (
     ),
     divider(),
     markdown(
-        "We're building with modern frameworks and tools: *TypeScript, React, Chakra UI, "
-        f"Tailwind CSS, Python, Django, Docker, and Kubernetes*.{2*NL}"
-        "OWASP Nest has clean and well-documented code, automated CI/CD pipeline, great test "
-        "coverage for both the frontend and backend making the project reliable and easy "
-        f"to scale.{2*NL}"
         f"Join the effort at <{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> and help shape "
         "the future :rocket:"
     ),
