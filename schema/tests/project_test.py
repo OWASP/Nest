@@ -29,6 +29,7 @@ def test_positive(project_schema):
         ),
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience-missing.yaml", "'audience' is a required property"),
+        ("blog-none.yaml", "None is not of type 'string'"),
         ("demo-none.yaml", "None is not of type 'string'"),
         ("downloads-empty.yaml", "[] should be non-empty"),
         (
@@ -58,6 +59,7 @@ def test_positive(project_schema):
         ("sponsors-empty-list.yaml", "[] should be non-empty"),
         ("sponsors-name-missing.yaml", "'name' is a required property"),
         ("sponsors-url-missing.yaml", "'url' is a required property"),
+        ("website-none.yaml", "None is not of type 'string'"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
