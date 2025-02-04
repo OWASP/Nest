@@ -2,8 +2,6 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #333;
-    color: white;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -13,9 +11,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.3s;
-  }
-  
-  .scroll-up-btn:hover {
-    background-color: #555;
-  } 
+    transition: all 0.3s ease;
+}
+
+/* Light theme (default) */
+.scroll-up-btn {
+    background-color: hsl(var(--primary-foreground));
+    color: hsl(var(--primary));
+}
+
+.scroll-up-btn:hover {
+    background-color: hsl(var(--primary-foreground) / 90%);
+    transform: translateY(-2px);
+}
+
+/* Dark theme */
+:root[class~="dark"] .scroll-up-btn {
+    background-color: hsl(var(--primary));
+    color: white;
+}
+
+:root[class~="dark"] .scroll-up-btn:hover {
+    background-color: hsl(var(--primary) / 90%);
+    transform: translateY(-2px);
+} 
