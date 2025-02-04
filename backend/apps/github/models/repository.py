@@ -102,16 +102,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.path
 
     @property
-    def is_indexable(self):
-        """Repositories to index."""
-        return (
-            not self.is_archived
-            and not self.is_empty
-            and not self.is_template
-            and self.project_set.exists()
-        )
-
-    @property
     def latest_release(self):
         """Repository latest release."""
         return self.published_releases.order_by("-published_at").first()
@@ -144,6 +134,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             for k, v in sorted(self.languages.items(), key=lambda pair: pair[1], reverse=True)
             if v >= LANGUAGE_PERCENTAGE_THRESHOLD and k.lower() not in IGNORED_LANGUAGES
         )
+
+    @property
+    def url(self):
+        """Return repository URL."""
+        return f"https://github.com/{self.path}"
 
     def from_github(
         self,

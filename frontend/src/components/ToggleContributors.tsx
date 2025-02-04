@@ -17,6 +17,9 @@ const TopContributors = ({
     ? contributors
     : contributors.slice(0, maxInitialDisplay)
 
+  if (contributors.length === 0) {
+    return
+  }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
       <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
@@ -28,7 +31,7 @@ const TopContributors = ({
             className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             <img
-              src={contributor.avatar_url}
+              src={`${contributor.avatar_url}&s=60`}
               alt={contributor.name || contributor.login}
               className="mr-3 h-10 w-10 rounded-full"
             />

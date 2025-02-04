@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import pytest
 
 from apps.github.models.mixins.repository import RepositoryIndexMixin
+from apps.github.models.release import Release
 
 CONTRIBUTORS_COUNT = 5
 FORKS_COUNT = 5
@@ -30,8 +31,19 @@ def repository_index_mixin_instance():
     return instance
 
 
-class TestRepositoryIndex:
+class TestRepositoryIndexMixin:
     """Test suite for RepositoryIndexMixin."""
+
+    @pytest.mark.parametrize(
+        ("is_draft", "expected_indexable"),
+        [
+            (False, True),
+            (True, False),
+        ],
+    )
+    def test_is_indexable(self, is_draft, expected_indexable):
+        release = Release(is_draft=is_draft)
+        assert release.is_indexable == expected_indexable
 
     @pytest.mark.parametrize(
         ("attr", "expected"),

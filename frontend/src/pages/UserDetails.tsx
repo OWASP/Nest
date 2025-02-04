@@ -12,6 +12,7 @@ import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
+import { formatDate } from 'utils/dateFormatter'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
@@ -196,12 +197,7 @@ const UserDetailsPage: React.FC = () => {
             ))}
           </div>
           <div className="border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            Joined{' '}
-            {new Date(Number(user.created_at) * 1000).toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
+            Joined {formatDate(user.created_at)}
           </div>
         </div>
       </div>

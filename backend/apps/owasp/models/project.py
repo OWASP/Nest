@@ -140,11 +140,6 @@ class Project(
         return self.type == self.ProjectType.TOOL
 
     @property
-    def is_indexable(self):
-        """Projects to index."""
-        return self.has_active_repositories
-
-    @property
     def issues(self):
         """Return issues."""
         return Issue.objects.filter(repository__in=self.repositories.all())
@@ -228,7 +223,7 @@ class Project(
     @lru_cache
     def active_projects_count():
         """Return active projects count."""
-        return IndexBase.get_total_count("projects")
+        return IndexBase.get_total_count("projects", search_filters="idx_is_active:true")
 
     @staticmethod
     def bulk_save(projects, fields=None):
