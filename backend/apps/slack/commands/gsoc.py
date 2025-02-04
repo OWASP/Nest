@@ -18,7 +18,7 @@ SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 
 
 def gsoc_handler(ack, command, client):
     """Slack /gsoc command handler."""
-    from apps.owasp.api.search.gsoc import get_gsoc_projects
+    from apps.owasp.api.search.project import get_gsoc_projects
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
 
     ack()

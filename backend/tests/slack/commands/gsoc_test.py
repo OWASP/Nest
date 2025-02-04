@@ -77,7 +77,7 @@ class TestGsocHandler:
         settings.SLACK_COMMANDS_ENABLED = True
 
         with patch(
-            "apps.owasp.api.search.gsoc.get_gsoc_projects",
+            "apps.owasp.api.search.project.get_gsoc_projects",
             return_value=mock_projects,
         ):
             gsoc_handler(ack=MagicMock(), command=command, client=mock_slack_client)
