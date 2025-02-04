@@ -75,6 +75,11 @@
       ],
       "type": "string"
     },
+    "blog": {
+      "description": "Project's blog.",
+      "format": "uri",
+      "type": ["string"]
+    },
     "demo": {
       "description": "Optional URL to the project demo.",
       "format": "uri",

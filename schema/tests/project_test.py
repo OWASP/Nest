@@ -29,6 +29,7 @@ def test_positive(project_schema):
         ),
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience-missing.yaml", "'audience' is a required property"),
+        ("blog-none.yaml", "None is not of type 'string'"),
         ("demo-none.yaml", "None is not of type 'string'"),
         ("downloads-empty.yaml", "[] should be non-empty"),
         (
