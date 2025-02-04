@@ -1,11 +1,8 @@
 audience: breaker
-events: []
 leaders:
-  - email: leader1@example.com
-    github: leader-1-github
+  - github: leader-1-github
     name: Leader 1 Name
-  - email: leader2@example.org
-    github: leader-2-github
+  - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
 level: 2
@@ -16,3 +13,4 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
+events: []
