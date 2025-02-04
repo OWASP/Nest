@@ -242,18 +242,18 @@ tests-mypy = ["mypy (>=1.11.1)", "pytest-mypy-plugins"]
 
 [[package]]
 name = "boto3"
-version = "1.36.10"
+version = "1.36.12"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "boto3-1.36.10-py3-none-any.whl", hash = "sha256:5f8d5c2024a2d1411d3d67abb7357ec7d4c6162e3f1c396dc9b79d042cfd0a80"},
-    {file = "boto3-1.36.10.tar.gz", hash = "sha256:d2f1010db699326b26fbd465d91c4b49177c9d995d7e72c0f31335f139efa0d2"},
+    {file = "boto3-1.36.12-py3-none-any.whl", hash = "sha256:32cdf0967287f3ec25a9dc09df0d29cb86b8900c3e0546a63d672775d8127abf"},
+    {file = "boto3-1.36.12.tar.gz", hash = "sha256:287d84f49bba3255a17b374578127d42b6251e72f55914a62e0ad9ca78c0954b"},
 ]
 
 [package.dependencies]
-botocore = ">=1.36.10,<1.37.0"
+botocore = ">=1.36.12,<1.37.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.11.0,<0.12.0"
 
@@ -262,14 +262,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.36.10"
+version = "1.36.12"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "botocore-1.36.10-py3-none-any.whl", hash = "sha256:45c8a6e01dc18d44a13ba688f1d60ad562db8154b08c46b412387ea040a741c2"},
-    {file = "botocore-1.36.10.tar.gz", hash = "sha256:d27bb73f0ea81395527a6298ac0a7ea5b2958094169f7cf7d48e3f4e4bc21b65"},
+    {file = "botocore-1.36.12-py3-none-any.whl", hash = "sha256:5ae1ed362c8ed908a6ced8cdd12b21e2196c100bc79f9e95c9c1fc7f9ea74f5a"},
+    {file = "botocore-1.36.12.tar.gz", hash = "sha256:86ed88beb4f244c96529435c868d3940073c2774116f0023fb7691f6e7053bd9"},
 ]
 
 [package.dependencies]
@@ -1249,22 +1249,6 @@ files = [
 ]
 
 [[package]]
-name = "isort"
-version = "6.0.0"
-description = "A Python utility / library to sort Python imports."
-optional = false
-python-versions = ">=3.9.0"
-groups = ["dev"]
-files = [
-    {file = "isort-6.0.0-py3-none-any.whl", hash = "sha256:567954102bb47bb12e0fae62606570faacddd441e45683968c8d1734fb1af892"},
-    {file = "isort-6.0.0.tar.gz", hash = "sha256:75d9d8a1438a9432a7d7b54f2d3b45cad9a4a0fdba43617d9873379704a8bdf1"},
-]
-
-[package.extras]
-colors = ["colorama"]
-plugins = ["setuptools"]
-
-[[package]]
 name = "jiter"
 version = "0.8.2"
 description = "Fast iterable JSON parser."
@@ -1679,14 +1663,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.60.2"
+version = "1.61.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "openai-1.60.2-py3-none-any.whl", hash = "sha256:993bd11b96900b9098179c728026f016b4982ded7ee30dfcf4555eab1171fff9"},
-    {file = "openai-1.60.2.tar.gz", hash = "sha256:a8f843e10f2855713007f491d96afb2694b11b5e02cb97c7d01a0be60bc5bb51"},
+    {file = "openai-1.61.0-py3-none-any.whl", hash = "sha256:e8c512c0743accbdbe77f3429a1490d862f8352045de8dc81969301eb4a4f666"},
+    {file = "openai-1.61.0.tar.gz", hash = "sha256:216f325a24ed8578e929b0f1b3fb2052165f3b04b0461818adaa51aa29c71f8a"},
 ]
 
 [package.dependencies]
@@ -2902,4 +2886,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "3e0231f0b4062636eb32acad3fbdf3dcc16dcf3f0db30436dbbe363b7be5e1b8"
+content-hash = "1cb1a5e09c9e70000d07a1c0bc7f77a970fba83dfbba763202cebbaff263fd68"

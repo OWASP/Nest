@@ -34,8 +34,3 @@ repos:
         entry: djlint --reformat
         types:
           - html
-
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort

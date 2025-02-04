@@ -19,6 +19,6 @@ USER owasp
 COPY poetry.lock pyproject.toml ./
 RUN poetry install --no-root
 
-COPY project.json project.json
+COPY *.json ./
 COPY tests tests
 COPY utils utils

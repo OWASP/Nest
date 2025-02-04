@@ -11,6 +11,7 @@ env:
 jobs:
   update-data:
     name: Run data sync
+    if: github.repository == 'OWASP/Nest'
     env:
       ANSIBLE_HOST_KEY_CHECKING: False
       STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'

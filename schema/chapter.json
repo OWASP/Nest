@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/chapter.json",
+  "$defs": {
+    "leader": {
+      "type": "object",
+      "title": "Leader",
+      "description": "A chapter leader.",
+      "required": ["github"],
+      "properties": {
+        "email": {
+          "description": "The leader's email address.",
+          "format": "email",
+          "type": ["string", "null"]
+        },
+        "github": {
+          "type": "string",
+          "description": "The GitHub username.",
+          "pattern": "^[a-zA-Z0-9-]{1,39}$"
+        },
+        "name": {
+          "type": ["string", "null"],
+          "description": "Leader's name."
+        },
+        "slack": {
+          "type": ["string", "null"],
+          "description": "The Slack username.",
+          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sponsor": {
+      "type": "object",
+      "title": "Sponsor",
+      "description": "A chapter sponsor.",
+      "required": [
+        "name",
+        "url"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "A brief description of the sponsor."
+        },
+        "logo": {
+          "type": "string",
+          "description": "The URL of the sponsor's logo.",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the sponsor or organization."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the sponsor.",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "additionalProperties": false,
+  "description": "OWASP chapter schema.",
+  "properties": {
+    "blog": {
+      "description": "Chapter's blog.",
+      "format": "uri",
+      "type": ["string"]
+    },
+    "country": {
+      "description": "Country.",
+      "type": "string"
+    },
+    "events": {
+      "description": "Event URLs related to the chapter.",
+      "type": "array",
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "leaders": {
+      "description": "Leaders of the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/leader"
+      },
+      "minItems": 2,
+      "uniqueItems": true
+    },
+    "meetup-group": {
+      "description": "Meetup group.",
+      "type": "string"
+    },
+    "name": {
+      "description": "The unique name of the chapter.",
+      "minLength": 10,
+      "type": "string"
+    },
+    "region": {
+      "description": "Region.",
+      "type": "string"
+    },
+    "sponsors": {
+      "description": "Sponsors of the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sponsor"
+      },
+      "minItems": 1
+    },
+    "tags": {
+      "description": "Tags for the chapter",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "uniqueItems": true
+    },
+    "website": {
+      "description": "The official website of the chapter.",
+      "type": "string",
+      "format": "url"
+    }
+  },
+  "required": [
+    "country",
+    "leaders",
+    "name",
+    "tags"
+  ],
+  "title": "OWASP Chapter",
+  "type": "object"
+}
