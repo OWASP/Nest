@@ -9,6 +9,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 
 import { cn } from 'utils/utility'
+import { FeedbackFormModal } from './FeedbackFormModal'
 import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
 
@@ -104,6 +105,7 @@ export default function Header() {
             hoverIconColor="#d9156c"
             text="Sponsor"
           />
+          <FeedbackFormModal />
           <ModeToggle />
           <div className="md:hidden">
             <button
