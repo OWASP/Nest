@@ -10,9 +10,9 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type React from 'react'
 import { useState } from 'react'
-import { RelatedRepositoryCardProps, RepositoryCardProps } from 'types/project'
+import { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
 
-const RelatedRepositoriesCard: React.FC<RelatedRepositoryCardProps> = ({ repositories }) => {
+const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
 
   const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4)
@@ -52,19 +52,19 @@ const RepositoryItem: React.FC<RepositoryCardProps> = ({
   contributorsCount,
   forksCount,
   starsCount,
-  repositoryUrl,
+  url,
 }) => (
   <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm transition-all duration-300 ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
     <a
-      href={repositoryUrl}
+      href={url}
       target="_blank"
       className="font-semibold text-blue-600 hover:underline dark:text-sky-400"
     >
       {name}
     </a>
     <div className="space-y-2 text-sm">
-      <InfoItem icon={faExclamationCircle} label="Issues" value={openIssuesCount} />
       <InfoItem icon={faUsers} label="Contributors" value={contributorsCount} />
+      <InfoItem icon={faExclamationCircle} label="Issues" value={openIssuesCount} />
       <InfoItem icon={faCodeFork} label="Forks" value={forksCount} />
       <InfoItem icon={faStar} label="Stars" value={starsCount} />
     </div>
@@ -85,4 +85,4 @@ const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: number }>
   </div>
 )
 
-export default RelatedRepositoriesCard
+export default RepositoriesCard

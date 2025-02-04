@@ -6,7 +6,7 @@ import {
   faCalendar,
   faFileCode,
   faTag,
-  faBook,
+  faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
@@ -15,7 +15,7 @@ import { getSocialIcon } from 'utils/urlIconMappings'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
-import RelatedRepositoriesCard from 'components/RelatedRepositoriesCard'
+import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import ToggleableList from 'components/ToogleList'
@@ -86,7 +86,7 @@ const DetailsCard = ({
               />
               <InfoBlock
                 className="pb-1"
-                icon={faBook}
+                icon={faExclamationCircle}
                 value={`${projectStats.issues || 'No'} Issues`}
               />
             </SecondaryCard>
@@ -139,8 +139,8 @@ const DetailsCard = ({
           </>
         )}
         {type === 'project' && repositories.length > 0 && (
-          <SecondaryCard title="Related Repository" className="mt-6">
-            <RelatedRepositoriesCard repositories={repositories} />
+          <SecondaryCard title="Repositories" className="mt-6">
+            <RepositoriesCard repositories={repositories} />
           </SecondaryCard>
         )}
       </div>

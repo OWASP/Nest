@@ -127,14 +127,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.releases.filter(is_draft=False, published_at__isnull=False)
 
     @property
-    def repository_url(self):
-        """Get all relevant URLs for the repository."""
-        url = ""
-        if self.owner and self.name:
-            url = f"https://github.com/{self.owner.login}/{self.name}"
-        return url
-
-    @property
     def top_languages(self):
         """Return a list of top used languages."""
         return sorted(
@@ -142,6 +134,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             for k, v in sorted(self.languages.items(), key=lambda pair: pair[1], reverse=True)
             if v >= LANGUAGE_PERCENTAGE_THRESHOLD and k.lower() not in IGNORED_LANGUAGES
         )
+
+    @property
+    def url(self):
+        """Return repository URL."""
+        return f"https://github.com/{self.path}"
 
     def from_github(
         self,

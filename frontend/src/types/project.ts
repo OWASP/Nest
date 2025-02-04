@@ -62,15 +62,15 @@ export type ProjectReleaseType = {
 }
 
 export type RepositoryCardProps = {
-  name: string
-  forksCount: number
-  starsCount: number
-  repositoryUrl: string
-  openIssuesCount: number
-  subscribersCount: number
   contributorsCount: number
+  forksCount: number
+  name: string
+  openIssuesCount: number
+  starsCount: number
+  subscribersCount: number
+  url: string
 }
 
-export interface RelatedRepositoryCardProps {
+export interface RepositoriesCardProps {
   repositories: RepositoryCardProps[]
 }

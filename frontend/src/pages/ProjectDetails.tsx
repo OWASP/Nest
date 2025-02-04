@@ -43,7 +43,7 @@ const ProjectDetailsPage = () => {
     if (data) {
       setRecentReleases(data?.project?.recentReleases || [])
       setRecentIssues(data?.project?.recentIssues || [])
-      setRepositories(data?.project?.relatedRepositories || [])
+      setRepositories(data?.project?.repositories || [])
     }
     if (graphQLRequestError && !isLoading) {
       toast({

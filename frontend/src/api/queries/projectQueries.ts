@@ -22,14 +22,14 @@ export const GET_PROJECT_DATA = gql`
           name
         }
       }
-      relatedRepositories {
-        name
-        forksCount
-        starsCount
-        repositoryUrl
-        openIssuesCount
-        subscribersCount
+      repositories {
         contributorsCount
+        forksCount
+        name
+        openIssuesCount
+        url
+        starsCount
+        subscribersCount
       }
     }
   }

@@ -9,7 +9,7 @@ from apps.github.models.repository import Repository
 class RepositoryNode(BaseNode):
     """GitHub repository node."""
 
-    repository_url = graphene.String()
+    url = graphene.String()
 
     class Meta:
         model = Repository
@@ -22,6 +22,6 @@ class RepositoryNode(BaseNode):
             "contributors_count",
         )
 
-    def resolve_repository_url(self, info):
-        """Resolve all URLs."""
-        return self.repository_url
+    def resolve_url(self, info):
+        """Resolve URL."""
+        return self.url
