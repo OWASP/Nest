@@ -73,13 +73,7 @@ export function useSearchPage<T extends object>({
           undefined,
           activeOnly
         )
-        const filteredItems = data.hits.filter((hit) => {
-          if ('is_active' in hit) {
-            return hit.is_active === true
-          }
-          return true
-        })
-        setItems(filteredItems)
+        setItems(data.hits)
         setTotalPages(data.totalPages)
       } catch (error) {
         handleAppError(error)
