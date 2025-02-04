@@ -58,7 +58,7 @@ def test_positive(project_schema):
         ("sponsors-empty-list.yaml", "[] should be non-empty"),
         ("sponsors-name-missing.yaml", "'name' is a required property"),
         ("sponsors-url-missing.yaml", "'url' is a required property"),
-        ("blog-url-invalid.yaml","'blogUrl' is not a valid uri")
+        ("blog-url-invalid.yaml","'blogUrl' is not a valid uri"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
