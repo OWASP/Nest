@@ -23,6 +23,7 @@ const ChaptersPage = () => {
   } = useSearchPage<ChapterType>({
     indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
+    activeOnly: true,
   })
 
   useEffect(() => {
@@ -32,6 +33,7 @@ const ChaptersPage = () => {
         query: '',
         currentPage: 1,
         filterKey: '',
+        activeOnly: true,
         hitsPerPage: 1000,
       }
       const data: AlgoliaResponseType<ChapterType> = await fetchAlgoliaData(
@@ -39,6 +41,7 @@ const ChaptersPage = () => {
         searchParams.query,
         searchParams.currentPage,
         searchParams.filterKey,
+        searchParams.activeOnly,
         searchParams.hitsPerPage
       )
       setGeoLocData(data.hits)

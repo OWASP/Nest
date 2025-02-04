@@ -12,6 +12,7 @@ export const fetchAlgoliaData = async <T>(
   query = '',
   currentPage = 0,
   filterKey?: string,
+  activeOnly = false,
   hitsPerPage = 25
 ): Promise<AlgoliaResponseType<T>> => {
   if (!client) {
@@ -28,9 +29,14 @@ export const fetchAlgoliaData = async <T>(
       removeWordsIfNoResults: 'allOptional',
       ...params,
     }
-    if (filterKey) {
-      request.filters = `idx_key: ${filterKey}`
-    }
+    request.filters =
+      filterKey && activeOnly
+        ? `idx_key:${filterKey} AND idx_is_active:true`
+        : activeOnly
+          ? `idx_is_active:true`
+          : filterKey
+            ? `idx_key:${filterKey}`
+            : ''
 
     const { results } = await client.search({
       requests: [request],

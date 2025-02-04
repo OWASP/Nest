@@ -9,6 +9,7 @@ interface UseSearchPageOptions {
   pageTitle: string
   defaultSortBy?: string
   defaultOrder?: string
+  activeOnly?: boolean
 }
 
 interface UseSearchPageReturn<T> {
@@ -30,6 +31,7 @@ export function useSearchPage<T extends object>({
   pageTitle,
   defaultSortBy = '',
   defaultOrder = '',
+  activeOnly = false,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -67,7 +69,9 @@ export function useSearchPage<T extends object>({
             ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
             : indexName,
           searchQuery,
-          currentPage
+          currentPage,
+          undefined,
+          activeOnly
         )
         const filteredItems = data.hits.filter((hit) => {
           if ('is_active' in hit) {
@@ -84,7 +88,7 @@ export function useSearchPage<T extends object>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, indexName, pageTitle, navigate])
+  }, [currentPage, searchQuery, order, sortBy, indexName, pageTitle, navigate, activeOnly])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)

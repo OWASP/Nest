@@ -26,6 +26,7 @@ const ProjectsPage = () => {
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
     defaultOrder: 'asc',
+    activeOnly: true,
   })
 
   const navigate = useNavigate()
