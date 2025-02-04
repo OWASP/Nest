@@ -4,7 +4,12 @@ import { ChapterType } from './chapter'
 import { topContributorsType } from './contributor'
 import { IconType } from './icon'
 import { Level } from './level'
-import { ProjectIssuesType, ProjectReleaseType, ProjectStatsType } from './project'
+import {
+  ProjectIssuesType,
+  ProjectReleaseType,
+  ProjectStatsType,
+  RepositoryCardProps,
+} from './project'
 
 export interface UserCardProps {
   avatar: string
@@ -43,4 +48,5 @@ export interface DetailsCardProps {
   type: string
   recentIssues?: ProjectIssuesType[]
   recentReleases?: ProjectReleaseType[]
+  repositories?: RepositoryCardProps[]
 }

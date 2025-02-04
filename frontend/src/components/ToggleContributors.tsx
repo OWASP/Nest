@@ -32,7 +32,7 @@ const TopContributors = ({
             className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             <img
-              src={contributor.avatar_url}
+              src={`${contributor.avatar_url}&s=60`}
               alt={contributor.name || contributor.login}
               className="mr-3 h-10 w-10 rounded-full"
             />

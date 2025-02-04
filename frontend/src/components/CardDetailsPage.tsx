@@ -6,7 +6,7 @@ import {
   faCalendar,
   faFileCode,
   faTag,
-  faBook,
+  faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
@@ -15,6 +15,7 @@ import { getSocialIcon } from 'utils/urlIconMappings'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
+import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import ToggleableList from 'components/ToogleList'
@@ -34,6 +35,7 @@ const DetailsCard = ({
   recentIssues,
   recentReleases,
   geolocationData = null,
+  repositories = [],
 }: DetailsCardProps) => {
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -84,7 +86,7 @@ const DetailsCard = ({
               />
               <InfoBlock
                 className="pb-1"
-                icon={faBook}
+                icon={faExclamationCircle}
                 value={`${projectStats.issues || 'No'} Issues`}
               />
             </SecondaryCard>
@@ -135,6 +137,11 @@ const DetailsCard = ({
               )}
             />
           </>
+        )}
+        {type === 'project' && repositories.length > 0 && (
+          <SecondaryCard title="Repositories" className="mt-6">
+            <RepositoriesCard repositories={repositories} />
+          </SecondaryCard>
         )}
       </div>
     </div>
