@@ -22,6 +22,23 @@ def escape(content):
 
 
 @lru_cache
+def get_gsoc_projects(year):
+    """Get GSoC projects."""
+    from apps.owasp.api.search.project import get_projects
+
+    return get_projects(
+        attributes=["idx_name", "idx_url"],
+        query=f"gsoc{year}",
+        searchable_attributes=[
+            "idx_custom_tags",
+            "idx_languages",
+            "idx_tags",
+            "idx_topics",
+        ],
+    )["hits"]
+
+
+@lru_cache
 def get_news_data(limit=10, timeout=30):
     """Get news data."""
     response = requests.get(OWASP_NEWS_URL, timeout=timeout)
