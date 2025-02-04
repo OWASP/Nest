@@ -144,6 +144,12 @@
       ],
       "type": "string"
     },
+    "blogUrl":{
+      "description": "URL of the project's blog.",
+      "type": ["string","null"],
+      "format": "uri"
+
+    }
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
