@@ -1,10 +1,19 @@
 """OWASP app chapter mixins."""
 
-from apps.owasp.models.mixins.common import GenericEntityMixin
+from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 
-class ChapterIndexMixin(GenericEntityMixin):
+class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
     """Chapter index mixin."""
+
+    @property
+    def is_indexable(self):
+        """Chapters to index."""
+        return (
+            self.latitude is not None
+            and self.longitude is not None
+            and not self.owasp_repository.is_empty
+        )
 
     @property
     def idx_country(self):

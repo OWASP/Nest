@@ -8,23 +8,10 @@ from apps.owasp.models.common import RepositoryBasedEntityModel
 class EntityModel(RepositoryBasedEntityModel):
     class Meta:
         abstract = False
-        app_label = "test_app"
+        app_label = "owasp"
 
 
 class TestRepositoryBasedEntityModel:
-    @pytest.mark.parametrize(
-        ("has_active_repositories", "expected"),
-        [
-            (True, True),
-            (False, False),
-        ],
-    )
-    def test_is_indexable(self, has_active_repositories, expected):
-        model = EntityModel()
-        model.has_active_repositories = has_active_repositories
-
-        assert model.is_indexable == expected
-
     @pytest.mark.parametrize(
         ("key", "expected_url"),
         [

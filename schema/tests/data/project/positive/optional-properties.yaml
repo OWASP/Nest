@@ -1,0 +1,25 @@
+audience: breaker
+blog: https://blog.projec.com
+demo: https://some-demo-url.com
+downloads:
+  - https://abc.com/download1
+  - https://abc.com/download2
+events:
+  - https://example.com/event1
+  - https://example.com/event2
+leaders:
+  - github: leader-1-github
+    name: Leader 1 Name
+  - github: leader-2-github
+    name: Leader 2 Name
+    slack: leader-2-slack
+level: 2
+license: MIT
+name: OWASP Incubator Code Project
+pitch: A very brief, one-line description of your project
+tags:
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
+type: code
+website: https://official-website.com
