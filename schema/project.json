@@ -149,6 +149,13 @@
       ],
       "type": "string"
     },
+    "mailing_list": {
+      "description": "The optional mailing list associated with the project.",
+      "type": "string",
+      "format": "email",
+      "minLength": 10,
+      "maxLength": 200
+},
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
