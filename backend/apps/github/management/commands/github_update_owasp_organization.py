@@ -13,7 +13,6 @@ from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
-from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -48,7 +47,6 @@ class Command(BaseCommand):
 
         chapters = []
         committees = []
-        events = []
         projects = []
 
         offset = options["offset"]
@@ -82,17 +80,12 @@ class Command(BaseCommand):
             elif entity_key.startswith("www-project-"):
                 projects.append(Project.update_data(gh_repository, repository, save=False))
 
-            # OWASP events.
-            elif entity_key.startswith("www-event-"):
-                events.append(Event.update_data(gh_repository, repository, save=False))
-
             # OWASP committees.
             elif entity_key.startswith("www-committee-"):
                 committees.append(Committee.update_data(gh_repository, repository, save=False))
 
         Chapter.bulk_save(chapters)
         Committee.bulk_save(committees)
-        Event.bulk_save(events)
         Project.bulk_save(projects)
 
         # Check repository counts.
