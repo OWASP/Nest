@@ -75,6 +75,11 @@
       ],
       "type": "string"
     },
+    "blog": {
+      "description": "Project's blog.",
+      "format": "uri",
+      "type": ["string"]
+    },
     "demo": {
       "description": "Optional URL to the project demo.",
       "format": "uri",
@@ -144,12 +149,6 @@
       ],
       "type": "string"
     },
-    "blogUrl":{
-      "description": "URL of the project's blog.",
-      "type": ["string","null"],
-      "format": "uri"
-
-    }
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
