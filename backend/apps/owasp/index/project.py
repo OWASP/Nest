@@ -95,7 +95,6 @@ class ProjectIndex(IndexBase):
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
-        return IndexBase.reindex_synonyms("owasp", "projects")
 
     def get_entities(self):
         """Get entities for indexing."""
