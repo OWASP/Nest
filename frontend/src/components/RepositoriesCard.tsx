@@ -54,7 +54,7 @@ const RepositoryItem: React.FC<RepositoryCardProps> = ({
   starsCount,
   url,
 }) => (
-  <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm transition-all duration-300 ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+  <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
     <a
       href={url}
       target="_blank"
