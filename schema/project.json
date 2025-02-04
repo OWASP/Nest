@@ -8,6 +8,11 @@
       "description": "A project leader.",
       "required": ["github"],
       "properties": {
+        "email": {
+          "description": "The leader's email address.",
+          "format": "email",
+          "type": ["string", "null"]
+        },
         "github": {
           "type": "string",
           "description": "The GitHub username.",
