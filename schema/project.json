@@ -34,7 +34,10 @@
       "type": "object",
       "title": "Sponsor",
       "description": "A project sponsor.",
-      "required": ["name", "url"],
+      "required": [
+        "name",
+        "url"
+      ],
       "properties": {
         "description": {
           "type": "string",
@@ -111,7 +114,12 @@
       "default": 2,
       "description": "The numeric level of the project.",
       "enum": [2, 3, 3.5, 4],
-      "enumDescriptions": ["Incubator", "Lab", "Production", "Flagship"],
+      "enumDescriptions": [
+        "Incubator",
+        "Lab",
+        "Production",
+        "Flagship"
+      ],
       "title": "Project level.",
       "type": "number"
     },
@@ -178,7 +186,15 @@
       "format": "url"
     }
   },
-  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
+  "required": [
+    "audience",
+    "leaders",
+    "level",
+    "name",
+    "pitch",
+    "tags",
+    "type"
+  ],
   "title": "OWASP Project",
   "type": "object"
 }
