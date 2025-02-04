@@ -13,7 +13,6 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
-repository:
+repositories:
  - description: A repository without URL
    name: test-repo
-   url: ''

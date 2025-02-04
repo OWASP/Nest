@@ -190,6 +190,7 @@
     "repositories": {
       "description": "Repositories associated with the project.",
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/repository"
       },
