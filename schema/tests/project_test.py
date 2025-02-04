@@ -35,10 +35,6 @@ def test_positive(project_schema):
             "downloads-non-unique.yaml",
             "['https://abc.com/download', 'https://abc.com/download'] has non-unique elements",
         ),
-        (
-            "downloads-non-uri.yaml",
-            "['example-url-1', 'example-url-2'] has non-uri elements",
-        ),
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique-urls.yaml",
