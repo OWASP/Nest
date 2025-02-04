@@ -31,7 +31,7 @@ docker:
           - 'docker-*.yaml'
           - '**/Dockerfile.*'
 
-documentation:
+docs:
   - changed-files:
       - any-glob-to-any-file:
           - '**/*.md'
@@ -67,11 +67,12 @@ nginx:
           - 'nginx/**'
 
 schema:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'schema/**'
-      - all-globs-to-all-files:
-          - '!schema/tests/**'
+  - all:
+    - changed-files:
+        - any-glob-to-any-file:
+            - 'schema/**'
+        - all-globs-to-all-files:
+            - '!schema/tests/**'
 
 schema-tests:
   - changed-files:
