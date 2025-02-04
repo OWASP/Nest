@@ -80,6 +80,17 @@
       "format": "uri",
       "type": "string"
     },
+    "downloads": {
+      "description": "Optional list of download URLs.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
+    },
     "events": {
       "description": "Event URLs related to the project.",
       "type": "array",
