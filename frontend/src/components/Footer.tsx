@@ -23,8 +23,6 @@ export default function Footer() {
           {footerSections.map((section: Section) => (
             <div key={section.title} className="space-y-4">
               <Button
-                focusVisibleRing={'none'}
-                focusRingColor={'currentBg'}
                 onClick={() => toggleSection(section.title)}
                 className="flex w-full items-center justify-between text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
                 aria-expanded={openSection === section.title}

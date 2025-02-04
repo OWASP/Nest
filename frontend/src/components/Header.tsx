@@ -108,8 +108,6 @@ export default function Header() {
           <ModeToggle />
           <div className="md:hidden">
             <Button
-              focusVisibleRing={'none'}
-              focusRingColor={'currentBg'}
               onClick={toggleMobileMenu}
               className="text-slate-300 hover:text-slate-100 focus:outline-none"
             >

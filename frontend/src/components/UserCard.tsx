@@ -6,8 +6,6 @@ import { UserCardProps } from 'types/card'
 const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
   return (
     <Button
-      focusVisibleRing={'none'}
-      focusRingColor={'currentBg'}
       onClick={button.onclick}
       className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >

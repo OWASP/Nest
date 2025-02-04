@@ -83,8 +83,6 @@ const SortBy = ({
             closeDelay={100}
           >
             <Button
-              focusVisibleRing={'none'}
-              focusRingColor={'currentBg'}
               onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
               className="flex items-center justify-center rounded-lg bg-gray-200 p-2 shadow-sm hover:bg-gray-300 dark:bg-[#323232] dark:text-gray-300 dark:hover:bg-[#454545]"
             >

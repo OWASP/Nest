@@ -23,8 +23,6 @@ const ToggleableList = ({ items, label, limit = 10 }) => {
       </div>
       {items.length > limit && (
         <Button
-          focusVisibleRing={'none'}
-          focusRingColor={'currentBg'}
           onClick={toggleShowAll}
           className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
         >

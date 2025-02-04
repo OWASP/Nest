@@ -37,8 +37,6 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, m
           </h2>
           <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
           <Button
-            focusVisibleRing={'none'}
-            focusRingColor={'currentBg'}
             onClick={() => navigate('/')}
             className="font-inter mt-8 h-12 w-40 rounded-lg bg-owasp-blue text-base font-medium text-white transition-colors hover:bg-blue-400"
           >
