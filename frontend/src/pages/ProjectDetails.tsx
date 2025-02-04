@@ -16,6 +16,7 @@ const ProjectDetailsPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [recentReleases, setRecentReleases] = useState<ProjectReleaseType[]>([])
   const [recentIssues, setRecentIssues] = useState<ProjectIssuesType[]>([])
+  const [repositories, setRepositories] = useState([])
 
   const {
     data,
@@ -41,7 +42,8 @@ const ProjectDetailsPage = () => {
   useEffect(() => {
     if (data) {
       setRecentReleases(data?.project?.recentReleases || [])
-      setRecentIssues(data?.project?.recentIssues)
+      setRecentIssues(data?.project?.recentIssues || [])
+      setRepositories(data?.project?.repositories || [])
     }
     if (graphQLRequestError && !isLoading) {
       toast({
@@ -103,6 +105,7 @@ const ProjectDetailsPage = () => {
       topics={project.topics}
       recentReleases={recentReleases}
       recentIssues={recentIssues}
+      repositories={repositories}
     />
   )
 }
