@@ -4,8 +4,8 @@ downloads:
   - https://abc.com/download1
   - https://abc.com/download2
 events:
-  - 'https://example.com/event1'
-  - 'https://example.com/event2'
+  - https://example.com/event1
+  - https://example.com/event2
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -21,3 +21,4 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
+website: https://official-website.com
