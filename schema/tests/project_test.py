@@ -35,9 +35,14 @@ def test_positive(project_schema):
             "events-non-unique-urls.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
-        ("leader-email-invalid.yaml", "'leader1' is not a 'email'"),
-        ("leader-email-missing-at.yaml", "'leader1.com' is not a 'email'"),
-        ("leader-email-invalid-domain.yaml", "'leader1@com' is not a 'email'"),
+        (
+            "leader-email-empty.yaml",
+            "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+        ),
+        (
+            "leader-email-missing.yaml",
+            "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+        ),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         (
             "license-invalid-value.yaml",

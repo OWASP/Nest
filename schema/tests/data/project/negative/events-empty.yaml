@@ -1,4 +1,5 @@
 audience: breaker
+events: []
 leaders:
   - email: leader1@example.com
     github: leader-1-github
@@ -15,4 +16,3 @@ tags:
   - example-tag-2
   - example-tag-3
 type: code
-events: []

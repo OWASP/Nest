@@ -9,9 +9,9 @@
       "required": ["github"],
       "properties": {
         "email": {
-          "type": ["string", "null"],
           "description": "The leader's email address.",
-          "format": "email"
+          "format": "email",
+          "type": ["string", "null"]
         },
         "github": {
           "type": "string",
