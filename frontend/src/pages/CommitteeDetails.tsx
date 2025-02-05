@@ -9,20 +9,20 @@ import CardSkeleton from 'components/skeletons/Card'
 
 const CommitteeDetailsPage = () => {
   const { committeeKey } = useParams()
-  const [committee, setcommittee] = useState(null)
+  const [committee, setCommittee] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchcommitteeData = async () => {
+    const fetchCommitteeData = async () => {
       setIsLoading(true)
       const { hits } = await fetchAlgoliaData('committees', committeeKey, 1, committeeKey)
       if (hits && hits.length > 0) {
-        setcommittee(hits[0])
+        setCommittee(hits[0])
       }
       setIsLoading(false)
     }
 
-    fetchcommitteeData()
+    fetchCommitteeData()
   }, [committeeKey])
   if (isLoading)
     return (
