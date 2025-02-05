@@ -41,7 +41,7 @@ const SearchPageLayout = ({
   }
 
   return (
-    <div className="text-text mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5">
+    <div className="mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
       <div className="flex w-full items-center justify-center">
         <SearchBar
           indexName={indexName}

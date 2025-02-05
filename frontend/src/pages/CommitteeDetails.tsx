@@ -52,7 +52,7 @@ const CommitteeDetailsPage = () => {
   const filteredIcons = getFilteredIcons(committee, params)
   const formattedUrls = handleSocialUrls(committee.related_urls)
   return (
-    <div className="container mx-auto pt-24 pb-16 xl:max-w-full">
+    <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
       <div className="flex justify-center">
         <Card
           key={committee.objectID}
