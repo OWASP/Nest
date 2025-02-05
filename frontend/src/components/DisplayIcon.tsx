@@ -38,7 +38,6 @@ export default function DisplayIcon({
 
   return icons[item] ? (
     <Tooltip
-      id={`icon-tooltip-${item}`}
       content={`${Icons[item as keyof typeof Icons]?.label}`}
       recipe={TooltipRecipe}
       openDelay={150}
