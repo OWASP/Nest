@@ -1,13 +1,12 @@
 """GitHub repository Algolia index configuration."""
 
 from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
 
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase, conditional_register
 from apps.github.models.repository import Repository
 
 
-@register(Repository)
+@conditional_register(Repository)
 class RepositoryIndex(AlgoliaIndex, IndexBase):
     """Repository index."""
 

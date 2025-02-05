@@ -1,14 +1,13 @@
 """GitHub user Algolia index configuration."""
 
 from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
 
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase, conditional_register
 from apps.github.models.organization import Organization
 from apps.github.models.user import User
 
 
-@register(User)
+@conditional_register(User)
 class UserIndex(AlgoliaIndex, IndexBase):
     """User index."""
 

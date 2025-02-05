@@ -1,14 +1,13 @@
 """OWASP app project index."""
 
 from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
 from django.conf import settings
 
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase, conditional_register
 from apps.owasp.models.project import Project
 
 
-@register(Project)
+@conditional_register(Project)
 class ProjectIndex(AlgoliaIndex, IndexBase):
     """Project index."""
 
@@ -97,7 +96,6 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
     def configure_replicas():
         """Configure the settings for project replicas."""
         env = settings.ENVIRONMENT.lower()
-        client = IndexBase.get_client()
         replicas = {
             f"{env}_projects_name_asc": ["asc(idx_name)"],
             f"{env}_projects_name_desc": ["desc(idx_name)"],
@@ -109,7 +107,4 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
             f"{env}_projects_forks_count_desc": ["desc(idx_forks_count)"],
         }
 
-        client.set_settings(f"{env}_projects", {"replicas": list(replicas.keys())})
-
-        for replica_name, ranking in replicas.items():
-            client.set_settings(replica_name, {"ranking": ranking})
+        IndexBase.configure_replicas(env, "projects", replicas)

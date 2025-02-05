@@ -1,13 +1,12 @@
 """OWASP app chapter index."""
 
 from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
 
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, conditional_register
 from apps.owasp.models.committee import Committee
 
 
-@register(Committee)
+@conditional_register(Committee)
 class CommitteeIndex(AlgoliaIndex):
     """Committee index."""
 

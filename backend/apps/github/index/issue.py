@@ -1,13 +1,12 @@
 """GitHub issue index."""
 
 from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
 
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
+from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase, conditional_register
 from apps.github.models.issue import Issue
 
 
-@register(Issue)
+@conditional_register(Issue)
 class IssueIndex(AlgoliaIndex, IndexBase):
     """Issue index."""
 

@@ -1,22 +1,16 @@
 """A command to update OWASP Nest suggestions index."""
 
-from algoliasearch.query_suggestions.client import QuerySuggestionsClientSync
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
+from apps.common.index import IndexBase, should_create_index
 
 
 class Command(BaseCommand):
     help = "Create query suggestions for Algolia indices"
 
     def handle(self, *args, **kwargs):
-        if settings.ENVIRONMENT == "Local":
-            return
-
-        client = QuerySuggestionsClientSync(
-            settings.ALGOLIA_APPLICATION_ID,
-            settings.ALGOLIA_WRITE_API_KEY,
-            settings.ALGOLIA_APPLICATION_REGION,
-        )
+        client = IndexBase.get_suggestions_client()
 
         entity_configs = {
             "chapters": {
@@ -93,6 +87,10 @@ class Command(BaseCommand):
         for entity, suggestion_settings in entity_configs.items():
             source_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}"
             suggestions_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}_suggestions"
+
+            # Skip updating if the index is excluded
+            if not should_create_index(suggestions_index_name, "suggestion"):
+                continue
 
             configuration = {
                 "sourceIndices": [
