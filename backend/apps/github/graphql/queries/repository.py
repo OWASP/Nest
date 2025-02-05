@@ -1,12 +1,15 @@
-import graphene 
+"""GITHUB repository GraphQL queries."""
 
-from apps.github.graphql.nodes.repository import RepositoryNode
+import graphene
+
 from apps.common.graphql.queries import BaseQuery
+from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.github.models.repository import Repository
 
 
 class RepositoryQuery(BaseQuery):
-    """Repository Query"""
+    """Repository queries."""
+
     repository = graphene.Field(RepositoryNode, key=graphene.String(required=True))
 
     def resolve_repository(root, info, key):
