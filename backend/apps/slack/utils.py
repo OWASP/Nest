@@ -1,6 +1,7 @@
 """Slack app utils."""
 
 import logging
+import re
 from functools import lru_cache
 from html import escape as escape_html
 from urllib.parse import urljoin
@@ -80,3 +81,42 @@ def get_staff_data(timeout=30):
         )
     except (RequestException, yaml.scanner.ScannerError):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
+
+
+def blocks_to_text(blocks):
+    """Convert Slack blocks to plain text, including handling Slack links."""
+    text = ""
+
+    for block in blocks:
+        if block.get("type") == "section":
+            if "text" in block and block["text"].get("type") == "mrkdwn":
+                text += _process_mrkdwn(block["text"]["text"]) + "\n"
+            elif "fields" in block:
+                for field in block["fields"]:
+                    if field.get("type") == "mrkdwn":
+                        text += _process_mrkdwn(field["text"]) + "\n"
+        elif block.get("type") == "divider":
+            text += "---\n"
+        elif block.get("type") == "context":
+            for element in block["elements"]:
+                if element.get("type") == "mrkdwn":
+                    text += _process_mrkdwn(element["text"]) + "\n"
+        elif block.get("type") == "actions":
+            for element in block["elements"]:
+                if element.get("type") == "button":
+                    text += _process_mrkdwn(element["text"]["text"]) + "\n"
+        elif block.get("type") == "image":
+            text += f"Image: {block.get('image_url', '')}\n"
+        elif (
+            block.get("type") == "header"
+            and "text" in block
+            and block["text"].get("type") == "plain_text"
+        ):
+            text += block["text"]["text"] + "\n"
+    return text.strip()
+
+
+def _process_mrkdwn(text):
+    """Process mrkdwn text, including Slack links and stars."""
+    slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
+    return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")
