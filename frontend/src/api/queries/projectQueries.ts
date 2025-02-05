@@ -11,6 +11,7 @@ export const GET_PROJECT_DATA = gql`
         author {
           avatarUrl
           name
+          login
         }
       }
       recentIssues {
@@ -20,6 +21,7 @@ export const GET_PROJECT_DATA = gql`
         author {
           avatarUrl
           name
+          login
         }
       }
       repositories {
