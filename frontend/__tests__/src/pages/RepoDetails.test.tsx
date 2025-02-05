@@ -1,10 +1,9 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { RepoDetailsPage } from 'pages' // Adjust the path as needed
+import { RepoDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import { mockRepositoryData } from '@tests/data/mockRepositoryData'
-// Mock the useQuery hook
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

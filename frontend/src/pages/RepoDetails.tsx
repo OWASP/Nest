@@ -62,7 +62,7 @@ const RepoDetailsPage = () => {
       value: formatDate(repository.updatedAt),
     },
     {
-      label: 'Lincese',
+      label: 'License',
       value: repository.license,
     },
     {

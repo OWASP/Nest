@@ -12,7 +12,7 @@ RECENT_RELEASES_LIMIT = 10
 
 
 class ContributorType(graphene.ObjectType):
-    """contributos type."""
+    """contributors type."""
 
     avatar_url = graphene.String()
     contributions_count = graphene.Int()
