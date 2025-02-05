@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
-import { mockChaterDetailsData } from '@tests/data/mockChapterDetailsData'
+import { mockChapterDetailsData } from '@tests/data/mockChapterDetailsData'
 jest.mock('api/fetchAlgoliaData')
 
 jest.mock('react-router-dom', () => ({
@@ -16,7 +16,7 @@ describe('chapterDetailsPage Component', () => {
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
       Promise.resolve({
-        hits: [mockChaterDetailsData],
+        hits: [mockChapterDetailsData],
       })
     )
   })
@@ -71,7 +71,7 @@ describe('chapterDetailsPage Component', () => {
 
   test('handles contributors with missing names gracefully', async () => {
     const chapterDataWithIncompleteContributors = {
-      ...mockChaterDetailsData,
+      ...mockChapterDetailsData,
       top_contributors: [
         {
           name: 'user1',
