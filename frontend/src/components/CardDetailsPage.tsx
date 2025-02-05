@@ -1,13 +1,4 @@
-import {
-  faUsers,
-  faCodeFork,
-  faStar,
-  faCode,
-  faCalendar,
-  faFileCode,
-  faTag,
-  faExclamationCircle,
-} from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
@@ -25,7 +16,7 @@ const DetailsCard = ({
   is_active = true,
   summary,
   description,
-  projectStats,
+  stats,
   details,
   socialLinks,
   type,
@@ -40,7 +31,9 @@ const DetailsCard = ({
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 mt-4 text-4xl font-bold">{title}</h1>
+        <h1 className="mb-6 mt-4 text-4xl font-bold">
+          {title && title[0].toUpperCase() + title.slice(1)}
+        </h1>
         <p className="mb-6 text-xl">{description}</p>
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
@@ -52,7 +45,7 @@ const DetailsCard = ({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             title={`${type[0].toUpperCase() + type.slice(1)} Details`}
-            className={`${type === 'project' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
+            className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
               details.map((detail, index) => (
@@ -62,33 +55,11 @@ const DetailsCard = ({
               ))}
             {socialLinks && type === 'chapter' && <SocialLinks urls={socialLinks || []} />}
           </SecondaryCard>
-          {type === 'project' && (
+          {(type === 'project' || type === 'repository') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
-              <InfoBlock
-                className="pb-1"
-                icon={faUsers}
-                value={`${projectStats.contributors || 'No'} Contributors`}
-              />
-              <InfoBlock
-                className="pb-1"
-                icon={faCodeFork}
-                value={`${projectStats.forks || 'No'} Forks`}
-              />
-              <InfoBlock
-                className="pb-1"
-                icon={faStar}
-                value={`${projectStats.stars || 'No'} Stars`}
-              />
-              <InfoBlock
-                className="pb-1"
-                icon={faCode}
-                value={`${projectStats.repositories || 'No'} Repositories`}
-              />
-              <InfoBlock
-                className="pb-1"
-                icon={faExclamationCircle}
-                value={`${projectStats.issues || 'No'} Issues`}
-              />
+              {stats.map((stat, index) => (
+                <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
+              ))}
             </SecondaryCard>
           )}
           {type === 'chapter' && geolocationData && (
@@ -101,7 +72,7 @@ const DetailsCard = ({
           )}
         </div>
 
-        {type === 'project' && (
+        {(type === 'project' || type === 'repository') && (
           <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             <ToggleableList items={languages} label="Languages" />
             <ToggleableList items={topics} label="Topics" />
@@ -110,7 +81,7 @@ const DetailsCard = ({
 
         <TopContributors contributors={topContributors} maxInitialDisplay={6} />
 
-        {type === 'project' && (
+        {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList
               title="Recent Issues"

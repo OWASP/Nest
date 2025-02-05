@@ -1,15 +1,11 @@
+import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { JSX } from 'react'
 import { ButtonType } from './button'
 import { ChapterType } from './chapter'
 import { topContributorsType } from './contributor'
 import { IconType } from './icon'
 import { Level } from './level'
-import {
-  ProjectIssuesType,
-  ProjectReleaseType,
-  ProjectStatsType,
-  RepositoryCardProps,
-} from './project'
+import { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from './project'
 
 export interface UserCardProps {
   avatar: string
@@ -33,14 +29,18 @@ export interface CardProps {
   isActive?: boolean
 }
 
+interface stats {
+  icon: IconDefinition
+  value: string
+}
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   geolocationData?: ChapterType
   is_active?: boolean
   languages?: string[]
-  projectStats?: ProjectStatsType
   socialLinks?: string[]
+  stats?: stats[]
   summary?: string
   title?: string
   topContributors?: topContributorsType[]
