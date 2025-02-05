@@ -1,4 +1,4 @@
-export const mockChaterDetailsData = {
+export const mockChapterDetailsData = {
   name: 'OWASP Test Chapter',
   suggested_location: 'Test City, Test Country',
   region: 'Test Region',

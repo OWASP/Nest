@@ -1,5 +1,5 @@
 {
-  "allowCompoundWords": true,
+  "allowCompoundWords": false,
   "caseSensitive": false,
   "language": "en",
   "minWordLength": 3,
@@ -38,7 +38,11 @@
   ],
   "enabled": true,
   "files": ["**/*"],
-  "ignorePaths": ["backend/static/**"],
+  "ignorePaths": [
+    "backend/**/migrations/*.py",
+    "backend/data/project-custom-tags/*.json",
+    "backend/static/**",
+  ],
   "ignoreRegExpList": [
     "#\\w+" // Slack channel names
   ],

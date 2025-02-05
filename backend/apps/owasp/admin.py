@@ -48,7 +48,7 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     search_fields = ("name", "key")
 
 
-class CommetteeAdmin(admin.ModelAdmin):
+class CommitteeAdmin(admin.ModelAdmin):
     autocomplete_fields = ("owasp_repository",)
     search_fields = ("name",)
 
@@ -102,6 +102,6 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
 
 
 admin.site.register(Chapter, ChapterAdmin)
-admin.site.register(Committee, CommetteeAdmin)
+admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Project, ProjectAdmin)
