@@ -19,6 +19,8 @@ class ProjectQuery(BaseQuery):
     def resolve_project(root, info, key, repo_key=None):
         """Resolve project by key, optionally filtering repositories by repo_key."""
         try:
-            return Project.objects.get(key=key)
+            project = Project.objects.get(key=key)
+            project.repo_key = repo_key
+            return project  # noqa: TRY300
         except Project.DoesNotExist:
             return None

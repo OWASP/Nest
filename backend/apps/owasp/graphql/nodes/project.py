@@ -33,6 +33,6 @@ class ProjectNode(BaseNode):
 
     def resolve_repositories(self, info, repo_key=None):
         """Resolve repositories, optionally filtered by repo_key."""
-        if repo_key:
-            return self.repositories.filter(key=repo_key)
+        if hasattr(self, "repo_key") and self.repo_key:
+            return self.repositories.filter(key=self.repo_key)
         return self.repositories.all()

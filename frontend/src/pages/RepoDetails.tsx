@@ -29,7 +29,7 @@ const RepoDetailsPage = () => {
 
   useEffect(() => {
     if (data) {
-      setRepository(data.project.repositories[0])
+      setRepository(data?.project?.repositories[0])
     }
     if (graphQLRequestError) {
       toast({
