@@ -73,9 +73,11 @@ const DetailsCard = ({
         </div>
 
         {(type === 'project' || type === 'repository') && (
-          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-            <ToggleableList items={languages} label="Languages" />
-            <ToggleableList items={topics} label="Topics" />
+          <div
+            className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+          >
+            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
+            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
           </div>
         )}
 

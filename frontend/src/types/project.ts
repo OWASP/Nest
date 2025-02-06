@@ -57,10 +57,10 @@ export type RepositoryCardProps = {
   contributorsCount: number
   forksCount: number
   name: string
+  key: string
   openIssuesCount: number
   starsCount: number
   subscribersCount: number
-  url: string
 }
 
 export interface RepositoriesCardProps {

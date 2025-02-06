@@ -25,7 +25,6 @@ class RepositoryNode(BaseNode):
 
     issues = graphene.List(IssueNode)
     languages = graphene.List(graphene.String)
-    project = graphene.String()
     releases = graphene.List(ReleaseNode)
     topics = graphene.List(graphene.String)
     top_contributors = graphene.List(ContributorType)
@@ -39,6 +38,7 @@ class RepositoryNode(BaseNode):
             "created_at",
             "description",
             "forks_count",
+            "key",
             "license",
             "name",
             "open_issues_count",

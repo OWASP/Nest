@@ -27,6 +27,7 @@ export const GET_PROJECT_DATA = gql`
       repositories {
         contributorsCount
         forksCount
+        key
         name
         openIssuesCount
         url

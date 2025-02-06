@@ -31,6 +31,8 @@ class ProjectNode(BaseNode):
         """Resolve project recent releases."""
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
-    def resolve_repositories(self, info):
-        """Resolve repositories."""
-        return self.repositories.order_by("-pushed_at", "-updated_at")
+    def resolve_repositories(self, info, repo_key=None):
+        """Resolve repositories, optionally filtered by repo_key."""
+        if repo_key:
+            return self.repositories.filter(key=repo_key)
+        return self.repositories.all()

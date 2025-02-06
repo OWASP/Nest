@@ -125,7 +125,7 @@ describe('RepoDetailsPage', () => {
     render(<RepoDetailsPage />)
 
     await waitFor(() => {
-      const issues = mockRepositoryData.repository.issues
+      const issues = mockRepositoryData.project.repositories[0].issues
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()

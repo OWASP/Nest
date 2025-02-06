@@ -16,7 +16,7 @@ import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const RepoDetailsPage = () => {
-  const { repositoryKey } = useParams()
+  const { projectKey, repositoryKey } = useParams()
   const [repository, setRepository] = useState(null)
 
   const {
@@ -24,12 +24,12 @@ const RepoDetailsPage = () => {
     loading: isGraphQlDataLoading,
     error: graphQLRequestError,
   } = useQuery(GET_REPOSITORY_DATA, {
-    variables: { key: repositoryKey },
+    variables: { projectKey: `www-project-${projectKey}`, repoKey: repositoryKey },
   })
 
   useEffect(() => {
     if (data) {
-      setRepository(data.repository)
+      setRepository(data.project.repositories[0])
     }
     if (graphQLRequestError) {
       toast({
@@ -38,7 +38,7 @@ const RepoDetailsPage = () => {
         description: 'Unable to complete the requested operation.',
       })
     }
-  }, [data, graphQLRequestError])
+  }, [data, graphQLRequestError, projectKey])
 
   if (isGraphQlDataLoading)
     return (
@@ -47,7 +47,7 @@ const RepoDetailsPage = () => {
       </div>
     )
 
-  if (!repository)
+  if (!isGraphQlDataLoading && !repository)
     return (
       <ErrorDisplay
         statusCode={404}
