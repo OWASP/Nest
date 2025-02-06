@@ -2,7 +2,15 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
-const ToggleableList = ({ items, label, limit = 10 }) => {
+const ToggleableList = ({
+  items,
+  label,
+  limit = 10,
+}: {
+  items: string[]
+  label: string
+  limit?: number
+}) => {
   const [showAll, setShowAll] = useState(false)
 
   const toggleShowAll = () => setShowAll(!showAll)

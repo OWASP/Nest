@@ -2,11 +2,17 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { TopContributorsType } from 'types/contributor'
 const TopContributors = ({
   contributors,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
   className = '',
+}: {
+  contributors: TopContributorsType[]
+  label?: string
+  maxInitialDisplay?: number
+  className?: string
 }) => {
   const navigate = useNavigate()
   const [showAllContributors, setShowAllContributors] = useState(false)
@@ -31,7 +37,7 @@ const TopContributors = ({
             className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             <img
-              src={`${contributor.avatar_url}&s=60`}
+              src={`${contributor.avatarUrl}&s=60`}
               alt={contributor.name || contributor.login}
               className="mr-3 h-10 w-10 rounded-full"
             />
@@ -40,7 +46,7 @@ const TopContributors = ({
                 {contributor.name || contributor.login}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {contributor.contributions_count} contributions
+                {contributor.contributionsCount} contributions
               </p>
             </div>
           </div>

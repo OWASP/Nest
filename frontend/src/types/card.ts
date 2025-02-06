@@ -1,7 +1,7 @@
 import { JSX } from 'react'
 import { ButtonType } from './button'
 import { ChapterType } from './chapter'
-import { topContributorsType } from './contributor'
+import { TopContributorsType } from './contributor'
 import { IconType } from './icon'
 import { Level } from './level'
 import {
@@ -11,26 +11,19 @@ import {
   RepositoryCardProps,
 } from './project'
 
-export interface UserCardProps {
-  avatar: string
-  name: string
-  company: string
-  button: ButtonType
-}
-
 export interface CardProps {
-  title: string
-  url: string
-  summary: string
-  level?: Level
-  icons?: IconType
-  topContributors?: topContributorsType[]
   button: ButtonType
-  projectName?: string
-  projectLink?: string
-  social?: { title: string; icon: string; url: string }[]
-  tooltipLabel?: string
+  icons?: IconType
   isActive?: boolean
+  level?: Level
+  projectLink?: string
+  projectName?: string
+  social?: { title: string; icon: string; url: string }[]
+  summary: string
+  title: string
+  tooltipLabel?: string
+  topContributors?: TopContributorsType[]
+  url: string
 }
 
 export interface DetailsCardProps {
@@ -43,10 +36,17 @@ export interface DetailsCardProps {
   socialLinks?: string[]
   summary?: string
   title?: string
-  topContributors?: topContributorsType[]
+  topContributors?: TopContributorsType[]
   topics?: string[]
   type: string
   recentIssues?: ProjectIssuesType[]
   recentReleases?: ProjectReleaseType[]
   repositories?: RepositoryCardProps[]
+}
+
+export interface UserCardProps {
+  avatar: string
+  button: ButtonType
+  company: string
+  name: string
 }
