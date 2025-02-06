@@ -37,7 +37,7 @@ const TopContributors = ({
             className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             <img
-              src={`${contributor.avatarUrl}&s=60`}
+              src={`${contributor?.avatar_url || contributor?.avatarUrl}&s=60`}
               alt={contributor.name || contributor.login}
               className="mr-3 h-10 w-10 rounded-full"
             />
@@ -46,7 +46,7 @@ const TopContributors = ({
                 {contributor.name || contributor.login}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {contributor.contributionsCount} contributions
+                {contributor?.contributions_count || contributor?.contributionsCount} contributions
               </p>
             </div>
           </div>

@@ -32,6 +32,7 @@ export const GET_PROJECT_DATA = gql`
         publishedAt
         author {
           avatarUrl
+          login
           name
         }
       }
@@ -41,17 +42,19 @@ export const GET_PROJECT_DATA = gql`
         createdAt
         author {
           avatarUrl
+          login
           name
         }
       }
       repositories {
         contributorsCount
         forksCount
+        key
         name
         openIssuesCount
-        url
         starsCount
         subscribersCount
+        url
       }
     }
   }

@@ -1,15 +1,11 @@
+import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { JSX } from 'react'
 import { ButtonType } from './button'
 import { GeoLocDataGraphQL } from './chapter'
 import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contributor'
 import { IconType } from './icon'
 import { Level } from './level'
-import {
-  ProjectIssuesType,
-  ProjectReleaseType,
-  ProjectStatsType,
-  RepositoryCardProps,
-} from './project'
+import { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from './project'
 
 export interface CardProps {
   button: ButtonType
@@ -26,6 +22,10 @@ export interface CardProps {
   url: string
 }
 
+interface stats {
+  icon: IconDefinition
+  value: string
+}
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
@@ -37,6 +37,7 @@ export interface DetailsCardProps {
   recentReleases?: ProjectReleaseType[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
+  stats?: stats[]
   summary?: string
   title?: string
   topContributors?: TopContributorsTypeGraphql[]
