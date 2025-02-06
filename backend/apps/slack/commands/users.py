@@ -5,6 +5,7 @@ from django.conf import settings
 from apps.slack.apps import SlackConfig
 from apps.slack.common.handlers.users import get_blocks
 from apps.slack.common.presentation import EntityPresentation
+from apps.slack.utils import get_text
 
 COMMAND = "/users"
 
