@@ -5,7 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL, OWASP_NEWS_URL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import divider, markdown
-from apps.slack.utils import blocks_to_text, get_news_data
+from apps.slack.utils import get_news_data, get_text
 
 COMMAND = "/news"
 
@@ -33,7 +33,9 @@ def news_handler(ack, command, client):
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(
-        channel=conversation["channel"]["id"], blocks=blocks, text=blocks_to_text(blocks)
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
     )
 
 

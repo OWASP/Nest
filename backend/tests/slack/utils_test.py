@@ -5,12 +5,12 @@ import pytest
 
 from apps.common.constants import OWASP_NEWS_URL
 from apps.slack.utils import (
-    _process_mrkdwn,
-    blocks_to_text,
     escape,
     get_gsoc_projects,
     get_news_data,
     get_staff_data,
+    get_text,
+    strip_markdown,
 )
 
 MOCK_GSOC_PROJECTS = {
@@ -77,7 +77,7 @@ MOCK_STAFF_YAML = """
 )
 def test_process_mrkdwn(input_text, expected_output):
     """Test the _process_mrkdwn function."""
-    assert _process_mrkdwn(input_text) == expected_output
+    assert strip_markdown(input_text) == expected_output
 
 
 @pytest.mark.parametrize(
@@ -136,7 +136,7 @@ def test_process_mrkdwn(input_text, expected_output):
 )
 def test_blocks_to_text(input_blocks, expected_output):
     """Test the blocks_to_text function."""
-    assert blocks_to_text(input_blocks) == expected_output
+    assert get_text(input_blocks) == expected_output
 
 
 @pytest.mark.parametrize(

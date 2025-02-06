@@ -8,7 +8,7 @@ from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.chapters import get_blocks
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.utils import blocks_to_text
+from apps.slack.utils import get_text
 
 COMMAND = "/chapters"
 
@@ -47,7 +47,9 @@ def chapters_handler(ack, command, client):
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(
-        channel=conversation["channel"]["id"], blocks=blocks, text=blocks_to_text(blocks)
+        channel=conversation["channel"]["id"],
+        blocks=blocks,
+        text=get_text(blocks),
     )
 
 

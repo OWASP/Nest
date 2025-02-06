@@ -11,7 +11,7 @@ import yaml
 from lxml import html
 from requests.exceptions import RequestException
 
-from apps.common.constants import OWASP_NEWS_URL
+from apps.common.constants import NL, OWASP_NEWS_URL
 
 logger = logging.getLogger(__name__)
 
@@ -83,40 +83,52 @@ def get_staff_data(timeout=30):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
 
 
-def blocks_to_text(blocks):
-    """Convert Slack blocks to plain text, including handling Slack links."""
-    text = ""
+def get_text(blocks):
+    """Convert blocks to plain text."""
+    text = []
 
     for block in blocks:
-        if block.get("type") == "section":
-            if "text" in block and block["text"].get("type") == "mrkdwn":
-                text += _process_mrkdwn(block["text"]["text"]) + "\n"
-            elif "fields" in block:
-                for field in block["fields"]:
-                    if field.get("type") == "mrkdwn":
-                        text += _process_mrkdwn(field["text"]) + "\n"
-        elif block.get("type") == "divider":
-            text += "---\n"
-        elif block.get("type") == "context":
-            for element in block["elements"]:
-                if element.get("type") == "mrkdwn":
-                    text += _process_mrkdwn(element["text"]) + "\n"
-        elif block.get("type") == "actions":
-            for element in block["elements"]:
-                if element.get("type") == "button":
-                    text += _process_mrkdwn(element["text"]["text"]) + "\n"
-        elif block.get("type") == "image":
-            text += f"Image: {block.get('image_url', '')}\n"
-        elif (
-            block.get("type") == "header"
-            and "text" in block
-            and block["text"].get("type") == "plain_text"
-        ):
-            text += block["text"]["text"] + "\n"
-    return text.strip()
+        match block.get("type"):
+            case "section":
+                if "text" in block and block["text"].get("type") == "mrkdwn":
+                    text.append(strip_markdown(block["text"]["text"]))
+                elif "fields" in block:
+                    text.append(
+                        NL.join(
+                            strip_markdown(field["text"])
+                            for field in block["fields"]
+                            if field.get("type") == "mrkdwn"
+                        )
+                    )
+            case "divider":
+                text.append("---")
+            case "context":
+                text.append(
+                    NL.join(
+                        strip_markdown(element["text"])
+                        for element in block["elements"]
+                        if element.get("type") == "mrkdwn"
+                    )
+                )
+            case "actions":
+                text.append(
+                    NL.join(
+                        strip_markdown(element["text"]["text"])
+                        for element in block["elements"]
+                        if element.get("type") == "button"
+                    )
+                )
+            # TODO(arkid15r): consider removing this.
+            case "image":
+                text.append(f"Image: {block.get('image_url', '')}")
+            case "header":
+                if "text" in block and block["text"].get("type") == "plain_text":
+                    text.append(block["text"]["text"])
+
+    return NL.join(text).strip()
 
 
-def _process_mrkdwn(text):
-    """Process mrkdwn text, including Slack links and stars."""
+def strip_markdown(text):
+    """Strip markdown formatting."""
     slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
     return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")

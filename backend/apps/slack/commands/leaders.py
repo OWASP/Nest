@@ -6,7 +6,7 @@ from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.utils import blocks_to_text, escape
+from apps.slack.utils import escape, get_text
 
 COMMAND = "/leaders"
 
@@ -81,7 +81,9 @@ def leaders_handler(ack, command, client):
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(
-        channel=conversation["channel"]["id"], blocks=blocks, text=blocks_to_text(blocks)
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
     )
 
 
