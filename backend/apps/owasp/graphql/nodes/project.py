@@ -17,7 +17,6 @@ class ProjectNode(BaseNode):
     """Project node."""
 
     contributors_count = graphene.Int()
-    description = graphene.String()
     forks_count = graphene.Int()
     issues_count = graphene.Int()
     is_active = graphene.Boolean()
@@ -48,10 +47,6 @@ class ProjectNode(BaseNode):
     def resolve_contributors_count(self, info):
         """Resolve project contributors count."""
         return self.idx_contributors_count
-
-    def resolve_description(self, info):
-        """Resolve project description."""
-        return self.idx_description
 
     def resolve_forks_count(self, info):
         """Resolve project forks count."""

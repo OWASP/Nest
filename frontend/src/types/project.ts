@@ -24,7 +24,6 @@ export interface RepositoriesCardProps {
 
 export interface Project {
   contributorsCount: number
-  description: string
   forksCount: number
   isActive: boolean
   issuesCount: number

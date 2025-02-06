@@ -5,7 +5,6 @@ export const GET_PROJECT_DATA = gql`
     project(key: $key) {
       contributorsCount
       forksCount
-      description
       issuesCount
       isActive
       key

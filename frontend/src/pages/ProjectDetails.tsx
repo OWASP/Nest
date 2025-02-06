@@ -78,7 +78,6 @@ const ProjectDetailsPage = () => {
   return (
     <DetailsCard
       title={project.name}
-      description={project.description}
       details={projectDetails}
       is_active={project.isActive}
       summary={project.summary}
