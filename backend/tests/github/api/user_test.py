@@ -20,7 +20,7 @@ class TestUserSerializer:
             },
             {
                 "name": "Jane Smith",
-                "login": "janesmith",
+                "login": "jane-smith",
                 "company": "Microsoft",
                 "location": "Redmond",
                 "created_at": "2024-12-29T00:00:00Z",
