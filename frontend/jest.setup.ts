@@ -13,6 +13,15 @@ if (!global.structuredClone) {
   global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
 }
 
+const originalWarn = console.warn;
+
+console.warn = (...args) => {
+  if (typeof args[0] === "string" && args[0].includes("[@zag-js/dismissable] node is `null` or `undefined`")) {
+    return;
+  }
+  originalWarn(...args);
+};
+
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
     throw new Error(`Console error: ${args.join(' ')}`)
