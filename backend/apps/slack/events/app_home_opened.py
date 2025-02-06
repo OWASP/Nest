@@ -40,7 +40,6 @@ def app_home_opened_handler(event, client, ack):
                     f"{TAB}• /contact{NL}"
                     f"{TAB}• /contribute{NL}"
                     f"{TAB}• /donate{NL}"
-                    f"{TAB}• /events{NL}"
                     f"{TAB}• /gsoc{NL}"
                     f"{TAB}• /jobs{NL}"
                     f"{TAB}• /leaders{NL}"
