@@ -18,19 +18,18 @@ export type user = {
 }
 
 export interface UserDetailsProps {
-  avatar_url: string
+  avatarUrl: string
   bio: string
   company: string
   email: string
-  followers_count: number
-  following_count: number
+  followersCount: number
+  followingCount: number
   location: string
   login: string
   name: string
-  public_repositories_count: number
+  publicRepositoriesCount: number
   title: string
-  twitter_username: string
   url: string
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }

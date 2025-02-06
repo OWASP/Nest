@@ -1,3 +1,4 @@
+import { useQuery } from '@apollo/client'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
 import {
@@ -8,20 +9,19 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { GET_USER_DATA } from 'api/queries/userQueries'
+import { toast } from 'hooks/useToast'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
-import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
-  const [isLoading, setIsLoading] = useState(true)
   const [data, setData] = useState<HeatmapData | null>(null)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
@@ -29,24 +29,31 @@ const UserDetailsPage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { hits } = await fetchAlgoliaData('users', userKey, 1, userKey)
-        if (hits.length === 0) {
-          setUser(null)
-        } else {
-          setUser(hits[0] as unknown as UserDetailsProps)
-        }
-      } catch (error) {
-        logger.error(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  const {
+      data: graphQLData,
+      loading: isGraphQlDataLoading,
+      error: graphQLRequestError,
+    } = useQuery(GET_USER_DATA, {
+      variables: { key: userKey },
+    })
 
-    fetchUserData()
-  }, [userKey])
+    useEffect(() => {
+      if (graphQLData && graphQLData.user) {
+        setUser(graphQLData.user)
+      }
+    }, [graphQLData])
+
+    useEffect(() => {
+      if (graphQLRequestError) {
+        toast({
+          variant: 'destructive',
+          title: 'GraphQL Request Failed',
+          description: 'Unable to complete the requested operation.',
+        })
+      }
+    }, [graphQLRequestError])
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,14 +76,14 @@ const UserDetailsPage: React.FC = () => {
     }
   }, [username, data])
 
-  if (isLoading)
+  if (isGraphQlDataLoading)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
 
-  if (!isLoading && user == null) {
+  if (!isGraphQlDataLoading && user == null) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -113,7 +120,7 @@ const UserDetailsPage: React.FC = () => {
                   <div className="-mt-24 flex-shrink-0">
                     <img
                       className="h-40 w-40 rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
-                      src={user.avatar_url}
+                      src={user.avatarUrl}
                       alt={user.name}
                     />
                   </div>
@@ -173,12 +180,12 @@ const UserDetailsPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-3 gap-4 bg-gray-200 p-6 dark:bg-gray-900 sm:grid-cols-3">
             {[
-              { icon: faUser, label: 'Followers', value: user.followers_count },
-              { icon: faUserPlus, label: 'Following', value: user.following_count },
+              { icon: faUser, label: 'Followers', value: user.followersCount },
+              { icon: faUserPlus, label: 'Following', value: user.followingCount },
               {
                 icon: faCodeBranch,
                 label: 'Repositories',
-                value: user.public_repositories_count,
+                value: user.publicRepositoriesCount,
               },
             ].map(({ icon: Icon, label, value }) => (
               <div
@@ -197,7 +204,7 @@ const UserDetailsPage: React.FC = () => {
             ))}
           </div>
           <div className="border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            Joined {formatDate(user.created_at)}
+            Joined {formatDate(user.createdAt)}
           </div>
         </div>
       </div>
