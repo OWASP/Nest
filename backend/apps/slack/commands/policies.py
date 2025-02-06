@@ -5,6 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import divider, markdown
+from apps.slack.utils import get_text
 
 COMMAND = "/policies"
 
@@ -82,7 +83,11 @@ def policies_handler(ack, command, client):
     ]
 
     conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+    client.chat_postMessage(
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
+    )
 
 
 if SlackConfig.app:
