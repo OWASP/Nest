@@ -6,7 +6,7 @@ from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP
-from apps.slack.utils import escape
+from apps.slack.utils import escape, get_text
 
 COMMAND = "/owasp"
 
@@ -59,7 +59,9 @@ def owasp_handler(ack, command, client):
             ),
         ]
         conversation = client.conversations_open(users=command["user_id"])
-        client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+        client.chat_postMessage(
+            channel=conversation["channel"]["id"], blocks=blocks, text=get_text(blocks)
+        )
     else:
         handler = command_tokens[0].strip().lower()
         command["text"] = " ".join(command_tokens[1:]).strip()
@@ -101,7 +103,11 @@ def owasp_handler(ack, command, client):
                     markdown(f"*`{COMMAND} {escape(handler)}` is not supported*{NL}"),
                 ]
                 conversation = client.conversations_open(users=command["user_id"])
-                client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+                client.chat_postMessage(
+                    blocks=blocks,
+                    channel=conversation["channel"]["id"],
+                    text=get_text(blocks),
+                )
 
 
 if SlackConfig.app:
