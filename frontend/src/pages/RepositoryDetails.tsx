@@ -18,18 +18,14 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
   const [repository, setRepository] = useState(null)
-
-  const {
-    data,
-    loading: isGraphQlDataLoading,
-    error: graphQLRequestError,
-  } = useQuery(GET_REPOSITORY_DATA, {
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
     variables: { projectKey: `www-project-${projectKey}`, repositoryKey: repositoryKey },
   })
-
   useEffect(() => {
     if (data) {
       setRepository(data?.repository)
+      setIsLoading(false)
     }
     if (graphQLRequestError) {
       toast({
@@ -37,17 +33,19 @@ const RepositoryDetailsPage = () => {
         title: 'GraphQL Request Failed',
         variant: 'destructive',
       })
+      setIsLoading(false)
     }
   }, [data, graphQLRequestError, projectKey])
 
-  if (isGraphQlDataLoading)
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
+  }
 
-  if (!isGraphQlDataLoading && !repository)
+  if (!isLoading && !repository) {
     return (
       <ErrorDisplay
         message="Sorry, the Repository you're looking for doesn't exist"
@@ -55,6 +53,7 @@ const RepositoryDetailsPage = () => {
         title="Repository not found"
       />
     )
+  }
 
   const repositoryDetails = [
     {
