@@ -106,11 +106,11 @@ def get_blocks(
             if issues_count:
                 meta_info.append(f"*Issues:* {issues_count}")
             if user_contributions:
-                contributions_text += f"*Contributions*{NL}"
+                contributions_text += f"*Contributions:*{NL}"
                 for contrib_info in user_contributions:
                     repo_name = contrib_info.get("repository_name", "N/A")
                     contrib_count = contrib_info.get("contributions_count", 0)
-                    contributions_text += f"*{repo_name}:* {contrib_count} contributions{NL}"
+                    contributions_text += f"{repo_name}: {contrib_count} contributions{NL}"
 
         metadata_text = f"_{' | '.join(meta_info)}_{NL}" if meta_info else ""
         metadata_text += contributions_text
