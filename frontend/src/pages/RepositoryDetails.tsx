@@ -15,7 +15,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
-const RepoDetailsPage = () => {
+const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
   const [repository, setRepository] = useState(null)
 
@@ -24,18 +24,18 @@ const RepoDetailsPage = () => {
     loading: isGraphQlDataLoading,
     error: graphQLRequestError,
   } = useQuery(GET_REPOSITORY_DATA, {
-    variables: { projectKey: `www-project-${projectKey}`, repoKey: repositoryKey },
+    variables: { projectKey: `www-project-${projectKey}`, repositoryKey: repositoryKey },
   })
 
   useEffect(() => {
     if (data) {
-      setRepository(data?.project?.repositories[0])
+      setRepository(data?.repository)
     }
     if (graphQLRequestError) {
       toast({
-        variant: 'destructive',
-        title: 'GraphQL Request Failed',
         description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        variant: 'destructive',
       })
     }
   }, [data, graphQLRequestError, projectKey])
@@ -50,9 +50,9 @@ const RepoDetailsPage = () => {
   if (!isGraphQlDataLoading && !repository)
     return (
       <ErrorDisplay
+        message="Sorry, the Repository you're looking for doesn't exist"
         statusCode={404}
         title="Repository not found"
-        message="Sorry, the Repository you're looking for doesn't exist"
       />
     )
 
@@ -79,7 +79,7 @@ const RepoDetailsPage = () => {
     },
   ]
 
-  const RepoStats = [
+  const RepositoryStats = [
     { icon: faHistory, value: `${repository?.commitsCount || 'No'} Commits` },
     { icon: faUsers, value: `${repository?.contributorsCount || 'No'} Contributors` },
     { icon: faCodeFork, value: `${repository?.forksCount || 'No'} Forks` },
@@ -88,17 +88,17 @@ const RepoDetailsPage = () => {
   ]
   return (
     <DetailsCard
-      title={repository.name}
       details={repositoryDetails}
-      summary={repository.description}
-      type="repository"
-      stats={RepoStats}
-      topContributors={repository.topContributors}
       languages={repository.languages}
-      topics={repository.topics}
       recentIssues={repository.issues}
       recentReleases={repository.releases}
+      stats={RepositoryStats}
+      summary={repository.description}
+      title={repository.name}
+      topContributors={repository.topContributors}
+      topics={repository.topics}
+      type="repository"
     />
   )
 }
-export default RepoDetailsPage
+export default RepositoryDetailsPage

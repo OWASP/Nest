@@ -1,5 +1,7 @@
-"""OWASP GraphQL queries."""
+"""GitHub GraphQL queries."""
+
+from apps.github.graphql.queries.repository import RepositoryQuery
 
 
-class GithubQuery:
-    """OWASP queries."""
+class GithubQuery(RepositoryQuery):
+    """GitHub query."""

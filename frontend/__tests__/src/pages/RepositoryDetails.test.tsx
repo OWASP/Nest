@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { RepoDetailsPage } from 'pages'
+import { RepositoryDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import { mockRepositoryData } from '@tests/data/mockRepositoryData'
@@ -19,7 +19,7 @@ const mockError = {
   error: new Error('GraphQL error'),
 }
 
-describe('RepoDetailsPage', () => {
+describe('RepositoryDetailsPage', () => {
   let navigateMock: jest.Mock
 
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('RepoDetailsPage', () => {
       error: null,
     })
 
-    render(<RepoDetailsPage />)
+    render(<RepositoryDetailsPage />)
 
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
@@ -58,7 +58,7 @@ describe('RepoDetailsPage', () => {
       error: null,
     })
 
-    render(<RepoDetailsPage />)
+    render(<RepositoryDetailsPage />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Repo')).toBeInTheDocument()
@@ -78,14 +78,14 @@ describe('RepoDetailsPage', () => {
       error: mockError,
     })
 
-    render(<RepoDetailsPage />)
+    render(<RepositoryDetailsPage />)
 
     await waitFor(() => screen.getByText('Repository not found'))
     expect(screen.getByText('Repository not found')).toBeInTheDocument()
   })
 
   test('toggles contributors list when show more/less is clicked', async () => {
-    render(<RepoDetailsPage />)
+    render(<RepositoryDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
       expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
@@ -111,7 +111,7 @@ describe('RepoDetailsPage', () => {
   })
 
   test('navigates to user page when contributor is clicked', async () => {
-    render(<RepoDetailsPage />)
+    render(<RepositoryDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
@@ -122,7 +122,7 @@ describe('RepoDetailsPage', () => {
   })
 
   test('Recent issues are rendered correctly', async () => {
-    render(<RepoDetailsPage />)
+    render(<RepositoryDetailsPage />)
 
     await waitFor(() => {
       const issues = mockRepositoryData.project.repositories[0].issues
@@ -143,7 +143,7 @@ describe('RepoDetailsPage', () => {
       loading: false,
       error: null,
     })
-    render(<RepoDetailsPage />)
+    render(<RepositoryDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Repository not found')).toBeInTheDocument()
     })

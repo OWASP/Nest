@@ -9,7 +9,7 @@ import {
   ChapterDetailsPage,
   UsersPage,
   UserDetailsPage,
-  RepoDetailsPage,
+  RepositoryDetailsPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
@@ -36,7 +36,7 @@ function App() {
         <Route path="/projects/:projectKey" element={<ProjectDetailsPage />}></Route>
         <Route
           path="/projects/:projectKey/repositories/:repositoryKey"
-          element={<RepoDetailsPage />}
+          element={<RepositoryDetailsPage />}
         ></Route>
         <Route path="/projects/contribute" element={<ContributePage />}></Route>
         <Route path="/committees" element={<CommitteesPage />}></Route>

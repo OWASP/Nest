@@ -21,8 +21,8 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {displayedRepositories.map((repo, index) => {
-          return <RepositoryItem key={index} details={repo} />
+        {displayedRepositories.map((repository, index) => {
+          return <RepositoryItem key={index} details={repository} />
         })}
       </div>
       {repositories.length > 4 && (
@@ -50,8 +50,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
 const RepositoryItem = ({ details }) => {
   const navigate = useNavigate()
   const handleClick = () => {
-    const currentUrl = window.location.pathname
-    navigate(currentUrl + '/repositories/' + details?.key)
+    navigate(window.location.pathname + '/repositories/' + details?.key)
   }
   return (
     <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">

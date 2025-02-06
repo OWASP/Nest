@@ -10,8 +10,8 @@ export const GET_PROJECT_DATA = gql`
         publishedAt
         author {
           avatarUrl
-          name
           login
+          name
         }
       }
       recentIssues {
@@ -20,8 +20,8 @@ export const GET_PROJECT_DATA = gql`
         createdAt
         author {
           avatarUrl
-          name
           login
+          name
         }
       }
       repositories {
@@ -30,9 +30,9 @@ export const GET_PROJECT_DATA = gql`
         key
         name
         openIssuesCount
-        url
         starsCount
         subscribersCount
+        url
       }
     }
   }

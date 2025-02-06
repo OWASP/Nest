@@ -1,52 +1,50 @@
 import { gql } from '@apollo/client'
 
 export const GET_REPOSITORY_DATA = gql`
-  query GetRepository($projectKey: String!, $repoKey: String!) {
-    project(key: $projectKey, repoKey: $repoKey) {
-      repositories {
-        commitsCount
-        contributorsCount
-        createdAt
-        description
-        forksCount
-        key
-        issues {
-          title
-          commentsCount
-          createdAt
-          author {
-            avatarUrl
-            name
-            login
-          }
-        }
-        languages
-        license
-        name
-        openIssuesCount
-        releases {
-          name
-          tagName
-          isPreRelease
-          publishedAt
-          author {
-            avatarUrl
-            name
-            login
-          }
-        }
-        size
-        starsCount
-        topContributors {
+  query GetRepository($projectKey: String!, $repositoryKey: String!) {
+    repository(projectKey: $projectKey, repositoryKey: $repositoryKey) {
+      commitsCount
+      contributorsCount
+      createdAt
+      description
+      forksCount
+      key
+      issues {
+        author {
           avatarUrl
-          contributionsCount
           login
           name
         }
-        topics
-        updatedAt
-        url
+        commentsCount
+        createdAt
+        title
       }
+      languages
+      license
+      name
+      openIssuesCount
+      releases {
+        author {
+          avatarUrl
+          name
+          login
+        }
+        isPreRelease
+        name
+        publishedAt
+        tagName
+      }
+      size
+      starsCount
+      topContributors {
+        avatarUrl
+        contributionsCount
+        login
+        name
+      }
+      topics
+      updatedAt
+      url
     }
   }
 `
