@@ -135,6 +135,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             if v >= LANGUAGE_PERCENTAGE_THRESHOLD and k.lower() not in IGNORED_LANGUAGES
         )
 
+    @property
+    def url(self):
+        """Return repository URL."""
+        return f"https://github.com/{self.path}"
+
     def from_github(
         self,
         gh_repository,

@@ -94,4 +94,4 @@ class IssueIndex(AlgoliaIndex, IndexBase):
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
-        return IssueIndex.reindex_synonyms("github", "issues")
+        return IssueIndex.reindex_synonyms("github", "issue")

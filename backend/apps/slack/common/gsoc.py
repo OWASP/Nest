@@ -12,10 +12,10 @@ from apps.slack.constants import (
     OWASP_PROJECT_NEST_CHANNEL_ID,
 )
 
-SEPTERMER = 9
+SEPTEMBER = 9
 
 now = timezone.now()
-previous_gsoc_year = now.year if now.month > SEPTERMER else now.year - 1
+previous_gsoc_year = now.year if now.month > SEPTEMBER else now.year - 1
 projects_url = get_absolute_url("projects")
 
 GSOC_GENERAL_INFORMATION_BLOCKS = (
@@ -64,11 +64,6 @@ GSOC_2025_MILESTONES = (
     ),
     divider(),
     markdown(
-        "We're building with modern frameworks and tools: *TypeScript, React, Chakra UI, "
-        f"Tailwind CSS, Python, Django, Docker, and Kubernetes*.{2*NL}"
-        "OWASP Nest has clean and well-documented code, automated CI/CD pipeline, great test "
-        "coverage for both the frontend and backend making the project reliable and easy "
-        f"to scale.{2*NL}"
         f"Join the effort at <{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> and help shape "
         "the future :rocket:"
     ),

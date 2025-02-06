@@ -32,7 +32,11 @@ def users_handler(ack, command, client):
     )
 
     conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+    client.chat_postMessage(
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
+    )
 
 
 if SlackConfig.app:
