@@ -28,7 +28,7 @@ const ScrollUp: React.FC = () => {
   return (
     <>
       {isVisible && (
-        <button 
+        <button
           onClick={scrollToTop}
           className="scroll-up-btn"
           aria-label="Scroll to top"
@@ -40,4 +40,4 @@ const ScrollUp: React.FC = () => {
   );
 };
 
-export default ScrollUp; 
+export default ScrollUp;

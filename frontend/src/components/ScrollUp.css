@@ -34,4 +34,4 @@
 :root[class~="dark"] .scroll-up-btn:hover {
     background-color: hsl(var(--primary) / 90%);
     transform: translateY(-2px);
-} 
+}

@@ -7,6 +7,7 @@ import {
   Home,
   ProjectDetailsPage,
   ProjectsPage,
+  RepositoryDetailsPage,
   UserDetailsPage,
   UsersPage,
 } from 'pages'
@@ -35,6 +36,10 @@ function App() {
         <Route path="/" element={<Home />}></Route>
         <Route path="/projects" element={<ProjectsPage />}></Route>
         <Route path="/projects/:projectKey" element={<ProjectDetailsPage />}></Route>
+        <Route
+          path="/projects/:projectKey/repositories/:repositoryKey"
+          element={<RepositoryDetailsPage />}
+        ></Route>
         <Route path="/projects/contribute" element={<ContributePage />}></Route>
         <Route path="/committees" element={<CommitteesPage />}></Route>
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>

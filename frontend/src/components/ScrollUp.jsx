@@ -29,7 +29,7 @@ const ScrollUp = () => {
   return (
     <>
       {isVisible && (
-        <button 
+        <button
           onClick={scrollToTop}
           className="scroll-up-btn"
           aria-label="Scroll to top"
@@ -41,4 +41,4 @@ const ScrollUp = () => {
   );
 };
 
-export default ScrollUp; 
+export default ScrollUp;
