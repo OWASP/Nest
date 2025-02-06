@@ -8,6 +8,7 @@ from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.contribute import get_blocks
 from apps.slack.common.presentation import EntityPresentation
+from apps.slack.utils import get_text
 
 COMMAND = "/contribute"
 
@@ -44,7 +45,11 @@ def contribute_handler(ack, command, client):
         )
 
     conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+    client.chat_postMessage(
+        channel=conversation["channel"]["id"],
+        blocks=blocks,
+        text=get_text(blocks),
+    )
 
 
 if SlackConfig.app:
