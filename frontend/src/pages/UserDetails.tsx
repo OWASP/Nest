@@ -23,37 +23,31 @@ const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [data, setData] = useState<HeatmapData | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
   const [privateContributor, setPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
-  const {
-      data: graphQLData,
-      loading: isGraphQlDataLoading,
-      error: graphQLRequestError,
-    } = useQuery(GET_USER_DATA, {
-      variables: { key: userKey },
-    })
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+    variables: { key: userKey },
+  })
 
-    useEffect(() => {
-      if (graphQLData && graphQLData.user) {
-        setUser(graphQLData.user)
-      }
-    }, [graphQLData])
-
-    useEffect(() => {
-      if (graphQLRequestError) {
-        toast({
-          variant: 'destructive',
-          title: 'GraphQL Request Failed',
-          description: 'Unable to complete the requested operation.',
-        })
-      }
-    }, [graphQLRequestError])
-
-
+  useEffect(() => {
+    if (graphQLData) {
+      setUser(graphQLData?.user)
+      setIsLoading(false)
+    }
+    if (graphQLRequestError) {
+      toast({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        variant: 'destructive',
+      })
+      setIsLoading(false)
+    }
+  }, [graphQLData, graphQLRequestError, userKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,14 +70,14 @@ const UserDetailsPage: React.FC = () => {
     }
   }, [username, data])
 
-  if (isGraphQlDataLoading)
+  if (isLoading)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
 
-  if (!isGraphQlDataLoading && user == null) {
+  if (!isLoading && user == null) {
     return (
       <ErrorDisplay
         statusCode={404}

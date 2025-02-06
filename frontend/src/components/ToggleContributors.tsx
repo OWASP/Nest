@@ -2,14 +2,14 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopContributorsType } from 'types/contributor'
+import { TopContributorsTypeGraphql } from 'types/contributor'
 const TopContributors = ({
   contributors,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
   className = '',
 }: {
-  contributors: TopContributorsType[]
+  contributors: TopContributorsTypeGraphql[]
   label?: string
   maxInitialDisplay?: number
   className?: string

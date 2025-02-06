@@ -3,7 +3,7 @@ import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
 import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { Project } from 'types/project'
+import { ProjectTypeGraphql } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
@@ -11,33 +11,29 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
-  const [project, setProject] = useState<Project>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [project, setProject] = useState<ProjectTypeGraphql>(null)
 
-  const {
-    data,
-    loading: isGraphQlDataLoading,
-    error: graphQLRequestError,
-  } = useQuery(GET_PROJECT_DATA, {
+  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })
 
   useEffect(() => {
-    if (data && data.project) {
-      setProject(data.project)
+    if (data) {
+      setProject(data?.project)
+      setIsLoading(false)
     }
-  }, [data])
-
-  useEffect(() => {
     if (graphQLRequestError) {
       toast({
-        variant: 'destructive',
-        title: 'GraphQL Request Failed',
         description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        variant: 'destructive',
       })
+      setIsLoading(false)
     }
-  }, [graphQLRequestError])
+  }, [data, graphQLRequestError, projectKey])
 
-  if (isGraphQlDataLoading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />

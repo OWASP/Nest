@@ -10,13 +10,10 @@ export const GET_USER_DATA = gql`
       email
       followersCount
       followingCount
-      key
       location
       login
       name
       publicRepositoriesCount
-      title
-      updatedAt
       url
     }
   }

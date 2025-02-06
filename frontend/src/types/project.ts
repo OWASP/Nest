@@ -1,4 +1,19 @@
-import { TopContributorsType } from './contributor'
+import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contributor'
+
+export interface ProjectDataType {
+  active_projects_count: number
+  total_pages: number
+  projects: ProjectTypeAlgolia[]
+}
+
+export interface ProjectIssuesType {
+  commentsCount: number
+  createdAt: string
+  number: number
+  title: string
+  author: { avatarUrl: string; key: string; name: string }
+  repository: { key: string; owner_key: string }
+}
 
 export interface ProjectStatsType {
   contributors: number
@@ -8,21 +23,29 @@ export interface ProjectStatsType {
   stars: number
 }
 
-export interface RepositoryCardProps {
-  contributorsCount: number
-  forksCount: number
+export interface ProjectTypeAlgolia {
+  contributors_count: number
+  description: string
+  forks_count: number
+  is_active: boolean
+  key: string
+  languages: string[]
+  leaders: string[]
+  level: string
   name: string
-  openIssuesCount: number
-  starsCount: number
-  subscribersCount: number
+  objectID: string
+  organizations: string
+  repositories_count: number
+  stars_count: number
+  summary: string
+  topics: string[]
+  top_contributors: TopContributorsTypeAlgolia[]
+  type: string
+  updated_at: number
   url: string
 }
 
-export interface RepositoriesCardProps {
-  repositories: RepositoryCardProps[]
-}
-
-export interface Project {
+export interface ProjectTypeGraphql {
   contributorsCount: number
   forksCount: number
   isActive: boolean
@@ -32,7 +55,6 @@ export interface Project {
   leaders: string[]
   level: string
   name: string
-  organizations: string
   repositoriesCount: number
   starsCount: number
   summary: string
@@ -43,22 +65,21 @@ export interface Project {
   recentIssues: ProjectIssuesType[]
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
-  topContributors: TopContributorsType[]
+  topContributors: TopContributorsTypeGraphql[]
 }
 
-export interface ProjectDataType {
-  active_projects_count: number
-  projects: Project[]
-  total_pages: number
+export interface RepositoriesCardProps {
+  repositories: RepositoryCardProps[]
 }
 
-export interface ProjectIssuesType {
-  author: { avatarUrl: string; key: string; name: string }
-  commentsCount: number
-  createdAt: string
-  number: number
-  repository: { key: string; owner_key: string }
-  title: string
+export interface RepositoryCardProps {
+  contributorsCount: number
+  forksCount: number
+  name: string
+  openIssuesCount: number
+  starsCount: number
+  subscribersCount: number
+  url: string
 }
 
 export type ProjectReleaseType = {

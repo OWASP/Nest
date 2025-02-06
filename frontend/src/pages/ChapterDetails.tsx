@@ -3,7 +3,7 @@ import { GET_CHAPTER_DATA } from 'api/queries/chapterQueries'
 import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { ChapterType } from 'types/chapter'
+import { ChapterTypeGraphQL } from 'types/chapter'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
@@ -11,32 +11,29 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
-  const [chapter, setChapter] = useState<ChapterType>(null)
-  const {
-    data,
-    loading: isGraphQlDataLoading,
-    error: graphQLRequestError,
-  } = useQuery(GET_CHAPTER_DATA, {
+  const [chapter, setChapter] = useState<ChapterTypeGraphQL>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  const { data, error: graphQLRequestError } = useQuery(GET_CHAPTER_DATA, {
     variables: { key: chapterKey },
   })
 
   useEffect(() => {
-    if (data && data.chapter) {
-      setChapter(data.chapter)
+    if (data) {
+      setChapter(data?.chapter)
+      setIsLoading(false)
     }
-  }, [data])
-
-  useEffect(() => {
     if (graphQLRequestError) {
       toast({
-        variant: 'destructive',
-        title: 'GraphQL Request Failed',
         description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        variant: 'destructive',
       })
+      setIsLoading(false)
     }
-  }, [graphQLRequestError])
+  }, [data, graphQLRequestError, chapterKey])
 
-  if (isGraphQlDataLoading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
@@ -44,7 +41,7 @@ export default function ChapterDetailsPage() {
     )
   }
 
-  if (!chapter || !chapter.isActive)
+  if ((!chapter && !isLoading) || !chapter?.isActive)
     return (
       <ErrorDisplay
         statusCode={404}

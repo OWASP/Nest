@@ -12,18 +12,6 @@ export const GET_PROJECT_DATA = gql`
       leaders
       level
       name
-      organizations
-      repositoriesIndexed {
-        contributorsCount
-        description
-        forksCount
-        key
-        latestRelease
-        license
-        name
-        ownerKey
-        starsCount
-      }
       repositoriesCount
       starsCount
       summary

@@ -4,10 +4,10 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
-import { GeoLocData } from 'types/chapter'
+import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
 const ChapterMap = ({ geoLocData, style }: {
-  geoLocData:GeoLocData[],
+  geoLocData:GeoLocDataGraphQL[] | GeoLocDataAlgolia[],
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
