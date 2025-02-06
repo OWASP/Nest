@@ -1,11 +1,15 @@
 import L from 'leaflet'
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
+import { GeoLocData } from 'types/chapter'
 
-const ChapterMap = ({ geoLocData, style }) => {
+const ChapterMap = ({ geoLocData, style }: {
+  geoLocData:GeoLocData[],
+  style: React.CSSProperties
+}) => {
   const mapRef = useRef<L.Map | null>(null)
 
   //for reference: https://leafletjs.com/reference.html#map-example
@@ -38,7 +42,7 @@ const ChapterMap = ({ geoLocData, style }) => {
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
     geoLocData.forEach((chapter) => {
-      if (chapter._geoloc) {
+      if (chapter.geoLocation) {
         const markerIcon = new L.Icon({
           iconAnchor: [12, 41], // Anchor point
           iconRetinaUrl: '/img/marker-icon-2x.png',
@@ -48,7 +52,7 @@ const ChapterMap = ({ geoLocData, style }) => {
           shadowSize: [41, 41], // Shadow size
           shadowUrl: '/img/marker-shadow.png',
         })
-        const marker = L.marker([chapter._geoloc.lat, chapter._geoloc.lng], { icon: markerIcon })
+        const marker = L.marker([chapter.geoLocation.lat, chapter.geoLocation.lng], { icon: markerIcon })
         const popup = L.popup()
         const popupContent = document.createElement('div')
         popupContent.className = 'popup-content'
@@ -59,7 +63,7 @@ const ChapterMap = ({ geoLocData, style }) => {
         popup.setContent(popupContent)
         marker.bindPopup(popup)
         markerClusterGroup.addLayer(marker)
-        bounds.push([chapter._geoloc.lat, chapter._geoloc.lng])
+        bounds.push([chapter.geoLocation.lat, chapter.geoLocation.lng])
       }
     })
 

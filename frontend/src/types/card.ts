@@ -1,6 +1,6 @@
 import { JSX } from 'react'
 import { ButtonType } from './button'
-import { ChapterType } from './chapter'
+import { GeoLocData } from './chapter'
 import { TopContributorsType } from './contributor'
 import { IconType } from './icon'
 import { Level } from './level'
@@ -29,7 +29,7 @@ export interface CardProps {
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
-  geolocationData?: ChapterType
+  geolocationData?: GeoLocData
   is_active?: boolean
   languages?: string[]
   projectStats?: ProjectStatsType

@@ -1,20 +1,31 @@
-import { topContributorsType } from './contributor'
+import { TopContributorsType } from './contributor'
 
 export interface ChapterType {
-  created_at: number
-  is_active: boolean
+  createdAt: number
+  isActive: boolean
   key: string
   leaders: string[]
   name: string
-  related_urls: string[]
-  top_contributors: topContributorsType[]
+  relatedUrls: string[]
+  topContributors: TopContributorsType[]
   region: string
   summary: string
-  suggested_location: string
-  updated_at: number
+  suggestedLocation: string
+  updatedAt: number
   url: string
-  objectID: string
-  _geoloc: { lat: number; lng: number }
+  geoLocation: GeoLocation
+}
+
+export interface GeoLocation{
+  lat: number
+  lng: number
+}
+
+
+export interface GeoLocData {
+  geoLocation: GeoLocation
+  name: string
+  key: string
 }
 
 export interface ChapterDataType {

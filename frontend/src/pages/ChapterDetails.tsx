@@ -1,4 +1,6 @@
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { useQuery } from '@apollo/client'
+import { GET_CHAPTER_DATA } from 'api/queries/chapterQueries'
+import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ChapterType } from 'types/chapter'
@@ -10,29 +12,39 @@ import LoadingSpinner from 'components/LoadingSpinner'
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
   const [chapter, setChapter] = useState<ChapterType>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const {
+    data,
+    loading: isGraphQlDataLoading,
+    error: graphQLRequestError,
+  } = useQuery(GET_CHAPTER_DATA, {
+    variables: { key: chapterKey },
+  })
 
   useEffect(() => {
-    const fetchChapterData = async () => {
-      setIsLoading(true)
-      const { hits } = await fetchAlgoliaData('chapters', chapterKey, 1, chapterKey)
-      if (hits && hits.length > 0) {
-        setChapter(hits[0] as ChapterType)
-      }
-      setIsLoading(false)
+    if (data && data.chapter) {
+      setChapter(data.chapter)
     }
+  }, [data])
 
-    fetchChapterData()
-  }, [chapterKey])
+  useEffect(() => {
+    if (graphQLRequestError) {
+      toast({
+        variant: 'destructive',
+        title: 'GraphQL Request Failed',
+        description: 'Unable to complete the requested operation.',
+      })
+    }
+  }, [graphQLRequestError])
 
-  if (isLoading)
+  if (isGraphQlDataLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
+  }
 
-  if (!chapter || !chapter.is_active)
+  if (!chapter || !chapter.isActive)
     return (
       <ErrorDisplay
         statusCode={404}
@@ -42,8 +54,8 @@ export default function ChapterDetailsPage() {
     )
 
   const details = [
-    { label: 'Last Updated', value: formatDate(chapter.updated_at) },
-    { label: 'Location', value: chapter.suggested_location },
+    { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
+    { label: 'Location', value: chapter.suggestedLocation },
     { label: 'Region', value: chapter.region },
     {
       label: 'URL',
@@ -57,12 +69,12 @@ export default function ChapterDetailsPage() {
   return (
     <DetailsCard
       title={chapter.name}
-      socialLinks={chapter.related_urls}
-      is_active={chapter.is_active}
+      socialLinks={chapter.relatedUrls}
+      is_active={chapter.isActive}
       details={details}
       summary={chapter.summary}
       type="chapter"
-      topContributors={chapter.top_contributors}
+      topContributors={chapter.topContributors}
       geolocationData={chapter}
     />
   )
