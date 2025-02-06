@@ -1,9 +1,13 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { toast } from 'hooks/useToast'
 import { RepositoryDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import { mockRepositoryData } from '@tests/data/mockRepositoryData'
+jest.mock('hooks/useToast', () => ({
+  toast: jest.fn(),
+}))
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -82,6 +86,11 @@ describe('RepositoryDetailsPage', () => {
 
     await waitFor(() => screen.getByText('Repository not found'))
     expect(screen.getByText('Repository not found')).toBeInTheDocument()
+    expect(toast).toHaveBeenCalledWith({
+      description: 'Unable to complete the requested operation.',
+      title: 'GraphQL Request Failed',
+      variant: 'destructive',
+    })
   })
 
   test('toggles contributors list when show more/less is clicked', async () => {
@@ -125,7 +134,7 @@ describe('RepositoryDetailsPage', () => {
     render(<RepositoryDetailsPage />)
 
     await waitFor(() => {
-      const issues = mockRepositoryData.project.repositories[0].issues
+      const issues = mockRepositoryData.repository.issues
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
@@ -162,5 +171,32 @@ describe('RepositoryDetailsPage', () => {
 
     expect(setRecentReleasesMock).toHaveBeenCalledWith(undefined)
     expect(setRecentIssuesMock).toHaveBeenCalledWith(undefined)
+  })
+
+  test('handles missing repository stats gracefully', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        repository: {
+          ...mockRepositoryData.repository,
+          commitsCount: 0,
+          contributorsCount: 0,
+          forksCount: 0,
+          openIssuesCount: 0,
+          starsCount: 0,
+        },
+      },
+      error: null,
+    })
+
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('No Commits')).toBeInTheDocument()
+      expect(screen.getByText('No Contributors')).toBeInTheDocument()
+      expect(screen.getByText('No Forks')).toBeInTheDocument()
+      expect(screen.getByText('No Issues')).toBeInTheDocument()
+      expect(screen.getByText('No Stars')).toBeInTheDocument()
+    })
   })
 })

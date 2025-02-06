@@ -50,7 +50,7 @@ const DetailsCard = ({
             {details &&
               details.map((detail, index) => (
                 <div key={index}>
-                  <strong>{detail.label}:</strong> {detail.value}
+                  <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
                 </div>
               ))}
             {socialLinks && type === 'chapter' && <SocialLinks urls={socialLinks || []} />}
