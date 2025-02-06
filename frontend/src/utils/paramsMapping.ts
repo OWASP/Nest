@@ -21,6 +21,7 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
     case 'chapters':
       return {
         attributesToRetrieve: [
+          '_geoloc',
           'idx_created_at',
           'idx_is_active',
           'idx_key',
@@ -34,7 +35,6 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_top_contributors',
           'idx_updated_at',
           'idx_url',
-          '_geoloc',
         ],
         aroundLatLngViaIP: true,
         minProximity: 4,
@@ -46,16 +46,16 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
         attributesToRetrieve: [
           'idx_contributors_count',
           'idx_forks_count',
-          'idx_issues_count',
           'idx_is_active',
+          'idx_issues_count',
           'idx_key',
           'idx_languages',
           'idx_leaders',
           'idx_level',
           'idx_name',
           'idx_organizations',
-          'idx_repositories',
           'idx_repositories_count',
+          'idx_repositories',
           'idx_stars_count',
           'idx_summary',
           'idx_top_contributors',
@@ -101,7 +101,6 @@ export const getParamsForIndexName = (indexName: string, distinct = false) => {
           'idx_title',
           'idx_updated_at',
           'idx_url',
-          'objectID',
         ],
         hitsPerPage: 24,
         minProximity: 4,
