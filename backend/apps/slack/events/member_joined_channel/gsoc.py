@@ -10,6 +10,7 @@ from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.gsoc import GSOC_2025_MILESTONES
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
+from apps.slack.utils import get_text
 
 logger = logging.getLogger(__name__)
 
@@ -38,22 +39,24 @@ def gsoc_handler(event, client, ack):
         user=user_id,
     )
 
+    blocks = [
+        markdown(
+            f"Hello <@{user_id}> and welcome to <{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
+            "Here's how you can start your journey toward contributing to OWASP projects and "
+            "making the most of Google Summer of Code:"
+        ),
+        *GSOC_GENERAL_INFORMATION_BLOCKS,
+        markdown(
+            "🎉 We're excited to have you on board, and we can't wait to see the amazing "
+            "contributions you'll make! Happy contributing and good luck with your GSoC "
+            "journey!"
+        ),
+        markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
+    ]
     client.chat_postMessage(
+        blocks=blocks,
         channel=conversation["channel"]["id"],
-        blocks=[
-            markdown(
-                f"Hello <@{user_id}> and welcome to <{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
-                "Here's how you can start your journey toward contributing to OWASP projects and "
-                "making the most of Google Summer of Code:"
-            ),
-            *GSOC_GENERAL_INFORMATION_BLOCKS,
-            markdown(
-                "🎉 We're excited to have you on board, and we can't wait to see the amazing "
-                "contributions you'll make! Happy contributing and good luck with your GSoC "
-                "journey!"
-            ),
-            markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-        ],
+        text=get_text(blocks),
     )
 
 

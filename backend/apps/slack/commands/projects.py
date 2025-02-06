@@ -5,6 +5,7 @@ from django.conf import settings
 from apps.slack.apps import SlackConfig
 from apps.slack.common.handlers.projects import get_blocks
 from apps.slack.common.presentation import EntityPresentation
+from apps.slack.utils import get_text
 
 COMMAND = "/projects"
 
@@ -30,7 +31,11 @@ def projects_handler(ack, command, client):
     )
 
     conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+    client.chat_postMessage(
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
+    )
 
 
 if SlackConfig.app:
