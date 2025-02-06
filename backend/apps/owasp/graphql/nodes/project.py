@@ -34,11 +34,11 @@ class ProjectNode(BaseNode):
     updated_at = graphene.Float()
     url = graphene.String()
 
+    recent_issues = graphene.List(IssueNode)
+    recent_releases = graphene.List(ReleaseNode)
+    repositories = graphene.List(RepositoryNode)
     repositories_indexed = graphene.List(RepositoryNode)
     top_contributors = graphene.List(UserNode)
-    recent_releases = graphene.List(ReleaseNode)
-    recent_issues = graphene.List(IssueNode)
-    repositories = graphene.List(RepositoryNode)
 
     class Meta:
         model = Project

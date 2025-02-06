@@ -15,7 +15,7 @@ class ProjectQuery(BaseQuery):
     def resolve_project(root, info, key):
         """Resolve project by key."""
         try:
-            key = "www-project-" + key
+            key = f"www-project-{key}"
             return Project.objects.get(key=key)
         except Project.DoesNotExist:
             return None
