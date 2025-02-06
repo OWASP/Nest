@@ -13,7 +13,7 @@ const ItemCardList = ({ title, data, renderDetails }) => (
                 alt={item?.author?.name}
                 className="mr-2 h-6 w-6 rounded-full"
               />
-              <span className="text-sm">{item?.author?.name}</span>
+              <span className="text-sm">{item?.author?.name || item?.author?.login}</span>
             </div>
             {renderDetails(item)}
           </div>
