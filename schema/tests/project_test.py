@@ -29,6 +29,7 @@ def test_positive(project_schema):
         ),
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience-missing.yaml", "'audience' is a required property"),
+        ("blog-none.yaml", "None is not of type 'string'"),
         ("demo-none.yaml", "None is not of type 'string'"),
         ("downloads-empty.yaml", "[] should be non-empty"),
         (
@@ -55,9 +56,16 @@ def test_positive(project_schema):
         ),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
+        ("repositories-empty.yaml", "[] should be non-empty"),
+        (
+            "repositories-non-unique.yaml",
+            "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
+        ),
+        ("repositories-missing-url.yaml", "'url' is a required property"),
         ("sponsors-empty-list.yaml", "[] should be non-empty"),
         ("sponsors-name-missing.yaml", "'name' is a required property"),
         ("sponsors-url-missing.yaml", "'url' is a required property"),
+        ("website-none.yaml", "None is not of type 'string'"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):
