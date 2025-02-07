@@ -1,10 +1,10 @@
+import { Button } from '@chakra-ui/react'
 import {
   faArrowDownShortWide,
   faArrowUpWideShort,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Tooltip } from 'react-tooltip'
 import { SortByProps } from 'types/sortBy'
 import {
   SelectContent,
@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValueText,
 } from 'components/ui/Select'
+import { Tooltip } from 'components/ui/tooltip'
+
 const SortBy = ({
   sortOptions,
   selectedSortOption,
@@ -73,28 +75,30 @@ const SortBy = ({
       {/* Sort Order Dropdown */}
       {selectedSortOption !== 'default' && (
         <div className="relative flex items-center">
-          <button
-            data-tooltip-id="sort-order-tooltip"
-            data-tooltip-content={selectedOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
-            onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
-            className="flex items-center justify-center rounded-lg bg-gray-200 p-2 shadow-sm hover:bg-gray-300 dark:bg-[#323232] dark:text-gray-300 dark:hover:bg-[#454545]"
-          >
-            {selectedOrder === 'asc' ? (
-              <FontAwesomeIcon
-                icon={faArrowDownShortWide}
-                className="h-5 w-5 text-gray-600 dark:text-gray-200"
-              />
-            ) : (
-              <FontAwesomeIcon
-                icon={faArrowUpWideShort}
-                className="h-5 w-5 text-gray-600 dark:text-gray-200"
-              />
-            )}
-          </button>
           <Tooltip
-            id="sort-order-tooltip"
-            className="rounded-lg bg-white px-1 py-0 text-sm text-gray-600 shadow-md"
-          />
+            content={selectedOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
+            showArrow
+            positioning={{ placement: 'top-start' }}
+            openDelay={100}
+            closeDelay={100}
+          >
+            <Button
+              onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
+              className="flex items-center justify-center rounded-lg bg-gray-200 p-2 shadow-sm hover:bg-gray-300 dark:bg-[#323232] dark:text-gray-300 dark:hover:bg-[#454545]"
+            >
+              {selectedOrder === 'asc' ? (
+                <FontAwesomeIcon
+                  icon={faArrowDownShortWide}
+                  className="h-5 w-5 text-gray-600 dark:text-gray-200"
+                />
+              ) : (
+                <FontAwesomeIcon
+                  icon={faArrowUpWideShort}
+                  className="h-5 w-5 text-gray-600 dark:text-gray-200"
+                />
+              )}
+            </Button>
+          </Tooltip>
         </div>
       )}
     </div>
