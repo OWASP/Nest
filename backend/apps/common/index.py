@@ -1,13 +1,13 @@
-"""Algolia index synonyms support and record count."""
+"""Algolia index common classes and helpers."""
 
 import logging
-import os
 from functools import lru_cache
 from pathlib import Path
 
 from algoliasearch.http.exceptions import AlgoliaException
 from algoliasearch.query_suggestions.client import QuerySuggestionsClientSync
 from algoliasearch.search.client import SearchClientSync
+from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register as algolia_register
 from django.conf import settings
 
@@ -15,7 +15,23 @@ from apps.common.constants import NL
 
 logger = logging.getLogger(__name__)
 
-IS_LOCAL_BUILD = settings.ENVIRONMENT.lower() == "local"
+EXCLUDED_LOCAL_INDEX_NAMES = (
+    "chapters_suggestions",
+    "committees_suggestions",
+    "issues_suggestions",
+    "projects_contributors_count_asc",
+    "projects_contributors_count_desc",
+    "projects_forks_count_asc",
+    "projects_forks_count_desc",
+    "projects_name_asc",
+    "projects_name_desc",
+    "projects_query_suggestions",
+    "projects_stars_count_asc",
+    "projects_stars_count_desc",
+    "projects_suggestions",
+    "users_suggestions",
+)
+IS_LOCAL_BUILD = settings.ENVIRONMENT == "Local"
 LOCAL_INDEX_LIMIT = 1000
 
 
@@ -25,90 +41,69 @@ class IndexRegistry:
     _instance = None
 
     def __init__(self):
-        """Initialize the IndexRegistry with empty sets and load excluded patterns."""
-        self.excluded_patterns = set()
-        self.excluded_models = set()
-        self.reload_excluded_patterns()
+        """Initialize index registry."""
+        self.excluded_local_index_names = set()
+        self.load_excluded_local_index_names()
 
     @classmethod
     def get_instance(cls):
         """Get or create a singleton instance of IndexRegistry."""
-        if not cls._instance:
+        if cls._instance is None:
             cls._instance = IndexRegistry()
         return cls._instance
 
-    def reload_excluded_patterns(self):
-        """Load excluded patterns and models from environment."""
-        excluded_str = os.getenv("ALGOLIA_EXCLUDED_INDICES", "").strip()
-        self.excluded_patterns = {
-            pattern.strip().lower() for pattern in excluded_str.split(",") if pattern.strip()
-        }
+    def is_indexable(self, name: str):
+        """Check if index is on."""
+        return name.lower() not in self.excluded_local_index_names if IS_LOCAL_BUILD else True
 
-        excluded_models = os.getenv("ALGOLIA_EXCLUDED_MODELS", "").strip()
-        self.excluded_models = {
-            model.strip().lower() for model in excluded_models.split(",") if model.strip()
-        }
-
-    def is_excluded(self, name: str, check_type: str = "index"):
-        """Check if an index name matches any excluded pattern."""
-        name = name.lower()
-
-        if check_type == "suggestion":
-            base_name = name.replace("_suggestions", "")
-            return any(
-                pattern in base_name or pattern in name for pattern in self.excluded_patterns
+    def load_excluded_local_index_names(self):
+        """Load excluded local index names."""
+        excluded_names = settings.ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES
+        self.excluded_local_index_names = set(
+            (
+                excluded_name.strip().lower()
+                for excluded_name in excluded_names.strip().split(",")
+                if excluded_name.strip()
             )
+            if excluded_names and excluded_names != "None"
+            else EXCLUDED_LOCAL_INDEX_NAMES
+        )
 
-        if check_type == "model":
-            return name in self.excluded_models
-
-        return any(pattern in name for pattern in self.excluded_patterns)
+        return self
 
 
-def should_create_index(index_name: str, index_type: str = "index"):
+def is_indexable(index_name: str):
     """Determine if an index should be created based on configuration."""
-    if not IS_LOCAL_BUILD:
-        return True
-
-    registry = IndexRegistry.get_instance()
-
-    if index_type == "suggestion" and registry.is_excluded(index_name, "suggestion"):
-        return False
-
-    return not registry.is_excluded(index_name)
+    return IndexRegistry.get_instance().is_indexable(index_name)
 
 
-def conditional_register(model, **kwargs):
-    """Register an Algolia index conditionally based on configuration."""
+def register(model, **kwargs):
+    """Register index if configuration allows."""
 
-    def decorator(index_cls):
-        model_path = f"{model._meta.app_label}/{model._meta.model_name}".lower()
+    def wrapper(index_cls):
+        return (
+            algolia_register(model, **kwargs)(index_cls)
+            if is_indexable(f"{index_cls.index_name}")
+            else index_cls
+        )
 
-        registry = IndexRegistry.get_instance()
-        if registry.is_excluded(model_path, "model"):
-            return index_cls
-
-        full_index_name = f"{settings.ENVIRONMENT.lower()}_{index_cls.index_name}"
-
-        if should_create_index(full_index_name):
-            return algolia_register(model, **kwargs)(index_cls)
-
-        return index_cls
-
-    return decorator
+    return wrapper
 
 
-class IndexBase:
-    """Base index class with enhanced functionality."""
+class IndexBase(AlgoliaIndex):
+    """Base index class."""
 
     @staticmethod
     def get_client():
-        """Return an instance of the Algolia search client."""
-        return SearchClientSync(settings.ALGOLIA_APPLICATION_ID, settings.ALGOLIA_WRITE_API_KEY)
+        """Return an instance of search client."""
+        return SearchClientSync(
+            settings.ALGOLIA_APPLICATION_ID,
+            settings.ALGOLIA_WRITE_API_KEY,
+        )
 
     @staticmethod
     def get_suggestions_client():
-        """Get the Algolia suggestions client."""
+        """Get suggestions client."""
         return QuerySuggestionsClientSync(
             settings.ALGOLIA_APPLICATION_ID,
             settings.ALGOLIA_WRITE_API_KEY,
@@ -116,34 +111,26 @@ class IndexBase:
         )
 
     @staticmethod
-    def configure_replicas(env: str, base_index: str, replicas: dict):
-        """Configure replica indices with selective creation based on environment."""
-        client = IndexBase.get_client()
-        base_index_name = f"{env}_{base_index}"
+    def configure_replicas(index_name: str, replicas: dict):
+        """Configure replicas."""
+        if not is_indexable(index_name):
+            return  # Skip replicas configuration if base index is off.
 
-        if not should_create_index(base_index_name):
-            return
+        env = settings.ENVIRONMENT.lower()
 
-        if not IS_LOCAL_BUILD:
-            replica_names = list(replicas.keys())
-            client.set_settings(base_index_name, {"replicas": replica_names})
-            for replica_name, ranking in replicas.items():
-                client.set_settings(replica_name, {"ranking": ranking})
-            return
+        if indexable_replicas := {
+            f"{env}_{index_name}_{replica_name}": replica_ranking
+            for replica_name, replica_ranking in replicas.items()
+            if is_indexable(f"{index_name}_{replica_name}")
+        }:
+            client = IndexBase.get_client()
+            client.set_settings(
+                f"{env}_{index_name}",
+                {"replicas": sorted(indexable_replicas.keys())},
+            )
 
-        filtered_replicas = {
-            name: ranking
-            for name, ranking in replicas.items()
-            if should_create_index(name, "replica")
-        }
-
-        client.set_settings(
-            base_index_name,
-            {"replicas": list(filtered_replicas.keys()) if filtered_replicas else []},
-        )
-
-        for replica_name, ranking in filtered_replicas.items():
-            client.set_settings(replica_name, {"ranking": ranking})
+            for replica_name, replica_ranking in indexable_replicas.items():
+                client.set_settings(replica_name, {"ranking": replica_ranking})
 
     @staticmethod
     def _parse_synonyms_file(file_path):
@@ -218,3 +205,9 @@ class IndexBase:
         except AlgoliaException:
             logger.exception("Error retrieving index count for '%s'", index_name)
             return 0
+
+    def get_queryset(self):
+        """Get queryset."""
+        qs = self.get_entities()
+
+        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs

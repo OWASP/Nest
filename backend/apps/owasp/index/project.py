@@ -1,14 +1,11 @@
 """OWASP app project index."""
 
-from algoliasearch_django import AlgoliaIndex
-from django.conf import settings
-
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase, conditional_register
+from apps.common.index import IndexBase, register
 from apps.owasp.models.project import Project
 
 
-@conditional_register(Project)
-class ProjectIndex(AlgoliaIndex, IndexBase):
+@register(Project)
+class ProjectIndex(IndexBase):
     """Project index."""
 
     index_name = "projects"
@@ -79,32 +76,30 @@ class ProjectIndex(AlgoliaIndex, IndexBase):
 
     should_index = "is_indexable"
 
-    def get_queryset(self):
-        """Get queryset."""
-        qs = Project.objects.prefetch_related(
-            "organizations",
-            "repositories",
-        )
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
+    @staticmethod
+    def configure_replicas():
+        """Configure the settings for project replicas."""
+        replicas = {
+            "contributors_count_asc": ["asc(idx_contributors_count)"],
+            "contributors_count_desc": ["desc(idx_contributors_count)"],
+            "forks_count_asc": ["asc(idx_forks_count)"],
+            "forks_count_desc": ["desc(idx_forks_count)"],
+            "name_asc": ["asc(idx_name)"],
+            "name_desc": ["desc(idx_name)"],
+            "stars_count_asc": ["asc(idx_stars_count)"],
+            "stars_count_desc": ["desc(idx_stars_count)"],
+        }
+
+        IndexBase.configure_replicas("projects", replicas)
 
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
-        return ProjectIndex.reindex_synonyms("owasp", "project")
+        return IndexBase.reindex_synonyms("owasp", "projects")
 
-    @staticmethod
-    def configure_replicas():
-        """Configure the settings for project replicas."""
-        env = settings.ENVIRONMENT.lower()
-        replicas = {
-            f"{env}_projects_name_asc": ["asc(idx_name)"],
-            f"{env}_projects_name_desc": ["desc(idx_name)"],
-            f"{env}_projects_stars_count_asc": ["asc(idx_stars_count)"],
-            f"{env}_projects_stars_count_desc": ["desc(idx_stars_count)"],
-            f"{env}_projects_contributors_count_asc": ["asc(idx_contributors_count)"],
-            f"{env}_projects_contributors_count_desc": ["desc(idx_contributors_count)"],
-            f"{env}_projects_forks_count_asc": ["asc(idx_forks_count)"],
-            f"{env}_projects_forks_count_desc": ["desc(idx_forks_count)"],
-        }
-
-        IndexBase.configure_replicas(env, "projects", replicas)
+    def get_entities(self):
+        """Get entities for indexing."""
+        return Project.objects.prefetch_related(
+            "organizations",
+            "repositories",
+        )

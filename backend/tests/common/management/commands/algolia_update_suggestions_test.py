@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from django.core.management import call_command
 
-MAX_UPDATE_CONFIG_COUNT = 5
+UPDATE_CONFIG_CALLS_COUNT = 5
 
 
 class TestUpdateSuggestionsCommand:
@@ -47,7 +47,7 @@ class TestUpdateSuggestionsCommand:
             patch(
                 "apps.common.management.commands.algolia_update_suggestions.settings"
             ) as mock_settings,
-            patch("apps.common.index.should_create_index", return_value=True),
+            patch("apps.common.index.is_indexable", return_value=True),
             patch("sys.stdout", new=StringIO()) as fake_out,
         ):
             mock_settings.ENVIRONMENT = environment
@@ -59,7 +59,7 @@ class TestUpdateSuggestionsCommand:
             patch(
                 "apps.common.management.commands.algolia_update_suggestions.settings"
             ) as mock_settings,
-            patch("apps.common.index.should_create_index") as mock_should_create,
+            patch("apps.common.index.is_indexable") as mock_is_indexable,
             patch("sys.stdout", new=StringIO()) as fake_out,
         ):
             mock_settings.ENVIRONMENT = "development"
@@ -67,7 +67,7 @@ class TestUpdateSuggestionsCommand:
             def mock_side_effect(name, index_type):
                 return name == "development_chapters_suggestions" and index_type == "suggestion"
 
-            mock_should_create.side_effect = mock_side_effect
+            mock_is_indexable.side_effect = mock_side_effect
 
             call_command("algolia_update_suggestions")
             output = fake_out.getvalue()
@@ -75,7 +75,7 @@ class TestUpdateSuggestionsCommand:
             assert "\nThe following query suggestion index were updated:" in output
             assert "* Chapters" in output
 
-            assert self.mock_client.update_config.call_count == MAX_UPDATE_CONFIG_COUNT
+            assert self.mock_client.update_config.call_count == UPDATE_CONFIG_CALLS_COUNT
 
             update_call = self.mock_client.update_config.call_args_list[0]
             assert update_call[1]["index_name"] == "development_chapters_suggestions"
@@ -85,7 +85,7 @@ class TestUpdateSuggestionsCommand:
             patch(
                 "apps.common.management.commands.algolia_update_suggestions.settings"
             ) as mock_settings,
-            patch("apps.common.index.should_create_index", return_value=True),
+            patch("apps.common.index.is_indexable", return_value=True),
         ):
             mock_settings.ENVIRONMENT = "development"
             call_command("algolia_update_suggestions")

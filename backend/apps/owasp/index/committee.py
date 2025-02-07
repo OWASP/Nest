@@ -1,13 +1,11 @@
 """OWASP app chapter index."""
 
-from algoliasearch_django import AlgoliaIndex
-
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, conditional_register
+from apps.common.index import IndexBase, register
 from apps.owasp.models.committee import Committee
 
 
-@conditional_register(Committee)
-class CommitteeIndex(AlgoliaIndex):
+@register(Committee)
+class CommitteeIndex(IndexBase):
     """Committee index."""
 
     index_name = "committees"
@@ -56,9 +54,8 @@ class CommitteeIndex(AlgoliaIndex):
 
     should_index = "is_indexable"
 
-    def get_queryset(self):
-        """Get queryset."""
-        qs = Committee.active_committees.select_related(
+    def get_entities(self):
+        """Get entities for indexing."""
+        return Committee.active_committees.select_related(
             "owasp_repository",
         )
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs

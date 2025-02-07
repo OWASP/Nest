@@ -3,9 +3,18 @@ from unittest.mock import MagicMock, mock_open, patch
 import pytest
 from algoliasearch.http.exceptions import AlgoliaException
 from algoliasearch_django import AlgoliaIndex
+from django.conf import settings
+from django.test import override_settings
 
-from apps.common.index import IndexBase, IndexRegistry, conditional_register, should_create_index
+from apps.common.index import (
+    EXCLUDED_LOCAL_INDEX_NAMES,
+    IndexBase,
+    IndexRegistry,
+    is_indexable,
+    register,
+)
 
+ENV = settings.ENVIRONMENT.lower()
 TOTAL_COUNT = 42
 
 
@@ -15,77 +24,37 @@ class TestIndexRegistry:
         registry2 = IndexRegistry.get_instance()
         assert registry1 is registry2
 
-    @patch("os.getenv")
-    def test_reload_excluded_patterns(self, mock_getenv):
-        mock_getenv.side_effect = lambda key, default="": {
-            "ALGOLIA_EXCLUDED_INDICES": "test1,test2,test3",
-            "ALGOLIA_EXCLUDED_MODELS": "model1,model2",
-        }.get(key, default)
-
-        registry = IndexRegistry.get_instance()
-        registry.reload_excluded_patterns()
-
-        assert registry.excluded_patterns == {"test1", "test2", "test3"}
-        assert registry.excluded_models == {"model1", "model2"}
-
-    @patch("os.getenv")
-    def test_reload_excluded_patterns_empty(self, mock_getenv):
-        mock_getenv.return_value = ""
-        registry = IndexRegistry.get_instance()
-        registry.reload_excluded_patterns()
-
-        assert registry.excluded_patterns == set()
-        assert registry.excluded_models == set()
-
     @pytest.mark.parametrize(
-        ("name", "check_type", "excluded_indices", "expected"),
+        ("excluded_index_names", "expected"),
         [
-            ("excluded_index", "index", "excluded", True),
-            ("not_excluded", "index", "other_pattern", False),
-            ("test_base", "suggestion", "test", True),
-            ("other_suggestions", "suggestion", "test", False),
-            ("excluded", "model", "excluded", True),
+            ("test1,test2,test3", {"test1", "test2", "test3"}),
+            ("test1, test2, test3", {"test1", "test2", "test3"}),
+            ("", set(EXCLUDED_LOCAL_INDEX_NAMES)),
+            (None, set(EXCLUDED_LOCAL_INDEX_NAMES)),
         ],
     )
-    def test_is_excluded(self, name, check_type, excluded_indices, expected):
-        with patch("os.getenv") as mock_getenv:
-            mock_getenv.side_effect = lambda key, default="": {
-                "ALGOLIA_EXCLUDED_INDICES": excluded_indices,
-                "ALGOLIA_EXCLUDED_MODELS": "excluded",
-            }.get(key, default)
+    def test_load_excluded_index_names(self, excluded_index_names, expected):
+        with override_settings(ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES=excluded_index_names):
+            registry = IndexRegistry.get_instance().load_excluded_local_index_names()
 
-            registry = IndexRegistry.get_instance()
-            registry.reload_excluded_patterns()
+        assert registry.excluded_local_index_names == expected
 
-            assert registry.is_excluded(name, check_type) == expected
-
-
-class TestShouldCreateIndex:
     @pytest.mark.parametrize(
-        ("is_local", "index_name", "index_type", "excluded_indices", "expected"),
+        ("is_local", "index_name", "excluded_index_names", "expected"),
         [
-            (False, "any_index", "index", "excluded", True),
-            (True, "not_excluded", "index", "other_pattern", True),
-            (True, "excluded_index", "index", "excluded", False),
-            (True, "test_base_suggestions", "suggestion", "test", False),
-            (True, "other_suggestions", "suggestion", "excluded", True),
+            (False, "excluded", "excluded", True),
+            (True, "other_name", "excluded_name", True),
+            (True, "excluded_index", "excluded_index", False),
         ],
     )
-    def test_should_create_index(
-        self, is_local, index_name, index_type, excluded_indices, expected
-    ):
+    def test_is_indexable(self, is_local, index_name, excluded_index_names, expected):
         with (
             patch("apps.common.index.IS_LOCAL_BUILD", is_local),
-            patch("os.getenv") as mock_getenv,
+            override_settings(ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES=excluded_index_names),
         ):
-            mock_getenv.side_effect = lambda key, default="": {
-                "ALGOLIA_EXCLUDED_INDICES": excluded_indices,
-            }.get(key, default)
+            IndexRegistry.get_instance().load_excluded_local_index_names()
 
-            registry = IndexRegistry.get_instance()
-            registry.reload_excluded_patterns()
-
-            assert should_create_index(index_name, index_type) == expected
+            assert is_indexable(index_name) == expected
 
 
 class MockAlgoliaRegister:
@@ -107,9 +76,9 @@ class TestConditionalRegister:
         return model
 
     @patch("apps.common.index.settings")
-    @patch("apps.common.index.should_create_index")
-    def test_conditional_register_included(self, mock_should_create, mock_settings, mock_model):
-        mock_should_create.return_value = True
+    @patch("apps.common.index.is_indexable")
+    def test_conditional_register_included(self, mock_is_indexable, mock_settings, mock_model):
+        mock_is_indexable.return_value = True
         mock_settings.ENVIRONMENT = "test"
 
         class TestIndex(AlgoliaIndex):
@@ -118,14 +87,14 @@ class TestConditionalRegister:
         with patch("os.getenv") as mock_getenv:
             mock_getenv.return_value = ""
 
-            decorated = conditional_register(mock_model)(TestIndex)
+            decorated = register(mock_model)(TestIndex)
             assert isinstance(decorated, type)
             assert issubclass(decorated, AlgoliaIndex)
 
     @patch("apps.common.index.settings")
-    @patch("apps.common.index.should_create_index")
-    def test_conditional_register_excluded(self, mock_should_create, mock_settings, mock_model):
-        mock_should_create.return_value = False
+    @patch("apps.common.index.is_indexable")
+    def test_conditional_register_excluded(self, mock_is_indexable, mock_settings, mock_model):
+        mock_is_indexable.return_value = False
         mock_settings.ENVIRONMENT = "test"
 
         class TestIndex(AlgoliaIndex):
@@ -134,7 +103,7 @@ class TestConditionalRegister:
         with patch("os.getenv") as mock_getenv:
             mock_getenv.return_value = "test_app/test_model"
 
-            decorated = conditional_register(mock_model)(TestIndex)
+            decorated = register(mock_model)(TestIndex)
             assert decorated is TestIndex
 
 
@@ -156,36 +125,40 @@ class TestIndexBase:
             yield
 
     @pytest.mark.parametrize(
-        ("is_local", "should_create", "expected_replicas"),
+        ("is_local", "is_indexable", "expected_replicas"),
         [
-            (False, True, ["replica1", "replica2"]),
-            (True, True, ["replica1"]),
+            (
+                False,
+                True,
+                ["test_index_name_index_name_attr_asc", "test_index_name_index_name_attr_desc"],
+            ),
+            (True, True, ["test_index_name_index_name_attr_asc"]),
             (True, False, []),
         ],
     )
-    def test_configure_replicas(self, is_local, should_create, expected_replicas):
-        replicas = {"replica1": ["custom"], "replica2": ["asc"]}
-        base_index_name = "test_base_index"
+    def test_configure_replicas(self, is_local, is_indexable, expected_replicas):
+        replicas = {"index_name_attr_asc": ["asc"], "index_name_attr_desc": ["desc"]}
+        index_name = "index_name"
 
         with (
             patch("apps.common.index.IS_LOCAL_BUILD", is_local),
-            patch("apps.common.index.should_create_index") as mock_should_create,
+            patch("apps.common.index.is_indexable") as mock_is_indexable,
         ):
 
-            def mock_should_create_func(name, _type="index"):
-                if name == f"test_{base_index_name}":
-                    return should_create
+            def mock_is_indexable_func(name):
+                if name == index_name:
+                    return is_indexable
                 if is_local:
-                    return name == "replica1"
+                    return name in {"index_name_index_name_attr_asc"}
                 return True
 
-            mock_should_create.side_effect = mock_should_create_func
+            mock_is_indexable.side_effect = mock_is_indexable_func
 
-            IndexBase.configure_replicas("test", base_index_name, replicas)
+            IndexBase.configure_replicas(index_name, replicas)
 
-            if should_create:
+            if is_indexable:
                 self.mock_client.set_settings.assert_any_call(
-                    f"test_{base_index_name}", {"replicas": expected_replicas}
+                    f"{ENV}_{index_name}", {"replicas": expected_replicas}
                 )
 
     def test_parse_synonyms_file_empty(self):
@@ -224,7 +197,7 @@ class TestIndexBase:
 
     def test_get_total_count_cache(self):
         mock_response = MagicMock()
-        mock_response.nb_hits = 42
+        mock_response.nb_hits = TOTAL_COUNT
         self.mock_client.search_single_index.return_value = mock_response
 
         IndexBase.get_total_count.cache_clear()

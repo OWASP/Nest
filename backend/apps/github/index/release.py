@@ -1,13 +1,11 @@
 """GitHub release Algolia index configuration."""
 
-from algoliasearch_django import AlgoliaIndex
-
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase, conditional_register
+from apps.common.index import IndexBase, register
 from apps.github.models.release import Release
 
 
-@conditional_register(Release)
-class ReleaseIndex(AlgoliaIndex, IndexBase):
+@register(Release)
+class ReleaseIndex(IndexBase):
     """Release index."""
 
     index_name = "releases"
@@ -52,15 +50,14 @@ class ReleaseIndex(AlgoliaIndex, IndexBase):
 
     should_index = "is_indexable"
 
-    def get_queryset(self):
-        """Get queryset for indexing."""
-        qs = Release.objects.filter(
-            is_draft=False,
-            published_at__isnull=False,
-        )
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
-
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
         ReleaseIndex.reindex_synonyms("github", "releases")
+
+    def get_entities(self):
+        """Get entities for indexing."""
+        return Release.objects.filter(
+            is_draft=False,
+            published_at__isnull=False,
+        )

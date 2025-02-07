@@ -1,14 +1,12 @@
 """GitHub user Algolia index configuration."""
 
-from algoliasearch_django import AlgoliaIndex
-
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase, conditional_register
+from apps.common.index import IndexBase, register
 from apps.github.models.organization import Organization
 from apps.github.models.user import User
 
 
-@conditional_register(User)
-class UserIndex(AlgoliaIndex, IndexBase):
+@register(User)
+class UserIndex(IndexBase):
     """User index."""
 
     index_name = "users"
@@ -63,12 +61,13 @@ class UserIndex(AlgoliaIndex, IndexBase):
 
     should_index = "is_indexable"
 
-    def get_queryset(self):
-        """Get queryset for indexing."""
-        qs = User.objects.exclude(login__in=Organization.get_logins())
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
-
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
         UserIndex.reindex_synonyms("github", "users")
+
+    def get_entities(self):
+        """Get entities for indexing."""
+        return User.objects.exclude(
+            login__in=Organization.get_logins(),
+        )

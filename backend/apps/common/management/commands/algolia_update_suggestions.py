@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from apps.common.index import IndexBase, should_create_index
+from apps.common.index import IndexBase, is_indexable
 
 
 class Command(BaseCommand):
@@ -84,24 +84,21 @@ class Command(BaseCommand):
         }
 
         print("\nThe following query suggestion index were updated:")
+        environment = settings.ENVIRONMENT.lower()
         for entity, suggestion_settings in entity_configs.items():
-            source_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}"
-            suggestions_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}_suggestions"
-
-            # Skip updating if the index is excluded
-            if not should_create_index(suggestions_index_name, "suggestion"):
-                continue
+            if not is_indexable(entity) or not is_indexable(f"{entity}_suggestions"):
+                continue  # Skip if the index name is excluded.
 
             configuration = {
                 "sourceIndices": [
                     {
-                        "indexName": source_index_name,
+                        "indexName": f"{environment}_{entity}",
                         **suggestion_settings,
                     }
                 ]
             }
             client.update_config(
-                index_name=suggestions_index_name,
+                index_name=f"{environment}_{entity}_suggestions",
                 configuration=configuration,
             )
             print(f"{7*' '} * {entity.capitalize()}")
