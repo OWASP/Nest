@@ -194,13 +194,20 @@ class IndexBase(AlgoliaIndex):
 
     @staticmethod
     @lru_cache(maxsize=1024)
-    def get_total_count(index_name):
+    def get_total_count(index_name, search_filters=None):
         """Get total count of records in index."""
         client = IndexBase.get_client()
         try:
+            search_params = {
+                "analytics": False,
+                "hitsPerPage": 0,
+                "query": "",
+            }
+            if search_filters:
+                search_params["filters"] = search_filters
             return client.search_single_index(
                 index_name=f"{settings.ENVIRONMENT.lower()}_{index_name}",
-                search_params={"query": "", "hitsPerPage": 0, "analytics": False},
+                search_params=search_params,
             ).nb_hits
         except AlgoliaException:
             logger.exception("Error retrieving index count for '%s'", index_name)
