@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react'
 import * as Sentry from '@sentry/react'
 import { toast } from 'hooks/useToast'
 import React from 'react'
@@ -35,12 +36,12 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, m
             {title}
           </h2>
           <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
-          <button
+          <Button
             onClick={() => navigate('/')}
             className="font-inter mt-8 h-12 w-40 rounded-lg bg-owasp-blue text-base font-medium text-white transition-colors hover:bg-blue-400"
           >
             Return To Home
-          </button>
+          </Button>
         </div>
       </div>
     </main>
