@@ -15,7 +15,7 @@ class ChapterQuery(BaseQuery):
     def resolve_chapter(root, info, key):
         """Resolve chapter by key."""
         try:
-            key = f"www-chapter-{key}"
-            return Chapter.objects.get(key=key)
+            normalized_key = "www-chapter-" + key
+            return Chapter.objects.get(key=normalized_key)
         except Chapter.DoesNotExist:
             return None
