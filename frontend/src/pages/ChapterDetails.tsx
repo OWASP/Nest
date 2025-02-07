@@ -1,3 +1,4 @@
+import { Link } from '@chakra-ui/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
@@ -48,9 +49,9 @@ export default function ChapterDetailsPage() {
     {
       label: 'URL',
       value: (
-        <a href={chapter.url} className="hover:underline dark:text-sky-600">
+        <Link href={chapter.url} className="hover:underline dark:text-sky-600">
           {chapter.url}
-        </a>
+        </Link>
       ),
     },
   ]
