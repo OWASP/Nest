@@ -1,3 +1,5 @@
+
+import { Link } from '@chakra-ui/react'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -20,9 +22,9 @@ const InfoBlock = ({
       <div className="text-sm md:text-base">
         {label && <div className="text-sm font-medium">{label}</div>}
         {isLink ? (
-          <a href={value} className="hover:underline dark:text-sky-600">
+          <Link href={value} className="hover:underline dark:text-sky-600">
             {value}
-          </a>
+          </Link>
         ) : (
           value
         )}

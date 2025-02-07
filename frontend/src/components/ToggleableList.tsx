@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
@@ -29,7 +30,7 @@ const ToggleableList = ({
         ))}
       </div>
       {items.length > limit && (
-        <button
+        <Button
           onClick={toggleShowAll}
           className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
         >
@@ -42,7 +43,7 @@ const ToggleableList = ({
               Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
             </>
           )}
-        </button>
+        </Button>
       )}
     </div>
   )

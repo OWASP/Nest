@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
@@ -53,7 +54,7 @@ const TopContributors = ({
         ))}
       </div>
       {contributors.length > maxInitialDisplay && (
-        <button
+        <Button
           onClick={toggleContributors}
           className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
         >
@@ -66,7 +67,7 @@ const TopContributors = ({
               Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
             </>
           )}
-        </button>
+        </Button>
       )}
     </div>
   )

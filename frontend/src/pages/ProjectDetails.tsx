@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client'
+import { Link } from '@chakra-ui/react'
 import {
   faCode,
   faCodeFork,
@@ -64,9 +65,9 @@ const ProjectDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <a href={project.url} className="hover:underline dark:text-sky-600">
+        <Link href={project.url} className="hover:underline dark:text-sky-600">
           {project.url}
-        </a>
+        </Link>
       ),
     },
   ]

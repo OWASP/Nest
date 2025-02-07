@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react'
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -106,7 +107,7 @@ export default function Header() {
           />
           <ModeToggle />
           <div className="md:hidden">
-            <button
+            <Button
               onClick={toggleMobileMenu}
               className="text-slate-300 hover:text-slate-100 focus:outline-none"
             >
@@ -116,7 +117,7 @@ export default function Header() {
               ) : (
                 <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
