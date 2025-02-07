@@ -1,9 +1,7 @@
-
 import { useQuery } from '@apollo/client'
+import { Link } from '@chakra-ui/react'
 import { GET_CHAPTER_DATA } from 'api/queries/chapterQueries'
 import { toast } from 'hooks/useToast'
-import { Link } from '@chakra-ui/react'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ChapterTypeGraphQL } from 'types/chapter'
