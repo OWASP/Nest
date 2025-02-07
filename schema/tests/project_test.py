@@ -29,12 +29,16 @@ def test_positive(project_schema):
         ),
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience-missing.yaml", "'audience' is a required property"),
-        ("blog-none.yaml", "None is not of type 'string'"),
-        ("demo-none.yaml", "None is not of type 'string'"),
+        ("blog-none.yaml", "None is not a 'uri'"),
+        ("demo-none.yaml", "None is not a 'uri'"),
         ("downloads-empty.yaml", "[] should be non-empty"),
         (
             "downloads-non-unique.yaml",
             "['https://abc.com/download', 'https://abc.com/download'] has non-unique elements",
+        ),
+         (
+            "downloads-non-uri.yaml",
+            "'xyz-abc' is not a 'uri'",
         ),
         ("events-empty.yaml", "[] should be non-empty"),
         (
