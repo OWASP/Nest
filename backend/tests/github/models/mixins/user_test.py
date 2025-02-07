@@ -61,8 +61,8 @@ class TestUserIndexMixin:
     @pytest.mark.parametrize(
         ("login", "expected_indexable"),
         [
-            ("johndoe", True),
-            ("janedoe", True),
+            ("john-doe", True),
+            ("jane-doe", True),
             ("ghost", False),
         ],
     )

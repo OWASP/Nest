@@ -12,10 +12,10 @@ from apps.slack.constants import (
     OWASP_PROJECT_NEST_CHANNEL_ID,
 )
 
-SEPTERMER = 9
+SEPTEMBER = 9
 
 now = timezone.now()
-previous_gsoc_year = now.year if now.month > SEPTERMER else now.year - 1
+previous_gsoc_year = now.year if now.month > SEPTEMBER else now.year - 1
 projects_url = get_absolute_url("projects")
 
 GSOC_GENERAL_INFORMATION_BLOCKS = (

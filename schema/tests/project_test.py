@@ -58,6 +58,12 @@ def test_positive(project_schema):
         ("mailing_list-empty.yaml", "'' is too short"),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
+        ("repositories-empty.yaml", "[] should be non-empty"),
+        (
+            "repositories-non-unique.yaml",
+            "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
+        ),
+        ("repositories-missing-url.yaml", "'url' is a required property"),
         ("sponsors-empty-list.yaml", "[] should be non-empty"),
         ("sponsors-name-missing.yaml", "'name' is a required property"),
         ("sponsors-url-missing.yaml", "'url' is a required property"),

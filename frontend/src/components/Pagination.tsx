@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react'
 import { faEllipsisH } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
@@ -59,13 +60,13 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="mt-8 flex flex-col items-center justify-center space-y-3">
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <button
+        <Button
           className="flex h-10 min-w-[2.5rem] items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
         >
           Prev
-        </button>
+        </Button>
         {pageNumbers.map((number, index) => (
           <React.Fragment key={index}>
             {number === '...' ? (
@@ -73,7 +74,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 <FontAwesomeIcon icon={faEllipsisH} className="h-5 w-5"></FontAwesomeIcon>
               </span>
             ) : (
-              <button
+              <Button
                 className={`flex h-10 min-w-[2.5rem] items-center justify-center rounded-md px-3 text-sm font-medium ${
                   currentPage === number
                     ? 'bg-[#83a6cc] text-white dark:bg-white dark:text-black'
@@ -82,17 +83,17 @@ const Pagination: React.FC<PaginationProps> = ({
                 onClick={() => onPageChange(number as number)}
               >
                 {number}
-              </button>
+              </Button>
             )}
           </React.Fragment>
         ))}
-        <button
+        <Button
           className="flex h-10 min-w-[2.5rem] items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   )
