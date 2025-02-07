@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.13-slim AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -26,3 +26,24 @@ COPY settings settings
 COPY static static
 COPY templates templates
 COPY tests tests
+
+FROM python:3.13-slim
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN groupadd owasp && \
+    useradd --create-home --home-dir /home/owasp -g owasp owasp && \
+    apt-get update && \
+    apt-get install -y libpq-dev && \
+    apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+ENV FORCE_COLOR=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /home/owasp
+
+USER owasp
+
+COPY --from=builder /home/owasp /home/owasp
+
+CMD ["/bin/bash", "-c", "VENV_DIR=$(ls -d /home/owasp/.cache/pypoetry/virtualenvs/*) && $VENV_DIR/bin/pytest"]

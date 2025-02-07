@@ -102,7 +102,7 @@ sync-data: update-data enrich-data index-data
 
 test-backend:
 	@docker build -f backend/Dockerfile.test backend -t nest-test-backend
-	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend poetry run pytest
+	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend
 
 update-data: \
 	github-update-owasp-organization \
