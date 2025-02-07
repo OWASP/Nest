@@ -28,14 +28,6 @@ export interface ProjectDataType {
   total_pages: number
 }
 
-export interface ProjectStatsType {
-  contributors: number
-  forks: number
-  repositories: number
-  stars: number
-  issues: number
-}
-
 export interface ProjectIssuesType {
   author: { avatar_url: string; key: string; name: string }
   commentsCount: number
@@ -65,10 +57,10 @@ export type RepositoryCardProps = {
   contributorsCount: number
   forksCount: number
   name: string
+  key: string
   openIssuesCount: number
   starsCount: number
   subscribersCount: number
-  url: string
 }
 
 export interface RepositoriesCardProps {
