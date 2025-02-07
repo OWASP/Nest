@@ -10,7 +10,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type React from 'react'
 import { useState } from 'react'
-import { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
+import { useNavigate } from 'react-router-dom'
+import { RepositoriesCardProps } from 'types/project'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
@@ -20,9 +21,9 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {displayedRepositories.map((repo, index) => (
-          <RepositoryItem key={index} {...repo} />
-        ))}
+        {displayedRepositories.map((repository, index) => {
+          return <RepositoryItem key={index} details={repository} />
+        })}
       </div>
       {repositories.length > 4 && (
         <div className="mt-6 flex items-center justify-center text-center">
@@ -46,30 +47,28 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   )
 }
 
-const RepositoryItem: React.FC<RepositoryCardProps> = ({
-  name,
-  openIssuesCount,
-  contributorsCount,
-  forksCount,
-  starsCount,
-  url,
-}) => (
-  <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-    <a
-      href={url}
-      target="_blank"
-      className="font-semibold text-blue-600 hover:underline dark:text-sky-400"
-    >
-      {name}
-    </a>
-    <div className="space-y-2 text-sm">
-      <InfoItem icon={faUsers} label="Contributors" value={contributorsCount} />
-      <InfoItem icon={faExclamationCircle} label="Issues" value={openIssuesCount} />
-      <InfoItem icon={faCodeFork} label="Forks" value={forksCount} />
-      <InfoItem icon={faStar} label="Stars" value={starsCount} />
+const RepositoryItem = ({ details }) => {
+  const navigate = useNavigate()
+  const handleClick = () => {
+    navigate(window.location.pathname + '/repositories/' + details?.key)
+  }
+  return (
+    <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+      <p
+        onClick={handleClick}
+        className="font-semibold text-blue-600 hover:cursor-pointer hover:underline dark:text-sky-400"
+      >
+        {details.name}
+      </p>
+      <div className="space-y-2 text-sm">
+        <InfoItem icon={faUsers} label="Contributors" value={details.contributorsCount} />
+        <InfoItem icon={faExclamationCircle} label="Issues" value={details.openIssuesCount} />
+        <InfoItem icon={faCodeFork} label="Forks" value={details.forksCount} />
+        <InfoItem icon={faStar} label="Stars" value={details.starsCount} />
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: number }> = ({
   icon,

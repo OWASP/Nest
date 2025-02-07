@@ -1,5 +1,12 @@
 import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
+import {
+  faCode,
+  faCodeFork,
+  faExclamationCircle,
+  faStar,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
 import { toast } from 'hooks/useToast'
@@ -84,14 +91,13 @@ const ProjectDetailsPage = () => {
       ),
     },
   ]
-
-  const projectStats = {
-    contributors: project.contributors_count,
-    forks: project.forks_count,
-    issues: project.issues_count,
-    repositories: project.repositories_count,
-    stars: project.stars_count,
-  }
+  const projectStats = [
+    { icon: faUsers, value: `${project?.contributors_count || 'No'} Contributors` },
+    { icon: faCodeFork, value: `${project?.forks_count || 'No'} Forks` },
+    { icon: faStar, value: `${project?.stars_count || 'No'} Stars` },
+    { icon: faCode, value: `${project?.repositories_count || 'No'} Repositories` },
+    { icon: faExclamationCircle, value: `${project?.issues_count || 'No'} Issues` },
+  ]
   return (
     <DetailsCard
       title={project.name}
@@ -99,7 +105,7 @@ const ProjectDetailsPage = () => {
       details={projectDetails}
       is_active={project.is_active}
       summary={project.summary}
-      projectStats={projectStats}
+      stats={projectStats}
       type="project"
       topContributors={project.top_contributors}
       languages={project.languages}

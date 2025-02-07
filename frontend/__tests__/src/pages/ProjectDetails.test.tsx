@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { toast } from 'hooks/useToast'
 import { act } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
@@ -10,6 +11,10 @@ import {
   mockProjectDetailsData,
   mockProjectDetailsDataGQL,
 } from '@tests/data/mockProjectDetailsData'
+
+jest.mock('hooks/useToast', () => ({
+  toast: jest.fn(),
+}))
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -23,6 +28,9 @@ jest.mock('react-router-dom', () => ({
 }))
 
 jest.mock('api/fetchAlgoliaData')
+const mockError = {
+  error: new Error('GraphQL error'),
+}
 
 describe('ProjectDetailsPage', () => {
   let navigateMock: jest.Mock
@@ -236,101 +244,145 @@ describe('ProjectDetailsPage', () => {
       expect(link).toHaveAttribute('href', 'https://example.com')
     })
   })
-})
 
-test('renders data state for GraphQL query', async () => {
-  render(<ProjectDetailsPage />)
+  test('renders data state for GraphQL query', async () => {
+    render(<ProjectDetailsPage />)
 
-  await waitFor(() => {
-    expect(screen.getByText('Test Project')).toBeInTheDocument()
-    expect(screen.getByText('This is a test project description')).toBeInTheDocument()
-    expect(screen.getByText('Tool')).toBeInTheDocument()
-    expect(screen.getByText('Flagship')).toBeInTheDocument()
-  })
-})
-
-test('Recent issues are rendered correctly', async () => {
-  render(<ProjectDetailsPage />)
-
-  await waitFor(() => {
-    const issues = mockProjectDetailsDataGQL.project.recentIssues
-
-    issues.forEach((issue) => {
-      expect(screen.getByText(issue.title)).toBeInTheDocument()
-
-      expect(screen.getByText(issue.author.name)).toBeInTheDocument()
-
-      expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+      expect(screen.getByText('This is a test project description')).toBeInTheDocument()
+      expect(screen.getByText('Tool')).toBeInTheDocument()
+      expect(screen.getByText('Flagship')).toBeInTheDocument()
     })
   })
-})
 
-test('No recent issues message is displayed when issues array is empty', async () => {
-  const emptyIssuesData = {
-    ...mockProjectDetailsDataGQL,
-    project: {
-      ...mockProjectDetailsDataGQL.project,
-      recentIssues: [],
-    },
-  }
+  test('Recent issues are rendered correctly', async () => {
+    render(<ProjectDetailsPage />)
 
-  ;(useQuery as jest.Mock).mockReturnValue({
-    data: emptyIssuesData,
-    loading: false,
-    error: null,
+    await waitFor(() => {
+      const issues = mockProjectDetailsDataGQL.project.recentIssues
+
+      issues.forEach((issue) => {
+        expect(screen.getByText(issue.title)).toBeInTheDocument()
+
+        expect(screen.getByText(issue.author.name)).toBeInTheDocument()
+
+        expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
+      })
+    })
   })
 
-  render(<ProjectDetailsPage />)
+  test('No recent issues message is displayed when issues array is empty', async () => {
+    const emptyIssuesData = {
+      ...mockProjectDetailsDataGQL,
+      project: {
+        ...mockProjectDetailsDataGQL.project,
+        recentIssues: [],
+      },
+    }
 
-  await waitFor(() => {
-    expect(screen.getByText('No recent issues.')).toBeInTheDocument()
-  })
-})
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: emptyIssuesData,
+      loading: false,
+      error: null,
+    })
 
-test('Handles case when no data is available', async () => {
-  ;(useQuery as jest.Mock).mockReturnValue({
-    data: null,
-    loading: false,
-    error: null,
-  })
-  ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [] })
+    render(<ProjectDetailsPage />)
 
-  render(<ProjectDetailsPage />)
-
-  await waitFor(() => {
-    expect(screen.getByText('Project not found')).toBeInTheDocument()
-  })
-})
-
-test('sets recent releases and issues correctly from GraphQL data', () => {
-  const setRecentReleasesMock = jest.fn()
-  const setRecentIssuesMock = jest.fn()
-
-  act(() => {
-    const data = mockProjectDetailsDataGQL
-
-    setRecentReleasesMock(data?.project?.recentReleases)
-    setRecentIssuesMock(data?.project?.recentIssues)
+    await waitFor(() => {
+      expect(screen.getByText('No recent issues.')).toBeInTheDocument()
+    })
   })
 
-  expect(setRecentReleasesMock).toHaveBeenCalledWith(
-    mockProjectDetailsDataGQL.project.recentReleases
-  )
+  test('Handles case when no data is available', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      loading: false,
+      error: null,
+    })
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [] })
 
-  expect(setRecentIssuesMock).toHaveBeenCalledWith(mockProjectDetailsDataGQL.project.recentIssues)
-})
+    render(<ProjectDetailsPage />)
 
-test('handles undefined data gracefully', () => {
-  const setRecentReleasesMock = jest.fn()
-  const setRecentIssuesMock = jest.fn()
-
-  act(() => {
-    const data = undefined
-
-    setRecentReleasesMock(data?.project?.recentReleases)
-    setRecentIssuesMock(data?.project?.recentIssues)
+    await waitFor(() => {
+      expect(screen.getByText('Project not found')).toBeInTheDocument()
+    })
   })
 
-  expect(setRecentReleasesMock).toHaveBeenCalledWith(undefined)
-  expect(setRecentIssuesMock).toHaveBeenCalledWith(undefined)
+  test('sets recent releases and issues correctly from GraphQL data', () => {
+    const setRecentReleasesMock = jest.fn()
+    const setRecentIssuesMock = jest.fn()
+
+    act(() => {
+      const data = mockProjectDetailsDataGQL
+
+      setRecentReleasesMock(data?.project?.recentReleases)
+      setRecentIssuesMock(data?.project?.recentIssues)
+    })
+
+    expect(setRecentReleasesMock).toHaveBeenCalledWith(
+      mockProjectDetailsDataGQL.project.recentReleases
+    )
+
+    expect(setRecentIssuesMock).toHaveBeenCalledWith(mockProjectDetailsDataGQL.project.recentIssues)
+  })
+
+  test('handles undefined data gracefully', () => {
+    const setRecentReleasesMock = jest.fn()
+    const setRecentIssuesMock = jest.fn()
+
+    act(() => {
+      const data = undefined
+
+      setRecentReleasesMock(data?.project?.recentReleases)
+      setRecentIssuesMock(data?.project?.recentIssues)
+    })
+
+    expect(setRecentReleasesMock).toHaveBeenCalledWith(undefined)
+    expect(setRecentIssuesMock).toHaveBeenCalledWith(undefined)
+  })
+
+  test('handles missing project stats gracefully', async () => {
+    const projectWithNoStats = {
+      ...mockProjectDetailsData,
+      contributors_count: 0,
+      forks_count: 0,
+      issues_count: 0,
+      repositories_count: 0,
+      stars_count: 0,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ hits: [projectWithNoStats] })
+    )
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('No Contributors')).toBeInTheDocument()
+      expect(screen.getByText('No Forks')).toBeInTheDocument()
+      expect(screen.getByText('No Issues')).toBeInTheDocument()
+      expect(screen.getByText('No Repositories')).toBeInTheDocument()
+      expect(screen.getByText('No Stars')).toBeInTheDocument()
+    })
+  })
+
+  test('renders error message when GraphQL request fails', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      loading: false,
+      data: null,
+      error: mockError,
+    })
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [] })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Project not found')).toBeInTheDocument()
+    })
+    expect(toast).toHaveBeenCalledWith({
+      description: 'Unable to complete the requested operation.',
+      title: 'GraphQL Request Failed',
+      variant: 'destructive',
+    })
+  })
 })
