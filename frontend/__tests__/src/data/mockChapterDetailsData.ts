@@ -56,4 +56,4 @@ export const mockChapterDetailsData = {
     lng: 77.401989,
   },
   establishedYear: 2020,
-};
+}
