@@ -9,7 +9,12 @@ const ItemCardList = ({
 }: {
   title: string
   data: ProjectReleaseType[] | ProjectIssuesType[]
-  renderDetails: (item: { createdAt: string; commentsCount: number; publishedAt: string; tagName: string }) => JSX.Element
+  renderDetails: (item: {
+    createdAt: string
+    commentsCount: number
+    publishedAt: string
+    tagName: string
+  }) => JSX.Element
 }) => (
   <SecondaryCard title={title}>
     {data && data.length > 0 ? (

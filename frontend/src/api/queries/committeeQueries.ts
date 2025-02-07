@@ -4,7 +4,6 @@ export const GET_COMMITTEE_DATA = gql`
   query GetCommittee($key: String!) {
     committee(key: $key) {
       createdAt
-      key
       leaders
       name
       relatedUrls

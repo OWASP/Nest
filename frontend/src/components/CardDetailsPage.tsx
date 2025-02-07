@@ -22,6 +22,7 @@ const DetailsCard = ({
   type,
   topContributors,
   languages,
+  leaders,
   topics,
   recentIssues,
   recentReleases,
@@ -53,7 +54,9 @@ const DetailsCard = ({
                   <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
                 </div>
               ))}
-            {socialLinks && type === 'chapter' && <SocialLinks urls={socialLinks || []} />}
+            {socialLinks && (type === 'chapter' || type === 'committee') && (
+              <SocialLinks urls={socialLinks || []} />
+            )}
           </SecondaryCard>
           {(type === 'project' || type === 'repository') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
@@ -68,6 +71,13 @@ const DetailsCard = ({
                 geoLocData={geolocationData ? [geolocationData] : []}
                 style={{ height: '200px', width: '100%', zIndex: '0' }}
               />
+            </SecondaryCard>
+          )}
+          {type === 'committee' && (
+            <SecondaryCard title="Leaders" className="md:col-span-2">
+              {leaders.map((leader, index) => (
+                <div key={index}>{leader}</div>
+              ))}
             </SecondaryCard>
           )}
         </div>

@@ -6,7 +6,6 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
 import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
@@ -72,11 +71,11 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-    { icon: faUsers, value: `${project?.contributors_count || 'No'} Contributors` },
-    { icon: faCodeFork, value: `${project?.forks_count || 'No'} Forks` },
-    { icon: faStar, value: `${project?.stars_count || 'No'} Stars` },
-    { icon: faCode, value: `${project?.repositories_count || 'No'} Repositories` },
-    { icon: faExclamationCircle, value: `${project?.issues_count || 'No'} Issues` },
+    { icon: faUsers, value: `${project?.contributorsCount || 'No'} Contributors` },
+    { icon: faCodeFork, value: `${project?.forksCount || 'No'} Forks` },
+    { icon: faStar, value: `${project?.starsCount || 'No'} Stars` },
+    { icon: faCode, value: `${project?.repositoriesCount || 'No'} Repositories` },
+    { icon: faExclamationCircle, value: `${project?.issuesCount || 'No'} Issues` },
   ]
   return (
     <DetailsCard

@@ -1,4 +1,6 @@
-export interface CommitteeType {
+import { TopContributorsTypeGraphql } from './contributor'
+
+export interface CommitteeTypeAlgolia {
   created_at: number
   key: string
   leaders: string[]
@@ -16,8 +18,20 @@ export interface CommitteeType {
   objectID: string
 }
 
+export interface CommitteeDetailsTypeGraphQL {
+  createdAt: number
+  key: string
+  leaders: string[]
+  name: string
+  relatedUrls: string[]
+  topContributors: TopContributorsTypeGraphql[]
+  summary: string
+  updatedAt: number
+  url: string
+}
+
 export interface CommitteeDataType {
   active_committees_count: number
-  committees: CommitteeType[]
+  committees: CommitteeTypeAlgolia[]
   total_pages: number
 }

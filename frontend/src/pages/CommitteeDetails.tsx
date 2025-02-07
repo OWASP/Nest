@@ -1,39 +1,50 @@
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { useEffect, useState } from 'react'
+import { useQuery } from '@apollo/client'
+import { GET_COMMITTEE_DATA } from 'api/queries/committeeQueries'
+import { toast } from 'hooks/useToast'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
+import type { CommitteeDetailsTypeGraphQL } from 'types/committee'
+import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import Card from 'components/Card'
-import CardSkeleton from 'components/skeletons/Card'
+import DetailsCard from 'components/CardDetailsPage'
+import LoadingSpinner from 'components/LoadingSpinner'
 
-const CommitteeDetailsPage = () => {
-  const { committeeKey } = useParams()
-  const [committee, setCommittee] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+export default function CommitteeDetailsPage() {
+  const { committeeKey } = useParams<{ committeeKey: string }>()
+  const [committee, setCommittee] = useState<CommitteeDetailsTypeGraphQL | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  const { data, error: graphQLRequestError } = useQuery<{ committee: CommitteeDetailsTypeGraphQL }>(
+    GET_COMMITTEE_DATA,
+    {
+      variables: { key: committeeKey },
+    }
+  )
 
   useEffect(() => {
-    const fetchCommitteeData = async () => {
-      setIsLoading(true)
-      const { hits } = await fetchAlgoliaData('committees', committeeKey, 1, committeeKey)
-      if (hits && hits.length > 0) {
-        setCommittee(hits[0])
-      }
+    if (data?.committee) {
+      setCommittee(data.committee)
       setIsLoading(false)
     }
+    if (graphQLRequestError) {
+      toast({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        variant: 'destructive',
+      })
+      setIsLoading(false)
+    }
+  }, [data, graphQLRequestError, committeeKey])
 
-    fetchCommitteeData()
-  }, [committeeKey])
-  if (isLoading)
+  if (isLoading) {
     return (
-      <div className="mt-16 flex w-full flex-col items-center justify-center">
-        <div className="w-full pt-12">
-          <CardSkeleton showLink={false} showLevel={false} showIcons={1} />
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
+  }
 
-  if (!committee)
+  if (!committee && !isLoading)
     return (
       <ErrorDisplay
         statusCode={404}
@@ -42,31 +53,28 @@ const CommitteeDetailsPage = () => {
       />
     )
 
-  const SubmitButton = {
-    label: 'Learn More',
-    icon: <FontAwesomeIconWrapper icon="fa-solid fa-people-group" />,
-    url: committee.url,
-  }
+  const details = [
+    { label: 'Last Updated', value: formatDate(committee.updatedAt) },
+    { label: 'Leaders', value: committee.leaders.join(', ') },
+    {
+      label: 'URL',
+      value: (
+        <a href={committee.url} className="hover:underline dark:text-sky-600">
+          {committee.url}
+        </a>
+      ),
+    },
+  ]
 
-  const params: string[] = ['updated_at']
-  const filteredIcons = getFilteredIcons(committee, params)
-  const formattedUrls = handleSocialUrls(committee.related_urls)
   return (
-    <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
-      <div className="flex justify-center">
-        <Card
-          key={committee.objectID}
-          title={committee.name}
-          url={committee.url}
-          summary={committee.summary}
-          icons={filteredIcons}
-          topContributors={committee.top_contributors}
-          button={SubmitButton}
-          social={formattedUrls}
-          tooltipLabel={`Learn more about ${committee.name}`}
-        />
-      </div>
-    </div>
+    <DetailsCard
+      title={committee.name}
+      details={details}
+      leaders={committee.leaders}
+      socialLinks={committee.relatedUrls}
+      summary={committee.summary}
+      type="committee"
+      topContributors={committee.topContributors}
+    />
   )
 }
-export default CommitteeDetailsPage

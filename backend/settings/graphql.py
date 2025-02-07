@@ -7,7 +7,6 @@ from apps.owasp.graphql.queries import OwaspQuery
 
 
 class Query(GithubQuery, OwaspQuery):
-
     """Schema queries."""
 
 

@@ -6,8 +6,11 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
-const ChapterMap = ({ geoLocData, style }: {
-  geoLocData:GeoLocDataGraphQL[] | GeoLocDataAlgolia[],
+const ChapterMap = ({
+  geoLocData,
+  style,
+}: {
+  geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
@@ -52,7 +55,9 @@ const ChapterMap = ({ geoLocData, style }: {
           shadowSize: [41, 41], // Shadow size
           shadowUrl: '/img/marker-shadow.png',
         })
-        const marker = L.marker([chapter.geoLocation.lat, chapter.geoLocation.lng], { icon: markerIcon })
+        const marker = L.marker([chapter.geoLocation.lat, chapter.geoLocation.lng], {
+          icon: markerIcon,
+        })
         const popup = L.popup()
         const popupContent = document.createElement('div')
         popupContent.className = 'popup-content'
