@@ -1,3 +1,4 @@
+import { Link } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { NavButtonProps } from 'types/button'
@@ -15,7 +16,7 @@ const NavButton = ({
   const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <a
+    <Link
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -34,7 +35,7 @@ const NavButton = ({
         style={{ color: isHovered ? hoverIconColor : defaultIconColor }}
       />
       <span>{text}</span>
-    </a>
+    </Link>
   )
 }
 

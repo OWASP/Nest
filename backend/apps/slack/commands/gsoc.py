@@ -7,6 +7,7 @@ from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_START
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.utils import get_text
 
 COMMAND = "/gsoc"
 
@@ -77,7 +78,11 @@ def gsoc_handler(ack, command, client):
         ]
 
     conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+    client.chat_postMessage(
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
+    )
 
 
 if SlackConfig.app:
