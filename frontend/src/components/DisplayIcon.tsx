@@ -5,7 +5,7 @@ import { TooltipRecipe } from 'utils/theme'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { Tooltip } from 'components/ui/tooltip'
 
-export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
+export default function DisplayIcon({ item, icons, idx }: { item: string; icons: IconType, idx: number }) {
   // className for the container
   const containerClassName = [
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
