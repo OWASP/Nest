@@ -68,10 +68,10 @@ def test_positive(project_schema):
             "repositories-non-unique.yaml",
             "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
         ),
-        ("repositories-missing-url.yaml", "'url' is a required property"),
+        ("repositories-null.yaml", "'url' is a required property"),
         ("sponsors-empty.yaml", "[] should be non-empty"),
         ("sponsors-name-undefined.yaml", "'name' is a required property"),
-        ("sponsors-url-undefined.yaml", "'url' is a required property"),
+        ("sponsors-undefined.yaml", "'url' is a required property"),
         ("website-null.yaml", "None is not of type 'string'"),
     ],
 )
