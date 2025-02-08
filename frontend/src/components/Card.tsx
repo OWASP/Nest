@@ -33,7 +33,6 @@ const Card = ({
 
   // Resize listener to adjust display based on screen width
   useEffect(() => {
-    console.log({ icons: icons })
     const checkMobile = () => {
       const mobile = window.innerWidth < desktopViewMinWidth
       setIsMobile(mobile)
