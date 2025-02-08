@@ -8,17 +8,17 @@ export function ReleaseCard({ release }: { release: Release }) {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <a
-            href={`https://github.com/${release.repository.owner_key}/${release.repository.key}/releases/tag/${release.tag_name}`}
+            href={`https://github.com/${release.repository.ownerKey}/${release.repository.key}/releases/tag/${release.tagName}`}
             className="font-medium text-gray-900 decoration-dotted underline-offset-2 hover:underline dark:text-white"
             target="_blank"
             rel="noopener noreferrer"
           >
-            {release.name || release.tag_name}
+            {release.name || release.tagName}
           </a>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <FontAwesomeIcon icon={faTag} className="h-4 w-4" />
-            {release.tag_name}
-            {release.is_pre_release && (
+            {release.tagName}
+            {release.isPreRelease && (
               <>
                 <span>•</span>
                 <span className="rounded-full bg-gray-200 px-2 py-1 text-sm text-gray-800 dark:bg-gray-600 dark:text-gray-300">
@@ -28,17 +28,17 @@ export function ReleaseCard({ release }: { release: Release }) {
             )}
           </div>
           <a
-            href={`https://github.com/${release.repository.owner_key}/${release.repository.key}`}
+            href={`https://github.com/${release.repository.ownerKey}/${release.repository.key}`}
             className="mt-2 text-sm text-gray-600 decoration-dotted underline-offset-2 hover:underline dark:text-gray-400"
             target="_blank"
             rel="noopener noreferrer"
           >
-            {release.repository.owner_key}/{release.repository.key}
+            {release.repository.ownerKey}/{release.repository.key}
           </a>
         </div>
         <div className="flex items-center gap-2 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
           <FontAwesomeIcon icon={faCalendarAlt} className="h-4 w-4" />
-          {new Date(release.published_at * 1000).toLocaleDateString()}
+          {new Date(release.publishedAt * 1000).toLocaleDateString()}
         </div>
       </div>
     </div>

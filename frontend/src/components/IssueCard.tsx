@@ -8,7 +8,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
       <div className="flex justify-between">
         <div>
           <a
-            href={`https://github.com/${issue.repository.owner_key}/${issue.repository.key}/issues/${issue.number}`}
+            href={`https://github.com/${issue.repository.ownerKey}/${issue.repository.key}/issues/${issue.number}`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold text-black underline decoration-dotted dark:text-white"
@@ -21,18 +21,18 @@ export function IssueCard({ issue }: { issue: Issue }) {
             </span>
             <span>•</span>
             <a
-              href={`https://github.com/${issue.repository.owner_key}/${issue.repository.key}`}
+              href={`https://github.com/${issue.repository.ownerKey}/${issue.repository.key}`}
               target="_blank"
               rel="noopener noreferrer"
               className="underline decoration-dotted dark:text-gray-300"
             >
-              {issue.repository.owner_key}/{issue.repository.key}
+              {issue.repository.ownerKey}/{issue.repository.key}
             </a>
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <FontAwesomeIcon icon={faCalendarAlt} className="h-4 w-4" />
-          {new Date(issue.created_at * 1000).toLocaleDateString()}
+          {new Date(issue.createdAt * 1000).toLocaleDateString()}
         </div>
       </div>
     </div>

@@ -1,39 +1,47 @@
 """GitHub user GraphQL node."""
 
 import graphene
+
 from apps.common.graphql.nodes import BaseNode
 from apps.github.models.user import User
 
+
 class RepositoryType(graphene.ObjectType):
     """Repository type for nested objects."""
+
     key = graphene.String()
     owner_key = graphene.String()
 
+
 class IssueType(graphene.ObjectType):
     """GitHub issue type."""
+
     created_at = graphene.Float()
     comments_count = graphene.Int()
     number = graphene.Int()
     repository = graphene.Field(RepositoryType)
     title = graphene.String()
 
+
 class ReleaseType(graphene.ObjectType):
     """GitHub release type."""
+
     is_pre_release = graphene.Boolean()
     name = graphene.String()
     published_at = graphene.Float()
     repository = graphene.Field(RepositoryType)
     tag_name = graphene.String()
 
+
 class UserNode(BaseNode):
     """GitHub user node."""
-    
+
     # Existing fields
     contributions_count = graphene.Int()
     created_at = graphene.Float()
     updated_at = graphene.Float()
     url = graphene.String()
-    
+
     # New fields for issues and releases
     issues = graphene.List(IssueType)
     issues_count = graphene.Int()

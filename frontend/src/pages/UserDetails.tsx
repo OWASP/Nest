@@ -33,9 +33,9 @@ const UserDetailsPage: React.FC = () => {
   const [privateContributor, setPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
-  console.log('www-project-' + userKey);
+  console.log(userKey);
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
-    variables: { key: 'www-project-' + userKey },
+    variables: { key: userKey },
   })
 
   useEffect(() => {
@@ -224,7 +224,7 @@ const UserDetailsPage: React.FC = () => {
                 <div className="grid gap-4">
                   {user.releases.map((release) => (
                     <ReleaseCard
-                      key={`${release.repository.key}-${release.tag_name}`}
+                      key={`${release.repository.key}-${release.tagName}`}
                       release={release}
                     />
                   ))}

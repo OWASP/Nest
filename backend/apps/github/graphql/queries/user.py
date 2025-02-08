@@ -10,11 +10,11 @@ from apps.github.models.user import User
 class UserQuery(BaseQuery):
     """User queries."""
 
-    user = graphene.Field(UserNode, key=graphene.String(required=True))
+    user = graphene.Field(UserNode, login=graphene.String(required=True))
 
-    def resolve_user(root, info, key):
+    def resolve_user(root, info, login):
         """Resolve user by login."""
         try:
-            return User.objects.get(key=key)
+            return User.objects.get(login=login)
         except User.DoesNotExist:
             return None
