@@ -33,7 +33,7 @@ const UserDetailsPage: React.FC = () => {
   const [privateContributor, setPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
-  console.log(userKey);
+  
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
     variables: { key: userKey },
   })
@@ -44,7 +44,6 @@ const UserDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      console.log("Graphql request error",graphQLRequestError)
       toast({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',

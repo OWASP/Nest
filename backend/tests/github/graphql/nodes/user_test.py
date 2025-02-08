@@ -13,23 +13,27 @@ class TestUserNode:
         assert issubclass(UserNode, BaseNode)
 
     def test_meta_configuration(self):
-        """Test if Meta is properly configured."""
-        assert UserNode._meta.model == User
-        expected_fields = {
-            "avatar_url",
-            "bio",
-            "company",
-            "email",
-            "followers_count",
-            "following_count",
-            "id",
-            "location",
-            "login",
-            "name",
-            "public_repositories_count",
-            "created_at",
-            "contributions_count",
-            "url",
-            "updated_at",
-        }
-        assert set(UserNode._meta.fields) == expected_fields
+     """Test if Meta is properly configured."""
+    assert UserNode._meta.model == User
+    expected_fields = {
+        "avatar_url",
+        "bio",
+        "company",
+        "email",
+        "followers_count",
+        "following_count",
+        "id",
+        "location",
+        "login",
+        "name",
+        "public_repositories_count",
+        "created_at",
+        "contributions_count",
+        "url",
+        "updated_at",
+        "issues",        
+        "issues_count",     
+        "releases",         
+        "releases_count"    
+    }
+    assert set(UserNode._meta.fields) == expected_fields
