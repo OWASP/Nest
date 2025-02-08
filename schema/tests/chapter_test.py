@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from utils.validators import validate_data
+from utils.schema_validators import validate_data
 
 from tests.conftest import tests_data_dir
 
@@ -23,7 +23,7 @@ def test_positive(chapter_schema):
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("blog-none.yaml", "None is not of type 'string'"),
+        ("blog-none.yaml", "None is not a 'uri'"),
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique-urls.yaml",
