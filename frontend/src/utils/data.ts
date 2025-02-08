@@ -65,15 +65,15 @@ library.add(
 
 export const Icons = {
   stars_count: {
-    label: 'Total GitHub stars count',
+    label: 'GitHub stars',
     icon: 'fa-regular fa-star',
   },
   forks_count: {
-    label: 'Total GitHub forks count',
+    label: 'GitHub forks',
     icon: 'fa-solid fa-code-fork',
   },
   contributors_count: {
-    label: 'Total GitHub contributors count',
+    label: 'GitHub contributors',
     icon: 'fa-regular fa-user',
   },
   created_at: {
