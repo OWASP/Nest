@@ -78,18 +78,19 @@ const Card = ({
           </Link>
         </div>
         {/* Icons associated with the project */}
-        <div className="-ml-1.5 flex flex-grow">
-          {icons &&
-            Object.keys(Icons).map((key, index) =>
+        {icons && (
+          <div className="-ml-1.5 flex flex-grow">
+            {Object.keys(Icons).map((key, index) =>
               icons[key] ? (
                 <DisplayIcon
                   key={`${key}-${index}`}
                   item={key}
-                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))} // only pass in truthy meta data
+                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))} // Only pass in truthy meta data
                 />
               ) : null
             )}
-        </div>
+          </div>
+        )}
       </div>
       {/* Link to project name if provided */}
       {projectName && (
