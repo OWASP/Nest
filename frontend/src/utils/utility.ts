@@ -20,9 +20,7 @@ type projectType = project | IssueType | CommitteeType
 export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
   const filteredIcons = params.reduce((acc: IconType, key) => {
     if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
-      if (key === 'updated_at') {
-        acc[key] = dayjs.unix(project[key] as number).fromNow()
-      } else if (key === 'created_at') {
+      if (key === 'created_at') {
         acc[key] = dayjs.unix(project[key as keyof projectType] as number).fromNow()
       } else {
         acc[key] = project[key as keyof typeof project] as number

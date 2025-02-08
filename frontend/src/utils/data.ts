@@ -64,10 +64,6 @@ library.add(
 )
 
 export const Icons = {
-  updated_at: {
-    label: 'Last update date',
-    icon: 'fa-solid fa-arrows-rotate',
-  },
   forks_count: {
     label: 'Total GitHub forks count',
     icon: 'fa-solid fa-code-fork',
