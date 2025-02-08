@@ -7,12 +7,12 @@ leaders:
 level: 2
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
+sponsors:
+  - description: A great sponsor
+    logo: https://sponsor1.com/logo.png
+    name: Sponsor 1
 tags:
   - example-tag-1
   - example-tag-2
   - example-tag-3
 type: code
-sponsors:
-  - description: A great sponsor
-    logo: https://sponsor1.com/logo.png
-    name: Sponsor 1

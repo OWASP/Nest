@@ -43,11 +43,14 @@ def test_positive(project_schema):
             "downloads-non-unique.yaml",
             "['https://abc.com/download', 'https://abc.com/download'] has non-unique elements",
         ),
+        ("downloads-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
+        ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
+        ("events-null.yaml", "None is not of type 'array'"),
         (
             "leaders-email-empty.yaml",
             "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
@@ -68,10 +71,11 @@ def test_positive(project_schema):
             "repositories-non-unique.yaml",
             "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
         ),
-        ("repositories-null.yaml", "'url' is a required property"),
+        ("repositories-null.yaml", "None is not of type 'array'"),
         ("sponsors-empty.yaml", "[] should be non-empty"),
-        ("sponsors-name-undefined.yaml", "'name' is a required property"),
+        ("sponsors-null.yaml", "None is not of type 'array'"),
         ("sponsors-undefined.yaml", "'url' is a required property"),
+        ("website-empty.yaml", "'' is too short"),
         ("website-null.yaml", "None is not of type 'string'"),
     ],
 )
