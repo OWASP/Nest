@@ -42,22 +42,20 @@ export type User = {
 }
 
 export interface UserDetailsProps {
-  avatar_url: string
-  bio: string
-  company: string
-  created_at: number
-  email: string
-  followers_count: number
-  following_count: number
+  avatarUrl: string
+  bio: string | null
+  company: string | null
+  createdAt: string
+  email: string | null
+  followersCount: number
+  followingCount: number
   issues?: Issue[]
-  location: string
+  issuesCount: number
+  location: string | null
   login: string
-  name: string
-  objectID: string
-  public_repositories_count: number
+  name: string | null
+  publicRepositoriesCount: number
   releases?: Release[]
-  title: string
-  twitter_username: string
-  updated_at: number
+  releasesCount: number
   url: string
 }
