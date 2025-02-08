@@ -33,6 +33,7 @@ const Card = ({
 
   // Resize listener to adjust display based on screen width
   useEffect(() => {
+    console.log({ icons: icons })
     const checkMobile = () => {
       const mobile = window.innerWidth < desktopViewMinWidth
       setIsMobile(mobile)
@@ -78,19 +79,19 @@ const Card = ({
           </Link>
         </div>
         {/* Icons associated with the project */}
-        {icons && (
+        {icons && Object.keys(Icons).some((key) => icons[key]) ? (
           <div className="-ml-1.5 flex flex-grow">
             {Object.keys(Icons).map((key, index) =>
               icons[key] ? (
                 <DisplayIcon
                   key={`${key}-${index}`}
                   item={key}
-                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))} // Only pass in truthy meta data
+                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))}
                 />
               ) : null
             )}
           </div>
-        )}
+        ) : null}
       </div>
       {/* Link to project name if provided */}
       {projectName && (
