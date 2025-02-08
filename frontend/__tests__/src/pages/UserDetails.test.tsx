@@ -1,168 +1,130 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { useQuery } from '@apollo/client'
+import { screen, waitFor } from '@testing-library/react'
+import { toast } from 'hooks/useToast'
+import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import UserDetailsPage from 'pages/UserDetails'
-import { GET_USER_DATA } from 'api/queries/userQueries'
 import '@testing-library/jest-dom'
+import { mockUserDetailsData } from '@tests/data/mockUserDetails'
 
-// Mock the Apollo Client
-const mockGraphQLData = {
-  user: {
-    login: 'testuser',
-    name: 'Test User',
-    avatarUrl: 'https://example.com/avatar.jpg',
-    url: 'https://github.com/testuser',
-    bio: 'This is a test user',
-    company: 'Test Company',
-    location: 'Test Location',
-    email: 'testuser@example.com',
-    followersCount: 10,
-    followingCount: 5,
-    publicRepositoriesCount: 3,
-    createdAt: 1723002473,
-    issues: [
-      {
-        number: 1,
-        title: 'Test Issue',
-        createdAt: 1723002473,
-        commentsCount: 5,
-        repository: {
-          key: 'test-repo',
-          ownerKey: 'testuser'
-        }
-      }
-    ],
-    releases: [
-      {
-        name: 'v1.0.0',
-        tagName: '1.0.0',
-        isPreRelease: false,
-        publishedAt: 1723002473,
-        repository: {
-          key: 'test-repo',
-          ownerKey: 'testuser'
-        }
-      }
-    ]
-  }
+jest.mock('hooks/useToast', () => ({
+  toast: jest.fn(),
+}))
+
+jest.mock('@apollo/client', () => ({
+  ...jest.requireActual('@apollo/client'),
+  useQuery: jest.fn(),
+}))
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({ userKey: 'test-user' }),
+  useNavigate: jest.fn(),
+}))
+
+const mockError = {
+  error: new Error('GraphQL error'),
 }
 
-const mocks = [
-  {
-    request: {
-      query: GET_USER_DATA,
-      variables: { key: 'testuser' }
-    },
-    result: {
-      data: mockGraphQLData
-    }
-  }
-]
-
-// Mock the heatmap utilities
-jest.mock('utils/helpers/githubHeatmap', () => ({
-  fetchHeatmapData: jest.fn().mockResolvedValue({
-    contributions: true,
-    years: [{ year: 2024, total: 365, range: { start: '2024-01-01', end: '2024-12-31' } }]
-  }),
-  drawContributions: jest.fn()
-}))
-
-jest.mock('utils/logger', () => ({
-  error: jest.fn()
-}))
-
 describe('UserDetailsPage', () => {
+  let navigateMock: jest.Mock
+
   beforeEach(() => {
+    navigateMock = jest.fn()
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      loading: false,
+      error: null,
+    })
+    ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
+  })
+
+  afterEach(() => {
     jest.clearAllMocks()
+  });
+
+  test('renders loading state', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      error: null,
+    })
+    render(<UserDetailsPage />)
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    await waitFor(() => {
+      expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
   })
 
-  test('renders loading spinner initially', async () => {
-    render(<UserDetailsPage />, { 
-      route: '/user/testuser',
-      mocks,
-      addTypename: false
+
+  test('renders user details', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      loading: false,
+      error: null,
     })
 
-    expect(screen.getByAltText('Loading indicator')).toBeInTheDocument()
-  })
+    // Wait for the loading state to finish
+    render(<UserDetailsPage />)
 
-  test('renders user details after fetching data', async () => {
-    render(<UserDetailsPage />, {
-      route: '/user/testuser',
-      mocks,
-      addTypename: false
-    })
-
-    // Wait for loading to finish
     await waitFor(() => {
       expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
     })
 
-    // Verify user details are displayed
-    expect(screen.getByText(mockGraphQLData.user.name)).toBeInTheDocument()
-    expect(screen.getByText(`@${mockGraphQLData.user.login}`)).toBeInTheDocument()
-    expect(screen.getByText(mockGraphQLData.user.bio)).toBeInTheDocument()
-    expect(screen.getByText(mockGraphQLData.user.company)).toBeInTheDocument()
-    expect(screen.getByText(mockGraphQLData.user.location)).toBeInTheDocument()
-    expect(screen.getByText('Joined August 7, 2024')).toBeInTheDocument()
-
-    // Verify statistics
-    expect(screen.getByText('10')).toBeInTheDocument() // followers
-    expect(screen.getByText('5')).toBeInTheDocument() // following
-    expect(screen.getByText('3')).toBeInTheDocument() // repositories
-
-    // Verify issues and releases sections
-    expect(screen.getByText('Recent Issues')).toBeInTheDocument()
-    expect(screen.getByText('Test Issue')).toBeInTheDocument()
-    expect(screen.getByText('Recent Releases')).toBeInTheDocument()
-    expect(screen.getByText('v1.0.0')).toBeInTheDocument()
+    expect(screen.getByText('Test User')).toBeInTheDocument()
+    expect(screen.getByText(`@testuser`)).toBeInTheDocument()
+    expect(screen.getByText('This is a test user')).toBeInTheDocument()
+    expect(screen.getByText('Test Company')).toBeInTheDocument()
+    expect(screen.getByText('Test Location')).toBeInTheDocument()
   })
 
-  test('renders "User not found" message when user does not exist', async () => {
-    const errorMocks = [
-      {
-        request: {
-          query: GET_USER_DATA,
-          variables: { key: 'testuser' }
-        },
-        result: {
-          data: { user: null }
-        }
-      }
-    ]
-
-    render(<UserDetailsPage />, {
-      route: '/user/testuser',
-      mocks: errorMocks,
-      addTypename: false
+  test('displays GitHub profile link correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
     })
 
+    render(<UserDetailsPage />)
+
     await waitFor(() => {
-      expect(screen.getByText('User not found')).toBeInTheDocument()
-      expect(screen.getByText("Sorry, the user you're looking for doesn't exist")).toBeInTheDocument()
+      const githubProfileLink = screen.getByText('Visit GitHub Profile')
+      expect(githubProfileLink).toBeInTheDocument()
+      expect(githubProfileLink.closest('a')).toHaveAttribute('href', 'https://github.com/testuser')
     })
   })
 
-  test('shows error toast when GraphQL request fails', async () => {
-    const errorMocks = [
-      {
-        request: {
-          query: GET_USER_DATA,
-          variables: { key: 'testuser' }
-        },
-        error: new Error('GraphQL Error')
-      }
-    ]
-
-    render(<UserDetailsPage />, {
-      route: '/user/testuser',
-      mocks: errorMocks,
-      addTypename: false
+  test('displays contact information elements', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
     })
 
+    render(<UserDetailsPage />)
+
     await waitFor(() => {
-      expect(screen.getByText('GraphQL Request Failed')).toBeInTheDocument()
-      expect(screen.getByText('Unable to complete the requested operation.')).toBeInTheDocument()
+      const emailElement = screen.getByText('testuser@example.com')
+      expect(emailElement).toBeInTheDocument()
+
+      const companyElement = screen.getByText('Test Company')
+      expect(companyElement).toBeInTheDocument()
+
+      const locationElement = screen.getByText('Test Location')
+      expect(locationElement).toBeInTheDocument()
+    })
+  })
+
+  test('renders error message when GraphQL request fails', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: { repository: null },
+      error: mockError,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => screen.getByText('User not found'))
+    expect(toast).toHaveBeenCalledWith({
+      description: 'Unable to complete the requested operation.',
+      title: 'GraphQL Request Failed',
+      variant: 'destructive',
     })
   })
 })

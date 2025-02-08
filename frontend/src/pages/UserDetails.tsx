@@ -1,3 +1,4 @@
+import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
@@ -8,16 +9,14 @@ import {
   faUserPlus,
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
-import { useQuery } from '@apollo/client'
-import { GET_USER_DATA } from 'api/queries/userQueries'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { GET_USER_DATA } from 'api/queries/userQueries'
 import { toast } from 'hooks/useToast'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
-import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import { IssueCard } from 'components/IssueCard'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -33,7 +32,7 @@ const UserDetailsPage: React.FC = () => {
   const [privateContributor, setPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
-  
+
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
     variables: { key: userKey },
   })
