@@ -78,7 +78,7 @@ const Card = ({
           </Link>
         </div>
         {/* Icons associated with the project */}
-        <div className="flex flex-grow flex-row-reverse">
+        <div className="flex flex-grow">
           {icons &&
             Object.keys(Icons).map((key, index) =>
               icons[key] ? (
