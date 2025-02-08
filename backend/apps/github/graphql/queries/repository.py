@@ -1,4 +1,4 @@
-"""OWASP project GraphQL queries."""
+"""OWASP repository GraphQL queries."""
 
 import graphene
 

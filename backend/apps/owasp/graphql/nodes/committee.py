@@ -1,4 +1,4 @@
-"""OWASP committee GraphQL queries."""
+"""OWASP committee GraphQL node."""
 
 import graphene
 
