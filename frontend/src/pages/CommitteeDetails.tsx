@@ -1,4 +1,11 @@
 import { useQuery } from '@apollo/client'
+import {
+  faCode,
+  faCodeFork,
+  faExclamationCircle,
+  faStar,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons'
 import { GET_COMMITTEE_DATA } from 'api/queries/committeeQueries'
 import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
@@ -66,11 +73,19 @@ export default function CommitteeDetailsPage() {
     },
   ]
 
+  const committeeStats = [
+    { icon: faUsers, value: `${committee?.contributorsCount || 'No'} Contributors` },
+    { icon: faCodeFork, value: `${committee?.forksCount || 'No'} Forks` },
+    { icon: faStar, value: `${committee?.starsCount || 'No'} Stars` },
+    { icon: faCode, value: `${committee?.repositoriesCount || 'No'} Repositories` },
+    { icon: faExclamationCircle, value: `${committee?.issuesCount || 'No'} Issues` },
+  ]
+
   return (
     <DetailsCard
       title={committee.name}
       details={details}
-      leaders={committee.leaders}
+      stats={committeeStats}
       socialLinks={committee.relatedUrls}
       summary={committee.summary}
       type="committee"

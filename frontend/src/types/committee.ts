@@ -19,12 +19,16 @@ export interface CommitteeTypeAlgolia {
 }
 
 export interface CommitteeDetailsTypeGraphQL {
+  contributorsCount: number
   createdAt: number
-  key: string
+  forksCount: number
+  issuesCount: number
   leaders: string[]
   name: string
   relatedUrls: string[]
+  starsCount: number
   topContributors: TopContributorsTypeGraphql[]
+  repositoriesCount: number
   summary: string
   updatedAt: number
   url: string

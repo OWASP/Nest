@@ -32,7 +32,6 @@ export interface DetailsCardProps {
   geolocationData?: GeoLocDataGraphQL
   is_active?: boolean
   languages?: string[]
-  leaders?: string[]
   recentIssues?: ProjectIssuesType[]
   recentReleases?: ProjectReleaseType[]
   repositories?: RepositoryCardProps[]

@@ -22,7 +22,6 @@ const DetailsCard = ({
   type,
   topContributors,
   languages,
-  leaders,
   topics,
   recentIssues,
   recentReleases,
@@ -58,7 +57,7 @@ const DetailsCard = ({
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
-          {(type === 'project' || type === 'repository') && (
+          {(type === 'project' || type === 'repository' || type === 'committee') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
@@ -71,15 +70,6 @@ const DetailsCard = ({
                 geoLocData={geolocationData ? [geolocationData] : []}
                 style={{ height: '200px', width: '100%', zIndex: '0' }}
               />
-            </SecondaryCard>
-          )}
-          {type === 'committee' && (
-            <SecondaryCard title="Leaders" className="md:col-span-2">
-              {leaders.map((leader, index) => (
-                <div className="py-1 font-medium" key={index}>
-                  {leader}
-                </div>
-              ))}
             </SecondaryCard>
           )}
         </div>
