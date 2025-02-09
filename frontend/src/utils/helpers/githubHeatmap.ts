@@ -35,26 +35,28 @@ export const fetchHeatmapData = async (username) => {
     heatmapData.contributions = heatmapData.contributions.filter(
       (item) => new Date(item.date) <= dateToday && new Date(item.date) >= oneYearAgo
     )
-    const transformedContributions = []
-    const allDates = heatmapData.contributions.map((contribution) => contribution.date)
 
-    for (let date of allDates) {
+    const allDates = []
+    for (let d = new Date(oneYearAgo); d <= dateToday; d.setDate(d.getDate() + 1)) {
+      allDates.push(format(d, 'yyyy-MM-dd'))
+    }
+
+    const transformedContributions = allDates.map((date) => {
       const contribution = heatmapData.contributions.find((c) => c.date === date)
       if (contribution) {
-        transformedContributions.push({
+        return {
           date: contribution.date,
           count: contribution.count,
           intensity: getIntensity(contribution.count),
-        })
+        }
       } else {
-        transformedContributions.push({
+        return {
           date: date,
           count: 0,
-          color: '#ebedf0',
           intensity: '0',
-        })
+        }
       }
-    }
+    })
 
     return {
       years: [
