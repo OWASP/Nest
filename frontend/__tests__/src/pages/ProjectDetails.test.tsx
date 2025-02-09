@@ -358,11 +358,11 @@ describe('ProjectDetailsPage', () => {
     render(<ProjectDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('No Contributors')).toBeInTheDocument()
-      expect(screen.getByText('No Forks')).toBeInTheDocument()
-      expect(screen.getByText('No Issues')).toBeInTheDocument()
-      expect(screen.getByText('No Repositories')).toBeInTheDocument()
-      expect(screen.getByText('No Stars')).toBeInTheDocument()
+      expect(screen.getByText('No Contributor')).toBeInTheDocument()
+      expect(screen.getByText('No Fork')).toBeInTheDocument()
+      expect(screen.getByText('No Issue')).toBeInTheDocument()
+      expect(screen.getByText('No Repositor')).toBeInTheDocument()
+      expect(screen.getByText('No Star')).toBeInTheDocument()
     })
   })
 

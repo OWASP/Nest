@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { project, ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
+import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -92,11 +93,26 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-    { icon: faUsers, value: `${project?.contributors_count || 'No'} Contributors` },
-    { icon: faCodeFork, value: `${project?.forks_count || 'No'} Forks` },
-    { icon: faStar, value: `${project?.stars_count || 'No'} Stars` },
-    { icon: faCode, value: `${project?.repositories_count || 'No'} Repositories` },
-    { icon: faExclamationCircle, value: `${project?.issues_count || 'No'} Issues` },
+    {
+      icon: faUsers,
+      value: `${project?.contributors_count || 'No'} Contributor${pluralize(project.contributors_count, 's')}`,
+    },
+    {
+      icon: faCodeFork,
+      value: `${project?.forks_count || 'No'} Fork${pluralize(project.forks_count, 's')}`,
+    },
+    {
+      icon: faStar,
+      value: `${project?.stars_count || 'No'} Star${pluralize(project.stars_count, 's')}`,
+    },
+    {
+      icon: faCode,
+      value: `${project?.repositories_count || 'No'} Repositor${pluralize(project.repositories_count, 'y,ies')}`,
+    },
+    {
+      icon: faExclamationCircle,
+      value: `${project?.issues_count || 'No'} Issue${pluralize(project.issues_count, 's')}`,
+    },
   ]
   return (
     <DetailsCard

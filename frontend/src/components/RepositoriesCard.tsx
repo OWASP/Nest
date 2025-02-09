@@ -12,6 +12,7 @@ import type React from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RepositoriesCardProps } from 'types/project'
+import { pluralize } from 'utils/pluralize'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
@@ -61,10 +62,26 @@ const RepositoryItem = ({ details }) => {
         {details.name}
       </p>
       <div className="space-y-2 text-sm">
-        <InfoItem icon={faUsers} label="Contributors" value={details.contributorsCount} />
-        <InfoItem icon={faExclamationCircle} label="Issues" value={details.openIssuesCount} />
-        <InfoItem icon={faCodeFork} label="Forks" value={details.forksCount} />
-        <InfoItem icon={faStar} label="Stars" value={details.starsCount} />
+        <InfoItem
+          icon={faUsers}
+          label={`Contributor${pluralize(details.contributorsCount, 's')}`}
+          value={details.contributorsCount}
+        />
+        <InfoItem
+          icon={faExclamationCircle}
+          label={`Issue${pluralize(details.openIssuesCount, 's')}`}
+          value={details.openIssuesCount}
+        />
+        <InfoItem
+          icon={faCodeFork}
+          label={`fork${pluralize(details.forks_count, 's')}`}
+          value={details.forksCount}
+        />
+        <InfoItem
+          icon={faStar}
+          label={`star${pluralize(details.starsCount, 's')}`}
+          value={details.starsCount}
+        />
       </div>
     </div>
   )
