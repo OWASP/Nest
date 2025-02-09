@@ -1,5 +1,6 @@
 audience: builder
-downloads: []
+downloads:
+  - xyz-abc
 name: Test Project
 level: 3
 leaders:
