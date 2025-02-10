@@ -42,7 +42,7 @@ export default function ChapterDetailsPage() {
     )
   }
 
-  if ((!chapter && !isLoading) || !chapter?.isActive)
+  if (!chapter && !isLoading)
     return (
       <ErrorDisplay
         statusCode={404}

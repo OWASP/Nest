@@ -32,7 +32,13 @@ class UserNode(BaseNode):
 
     def resolve_contributions_count(self, info):
         """Resolve user contributions count."""
-        return self.contributions_count
+        if hasattr(self, "contributions_count"):
+            return self.contributions_count
+
+        if hasattr(self, "idx_contributions"):
+            return sum(rc.get("contributions_count", 0) for rc in self.idx_contributions)
+
+        return 0
 
     def resolve_created_at(self, info):
         """Resolve user created at."""

@@ -15,7 +15,6 @@ class CommitteeQuery(BaseQuery):
     def resolve_committee(root, info, key):
         """Resolve committee by key."""
         try:
-            normalized_key = "www-committee-" + key
-            return Committee.objects.get(key=normalized_key)
+            return Committee.objects.get(key=f"www-committee-{key}")
         except Committee.DoesNotExist:
             return None

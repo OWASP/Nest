@@ -19,9 +19,8 @@ class RepositoryQuery(BaseQuery):
     def resolve_repository(root, info, project_key, repository_key):
         """Resolve project."""
         try:
-            normalized_key = "www-project-" + project_key
             return (
-                Project.objects.get(key=normalized_key)
+                Project.objects.get(key=f"www-project-{project_key}")
                 .repositories.filter(key=repository_key)
                 .first()
             )
