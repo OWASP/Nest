@@ -1,7 +1,5 @@
 """Common GraphQL queries."""
 
-from __future__ import annotations
-
 import graphene
 
 from apps.github.models.user import User
