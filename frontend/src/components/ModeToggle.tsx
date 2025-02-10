@@ -1,13 +1,13 @@
-import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState, useEffect } from 'react';
-import { Tooltip } from 'react-tooltip';
-import { themeToggleTooltip } from 'utils/constants';
-import { cn } from 'utils/utility';
+import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useState, useEffect } from 'react'
+import { Tooltip } from 'react-tooltip'
+import { themeToggleTooltip } from 'utils/constants'
+import { cn } from 'utils/utility'
 
 function ModeToggle({ className }: { className?: string }) {
   const [dark, setDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
+    return localStorage.getItem('theme') === 'dark'
   });
 
   useEffect(() => {
@@ -49,7 +49,7 @@ function ModeToggle({ className }: { className?: string }) {
       </label>
       <Tooltip id="mode-toggle-tooltip" style={themeToggleTooltip} />
     </div>
-  );
+  )
 }
 
-export default ModeToggle;
+export default ModeToggle
