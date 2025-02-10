@@ -38,4 +38,6 @@ export default {
     '\\.(scss|sass|css)$': 'identity-obj-proxy',
   },
   moduleDirectories: ['node_modules', 'src'],
+    transformIgnorePatterns: ["<rootDir>/node_modules/(?!@zag-js)"],
+
 }

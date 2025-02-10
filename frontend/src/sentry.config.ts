@@ -3,7 +3,7 @@ import { SENTRY_DSN, ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
 
 Sentry.init({
   dsn: SENTRY_DSN,
-  environment: ENVIRONMENT.toLowerCase(),
+  environment: ENVIRONMENT?.toLowerCase(),
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration({
