@@ -1,10 +1,8 @@
 import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect } from 'react'
-import { Tooltip } from 'react-tooltip'
-import { themeToggleTooltip } from 'utils/constants'
-
 import { cn } from 'utils/utility'
+import { Tooltip } from 'components/ui/tooltip'
 
 function ModeToggle({ className }: { className?: string }) {
   const [dark, setDark] = useState(() => {
@@ -31,21 +29,23 @@ function ModeToggle({ className }: { className?: string }) {
       <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
         <FontAwesomeIcon icon={dark ? faMoon : faSun} className="h-4 w-4" fixedWidth />
       </span>
-      <label
-        className="relative inline-flex cursor-pointer items-center"
-        data-tooltip-id="mode-toggle-tooltip"
-        data-tooltip-place="bottom-start"
-        data-tooltip-content={dark ? 'Enable light mode' : 'Enable dark mode'}
+      <Tooltip
+        showArrow
+        content={dark ? 'Enable light mode' : 'Enable dark mode'}
+        positioning={{ placement: 'bottom-start' }}
+        openDelay={100}
+        closeDelay={100}
       >
-        <input
-          type="checkbox"
-          className="peer sr-only"
-          checked={!dark}
-          onChange={darkModeHandler}
-        />
-        <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600 dark:bg-gray-700"></div>
-      </label>
-      <Tooltip id="mode-toggle-tooltip" style={themeToggleTooltip} />
+        <label className="relative inline-flex cursor-pointer items-center">
+          <input
+            type="checkbox"
+            className="peer sr-only"
+            checked={!dark}
+            onChange={darkModeHandler}
+          />
+          <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600 dark:bg-gray-700"></div>
+        </label>
+      </Tooltip>
     </div>
   )
 }

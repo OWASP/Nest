@@ -5,23 +5,11 @@ import { TooltipRecipe } from 'utils/theme'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { Tooltip } from 'components/ui/tooltip'
 
-export default function DisplayIcon({
-  item,
-  icons,
-  idx,
-}: {
-  item: string
-  icons: IconType
-  idx: number
-}) {
+export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
   // className for the container
   const containerClassName = [
-    'flex flex-col items-center justify-center gap-1 border-b border-l border-t border-border px-4 pb-1 sm:border-t-0',
-    idx === 0 || (idx === -1 && Object.keys(icons).length === 1)
-      ? 'rounded-bl-none sm:rounded-bl-md'
-      : '',
-    idx === -1 ? 'border-r sm:border-r-0' : '',
-    item === 'updated_at' || item === 'stars_count' ? 'rotate-container' : '',
+    'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
+    item === 'stars_count' ? 'rotate-container' : '',
     item === 'forks_count' || item === 'contributors_count' ? 'flip-container' : '',
   ]
     .filter(Boolean)
@@ -30,7 +18,7 @@ export default function DisplayIcon({
   // className for the FontAwesome icon
   const iconClassName = [
     'text-gray-600 dark:text-gray-300',
-    item === 'updated_at' || item === 'stars_count' ? 'icon-rotate' : '',
+    item === 'stars_count' ? 'icon-rotate' : '',
     item === 'forks_count' || item === 'contributors_count' ? 'icon-flip' : '',
   ]
     .filter(Boolean)
@@ -38,7 +26,6 @@ export default function DisplayIcon({
 
   return icons[item] ? (
     <Tooltip
-      id={`icon-tooltip-${item}`}
       content={`${Icons[item as keyof typeof Icons]?.label}`}
       recipe={TooltipRecipe}
       openDelay={150}

@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import Q
 
 
-class ActiveChaptertManager(models.Manager):
+class ActiveChapterManager(models.Manager):
     """Active chapters."""
 
     def get_queryset(self):

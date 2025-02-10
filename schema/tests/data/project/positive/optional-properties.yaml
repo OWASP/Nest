@@ -1,11 +1,12 @@
 audience: breaker
+blog: https://blog.projec.com
 demo: https://some-demo-url.com
 downloads:
   - https://abc.com/download1
   - https://abc.com/download2
 events:
-  - 'https://example.com/event1'
-  - 'https://example.com/event2'
+  - https://example.com/event1
+  - https://example.com/event2
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -16,8 +17,16 @@ level: 2
 license: MIT
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
+repositories:
+  - description: A repository with a valid URL.
+    name: test-repo
+    url: https://example.com/repo1
+  - description: Another repository with a valid URL.
+    name: test-repo-2
+    url: https://example.com/repo2
 tags:
   - example-tag-1
   - example-tag-2
   - example-tag-3
 type: code
+website: https://official-website.com

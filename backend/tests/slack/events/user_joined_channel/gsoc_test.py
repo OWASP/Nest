@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from django.conf import settings
@@ -33,7 +33,6 @@ class TestGsocEventHandler:
             ),
         ],
     )
-    @patch("apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS", ["block1", "block2"])
     def test_handler_responses(
         self,
         events_enabled,
