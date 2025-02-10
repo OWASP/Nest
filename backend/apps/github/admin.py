@@ -1,4 +1,4 @@
-"""Repository app admin."""
+"""GitHub app admin."""
 
 from django.contrib import admin
 from django.utils.safestring import mark_safe

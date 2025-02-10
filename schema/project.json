@@ -112,7 +112,8 @@
     "blog": {
       "type": ["string"],
       "description": "Project's blog.",
-      "format": "uri"
+      "format": "uri",
+      "type": "string"
     },
     "demo": {
       "type": "string",
@@ -230,8 +231,9 @@
     },
     "website": {
       "description": "The official website of the project.",
-      "type": "string",
-      "format": "url"
+      "format": "url",
+      "minLength": 4,
+      "type": "string"
     }
   },
   "required": [
