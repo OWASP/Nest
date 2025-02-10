@@ -3,10 +3,12 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
 import { IssueType } from 'types/issue'
+import { METADATA_CONFIG } from 'utils/metadata'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 
 import Card from 'components/Card'
+import MetadataManager from 'components/MetadataManager'
 import Modal from 'components/Modal'
 import SearchPageLayout from 'components/SearchPageLayout'
 
@@ -68,19 +70,21 @@ const ContributePage = () => {
   }
 
   return (
-    <SearchPageLayout
-      isLoaded={isLoaded}
-      indexName="issues"
-      totalPages={totalPages}
-      currentPage={currentPage}
-      searchQuery={searchQuery}
-      onSearch={handleSearch}
-      onPageChange={handlePageChange}
-      searchPlaceholder="Search for OWASP issues..."
-      empty="No issues found"
-    >
-      {issues && issues.map(renderContributeCard)}
-    </SearchPageLayout>
+    <MetadataManager {...METADATA_CONFIG.projectContribute}>
+      <SearchPageLayout
+        isLoaded={isLoaded}
+        indexName="issues"
+        totalPages={totalPages}
+        currentPage={currentPage}
+        searchQuery={searchQuery}
+        onSearch={handleSearch}
+        onPageChange={handlePageChange}
+        searchPlaceholder="Search for OWASP issues..."
+        empty="No issues found"
+      >
+        {issues && issues.map(renderContributeCard)}
+      </SearchPageLayout>
+    </MetadataManager>
   )
 }
 

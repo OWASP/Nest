@@ -1,9 +1,11 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { CommitteeType } from 'types/committee'
+import { METADATA_CONFIG } from 'utils/metadata'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
+import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const CommitteesPage = () => {
@@ -50,19 +52,21 @@ const CommitteesPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      isLoaded={isLoaded}
-      indexName="committees"
-      totalPages={totalPages}
-      currentPage={currentPage}
-      onSearch={handleSearch}
-      searchQuery={searchQuery}
-      onPageChange={handlePageChange}
-      empty="No committees found"
-      searchPlaceholder="Search for OWASP committees..."
-    >
-      {committees && committees.map(renderCommitteeCard)}
-    </SearchPageLayout>
+    <MetadataManager {...METADATA_CONFIG.committees}>
+      <SearchPageLayout
+        isLoaded={isLoaded}
+        indexName="committees"
+        totalPages={totalPages}
+        currentPage={currentPage}
+        onSearch={handleSearch}
+        searchQuery={searchQuery}
+        onPageChange={handlePageChange}
+        empty="No committees found"
+        searchPlaceholder="Search for OWASP committees..."
+      >
+        {committees && committees.map(renderCommitteeCard)}
+      </SearchPageLayout>
+    </MetadataManager>
   )
 }
 

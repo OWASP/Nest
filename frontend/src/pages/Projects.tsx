@@ -2,10 +2,12 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { project } from 'types/project'
 import { level } from 'utils/data'
+import { METADATA_CONFIG } from 'utils/metadata'
 import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
+import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
 const ProjectsPage = () => {
@@ -58,28 +60,30 @@ const ProjectsPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      isLoaded={isLoaded}
-      totalPages={totalPages}
-      currentPage={currentPage}
-      searchQuery={searchQuery}
-      indexName="projects"
-      onSearch={handleSearch}
-      onPageChange={handlePageChange}
-      empty="No projects found"
-      searchPlaceholder="Search for OWASP projects..."
-      sortChildren={
-        <SortBy
-          sortOptions={sortOptionsProject}
-          selectedSortOption={sortBy}
-          onSortChange={handleSortChange}
-          selectedOrder={order}
-          onOrderChange={handleOrderChange}
-        />
-      }
-    >
-      {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
-    </SearchPageLayout>
+    <MetadataManager {...METADATA_CONFIG.projects}>
+      <SearchPageLayout
+        isLoaded={isLoaded}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        searchQuery={searchQuery}
+        indexName="projects"
+        onSearch={handleSearch}
+        onPageChange={handlePageChange}
+        empty="No projects found"
+        searchPlaceholder="Search for OWASP projects..."
+        sortChildren={
+          <SortBy
+            sortOptions={sortOptionsProject}
+            selectedSortOption={sortBy}
+            onSortChange={handleSortChange}
+            selectedOrder={order}
+            onOrderChange={handleOrderChange}
+          />
+        }
+      >
+        {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
+      </SearchPageLayout>
+    </MetadataManager>
   )
 }
 

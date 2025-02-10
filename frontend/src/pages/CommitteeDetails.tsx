@@ -5,6 +5,7 @@ import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
+import MetadataManager from 'components/MetadataManager'
 import CardSkeleton from 'components/skeletons/Card'
 
 const CommitteeDetailsPage = () => {
@@ -52,21 +53,23 @@ const CommitteeDetailsPage = () => {
   const filteredIcons = getFilteredIcons(committee, params)
   const formattedUrls = handleSocialUrls(committee.related_urls)
   return (
-    <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
-      <div className="flex justify-center">
-        <Card
-          key={committee.objectID}
-          title={committee.name}
-          url={committee.url}
-          summary={committee.summary}
-          icons={filteredIcons}
-          topContributors={committee.top_contributors}
-          button={SubmitButton}
-          social={formattedUrls}
-          tooltipLabel={`Learn more about ${committee.name}`}
-        />
+    <MetadataManager title={committee.name} description={committee.summary} url={committee.url}>
+      <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
+        <div className="flex justify-center">
+          <Card
+            key={committee.objectID}
+            title={committee.name}
+            url={committee.url}
+            summary={committee.summary}
+            icons={filteredIcons}
+            topContributors={committee.top_contributors}
+            button={SubmitButton}
+            social={formattedUrls}
+            tooltipLabel={`Learn more about ${committee.name}`}
+          />
+        </div>
       </div>
-    </div>
+    </MetadataManager>
   )
 }
 export default CommitteeDetailsPage

@@ -55,6 +55,8 @@ rsc
 RUF
 saft
 samm
+seo
+SEO
 slackbot
 SLF
 Truncator

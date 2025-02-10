@@ -1,7 +1,9 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
 import { user } from 'types/user'
+import { METADATA_CONFIG } from 'utils/metadata'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -43,21 +45,23 @@ const UsersPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      indexName="users"
-      isLoaded={isLoaded}
-      totalPages={totalPages}
-      currentPage={currentPage}
-      searchQuery={searchQuery}
-      onSearch={handleSearch}
-      onPageChange={handlePageChange}
-      empty="No Users found"
-      searchPlaceholder="Search for OWASP users..."
-    >
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {users && users.map((user) => <div key={user.key}>{renderUserCard(user)}</div>)}
-      </div>
-    </SearchPageLayout>
+    <MetadataManager {...METADATA_CONFIG.users}>
+      <SearchPageLayout
+        indexName="users"
+        isLoaded={isLoaded}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        searchQuery={searchQuery}
+        onSearch={handleSearch}
+        onPageChange={handlePageChange}
+        empty="No Users found"
+        searchPlaceholder="Search for OWASP users..."
+      >
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {users && users.map((user) => <div key={user.key}>{renderUserCard(user)}</div>)}
+        </div>
+      </SearchPageLayout>
+    </MetadataManager>
   )
 }
 

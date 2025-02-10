@@ -14,6 +14,7 @@ import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
@@ -86,18 +87,25 @@ const RepositoryDetailsPage = () => {
     { icon: faStar, value: `${repository?.starsCount || 'No'} Stars` },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      languages={repository.languages}
-      recentIssues={repository.issues}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={repository.topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <MetadataManager
+      title={repository.name || repositoryKey}
+      description={repository.description}
+      url={repository.url}
+      keywords={repository.topics}
+    >
+      <DetailsCard
+        details={repositoryDetails}
+        languages={repository.languages}
+        recentIssues={repository.issues}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={repository.topContributors}
+        topics={repository.topics}
+        type="repository"
+      />
+    </MetadataManager>
   )
 }
 export default RepositoryDetailsPage
