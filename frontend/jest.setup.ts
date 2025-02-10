@@ -13,22 +13,20 @@ if (!global.structuredClone) {
   global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
 }
 
-
 // mock runAnimationFrameCallbacks function for testing
 beforeAll(() => {
-  if (typeof window !== "undefined") {
-    jest.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
-      return setTimeout(cb, 0);
-    });
+  if (typeof window !== 'undefined') {
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      return setTimeout(cb, 0)
+    })
 
-    Object.defineProperty(window, "runAnimationFrameCallbacks", {
+    Object.defineProperty(window, 'runAnimationFrameCallbacks', {
       value: () => {},
       writable: true,
       configurable: true,
-    });
+    })
   }
-});
-
+})
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
@@ -36,10 +34,13 @@ beforeEach(() => {
   })
 
   jest.spyOn(global.console, 'warn').mockImplementation((message) => {
-    if (typeof message === 'string' && message.includes('[@zag-js/dismissable] node is `null` or `undefined`')) {
-      return;
+    if (
+      typeof message === 'string' &&
+      message.includes('[@zag-js/dismissable] node is `null` or `undefined`')
+    ) {
+      return
     }
-  });
+  })
 
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
