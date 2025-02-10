@@ -1,14 +1,11 @@
 """GitHub repository Algolia index configuration."""
 
-from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
-
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
+from apps.common.index import IndexBase, register
 from apps.github.models.repository import Repository
 
 
 @register(Repository)
-class RepositoryIndex(AlgoliaIndex, IndexBase):
+class RepositoryIndex(IndexBase):
     """Repository index."""
 
     index_name = "repositories"
@@ -59,14 +56,15 @@ class RepositoryIndex(AlgoliaIndex, IndexBase):
 
     should_index = "is_indexable"
 
-    def get_queryset(self):
-        """Get queryset for indexing."""
-        qs = Repository.objects.filter(is_template=False).prefetch_related(
-            "repositorycontributor_set"
-        )
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
-
     @staticmethod
     def update_synonyms():
         """Update synonyms."""
         RepositoryIndex.reindex_synonyms("github", "repositories")
+
+    def get_entities(self):
+        """Get entities for indexing."""
+        return Repository.objects.filter(
+            is_template=False,
+        ).prefetch_related(
+            "repositorycontributor_set",
+        )
