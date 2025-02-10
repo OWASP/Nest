@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from utils.validators import validate_data
+from utils.schema_validators import validate_data
 
 from tests.conftest import tests_data_dir
 

@@ -110,14 +110,14 @@
       "type": "string"
     },
     "blog": {
+      "type": ["string"],
       "description": "Project's blog.",
-      "format": "uri",
-      "type": ["string"]
+      "format": "uri"
     },
     "demo": {
+      "type": "string",
       "description": "Optional URL to the project demo.",
-      "format": "uri",
-      "type": "string"
+      "format": "uri"
     },
     "downloads": {
       "description": "Optional list of download URLs.",
