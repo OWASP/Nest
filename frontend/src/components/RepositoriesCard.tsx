@@ -74,7 +74,7 @@ const RepositoryItem = ({ details }) => {
         />
         <InfoItem
           icon={faCodeFork}
-          label={`fork${pluralize(details.forks_count, 's')}`}
+          label={`fork${pluralize(details.forksCount, 's')}`}
           value={details.forksCount}
         />
         <InfoItem
