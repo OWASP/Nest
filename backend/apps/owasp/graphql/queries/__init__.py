@@ -5,5 +5,5 @@ from apps.owasp.graphql.queries.committee import CommitteeQuery
 from apps.owasp.graphql.queries.project import ProjectQuery
 
 
-class OwaspQuery(ProjectQuery, ChapterQuery, CommitteeQuery):
+class OwaspQuery(ChapterQuery, CommitteeQuery, ProjectQuery):
     """OWASP queries."""
