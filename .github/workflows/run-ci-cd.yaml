@@ -180,9 +180,7 @@ jobs:
   build-docker-staging-images:
     name: Build Docker Staging Images
     environment: staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+    if: false
     needs:
       - code-ql
       - run-backend-tests
@@ -243,9 +241,7 @@ jobs:
       STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'
       STAGING_SSH_PRIVATE_KEY_PATH: '${{ vars.STAGING_SSH_PRIVATE_KEY_PATH }}'
     environment: staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+    if: false
     needs:
       - build-docker-staging-images
     runs-on: ubuntu-latest
@@ -363,7 +359,6 @@ jobs:
       github.ref == 'refs/heads/main'
     needs:
       - build-docker-production-images
-      - deploy-nest-staging
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
