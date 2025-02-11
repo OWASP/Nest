@@ -31,14 +31,12 @@ const ChaptersPage = () => {
         indexName: 'chapters',
         query: '',
         currentPage: 1,
-        filterKey: '',
         hitsPerPage: 1000,
       }
       const data: AlgoliaResponseType<ChapterType> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
-        searchParams.filterKey,
         searchParams.hitsPerPage
       )
       setGeoLocData(data.hits)

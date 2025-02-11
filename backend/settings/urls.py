@@ -13,6 +13,7 @@ from graphene_django.views import GraphQLView
 from rest_framework import routers
 
 from apps.github.api.urls import router as github_router
+from apps.owasp.api.search.algolia import algolia_search
 from apps.owasp.api.urls import router as owasp_router
 from apps.slack.apps import SlackConfig
 
@@ -23,6 +24,9 @@ router.registry.extend(owasp_router.registry)
 urlpatterns = [
     path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=settings.DEBUG))),
     path("api/v1/", include(router.urls)),
+    path(
+        "api/v1/owasp/api/search/algolia", csrf_exempt(algolia_search), name="api-search-algolia"
+    ),
     path("a/", admin.site.urls),
 ]
 
