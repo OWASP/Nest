@@ -1,3 +1,5 @@
+"""API service module for handling snapshot-related functionality in OWASP."""
+
 from datetime import timedelta
 
 from django.utils import timezone
@@ -6,6 +8,8 @@ from apps.owasp.models import snapshot
 
 
 class SnapshotService:
+    """Service class for managing snapshot-related operations."""
+
     @staticmethod
     def create_snapshot(start_at=None, end_at=None):
         """Create a new snapshot with the given time range or default to last 24 hours."""
