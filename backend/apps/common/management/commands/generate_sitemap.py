@@ -68,11 +68,12 @@ class Command(BaseCommand):
         """Generate sitemap for projects."""
         routes = self.static_routes["projects"]
         projects = Project.objects.all()
+        indexable_projects = [project for project in projects if project.is_indexable]
 
         routes.extend(
             [
                 {"path": f"/projects/{project.nest_key}", "changefreq": "weekly", "priority": 0.7}
-                for project in projects
+                for project in indexable_projects
             ]
         )
 
@@ -82,11 +83,13 @@ class Command(BaseCommand):
     def generate_chapter_sitemap(self, output_dir):
         """Generate sitemap for chapters."""
         routes = self.static_routes["chapters"]
+        chapters = Chapter.objects.filter(is_active=True)
 
+        indexable_chapters = [chapter for chapter in chapters if chapter.is_indexable]
         chapter_keys = [
-            key.replace("www-chapter-", "")
-            for key in Chapter.objects.filter(is_active=True).values_list("key", flat=True)
-            if key
+            chapter.key.replace("www-chapter-", "")
+            for chapter in indexable_chapters
+            if chapter.key
         ]
 
         routes.extend(
@@ -102,11 +105,12 @@ class Command(BaseCommand):
     def generate_committee_sitemap(self, output_dir):
         """Generate sitemap for committees."""
         routes = self.static_routes["committees"]
+        indexable_committees = Committee.objects.filter(is_active=True)
 
         committee_keys = [
-            key.replace("www-committee-", "")
-            for key in Committee.objects.filter(is_active=True).values_list("key", flat=True)
-            if key
+            committee.key.replace("www-committee-", "")
+            for committee in indexable_committees
+            if committee.key
         ]
 
         routes.extend(
@@ -123,7 +127,12 @@ class Command(BaseCommand):
         """Generate sitemap for users."""
         routes = self.static_routes["users"]
 
-        user_keys = [key for key in User.objects.all().values_list("login", flat=True) if key]
+        users = User.objects.all()
+        user_keys = [
+            user.login
+            for user in users
+            if hasattr(user, "is_indexable") and user.is_indexable and user.login
+        ]
 
         routes.extend(
             [
