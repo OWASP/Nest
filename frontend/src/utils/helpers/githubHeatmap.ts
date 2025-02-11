@@ -7,11 +7,12 @@ import { parseISO } from 'date-fns/parseISO'
 import { setDay } from 'date-fns/setDay'
 import { startOfWeek } from 'date-fns/startOfWeek'
 
-const today = new Date()
-const date = format(today, 'yyyy-MM-dd')
-const dateToday = new Date(date)
-const oneYearAgo = new Date(today)
-oneYearAgo.setFullYear(today.getFullYear() - 1)
+const endDate = new Date()
+endDate.setDate(endDate.getDate())
+
+const startDate = new Date(endDate)
+startDate.setDate(endDate.getDate() - 7 * 52 - 1) // 52 weeks and 1 day.
+
 export interface HeatmapData {
   years: DataStructYear[]
   contributions: []
@@ -33,28 +34,28 @@ export const fetchHeatmapData = async (username) => {
       return {}
     }
     heatmapData.contributions = heatmapData.contributions.filter(
-      (item) => new Date(item.date) <= dateToday && new Date(item.date) >= oneYearAgo
+      (item) => new Date(item.date) <= endDate && new Date(item.date) >= startDate
     )
-    const transformedContributions = []
-    const allDates = heatmapData.contributions.map((contribution) => contribution.date)
 
-    for (let date of allDates) {
-      const contribution = heatmapData.contributions.find((c) => c.date === date)
-      if (contribution) {
-        transformedContributions.push({
-          date: contribution.date,
-          count: contribution.count,
-          intensity: getIntensity(contribution.count),
-        })
-      } else {
-        transformedContributions.push({
-          date: date,
-          count: 0,
-          color: '#ebedf0',
-          intensity: '0',
-        })
-      }
+    const allDates = []
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      allDates.push(format(d, 'yyyy-MM-dd'))
     }
+
+    const transformedContributions = allDates.map((date) => {
+      const contribution = heatmapData.contributions.find((c) => c.date === date)
+      return contribution
+        ? {
+            date: contribution.date,
+            count: contribution.count,
+            intensity: getIntensity(contribution.count),
+          }
+        : {
+            date: date,
+            count: 0,
+            intensity: '0',
+          }
+    })
 
     return {
       years: [
@@ -68,7 +69,8 @@ export const fetchHeatmapData = async (username) => {
     return err.message
   }
 }
-// below is the modified code of package 'github-contributions-canvas' for reference visit 'https://www.npmjs.com/package/github-contributions-canvas?activeTab=code'
+// The code below is a modified version of 'github-contributions-canvas'
+// https://www.npmjs.com/package/github-contributions-canvas?activeTab=code
 
 const themes = {
   blue: {
@@ -164,19 +166,14 @@ function getDateInfo(data: DataStruct, date: string) {
 }
 
 function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
-  const { year, offsetX = 0, offsetY = 0, data, fontFace = defaultFontFace } = opts
+  const { offsetX = 0, offsetY = 0, data, fontFace = defaultFontFace } = opts
   const theme = getTheme(opts)
 
-  const thisYear = '2024'
-  const lastDate = year.year === thisYear ? today : parseISO(year.range.end)
-  const firstRealDate = oneYearAgo
-  const firstDate = startOfWeek(firstRealDate)
-
-  let nextDate = firstDate
+  let nextDate = startOfWeek(startDate)
   const firstRowDates: GraphEntry[] = []
   const graphEntries: GraphEntry[][] = []
 
-  while (isBefore(nextDate, lastDate)) {
+  while (isBefore(nextDate, endDate)) {
     const date = format(nextDate, DATE_FORMAT)
     firstRowDates.push({
       date,
@@ -208,7 +205,7 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     for (let x = 0; x < graphEntries[y].length; x += 1) {
       const day = graphEntries[y][x]
       const cellDate = parseISO(day.date)
-      if (isAfter(cellDate, lastDate) || !day.info) {
+      if (isAfter(cellDate, endDate) || !day.info) {
         continue
       }
       // @ts-ignore
