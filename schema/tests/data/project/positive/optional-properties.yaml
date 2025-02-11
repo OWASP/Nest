@@ -13,6 +13,8 @@ leaders:
   - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
+social_media:
+  - description: A brief description of the social media platform
 level: 2
 license: MIT
 name: OWASP Incubator Code Project
