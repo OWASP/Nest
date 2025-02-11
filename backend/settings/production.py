@@ -1,4 +1,4 @@
-"""OWASP Nest staging configuration."""
+"""OWASP Nest production configuration."""
 
 import sentry_sdk
 from configurations import values
@@ -6,8 +6,8 @@ from configurations import values
 from settings.base import Base
 
 
-class Staging(Base):
-    """Staging configuration."""
+class Production(Base):
+    """Production configuration."""
 
     sentry_sdk.init(
         dsn=Base.SENTRY_DSN,
@@ -19,7 +19,7 @@ class Staging(Base):
 
     AWS_ACCESS_KEY_ID = values.SecretValue()
     AWS_SECRET_ACCESS_KEY = values.SecretValue()
-    AWS_STORAGE_BUCKET_NAME = "owasp-nest"
+    AWS_STORAGE_BUCKET_NAME = "owasp-nest-production"
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
     AWS_S3_OBJECT_PARAMETERS = {
         "CacheControl": "max-age=86400",
@@ -39,8 +39,8 @@ class Staging(Base):
         },
     }
 
-    APP_NAME = "OWASP Nest Staging"
-    SITE_NAME = "nest.owasp.dev"
+    APP_NAME = "OWASP Nest"
+    SITE_NAME = "nest.owasp.org"
     SITE_URL = f"https://{SITE_NAME}"
 
     CSRF_TRUSTED_ORIGINS = (SITE_URL,)
