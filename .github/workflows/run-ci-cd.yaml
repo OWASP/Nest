@@ -296,8 +296,8 @@ jobs:
     name: Build Docker Production Images
     environment: production
     if: |
-      github.event_name == 'release' &&
-      github.event.action == 'published'
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
       - code-ql
       - run-backend-tests
@@ -336,7 +336,7 @@ jobs:
           echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
           echo "VITE_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
           echo "VITE_ENVIRONMENT=production" >> frontend/.env.production
-          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.staging
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.production
           echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env.production
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
 
@@ -359,10 +359,11 @@ jobs:
       PRODUCTION_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_production_private_key'
     environment: production
     if: |
-      github.event_name == 'release' &&
-      github.event.action == 'published'
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
       - build-docker-production-images
+      - deploy-nest-staging
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
