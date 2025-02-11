@@ -10,7 +10,7 @@
     - name: Copy nginx configuration file
       ansible.builtin.copy:
         src: '{{ github_workspace }}/nginx/production.conf'
-        dest: ~/nginx/nginx.conf
+        dest: ~/nginx/production.conf
         mode: '0644'
 
     - name: Copy docker-compose.yaml
