@@ -19,3 +19,5 @@ def validate_data(schema, data):
         validate(schema=schema, instance=data, format_checker=format_checker)
     except ValidationError as e:
         return e.message
+
+
