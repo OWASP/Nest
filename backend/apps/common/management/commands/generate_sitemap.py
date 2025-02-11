@@ -1,0 +1,215 @@
+"""Management command to generate XML sitemaps for the website."""
+
+from datetime import datetime, timezone
+from pathlib import Path
+
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from apps.github.models.user import User
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.committee import Committee
+from apps.owasp.models.project import Project
+
+
+class Command(BaseCommand):
+    help = "Generate XML sitemaps for the website"
+
+    def __init__(self):
+        """Initialize the command with site URL and static routes."""
+        super().__init__()
+        self.site_url = "https://nest.owasp.dev"
+        self.static_routes = {
+            "projects": [
+                {"path": "/projects", "changefreq": "daily", "priority": 0.9},
+                {"path": "/projects/contribute", "changefreq": "monthly", "priority": 0.6},
+            ],
+            "chapters": [
+                {"path": "/chapters", "changefreq": "weekly", "priority": 0.8},
+            ],
+            "committees": [
+                {"path": "/committees", "changefreq": "weekly", "priority": 0.8},
+            ],
+            "users": [
+                {"path": "/community/users", "changefreq": "daily", "priority": 0.7},
+            ],
+        }
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--output-dir",
+            default=settings.STATIC_ROOT,
+            help="Directory where sitemap files will be saved",
+        )
+
+    def handle(self, *args, **options):
+        output_dir = Path(options["output_dir"])
+        self.ensure_directory(output_dir)
+
+        sitemap_files = [
+            "project-sitemap.xml",
+            "chapter-sitemap.xml",
+            "committee-sitemap.xml",
+            "user-sitemap.xml",
+        ]
+
+        self.generate_project_sitemap(output_dir)
+        self.generate_chapter_sitemap(output_dir)
+        self.generate_committee_sitemap(output_dir)
+        self.generate_user_sitemap(output_dir)
+
+        index_content = self.generate_index_sitemap(sitemap_files)
+        index_path = output_dir / "sitemap.xml"
+        self.save_sitemap(index_content, index_path)
+
+        self.stdout.write(self.style.SUCCESS(f"Successfully generated sitemaps in {output_dir}"))
+
+    def generate_project_sitemap(self, output_dir):
+        """Generate sitemap for projects."""
+        routes = self.static_routes["projects"]
+        projects = Project.objects.all()
+
+        routes.extend(
+            [
+                {"path": f"/projects/{project.nest_key}", "changefreq": "weekly", "priority": 0.7}
+                for project in projects
+            ]
+        )
+
+        content = self.generate_sitemap_content(routes)
+        self.save_sitemap(content, output_dir / "project-sitemap.xml")
+
+    def generate_chapter_sitemap(self, output_dir):
+        """Generate sitemap for chapters."""
+        routes = self.static_routes["chapters"]
+
+        chapter_keys = [
+            key.replace("www-chapter-", "")
+            for key in Chapter.objects.filter(is_active=True).values_list("key", flat=True)
+            if key
+        ]
+
+        routes.extend(
+            [
+                {"path": f"/chapters/{key}", "changefreq": "weekly", "priority": 0.7}
+                for key in chapter_keys
+            ]
+        )
+
+        content = self.generate_sitemap_content(routes)
+        self.save_sitemap(content, output_dir / "chapter-sitemap.xml")
+
+    def generate_committee_sitemap(self, output_dir):
+        """Generate sitemap for committees."""
+        routes = self.static_routes["committees"]
+
+        committee_keys = [
+            key.replace("www-committee-", "")
+            for key in Committee.objects.filter(is_active=True).values_list("key", flat=True)
+            if key
+        ]
+
+        routes.extend(
+            [
+                {"path": f"/committees/{key}", "changefreq": "weekly", "priority": 0.7}
+                for key in committee_keys
+            ]
+        )
+
+        content = self.generate_sitemap_content(routes)
+        self.save_sitemap(content, output_dir / "committee-sitemap.xml")
+
+    def generate_user_sitemap(self, output_dir):
+        """Generate sitemap for users."""
+        routes = self.static_routes["users"]
+
+        user_keys = [key for key in User.objects.all().values_list("login", flat=True) if key]
+
+        routes.extend(
+            [
+                {"path": f"/community/users/{key}", "changefreq": "weekly", "priority": 0.7}
+                for key in user_keys
+            ]
+        )
+
+        content = self.generate_sitemap_content(routes)
+        self.save_sitemap(content, output_dir / "user-sitemap.xml")
+
+    def generate_sitemap_content(self, routes):
+        """Generate sitemap content for a set of routes."""
+        urls = []
+        lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        for route in routes:
+            url_entry = {
+                "loc": f"{self.site_url}{route['path']}",
+                "lastmod": lastmod,
+                "changefreq": route["changefreq"],
+                "priority": str(route["priority"]),
+            }
+            urls.append(self.create_url_entry(url_entry))
+
+        return self.create_sitemap(urls)
+
+    def generate_index_sitemap(self, sitemap_files):
+        """Generate the sitemap index file."""
+        sitemaps = []
+        lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        for sitemap_file in sitemap_files:
+            sitemap_entry = {"loc": f"{self.site_url}/{sitemap_file}", "lastmod": lastmod}
+            sitemaps.append(self.create_sitemap_index_entry(sitemap_entry))
+
+        return self.create_sitemap_index(sitemaps)
+
+    def create_url_entry(self, url_data):
+        """Create a URL entry for the sitemap."""
+        url_template = (
+            "  <url>\n"
+            "    <loc>{loc}</loc>\n"
+            "    <lastmod>{lastmod}</lastmod>\n"
+            "    <changefreq>{changefreq}</changefreq>\n"
+            "    <priority>{priority}</priority>\n"
+            "  </url>"
+        )
+        return url_template.format(**url_data)
+
+    def create_sitemap_index_entry(self, sitemap_data):
+        """Create a sitemap entry for the index."""
+        sitemap_template = (
+            "  <sitemap>\n"
+            "    <loc>{loc}</loc>\n"
+            "    <lastmod>{lastmod}</lastmod>\n"
+            "  </sitemap>"
+        )
+        return sitemap_template.format(**sitemap_data)
+
+    def create_sitemap(self, urls):
+        """Create the complete sitemap XML."""
+        return (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f"{chr(10).join(urls)}\n"
+            "</urlset>"
+        )
+
+    def create_sitemap_index(self, sitemaps):
+        """Create the complete sitemap index XML."""
+        return (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f"{chr(10).join(sitemaps)}\n"
+            "</sitemapindex>"
+        )
+
+    @staticmethod
+    def ensure_directory(directory):
+        """Ensure the output directory exists."""
+        if not directory.exists():
+            directory.mkdir(parents=True)
+
+    @staticmethod
+    def save_sitemap(content, filepath):
+        """Save the sitemap content to a file."""
+        with filepath.open("w", encoding="utf-8") as f:
+            f.write(content)
