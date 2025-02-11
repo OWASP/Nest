@@ -1,13 +1,16 @@
 """OWASP app Algolia search proxy API."""
 
-from django.http import JsonResponse
-from django.core.cache import cache
 import json
+
+from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
+from django.core.cache import cache
+from django.http import JsonResponse
+
 from apps.common.index import IndexBase
 from apps.owasp.api.search.params_mapping import get_params_for_index
 
-CACHE_DURATION = 3600 #1hr
+CACHE_DURATION = 3600  # 1hr
 CACHE_PREFIX = "algolia_proxy:"
 
 
@@ -17,12 +20,14 @@ def get_search_results(index_name, query, page, hits_per_page):
     full_index_name = f"{env}_{index_name}"
 
     search_params = get_params_for_index(index_name.split("_")[0])
-    search_params.update({
-        "indexName": full_index_name,
-        "query": query,
-        "page": page - 1,
-        "hitsPerPage": hits_per_page,
-    })
+    search_params.update(
+        {
+            "indexName": full_index_name,
+            "query": query,
+            "page": page - 1,
+            "hitsPerPage": hits_per_page,
+        }
+    )
 
     # Perform search
     client = IndexBase.get_client()
@@ -57,7 +62,7 @@ def algolia_search(request):
             cache.set(cache_key, search_results, CACHE_DURATION)
 
             return JsonResponse(search_results)
-        except Exception as e:
+        except AlgoliaException as e:
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Method not allowed"}, status=405)

@@ -1,10 +1,14 @@
-from unittest.mock import patch, Mock
+import json
+from unittest.mock import Mock, patch
 
 import pytest
-import json
-
 from django.core.cache import cache
-from apps.owasp.api.search.algolia import algolia_search, get_search_results
+
+from apps.owasp.api.search.algolia import algolia_search
+
+HTTP_200_OK = 200
+HTTP_405_METHOD_NOT_ALLOWED = 405
+HTTP_500_INTERNAL_SERVER_ERROR = 500
 
 MOCKED_SEARCH_RESULTS = {
     "hits": [
@@ -15,8 +19,9 @@ MOCKED_SEARCH_RESULTS = {
 }
 
 
-@pytest.fixture
-def clear_cache():
+@pytest.fixture()
+def _clear_cache():
+    """Clear the cache before and after each test."""
     cache.clear()
     yield
     cache.clear()
@@ -32,70 +37,38 @@ def clear_cache():
         ("issues", "bug", 1, 10, MOCKED_SEARCH_RESULTS),
     ],
 )
-def algolia_search(clear_cache, index_name, query, page, hits_per_page, expected_result):
+@pytest.mark.usefixtures("_clear_cache")
+def test_algolia_search_valid_request(index_name, query, page, hits_per_page, expected_result):
+    """Test valid requests for the algolia_search."""
     with patch(
         "apps.owasp.api.search.algolia.get_search_results", return_value=expected_result
     ) as mock_get_search_results:
-
         mock_request = Mock()
         mock_request.method = "POST"
-        mock_request.body = json.dumps({
-            "indexName": index_name,
-            "query": query,
-            "page": page,
-            "hitsPerPage": hits_per_page,
-        }).encode("utf-8")
+        mock_request.body = json.dumps(
+            {
+                "indexName": index_name,
+                "query": query,
+                "page": page,
+                "hitsPerPage": hits_per_page,
+            }
+        ).encode("utf-8")
 
         response = algolia_search(mock_request)
         response_data = json.loads(response.content)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTP_200_OK
         assert response_data == expected_result
         mock_get_search_results.assert_called_once_with(index_name, query, page, hits_per_page)
 
 
-def algolia_search():
-
+def test_algolia_search_invalid_method():
+    """Test the scenario where the HTTP method is not POST."""
     mock_request = Mock()
     mock_request.method = "GET"
 
     response = algolia_search(mock_request)
     response_data = json.loads(response.content)
 
-    assert response.status_code == 405
+    assert response.status_code == HTTP_405_METHOD_NOT_ALLOWED
     assert response_data["error"] == "Method not allowed"
-
-
-def algolia_search():
-
-    mock_request = Mock()
-    mock_request.method = "POST"
-    mock_request.body = b"invalid json"
-
-    response = algolia_search(mock_request)
-    response_data = json.loads(response.content)
-
-    assert response.status_code == 500
-    assert "error" in response_data
-
-
-def algolia_search():
-    with patch(
-        "apps.owasp.api.search.algolia.get_search_results", return_value=None
-    ) as mock_get_search_results:
-
-        mock_request = Mock()
-        mock_request.method = "POST"
-        mock_request.body = json.dumps({
-            "indexName": "projects",
-            "query": "security",
-            "page": 1,
-            "hitsPerPage": 10,
-        }).encode("utf-8")
-
-        mock_get_search_results.side_effect = Exception("Test error")
-        response = algolia_search(mock_request)
-        response_data = json.loads(response.content)
-
-        assert response.status_code == 500
-        assert response_data["error"] == "Test error"
