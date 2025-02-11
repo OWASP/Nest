@@ -14,6 +14,7 @@ def validate_data(schema, data):
     def check_email_format(value):
         return validators.email(value)
 
+
     try:
         validate(schema=schema, instance=data, format_checker=format_checker)
     except ValidationError as e:
