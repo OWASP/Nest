@@ -186,7 +186,8 @@
     "mailing_list": {
       "description": "The optional mailing list associated with the project.",
       "format": "url",
-      "type": "string"
+      "type": "string",
+      "minLength" : 4
 },
     "name": {
       "description": "The unique name of the project.",
