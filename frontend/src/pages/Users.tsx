@@ -1,7 +1,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
-import { user } from 'types/user'
 import { METADATA_CONFIG } from 'utils/metadata'
+import { User } from 'types/user'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'
@@ -16,18 +16,18 @@ const UsersPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<user>({
+  } = useSearchPage<User>({
     indexName: 'users',
     pageTitle: 'OWASP Users',
   })
 
   const navigate = useNavigate()
 
-  const handleButtonClick = (user: user) => {
+  const handleButtonClick = (user: User) => {
     navigate(`/community/users/${user.key}`)
   }
 
-  const renderUserCard = (user: user) => {
+  const renderUserCard = (user: User) => {
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,

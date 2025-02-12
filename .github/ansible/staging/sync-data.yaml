@@ -1,8 +1,0 @@
-- name: Run Nest Staging Data Sync
-  hosts: nest_staging
-  tasks:
-    - name: Sync Nest data
-      async: 21600 # 6 hours
-      poll: 0
-      shell: |
-        make sync-data > /var/log/nest/sync-data.log 2>&1
