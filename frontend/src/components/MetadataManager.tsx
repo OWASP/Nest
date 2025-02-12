@@ -39,7 +39,7 @@ const MetadataManager: React.FC<MetadataManagerProps> = ({
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content={DEFAULT_METADATA.siteName} />
       <meta property="og:locale" content="en_US" />
-      <meta property="og:image:alt" content="OWASP Nest logo" />
+      <meta property="og:image:alt" content="OWASP logo" />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/png" />
