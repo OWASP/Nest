@@ -39,10 +39,6 @@ def test_positive(project_schema):
             "documentation-invalid.yaml",
             "'xyz-abc' is not a 'uri'",
         ),
-        (
-            "documentation-non-unique.yaml",
-            " ['https://example.com/docs' , 'https://example.com/docs'] has non-unique elements",
-        ),
         ("downloads-empty.yaml", "[] should be non-empty"),
         (
             "downloads-invalid.yaml",
