@@ -23,7 +23,7 @@ const MetadataManager: React.FC<MetadataManagerProps> = ({
   const metaDescription = description ? description : DEFAULT_METADATA.defaultDescription
   const metaImage = image ? image : DEFAULT_METADATA.defaultIcon
   const metaUrl = url ? url : DEFAULT_METADATA.baseUrl
-  const Title = `${title} | ${DEFAULT_METADATA.siteName}`
+  const title = `${title} | ${DEFAULT_METADATA.siteName}`
 
   return (
     <>
