@@ -42,7 +42,6 @@ def algolia_search(request):
     """Search Algolia API endpoint."""
     if request.method == "GET":
         try:
-
             index_name = request.GET.get("indexName")
             query = request.GET.get("query", "")
             current_page = int(request.GET.get("page", 1))

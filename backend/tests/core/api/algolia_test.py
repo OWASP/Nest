@@ -1,8 +1,9 @@
 import json
 from unittest.mock import Mock, patch
+
 import pytest
-from django.core.cache import cache
 import requests
+from django.core.cache import cache
 
 from apps.core.api.algolia import algolia_search
 
@@ -33,7 +34,6 @@ def _clear_cache():
         ("issues", "bug", 1, 10, MOCKED_SEARCH_RESULTS),
     ],
 )
-
 @pytest.mark.usefixtures("_clear_cache")
 def test_algolia_search_valid_request(index_name, query, page, hits_per_page, expected_result):
     """Test valid requests for the algolia_search."""
