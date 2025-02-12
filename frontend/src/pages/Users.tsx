@@ -17,6 +17,7 @@ const UsersPage = () => {
   } = useSearchPage<User>({
     indexName: 'users',
     pageTitle: 'OWASP Users',
+    hitsPerPage: 24,
   })
 
   const navigate = useNavigate()

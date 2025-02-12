@@ -1,4 +1,4 @@
-from apps.owasp.api.search.params_mapping import get_params_for_index
+from apps.core.utils.params_mapping import get_params_for_index
 
 
 def test_get_params_for_issues():
