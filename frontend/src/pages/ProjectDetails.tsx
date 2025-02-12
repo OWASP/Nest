@@ -95,15 +95,15 @@ const ProjectDetailsPage = () => {
   const projectStats = [
     {
       icon: faUsers,
-      value: `${project?.contributors_count || 'No'} Contributor${pluralize(project.contributors_count, 's')}`,
+      value: `${project?.contributors_count || 'No'} Contributor${pluralize(project.contributors_count)}`,
     },
     {
       icon: faCodeFork,
-      value: `${project?.forks_count || 'No'} Fork${pluralize(project.forks_count, 's')}`,
+      value: `${project?.forks_count || 'No'} Fork${pluralize(project.forks_count)}`,
     },
     {
       icon: faStar,
-      value: `${project?.stars_count || 'No'} Star${pluralize(project.stars_count, 's')}`,
+      value: `${project?.stars_count || 'No'} Star${pluralize(project.stars_count)}`,
     },
     {
       icon: faCode,
@@ -111,7 +111,7 @@ const ProjectDetailsPage = () => {
     },
     {
       icon: faExclamationCircle,
-      value: `${project?.issues_count || 'No'} Issue${pluralize(project.issues_count, 's')}`,
+      value: `${project?.issues_count || 'No'} Issue${pluralize(project.issues_count)}`,
     },
   ]
   return (

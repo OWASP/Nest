@@ -82,23 +82,23 @@ const RepositoryDetailsPage = () => {
   const RepositoryStats = [
     {
       icon: faHistory,
-      value: `${repository?.commitsCount || 'No'} Commit${pluralize(repository.commitsCount, 's')}`,
+      value: `${repository?.commitsCount || 'No'} Commit${pluralize(repository.commitsCount)}`,
     },
     {
       icon: faUsers,
-      value: `${repository?.contributorsCount || 'No'} Contributor${pluralize(repository.contributorsCount, 's')}`,
+      value: `${repository?.contributorsCount || 'No'} Contributor${pluralize(repository.contributorsCount)}`,
     },
     {
       icon: faCodeFork,
-      value: `${repository?.forksCount || 'No'} Fork${pluralize(repository.forksCount, 's')}`,
+      value: `${repository?.forksCount || 'No'} Fork${pluralize(repository.forksCount)}`,
     },
     {
       icon: faExclamationCircle,
-      value: `${repository?.openIssuesCount || 'No'} Issue${pluralize(repository.openIssuesCount, 's')}`,
+      value: `${repository?.openIssuesCount || 'No'} Issue${pluralize(repository.openIssuesCount)}`,
     },
     {
       icon: faStar,
-      value: `${repository?.starsCount || 'No'} Star${pluralize(repository.starsCount, 's')}`,
+      value: `${repository?.starsCount || 'No'} Star${pluralize(repository.starsCount)}`,
     },
   ]
   return (
