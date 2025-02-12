@@ -6,11 +6,10 @@ export interface DefaultMetadata {
   defaultDescription: string
   twitterHandle: string
   defaultIcon: string
-  author: string
 }
 
 export interface PageMetadata {
-  title: string
+  pageTitle: string
   description: string
   keywords: string[]
   image?: string
@@ -18,16 +17,21 @@ export interface PageMetadata {
   url?: string
 }
 
+export interface MetadataConfig {
+  home: PageMetadata
+  projects: PageMetadata
+  committees: PageMetadata
+  chapters: PageMetadata
+  users: PageMetadata
+  projectContribute: PageMetadata
+}
+
 export interface MetadataManagerProps {
-  title: string
+  pageTitle: string
   description?: string
   image?: string
   url?: string
   type?: string
   keywords?: string[]
   children?: React.ReactNode
-}
-
-export interface SEOWrapperProps extends PageMetadata {
-  children: React.ReactNode
 }

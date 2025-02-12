@@ -1,7 +1,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
-import { METADATA_CONFIG } from 'utils/metadata'
 import { User } from 'types/user'
+import { METADATA_CONFIG } from 'utils/metadata'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'

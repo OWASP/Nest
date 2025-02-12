@@ -53,7 +53,7 @@ const CommitteeDetailsPage = () => {
   const filteredIcons = getFilteredIcons(committee, params)
   const formattedUrls = handleSocialUrls(committee.related_urls)
   return (
-    <MetadataManager title={committee.name} description={committee.summary} url={committee.url}>
+    <MetadataManager pageTitle={committee.name} description={committee.summary} url={committee.url}>
       <div className="container mx-auto pb-16 pt-24 xl:max-w-full">
         <div className="flex justify-center">
           <Card

@@ -88,7 +88,7 @@ const RepositoryDetailsPage = () => {
   ]
   return (
     <MetadataManager
-      title={repository.name || repositoryKey}
+      pageTitle={repository.name || repositoryKey}
       description={repository.description}
       url={repository.url}
       keywords={repository.topics}

@@ -101,7 +101,7 @@ const ProjectDetailsPage = () => {
   ]
   return (
     <MetadataManager
-      title={project.name || projectKey}
+      pageTitle={project.name || projectKey}
       description={project.summary}
       url={project.url}
       keywords={project.topics}

@@ -57,7 +57,7 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <MetadataManager title={chapter.name} description={chapter.summary} url={chapter.url}>
+    <MetadataManager pageTitle={chapter.name} description={chapter.summary} url={chapter.url}>
       <DetailsCard
         title={chapter.name}
         socialLinks={chapter.related_urls}

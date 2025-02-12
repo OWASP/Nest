@@ -8,11 +8,10 @@ const DEFAULT_METADATA: DefaultMetadata = {
     'OWASP Nest is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community.',
   twitterHandle: '@owasp',
   defaultIcon: '/img/owasp_icon_white_background.png',
-  author: 'Arkadii Yakovets',
 }
 
 const MetadataManager: React.FC<MetadataManagerProps> = ({
-  title,
+  pageTitle,
   description,
   image,
   url,
@@ -23,16 +22,15 @@ const MetadataManager: React.FC<MetadataManagerProps> = ({
   const metaDescription = description ? description : DEFAULT_METADATA.defaultDescription
   const metaImage = image ? image : DEFAULT_METADATA.defaultIcon
   const metaUrl = url ? url : DEFAULT_METADATA.baseUrl
-  const title = `${title} | ${DEFAULT_METADATA.siteName}`
+  const title = `${pageTitle} | ${DEFAULT_METADATA.siteName}`
 
   return (
     <>
-      <title>{Title}</title>
+      <title>{title}</title>
       <meta name="description" content={metaDescription} />
       {keywords.length > 0 && <meta name="keywords" content={keywords.join(',')} />}
-      <meta name="author" content="Arkadii Yakovets" />
 
-      <meta property="og:title" content={Title} />
+      <meta property="og:title" content={title} />
       <meta property="og:description" content={metaDescription} />
       <meta property="og:image" content={metaImage} />
       <meta property="og:url" content={metaUrl} />
@@ -47,7 +45,7 @@ const MetadataManager: React.FC<MetadataManagerProps> = ({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={DEFAULT_METADATA.twitterHandle} />
       <meta name="twitter:creator" content={DEFAULT_METADATA.twitterHandle} />
-      <meta name="twitter:title" content={Title} />
+      <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={metaDescription} />
       <meta name="twitter:image" content={metaImage} />
       <meta name="twitter:image:alt" content="OWASP Nest logo" />
