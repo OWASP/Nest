@@ -66,9 +66,9 @@
   "description": "OWASP chapter schema.",
   "properties": {
     "blog": {
+      "type": ["string"],
       "description": "Chapter's blog.",
-      "format": "uri",
-      "type": ["string"]
+      "format": "uri"
     },
     "country": {
       "description": "Country.",

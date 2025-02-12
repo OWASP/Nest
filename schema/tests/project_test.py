@@ -56,6 +56,11 @@ def test_positive(project_schema):
             "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
         ),
         (
+            "leader-email-invalid.yaml",
+            "[{'email': 'test@gmail', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+        ),
+        (
+            "leader-email-missing.yaml",
             "leaders-email-null.yaml",
             "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
         ),
