@@ -18,7 +18,7 @@ class Command(BaseCommand):
     def __init__(self):
         """Initialize the command with site URL and static routes."""
         super().__init__()
-        self.site_url = "https://nest.owasp.dev"
+        self.site_url = settings.SITE_URL
         self.static_routes = {
             "projects": [
                 {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
@@ -47,10 +47,10 @@ class Command(BaseCommand):
         self.ensure_directory(output_dir)
 
         sitemap_files = [
-            "project-sitemap.xml",
-            "chapter-sitemap.xml",
-            "committee-sitemap.xml",
-            "user-sitemap.xml",
+            "sitemap-project.xml",
+            "sitemap-chapter.xml",
+            "sitemap-committee.xml",
+            "sitemap-user.xml",
         ]
 
         self.generate_project_sitemap(output_dir)
@@ -78,7 +78,7 @@ class Command(BaseCommand):
         )
 
         content = self.generate_sitemap_content(routes)
-        self.save_sitemap(content, output_dir / "project-sitemap.xml")
+        self.save_sitemap(content, output_dir / "sitemap-project.xml")
 
     def generate_chapter_sitemap(self, output_dir):
         """Generate sitemap for chapters."""
@@ -100,7 +100,7 @@ class Command(BaseCommand):
         )
 
         content = self.generate_sitemap_content(routes)
-        self.save_sitemap(content, output_dir / "chapter-sitemap.xml")
+        self.save_sitemap(content, output_dir / "sitemap-chapter.xml")
 
     def generate_committee_sitemap(self, output_dir):
         """Generate sitemap for committees."""
@@ -121,7 +121,7 @@ class Command(BaseCommand):
         )
 
         content = self.generate_sitemap_content(routes)
-        self.save_sitemap(content, output_dir / "committee-sitemap.xml")
+        self.save_sitemap(content, output_dir / "sitemap-committee.xml")
 
     def generate_user_sitemap(self, output_dir):
         """Generate sitemap for users."""
@@ -142,7 +142,7 @@ class Command(BaseCommand):
         )
 
         content = self.generate_sitemap_content(routes)
-        self.save_sitemap(content, output_dir / "user-sitemap.xml")
+        self.save_sitemap(content, output_dir / "sitemap-user.xml")
 
     def generate_sitemap_content(self, routes):
         """Generate sitemap content for a set of routes."""
