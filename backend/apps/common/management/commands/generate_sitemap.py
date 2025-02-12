@@ -22,7 +22,7 @@ class Command(BaseCommand):
         self.static_routes = {
             "projects": [
                 {"path": "/projects", "changefreq": "daily", "priority": 0.9},
-                {"path": "/projects/contribute", "changefreq": "monthly", "priority": 0.6},
+                {"path": "/projects/contribute", "changefreq": "daily", "priority": 0.6},
             ],
             "chapters": [
                 {"path": "/chapters", "changefreq": "weekly", "priority": 0.8},
