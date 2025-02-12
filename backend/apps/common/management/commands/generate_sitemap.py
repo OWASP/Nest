@@ -28,7 +28,7 @@ class Command(BaseCommand):
                 {"path": "/chapters", "changefreq": "weekly", "priority": 0.8},
             ],
             "committees": [
-                {"path": "/committees", "changefreq": "weekly", "priority": 0.8},
+                {"path": "/committees", "changefreq": "monthly", "priority": 0.8},
             ],
             "users": [
                 {"path": "/community/users", "changefreq": "daily", "priority": 0.7},
