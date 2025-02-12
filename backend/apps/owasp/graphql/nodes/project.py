@@ -18,12 +18,11 @@ class ProjectNode(GenericEntityNode):
     issues_count = graphene.Int()
     key = graphene.String()
     languages = graphene.List(graphene.String)
-    repositories_count = graphene.Int()
-    topics = graphene.List(graphene.String)
-
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
     repositories = graphene.List(RepositoryNode)
+    repositories_count = graphene.Int()
+    topics = graphene.List(graphene.String)
 
     class Meta:
         model = Project
@@ -39,37 +38,33 @@ class ProjectNode(GenericEntityNode):
         )
 
     def resolve_issues_count(self, info):
-        """Resolve project issues count."""
+        """Resolve issues count."""
         return self.idx_issues_count
 
     def resolve_key(self, info):
-        """Resolve project key."""
+        """Resolve key."""
         return self.idx_key
 
     def resolve_languages(self, info):
-        """Resolve project languages."""
+        """Resolve languages."""
         return self.idx_languages
 
     def resolve_recent_issues(self, info):
-        """Resolve project recent issues."""
+        """Resolve recent issues."""
         return self.issues.select_related("author").order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
     def resolve_recent_releases(self, info):
-        """Resolve project recent releases."""
+        """Resolve recent releases."""
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
     def resolve_repositories(self, info):
-        """Resolve project repositories."""
+        """Resolve repositories."""
         return self.repositories.order_by("-pushed_at", "-updated_at")
 
     def resolve_repositories_count(self, info):
-        """Resolve project repositories count."""
+        """Resolve repositories count."""
         return self.idx_repositories_count
 
-    def resolve_repositories_indexed(self, info):
-        """Resolve project indexed repositories."""
-        return [RepositoryNode(**repo) for repo in self.idx_repositories]
-
     def resolve_topics(self, info):
-        """Resolve project topics."""
+        """Resolve topics."""
         return self.idx_topics

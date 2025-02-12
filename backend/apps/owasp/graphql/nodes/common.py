@@ -9,12 +9,11 @@ from apps.github.graphql.nodes.user import UserNode
 class GenericEntityNode(BaseNode):
     """Base node class for OWASP entities with common fields and resolvers."""
 
-    url = graphene.String()
-    updated_at = graphene.Float()
-    related_urls = graphene.List(graphene.String)
     leaders = graphene.List(graphene.String)
-
+    related_urls = graphene.List(graphene.String)
     top_contributors = graphene.List(UserNode)
+    updated_at = graphene.Float()
+    url = graphene.String()
 
     class Meta:
         abstract = True

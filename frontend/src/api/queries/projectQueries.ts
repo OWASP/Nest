@@ -12,19 +12,6 @@ export const GET_PROJECT_DATA = gql`
       leaders
       level
       name
-      repositoriesCount
-      starsCount
-      summary
-      topContributors {
-        avatarUrl
-        contributionsCount
-        login
-        name
-      }
-      topics
-      type
-      updatedAt
-      url
       recentReleases {
         name
         tagName
@@ -56,6 +43,19 @@ export const GET_PROJECT_DATA = gql`
         subscribersCount
         url
       }
+      repositoriesCount
+      starsCount
+      summary
+      topContributors {
+        avatarUrl
+        contributionsCount
+        login
+        name
+      }
+      topics
+      type
+      updatedAt
+      url
     }
   }
 `

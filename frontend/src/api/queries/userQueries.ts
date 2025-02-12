@@ -10,10 +10,32 @@ export const GET_USER_DATA = gql`
       email
       followersCount
       followingCount
+      issues {
+        title
+        number
+        createdAt
+        commentsCount
+        repository {
+          key
+          ownerKey
+        }
+      }
+      issuesCount
       location
       login
       name
       publicRepositoriesCount
+      releases {
+        name
+        tagName
+        publishedAt
+        isPreRelease
+        repository {
+          key
+          ownerKey
+        }
+      }
+      releasesCount
       url
     }
   }

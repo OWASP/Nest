@@ -15,11 +15,13 @@ jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ userKey: 'test-user' }),
   useNavigate: jest.fn(),
 }))
+
 const mockError = {
   error: new Error('GraphQL error'),
 }
@@ -48,7 +50,6 @@ describe('UserDetailsPage', () => {
     })
 
     render(<UserDetailsPage />)
-
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
@@ -59,8 +60,10 @@ describe('UserDetailsPage', () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
+      loading: false,
     })
 
+    // Wait for the loading state to finish
     render(<UserDetailsPage />)
 
     await waitFor(() => {

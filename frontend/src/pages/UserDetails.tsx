@@ -18,7 +18,9 @@ import { UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import { IssueCard } from 'components/IssueCard'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { ReleaseCard } from 'components/ReleaseCard'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
@@ -197,6 +199,36 @@ const UserDetailsPage: React.FC = () => {
                 <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
               </div>
             ))}
+          </div>
+          <div className="grid gap-6 p-6">
+            {user.issues && user.issues.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Issues
+                </h2>
+                <div className="grid gap-4">
+                  {user.issues.map((issue) => (
+                    <IssueCard key={`${issue.repository.key}-${issue.number}`} issue={issue} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {user.releases && user.releases.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Releases
+                </h2>
+                <div className="grid gap-4">
+                  {user.releases.map((release) => (
+                    <ReleaseCard
+                      key={`${release.repository.key}-${release.tagName}`}
+                      release={release}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
             Joined {formatDate(user.createdAt)}
