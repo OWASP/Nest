@@ -21,7 +21,7 @@ class Command(BaseCommand):
         self.site_url = "https://nest.owasp.dev"
         self.static_routes = {
             "projects": [
-                {"path": "/projects", "changefreq": "daily", "priority": 0.9},
+                {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
                 {"path": "/projects/contribute", "changefreq": "daily", "priority": 0.6},
             ],
             "chapters": [
