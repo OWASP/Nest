@@ -185,11 +185,8 @@
     },
     "mailing_list": {
       "description": "The optional mailing list associated with the project.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "email"
-      }
+      "format": "url",
+      "type": "string"
 },
     "name": {
       "description": "The unique name of the project.",
