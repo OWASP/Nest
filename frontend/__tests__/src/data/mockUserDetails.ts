@@ -1,4 +1,3 @@
-
 export const mockUserDetailsData = {
   user: {
     login: 'testuser',
@@ -21,9 +20,9 @@ export const mockUserDetailsData = {
         commentsCount: 5,
         repository: {
           key: 'test-repo',
-          ownerKey: 'testuser'
-        }
-      }
+          ownerKey: 'testuser',
+        },
+      },
     ],
     releases: [
       {
@@ -33,9 +32,9 @@ export const mockUserDetailsData = {
         publishedAt: 1723002473,
         repository: {
           key: 'test-repo',
-          ownerKey: 'testuser'
-        }
-      }
-    ]
-  }
+          ownerKey: 'testuser',
+        },
+      },
+    ],
+  },
 }

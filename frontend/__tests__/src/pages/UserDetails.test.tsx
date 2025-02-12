@@ -41,7 +41,7 @@ describe('UserDetailsPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
-  });
+  })
 
   test('renders loading state', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
@@ -54,7 +54,6 @@ describe('UserDetailsPage', () => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
     })
   })
-
 
   test('renders user details', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({

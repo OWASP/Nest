@@ -37,7 +37,6 @@ class UserNode(BaseNode):
     """GitHub user node."""
 
     # Existing fields
-    contributions_count = graphene.Int()
     created_at = graphene.Float()
     updated_at = graphene.Float()
     url = graphene.String()
@@ -63,10 +62,6 @@ class UserNode(BaseNode):
             "name",
             "public_repositories_count",
         )
-
-    def resolve_contributions_count(self, info):
-        """Resolve user contributions count."""
-        return self.contributions_count
 
     def resolve_created_at(self, info):
         """Resolve user created at."""
