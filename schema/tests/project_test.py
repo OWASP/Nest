@@ -65,7 +65,7 @@ def test_positive(project_schema):
             "'INVALID-LICENSE-VALUE' is not one of ['AGPL-3.0', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'CC-BY-4.0', 'CC-BY-SA-4.0', 'CC0-1.0', 'EUPL-1.2', 'GPL-2.0', 'GPL-3.0', 'LGPL-2.1', 'LGPL-3.0', 'MIT', 'MPL-2.0', 'OTHER']",
         ),
         ("mailing-none.yaml", "None is not of type 'string'"),
-        ("mailing-empty.yaml", "'' is not of type 'string'"),
+        ("mailing-empty.yaml", "'' is too short"),
         ("name-empty.yaml", "'' is too short"),
         ("name-null.yaml", "None is not of type 'string'"),
         ("repositories-empty.yaml", "[] should be non-empty"),
