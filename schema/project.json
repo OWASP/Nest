@@ -128,7 +128,7 @@
       },
       "minItems": 1,
       "uniqueItems": true,
-      "optional":true
+      "optional": true
     },
     "downloads": {
       "description": "Optional list of download URLs.",
