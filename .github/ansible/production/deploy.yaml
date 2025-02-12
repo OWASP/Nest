@@ -75,6 +75,18 @@
         dest: ~/
         mode: '0755'
 
+    - name: Copy .env.backend
+      copy:
+        src: '{{ github_workspace }}/.env.backend'
+        dest: ~/
+        mode: '0400'
+
+    - name: Copy .env.db
+      copy:
+        src: '{{ github_workspace }}/.env.db'
+        dest: ~/
+        mode: '0400'
+
     - name: Prune docker images
       shell:
         cmd: docker image prune -f
