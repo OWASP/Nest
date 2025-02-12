@@ -34,6 +34,9 @@ def test_positive(project_schema):
         ("blog-null.yaml", "None is not a 'uri'"),
         ("demo-invalid.yaml", "'https://invalid/' is not a 'uri'"),
         ("demo-null.yaml", "None is not a 'uri'"),
+        ("documentation_empty.yaml", "['documentation'] should be non-empty"),
+        ("documentation-invalid.yaml", "['documentation'][0] is not a valid URI"),
+        ("documentation-non-unique.yaml", "['documentation'] has non-unique elements"),
         ("downloads-empty.yaml", "[] should be non-empty"),
         (
             "downloads-invalid.yaml",
