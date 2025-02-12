@@ -119,6 +119,17 @@
       "format": "uri",
       "type": "string"
     },
+    "documentation": {
+      "description": "Optional URLs to project documentation.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional":true
+    },
     "downloads": {
       "description": "Optional list of download URLs.",
       "type": "array",
@@ -129,17 +140,6 @@
       "minItems": 1,
       "uniqueItems": true,
       "optional": true
-    },
-    "documentation": {
-      "description": "Optional URL to project documentation.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri"
-      },
-      "minItems": 1,
-      "uniqueItems": true,
-      "optional":true
     },
     "events": {
       "description": "Event URLs related to the project.",

@@ -1,5 +1,5 @@
 audience: builder
-documentation: []  # Empty array - should be invalid
+documentation: []
 name: OWASP Incubator Code Project
 leaders:
   - github: leader-1-github

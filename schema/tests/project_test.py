@@ -39,6 +39,7 @@ def test_positive(project_schema):
             "documentation-invalid.yaml",
             "'xyz-abc' is not a 'uri'",
         ),
+        ("documentation-null.yaml", "None is not of type 'array'"),
         ("downloads-empty.yaml", "[] should be non-empty"),
         (
             "downloads-invalid.yaml",
