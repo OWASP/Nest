@@ -3,7 +3,7 @@
 import graphene
 
 from apps.common.graphql.nodes import BaseNode
-from apps.github.graphql.nodes.user import UserNode
+from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
 
 
 class GenericEntityNode(BaseNode):
@@ -11,7 +11,7 @@ class GenericEntityNode(BaseNode):
 
     leaders = graphene.List(graphene.String)
     related_urls = graphene.List(graphene.String)
-    top_contributors = graphene.List(UserNode)
+    top_contributors = graphene.List(RepositoryContributorNode)
     updated_at = graphene.Float()
     url = graphene.String()
 
@@ -36,4 +36,4 @@ class GenericEntityNode(BaseNode):
 
     def resolve_top_contributors(self, info):
         """Resolve entity top contributors."""
-        return [UserNode(**repo) for repo in self.idx_top_contributors]
+        return [RepositoryContributorNode(**repo) for repo in self.idx_top_contributors]

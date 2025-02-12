@@ -19,7 +19,6 @@ class TestUserNode:
             "avatar_url",
             "bio",
             "company",
-            "contributions_count",
             "created_at",
             "email",
             "followers_count",
