@@ -29,15 +29,15 @@ class CommitteeNode(GenericEntityNode):
 
     def resolve_contributors_count(self, info):
         """Resolve project contributors count."""
-        return self.owasp_repository.contributors_count if self.owasp_repository else 0
+        return self.owasp_repository.contributors_count
 
     def resolve_forks_count(self, info):
         """Resolve project forks count."""
-        return self.owasp_repository.forks_count if self.owasp_repository else 0
+        return self.owasp_repository.forks_count
 
     def resolve_stars_count(self, info):
         """Resolve project stars count."""
-        return self.owasp_repository.stars_count if self.owasp_repository else 0
+        return self.owasp_repository.stars_count
 
     def resolve_repositories_count(self, info):
         """Resolve project repositories count."""
@@ -45,4 +45,4 @@ class CommitteeNode(GenericEntityNode):
 
     def resolve_issues_count(self, info):
         """Resolve project issues count."""
-        return self.owasp_repository.open_issues_count if self.owasp_repository else 0
+        return self.owasp_repository.open_issues_count
