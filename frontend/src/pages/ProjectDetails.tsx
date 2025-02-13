@@ -76,23 +76,23 @@ const ProjectDetailsPage = () => {
 
     {
       icon: faUsers,
-      value: `${project?.contributors_count || 'No'} Contributor${pluralize(project.contributors_count)}`,
+      value: `${project?.contributorsCount || 'No'} Contributor${pluralize(project.contributorsCount)}`,
     },
     {
       icon: faCodeFork,
-      value: `${project?.forks_count || 'No'} Fork${pluralize(project.forks_count)}`,
+      value: `${project?.forksCount || 'No'} Fork${pluralize(project.forksCount)}`,
     },
     {
       icon: faStar,
-      value: `${project?.stars_count || 'No'} Star${pluralize(project.stars_count)}`,
+      value: `${project?.starsCount || 'No'} Star${pluralize(project.starsCount)}`,
     },
     {
       icon: faCode,
-      value: `${project?.repositories_count || 'No'} Repositor${pluralize(project.repositories_count, 'y,ies')}`,
+      value: `${project?.repositoriesCount || 'No'} Repositor${pluralize(project.repositoriesCount, 'y,ies')}`,
     },
     {
       icon: faExclamationCircle,
-      value: `${project?.issues_count || 'No'} Issue${pluralize(project.issues_count)}`,
+      value: `${project?.issuesCount || 'No'} Issue${pluralize(project.issuesCount)}`,
     },
 
   ]
