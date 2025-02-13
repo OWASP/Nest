@@ -1,6 +1,6 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
-import { user } from 'types/user'
+import { User } from 'types/user'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
@@ -14,18 +14,18 @@ const UsersPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<user>({
+  } = useSearchPage<User>({
     indexName: 'users',
     pageTitle: 'OWASP Users',
   })
 
   const navigate = useNavigate()
 
-  const handleButtonClick = (user: user) => {
+  const handleButtonClick = (user: User) => {
     navigate(`/community/users/${user.key}`)
   }
 
-  const renderUserCard = (user: user) => {
+  const renderUserCard = (user: User) => {
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,

@@ -1,3 +1,4 @@
+import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
@@ -9,45 +10,47 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { GET_USER_DATA } from 'api/queries/userQueries'
+import { toast } from 'hooks/useToast'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
-import logger from 'utils/logger'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import { IssueCard } from 'components/IssueCard'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { ReleaseCard } from 'components/ReleaseCard'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
-  const [isLoading, setIsLoading] = useState(true)
   const [data, setData] = useState<HeatmapData | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
   const [privateContributor, setPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { hits } = await fetchAlgoliaData('users', userKey, 1, userKey)
-        if (hits.length === 0) {
-          setUser(null)
-        } else {
-          setUser(hits[0] as unknown as UserDetailsProps)
-        }
-      } catch (error) {
-        logger.error(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+    variables: { key: userKey },
+  })
 
-    fetchUserData()
-  }, [userKey])
+  useEffect(() => {
+    if (graphQLData) {
+      setUser(graphQLData?.user)
+      setIsLoading(false)
+    }
+    if (graphQLRequestError) {
+      toast({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        variant: 'destructive',
+      })
+      setIsLoading(false)
+    }
+  }, [graphQLData, graphQLRequestError, userKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -114,7 +117,7 @@ const UserDetailsPage: React.FC = () => {
                   <div className="-mt-24 flex-shrink-0">
                     <img
                       className="h-40 w-40 rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
-                      src={user.avatar_url}
+                      src={user.avatarUrl}
                       alt={user.name}
                     />
                   </div>
@@ -174,12 +177,12 @@ const UserDetailsPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-3 gap-4 bg-gray-200 p-6 dark:bg-gray-900 sm:grid-cols-3">
             {[
-              { icon: faUser, label: 'Followers', value: user.followers_count },
-              { icon: faUserPlus, label: 'Following', value: user.following_count },
+              { icon: faUser, label: 'Followers', value: user.followersCount },
+              { icon: faUserPlus, label: 'Following', value: user.followingCount },
               {
                 icon: faCodeBranch,
                 label: 'Repositories',
-                value: user.public_repositories_count,
+                value: user.publicRepositoriesCount,
               },
             ].map(({ icon: Icon, label, value }) => (
               <div
@@ -197,8 +200,38 @@ const UserDetailsPage: React.FC = () => {
               </div>
             ))}
           </div>
+          <div className="grid gap-6 p-6">
+            {user.issues && user.issues.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Issues
+                </h2>
+                <div className="grid gap-4">
+                  {user.issues.map((issue) => (
+                    <IssueCard key={`${issue.repository.key}-${issue.number}`} issue={issue} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {user.releases && user.releases.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Releases
+                </h2>
+                <div className="grid gap-4">
+                  {user.releases.map((release) => (
+                    <ReleaseCard
+                      key={`${release.repository.key}-${release.tagName}`}
+                      release={release}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            Joined {formatDate(user.created_at)}
+            Joined {formatDate(user.createdAt)}
           </div>
         </div>
       </div>

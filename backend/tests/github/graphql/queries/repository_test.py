@@ -34,7 +34,7 @@ class TestRepositoryQuery:
             )
 
             assert result == mock_repository
-            mock_get.assert_called_once_with(key="test-project")
+            mock_get.assert_called_once_with(key="www-project-test-project")
             mock_project.repositories.filter.assert_called_once_with(key="test-repo")
 
     def test_resolve_repository_not_found_project(self, mock_info):
@@ -47,7 +47,7 @@ class TestRepositoryQuery:
             )
 
             assert result is None
-            mock_get.assert_called_once_with(key="non-existent-project")
+            mock_get.assert_called_once_with(key="www-project-non-existent-project")
 
     def test_resolve_repository_not_found_repository(self, mock_project, mock_info):
         """Test resolving a non-existent repository in an existing project."""
@@ -61,5 +61,5 @@ class TestRepositoryQuery:
             )
 
             assert result is None
-            mock_get.assert_called_once_with(key="test-project")
+            mock_get.assert_called_once_with(key="www-project-test-project")
             mock_project.repositories.filter.assert_called_once_with(key="non-existent-repo")
