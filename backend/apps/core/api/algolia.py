@@ -1,5 +1,7 @@
 """OWASP app Algolia search proxy API."""
 
+import json
+
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
@@ -40,12 +42,14 @@ def get_search_results(index_name, query, page, hits_per_page):
 
 def algolia_search(request):
     """Search Algolia API endpoint."""
-    if request.method == "GET":
+    if request.method == "POST":
         try:
-            index_name = request.GET.get("indexName")
-            query = request.GET.get("query", "")
-            current_page = int(request.GET.get("page", 1))
-            hits_per_page = int(request.GET.get("hitsPerPage", 25))
+            data = json.loads(request.body)
+
+            index_name = data.get("indexName")
+            query = data.get("query", "")
+            current_page = int(data.get("page", 1))
+            hits_per_page = int(data.get("hitsPerPage", 25))
 
             cache_key = f"{CACHE_PREFIX}{index_name}:{query}:{current_page}:{hits_per_page}"
 
@@ -55,11 +59,10 @@ def algolia_search(request):
 
             search_results = get_search_results(index_name, query, current_page, hits_per_page)
 
-            # Cache the result
             cache.set(cache_key, search_results, CACHE_DURATION)
 
             return JsonResponse(search_results)
-        except AlgoliaException:
+        except (AlgoliaException, json.JSONDecodeError):
             return JsonResponse(
                 {"error": "An internal error occurred. Please try again later."}, status=500
             )

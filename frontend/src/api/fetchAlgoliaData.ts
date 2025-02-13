@@ -10,14 +10,18 @@ export const fetchAlgoliaData = async <T>(
   hitsPerPage = 25
 ): Promise<AlgoliaResponseType<T>> => {
   try {
-    const queryString = new URLSearchParams({
-      indexName,
-      query,
-      page: currentPage.toString(),
-      hitsPerPage: hitsPerPage.toString(),
-    }).toString()
-
-    const response = await fetch(`${API_URL}/idx?${queryString}`)
+    const response = await fetch(`${API_URL}/idx`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        indexName,
+        query,
+        page: currentPage,
+        hitsPerPage,
+      }),
+    })
 
     if (!response.ok) {
       throw new AppError(response.status, 'Search service error')

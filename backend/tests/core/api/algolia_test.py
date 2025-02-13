@@ -41,14 +41,16 @@ def test_algolia_search_valid_request(index_name, query, page, hits_per_page, ex
         "apps.core.api.algolia.get_search_results", return_value=expected_result
     ) as mock_get_search_results:
         mock_request = Mock()
-        mock_request.method = "GET"
+        mock_request.method = "POST"
 
-        mock_request.GET = {
-            "indexName": index_name,
-            "query": query,
-            "page": str(page),
-            "hitsPerPage": str(hits_per_page),
-        }
+        mock_request.body = json.dumps(
+            {
+                "indexName": index_name,
+                "query": query,
+                "page": page,
+                "hitsPerPage": hits_per_page,
+            }
+        )
 
         response = algolia_search(mock_request)
         response_data = json.loads(response.content)
@@ -59,9 +61,9 @@ def test_algolia_search_valid_request(index_name, query, page, hits_per_page, ex
 
 
 def test_algolia_search_invalid_method():
-    """Test the scenario where the HTTP method is not GET."""
+    """Test the scenario where the HTTP method is not POST."""
     mock_request = Mock()
-    mock_request.method = "POST"
+    mock_request.method = "GET"
 
     response = algolia_search(mock_request)
     response_data = json.loads(response.content)

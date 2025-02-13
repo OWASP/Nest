@@ -24,7 +24,7 @@ router.registry.extend(owasp_router.registry)
 urlpatterns = [
     path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=settings.DEBUG))),
     path("api/v1/", include(router.urls)),
-    path("api/v1/idx/", csrf_exempt(algolia_search), name="api-search-algolia"),
+    path("api/v1/idx", csrf_exempt(algolia_search), name="api-search-algolia"),
     path("a/", admin.site.urls),
 ]
 
