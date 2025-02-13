@@ -34,7 +34,6 @@ const ProjectsPage = () => {
   const renderProjectCard = (project: ProjectTypeAlgolia) => {
     const params: string[] = ['forks_count', 'stars_count', 'contributors_count']
     const filteredIcons = getFilteredIcons(project, params)
-
     const handleButtonClick = () => {
       navigate(`/projects/${project.key}`)
     }
