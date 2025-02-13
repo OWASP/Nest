@@ -28,6 +28,31 @@ class TestUserQuery:
         """Test if UserQuery inherits from BaseQuery."""
         assert issubclass(UserQuery, BaseQuery)
 
+    def test_user_field_configuration(self):
+        """Test if user field is properly configured."""
+        user_field = UserQuery._meta.fields.get("user")
+        assert isinstance(user_field, Field)
+        assert user_field.type == UserNode
+
+        assert "login" in user_field.args
+        login_arg = user_field.args["login"]
+        assert isinstance(login_arg.type, NonNull)
+        assert login_arg.type.of_type == String
+
+
+class TestUserResolution:
+    """Test cases for user resolution."""
+
+    @pytest.fixture()
+    def mock_user(self):
+        """User mock fixture."""
+        return Mock(spec=User)
+
+    @pytest.fixture()
+    def mock_info(self):
+        """GraphQL info mock fixture."""
+        return Mock()
+
     def test_resolve_user_existing(self, mock_user, mock_info):
         """Test resolving an existing user."""
         with patch("apps.github.models.user.User.objects.get") as mock_get:

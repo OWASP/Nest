@@ -69,6 +69,18 @@
         dest: ~/Makefile
         mode: '0644'
 
+    - name: Ensure schema directory exists
+      ansible.builtin.file:
+        path: ~/schema
+        state: directory
+        mode: '0755'
+
+    - name: Copy schema makefile
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/schema/Makefile'
+        dest: ~/schema/Makefile
+        mode: '0644'
+
     - name: Copy directory recursively
       copy:
         src: '{{ github_workspace }}/backend/data'
