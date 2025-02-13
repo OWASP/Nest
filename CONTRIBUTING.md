@@ -17,13 +17,15 @@ The project uses a **containerized approach** for both development and productio
 Before contributing, ensure you have the following installed:
 
 1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
-1. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using virtual environment with `pip install pre-commit` command, as OS package with `apt install pre-commit` / `brew install pre-commit` or any other method depending on your configuration.
-
-1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
-    1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
-    If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
-    1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
-    1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
+2. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using:
+   - Virtual environment: `pip install pre-commit`
+   - OS package: `apt install pre-commit` (Linux) / `brew install pre-commit` (MacOS)
+   - Any other method depending on your configuration.
+3. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+   - The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
+   - If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+   - You must use the WSL terminal (not Windows PowerShell); otherwise, there is no guarantee that the Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running commands—it is not the intended way to run Nest locally.
+   - Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
 
 ## Starring the Project
 
@@ -37,48 +39,63 @@ Before contributing, ensure you have the following installed:
 
 Follow these steps to set up the OWASP Nest application:
 
-1. **Clone the Repository**:
-    - Clone the repository code from your GitHub account using the following command:
+### 1. Clone the Repository
 
-      ```bash
-      git clone https://github.com/<your-account>/<nest-fork>
-      ```
+Clone the repository code from your GitHub account using the following command:
 
-1. **Create Environment Files**:
-    - Create a local environment file in the `backend` directory:
+```bash
+git clone https://github.com/<your-account>/<nest-fork>
+```
 
-      ```bash
-      touch backend/.env
-      ```
+### 2. Create Environment Files
 
-    - Copy the contents from the template file into your new local environment file:
+#### Backend Environment File
 
-      ```bash
-      cat backend/.env.example > backend/.env
-      ```
+```bash
+touch backend/.env
+```
 
-    - Create a local environment file in the `frontend` directory:
+Copy the contents from the template file into your new local environment file:
 
-      ```bash
-      touch frontend/.env
-      ```
+```bash
+cat backend/.env.example > backend/.env
+```
 
-    - Copy the contents from the template file into your new local environment file:
+#### Frontend Environment File
 
-      ```bash
-      cat frontend/.env.example > frontend/.env
-      ```
+```bash
+touch frontend/.env
+```
 
-    Please note you need to restart the application in order to apply any `.env` file changes.
+Copy the contents from the template file into your new local environment file:
 
-1. **Configure Environment Variables**:
+```bash
+cat frontend/.env.example > frontend/.env
+```
+
+### Important Notes
+
+Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
+
+#### Steps to Save `.env` Files in UTF-8 Format in VS Code:
+
+1. Open the `.env` file in Visual Studio Code.
+2. Click on the encoding information in the bottom-right corner of the window.
+3. Select **"Save with Encoding"**.
+4. Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
+
+**Note**: You need to restart the application to apply any `.env` file changes.
+
+1.  **Configure Environment Variables**:
+
     - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
 
       ```plaintext
       DJANGO_CONFIGURATION=Local
       ```
 
-1. **Set Up Algolia**:
+1.  **Set Up Algolia**:
+
     - Go to [Algolia](https://www.algolia.com/) and create a free account.
     - After creating an account, create an Algolia app.
     - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
@@ -98,7 +115,8 @@ Follow these steps to set up the OWASP Nest application:
 
     - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
-1. **Run the Application**:
+1.  **Run the Application**:
+
     - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
 
       ```bash
@@ -108,21 +126,23 @@ Follow these steps to set up the OWASP Nest application:
     - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
     - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
 
-1. **Load Initial Data**:
+1.  **Load Initial Data**:
+
     - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
     ```bash
     make load-data
     ```
 
-1. **Index Data**:
+1.  **Index Data**:
+
     - In the same terminal session, run the following command to index the data:
 
       ```bash
       make index-data
       ```
 
-1. **Verify API Endpoints**:
+1.  **Verify API Endpoints**:
     - Check that the data is available via these API endpoints:
       - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
       - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
@@ -134,28 +154,32 @@ Follow these steps to set up the OWASP Nest application:
 If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 
 1. **Create a Super User**:
-    - Run the following command to create a super user for accessing the admin interface:
 
-      ```bash
-      make setup
-      ```
+   - Run the following command to create a super user for accessing the admin interface:
+
+     ```bash
+     make setup
+     ```
 
 1. **Generate a GitHub Personal Access Token**:
-    - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+
+   - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
 1. **Update Environment Variables with GitHub Token**:
-    - Open `backend/.env` again and update it with your GitHub token:
 
-      ```plaintext
-      GITHUB_TOKEN=<your-github-token>
-      ```
+   - Open `backend/.env` again and update it with your GitHub token:
+
+     ```plaintext
+     GITHUB_TOKEN=<your-github-token>
+     ```
 
 1. **Sync Local Database Data**:
-    - Now you should be able to run the following command to sync your local database data with GitHub:
 
-      ```bash
-      make sync-data
-      ```
+   - Now you should be able to run the following command to sync your local database data with GitHub:
+
+     ```bash
+     make sync-data
+     ```
 
 #### NestBot Development
 
@@ -166,44 +190,47 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 To setup NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
-    - Go to [ngrok](https://ngrok.com/) and create a free account.
-    - Install and configure ngrok on your machine using these [instructions](https://ngrok.com/docs/getting-started/#step-1-install)
-    - Create your static domain by simply going to [ngrok domains](https://dashboard.ngrok.com/domains)
-    - Run the following commands to edit ngrok configuration:
 
-      ```bash
-      ngrok config edit
-      ```
+   - Go to [ngrok](https://ngrok.com/) and create a free account.
+   - Install and configure ngrok on your machine using these [instructions](https://ngrok.com/docs/getting-started/#step-1-install)
+   - Create your static domain by simply going to [ngrok domains](https://dashboard.ngrok.com/domains)
+   - Run the following commands to edit ngrok configuration:
 
-      ```plaintext
-      agent:
-          authtoken: <your-auth-token>
-      tunnels:
-          NestBot:
-            addr: 8000
-            proto: http
-            hostname: <your-static-domain>
-      ```
+     ```bash
+     ngrok config edit
+     ```
 
-    - Now ngrok is all set, you access your local setup over internet, running the following command:
+     ```plaintext
+     agent:
+         authtoken: <your-auth-token>
+     tunnels:
+         NestBot:
+           addr: 8000
+           proto: http
+           hostname: <your-static-domain>
+     ```
 
-      ```bash
-      ngrok start NestBot
-      ```
+   - Now ngrok is all set, you access your local setup over internet, running the following command:
+
+     ```bash
+     ngrok start NestBot
+     ```
 
 1. **Update environment Variables with your NestBot Configuration**:
-    - Update `backend/.env` with your Slack application tokens:
-      - Bot User OAuth Token from `Settings -- Install App -- OAuth Tokens` section
-      - Signing Secret from `Settings -- Basic Information -- App Credentials` section
 
-      ```plaintext
-      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
-      DJANGO_SLACK_SIGNING_SECRET=<your-slack-signing-secret>
-      ```
+   - Update `backend/.env` with your Slack application tokens:
+
+     - Bot User OAuth Token from `Settings -- Install App -- OAuth Tokens` section
+     - Signing Secret from `Settings -- Basic Information -- App Credentials` section
+
+     ```plaintext
+     DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
+     DJANGO_SLACK_SIGNING_SECRET=<your-slack-signing-secret>
+     ```
 
 1. **Set up Slack application**:
-    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
-    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
+   - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
 ## Code Quality Checks
 
@@ -302,6 +329,7 @@ git checkout -b feature/my-feature-name
   - Restart the application with `make run` and verify the error is resolved.
 
   Tips:
+
   - Ensure consistent file encoding using a code editor or linter.
   - If the issue persists, check the project's documentation or issue tracker.
 
