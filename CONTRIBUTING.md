@@ -38,12 +38,11 @@ Before contributing, ensure you have the following installed:
 Follow these steps to set up the OWASP Nest application:
 
 1. **Clone the Repository**:
+    - Clone the repository code from your GitHub account using the following command:
 
-   - Clone the repository code from your GitHub account using the following command:
-
-     ```bash
-     git clone https://github.com/<your-account>/<nest-fork>
-     ```
+      ```bash
+      git clone https://github.com/<your-account>/<nest-fork>
+      ```
 
 1. **Create Environment Files**:
 
@@ -71,19 +70,11 @@ Follow these steps to set up the OWASP Nest application:
      cat frontend/.env.example > frontend/.env
      ```
 
-### Important Note
-
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
 
-#### Steps to Save `.env` Files in UTF-8 Format in VS Code:
+**Please note you need to restart the application in order to apply any `.env` file changes.**
 
-1. Open the `.env` file in Visual Studio Code.
-2. Click on the encoding information in the bottom-right corner of the window.
-3. Select **"Save with Encoding"**.
-4. Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
-   Please note you need to restart the application in order to apply any `.env` file changes.
-
-5. **Configure Environment Variables**:
+1. **Configure Environment Variables**:
 
    - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
 
@@ -91,11 +82,11 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      DJANGO_CONFIGURATION=Local
      ```
 
-6. **Set Up Algolia**:
+1. **Set Up Algolia**:
 
-   - Go to [Algolia](https://www.algolia.com/) and create a free account.
-   - After creating an account, create an Algolia app.
-   - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
+    - Go to [Algolia](https://www.algolia.com/) and create a free account.
+    - After creating an account, create an Algolia app.
+    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
      ```plaintext
      DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
@@ -112,7 +103,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
-7. **Run the Application**:
+1. **Run the Application**:
 
    - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
 
@@ -123,7 +114,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
    - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
 
-8. **Load Initial Data**:
+1. **Load Initial Data**:
 
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
@@ -131,7 +122,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    make load-data
    ```
 
-9. **Index Data**:
+1. **Index Data**:
 
    - In the same terminal session, run the following command to index the data:
 
@@ -139,7 +130,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      make index-data
      ```
 
-10. **Verify API Endpoints**:
+1. **Verify API Endpoints**:
     - Check that the data is available via these API endpoints:
       - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
       - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
@@ -322,13 +313,12 @@ git checkout -b feature/my-feature-name
 - **"Unexpected character" error during application execution or Docker image building**
   This error is usually caused by incorrect encoding of `.env` files.
 
-  - Open the `.env` files in a text editor (e.g., VS Code) and save them as "UTF-8 without BOM."
+  - Open the `.env` files in a text editor (e.g., VS Code) and save them as "UTF-8 without BOM":
+    - Open the `.env` file in Visual Studio Code.
+    - Click on the encoding information in the bottom-right corner of the window.
+    - Select **"Save with Encoding"**.
+    - Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
   - Restart the application with `make run` and verify the error is resolved.
-
-  Tips:
-
-  - Ensure consistent file encoding using a code editor or linter.
-  - If the issue persists, check the project's documentation or issue tracker.
 
 ## Code of Conduct
 

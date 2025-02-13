@@ -11,7 +11,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
             href={`https://github.com/${issue.repository.ownerKey}/${issue.repository.key}/issues/${issue.number}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-bold text-black underline decoration-dotted dark:text-white hover:cursor-pointer"
+            className="font-bold text-black underline decoration-dotted hover:cursor-pointer dark:text-white"
           >
             {issue.title}
           </a>
