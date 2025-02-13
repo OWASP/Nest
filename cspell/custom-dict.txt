@@ -60,6 +60,7 @@ slackbot
 SLF
 Truncator
 tsc
+usefixtures
 Whistleblower
 winsrdf
 wsgi
