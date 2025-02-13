@@ -6,6 +6,7 @@ from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.utils import get_events_data
+from apps.slack.utils import get_text
 
 COMMAND = "/events"
 
@@ -67,7 +68,9 @@ def events_handler(ack, command, client):
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(
-        channel=conversation["channel"]["id"], text="Upcoming OWASP Events", blocks=blocks
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
     )
 
 

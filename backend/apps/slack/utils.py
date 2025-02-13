@@ -1,6 +1,7 @@
 """Slack app utils."""
 
 import logging
+import re
 from functools import lru_cache
 from html import escape as escape_html
 from urllib.parse import urljoin
@@ -11,7 +12,7 @@ import yaml
 from lxml import html
 from requests.exceptions import RequestException
 
-from apps.common.constants import OWASP_NEWS_URL
+from apps.common.constants import NL, OWASP_NEWS_URL
 
 logger = logging.getLogger(__name__)
 
@@ -108,3 +109,53 @@ def get_events_data():
     except Exception as e:
         logger.exception("Failed to fetch events data via GraphQL", extra={"error": str(e)})
         return None
+
+def get_text(blocks):
+    """Convert blocks to plain text."""
+    text = []
+
+    for block in blocks:
+        match block.get("type"):
+            case "section":
+                if "text" in block and block["text"].get("type") == "mrkdwn":
+                    text.append(strip_markdown(block["text"]["text"]))
+                elif "fields" in block:
+                    text.append(
+                        NL.join(
+                            strip_markdown(field["text"])
+                            for field in block["fields"]
+                            if field.get("type") == "mrkdwn"
+                        )
+                    )
+            case "divider":
+                text.append("---")
+            case "context":
+                text.append(
+                    NL.join(
+                        strip_markdown(element["text"])
+                        for element in block["elements"]
+                        if element.get("type") == "mrkdwn"
+                    )
+                )
+            case "actions":
+                text.append(
+                    NL.join(
+                        strip_markdown(element["text"]["text"])
+                        for element in block["elements"]
+                        if element.get("type") == "button"
+                    )
+                )
+            # TODO(arkid15r): consider removing this.
+            case "image":
+                text.append(f"Image: {block.get('image_url', '')}")
+            case "header":
+                if "text" in block and block["text"].get("type") == "plain_text":
+                    text.append(block["text"]["text"])
+
+    return NL.join(text).strip()
+
+
+def strip_markdown(text):
+    """Strip markdown formatting."""
+    slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
+    return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")

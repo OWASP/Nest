@@ -1,14 +1,11 @@
 """OWASP app chapter index."""
 
-from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
-
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT
+from apps.common.index import IndexBase, register
 from apps.owasp.models.chapter import Chapter
 
 
 @register(Chapter)
-class ChapterIndex(AlgoliaIndex):
+class ChapterIndex(IndexBase):
     """Chapter index."""
 
     index_name = "chapters"
@@ -67,9 +64,8 @@ class ChapterIndex(AlgoliaIndex):
 
     should_index = "is_indexable"
 
-    def get_queryset(self):
-        """Get queryset."""
-        qs = Chapter.active_chapters.select_related(
+    def get_entities(self):
+        """Get entities for indexing."""
+        return Chapter.active_chapters.select_related(
             "owasp_repository",
         )
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs

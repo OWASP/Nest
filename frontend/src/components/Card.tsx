@@ -43,7 +43,7 @@ const Card = ({
 
   return (
     <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
-      <div className="flex w-full flex-col items-start gap-4 pt-2 sm:flex-row sm:items-center sm:gap-6 md:pt-0">
+      <div className="mt-2 flex w-full flex-col items-start gap-4 pt-2 sm:flex-col sm:gap-4 md:pt-0">
         <div className="flex items-center gap-3">
           {/* Display project level badge (if available) */}
           {level && (
@@ -78,24 +78,19 @@ const Card = ({
           </Link>
         </div>
         {/* Icons associated with the project */}
-        <div className="flex min-w-[30%] flex-grow flex-row items-center justify-end overflow-auto">
-          {icons &&
-            Object.keys(Icons).map((key, index) =>
+        {icons && Object.keys(Icons).some((key) => icons[key]) ? (
+          <div className="-ml-1.5 flex flex-grow">
+            {Object.keys(Icons).map((key, index) =>
               icons[key] ? (
                 <DisplayIcon
                   key={`${key}-${index}`}
                   item={key}
-                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))} // only pass in truthy meta data
-                  idx={
-                    Object.keys(icons).findIndex((e) => e === key) ===
-                    Object.keys(icons).filter((key) => icons[key]).length - 1
-                      ? -1
-                      : Object.keys(icons).findIndex((e) => e === key)
-                  }
+                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))}
                 />
               ) : null
             )}
-        </div>
+          </div>
+        ) : null}
       </div>
       {/* Link to project name if provided */}
       {projectName && (

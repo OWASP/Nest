@@ -1,8 +1,10 @@
 """OWASP GraphQL queries."""
 
-from apps.owasp.graphql.queries.event import EventQuery
-from apps.owasp.graphql.queries.project import ProjectQuery
+
+from .chapter import ChapterQuery
+from .committee import CommitteeQuery
+from .project import ProjectQuery
 
 
-class OwaspQuery(ProjectQuery, EventQuery):
+class OwaspQuery(ChapterQuery, CommitteeQuery, EventQuery, ProjectQuery):
     """OWASP queries."""

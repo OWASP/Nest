@@ -1,0 +1,10 @@
+{
+  "projects": [
+    "www-project-bug-logging-tool",
+    "www-project-devsecops-maturity-model",
+    "www-project-juice-shop",
+    "www-project-nest",
+    "www-project-nettacker"
+  ],
+  "tags": ["gsoc2025"]
+}

@@ -106,7 +106,7 @@ Follow these steps to set up the OWASP Nest application:
       ```
 
     - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
-    - Please note as we use containerazed approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
+    - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
 
 1. **Load Initial Data**:
     - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
@@ -185,7 +185,7 @@ To setup NestBot development environment, follow these steps:
             hostname: <your-static-domain>
       ```
 
-    - Now ngrok is all set, you access your local setup over internet, running the follwing command:
+    - Now ngrok is all set, you access your local setup over internet, running the following command:
 
       ```bash
       ngrok start NestBot

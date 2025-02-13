@@ -32,7 +32,13 @@ const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel,
     </TooltipWrapper>
   ) : (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
-      <Button onClick={onClick} className={baseStyles} aria-label={tooltipLabel}>
+      <Button
+        focusVisibleRing={'none'}
+        focusRingColor={'currentBg'}
+        onClick={onClick}
+        className={baseStyles}
+        aria-label={tooltipLabel}
+      >
         {children}
       </Button>
     </TooltipWrapper>

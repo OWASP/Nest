@@ -1,4 +1,4 @@
-"""OWASP app commettee model."""
+"""OWASP app committee model."""
 
 from functools import lru_cache
 

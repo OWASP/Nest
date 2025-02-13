@@ -11,7 +11,7 @@ from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
-from apps.owasp.models.managers.chapter import ActiveChaptertManager
+from apps.owasp.models.managers.chapter import ActiveChapterManager
 from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 
 
@@ -25,7 +25,7 @@ class Chapter(
     """Chapter model."""
 
     objects = models.Manager()
-    active_chapters = ActiveChaptertManager()
+    active_chapters = ActiveChapterManager()
 
     class Meta:
         db_table = "owasp_chapters"

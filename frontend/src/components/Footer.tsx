@@ -1,3 +1,4 @@
+import { Button, Link } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useCallback } from 'react'
@@ -21,7 +22,7 @@ export default function Footer() {
           {/* Iterate over footerSections to render each section */}
           {footerSections.map((section: Section) => (
             <div key={section.title} className="space-y-4">
-              <button
+              <Button
                 onClick={() => toggleSection(section.title)}
                 className="flex w-full items-center justify-between text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
                 aria-expanded={openSection === section.title}
@@ -36,7 +37,7 @@ export default function Footer() {
                     <FontAwesomeIcon icon={faChevronDown} className="h-4 w-4" />
                   )}
                 </span>
-              </button>
+              </Button>
               <ul
                 id={`footer-section-${section.title}`}
                 className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
@@ -49,13 +50,13 @@ export default function Footer() {
                     {link.isSpan ? (
                       <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                     ) : (
-                      <a
+                      <Link
                         target="_blank"
                         className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                         href={link.href}
                       >
                         {link.text}
-                      </a>
+                      </Link>
                     )}
                   </li>
                 ))}
