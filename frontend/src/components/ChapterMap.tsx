@@ -1,5 +1,5 @@
 import L from 'leaflet'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
@@ -14,6 +14,15 @@ const ChapterMap = ({
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
+
+  const normalizedData = useMemo(() => {
+    return geoLocData.map((chapter) => ({
+      lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
+      lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
+      key: chapter.key,
+      name: chapter.name,
+    }))
+  }, [geoLocData])
 
   //for reference: https://leafletjs.com/reference.html#map-example
   useEffect(() => {
@@ -44,8 +53,7 @@ const ChapterMap = ({
 
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
-    geoLocData.forEach((chapter) => {
-      if (chapter.geoLocation) {
+    normalizedData.forEach((chapter) => {
         const markerIcon = new L.Icon({
           iconAnchor: [12, 41], // Anchor point
           iconRetinaUrl: '/img/marker-icon-2x.png',
@@ -55,7 +63,7 @@ const ChapterMap = ({
           shadowSize: [41, 41], // Shadow size
           shadowUrl: '/img/marker-shadow.png',
         })
-        const marker = L.marker([chapter.geoLocation.lat, chapter.geoLocation.lng], {
+        const marker = L.marker([chapter.lat, chapter.lng], {
           icon: markerIcon,
         })
         const popup = L.popup()
@@ -68,8 +76,7 @@ const ChapterMap = ({
         popup.setContent(popupContent)
         marker.bindPopup(popup)
         markerClusterGroup.addLayer(marker)
-        bounds.push([chapter.geoLocation.lat, chapter.geoLocation.lng])
-      }
+        bounds.push([chapter.lat, chapter.lng])
     })
 
     map.addLayer(markerClusterGroup)
@@ -77,7 +84,7 @@ const ChapterMap = ({
     if (bounds.length > 0) {
       map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
     }
-  }, [geoLocData])
+  }, [normalizedData])
 
   return <div id="chapter-map" className="rounded-2xl" style={style} />
 }
