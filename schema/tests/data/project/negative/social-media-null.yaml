@@ -9,8 +9,6 @@ level: 2
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 social_media:
-  - platform: youtube
-    url: ''
 sponsors:
   - description: Sponsor 1 description
     logo: https://sponsor1.com/logo.png

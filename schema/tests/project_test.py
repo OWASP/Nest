@@ -72,9 +72,11 @@ def test_positive(project_schema):
             "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
         ),
         ("repositories-null.yaml", "None is not of type 'array'"),
+        ("social-media-empty.yaml", "[] should be non-empty"),
+        ("social-media-null.yaml", "None is not of type 'array'"),
         (
             "social-media-platform-invalid.yaml",
-            "'bitcoin' is not one of ['linkedin', 'x', 'youtube', 'bluesky']",
+            "'bitcoin' is not one of ['bluesky', 'linkedin', 'x', 'youtube']",
         ),
         ("social-media-url-empty.yaml", "'' is not a 'uri'"),
         ("social-media-url-null.yaml", "None is not of type 'string'"),
