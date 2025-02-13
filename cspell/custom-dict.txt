@@ -14,6 +14,7 @@ corsheaders
 csrfguard
 csrfprotector
 cva
+dismissable
 dsn
 env
 GBP
@@ -55,6 +56,8 @@ rsc
 RUF
 saft
 samm
+seo
+SEO
 slackbot
 SLF
 Truncator

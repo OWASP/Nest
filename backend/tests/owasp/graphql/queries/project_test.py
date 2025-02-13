@@ -50,7 +50,7 @@ class TestProjectQuery:
                 result = ProjectQuery.resolve_project(None, mock_info, key="test-project")
 
                 assert result == mock_project
-                mock_get.assert_called_once_with(key="test-project")
+                mock_get.assert_called_once_with(key="www-project-test-project")
 
         def test_resolve_project_not_found(self, mock_info):
             """Test resolving a non-existent project."""
@@ -60,4 +60,4 @@ class TestProjectQuery:
                 result = ProjectQuery.resolve_project(None, mock_info, key="non-existent")
 
                 assert result is None
-                mock_get.assert_called_once_with(key="non-existent")
+                mock_get.assert_called_once_with(key="www-project-non-existent")

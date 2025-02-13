@@ -1,9 +1,9 @@
 import { Link } from '@chakra-ui/react'
 import { memo } from 'react'
-import { topContributorsType } from 'types/contributor'
+import { TopContributorsTypeAlgolia } from 'types/contributor'
 import { Tooltip } from 'components/ui/tooltip'
 
-const ContributorAvatar = memo(({ contributor }: { contributor: topContributorsType }) => {
+const ContributorAvatar = memo(({ contributor }: { contributor: TopContributorsTypeAlgolia }) => {
   const displayName = contributor.name || contributor.login
 
   return (
