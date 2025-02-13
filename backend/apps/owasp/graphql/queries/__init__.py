@@ -1,7 +1,9 @@
 """OWASP GraphQL queries."""
 
-from apps.owasp.graphql.queries.project import ProjectQuery
+from .chapter import ChapterQuery
+from .committee import CommitteeQuery
+from .project import ProjectQuery
 
 
-class OwaspQuery(ProjectQuery):
+class OwaspQuery(ChapterQuery, CommitteeQuery, ProjectQuery):
     """OWASP queries."""

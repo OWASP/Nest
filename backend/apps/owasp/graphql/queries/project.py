@@ -18,6 +18,6 @@ class ProjectQuery(BaseQuery):
     def resolve_project(root, info, key):
         """Resolve project."""
         try:
-            return Project.objects.get(key=key)
+            return Project.objects.get(key=f"www-project-{key}")
         except Project.DoesNotExist:
             return None

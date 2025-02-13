@@ -4,9 +4,7 @@
     "www-project-devsecops-maturity-model",
     "www-project-juice-shop",
     "www-project-nest",
-    "www-project-nettacker",
-    "www-project-owtf",
-    "www-project-securecodebox"
+    "www-project-nettacker"
   ],
   "tags": ["gsoc2025"]
 }

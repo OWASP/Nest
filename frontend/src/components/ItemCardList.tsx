@@ -1,6 +1,21 @@
+import { JSX } from 'react'
+import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import SecondaryCard from './SecondaryCard'
 
-const ItemCardList = ({ title, data, renderDetails }) => (
+const ItemCardList = ({
+  title,
+  data,
+  renderDetails,
+}: {
+  title: string
+  data: ProjectReleaseType[] | ProjectIssuesType[]
+  renderDetails: (item: {
+    createdAt: string
+    commentsCount: number
+    publishedAt: string
+    tagName: string
+  }) => JSX.Element
+}) => (
   <SecondaryCard title={title}>
     {data && data.length > 0 ? (
       <div className="h-64 overflow-y-auto pr-2">
