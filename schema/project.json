@@ -194,11 +194,10 @@
       ],
       "type": "string"
     },
-    "mailing_list": {
+    "mailing-list": {
       "description": "The optional mailing list associated with the project.",
-      "format": "url",
-      "type": "string",
-      "minLength" : 4
+      "format": "uri",
+      "type": "string"
 },
     "name": {
       "description": "The unique name of the project.",
