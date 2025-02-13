@@ -17,15 +17,13 @@ The project uses a **containerized approach** for both development and productio
 Before contributing, ensure you have the following installed:
 
 1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
-2. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using:
-   - Virtual environment: `pip install pre-commit`
-   - OS package: `apt install pre-commit` (Linux) / `brew install pre-commit` (MacOS)
-   - Any other method depending on your configuration.
-3. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
-   - The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
-   - If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
-   - You must use the WSL terminal (not Windows PowerShell); otherwise, there is no guarantee that the Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running commands—it is not the intended way to run Nest locally.
-   - Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
+1. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using virtual environment with `pip install pre-commit` command, as OS package with `apt install pre-commit` / `brew install pre-commit` or any other method depending on your configuration.
+
+1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+   1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
+      If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
+   1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
 
 ## Starring the Project
 
@@ -39,41 +37,41 @@ Before contributing, ensure you have the following installed:
 
 Follow these steps to set up the OWASP Nest application:
 
-### 1. Clone the Repository
+1. **Clone the Repository**:
 
-Clone the repository code from your GitHub account using the following command:
+   - Clone the repository code from your GitHub account using the following command:
 
-```bash
-git clone https://github.com/<your-account>/<nest-fork>
-```
+     ```bash
+     git clone https://github.com/<your-account>/<nest-fork>
+     ```
 
-### 2. Create Environment Files
+1. **Create Environment Files**:
 
-#### Backend Environment File
+   - Create a local environment file in the `backend` directory:
 
-```bash
-touch backend/.env
-```
+     ```bash
+     touch backend/.env
+     ```
 
-Copy the contents from the template file into your new local environment file:
+   - Copy the contents from the template file into your new local environment file:
 
-```bash
-cat backend/.env.example > backend/.env
-```
+     ```bash
+     cat backend/.env.example > backend/.env
+     ```
 
-#### Frontend Environment File
+   - Create a local environment file in the `frontend` directory:
 
-```bash
-touch frontend/.env
-```
+     ```bash
+     touch frontend/.env
+     ```
 
-Copy the contents from the template file into your new local environment file:
+   - Copy the contents from the template file into your new local environment file:
 
-```bash
-cat frontend/.env.example > frontend/.env
-```
+     ```bash
+     cat frontend/.env.example > frontend/.env
+     ```
 
-### Important Notes
+### Important Note
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
 
@@ -83,66 +81,65 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 2. Click on the encoding information in the bottom-right corner of the window.
 3. Select **"Save with Encoding"**.
 4. Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
+   Please note you need to restart the application in order to apply any `.env` file changes.
 
-**Note**: You need to restart the application to apply any `.env` file changes.
+5. **Configure Environment Variables**:
 
-1.  **Configure Environment Variables**:
+   - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
 
-    - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
+     ```plaintext
+     DJANGO_CONFIGURATION=Local
+     ```
 
-      ```plaintext
-      DJANGO_CONFIGURATION=Local
-      ```
+6. **Set Up Algolia**:
 
-1.  **Set Up Algolia**:
+   - Go to [Algolia](https://www.algolia.com/) and create a free account.
+   - After creating an account, create an Algolia app.
+   - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
-    - Go to [Algolia](https://www.algolia.com/) and create a free account.
-    - After creating an account, create an Algolia app.
-    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
+     ```plaintext
+     DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
+     DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
+     DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
+     ```
 
-      ```plaintext
-      DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
-      DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
-      DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
-      ```
+   - Update your `frontend/.env` file with the following keys from your Algolia app (use **search** API key for frontend):
 
-    - Update your `frontend/.env` file with the following keys from your Algolia app (use **search** API key for frontend):
+     ```plaintext
+     VITE_ALGOLIA_APP_ID=<your-algolia-application-id>
+     VITE_ALGOLIA_SEARCH_API_KEY=<your-algolia-search-api-key>
+     ```
 
-      ```plaintext
-      VITE_ALGOLIA_APP_ID=<your-algolia-application-id>
-      VITE_ALGOLIA_SEARCH_API_KEY=<your-algolia-search-api-key>
-      ```
+   - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
-    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
+7. **Run the Application**:
 
-1.  **Run the Application**:
+   - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
 
-    - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
+     ```bash
+     make run
+     ```
 
-      ```bash
-      make run
-      ```
+   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
+   - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
 
-    - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
-    - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
+8. **Load Initial Data**:
 
-1.  **Load Initial Data**:
+   - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
-    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
+   ```bash
+   make load-data
+   ```
 
-    ```bash
-    make load-data
-    ```
+9. **Index Data**:
 
-1.  **Index Data**:
+   - In the same terminal session, run the following command to index the data:
 
-    - In the same terminal session, run the following command to index the data:
+     ```bash
+     make index-data
+     ```
 
-      ```bash
-      make index-data
-      ```
-
-1.  **Verify API Endpoints**:
+10. **Verify API Endpoints**:
     - Check that the data is available via these API endpoints:
       - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
       - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
