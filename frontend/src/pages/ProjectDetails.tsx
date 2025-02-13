@@ -73,7 +73,6 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-
     {
       icon: faUsers,
       value: `${project?.contributorsCount || 'No'} Contributor${pluralize(project.contributorsCount)}`,
@@ -94,7 +93,6 @@ const ProjectDetailsPage = () => {
       icon: faExclamationCircle,
       value: `${project?.issuesCount || 'No'} Issue${pluralize(project.issuesCount)}`,
     },
-
   ]
   return (
     <DetailsCard
