@@ -44,7 +44,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         output_dir = Path(options["output_dir"])
-        self.ensure_directory(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         sitemap_files = [
             "sitemap-project.xml",
@@ -84,18 +84,12 @@ class Command(BaseCommand):
         """Generate sitemap for chapters."""
         routes = self.static_routes["chapters"]
         chapters = Chapter.objects.filter(is_active=True)
-
         indexable_chapters = [chapter for chapter in chapters if chapter.is_indexable]
-        chapter_keys = [
-            chapter.key.replace("www-chapter-", "")
-            for chapter in indexable_chapters
-            if chapter.key
-        ]
 
         routes.extend(
             [
-                {"path": f"/chapters/{key}", "changefreq": "weekly", "priority": 0.7}
-                for key in chapter_keys
+                {"path": f"/chapters/{chapter.nest_key}", "changefreq": "weekly", "priority": 0.7}
+                for chapter in indexable_chapters
             ]
         )
 
@@ -107,16 +101,14 @@ class Command(BaseCommand):
         routes = self.static_routes["committees"]
         indexable_committees = Committee.objects.filter(is_active=True)
 
-        committee_keys = [
-            committee.key.replace("www-committee-", "")
-            for committee in indexable_committees
-            if committee.key
-        ]
-
         routes.extend(
             [
-                {"path": f"/committees/{key}", "changefreq": "weekly", "priority": 0.7}
-                for key in committee_keys
+                {
+                    "path": f"/committees/{committee.nest_key}",
+                    "changefreq": "weekly",
+                    "priority": 0.7,
+                }
+                for committee in indexable_committees
             ]
         )
 
@@ -126,18 +118,13 @@ class Command(BaseCommand):
     def generate_user_sitemap(self, output_dir):
         """Generate sitemap for users."""
         routes = self.static_routes["users"]
-
         users = User.objects.all()
-        user_keys = [
-            user.login
-            for user in users
-            if hasattr(user, "is_indexable") and user.is_indexable and user.login
-        ]
+        indexable_users = [user for user in users if user.is_indexable]
 
         routes.extend(
             [
-                {"path": f"/community/users/{key}", "changefreq": "weekly", "priority": 0.7}
-                for key in user_keys
+                {"path": f"/community/users/{user.login}", "changefreq": "weekly", "priority": 0.7}
+                for user in indexable_users
             ]
         )
 
@@ -210,12 +197,6 @@ class Command(BaseCommand):
             f"{chr(10).join(sitemaps)}\n"
             "</sitemapindex>"
         )
-
-    @staticmethod
-    def ensure_directory(directory):
-        """Ensure the output directory exists."""
-        if not directory.exists():
-            directory.mkdir(parents=True)
 
     @staticmethod
     def save_sitemap(content, filepath):
