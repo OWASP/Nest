@@ -36,16 +36,13 @@ class ReleaseType(graphene.ObjectType):
 class UserNode(BaseNode):
     """GitHub user node."""
 
-    # Existing fields
     created_at = graphene.Float()
-    updated_at = graphene.Float()
-    url = graphene.String()
-
-    # New fields for issues and releases
     issues = graphene.List(IssueType)
     issues_count = graphene.Int()
     releases = graphene.List(ReleaseType)
     releases_count = graphene.Int()
+    updated_at = graphene.Float()
+    url = graphene.String()
 
     class Meta:
         model = User
@@ -64,29 +61,29 @@ class UserNode(BaseNode):
         )
 
     def resolve_created_at(self, info):
-        """Resolve user created at."""
+        """Resolve created at."""
         return self.idx_created_at
 
     def resolve_updated_at(self, info):
-        """Resolve user updated at."""
+        """Resolve updated at."""
         return self.idx_updated_at
 
     def resolve_url(self, info):
-        """Resolve user URL."""
+        """Resolve URL."""
         return self.url
 
     def resolve_issues(self, info):
-        """Resolve user issues."""
+        """Resolve issues."""
         return self.idx_issues
 
     def resolve_issues_count(self, info):
-        """Resolve user issues count."""
+        """Resolve issues count."""
         return self.idx_issues_count
 
     def resolve_releases(self, info):
-        """Resolve user releases."""
+        """Resolve releases."""
         return self.idx_releases
 
     def resolve_releases_count(self, info):
-        """Resolve user releases count."""
+        """Resolve releases count."""
         return self.idx_releases_count

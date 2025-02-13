@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
-import { mockUserDetailsData } from '@tests/data/mockUserDetails'
+import { mockUserDetailsData } from '@tests/data/mockUserDetailsData'
 
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),
@@ -48,6 +48,7 @@ describe('UserDetailsPage', () => {
       data: null,
       error: null,
     })
+
     render(<UserDetailsPage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
@@ -58,8 +59,8 @@ describe('UserDetailsPage', () => {
   test('renders user details', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
-      loading: false,
       error: null,
+      loading: false,
     })
 
     // Wait for the loading state to finish
@@ -74,6 +75,7 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText('This is a test user')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
+    expect(screen.getByText(`Joined December 15, 2023`)).toBeInTheDocument()
   })
 
   test('displays GitHub profile link correctly', async () => {

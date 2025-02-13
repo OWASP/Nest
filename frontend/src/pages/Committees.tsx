@@ -1,6 +1,6 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
-import { CommitteeType } from 'types/committee'
+import { CommitteeTypeAlgolia } from 'types/committee'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
@@ -15,12 +15,12 @@ const CommitteesPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<CommitteeType>({
+  } = useSearchPage<CommitteeTypeAlgolia>({
     indexName: 'committees',
     pageTitle: 'OWASP Committees',
   })
   const navigate = useNavigate()
-  const renderCommitteeCard = (committee: CommitteeType) => {
+  const renderCommitteeCard = (committee: CommitteeTypeAlgolia) => {
     const params: string[] = ['updated_at']
     const filteredIcons = getFilteredIcons(committee, params)
     const formattedUrls = handleSocialUrls(committee.related_urls)

@@ -25,8 +25,8 @@ import { ReleaseCard } from 'components/ReleaseCard'
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
-  const [isLoading, setIsLoading] = useState(true)
   const [data, setData] = useState<HeatmapData | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
   const [privateContributor, setPrivateContributor] = useState(false)
