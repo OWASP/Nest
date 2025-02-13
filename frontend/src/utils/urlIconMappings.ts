@@ -5,6 +5,7 @@ import {
   faYoutube,
   faTwitter as faXTwitter,
   faMeetup,
+  faSlack,
 } from '@fortawesome/free-brands-svg-icons'
 import { faGlobe } from '@fortawesome/free-solid-svg-icons'
 
@@ -20,6 +21,7 @@ export const getSocialIcon = (url) => {
   if (hostname.includes('linkedin')) return faLinkedin
   if (hostname.includes('youtube')) return faYoutube
   if (hostname.includes('meetup')) return faMeetup
+  if (hostname.includes('slack')) return faSlack
 
   if (hostname === 'x.com' || hostname.endsWith('.x.com') || hostname.includes('twitter')) {
     return faXTwitter

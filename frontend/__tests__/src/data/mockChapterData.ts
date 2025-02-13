@@ -24,6 +24,10 @@ export const mockChapterData = {
       url: 'https://owasp.org/www-chapter-nagoya',
       objectID: '539',
       is_active: true,
+      _geoloc: {
+        lat: 35.1815,
+        lng: 136.9066,
+      },
     },
   ],
 }

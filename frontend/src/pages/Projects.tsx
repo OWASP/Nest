@@ -1,6 +1,6 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useNavigate } from 'react-router-dom'
-import { project } from 'types/project'
+import { ProjectTypeAlgolia } from 'types/project'
 import { level } from 'utils/data'
 import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
@@ -21,7 +21,7 @@ const ProjectsPage = () => {
     handlePageChange,
     handleSortChange,
     handleOrderChange,
-  } = useSearchPage<project>({
+  } = useSearchPage<ProjectTypeAlgolia>({
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
@@ -30,7 +30,7 @@ const ProjectsPage = () => {
   })
 
   const navigate = useNavigate()
-  const renderProjectCard = (project: project) => {
+  const renderProjectCard = (project: ProjectTypeAlgolia) => {
     const params: string[] = ['forks_count', 'stars_count', 'contributors_count']
     const filteredIcons = getFilteredIcons(project, params)
 
