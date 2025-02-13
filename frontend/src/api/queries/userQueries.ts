@@ -11,14 +11,14 @@ export const GET_USER_DATA = gql`
       followersCount
       followingCount
       issues {
-        title
-        number
-        createdAt
         commentsCount
+        createdAt
+        number
         repository {
           key
           ownerKey
         }
+        title
       }
       issuesCount
       location
@@ -26,14 +26,14 @@ export const GET_USER_DATA = gql`
       name
       publicRepositoriesCount
       releases {
-        name
-        tagName
-        publishedAt
         isPreRelease
+        name
+        publishedAt
         repository {
           key
           ownerKey
         }
+        tagName
       }
       releasesCount
       url

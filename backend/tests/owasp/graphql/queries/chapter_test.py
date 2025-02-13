@@ -27,35 +27,36 @@ class TestChapterQuery:
         assert isinstance(key_arg.type, NonNull)
         assert key_arg.type.of_type == String
 
-    class TestChapterResolution:
-        """Test cases for chapter resolution."""
 
-        @pytest.fixture()
-        def mock_chapter(self):
-            """Chapter mock fixture."""
-            return Mock(spec=Chapter)
+class TestChapterResolution:
+    """Test cases for chapter resolution."""
 
-        @pytest.fixture()
-        def mock_info(self):
-            """GraphQL info mock fixture."""
-            return Mock()
+    @pytest.fixture()
+    def mock_chapter(self):
+        """Chapter mock fixture."""
+        return Mock(spec=Chapter)
 
-        def test_resolve_chapter_existing(self, mock_chapter, mock_info):
-            """Test resolving an existing chapter."""
-            with patch("apps.owasp.models.chapter.Chapter.objects.get") as mock_get:
-                mock_get.return_value = mock_chapter
+    @pytest.fixture()
+    def mock_info(self):
+        """GraphQL info mock fixture."""
+        return Mock()
 
-                result = ChapterQuery.resolve_chapter(None, mock_info, key="test-chapter")
+    def test_resolve_chapter_existing(self, mock_chapter, mock_info):
+        """Test resolving an existing chapter."""
+        with patch("apps.owasp.models.chapter.Chapter.objects.get") as mock_get:
+            mock_get.return_value = mock_chapter
 
-                assert result == mock_chapter
-                mock_get.assert_called_once_with(key="www-chapter-test-chapter")
+            result = ChapterQuery.resolve_chapter(None, mock_info, key="test-chapter")
 
-        def test_resolve_chapter_not_found(self, mock_info):
-            """Test resolving a non-existent chapter."""
-            with patch("apps.owasp.models.chapter.Chapter.objects.get") as mock_get:
-                mock_get.side_effect = Chapter.DoesNotExist
+            assert result == mock_chapter
+            mock_get.assert_called_once_with(key="www-chapter-test-chapter")
 
-                result = ChapterQuery.resolve_chapter(None, mock_info, key="non-existent")
+    def test_resolve_chapter_not_found(self, mock_info):
+        """Test resolving a non-existent chapter."""
+        with patch("apps.owasp.models.chapter.Chapter.objects.get") as mock_get:
+            mock_get.side_effect = Chapter.DoesNotExist
 
-                assert result is None
-                mock_get.assert_called_once_with(key="www-chapter-non-existent")
+            result = ChapterQuery.resolve_chapter(None, mock_info, key="non-existent")
+
+            assert result is None
+            mock_get.assert_called_once_with(key="www-chapter-non-existent")

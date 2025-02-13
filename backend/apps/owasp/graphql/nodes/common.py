@@ -19,21 +19,21 @@ class GenericEntityNode(BaseNode):
         abstract = True
 
     def resolve_url(self, info):
-        """Resolve entity URL."""
+        """Resolve URL."""
         return self.idx_url
 
     def resolve_updated_at(self, info):
-        """Resolve entity updated at timestamp."""
+        """Resolve updated at."""
         return self.idx_updated_at
 
     def resolve_related_urls(self, info):
-        """Resolve entity related URLs."""
+        """Resolve related URLs."""
         return self.idx_related_urls
 
     def resolve_leaders(self, info):
-        """Resolve entity leaders."""
+        """Resolve leaders."""
         return self.idx_leaders
 
     def resolve_top_contributors(self, info):
-        """Resolve entity top contributors."""
-        return [RepositoryContributorNode(**repo) for repo in self.idx_top_contributors]
+        """Resolve top contributors."""
+        return [RepositoryContributorNode(**tc) for tc in self.idx_top_contributors]

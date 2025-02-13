@@ -73,17 +73,17 @@ class UserNode(BaseNode):
         return self.url
 
     def resolve_issues(self, info):
-        """Resolve user issues."""
+        """Resolve issues."""
         return self.idx_issues
 
     def resolve_issues_count(self, info):
-        """Resolve user issues count."""
+        """Resolve issues count."""
         return self.idx_issues_count
 
     def resolve_releases(self, info):
-        """Resolve user releases."""
+        """Resolve releases."""
         return self.idx_releases
 
     def resolve_releases_count(self, info):
-        """Resolve user releases count."""
+        """Resolve releases count."""
         return self.idx_releases_count

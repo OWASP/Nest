@@ -101,12 +101,12 @@ class TestProjectNode:
             "leaders",
             "recent_issues",
             "recent_releases",
-            "repositories",
             "repositories_count",
+            "repositories",
+            "top_contributors",
             "topics",
             "updated_at",
             "url",
-            "top_contributors",
         }
         node_fields = node_fields - custom_fields
 

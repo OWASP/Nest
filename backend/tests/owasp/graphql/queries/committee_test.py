@@ -27,35 +27,36 @@ class TestCommitteeQuery:
         assert isinstance(key_arg.type, NonNull)
         assert key_arg.type.of_type == String
 
-    class TestCommitteeResolution:
-        """Test cases for committee resolution."""
 
-        @pytest.fixture()
-        def mock_committee(self):
-            """Committee mock fixture."""
-            return Mock(spec=Committee)
+class TestCommitteeResolution:
+    """Test cases for committee resolution."""
 
-        @pytest.fixture()
-        def mock_info(self):
-            """GraphQL info mock fixture."""
-            return Mock()
+    @pytest.fixture()
+    def mock_committee(self):
+        """Committee mock fixture."""
+        return Mock(spec=Committee)
 
-        def test_resolve_committee_existing(self, mock_committee, mock_info):
-            """Test resolving an existing committee."""
-            with patch("apps.owasp.models.committee.Committee.objects.get") as mock_get:
-                mock_get.return_value = mock_committee
+    @pytest.fixture()
+    def mock_info(self):
+        """GraphQL info mock fixture."""
+        return Mock()
 
-                result = CommitteeQuery.resolve_committee(None, mock_info, key="test-committee")
+    def test_resolve_committee_existing(self, mock_committee, mock_info):
+        """Test resolving an existing committee."""
+        with patch("apps.owasp.models.committee.Committee.objects.get") as mock_get:
+            mock_get.return_value = mock_committee
 
-                assert result == mock_committee
-                mock_get.assert_called_once_with(key="www-committee-test-committee")
+            result = CommitteeQuery.resolve_committee(None, mock_info, key="test-committee")
 
-        def test_resolve_committee_not_found(self, mock_info):
-            """Test resolving a non-existent committee."""
-            with patch("apps.owasp.models.committee.Committee.objects.get") as mock_get:
-                mock_get.side_effect = Committee.DoesNotExist
+            assert result == mock_committee
+            mock_get.assert_called_once_with(key="www-committee-test-committee")
 
-                result = CommitteeQuery.resolve_committee(None, mock_info, key="non-existent")
+    def test_resolve_committee_not_found(self, mock_info):
+        """Test resolving a non-existent committee."""
+        with patch("apps.owasp.models.committee.Committee.objects.get") as mock_get:
+            mock_get.side_effect = Committee.DoesNotExist
 
-                assert result is None
-                mock_get.assert_called_once_with(key="www-committee-non-existent")
+            result = CommitteeQuery.resolve_committee(None, mock_info, key="non-existent")
+
+            assert result is None
+            mock_get.assert_called_once_with(key="www-committee-non-existent")

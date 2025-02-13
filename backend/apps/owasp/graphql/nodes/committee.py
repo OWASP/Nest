@@ -24,25 +24,25 @@ class CommitteeNode(GenericEntityNode):
         )
 
     def resolve_created_at(self, info):
-        """Resolve project created at."""
+        """Resolve created at."""
         return self.idx_created_at
 
     def resolve_contributors_count(self, info):
-        """Resolve project contributors count."""
+        """Resolve contributors count."""
         return self.owasp_repository.contributors_count
 
     def resolve_forks_count(self, info):
-        """Resolve project forks count."""
+        """Resolve forks count."""
         return self.owasp_repository.forks_count
 
-    def resolve_stars_count(self, info):
-        """Resolve project stars count."""
-        return self.owasp_repository.stars_count
+    def resolve_issues_count(self, info):
+        """Resolve issues count."""
+        return self.owasp_repository.open_issues_count
 
     def resolve_repositories_count(self, info):
-        """Resolve project repositories count."""
-        return 1  # only one repository per committee
+        """Resolve repositories count."""
+        return 1
 
-    def resolve_issues_count(self, info):
-        """Resolve project issues count."""
-        return self.owasp_repository.open_issues_count
+    def resolve_stars_count(self, info):
+        """Resolve stars count."""
+        return self.owasp_repository.stars_count

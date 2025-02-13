@@ -12,21 +12,21 @@ export const GET_PROJECT_DATA = gql`
       leaders
       level
       name
-      recentReleases {
-        name
-        tagName
-        isPreRelease
-        publishedAt
+      recentIssues {
+        title
+        commentsCount
+        createdAt
         author {
           avatarUrl
           login
           name
         }
       }
-      recentIssues {
-        title
-        commentsCount
-        createdAt
+      recentReleases {
+        name
+        tagName
+        isPreRelease
+        publishedAt
         author {
           avatarUrl
           login

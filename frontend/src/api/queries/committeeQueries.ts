@@ -10,15 +10,15 @@ export const GET_COMMITTEE_DATA = gql`
       leaders
       name
       relatedUrls
+      repositoriesCount
       starsCount
+      summary
       topContributors {
         avatarUrl
         contributionsCount
         login
         name
       }
-      repositoriesCount
-      summary
       updatedAt
       url
     }
