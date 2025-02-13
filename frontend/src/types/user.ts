@@ -1,3 +1,19 @@
+export type user = {
+  avatar_url: string
+  bio: string
+  company: string
+  created_at: number
+  email: string
+  followers_count: number
+  following_count: number
+  key: string
+  location: string
+  login: string
+  name: string
+  objectID: string
+  public_repositories_count: number
+}
+
 export type RepositoryDetails = {
   key: string
   ownerKey: string

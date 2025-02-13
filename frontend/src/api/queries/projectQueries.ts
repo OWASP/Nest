@@ -3,21 +3,30 @@ import { gql } from '@apollo/client'
 export const GET_PROJECT_DATA = gql`
   query GetProject($key: String!) {
     project(key: $key) {
-      recentReleases {
-        name
-        tagName
-        isPreRelease
-        publishedAt
+      contributorsCount
+      forksCount
+      issuesCount
+      isActive
+      key
+      languages
+      leaders
+      level
+      name
+      recentIssues {
+        title
+        commentsCount
+        createdAt
         author {
           avatarUrl
           login
           name
         }
       }
-      recentIssues {
-        title
-        commentsCount
-        createdAt
+      recentReleases {
+        name
+        tagName
+        isPreRelease
+        publishedAt
         author {
           avatarUrl
           login
@@ -34,6 +43,19 @@ export const GET_PROJECT_DATA = gql`
         subscribersCount
         url
       }
+      repositoriesCount
+      starsCount
+      summary
+      topContributors {
+        avatarUrl
+        contributionsCount
+        login
+        name
+      }
+      topics
+      type
+      updatedAt
+      url
     }
   }
 `
