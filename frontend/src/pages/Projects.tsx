@@ -47,14 +47,14 @@ const ProjectsPage = () => {
 
     return (
       <Card
-        key={project.objectID}
-        title={project.name}
-        url={`/projects/${project.key}`}
-        summary={project.summary}
-        level={level[`${project.level as keyof typeof level}`]}
-        icons={filteredIcons}
-        topContributors={project.top_contributors}
         button={SubmitButton}
+        icons={filteredIcons}
+        key={project.objectID}
+        level={level[`${project.level as keyof typeof level}`]}
+        summary={project.summary}
+        title={project.name}
+        topContributors={project.top_contributors}
+        url={`/projects/${project.key}`}
       />
     )
   }
@@ -62,24 +62,24 @@ const ProjectsPage = () => {
   return (
     <MetadataManager {...METADATA_CONFIG.projects}>
       <SearchPageLayout
-        isLoaded={isLoaded}
-        totalPages={totalPages}
         currentPage={currentPage}
-        searchQuery={searchQuery}
-        indexName="projects"
-        onSearch={handleSearch}
-        onPageChange={handlePageChange}
         empty="No projects found"
+        indexName="projects"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
         searchPlaceholder="Search for OWASP projects..."
+        searchQuery={searchQuery}
         sortChildren={
           <SortBy
-            sortOptions={sortOptionsProject}
-            selectedSortOption={sortBy}
+            onOrderChange={handleOrderChange}
             onSortChange={handleSortChange}
             selectedOrder={order}
-            onOrderChange={handleOrderChange}
+            selectedSortOption={sortBy}
+            sortOptions={sortOptionsProject}
           />
         }
+        totalPages={totalPages}
       >
         {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
       </SearchPageLayout>

@@ -68,14 +68,14 @@ export default function ChapterDetailsPage() {
   return (
     <MetadataManager pageTitle={chapter.name} description={chapter.summary} url={chapter.url}>
       <DetailsCard
-        title={chapter.name}
-        socialLinks={chapter.relatedUrls}
-        is_active={chapter.isActive}
         details={details}
-        summary={chapter.summary}
-        type="chapter"
-        topContributors={chapter.topContributors}
         geolocationData={chapter}
+        is_active={chapter.isActive}
+        socialLinks={chapter.relatedUrls}
+        summary={chapter.summary}
+        title={chapter.name}
+        topContributors={chapter.topContributors}
+        type="chapter"
       />
     </MetadataManager>
   )

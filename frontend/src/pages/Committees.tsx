@@ -54,15 +54,15 @@ const CommitteesPage = () => {
   return (
     <MetadataManager {...METADATA_CONFIG.committees}>
       <SearchPageLayout
-        isLoaded={isLoaded}
-        indexName="committees"
-        totalPages={totalPages}
         currentPage={currentPage}
-        onSearch={handleSearch}
-        searchQuery={searchQuery}
-        onPageChange={handlePageChange}
         empty="No committees found"
+        indexName="committees"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
         searchPlaceholder="Search for OWASP committees..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
       >
         {committees && committees.map(renderCommitteeCard)}
       </SearchPageLayout>

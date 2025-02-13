@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://nest.owasp.dev/sitemap.xml
+Sitemap: https://nest.owasp.org/sitemap.xml

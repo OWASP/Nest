@@ -81,15 +81,15 @@ const ChaptersPage = () => {
   return (
     <MetadataManager {...METADATA_CONFIG.chapters}>
       <SearchPageLayout
-        isLoaded={isLoaded}
-        totalPages={totalPages}
         currentPage={currentPage}
-        searchQuery={searchQuery}
-        indexName="chapters"
-        onSearch={handleSearch}
-        onPageChange={handlePageChange}
-        searchPlaceholder="Search for OWASP chapters..."
         empty="No chapters found"
+        indexName="chapters"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for OWASP chapters..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
       >
         {chapters.length > 0 && (
           <ChapterMap

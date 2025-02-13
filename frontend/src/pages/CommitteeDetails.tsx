@@ -85,13 +85,13 @@ export default function CommitteeDetailsPage() {
   return (
     <MetadataManager pageTitle={committee.name} description={committee.summary} url={committee.url}>
       <DetailsCard
-        title={committee.name}
         details={details}
-        stats={committeeStats}
         socialLinks={committee.relatedUrls}
+        stats={committeeStats}
         summary={committee.summary}
-        type="committee"
+        title={committee.name}
         topContributors={committee.topContributors}
+        type="committee"
       />
     </MetadataManager>
   )

@@ -72,15 +72,15 @@ const ContributePage = () => {
   return (
     <MetadataManager {...METADATA_CONFIG.projectContribute}>
       <SearchPageLayout
-        isLoaded={isLoaded}
-        indexName="issues"
-        totalPages={totalPages}
         currentPage={currentPage}
-        searchQuery={searchQuery}
-        onSearch={handleSearch}
-        onPageChange={handlePageChange}
-        searchPlaceholder="Search for OWASP issues..."
         empty="No issues found"
+        indexName="issues"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for OWASP issues..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
       >
         {issues && issues.map(renderContributeCard)}
       </SearchPageLayout>

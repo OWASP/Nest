@@ -1,37 +1,37 @@
 import React from 'react'
 
 export interface DefaultMetadata {
-  siteName: string
   baseUrl: string
   defaultDescription: string
-  twitterHandle: string
   defaultIcon: string
+  siteName: string
+  twitterHandle: string
 }
 
 export interface PageMetadata {
-  pageTitle: string
   description: string
-  keywords: string[]
   image?: string
+  keywords: string[]
+  pageTitle: string
   type?: string
   url?: string
 }
 
 export interface MetadataConfig {
-  home: PageMetadata
-  projects: PageMetadata
-  committees: PageMetadata
   chapters: PageMetadata
-  users: PageMetadata
+  committees: PageMetadata
+  home: PageMetadata
   projectContribute: PageMetadata
+  projects: PageMetadata
+  users: PageMetadata
 }
 
 export interface MetadataManagerProps {
-  pageTitle: string
+  children?: React.ReactNode
   description?: string
   image?: string
-  url?: string
-  type?: string
   keywords?: string[]
-  children?: React.ReactNode
+  pageTitle: string
+  type?: string
+  url?: string
 }

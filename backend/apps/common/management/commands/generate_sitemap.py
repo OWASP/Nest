@@ -1,4 +1,4 @@
-"""Management command to generate XML sitemaps for the website."""
+"""Management command to generate OWASP Nest sitemap."""
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -6,6 +6,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from apps.common.constants import NL
 from apps.github.models.user import User
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
@@ -13,27 +14,19 @@ from apps.owasp.models.project import Project
 
 
 class Command(BaseCommand):
-    help = "Generate XML sitemaps for the website"
+    help = "Generate sitemap"
 
-    def __init__(self):
-        """Initialize the command with site URL and static routes."""
-        super().__init__()
-        self.site_url = settings.SITE_URL
-        self.static_routes = {
-            "projects": [
-                {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
-                {"path": "/projects/contribute", "changefreq": "daily", "priority": 0.6},
-            ],
-            "chapters": [
-                {"path": "/chapters", "changefreq": "weekly", "priority": 0.8},
-            ],
-            "committees": [
-                {"path": "/committees", "changefreq": "monthly", "priority": 0.8},
-            ],
-            "users": [
-                {"path": "/community/users", "changefreq": "daily", "priority": 0.7},
-            ],
-        }
+    static_routes = {
+        "chapters": [{"path": "/chapters", "changefreq": "weekly", "priority": 0.8}],
+        "committees": [{"path": "/committees", "changefreq": "monthly", "priority": 0.8}],
+        "projects": [
+            {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
+            {"path": "/projects/contribute", "changefreq": "daily", "priority": 0.6},
+        ],
+        "users": [
+            {"path": "/community/users", "changefreq": "daily", "priority": 0.7},
+        ],
+    }
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -47,15 +40,15 @@ class Command(BaseCommand):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         sitemap_files = [
-            "sitemap-project.xml",
-            "sitemap-chapter.xml",
-            "sitemap-committee.xml",
-            "sitemap-user.xml",
+            "sitemap-chapters.xml",
+            "sitemap-committees.xml",
+            "sitemap-projects.xml",
+            "sitemap-users.xml",
         ]
 
-        self.generate_project_sitemap(output_dir)
         self.generate_chapter_sitemap(output_dir)
         self.generate_committee_sitemap(output_dir)
+        self.generate_project_sitemap(output_dir)
         self.generate_user_sitemap(output_dir)
 
         index_content = self.generate_index_sitemap(sitemap_files)
@@ -94,7 +87,7 @@ class Command(BaseCommand):
         )
 
         content = self.generate_sitemap_content(routes)
-        self.save_sitemap(content, output_dir / "sitemap-chapter.xml")
+        self.save_sitemap(content, output_dir / "sitemap-chapters.xml")
 
     def generate_committee_sitemap(self, output_dir):
         """Generate sitemap for committees."""
@@ -113,7 +106,7 @@ class Command(BaseCommand):
         )
 
         content = self.generate_sitemap_content(routes)
-        self.save_sitemap(content, output_dir / "sitemap-committee.xml")
+        self.save_sitemap(content, output_dir / "sitemap-committees.xml")
 
     def generate_user_sitemap(self, output_dir):
         """Generate sitemap for users."""
@@ -129,7 +122,7 @@ class Command(BaseCommand):
         )
 
         content = self.generate_sitemap_content(routes)
-        self.save_sitemap(content, output_dir / "sitemap-user.xml")
+        self.save_sitemap(content, output_dir / "sitemap-users.xml")
 
     def generate_sitemap_content(self, routes):
         """Generate sitemap content for a set of routes."""
@@ -138,7 +131,7 @@ class Command(BaseCommand):
 
         for route in routes:
             url_entry = {
-                "loc": f"{self.site_url}{route['path']}",
+                "loc": f"{settings.SITE_URL}{route['path']}",
                 "lastmod": lastmod,
                 "changefreq": route["changefreq"],
                 "priority": str(route["priority"]),
@@ -153,39 +146,37 @@ class Command(BaseCommand):
         lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         for sitemap_file in sitemap_files:
-            sitemap_entry = {"loc": f"{self.site_url}/{sitemap_file}", "lastmod": lastmod}
+            sitemap_entry = {"loc": f"{settings.SITE_URL}/{sitemap_file}", "lastmod": lastmod}
             sitemaps.append(self.create_sitemap_index_entry(sitemap_entry))
 
         return self.create_sitemap_index(sitemaps)
 
     def create_url_entry(self, url_data):
         """Create a URL entry for the sitemap."""
-        url_template = (
+        return (
             "  <url>\n"
             "    <loc>{loc}</loc>\n"
             "    <lastmod>{lastmod}</lastmod>\n"
             "    <changefreq>{changefreq}</changefreq>\n"
             "    <priority>{priority}</priority>\n"
             "  </url>"
-        )
-        return url_template.format(**url_data)
+        ).format(**url_data)
 
     def create_sitemap_index_entry(self, sitemap_data):
         """Create a sitemap entry for the index."""
-        sitemap_template = (
+        return (
             "  <sitemap>\n"
             "    <loc>{loc}</loc>\n"
             "    <lastmod>{lastmod}</lastmod>\n"
             "  </sitemap>"
-        )
-        return sitemap_template.format(**sitemap_data)
+        ).format(**sitemap_data)
 
     def create_sitemap(self, urls):
         """Create the complete sitemap XML."""
         return (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-            f"{chr(10).join(urls)}\n"
+            f"{NL.join(urls)}\n"
             "</urlset>"
         )
 
@@ -194,7 +185,7 @@ class Command(BaseCommand):
         return (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
             '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-            f"{chr(10).join(sitemaps)}\n"
+            f"{NL.join(sitemaps)}\n"
             "</sitemapindex>"
         )
 
