@@ -1,4 +1,4 @@
-"""OWASP project GraphQL queries."""
+"""OWASP repository GraphQL queries."""
 
 import graphene
 
@@ -20,7 +20,7 @@ class RepositoryQuery(BaseQuery):
         """Resolve project."""
         try:
             return (
-                Project.objects.get(key=project_key)
+                Project.objects.get(key=f"www-project-{project_key}")
                 .repositories.filter(key=repository_key)
                 .first()
             )

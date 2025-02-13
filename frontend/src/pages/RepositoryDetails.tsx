@@ -21,7 +21,7 @@ const RepositoryDetailsPage = () => {
   const [repository, setRepository] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
-    variables: { projectKey: `www-project-${projectKey}`, repositoryKey: repositoryKey },
+    variables: { projectKey: projectKey, repositoryKey: repositoryKey },
   })
   useEffect(() => {
     if (data) {
