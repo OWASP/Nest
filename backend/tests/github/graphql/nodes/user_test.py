@@ -17,9 +17,22 @@ class TestUserNode:
         assert UserNode._meta.model == User
         expected_fields = {
             "avatar_url",
+            "bio",
+            "company",
+            "created_at",
             "email",
+            "followers_count",
+            "following_count",
             "id",
+            "issues_count",
+            "issues",
+            "location",
             "login",
             "name",
+            "public_repositories_count",
+            "releases_count",
+            "releases",
+            "updated_at",
+            "url",
         }
         assert set(UserNode._meta.fields) == expected_fields

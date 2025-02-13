@@ -1,33 +1,30 @@
+import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
-
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { CommitteeDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
+import { mockCommitteeDetailsData } from '@tests/data/mockCommitteeDetailsData'
 
-import { mockCommitteeData } from '@tests/data/mockCommitteeData'
-
-jest.mock('api/fetchAlgoliaData', () => ({
-  fetchAlgoliaData: jest.fn(),
+jest.mock('hooks/useToast', () => ({
+  toast: jest.fn(),
 }))
+
+jest.mock('@apollo/client', () => ({
+  ...jest.requireActual('@apollo/client'),
+  useQuery: jest.fn(),
+}))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+  useParams: () => ({
+    committeeKey: 'test-committee',
+  }),
 }))
-jest.mock('components/Pagination', () =>
-  jest.fn(({ currentPage, onPageChange, totalPages }) =>
-    totalPages > 1 ? (
-      <div>
-        <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
-      </div>
-    ) : null
-  )
-)
 
-describe('Committees Component', () => {
+describe('CommitteeDetailsPage Component', () => {
   beforeEach(() => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockCommitteeData.committees,
-      totalPages: 2,
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: { committee: mockCommitteeDetailsData.committee },
+      error: null,
     })
   })
 
@@ -35,31 +32,92 @@ describe('Committees Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders skeleton initially', async () => {
+  test('renders loading spinner initially', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      loading: true,
+      error: null,
+    })
     render(<CommitteeDetailsPage />)
+    const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByRole('status')
-      expect(skeletonLoaders.length).toBeGreaterThan(0)
+      expect(loadingSpinner.length).toBeGreaterThan(0)
     })
   })
 
   test('renders committee data correctly', async () => {
     render(<CommitteeDetailsPage />)
-
     await waitFor(() => {
-      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+      expect(screen.getByText('Test Committee')).toBeInTheDocument()
     })
-    expect(screen.getByText('This is a summary of Committee 1.')).toBeInTheDocument()
-    const viewButton = screen.getByText('Learn More')
-    expect(viewButton).toBeInTheDocument()
+    expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
+    expect(screen.getByText('Leader 1, Leader 2')).toBeInTheDocument()
+    expect(screen.getByText('https://owasp.org/test-committee')).toBeInTheDocument()
   })
 
-  test('displays "Committee not found" when there are no committees', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [],
-      totalPages: 0,
+  test('displays "Committee not found" when there is no committee', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      error: { message: 'Committee not found' },
     })
     render(<CommitteeDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Committee not found')).toBeInTheDocument()
+    })
+  })
+
+  test('renders committee URL as clickable link', async () => {
+    render(<CommitteeDetailsPage />)
+    await waitFor(() => {
+      const link = screen.getByText('https://owasp.org/test-committee')
+      expect(link.tagName).toBe('A')
+      expect(link).toHaveAttribute('href', 'https://owasp.org/test-committee')
+    })
+  })
+
+  test('handles contributors with missing names gracefully', async () => {
+    const committeeDataWithIncompleteContributors = {
+      ...mockCommitteeDetailsData,
+      committee: {
+        ...mockCommitteeDetailsData.committee,
+        topContributors: [
+          {
+            avatarUrl: 'https://example.com/avatar1.jpg',
+            contributionsCount: 30,
+            login: 'user1',
+            name: '',
+            __typename: 'UserNode',
+          },
+        ],
+      },
+    }
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: { committee: committeeDataWithIncompleteContributors.committee },
+      error: null,
+    })
+    render(<CommitteeDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument()
+    })
+  })
+
+  test('renders top contributors correctly', async () => {
+    render(<CommitteeDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 2')).toBeInTheDocument()
+    })
+  })
+
+  test('renders error message when GraphQL request fails', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      loading: false,
+      data: null,
+      error: { message: 'GraphQL error' },
+    })
+    render(<CommitteeDetailsPage />)
+
     await waitFor(() => {
       expect(screen.getByText('Committee not found')).toBeInTheDocument()
     })

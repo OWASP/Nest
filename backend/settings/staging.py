@@ -41,11 +41,11 @@ class Staging(Base):
 
     APP_NAME = "OWASP Nest Staging"
     SITE_NAME = "nest.owasp.dev"
-    SITE_URL = "https://nest.owasp.dev"
+    SITE_URL = f"https://{SITE_NAME}"
 
     CSRF_TRUSTED_ORIGINS = (SITE_URL,)
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
 
-    CORS_ALLOWED_ORIGINS = ("https://nest.owasp.dev",)
+    CORS_ALLOWED_ORIGINS = (SITE_URL,)

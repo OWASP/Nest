@@ -17,6 +17,8 @@ class RepositoryNode(BaseNode):
 
     issues = graphene.List(IssueNode)
     languages = graphene.List(graphene.String)
+    latest_release = graphene.String()
+    owner_key = graphene.String()
     releases = graphene.List(ReleaseNode)
     top_contributors = graphene.List(RepositoryContributorNode)
     topics = graphene.List(graphene.String)
@@ -47,6 +49,14 @@ class RepositoryNode(BaseNode):
     def resolve_languages(self, info):
         """Resolve languages."""
         return self.languages.keys()
+
+    def resolve_latest_release(self, info):
+        """Resolve latest release."""
+        return self.latest_release
+
+    def resolve_owner_key(self, info):
+        """Resolve owner key."""
+        return self.owner_key
 
     def resolve_releases(self, info):
         """Resolve recent releases."""
