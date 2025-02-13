@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
+import { METADATA_CONFIG } from 'utils/metadata'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import ChapterMap from 'components/ChapterMap'
+import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
@@ -77,25 +79,27 @@ const ChaptersPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      isLoaded={isLoaded}
-      totalPages={totalPages}
-      currentPage={currentPage}
-      searchQuery={searchQuery}
-      indexName="chapters"
-      onSearch={handleSearch}
-      onPageChange={handlePageChange}
-      searchPlaceholder="Search for OWASP chapters..."
-      empty="No chapters found"
-    >
-      {chapters.length > 0 && (
-        <ChapterMap
-          geoLocData={searchQuery ? chapters : geoLocData}
-          style={{ height: '400px', width: '100%', zIndex: '0' }}
-        />
-      )}
-      {chapters && chapters.map(renderChapterCard)}
-    </SearchPageLayout>
+    <MetadataManager {...METADATA_CONFIG.chapters}>
+      <SearchPageLayout
+        currentPage={currentPage}
+        empty="No chapters found"
+        indexName="chapters"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for OWASP chapters..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
+      >
+        {chapters.length > 0 && (
+          <ChapterMap
+            geoLocData={searchQuery ? chapters : geoLocData}
+            style={{ height: '400px', width: '100%', zIndex: '0' }}
+          />
+        )}
+        {chapters && chapters.map(renderChapterCard)}
+      </SearchPageLayout>
+    </MetadataManager>
   )
 }
 
