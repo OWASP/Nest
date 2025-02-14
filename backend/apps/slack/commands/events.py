@@ -5,8 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.utils import get_events_data
-from apps.slack.utils import get_text
+from apps.slack.utils import get_events_data, get_text
 
 COMMAND = "/events"
 

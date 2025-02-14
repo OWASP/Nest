@@ -1,4 +1,4 @@
-"""A command to add events data."""
+"""A command to update OWASP events."""
 
 import yaml
 from django.core.management.base import BaseCommand
@@ -25,14 +25,14 @@ class Command(BaseCommand):
                 key = f"www-event-{event_name_slug}"
 
                 fields = {
-                    "key": key,
-                    "name": event_data.get("name", ""),
-                    "url": normalize_url(event_data.get("url", "")) or "",
+                    "category_description": category_description,
                     "category": category_name,
                     "dates": event_data.get("dates", ""),
-                    "start_date": event_data.get("start-date", None),
+                    "key": key,
+                    "name": event_data.get("name", ""),
                     "optional_text": event_data.get("optional-text", ""),
-                    "category_description": category_description,
+                    "start_date": event_data.get("start-date", None),
+                    "url": normalize_url(event_data.get("url", "")) or "",
                 }
 
                 try:

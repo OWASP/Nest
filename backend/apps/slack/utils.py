@@ -110,6 +110,7 @@ def get_events_data():
         logger.exception("Failed to fetch events data via GraphQL", extra={"error": str(e)})
         return None
 
+
 def get_text(blocks):
     """Convert blocks to plain text."""
     text = []
