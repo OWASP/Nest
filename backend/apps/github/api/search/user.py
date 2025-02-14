@@ -1,4 +1,4 @@
-"""OWASP app project search API."""
+"""OWASP app user search API."""
 
 from algoliasearch_django import raw_search
 

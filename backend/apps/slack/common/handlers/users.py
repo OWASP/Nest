@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.text import Truncator
 
 from apps.common.constants import NL
-from apps.common.utils import get_absolute_url, natural_date
+from apps.common.utils import get_absolute_url
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
@@ -63,6 +63,7 @@ def get_blocks(
         ),
     ]
 
+    blocks = []
     for idx, user in enumerate(users):
         user_name_raw = user.get("idx_name") or user.get("idx_login", "")
         user_name = Truncator(escape(user_name_raw)).chars(
@@ -75,58 +76,35 @@ def get_blocks(
 
         location = escape(user.get("idx_location", ""))
         company = escape(user.get("idx_company", ""))
-        email = escape(user.get("idx_email", ""))
-        user_contributions = user.get("idx_contributions", 0)
         followers_count = user.get("idx_followers_count", 0)
         following_count = user.get("idx_following_count", 0)
-        public_repos = user.get("idx_public_repositories_count", 0)
-        issues_count = user.get("idx_issues_count", 0)
+        public_repositories = user.get("idx_public_repositories_count", 0)
 
-        updated_text = (
-            f"_Updated {natural_date(int(user['idx_updated_at']))}_{NL}"
-            if presentation.include_timestamps
-            else ""
-        )
-
-        meta_info = []
-        contributions_text = ""
+        metadata = []
         if presentation.include_metadata:
             if company:
-                meta_info.append(f"*Company:* {company}")
-            if email:
-                meta_info.append(f"*Email:* {email}")
+                metadata.append(f"Company: {company}")
             if location:
-                meta_info.append(f"*Location:* {location}")
+                metadata.append(f"Location: {location}")
             if followers_count:
-                meta_info.append(f"*Followers:* {followers_count}")
+                metadata.append(f"Followers: {followers_count}")
             if following_count:
-                meta_info.append(f"*Following:* {following_count}")
-            if public_repos:
-                meta_info.append(f"*Public Repos:* {public_repos}")
-            if issues_count:
-                meta_info.append(f"*Issues:* {issues_count}")
-            if user_contributions:
-                contributions_text += f"*Contributions:*{NL}"
-                for contrib_info in user_contributions:
-                    repo_name = contrib_info.get("repository_name", "N/A")
-                    contrib_count = contrib_info.get("contributions_count", 0)
-                    contributions_text += f"{repo_name}: {contrib_count} contributions{NL}"
+                metadata.append(f"Following: {following_count}")
+            if public_repositories:
+                metadata.append(f"Repositories: {public_repositories}")
 
-        metadata_text = f"_{' | '.join(meta_info)}_{NL}" if meta_info else ""
-        metadata_text += contributions_text
         blocks.append(
             markdown(
                 f"{offset + idx + 1}. <{user['idx_url']}|*{user_name}*>{NL}"
-                f"{updated_text}"
+                f"_{' | '.join(metadata)}_{NL}"
                 f"{bio}{NL}"
-                f"{metadata_text}"
             )
         )
 
     if presentation.include_feedback:
         blocks.append(
             markdown(
-                f"⚠️ *Extended search over GitHub users is available at "
+                f"⚠️ *Extended search over OWASP community users is available at "
                 f"<{get_absolute_url('community/users')}?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
