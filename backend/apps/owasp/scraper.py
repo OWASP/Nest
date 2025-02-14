@@ -1,5 +1,6 @@
 """OWASP scraper."""
 
+#!/usr/bin/env python3
 import logging
 from urllib.parse import urlparse
 

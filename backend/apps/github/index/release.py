@@ -1,5 +1,6 @@
 """GitHub release Algolia index configuration."""
 
+#!/usr/bin/env python3
 from apps.common.index import IndexBase, register
 from apps.github.models.release import Release
 

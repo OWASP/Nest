@@ -1,5 +1,6 @@
 """Core app admin."""
 
+#!/usr/bin/env python3
 from django.contrib import admin
 
 from apps.core.models.prompt import Prompt

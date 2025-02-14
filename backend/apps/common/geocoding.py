@@ -1,5 +1,6 @@
 """Geocoding utils."""
 
+#!/usr/bin/env python3
 import time
 
 from geopy.geocoders import Nominatim

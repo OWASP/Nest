@@ -1,5 +1,6 @@
 """GitHub app admin."""
 
+#!/usr/bin/env python3
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 

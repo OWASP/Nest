@@ -1,5 +1,6 @@
 """Github app common models."""
 
+#!/usr/bin/env python3
 from django.db import models
 
 

@@ -1,5 +1,6 @@
 """OWASP app committee managers."""
 
+#!/usr/bin/env python3
 from django.db import models
 
 

@@ -1,5 +1,6 @@
 """GitHub issue index."""
 
+#!/usr/bin/env python3
 from apps.common.index import IndexBase, register
 from apps.github.models.issue import Issue
 

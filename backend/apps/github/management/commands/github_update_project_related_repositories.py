@@ -1,5 +1,6 @@
 """A command to update OWASP entities related repositories data."""
 
+#!/usr/bin/env python3
 import logging
 import os
 

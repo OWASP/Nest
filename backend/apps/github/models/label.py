@@ -1,5 +1,6 @@
 """Github app label model."""
 
+#!/usr/bin/env python3
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel

@@ -34,3 +34,12 @@ repos:
         entry: djlint --reformat
         types:
           - html
+
+  - repo: local
+    hooks:
+    -   id: generate-erd
+        name: Generate ERD
+        entry: python3 backend/generate_erd.py
+        language: system
+        files: backend/.*models\.py$
+        pass_filenames: false

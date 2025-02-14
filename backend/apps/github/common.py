@@ -1,5 +1,6 @@
 """GitHub app common module."""
 
+#!/usr/bin/env python3
 import logging
 
 from github.GithubException import UnknownObjectException

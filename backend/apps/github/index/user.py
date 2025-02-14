@@ -1,5 +1,6 @@
 """GitHub user Algolia index configuration."""
 
+#!/usr/bin/env python3
 from apps.common.index import IndexBase, register
 from apps.github.models.organization import Organization
 from apps.github.models.user import User

@@ -1,5 +1,6 @@
 """Common app models."""
 
+#!/usr/bin/env python3
 from django.db import models
 
 BATCH_SIZE = 1000

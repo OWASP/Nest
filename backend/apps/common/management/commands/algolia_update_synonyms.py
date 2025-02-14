@@ -1,5 +1,6 @@
 """A command to update OWASP Nest index synonyms."""
 
+#!/usr/bin/env python3
 from django.core.management.base import BaseCommand
 
 from apps.github.index.issue import IssueIndex

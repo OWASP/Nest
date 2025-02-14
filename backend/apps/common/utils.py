@@ -1,5 +1,6 @@
 """Common app utils."""
 
+#!/usr/bin/env python3
 from datetime import datetime, timezone
 
 from django.conf import settings

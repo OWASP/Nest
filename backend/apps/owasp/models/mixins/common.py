@@ -1,4 +1,5 @@
 """OWASP app common mixins."""
+#!/usr/bin/env python3
 
 
 class RepositoryBasedEntityModelMixin:

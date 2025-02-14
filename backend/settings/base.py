@@ -20,7 +20,7 @@ class Base(Configuration):
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
-    SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
+    # SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN", environ_prefix=None)
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
@@ -39,6 +39,9 @@ class Base(Configuration):
         "graphene_django",
         "rest_framework",
         "storages",
+        "algoliasearch_django",
+        "django_extensions",
+        "django_configurations",
     )
 
     LOCAL_APPS = (
@@ -67,6 +70,11 @@ class Base(Configuration):
                 "propagate": True,
             },
         },
+    }
+
+    GRAPH_MODELS = {
+        "all_applications": True,
+        "group_models": True,
     }
 
     MIDDLEWARE = [
@@ -110,16 +118,19 @@ class Base(Configuration):
 
     WSGI_APPLICATION = "wsgi.application"
 
-    ALGOLIA_APPLICATION_ID = values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID")
-    ALGOLIA_APPLICATION_REGION = values.SecretValue(environ_name="ALGOLIA_APPLICATION_REGION")
-    ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES = values.Value(
-        environ_name="ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES"
+    ALGOLIA_APPLICATION_ID = values.Value(
+        environ_name="ALGOLIA_APPLICATION_ID", environ_prefix=None
     )
-    ALGOLIA_WRITE_API_KEY = values.SecretValue(environ_name="ALGOLIA_WRITE_API_KEY")
+    ALGOLIA_APPLICATION_REGION = values.Value(
+        environ_name="ALGOLIA_APPLICATION_REGION", environ_prefix=None
+    )
+    # ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES = values.Value(
+    # environ_name="ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES"
+    # )
+    ALGOLIA_WRITE_API_KEY = values.Value(environ_name="ALGOLIA_WRITE_API_KEY", environ_prefix=None)
 
     ALGOLIA = {
         "API_KEY": ALGOLIA_WRITE_API_KEY,
-        "APPLICATION_ID": ALGOLIA_APPLICATION_ID,
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
 
@@ -135,7 +146,7 @@ class Base(Configuration):
             "ENGINE": "django.db.backends.postgresql",
             "NAME": values.Value(environ_name="DB_NAME"),
             "USER": values.Value(environ_name="DB_USER"),
-            "PASSWORD": values.SecretValue(environ_name="DB_PASSWORD"),
+            "PASSWORD": values.Value(environ_name="DB_PASSWORD"),
             "HOST": values.Value(environ_name="DB_HOST"),
             "PORT": values.Value(environ_name="DB_PORT"),
         },
@@ -185,16 +196,53 @@ class Base(Configuration):
     DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = values.SecretValue()
+    SECRET_KEY = values.Value(environ_name="SECRET_KEY", environ_prefix=None)
 
     # https://docs.djangoproject.com/en/5.1/ref/settings/#data-upload-max-number-fields
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
 
-    OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
+    OPEN_AI_SECRET_KEY = values.Value(environ_name="OPEN_AI_SECRET_KEY", environ_prefix=None)
 
-    SLACK_BOT_TOKEN = values.SecretValue()
+    SLACK_BOT_TOKEN = values.Value(environ_name="SLACK_BOT_TOKEN", environ_prefix=None)
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-    SLACK_SIGNING_SECRET = values.SecretValue()
+    SLACK_SIGNING_SECRET = values.Value(environ_name="SLACK_SIGNING_SECRET", environ_prefix=None)
+
+
+class Local(Base):
+    """Local configuration."""
+
+    DEBUG = True
+
+    # Add any other local-specific settings here
+    # For example:
+    # ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+    # You can override any settings from the Base class if needed for local development
+
+
+class Production(Base):
+    """Production configuration."""
+
+    DEBUG = False
+
+    # Add production-specific settings here
+    # For example:
+    # ALLOWED_HOSTS = ['your-production-domain.com']
+
+    # Override any other settings as needed for production
+
+
+class Test(Base):
+    """Test configuration."""
+
+    DEBUG = True
+
+    # Add test-specific settings here
+    # For example:
+    # Use a faster password hasher for testing
+    # PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
+
+    # Override any other settings as needed for testing

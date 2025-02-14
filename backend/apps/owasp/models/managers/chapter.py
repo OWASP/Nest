@@ -1,5 +1,6 @@
 """OWASP app chapter managers."""
 
+#!/usr/bin/env python3
 from django.db import models
 from django.db.models import Q
 

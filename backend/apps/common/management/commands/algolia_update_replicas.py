@@ -1,5 +1,6 @@
 """A command to update OWASP Nest index replicas."""
 
+#!/usr/bin/env python3
 from django.core.management.base import BaseCommand
 
 from apps.owasp.index.project import ProjectIndex

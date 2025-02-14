@@ -1,5 +1,6 @@
 """OWASP app committee model."""
 
+#!/usr/bin/env python3
 from functools import lru_cache
 
 from django.db import models

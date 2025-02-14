@@ -1,5 +1,6 @@
 """A command to update OWASP Nest suggestions index."""
 
+#!/usr/bin/env python3
 from django.conf import settings
 from django.core.management.base import BaseCommand
 

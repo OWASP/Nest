@@ -1,5 +1,6 @@
 """A command to load OWASP Nest data."""
 
+#!/usr/bin/env python3
 import contextlib
 
 from algoliasearch_django import register, unregister

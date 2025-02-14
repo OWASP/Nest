@@ -1,5 +1,6 @@
 """A command to purge OWASP Nest data."""
 
+#!/usr/bin/env python3
 from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db import connection

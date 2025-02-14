@@ -1,5 +1,6 @@
 """GitHub issue GraphQL node."""
 
+#!/usr/bin/env python3
 from apps.common.graphql.nodes import BaseNode
 from apps.github.models.issue import Issue
 

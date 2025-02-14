@@ -1,5 +1,6 @@
 """GitHub app constants."""
 
+#!/usr/bin/env python3
 import re
 
 GITHUB_GHOST_USER_LOGIN = "ghost"

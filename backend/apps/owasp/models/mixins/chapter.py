@@ -1,5 +1,6 @@
 """OWASP app chapter mixins."""
 
+#!/usr/bin/env python3
 from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 

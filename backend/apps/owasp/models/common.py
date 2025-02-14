@@ -1,5 +1,6 @@
 """OWASP app common models."""
 
+#!/usr/bin/env python3
 import logging
 import re
 from urllib.parse import urlparse

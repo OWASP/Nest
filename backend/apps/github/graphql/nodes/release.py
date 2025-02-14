@@ -1,5 +1,6 @@
 """GitHub release GraphQL node."""
 
+#!/usr/bin/env python3
 from graphene import Field
 
 from apps.common.graphql.nodes import BaseNode

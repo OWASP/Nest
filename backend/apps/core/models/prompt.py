@@ -1,5 +1,6 @@
 """Core app prompt model."""
 
+#!/usr/bin/env python3
 import logging
 
 from django.conf import settings

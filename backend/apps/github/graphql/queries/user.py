@@ -1,5 +1,6 @@
 """OWASP user GraphQL queries."""
 
+#!/usr/bin/env python3
 import graphene
 
 from apps.common.graphql.queries import BaseQuery

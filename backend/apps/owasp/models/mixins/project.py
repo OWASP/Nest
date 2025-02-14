@@ -1,5 +1,6 @@
 """OWASP app project mixins."""
 
+#!/usr/bin/env python3
 from apps.common.utils import join_values
 from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 

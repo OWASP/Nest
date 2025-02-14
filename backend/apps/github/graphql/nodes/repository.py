@@ -1,5 +1,6 @@
 """GitHub repository GraphQL node."""
 
+#!/usr/bin/env python3
 import graphene
 
 from apps.common.graphql.nodes import BaseNode

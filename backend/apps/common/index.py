@@ -1,5 +1,6 @@
 """Algolia index common classes and helpers."""
 
+#!/usr/bin/env python3
 import logging
 from functools import lru_cache
 from pathlib import Path

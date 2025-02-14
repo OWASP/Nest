@@ -1,5 +1,6 @@
 """Github app repository model."""
 
+#!/usr/bin/env python3
 from base64 import b64decode
 
 import yaml

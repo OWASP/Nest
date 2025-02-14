@@ -1,5 +1,6 @@
 """Open AI API module."""
 
+#!/usr/bin/env python3
 import logging
 
 import openai

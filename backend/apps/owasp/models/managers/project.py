@@ -1,5 +1,6 @@
 """OWASP app project managers."""
 
+#!/usr/bin/env python3
 from django.db import models
 
 

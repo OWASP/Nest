@@ -1,0 +1,34 @@
+name: Generate ERD
+
+on:
+  push:
+    paths:
+      - 'backend/**/*.py'
+      - 'backend/**/*.json'
+  workflow_dispatch:
+
+jobs:
+  generate-erd:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        sudo apt-get install graphviz graphviz-dev
+        cd backend
+        pip install django django-extensions pygraphviz
+    - name: Generate ERD
+      run: |
+        cd backend
+        python manage.py graph_models -a -g -o erd.png
+    - name: Commit and push if changed
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git add erdImages/erd.png
+        git commit -m "Update ERD" || exit 0
+        git push

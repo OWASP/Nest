@@ -1,5 +1,6 @@
 """GitHub API URLs."""
 
+#!/usr/bin/env python3
 from rest_framework import routers
 
 from apps.github.api.issue import IssueViewSet
