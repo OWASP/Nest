@@ -16,6 +16,7 @@ import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -79,20 +80,28 @@ const ProjectDetailsPage = () => {
     { icon: faExclamationCircle, value: `${project?.issuesCount || 'No'} Issues` },
   ]
   return (
-    <DetailsCard
-      title={project.name}
-      details={projectDetails}
-      is_active={project.isActive}
-      summary={project.summary}
-      stats={projectStats}
-      type="project"
-      topContributors={project.topContributors}
-      languages={project.languages}
-      topics={project.topics}
-      recentReleases={project.recentReleases}
-      recentIssues={project.recentIssues}
-      repositories={project.repositories}
-    />
+    <MetadataManager
+      description={project.summary}
+      keywords={project.topics}
+      pageTitle={project.name || projectKey}
+      type={project.type}
+      url={project.url}
+    >
+      <DetailsCard
+        details={projectDetails}
+        is_active={project.isActive}
+        languages={project.languages}
+        recentIssues={project.recentIssues}
+        recentReleases={project.recentReleases}
+        repositories={project.repositories}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={project.topContributors}
+        topics={project.topics}
+        type="project"
+      />
+    </MetadataManager>
   )
 }
 

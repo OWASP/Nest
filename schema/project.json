@@ -194,6 +194,11 @@
       ],
       "type": "string"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the project.",
+      "format": "uri",
+      "type": "string"
+},
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,

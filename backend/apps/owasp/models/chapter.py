@@ -62,6 +62,11 @@ class Chapter(
         """Chapter human readable representation."""
         return f"{self.name or self.key}"
 
+    @property
+    def nest_key(self):
+        """Get Nest key."""
+        return self.key.replace("www-chapter-", "")
+
     @staticmethod
     @lru_cache
     def active_chapters_count():
