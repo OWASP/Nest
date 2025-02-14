@@ -89,6 +89,7 @@ features:
     - command: /users
       url: https://nest.owasp.org/integrations/slack/commands/
       description: OWASP users list
+      usage_hint: <user>
       should_escape: false
 oauth_config:
   scopes:
