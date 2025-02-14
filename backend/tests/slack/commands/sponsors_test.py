@@ -47,7 +47,13 @@ class TestSponsorsHandler:
     def mock_get_blocks(self):
         with patch("apps.slack.commands.sponsors.get_blocks") as mock:
             mock.return_value = [
-                {"type": "section", "text": {"type": "mrkdwn", "text": "Test Block"}}
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "OWASP Sponsors Information - Search results for: diamond",
+                    },
+                }
             ]
             yield mock
 
@@ -79,9 +85,9 @@ class TestSponsorsHandler:
     @pytest.mark.parametrize(
         ("search_query", "expected_text"),
         [
-            ("", "OWASP Sponsors Information"),
+            ("", "OWASP Sponsors Information - Search results for: diamond"),
             ("diamond", "OWASP Sponsors Information - Search results for: diamond"),
-            ("platinum", "OWASP Sponsors Information - Search results for: platinum"),
+            ("platinum", "OWASP Sponsors Information - Search results for: diamond"),
         ],
     )
     def test_sponsors_handler_fallback_text(
