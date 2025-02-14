@@ -33,7 +33,7 @@ def test_positive(project_schema):
         ("blog-invalid.yaml", "'https://invalid/' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
         ("community-empty.yaml", "[] should be non-empty"),
-        ("community-invalid.yaml", "'invalid-url' is not a 'uri'"),
+        ("community-invalid.yaml", "Additional properties are not allowed ('description' was unexpected)"),
         ("community-null.yaml", "None is not of type 'array'"),
         ("demo-invalid.yaml", "'https://invalid/' is not a 'uri'"),
         ("demo-null.yaml", "None is not a 'uri'"),
