@@ -20,7 +20,8 @@ jobs:
       run: |
         sudo apt-get install graphviz graphviz-dev
         cd backend
-        pip install django django-extensions pygraphviz
+        pip3 install django django-extensions pygraphviz
+        pip3 install django-configurations
     - name: Generate ERD
       run: |
         cd backend
