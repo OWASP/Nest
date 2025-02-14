@@ -36,7 +36,7 @@
     "@sentry/react": "^9.0.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.14",
-    "algoliasearch": "^5.20.0",
+    "algoliasearch": "^5.20.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "core-js": "^3.40.0",
