@@ -30,6 +30,40 @@
       },
       "additionalProperties": false
     },
+    "repository": {
+      "type": "object",
+      "title": "Repository",
+      "description": "A project repository.",
+      "required": ["url"],
+      "properties": {
+        "changelog": {
+          "type": ["string", "null"],
+          "description": "Link to the changelog."
+        },
+        "code_of_conduct": {
+          "type": ["string", "null"],
+          "description": "Link to the code of conduct."
+        },
+        "contribution_guide": {
+          "type": ["string", "null"],
+          "description": "Link to the contribution guide."
+        },
+        "description": {
+          "type": ["string"],
+          "description": "Repository description."
+        },
+        "name": {
+          "type": ["string"],
+          "description": "Repository name."
+        },
+        "url": {
+          "type": "string",
+          "description": "The repository URL.",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    },
     "sponsor": {
       "type": "object",
       "title": "Sponsor",
@@ -75,10 +109,26 @@
       ],
       "type": "string"
     },
+    "blog": {
+      "description": "Project's blog.",
+      "format": "uri",
+      "type": "string"
+    },
     "demo": {
       "description": "Optional URL to the project demo.",
       "format": "uri",
       "type": "string"
+    },
+    "documentation": {
+      "description": "Optional URLs to project documentation.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
     },
     "downloads": {
       "description": "Optional list of download URLs.",
@@ -144,6 +194,11 @@
       ],
       "type": "string"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the project.",
+      "format": "uri",
+      "type": "string"
+},
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
@@ -152,6 +207,15 @@
     "pitch": {
       "description": "The project pitch.",
       "type": "string"
+    },
+    "repositories": {
+      "description": "Repositories associated with the project.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/repository"
+      },
+      "uniqueItems": true
     },
     "sponsors": {
       "description": "Sponsors of the project.",
@@ -178,6 +242,12 @@
         "Documentation, standards, etc.",
         "Tools"
       ],
+      "type": "string"
+    },
+    "website": {
+      "description": "The official website of the project.",
+      "format": "url",
+      "minLength": 4,
       "type": "string"
     }
   },

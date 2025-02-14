@@ -7,19 +7,20 @@ from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_START
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.utils import get_text
 
 COMMAND = "/gsoc"
 
 SUPPORTED_YEAR_START = 2012
 SUPPORTED_YEAR_END = 2025
-SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))  # 2012-2025
+SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
 
 def gsoc_handler(ack, command, client):
     """Slack /gsoc command handler."""
-    from apps.owasp.models.project import Project
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
+    from apps.slack.utils import get_gsoc_projects
 
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
@@ -35,10 +36,10 @@ def gsoc_handler(ack, command, client):
     elif command_text.isnumeric():
         year = int(command_text)
         if year in SUPPORTED_YEARS:
-            gsoc_projects = Project.get_gsoc_projects(year)
+            gsoc_projects = get_gsoc_projects(year)
             gsoc_projects_markdown = f"{NL}".join(
-                f"  • <{gp.nest_url}|{gp.owasp_name}>"
-                for gp in sorted(gsoc_projects, key=lambda p: p.owasp_name)
+                f"  • <{gp['idx_url']}|{gp['idx_name']}>"
+                for gp in sorted(gsoc_projects, key=lambda p: p["idx_name"])
             )
             additional_info = []
             blocks = [
@@ -77,7 +78,11 @@ def gsoc_handler(ack, command, client):
         ]
 
     conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(channel=conversation["channel"]["id"], blocks=blocks)
+    client.chat_postMessage(
+        blocks=blocks,
+        channel=conversation["channel"]["id"],
+        text=get_text(blocks),
+    )
 
 
 if SlackConfig.app:

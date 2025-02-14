@@ -2,29 +2,69 @@
 
 import graphene
 
-from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.issue import IssueNode
 from apps.github.graphql.nodes.release import ReleaseNode
+from apps.github.graphql.nodes.repository import RepositoryNode
+from apps.owasp.graphql.nodes.common import GenericEntityNode
 from apps.owasp.models.project import Project
 
 RECENT_ISSUES_LIMIT = 10
 RECENT_RELEASES_LIMIT = 10
 
 
-class ProjectNode(BaseNode):
+class ProjectNode(GenericEntityNode):
     """Project node."""
 
+    issues_count = graphene.Int()
+    key = graphene.String()
+    languages = graphene.List(graphene.String)
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
+    repositories = graphene.List(RepositoryNode)
+    repositories_count = graphene.Int()
+    topics = graphene.List(graphene.String)
 
     class Meta:
         model = Project
-        fields = ()
+        fields = (
+            "contributors_count",
+            "forks_count",
+            "is_active",
+            "level",
+            "name",
+            "stars_count",
+            "summary",
+            "type",
+        )
+
+    def resolve_issues_count(self, info):
+        """Resolve issues count."""
+        return self.idx_issues_count
+
+    def resolve_key(self, info):
+        """Resolve key."""
+        return self.idx_key
+
+    def resolve_languages(self, info):
+        """Resolve languages."""
+        return self.idx_languages
 
     def resolve_recent_issues(self, info):
-        """Resolve project recent issues."""
+        """Resolve recent issues."""
         return self.issues.select_related("author").order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
     def resolve_recent_releases(self, info):
-        """Resolve project recent releases."""
+        """Resolve recent releases."""
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+
+    def resolve_repositories(self, info):
+        """Resolve repositories."""
+        return self.repositories.order_by("-pushed_at", "-updated_at")
+
+    def resolve_repositories_count(self, info):
+        """Resolve repositories count."""
+        return self.idx_repositories_count
+
+    def resolve_topics(self, info):
+        """Resolve topics."""
+        return self.idx_topics

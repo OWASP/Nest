@@ -1,14 +1,11 @@
 """GitHub issue index."""
 
-from algoliasearch_django import AlgoliaIndex
-from algoliasearch_django.decorators import register
-
-from apps.common.index import IS_LOCAL_BUILD, LOCAL_INDEX_LIMIT, IndexBase
+from apps.common.index import IndexBase, register
 from apps.github.models.issue import Issue
 
 
 @register(Issue)
-class IssueIndex(AlgoliaIndex, IndexBase):
+class IssueIndex(IndexBase):
     """Issue index."""
 
     index_name = "issues"
@@ -79,19 +76,17 @@ class IssueIndex(AlgoliaIndex, IndexBase):
 
     should_index = "is_indexable"
 
-    def get_queryset(self):
-        """Get queryset."""
-        qs = Issue.open_issues.assignable.select_related(
+    @staticmethod
+    def update_synonyms():
+        """Update synonyms."""
+        return IndexBase.reindex_synonyms("github", "issues")
+
+    def get_entities(self):
+        """Get entities for indexing."""
+        return Issue.open_issues.assignable.select_related(
             "repository",
         ).prefetch_related(
             "assignees",
             "labels",
             "repository__project_set",
         )
-
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
-
-    @staticmethod
-    def update_synonyms():
-        """Update synonyms."""
-        return IssueIndex.reindex_synonyms("github", "issues")

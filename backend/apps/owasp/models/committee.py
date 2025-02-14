@@ -1,4 +1,4 @@
-"""OWASP app commettee model."""
+"""OWASP app committee model."""
 
 from functools import lru_cache
 
@@ -54,6 +54,11 @@ class Committee(
             self.generate_summary(prompt=prompt)
 
         super().save(*args, **kwargs)
+
+    @property
+    def nest_key(self):
+        """Get Nest key."""
+        return self.key.replace("www-committee-", "")
 
     @staticmethod
     @lru_cache

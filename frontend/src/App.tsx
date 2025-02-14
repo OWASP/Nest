@@ -9,7 +9,7 @@ import {
   ProjectsPage,
   RepositoryDetailsPage,
   UserDetailsPage,
-  UsersPage,
+  RepositoryDetailsPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'

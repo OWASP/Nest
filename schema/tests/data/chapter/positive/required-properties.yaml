@@ -1,0 +1,12 @@
+country: India
+leaders:
+  - github: leader-1-github
+    name: Leader 1 Name
+  - github: leader-2-github
+    name: Leader 2 Name
+    slack: leader-2-slack
+name: OWASP Chapter
+tags:
+  - chapter-tag-1
+  - chapter-tag-2
+  - chapter-tag-3
