@@ -67,7 +67,7 @@
     "@testing-library/react": "^16.2.0",
     "@types/date-fns": "^2.6.3",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.8",
+    "@types/node": "^22.13.4",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.3",
     "@types/react-gtm-module": "^2.0.4",
