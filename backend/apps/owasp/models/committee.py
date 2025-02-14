@@ -55,6 +55,11 @@ class Committee(
 
         super().save(*args, **kwargs)
 
+    @property
+    def nest_key(self):
+        """Get Nest key."""
+        return self.key.replace("www-committee-", "")
+
     @staticmethod
     @lru_cache
     def active_committees_count():

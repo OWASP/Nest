@@ -20,6 +20,9 @@ dump-data:
 
 enrich-data: github-enrich-issues owasp-enrich-chapters owasp-enrich-committees owasp-enrich-projects
 
+generate-sitemap:
+	@CMD="poetry run python manage.py generate_sitemap" $(MAKE) exec-backend-command
+
 github-enrich-issues:
 	@echo "Enriching GitHub issues"
 	@CMD="poetry run python manage.py github_enrich_issues" $(MAKE) exec-backend-command

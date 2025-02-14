@@ -11,10 +11,11 @@ export function IssueCard({ issue }: { issue: Issue }) {
             href={`https://github.com/${issue.repository.ownerKey}/${issue.repository.key}/issues/${issue.number}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-bold text-black underline decoration-dotted dark:text-white"
+            className="font-bold text-black underline decoration-dotted hover:cursor-pointer dark:text-white"
           >
             {issue.title}
           </a>
+
           <div className="mt-1 flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <span className="rounded-full bg-gray-200 px-2 py-1 text-sm dark:bg-gray-700">
               #{issue.number}
