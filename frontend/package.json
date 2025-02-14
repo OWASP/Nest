@@ -23,7 +23,7 @@
     "@algolia/autocomplete-theme-classic": "^1.17.9",
     "@apollo/client": "^3.12.7",
     "@ark-ui/react": "^4.9.1",
-    "@chakra-ui/react": "^3.7.0",
+    "@chakra-ui/react": "^3.8.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.0",
