@@ -15,6 +15,7 @@ import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
@@ -102,18 +103,25 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      languages={repository.languages}
-      recentIssues={repository.issues}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={repository.topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <MetadataManager
+      description={repository.description}
+      keywords={repository.topics}
+      pageTitle={repository.name || repositoryKey}
+      url={repository.url}
+    >
+      <DetailsCard
+        details={repositoryDetails}
+        languages={repository.languages}
+        recentIssues={repository.issues}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={repository.topContributors}
+        topics={repository.topics}
+        type="repository"
+      />
+    </MetadataManager>
   )
 }
 export default RepositoryDetailsPage
