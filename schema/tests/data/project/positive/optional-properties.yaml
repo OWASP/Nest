@@ -1,6 +1,9 @@
 audience: breaker
 blog: https://blog.projec.com
 demo: https://some-demo-url.com
+documentation:
+  - https://example.com/docs1
+  - https://example.com/docs2
 downloads:
   - https://abc.com/download1
   - https://abc.com/download2
@@ -13,10 +16,6 @@ leaders:
   - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
-social_media:
-  - description: A brief description of the social media platform
-    platform: youtube
-    url: https://www.youtube.com/channel/UC1234567890abc
 level: 2
 license: MIT
 name: OWASP Incubator Code Project
@@ -28,6 +27,10 @@ repositories:
   - description: Another repository with a valid URL.
     name: test-repo-2
     url: https://example.com/repo2
+social_media:
+  - description: A brief description of the social media platform
+    platform: youtube
+    url: https://www.youtube.com/channel/UC1234567890abc
 tags:
   - example-tag-1
   - example-tag-2

@@ -1,9 +1,17 @@
+import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
 import { mockChapterDetailsData } from '@tests/data/mockChapterDetailsData'
-jest.mock('api/fetchAlgoliaData')
+
+jest.mock('hooks/useToast', () => ({
+  toast: jest.fn(),
+}))
+
+jest.mock('@apollo/client', () => ({
+  ...jest.requireActual('@apollo/client'),
+  useQuery: jest.fn(),
+}))
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -14,11 +22,10 @@ jest.mock('react-router-dom', () => ({
 
 describe('chapterDetailsPage Component', () => {
   beforeEach(() => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
-      Promise.resolve({
-        hits: [mockChapterDetailsData],
-      })
-    )
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: { chapter: mockChapterDetailsData },
+      error: null,
+    })
   })
 
   afterEach(() => {
@@ -26,6 +33,10 @@ describe('chapterDetailsPage Component', () => {
   })
 
   test('renders loading spinner initially', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      error: null,
+    })
     render(<ChapterDetailsPage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
@@ -34,6 +45,10 @@ describe('chapterDetailsPage Component', () => {
   })
 
   test('renders chapter data correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: { chapter: mockChapterDetailsData },
+      error: null,
+    })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Test City, Test Country')).toBeInTheDocument()
@@ -44,7 +59,9 @@ describe('chapterDetailsPage Component', () => {
   })
 
   test('displays "No chapters found" when there are no chapters', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      error: true,
+    })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Chapter not found')).toBeInTheDocument()
@@ -72,21 +89,18 @@ describe('chapterDetailsPage Component', () => {
   test('handles contributors with missing names gracefully', async () => {
     const chapterDataWithIncompleteContributors = {
       ...mockChapterDetailsData,
-      top_contributors: [
+      topContributors: [
         {
           name: 'user1',
-          avatar_url: 'https://example.com/avatar1.jpg',
-          contributions_count: 30,
+          avatarUrl: 'https://example.com/avatar1.jpg',
+          contributionsCount: 30,
         },
       ],
     }
-
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation(() =>
-      Promise.resolve({
-        hits: [chapterDataWithIncompleteContributors],
-      })
-    )
-
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: { chapter: chapterDataWithIncompleteContributors },
+      error: null,
+    })
     render(<ChapterDetailsPage />)
 
     await waitFor(() => {

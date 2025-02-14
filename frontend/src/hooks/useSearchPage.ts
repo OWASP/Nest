@@ -57,7 +57,6 @@ export function useSearchPage<T>({
   }, [searchQuery, order, currentPage, sortBy, setSearchParams])
 
   useEffect(() => {
-    document.title = pageTitle
     setIsLoaded(false)
 
     const fetchData = async () => {

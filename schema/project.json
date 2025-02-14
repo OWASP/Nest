@@ -64,6 +64,28 @@
       },
       "additionalProperties": false
     },
+    "socialMedia": {
+      "description": "A social media platform for the project",
+      "type": "object",
+      "properties": {
+          "description": {
+          "description": "Description of the social media platform",
+          "type": "string"
+        },
+        "platform": {
+          "description": "The type of social media platform.",
+          "enum": ["bluesky", "linkedin", "x", "youtube"],
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL of the social media profile.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": ["platform", "url"],
+      "additionalProperties": false
+    },
     "sponsor": {
       "type": "object",
       "title": "Sponsor",
@@ -93,30 +115,7 @@
         }
       },
       "additionalProperties": false
-    },
-	"socialMedia": {
-	  "description": "A social media platform for the project",
-	  "type": "object",
-	  "properties": {
-	  	  "description": {
-			  "description": "Description of the social media platform",
-			  "type": "string"
-		  },
-		  "platform": {
-			  "description": "The type of social media platform.",
-			  "enum": ["linkedin", "x", "youtube", "bluesky"],
-			  "type": "string"
-		  },
-		  "url": {
-			  "description": "The URL of the social media profile.",
-			  "type": "string",
-			  "format": "uri"
-		  }
-	},
-	  "required": ["platform", "url"],
-	  "additionalProperties": false
-	}
-
+    }
   },
 
   "additionalProperties": false,
@@ -141,6 +140,17 @@
       "description": "Optional URL to the project demo.",
       "format": "uri",
       "type": "string"
+    },
+    "documentation": {
+      "description": "Optional URLs to project documentation.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
     },
     "downloads": {
       "description": "Optional list of download URLs.",
@@ -263,7 +273,6 @@
 	  "items": {
 		  "$ref": "#/$defs/socialMedia"
 	  },
-	  "required": ["platform", "url"],
 	  "minItems": 1,
 	  "additionalProperties": false
 	}

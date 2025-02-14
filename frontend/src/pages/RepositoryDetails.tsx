@@ -14,13 +14,14 @@ import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
   const [repository, setRepository] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
-    variables: { projectKey: `www-project-${projectKey}`, repositoryKey: repositoryKey },
+    variables: { projectKey: projectKey, repositoryKey: repositoryKey },
   })
   useEffect(() => {
     if (data) {
@@ -86,18 +87,25 @@ const RepositoryDetailsPage = () => {
     { icon: faStar, value: `${repository?.starsCount || 'No'} Stars` },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      languages={repository.languages}
-      recentIssues={repository.issues}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={repository.topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <MetadataManager
+      description={repository.description}
+      keywords={repository.topics}
+      pageTitle={repository.name || repositoryKey}
+      url={repository.url}
+    >
+      <DetailsCard
+        details={repositoryDetails}
+        languages={repository.languages}
+        recentIssues={repository.issues}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={repository.topContributors}
+        topics={repository.topics}
+        type="repository"
+      />
+    </MetadataManager>
   )
 }
 export default RepositoryDetailsPage
