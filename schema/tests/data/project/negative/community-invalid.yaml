@@ -1,4 +1,11 @@
 audience: breaker
+community:
+  - platform: slack
+    description: Slack community
+    url: invalid-url
+  - platform: discord
+    description: Discord community
+    url: another-invalid-url
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -6,16 +13,9 @@ leaders:
     name: Leader 2 Name
 level: 2
 name: OWASP Incubator Code Project
-description: A very brief, one-line description of your project
+pitch: A very brief, one-line description of your project
 tags:
   - example-tag-1
   - example-tag-2
   - example-tag-3
 type: code
-community:
-  - platform: slack
-    url: invalid-url
-    description: Slack community
-  - platform: discord
-    url: another-invalid-url
-    description: Discord community
