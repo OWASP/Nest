@@ -61,10 +61,10 @@ const RepositoryItem = ({ details }) => {
         {details.name}
       </p>
       <div className="space-y-2 text-sm">
+        <InfoItem icon={faStar} label="Stars" value={details.starsCount} />
+        <InfoItem icon={faCodeFork} label="Forks" value={details.forksCount} />
         <InfoItem icon={faUsers} label="Contributors" value={details.contributorsCount} />
         <InfoItem icon={faExclamationCircle} label="Issues" value={details.openIssuesCount} />
-        <InfoItem icon={faCodeFork} label="Forks" value={details.forksCount} />
-        <InfoItem icon={faStar} label="Stars" value={details.starsCount} />
       </div>
     </div>
   )
