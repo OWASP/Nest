@@ -7,8 +7,6 @@ leaders:
     slack: leader-2-slack
 name: OWASP Chapter
 social_media:
-  - platform: youtube
-    url: https://www.youtube.com/channel/UC1234567890abc
 tags:
   - chapter-tag-1
   - chapter-tag-2
