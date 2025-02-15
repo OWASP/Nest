@@ -2782,6 +2782,17 @@ botocore = ">=1.36.0,<2.0a.0"
 crt = ["botocore[crt] (>=1.36.0,<2.0a.0)"]
 
 [[package]]
+name = "sed"
+version = "0.3.1"
+description = "Streaming editor toolkit"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "sed-0.3.1.tar.gz", hash = "sha256:42526b3f2fac4a0d8e0866a4209162384f4e65e0c6a40aac17ad39e5157c33bf"},
+]
+
+[[package]]
 name = "sentry-sdk"
 version = "2.21.0"
 description = "Python client for Sentry (https://sentry.io)"
@@ -3254,4 +3265,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "057dc2269443e0f146980046dd9dffa17b062146c2e86e58c0d9c0da57cade6c"
+content-hash = "f7c42aba864d683ec29036647b731e4d72a410a30a67c223b3727e15a77b6a26"
