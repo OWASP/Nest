@@ -7,6 +7,7 @@ from github.GithubException import UnknownObjectException
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
 from apps.github.models.organization import Organization
+from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -91,6 +92,48 @@ def sync_repository(gh_repository, organization=None, user=None):
                     issue.labels.add(Label.update_data(gh_issue_label))
                 except UnknownObjectException:
                     logger.info("Couldn't get GitHub issue label %s", issue.url)
+    # GitHub Pull Requests Part!
+    else:
+        logger.info("Skipping issues sync for %s", repository.name)
+    if not repository.is_archived and repository.project:
+        kwargs = {
+            "direction": "asc",
+            "sort": "created",
+            "state": "open",
+        }
+        latest_pull_request = (
+            PullRequest.objects.filter(repository=repository).order_by("-updated_at").first()
+        )
+        if latest_pull_request:
+            # Sync open/closed issues for subsequent runs.
+            kwargs.update(
+                {
+                    "since": latest_pull_request.updated_at,
+                    "state": "all",
+                }
+            )
+
+        for gh_pull_request in gh_repository.get_pulls(**kwargs):
+            author = (
+                User.update_data(gh_pull_request.user)
+                if gh_pull_request.user and gh_pull_request.user.type != "Bot"
+                else None
+            )
+
+            pull_request = PullRequest.update_data(
+                gh_pull_request, author=author, repository=repository
+            )
+
+            pull_request.assignees.clear()
+            for gh_pull_request_assignee in gh_pull_request.assignees:
+                pull_request.assignees.add(User.update_data(gh_pull_request_assignee))
+
+            pull_request.labels.clear()
+            for gh_pull_request_label in gh_pull_request.labels:
+                try:
+                    pull_request.labels.add(Label.update_data(gh_pull_request_label))
+                except UnknownObjectException:
+                    logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
     else:
         logger.info("Skipping issues sync for %s", repository.name)
 
