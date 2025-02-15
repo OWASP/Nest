@@ -65,12 +65,12 @@ const DetailsCard = ({
             </SecondaryCard>
           )}
           {type === 'chapter' && geolocationData && (
-            <SecondaryCard className="md:col-span-4">
+            <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
-                style={{ height: '200px', width: '100%', zIndex: '0' }}
+                style={{ height: '100%', width: '100%', zIndex: '0' }}
               />
-            </SecondaryCard>
+            </div>
           )}
         </div>
 
