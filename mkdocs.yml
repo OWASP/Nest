@@ -53,7 +53,6 @@ markdown_extensions:
   - pymdownx.mark
   - attr_list
   - pymdownx.emoji:
-      emoji_index: pymdownx.emoji.twemoji
       emoji_generator: pymdownx.emoji.to_svg
 
 plugins:
