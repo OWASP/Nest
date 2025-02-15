@@ -38,11 +38,12 @@ markdown = "^3.7"
 openai = "^1.60.1"
 psycopg = "^3.2.4"
 pygithub = "^2.5.0"
-python = "^3.13"
+python = "^3.10"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
+django-extensions = "^3.2.3"
 
 
 [tool.poetry.group.dev.dependencies]

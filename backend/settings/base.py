@@ -12,10 +12,10 @@ class Base(Configuration):
     BASE_DIR = Path(__file__).resolve().parent.parent
 
     ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION", "Local")
-    if ENVIRONMENT == "Test":
+    if ENVIRONMENT == "Local":
         from dotenv import load_dotenv
 
-        load_dotenv(BASE_DIR / ".env.example")
+        load_dotenv(BASE_DIR / ".env")
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
@@ -39,6 +39,7 @@ class Base(Configuration):
         "graphene_django",
         "rest_framework",
         "storages",
+        "django_extensions",
     )
 
     LOCAL_APPS = (
@@ -130,16 +131,6 @@ class Base(Configuration):
     }
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": values.Value(environ_name="DB_NAME"),
-            "USER": values.Value(environ_name="DB_USER"),
-            "PASSWORD": values.SecretValue(environ_name="DB_PASSWORD"),
-            "HOST": values.Value(environ_name="DB_HOST"),
-            "PORT": values.Value(environ_name="DB_PORT"),
-        },
-    }
 
     GRAPHENE = {
         "SCHEMA": "settings.graphql.schema",

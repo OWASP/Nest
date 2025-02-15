@@ -22,6 +22,8 @@ LANGUAGE_PERCENTAGE_THRESHOLD = 1
 class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     """Repository model."""
 
+    node_id = models.CharField(max_length=255)
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=("key", "owner"), name="unique_key_owner"),
