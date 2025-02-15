@@ -5,7 +5,6 @@ import logging
 from backend.apps.owasp.exceptions import SnapshotProcessingError
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.db.models import Q
 
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
@@ -87,8 +86,7 @@ class Command(BaseCommand):
             raise SnapshotProcessingError(error_msg) from e
 
     def get_new_items(self, model, snapshot):
-        """Get items created or updated within the snapshot timeframe."""
+        """Get only newly created items within the snapshot timeframe."""
         return model.objects.filter(
-            Q(created_at__gte=snapshot.start_at, created_at__lte=snapshot.end_at)
-            | Q(updated_at__gte=snapshot.start_at, updated_at__lte=snapshot.end_at)
+            created_at__gte=snapshot.start_at, created_at__lte=snapshot.end_at
         )
