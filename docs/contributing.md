@@ -239,7 +239,7 @@ make test
 #### Test Coverage
 
 * Minimum test coverage requirement for the Backend: [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml)
-* Minimum test coverage requirement for the Fackend: [jest.config.ts](https://github.com/OWASP/Nest/blob/main/frontend/jest.config.ts)
+* Minimum test coverage requirement for the Frontend: [jest.config.ts](https://github.com/OWASP/Nest/blob/main/frontend/jest.config.ts)
 
 !!! danger "Important Notice"
     - Ensure your changes do not drop the overall test coverage percentage.
