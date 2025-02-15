@@ -61,7 +61,7 @@
       "additionalProperties": false
     }
   },
-
+  
   "additionalProperties": false,
   "description": "OWASP chapter schema.",
   "properties": {
@@ -127,6 +127,11 @@
       "description": "The official website of the chapter.",
       "type": "string",
       "format": "url"
+    },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the chapter.",
+      "format": "uri",
+      "type": "string"
     }
   },
   "required": [

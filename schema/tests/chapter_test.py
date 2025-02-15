@@ -44,6 +44,11 @@ def test_positive(chapter_schema):
         ("sponsors-name-undefined.yaml", "'name' is a required property"),
         ("sponsors-undefined.yaml", "'url' is a required property"),
         ("website-null.yaml", "None is not of type 'string'"),
+
+        #Added test cases for mailing-list validation
+        ("mailing-list-empty.yaml", "'' is not a 'uri'"),
+        ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("mailing-list-null.yaml", "None is not a 'uri'"),
     ],
 )
 def test_negative(chapter_schema, file_path, error_message):
