@@ -16,16 +16,13 @@ CACHE_PREFIX = "algolia_proxy:"
 
 def get_search_results(index_name, query, page, hits_per_page):
     """Return search results for the given parameters."""
-    env = settings.ENVIRONMENT.lower()
-    full_index_name = f"{env}_{index_name}"
-
     search_params = get_params_for_index(index_name.split("_")[0])
     search_params.update(
         {
-            "indexName": full_index_name,
-            "query": query,
-            "page": page - 1,
             "hitsPerPage": hits_per_page,
+            "indexName": f"{settings.ENVIRONMENT.lower()}_{index_name}",
+            "page": page - 1,
+            "query": query,
         }
     )
 
@@ -47,21 +44,20 @@ def algolia_search(request):
             data = json.loads(request.body)
 
             index_name = data.get("indexName")
+            limit = int(data.get("hitsPerPage", 25))
+            page = int(data.get("page", 1))
             query = data.get("query", "")
-            current_page = int(data.get("page", 1))
-            hits_per_page = int(data.get("hitsPerPage", 25))
 
-            cache_key = f"{CACHE_PREFIX}{index_name}:{query}:{current_page}:{hits_per_page}"
+            cache_key = f"{CACHE_PREFIX}{index_name}:{query}:{page}:{limit}"
 
-            cached_result = cache.get(cache_key)
-            if cached_result:
-                return JsonResponse(cached_result)
+            result = cache.get(cache_key)
+            if result is not None:
+                return JsonResponse(result)
 
-            search_results = get_search_results(index_name, query, current_page, hits_per_page)
+            result = get_search_results(index_name, query, page, limit)
+            cache.set(cache_key, result, CACHE_DURATION)
 
-            cache.set(cache_key, search_results, CACHE_DURATION)
-
-            return JsonResponse(search_results)
+            return JsonResponse(result)
         except (AlgoliaException, json.JSONDecodeError):
             return JsonResponse(
                 {"error": "An internal error occurred. Please try again later."}, status=500

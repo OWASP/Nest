@@ -1,5 +1,5 @@
 import { AlgoliaResponseType } from 'types/algolia'
-import { API_URL } from 'utils/credentials'
+import { IDX_URL } from 'utils/credentials'
 import { AppError } from 'wrappers/ErrorWrapper'
 import { removeIdxPrefix } from './utility'
 
@@ -10,7 +10,7 @@ export const fetchAlgoliaData = async <T>(
   hitsPerPage = 25
 ): Promise<AlgoliaResponseType<T>> => {
   try {
-    const response = await fetch(`${API_URL}/idx`, {
+    const response = await fetch(IDX_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
