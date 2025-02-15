@@ -5,7 +5,7 @@ cspell-check: CMD="--no-progress -r /nest"
 cspell-check: cspell-install cspell-run
 
 cspell-run:
-	@-docker run \
+	@docker run \
 		--mount type=bind,src="$(PWD)",dst=/nest \
 		--rm \
 		cspell -c cspell/cspell.json "$(CMD)"
