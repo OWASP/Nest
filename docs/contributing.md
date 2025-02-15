@@ -35,7 +35,7 @@ Before contributing, ensure you have the following installed:
 
 !!! warning "Windows Setup Requirements"
     **WSL (Windows Subsystem for Linux)** is required for Windows users to enable Linux compatibility.
-    
+
     1. The `make run` command requires WSL
     2. You must use WSL terminal (not Windows PowerShell)
     3. WSL integration must be enabled in Docker Desktop settings
@@ -201,7 +201,7 @@ To fetch GitHub OWASP data locally:
         ```
 
 2. **Update NestBot Configuration**
-    
+
     Add to `backend/.env`:
     ```plaintext
     DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
@@ -242,7 +242,7 @@ make test
 * Minimum test coverage requirement for the Fackend: [jest.config.ts](https://github.com/OWASP/Nest/blob/main/frontend/jest.config.ts)
 
 !!! danger "Important Notice"
-    - Ensure your changes do not drop the overall test coverage percentage.  
+    - Ensure your changes do not drop the overall test coverage percentage.
     - If you are adding new functionality, include relevant test cases.
 
 
@@ -261,22 +261,22 @@ git checkout -b feature/my-feature-name
 ### 3. Make Changes and Commit
 * Check that your commits include only related and intended changes. Do not include unrelated files.
 * Follow best practices for code style and testing.
-- **Add tests** for any new functionality or changes to ensure proper coverage.  
-    - **Run the code quality checks**:  
+- **Add tests** for any new functionality or changes to ensure proper coverage.
+    - **Run the code quality checks**:
       ```bash
       make check
-      ```  
-    - **Run tests to ensure everything works correctly**:  
+      ```
+    - **Run tests to ensure everything works correctly**:
       ```bash
       make test
-      ```  
-    - **Write meaningful commit messages**:  
+      ```
+    - **Write meaningful commit messages**:
       ```bash
       git commit -m "Add feature: short description"
-      ```  
+      ```
 
 ### 4. Push Changes
-- **Push your branch to the repository**:  
+- **Push your branch to the repository**:
     ```bash
     git push origin feature/my-feature-name
     ```
@@ -304,7 +304,7 @@ This error is usually caused by incorrect encoding of `.env` files. To resolve t
    - Choose **"UTF-8"** from the list (ensure it's not "UTF-8 with BOM").
 3. **Save the file** with the correct encoding.
 4. **Restart the application** using the command
-   **`make run`**. 
+   **`make run`**.
 
 ## Code of Conduct
 

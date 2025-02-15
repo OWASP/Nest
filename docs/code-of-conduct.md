@@ -40,7 +40,7 @@ We encourage behaviors that contribute to a positive environment:
 
 !!! info "Leadership Role"
     Community leaders are responsible for:
-    
+
     - Clarifying and enforcing standards of acceptable behavior
     - Taking appropriate and fair corrective action
     - Removing, editing, or rejecting contributions not aligned with this Code
@@ -88,4 +88,4 @@ Community Impact Guidelines were inspired by [Mozilla's code of conduct enforcem
 
 !!! note "Additional Resources"
     - [Contributor Covenant FAQ](https://www.contributor-covenant.org/faq)
-    - [Available Translations](https://www.contributor-covenant.org/translations) 
+    - [Available Translations](https://www.contributor-covenant.org/translations)

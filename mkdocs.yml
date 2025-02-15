@@ -24,17 +24,17 @@ theme:
   palette:
     - scheme: default
       toggle:
-        icon: material/toggle-switch-off-outline 
+        icon: material/toggle-switch-off-outline
         name: Switch to dark mode
       primary: teal
-      accent: purple 
-    - scheme: slate 
+      accent: purple
+    - scheme: slate
       toggle:
         icon: material/toggle-switch
-        name: Switch to light mode    
+        name: Switch to light mode
       primary: teal
       accent: lime
-      
+
 markdown_extensions:
   - pymdownx.tasklist
   - pymdownx.tabbed:
@@ -53,8 +53,8 @@ markdown_extensions:
   - pymdownx.mark
   - attr_list
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: pymdownx.emoji.twemoji
+      emoji_generator: pymdownx.emoji.to_svg
 
 plugins:
   - search

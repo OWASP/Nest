@@ -2,7 +2,7 @@
 title: OWASP Nest
 ---
 
-# OWASP Nest 🚀  
+# OWASP Nest 🚀
 
 [![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue) [![Slack](https://img.shields.io/badge/OWASP-Slack-blue.svg)](https://owasp.slack.com/messages/project-nest)
 
@@ -18,10 +18,10 @@ title: OWASP Nest
 
 ### 🚀 **Key Features**
 
-✅ **Advanced Search Capabilities** – Find projects and issues efficiently using powerful filters.  
-✅ **Slack Integration** – Stay connected with a [Slack bot](https://owasp.slack.com/team/U07M1C4JASK) for real-time updates.  
-✅ **OWASP Chapters Proximity Page** – Discover OWASP chapters near you and participate in community events.  
-✅ **AI-Generated Insights** – Get automatic issue descriptions and actionable steps to contribute effectively.  
+✅ **Advanced Search Capabilities** – Find projects and issues efficiently using powerful filters.
+✅ **Slack Integration** – Stay connected with a [Slack bot](https://owasp.slack.com/team/U07M1C4JASK) for real-time updates.
+✅ **OWASP Chapters Proximity Page** – Discover OWASP chapters near you and participate in community events.
+✅ **AI-Generated Insights** – Get automatic issue descriptions and actionable steps to contribute effectively.
 
 OWASP Nest makes it easier for both new and experienced contributors to engage meaningfully with OWASP's mission to improve software security worldwide.
 
@@ -60,12 +60,11 @@ OWASP Nest thrives on community contributions. Whether you're a developer, desig
 
 ## 🔗 Useful Links
 
-📌 [OWASP Nest GitHub Repository](https://github.com/OWASP/Nest)  
-📌 [OWASP Project Nest Page](https://owasp.org/www-project-nest/)  
-📌 [Join OWASP Slack](https://owasp.slack.com)  
-📌 [OWASP Nest Issues](https://github.com/OWASP/Nest/issues)  
+📌 [OWASP Nest GitHub Repository](https://github.com/OWASP/Nest)
+📌 [OWASP Project Nest Page](https://owasp.org/www-project-nest/)
+📌 [Join OWASP Slack](https://owasp.slack.com)
+📌 [OWASP Nest Issues](https://github.com/OWASP/Nest/issues)
 
 ---
 
 ✨ **Join us in making OWASP Nest the ultimate hub for security contributors!** 🚀
-
