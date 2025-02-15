@@ -71,3 +71,10 @@ xdg
 xdist
 xsser
 zsc
+kasya
+mamicidal
+mdfile
+inlinehilite
+arithmatex
+superfences
+pymdownx
