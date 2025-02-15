@@ -42,6 +42,19 @@ export function useSearchPage<T>({
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (searchParams) {
+      const searchQueryParam = searchParams.get('q') || ''
+      const sortByParam = searchParams.get('sortBy') || 'default'
+      const orderParam = searchParams.get('order') || 'asc'
+
+      if (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam) {
+        setCurrentPage(1)
+      }
+    }
+  }, [searchQuery, sortBy, order, searchParams])
+
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
@@ -59,7 +72,6 @@ export function useSearchPage<T>({
   }, [searchQuery, order, currentPage, sortBy, setSearchParams])
 
   useEffect(() => {
-    document.title = pageTitle
     setIsLoaded(false)
 
     const fetchData = async () => {
@@ -85,7 +97,6 @@ export function useSearchPage<T>({
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
-    setCurrentPage(1)
   }
 
   const handlePageChange = (page: number) => {
@@ -98,12 +109,12 @@ export function useSearchPage<T>({
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort)
-    setCurrentPage(1)
   }
+
   const handleOrderChange = (order: string) => {
     setOrder(order)
-    setCurrentPage(1)
   }
+
   return {
     items,
     isLoaded,

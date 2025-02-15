@@ -9,6 +9,7 @@ import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -65,15 +66,17 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <DetailsCard
-      title={chapter.name}
-      socialLinks={chapter.relatedUrls}
-      is_active={chapter.isActive}
-      details={details}
-      summary={chapter.summary}
-      type="chapter"
-      topContributors={chapter.topContributors}
-      geolocationData={chapter}
-    />
+    <MetadataManager pageTitle={chapter.name} description={chapter.summary} url={chapter.url}>
+      <DetailsCard
+        details={details}
+        geolocationData={chapter}
+        is_active={chapter.isActive}
+        socialLinks={chapter.relatedUrls}
+        summary={chapter.summary}
+        title={chapter.name}
+        topContributors={chapter.topContributors}
+        type="chapter"
+      />
+    </MetadataManager>
   )
 }
