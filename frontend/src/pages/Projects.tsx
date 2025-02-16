@@ -28,6 +28,7 @@ const ProjectsPage = () => {
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
     defaultOrder: 'asc',
+    activeOnly: true,
   })
 
   const navigate = useNavigate()
@@ -80,7 +81,7 @@ const ProjectsPage = () => {
         }
         totalPages={totalPages}
       >
-        {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
+        {projects && projects.map(renderProjectCard)}
       </SearchPageLayout>
     </MetadataManager>
   )
