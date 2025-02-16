@@ -25,7 +25,7 @@ def test_positive(chapter_schema):
     [
         ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
-        ("community-empty.yaml", "[] should be non-empty"),
+        ("community-empty.yaml", "Additional properties are not allowed ('level' was unexpected)"),
         (
             "community-invalid.yaml",
             "'another-invalid-url' is not a 'uri'",
