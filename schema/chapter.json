@@ -2,84 +2,30 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/chapter.json",
   "$defs": {
-    "leader": {
-      "type": "object",
-      "title": "Leader",
-      "description": "A chapter leader.",
-      "required": ["github"],
-      "properties": {
-        "email": {
-          "description": "The leader's email address.",
-          "format": "email",
-          "type": ["string", "null"]
-        },
-        "github": {
-          "type": "string",
-          "description": "The GitHub username.",
-          "pattern": "^[a-zA-Z0-9-]{1,39}$"
-        },
-        "name": {
-          "type": ["string", "null"],
-          "description": "Leader's name."
-        },
-        "slack": {
-          "type": ["string", "null"],
-          "description": "The Slack username.",
-          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
-        }
+    "leaders": {
+      "description": "Leaders of the project.",
+      "type": "array",
+      "items": {
+        "$ref": "./definitions/person.json"
       },
-      "additionalProperties": false
+      "minItems": 2,
+      "uniqueItems": true
     },
-    "sponsor": {
-      "type": "object",
-      "title": "Sponsor",
-      "description": "A chapter sponsor.",
-      "required": [
-        "name",
-        "url"
-      ],
-      "properties": {
-        "description": {
-          "type": "string",
-          "description": "A brief description of the sponsor."
-        },
-        "logo": {
-          "type": "string",
-          "description": "The URL of the sponsor's logo.",
-          "format": "uri"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the sponsor or organization."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the sponsor.",
-          "format": "uri"
-        }
+    "sponsors": {
+      "description": "Sponsors of the project.",
+      "type": "array",
+      "items": {
+        "$ref": "./definitions/sponsor.json"
       },
-      "additionalProperties": false
+      "minItems": 1
     },
-    "socialMedia": {
-      "description": "A social media platform for the chapter.",
-      "type": "object",
-      "properties": {
-          "description": {
-          "description": "Description of the social media platform",
-          "type": "string"
-        },
-        "platform": {
-          "description": "The type of social media platform.",
-          "enum": ["bluesky", "linkedin", "x", "youtube"],
-          "type": "string"
-        },
-        "url": {
-          "description": "The URL of the social media profile.",
-          "type": "string",
-          "format": "uri"
-        }
+    "social_media": {
+      "description": "Social media information for the project",
+      "type": "array",
+      "items": {
+        "$ref": "./definitions/socialMedia.json"
       },
-      "required": ["platform", "url"],
+      "minItems": 1,
       "additionalProperties": false
     }
   },
@@ -110,7 +56,7 @@
       "description": "Leaders of the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/leader"
+        "$ref": "#/$defs/leaders"
       },
       "minItems": 2,
       "uniqueItems": true
@@ -132,7 +78,7 @@
       "description": "Sponsors of the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/sponsor"
+        "$ref": "#/$defs/sponsors"
       },
       "minItems": 1
     },
@@ -150,22 +96,17 @@
       "type": "string",
       "format": "url"
     },
-	  "social_media": {
-	  "description": "Social media information for the chapter.",
-	  "type": "array",
-	  "items": {
-		  "$ref": "#/$defs/socialMedia"
-	  },
-	  "minItems": 1,
-	  "additionalProperties": false
-	  }
+    "social_media": {
+      "description": "Social media information for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/social_media"
+      },
+      "minItems": 1,
+      "additionalProperties": false
+    }
   },
-  "required": [
-    "country",
-    "leaders",
-    "name",
-    "tags"
-  ],
+  "required": ["country", "leaders", "name", "tags"],
   "title": "OWASP Chapter",
   "type": "object"
 }

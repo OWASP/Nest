@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sponsor",
+  "description": "A project sponsor.",
+  "type": "object",
+  "required": ["name", "url"],
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "A brief description of the sponsor."
+    },
+    "logo": {
+      "type": "string",
+      "description": "The URL of the sponsor's logo.",
+      "format": "uri"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the sponsor or organization."
+    },
+    "url": {
+      "type": "string",
+      "description": "The URL of the sponsor.",
+      "format": "uri"
+    }
+  },
+  "additionalProperties": false
+}
