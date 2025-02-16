@@ -19,6 +19,6 @@ tags:
   - example-tag-3
 type: code
 logo:
-  - small: "https://example.com/smallLogo"
+  - small: https://example.com/smallLogo
     medium:
-    large: "https://example.com/largeLogo"
+    large: https://example.com/largeLogo

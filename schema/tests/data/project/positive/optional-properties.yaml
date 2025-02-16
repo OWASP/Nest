@@ -38,6 +38,6 @@ tags:
 type: code
 website: https://official-website.com
 logo:
-  - small: "https://example.com/smallLogo"
-    medium: "https://example.com/mediumLogo"
-    large: "https://example.com/largeLogo"
+  - small: https://example.com/smallLogo
+    medium: https://example.com/mediumLogo
+    large: https://example.com/largeLogo

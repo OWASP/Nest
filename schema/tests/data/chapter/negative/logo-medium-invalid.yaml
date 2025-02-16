@@ -15,5 +15,5 @@ tags:
   - chapter-tag-3
 logo:
   - small: https://example.com/smallLogo
-    medium: https://example.com/mediumLogo
-    large:
+    medium: https://xyz
+    large: https://example.com/largeLogo

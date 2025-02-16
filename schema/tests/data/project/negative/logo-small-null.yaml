@@ -20,5 +20,5 @@ tags:
 type: code
 logo:
   - small:
-    medium: "https://example.com/mediumLogo"
-    large: "https://example.com/largeLogo"
+    medium: https://example.com/mediumLogo
+    large: https://example.com/largeLogo
