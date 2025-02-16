@@ -14,6 +14,9 @@
     "socialMedia": {
       "$ref": "./schema/definitions/socialMedia.json"
     },
+    "socialMedia": {
+      "$ref": "./schema/definitions/socialMedia.json"
+    },
     "sponsor": {
       "$ref": "./schema/definitions/sponsor.json"
     }
