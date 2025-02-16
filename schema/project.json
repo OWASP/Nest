@@ -138,6 +138,17 @@
         }
       },
       "additionalProperties": false
+    },
+    "logo": {
+      "description" : "A logo for the project",
+      "type": "object",
+      "properties": {
+        "small": {"description": "Logo size should be 192x192 pixels.","type": "string", "format": "uri"},
+        "medium": {"description": "Logo size should be 256x256 pixels.", "type": "string", "format": "uri"},
+        "large": {"description": "Logo size should be 512x512 pixels.", "type": "string", "format": "uri"}
+      },
+      "required": ["small", "medium", "large"],
+      "additionalProperties": false
     }
   },
 
@@ -249,6 +260,16 @@
       ],
       "type": "string"
     },
+    "logo": {
+    "description": "Logo information for the project.",
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/logo"
+    },
+    "minItems": 1,
+    "additionalProperties": false,
+    "optional": true
+  },
     "mailing-list": {
       "description": "The optional mailing list associated with the project.",
       "format": "uri",
@@ -271,6 +292,15 @@
         "$ref": "#/$defs/repository"
       },
       "uniqueItems": true
+    },
+    "social_media": {
+      "description": "Social media information for the project",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/socialMedia"
+      },
+      "minItems": 1,
+      "additionalProperties": false
     },
     "sponsors": {
       "description": "Sponsors of the project.",
@@ -304,16 +334,7 @@
       "format": "url",
       "minLength": 4,
       "type": "string"
-    },
-	"social_media": {
-	  "description": "Social media information for the project",
-	  "type": "array",
-	  "items": {
-		  "$ref": "#/$defs/socialMedia"
-	  },
-	  "minItems": 1,
-	  "additionalProperties": false
-	}
+    }
   },
   "required": [
     "audience",

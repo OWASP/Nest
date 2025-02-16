@@ -104,6 +104,17 @@
       },
       "required": ["platform", "url"],
       "additionalProperties": false
+    },
+    "logo": {
+      "description" : "A logo for the chapter",
+      "type": "object",
+      "properties": {
+        "small": {"description": "Logo size should be 192x192 pixels.","type": "string", "format": "uri"},
+        "medium": {"description": "Logo size should be 256x256 pixels.", "type": "string", "format": "uri"},
+        "large": {"description": "Logo size should be 512x512 pixels.", "type": "string", "format": "uri"}
+      },
+      "required": ["small", "medium", "large"],
+      "additionalProperties": false
     }
   },
 
@@ -148,6 +159,16 @@
       "minItems": 2,
       "uniqueItems": true
     },
+    "logo": {
+    "description": "Logo for the chapter.",
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/logo"
+    },
+    "minItems": 1,
+    "additionalProperties": false,
+    "optional": true
+    },
     "meetup-group": {
       "description": "Meetup group.",
       "type": "string"
@@ -161,6 +182,15 @@
       "description": "Region.",
       "type": "string"
     },
+    "social_media": {
+	  "description": "Social media information for the chapter.",
+	  "type": "array",
+	  "items": {
+		  "$ref": "#/$defs/socialMedia"
+	  },
+	  "minItems": 1,
+	  "additionalProperties": false
+	  },
     "sponsors": {
       "description": "Sponsors of the chapter.",
       "type": "array",
@@ -182,16 +212,7 @@
       "description": "The official website of the chapter.",
       "type": "string",
       "format": "url"
-    },
-	  "social_media": {
-	  "description": "Social media information for the chapter.",
-	  "type": "array",
-	  "items": {
-		  "$ref": "#/$defs/socialMedia"
-	  },
-	  "minItems": 1,
-	  "additionalProperties": false
-	  }
+    }
   },
   "required": [
     "country",
