@@ -55,6 +55,8 @@ def test_positive(project_schema):
         ),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
+        ("repository-url-missing.yaml", "url' is a required property"),
+        ("repository-type-invalid.yaml", "is not one of ['git', 'svn', 'mercurial']"),
         ("sponsors-empty-list.yaml", "[] should be non-empty"),
         ("sponsors-name-missing.yaml", "'name' is a required property"),
         ("sponsors-url-missing.yaml", "'url' is a required property"),

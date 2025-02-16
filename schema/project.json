@@ -2,63 +2,29 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
   "$defs": {
-    "leader": {
-      "type": "object",
-      "title": "Leader",
-      "description": "A project leader.",
-      "required": ["github"],
-      "properties": {
-        "email": {
-          "description": "The leader's email address.",
-          "format": "email",
-          "type": ["string", "null"]
-        },
-        "github": {
-          "type": "string",
-          "description": "The GitHub username.",
-          "pattern": "^[a-zA-Z0-9-]{1,39}$"
-        },
-        "name": {
-          "type": ["string", "null"],
-          "description": "Leader's name."
-        },
-        "slack": {
-          "type": ["string", "null"],
-          "description": "The Slack username.",
-          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
-        }
+    "leaders": {
+      "description": "Leaders of the project.",
+      "type": "array",
+      "items": {
+        "$ref": "./definitions/person.json"
       },
-      "additionalProperties": false
+      "minItems": 2,
+      "uniqueItems": true
     },
-    "sponsor": {
-      "type": "object",
-      "title": "Sponsor",
-      "description": "A project sponsor.",
-      "required": [
-        "name",
-        "url"
-      ],
-      "properties": {
-        "description": {
-          "type": "string",
-          "description": "A brief description of the sponsor."
-        },
-        "logo": {
-          "type": "string",
-          "description": "The URL of the sponsor's logo.",
-          "format": "uri"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the sponsor or organization."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the sponsor.",
-          "format": "uri"
-        }
+    "repositories": {
+      "description": "Repositories associated with the project.",
+      "type": "array",
+      "items": {
+        "$ref": "./definitions/repository.json"
+      }
+    },
+    "sponsors": {
+      "description": "Sponsors of the project.",
+      "type": "array",
+      "items": {
+        "$ref": "./definitions/sponsor.json"
       },
-      "additionalProperties": false
+      "minItems": 1
     }
   },
 
@@ -114,12 +80,7 @@
       "default": 2,
       "description": "The numeric level of the project.",
       "enum": [2, 3, 3.5, 4],
-      "enumDescriptions": [
-        "Incubator",
-        "Lab",
-        "Production",
-        "Flagship"
-      ],
+      "enumDescriptions": ["Incubator", "Lab", "Production", "Flagship"],
       "title": "Project level.",
       "type": "number"
     },
@@ -186,15 +147,7 @@
       "format": "url"
     }
   },
-  "required": [
-    "audience",
-    "leaders",
-    "level",
-    "name",
-    "pitch",
-    "tags",
-    "type"
-  ],
+  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
   "title": "OWASP Project",
   "type": "object"
 }

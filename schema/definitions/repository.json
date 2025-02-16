@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Repository",
+  "description": "A project's repository details.",
+  "type": "object",
+  "required": ["url", "type"],
+  "properties": {
+    "url": {
+      "description": "The repository URL.",
+      "type": "string",
+      "format": "uri"
+    },
+    "type": {
+      "description": "The repository type.",
+      "type": "string",
+      "enum": ["git", "svn", "mercurial"]
+    },
+    "branch": {
+      "description": "The default branch of the repository.",
+      "type": "string",
+      "default": "main"
+    },
+    "issues": {
+      "description": "The issue tracker URL.",
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "pull_requests": {
+      "description": "The pull request page URL.",
+      "type": ["string", "null"],
+      "format": "uri"
+    }
+  },
+  "additionalProperties": false
+}
