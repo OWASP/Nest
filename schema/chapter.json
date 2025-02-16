@@ -81,6 +81,17 @@
       },
       "required": ["platform", "url"],
       "additionalProperties": false
+    },
+    "logo": {
+      "description" : "A logo for the chapter",
+      "type": "object",
+      "properties": {
+        "small": {"description": "Logo size should be 192x192 pixels.","type": "string", "format": "uri"},
+        "medium": {"description": "Logo size should be 256x256 pixels.", "type": "string", "format": "uri"},
+        "large": {"description": "Logo size should be 512x512 pixels.", "type": "string", "format": "uri"}
+      },
+      "required": ["small", "medium", "large"],
+      "additionalProperties": false
     }
   },
 
@@ -158,7 +169,17 @@
 	  },
 	  "minItems": 1,
 	  "additionalProperties": false
-	  }
+	  },
+    "logo": {
+    "description": "Logo for the chapter.",
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/logo"
+    },
+    "minItems": 1,
+    "additionalProperties": false,
+    "optional": true
+    }
   },
   "required": [
     "country",
