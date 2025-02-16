@@ -25,6 +25,12 @@ def test_positive(chapter_schema):
     [
         ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
+        ("community-empty.yaml", "[] should be non-empty"),
+        (
+            "community-invalid.yaml",
+            "'another-invalid-url' is not a 'uri'",
+        ),
+        ("community-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique.yaml",
