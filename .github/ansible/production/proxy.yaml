@@ -1,0 +1,22 @@
+- name: Deploy Production Nest Proxy
+  hosts: production_nest_proxy
+  tasks:
+    - name: Copy proxy docker-compose.yaml
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/proxy/docker-compose.yaml'
+        dest: ~/docker-compose.yaml
+        mode: '0644'
+
+    - name: Copy proxy configuration file
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/proxy/production.conf'
+        dest: ~/production.conf
+        mode: '0644'
+
+    - name: Update Docker images
+      shell:
+        cmd: docker compose pull
+
+    - name: Retart proxy server
+      shell:
+        cmd: docker compose up -d

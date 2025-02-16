@@ -5,4 +5,4 @@
       async: 21600 # 6 hours
       poll: 0
       shell: |
-        make sync-data > /var/log/nest/sync-data.log 2>&1
+        make sync-data > /var/log/nest/production/sync-data.log 2>&1
