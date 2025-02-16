@@ -13,7 +13,7 @@ tags:
   - chapter-tag-1
   - chapter-tag-2
   - chapter-tag-3
-logo: 
+logo:
   - small: "https://example.com/smallLogo"
     medium:
     large: "https://example.com/largeLogo"
