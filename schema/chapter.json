@@ -150,6 +150,10 @@
       "type": "string",
       "format": "url"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the chapter.",
+      "format": "uri",
+      "type": "string"},
 	  "social_media": {
 	  "description": "Social media information for the chapter.",
 	  "type": "array",
