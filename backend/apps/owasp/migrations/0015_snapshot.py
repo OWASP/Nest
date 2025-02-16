@@ -4,28 +4,59 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0014_project_custom_tags'),
+        ("owasp", "0014_project_custom_tags"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Snapshot',
+            name="Snapshot",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_at', models.DateTimeField()),
-                ('end_at', models.DateTimeField()),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), ('completed', 'Completed'), ('error', 'Error')], default='pending', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('error_message', models.TextField(blank=True)),
-                ('new_chapters', models.ManyToManyField(blank=True, related_name='snapshots', to='owasp.chapter')),
-                ('new_projects', models.ManyToManyField(blank=True, related_name='snapshots', to='owasp.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("start_at", models.DateTimeField()),
+                ("end_at", models.DateTimeField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("processing", "Processing"),
+                            ("completed", "Completed"),
+                            ("error", "Error"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("error_message", models.TextField(blank=True)),
+                (
+                    "new_chapters",
+                    models.ManyToManyField(
+                        blank=True, related_name="snapshots", to="owasp.chapter"
+                    ),
+                ),
+                (
+                    "new_projects",
+                    models.ManyToManyField(
+                        blank=True, related_name="snapshots", to="owasp.project"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-start_at'],
-                'indexes': [models.Index(fields=['status'], name='owasp_snaps_status_a0cde6_idx'), models.Index(fields=['start_at', 'end_at'], name='owasp_snaps_start_a_025dfc_idx')],
+                "ordering": ["-start_at"],
+                "indexes": [
+                    models.Index(fields=["status"], name="owasp_snaps_status_a0cde6_idx"),
+                    models.Index(
+                        fields=["start_at", "end_at"], name="owasp_snaps_start_a_025dfc_idx"
+                    ),
+                ],
             },
         ),
     ]
