@@ -45,7 +45,7 @@ export function useSearchPage<T>({
     if (searchParams) {
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'asc'
+      const orderParam = searchParams.get('order') || 'desc'
 
       if (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam) {
         setCurrentPage(1)
