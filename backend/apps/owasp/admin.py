@@ -7,6 +7,7 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
+from apps.owasp.models.snapshot import Snapshot
 
 
 class GenericEntityAdminMixin:
@@ -59,6 +60,13 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
+class SnapshotAdmin(admin.ModelAdmin):
+    list_display = ("start_at", "end_at", "status", "created_at", "updated_at")
+    list_filter = ("status", "start_at", "end_at")
+    search_fields = ("status", "error_message")
+    ordering = ("-start_at",)
+
+
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     autocomplete_fields = (
         "organizations",
@@ -105,3 +113,4 @@ admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Project, ProjectAdmin)
+admin.site.register(Snapshot, SnapshotAdmin)
