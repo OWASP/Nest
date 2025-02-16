@@ -14,7 +14,7 @@
         },
         "platform": {
           "type": "string",
-          "enum": ["slack", "discord"],
+          "enum": ["discord", "slack"],
           "description": "The platform used by the community."
         },
         "url": {
