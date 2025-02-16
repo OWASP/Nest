@@ -2,10 +2,10 @@
 
 import logging
 
-from backend.apps.owasp.exceptions import SnapshotProcessingError
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from apps.owasp.exceptions import SnapshotProcessingError
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
