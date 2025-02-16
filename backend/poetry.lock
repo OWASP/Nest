@@ -2809,6 +2809,6 @@ multidict = ">=4.0"
 propcache = ">=0.2.0"
 
 [metadata]
-lock-version = "2.0"
+lock-version = "2.1"
 python-versions = "^3.1"
 content-hash = "0cca9f932b880f804135bdd421cdc5f3926bfdd9ab44bde83e723a4f08aa6386"
