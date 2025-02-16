@@ -124,7 +124,7 @@ describe('Contribute Component', () => {
       fireEvent.change(searchInput, { target: { value: '' } })
     })
 
-    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1)
+    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1, undefined)
   })
 
   test('handles error states in card rendering', async () => {
