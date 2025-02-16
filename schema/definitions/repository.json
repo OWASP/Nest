@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "title": "Repository",
+  "description": "A project repository.",
+  "required": ["url"],
+  "properties": {
+    "changelog": {
+      "type": ["string", "null"],
+      "description": "Link to the changelog."
+    },
+    "code_of_conduct": {
+      "type": ["string", "null"],
+      "description": "Link to the code of conduct."
+    },
+    "contribution_guide": {
+      "type": ["string", "null"],
+      "description": "Link to the contribution guide."
+    },
+    "description": {
+      "type": ["string"],
+      "description": "Repository description."
+    },
+    "name": {
+      "type": ["string"],
+      "description": "Repository name."
+    },
+    "url": {
+      "type": "string",
+      "description": "The repository URL.",
+      "format": "uri"
+    }
+  },
+  "additionalProperties": false
+}

@@ -3,141 +3,19 @@
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
   "$defs": {
     "community": {
-      "type": "object",
-      "title": "Community",
-      "description": "A project community.",
-      "required": ["platform", "url"],
-      "properties": {
-        "description": {
-          "description": "A brief description of the community.",
-          "type": "string"
-        },
-        "platform": {
-          "type": "string",
-          "enum": ["discord", "slack"],
-          "description": "The platform used by the community."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the community.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
+      "$ref": "./schema/definitions/community.json"
     },
     "leader": {
-      "type": "object",
-      "title": "Leader",
-      "description": "A project leader.",
-      "required": ["github"],
-      "properties": {
-        "email": {
-          "description": "The leader's email address.",
-          "format": "email",
-          "type": ["string", "null"]
-        },
-        "github": {
-          "type": "string",
-          "description": "The GitHub username.",
-          "pattern": "^[a-zA-Z0-9-]{1,39}$"
-        },
-        "name": {
-          "type": ["string", "null"],
-          "description": "Leader's name."
-        },
-        "slack": {
-          "type": ["string", "null"],
-          "description": "The Slack username.",
-          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
-        }
-      },
-      "additionalProperties": false
+      "$ref": "./schema/definitions/person.json"
     },
     "repository": {
-      "type": "object",
-      "title": "Repository",
-      "description": "A project repository.",
-      "required": ["url"],
-      "properties": {
-        "changelog": {
-          "type": ["string", "null"],
-          "description": "Link to the changelog."
-        },
-        "code_of_conduct": {
-          "type": ["string", "null"],
-          "description": "Link to the code of conduct."
-        },
-        "contribution_guide": {
-          "type": ["string", "null"],
-          "description": "Link to the contribution guide."
-        },
-        "description": {
-          "type": ["string"],
-          "description": "Repository description."
-        },
-        "name": {
-          "type": ["string"],
-          "description": "Repository name."
-        },
-        "url": {
-          "type": "string",
-          "description": "The repository URL.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
+      "$ref": "./schema/definitions/repository.json"
     },
     "socialMedia": {
-      "description": "A social media platform for the project",
-      "type": "object",
-      "properties": {
-          "description": {
-          "description": "Description of the social media platform",
-          "type": "string"
-        },
-        "platform": {
-          "description": "The type of social media platform.",
-          "enum": ["bluesky", "linkedin", "x", "youtube"],
-          "type": "string"
-        },
-        "url": {
-          "description": "The URL of the social media profile.",
-          "type": "string",
-          "format": "uri"
-        }
-      },
-      "required": ["platform", "url"],
-      "additionalProperties": false
+      "$ref": "./schema/definitions/socialMedia.json"
     },
     "sponsor": {
-      "type": "object",
-      "title": "Sponsor",
-      "description": "A project sponsor.",
-      "required": [
-        "name",
-        "url"
-      ],
-      "properties": {
-        "description": {
-          "type": "string",
-          "description": "A brief description of the sponsor."
-        },
-        "logo": {
-          "type": "string",
-          "description": "The URL of the sponsor's logo.",
-          "format": "uri"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the sponsor or organization."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the sponsor.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
+      "$ref": "./schema/definitions/sponsor.json"
     }
   },
 
@@ -219,12 +97,7 @@
       "default": 2,
       "description": "The numeric level of the project.",
       "enum": [2, 3, 3.5, 4],
-      "enumDescriptions": [
-        "Incubator",
-        "Lab",
-        "Production",
-        "Flagship"
-      ],
+      "enumDescriptions": ["Incubator", "Lab", "Production", "Flagship"],
       "title": "Project level.",
       "type": "number"
     },
@@ -253,7 +126,7 @@
       "description": "The optional mailing list associated with the project.",
       "format": "uri",
       "type": "string"
-},
+    },
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
@@ -305,25 +178,17 @@
       "minLength": 4,
       "type": "string"
     },
-	"social_media": {
-	  "description": "Social media information for the project",
-	  "type": "array",
-	  "items": {
-		  "$ref": "#/$defs/socialMedia"
-	  },
-	  "minItems": 1,
-	  "additionalProperties": false
-	}
+    "social_media": {
+      "description": "Social media information for the project",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/socialMedia"
+      },
+      "minItems": 1,
+      "additionalProperties": false
+    }
   },
-  "required": [
-    "audience",
-    "leaders",
-    "level",
-    "name",
-    "pitch",
-    "tags",
-    "type"
-  ],
+  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
   "title": "OWASP Project",
   "type": "object"
 }
