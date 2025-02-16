@@ -64,6 +64,28 @@
       },
       "additionalProperties": false
     },
+    "socialMedia": {
+      "description": "A social media platform for the project",
+      "type": "object",
+      "properties": {
+          "description": {
+          "description": "Description of the social media platform",
+          "type": "string"
+        },
+        "platform": {
+          "description": "The type of social media platform.",
+          "enum": ["bluesky", "linkedin", "x", "youtube"],
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL of the social media profile.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": ["platform", "url"],
+      "additionalProperties": false
+    },
     "sponsor": {
       "type": "object",
       "title": "Sponsor",
@@ -118,6 +140,17 @@
       "description": "Optional URL to the project demo.",
       "format": "uri",
       "type": "string"
+    },
+    "documentation": {
+      "description": "Optional URLs to project documentation.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
     },
     "downloads": {
       "description": "Optional list of download URLs.",
@@ -183,6 +216,11 @@
       ],
       "type": "string"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the project.",
+      "format": "uri",
+      "type": "string"
+},
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
@@ -233,7 +271,16 @@
       "format": "url",
       "minLength": 4,
       "type": "string"
-    }
+    },
+	"social_media": {
+	  "description": "Social media information for the project",
+	  "type": "array",
+	  "items": {
+		  "$ref": "#/$defs/socialMedia"
+	  },
+	  "minItems": 1,
+	  "additionalProperties": false
+	}
   },
   "required": [
     "audience",

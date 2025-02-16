@@ -207,8 +207,8 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
           context: backend
           file: backend/Dockerfile.staging
           platforms: linux/amd64
@@ -223,25 +223,25 @@ jobs:
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.staging
           echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env.staging
-          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
+          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env.staging
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
           context: frontend
           file: frontend/Dockerfile.staging
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
-  deploy-nest-staging:
+  deploy-staging-nest:
     name: Deploy Nest Staging
     env:
       ANSIBLE_HOST_KEY_CHECKING: False
-      STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'
-      STAGING_SSH_PRIVATE_KEY_PATH: '${{ vars.STAGING_SSH_PRIVATE_KEY_PATH }}'
+      NEST_HOST_IP_ADDRESS: '${{ secrets.NEST_HOST_IP_ADDRESS }}'
+      NEST_SSH_PRIVATE_KEY_PATH: '${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}'
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -256,8 +256,8 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
+          echo "${{ secrets.NEST_SSH_PRIVATE_KEY }}" > ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
 
       - name: Prepare secrets
         run: |
@@ -290,12 +290,41 @@ jobs:
 
       - name: Run Nest deploy
         working-directory: .github/ansible
-        run: ansible-playbook -i inventory.yaml staging/deploy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+
+  deploy-staging-nest-proxy:
+    name: Deploy Staging Nest Proxy
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: False
+      PROXY_HOST_IP_ADDRESS: '${{ secrets.PROXY_HOST_IP_ADDRESS }}'
+      PROXY_SSH_PRIVATE_KEY_PATH: ${{ vars.PROXY_SSH_PRIVATE_KEY_PATH }}
+    environment: staging
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
+    needs:
+      - deploy-staging-nest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "${{ secrets.PROXY_SSH_PRIVATE_KEY }}" > ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+
+      - name: Run proxy deploy
+        working-directory: .github/ansible
+        run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
   build-docker-production-images:
     name: Build Docker Production Images
     environment: production
-    if: false
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
       - code-ql
       - run-backend-tests
@@ -320,8 +349,8 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
           context: backend
           file: backend/Dockerfile.production
           platforms: linux/amd64
@@ -330,33 +359,35 @@ jobs:
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.production
-          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
-          echo "VITE_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
-          echo "VITE_ENVIRONMENT=production" >> frontend/.env.production
+          echo "VITE_ALGOLIA_APP_ID=${{ secrets.VITE_ALGOLIA_APP_ID }}" > frontend/.env.production
+          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.production
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.production
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.production
-          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env.production
-          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
+          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env.production
+          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env.production
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
           context: frontend
           file: frontend/Dockerfile.production
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
-  deploy-nest-production:
-    name: Deploy Nest Production
+  deploy-production-nest:
+    name: Deploy Nest to Production
     env:
       ANSIBLE_HOST_KEY_CHECKING: False
-      PRODUCTION_HOST_IP_ADDRESS: '${{ secrets.PRODUCTION_HOST_IP_ADDRESS }}'
-      PRODUCTION_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_production_private_key'
+      NEST_HOST_IP_ADDRESS: '${{ secrets.NEST_HOST_IP_ADDRESS }}'
+      NEST_SSH_PRIVATE_KEY_PATH: '${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}'
     environment: production
-    if: false
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
       - build-docker-production-images
     runs-on: ubuntu-latest
@@ -367,8 +398,8 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}" > ${{ env.PRODUCTION_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.PRODUCTION_SSH_PRIVATE_KEY_PATH }}
+          echo "${{ secrets.NEST_SSH_PRIVATE_KEY }}" > ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
 
       - name: Prepare secrets
         run: |
@@ -401,4 +432,31 @@ jobs:
 
       - name: Run Nest deploy
         working-directory: .github/ansible
-        run: ansible-playbook -i inventory.yaml production/deploy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+
+  deploy-production-nest-proxy:
+    name: Deploy Production Nest Proxy
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: False
+      PROXY_HOST_IP_ADDRESS: '${{ secrets.PROXY_HOST_IP_ADDRESS }}'
+      PROXY_SSH_PRIVATE_KEY_PATH: ${{ vars.PROXY_SSH_PRIVATE_KEY_PATH }}
+    environment: production
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
+    needs:
+      - deploy-production-nest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "${{ secrets.PROXY_SSH_PRIVATE_KEY }}" > ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+
+      - name: Run proxy deploy
+        working-directory: .github/ansible
+        run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
