@@ -48,12 +48,16 @@ export function useSearchPage<T>({
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
       const orderParam = searchParams.get('order') || 'desc'
-
-      if (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam) {
+      if (
+        indexName === 'projects' &&
+        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
+      ) {
+        setCurrentPage(1)
+      } else if (searchQuery !== searchQueryParam) {
         setCurrentPage(1)
       }
     }
-  }, [searchQuery, sortBy, order, searchParams])
+  }, [searchQuery, sortBy, order, searchParams, indexName])
 
   useEffect(() => {
     const params = new URLSearchParams()
