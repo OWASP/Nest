@@ -119,6 +119,12 @@
       "description": "Meetup group.",
       "type": "string"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the chapter.",
+      "format": "uri",
+      "type": ["string", "null"]
+    },
+
     "name": {
       "description": "The unique name of the chapter.",
       "minLength": 10,
@@ -150,18 +156,15 @@
       "type": "string",
       "format": "url"
     },
-    "mailing-list": {
-      "description": "The optional mailing list associated with the chapter.",
-      "format": "uri",
-      "type": "string"},
+    
 	  "social_media": {
 	  "description": "Social media information for the chapter.",
 	  "type": "array",
 	  "items": {
 		  "$ref": "#/$defs/socialMedia"
 	  },
-	  "minItems": 1,
-	  "additionalProperties": false
+	  "minItems": 1
+	 
 	  }
   },
   "required": [
