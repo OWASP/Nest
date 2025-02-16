@@ -5,7 +5,7 @@
     "community": {
       "type": "object",
       "title": "Community",
-      "description": "A pchapter community.",
+      "description": "A chapter community.",
       "required": ["platform", "url"],
       "properties": {
         "description": {
