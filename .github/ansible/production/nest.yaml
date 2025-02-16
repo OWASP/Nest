@@ -1,5 +1,5 @@
 - name: Deploy Nest to Production
-  hosts: nest_production
+  hosts: production_nest
   tasks:
     - name: Copy docker-compose.yaml
       ansible.builtin.copy:
