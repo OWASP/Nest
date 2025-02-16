@@ -25,6 +25,15 @@ def test_positive(chapter_schema):
     [
         ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
+        (
+            "community-empty.yaml",
+            "Additional properties are not allowed ('level' was unexpected)",
+        ),
+        (
+            "community-invalid.yaml",
+            "'another-invalid-url' is not a 'uri'",
+        ),
+        ("community-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique.yaml",
@@ -40,6 +49,15 @@ def test_positive(chapter_schema):
         ),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
+        ("social-media-empty.yaml", "[] should be non-empty"),
+        ("social-media-null.yaml", "None is not of type 'array'"),
+        (
+            "social-media-platform-invalid.yaml",
+            "'bitcoin' is not one of ['bluesky', 'linkedin', 'x', 'youtube']",
+        ),
+        ("social-media-url-empty.yaml", "'' is not a 'uri'"),
+        ("social-media-url-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("social-media-url-null.yaml", "None is not of type 'string'"),
         ("sponsors-empty.yaml", "[] should be non-empty"),
         ("sponsors-name-undefined.yaml", "'name' is a required property"),
         ("sponsors-undefined.yaml", "'url' is a required property"),

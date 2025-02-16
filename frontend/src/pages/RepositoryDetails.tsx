@@ -11,9 +11,11 @@ import { toast } from 'hooks/useToast'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
+import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
@@ -79,25 +81,47 @@ const RepositoryDetailsPage = () => {
   ]
 
   const RepositoryStats = [
-    { icon: faHistory, value: `${repository?.commitsCount || 'No'} Commits` },
-    { icon: faUsers, value: `${repository?.contributorsCount || 'No'} Contributors` },
-    { icon: faCodeFork, value: `${repository?.forksCount || 'No'} Forks` },
-    { icon: faExclamationCircle, value: `${repository?.openIssuesCount || 'No'} Issues` },
-    { icon: faStar, value: `${repository?.starsCount || 'No'} Stars` },
+    {
+      icon: faHistory,
+      value: `${repository?.commitsCount || 'No'} ${pluralize(repository.commitsCount, 'Commit')}`,
+    },
+    {
+      icon: faUsers,
+      value: `${repository?.contributorsCount || 'No'} ${pluralize(repository.contributorsCount, 'Contributor')}`,
+    },
+    {
+      icon: faCodeFork,
+      value: `${repository?.forksCount || 'No'} ${pluralize(repository.forksCount, 'Fork')}`,
+    },
+    {
+      icon: faExclamationCircle,
+      value: `${repository?.openIssuesCount || 'No'} ${pluralize(repository.openIssuesCount, 'Issue')}`,
+    },
+    {
+      icon: faStar,
+      value: `${repository?.starsCount || 'No'} ${pluralize(repository.starsCount, 'Star')}`,
+    },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      languages={repository.languages}
-      recentIssues={repository.issues}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={repository.topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <MetadataManager
+      description={repository.description}
+      keywords={repository.topics}
+      pageTitle={repository.name || repositoryKey}
+      url={repository.url}
+    >
+      <DetailsCard
+        details={repositoryDetails}
+        languages={repository.languages}
+        recentIssues={repository.issues}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={repository.topContributors}
+        topics={repository.topics}
+        type="repository"
+      />
+    </MetadataManager>
   )
 }
 export default RepositoryDetailsPage

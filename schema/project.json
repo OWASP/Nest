@@ -2,6 +2,29 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
   "$defs": {
+    "community": {
+      "type": "object",
+      "title": "Community",
+      "description": "A project community.",
+      "required": ["platform", "url"],
+      "properties": {
+        "description": {
+          "description": "A brief description of the community.",
+          "type": "string"
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["discord", "slack"],
+          "description": "The platform used by the community."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the community.",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    },
     "leader": {
       "type": "object",
       "title": "Leader",
@@ -64,6 +87,28 @@
       },
       "additionalProperties": false
     },
+    "socialMedia": {
+      "description": "A social media platform for the project",
+      "type": "object",
+      "properties": {
+          "description": {
+          "description": "Description of the social media platform",
+          "type": "string"
+        },
+        "platform": {
+          "description": "The type of social media platform.",
+          "enum": ["bluesky", "linkedin", "x", "youtube"],
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL of the social media profile.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": ["platform", "url"],
+      "additionalProperties": false
+    },
     "sponsor": {
       "type": "object",
       "title": "Sponsor",
@@ -113,6 +158,16 @@
       "description": "Project's blog.",
       "format": "uri",
       "type": "string"
+    },
+    "community": {
+      "description": "A list of community platforms associated with the project.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/community"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
     },
     "demo": {
       "description": "Optional URL to the project demo.",
@@ -194,6 +249,11 @@
       ],
       "type": "string"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the project.",
+      "format": "uri",
+      "type": "string"
+},
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
@@ -244,7 +304,16 @@
       "format": "url",
       "minLength": 4,
       "type": "string"
-    }
+    },
+	"social_media": {
+	  "description": "Social media information for the project",
+	  "type": "array",
+	  "items": {
+		  "$ref": "#/$defs/socialMedia"
+	  },
+	  "minItems": 1,
+	  "additionalProperties": false
+	}
   },
   "required": [
     "audience",

@@ -5,7 +5,7 @@ import { Skeleton, SkeletonCircle, SkeletonText } from 'components/ui/Skeleton'
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({
   showLevel = true,
-  showIcons = 4,
+  showIcons = 3,
   showProjectName = true,
   showSummary = true,
   showLink = true,
@@ -27,16 +27,16 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
                 {showProjectName && <Skeleton className="h-8 w-[180px] sm:w-[250px]" />}
               </Flex>
             </Flex>
-
-            {showIcons && (
-              <Flex className="flex min-w-[30%] flex-grow flex-row items-center justify-end gap-2 overflow-auto">
-                {Array.from({ length: showIcons }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-16" />
-                ))}
-                <Skeleton />
-              </Flex>
-            )}
           </Flex>
+
+          {showIcons && (
+            <Flex className="flex min-w-[30%] flex-grow flex-row items-center justify-start gap-2 overflow-auto">
+              {Array.from({ length: showIcons }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-16" />
+              ))}
+              <Skeleton />
+            </Flex>
+          )}
 
           {/* Link Section */}
           {showLink && <SkeletonText className="w-[180px] md:w-[350px]" noOfLines={1} />}
