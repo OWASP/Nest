@@ -1,5 +1,5 @@
-- name: Deploy Production Nest Proxy
-  hosts: production_nest_proxy
+- name: Deploy Staging Nest Proxy
+  hosts: staging_nest_proxy
   tasks:
     - name: Copy proxy docker-compose.yaml
       ansible.builtin.copy:
@@ -9,8 +9,8 @@
 
     - name: Copy proxy configuration file
       ansible.builtin.copy:
-        src: '{{ github_workspace }}/proxy/production.conf'
-        dest: ~/production.conf
+        src: '{{ github_workspace }}/proxy/staging.conf'
+        dest: ~/staging.conf
         mode: '0644'
 
     - name: Update Docker images
