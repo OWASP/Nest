@@ -41,10 +41,10 @@
   "ignorePaths": [
     "backend/**/migrations/*.py",
     "backend/data/project-custom-tags/*.json",
-    "backend/static/**",
+    "backend/static/**"
   ],
   "ignoreRegExpList": [
-    "#\\w+" // Slack channel names
+    "#\\w+" 
   ],
   "import": [
     "@cspell/dict-aws/cspell-ext.json",
