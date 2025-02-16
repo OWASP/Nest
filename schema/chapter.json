@@ -82,6 +82,28 @@
         }
       },
       "additionalProperties": false
+    },
+    "socialMedia": {
+      "description": "A social media platform for the chapter.",
+      "type": "object",
+      "properties": {
+          "description": {
+          "description": "Description of the social media platform",
+          "type": "string"
+        },
+        "platform": {
+          "description": "The type of social media platform.",
+          "enum": ["bluesky", "linkedin", "x", "youtube"],
+          "type": "string"
+        },
+        "url": {
+          "description": "The URL of the social media profile.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": ["platform", "url"],
+      "additionalProperties": false
     }
   },
 
@@ -160,7 +182,16 @@
       "description": "The official website of the chapter.",
       "type": "string",
       "format": "url"
-    }
+    },
+	  "social_media": {
+	  "description": "Social media information for the chapter.",
+	  "type": "array",
+	  "items": {
+		  "$ref": "#/$defs/socialMedia"
+	  },
+	  "minItems": 1,
+	  "additionalProperties": false
+	  }
   },
   "required": [
     "country",

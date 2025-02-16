@@ -17,6 +17,10 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 name: OWASP Chapter
+social_media:
+  - description: A brief description of the social media platform
+    platform: youtube
+    url: https://www.youtube.com/channel/UC1234567890abc
 tags:
   - example-tag-1
   - example-tag-2
