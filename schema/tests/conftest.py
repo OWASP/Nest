@@ -1,20 +1,31 @@
 import json
 from pathlib import Path
-
 import pytest
 
-tests_dir = Path(__file__).resolve().parent
-tests_data_dir = tests_dir / "data"
-schema_dir = tests_dir.parent
+# Resolve paths
+TESTS_DIR = Path(__file__).resolve().parent
+TESTS_DATA_DIR = TESTS_DIR / "data"
+SCHEMA_DIR = TESTS_DIR.parent
+
+
+def load_json(file_path):
+    """Helper function to load JSON files safely."""
+    try:
+        with file_path.open() as file:
+            return json.load(file)
+    except FileNotFoundError:
+        pytest.fail(f"File not found: {file_path}")
+    except json.JSONDecodeError:
+        pytest.fail(f"Invalid JSON format: {file_path}")
 
 
 @pytest.fixture
 def chapter_schema():
-    with Path(schema_dir / "chapter.json").open() as file:
-        yield json.load(file)
+    """Fixture to load the chapter schema JSON."""
+    return load_json(SCHEMA_DIR / "chapter.json")
 
 
 @pytest.fixture
 def project_schema():
-    with Path(schema_dir / "project.json").open() as file:
-        yield json.load(file)
+    """Fixture to load the project schema JSON."""
+    return load_json(SCHEMA_DIR / "project.json")

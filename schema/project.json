@@ -6,7 +6,7 @@
       "description": "Leaders of the project.",
       "type": "array",
       "items": {
-        "$ref": "./definitions/person.json"
+        "$ref": "definitions/person.json"
       },
       "minItems": 2,
       "uniqueItems": true
@@ -15,7 +15,7 @@
       "description": "Repositories associated with the project.",
       "type": "array",
       "items": {
-        "$ref": "./definitions/repository.json"
+        "$ref": "definitions/repository.json"
       },
       "minItems": 1,
       "uniqueItems": true
@@ -24,7 +24,7 @@
       "description": "Sponsors of the project.",
       "type": "array",
       "items": {
-        "$ref": "./definitions/sponsor.json"
+        "$ref": "definitions/sponsor.json"
       },
       "minItems": 1
     },
@@ -32,7 +32,7 @@
       "description": "Social media information for the project",
       "type": "array",
       "items": {
-        "$ref": "./definitions/socialMedia.json"
+        "$ref": "definitions/socialMedia.json"
       },
       "minItems": 1,
       "additionalProperties": false
