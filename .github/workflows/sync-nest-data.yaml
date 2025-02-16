@@ -14,9 +14,9 @@ jobs:
     if: github.repository == 'OWASP/Nest'
     env:
       ANSIBLE_HOST_KEY_CHECKING: False
-      STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'
-      STAGING_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_staging_private_key'
-    environment: staging
+      NEST_HOST_IP_ADDRESS: '${{ secrets.NEST_HOST_IP_ADDRESS }}'
+      NEST_SSH_PRIVATE_KEY_PATH: '${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}'
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -25,8 +25,8 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
+          echo "${{ secrets.NEST_SSH_PRIVATE_KEY }}" > ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
 
       - name: Run make sync-data
         working-directory: .github/ansible
