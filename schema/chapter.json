@@ -156,15 +156,13 @@
       "type": "string",
       "format": "url"
     },
-    
+
 	  "social_media": {
 	  "description": "Social media information for the chapter.",
 	  "type": "array",
 	  "items": {
 		  "$ref": "#/$defs/socialMedia"
-	  },
-	  "minItems": 1
-	 
+	  }
 	  }
   },
   "required": [
