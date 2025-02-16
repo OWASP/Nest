@@ -2,6 +2,7 @@
 
 import json
 
+import requests
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
@@ -40,7 +41,10 @@ def get_search_results(index_name, query, page, hits_per_page):
 def algolia_search(request):
     """Search Algolia API endpoint."""
     if request.method != "POST":
-        return JsonResponse({"error": "Method not allowed"}, status=405)
+        return JsonResponse(
+            {"error": f"Method {request.method} is not allowed"},
+            status=requests.codes.method_not_allowed,
+        )
 
     try:
         data = json.loads(request.body)

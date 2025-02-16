@@ -19,4 +19,4 @@
 
     - name: Retart proxy server
       shell:
-        cmd: docker compose up -d
+        cmd: docker compose restart
