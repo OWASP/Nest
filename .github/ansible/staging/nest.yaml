@@ -1,5 +1,5 @@
 - name: Deploy Nest to Staging
-  hosts: nest_staging
+  hosts: staging_nest
   tasks:
     - name: Copy docker-compose.yaml
       ansible.builtin.copy:
