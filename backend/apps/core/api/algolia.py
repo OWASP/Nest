@@ -39,28 +39,29 @@ def get_search_results(index_name, query, page, hits_per_page):
 
 def algolia_search(request):
     """Search Algolia API endpoint."""
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-
-            index_name = data.get("indexName")
-            limit = int(data.get("hitsPerPage", 25))
-            page = int(data.get("page", 1))
-            query = data.get("query", "")
-
-            cache_key = f"{CACHE_PREFIX}{index_name}:{query}:{page}:{limit}"
-
-            result = cache.get(cache_key)
-            if result is not None:
-                return JsonResponse(result)
-
-            result = get_search_results(index_name, query, page, limit)
-            cache.set(cache_key, result, CACHE_DURATION)
-
-            return JsonResponse(result)
-        except (AlgoliaException, json.JSONDecodeError):
-            return JsonResponse(
-                {"error": "An internal error occurred. Please try again later."}, status=500
-            )
-    else:
+    if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+
+        index_name = data.get("indexName")
+        limit = int(data.get("hitsPerPage", 25))
+        page = int(data.get("page", 1))
+        query = data.get("query", "")
+
+        cache_key = f"{CACHE_PREFIX}{index_name}:{query}:{page}:{limit}"
+
+        result = cache.get(cache_key)
+        if result is not None:
+            return JsonResponse(result)
+
+        result = get_search_results(index_name, query, page, limit)
+        cache.set(cache_key, result, CACHE_DURATION)
+
+        return JsonResponse(result)
+    except (AlgoliaException, json.JSONDecodeError):
+        return JsonResponse(
+            {"error": "An internal error occurred. Please try again later."},
+            status=500,
+        )
