@@ -1,6 +1,8 @@
 from jsonschema import validate, FormatChecker
 from jsonschema.exceptions import ValidationError
 import validators
+
+
 def validate_data(schema, data):
     format_checker = FormatChecker()
 
