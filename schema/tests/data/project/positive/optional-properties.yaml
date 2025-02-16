@@ -2,11 +2,11 @@ audience: breaker
 blog: https://blog.projec.com
 community:
   - platform: slack
-    url: https://slack.com/example
     description: Slack community
+    url: https://slack.com/example
   - platform: discord
-    url: https://discord.com/example
     description: Discord community
+    url: https://discord.com/example
 demo: https://some-demo-url.com
 documentation:
   - https://example.com/docs1
