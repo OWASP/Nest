@@ -4,26 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0015_alter_release_author'),
-        ('owasp', '0015_snapshot'),
+        ("github", "0015_alter_release_author"),
+        ("owasp", "0015_snapshot"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='snapshot',
-            name='new_issues',
-            field=models.ManyToManyField(blank=True, related_name='snapshots', to='github.issue'),
+            model_name="snapshot",
+            name="new_issues",
+            field=models.ManyToManyField(blank=True, related_name="snapshots", to="github.issue"),
         ),
         migrations.AddField(
-            model_name='snapshot',
-            name='new_releases',
-            field=models.ManyToManyField(blank=True, related_name='snapshots', to='github.release'),
+            model_name="snapshot",
+            name="new_releases",
+            field=models.ManyToManyField(
+                blank=True, related_name="snapshots", to="github.release"
+            ),
         ),
         migrations.AddField(
-            model_name='snapshot',
-            name='new_users',
-            field=models.ManyToManyField(blank=True, related_name='snapshots', to='github.user'),
+            model_name="snapshot",
+            name="new_users",
+            field=models.ManyToManyField(blank=True, related_name="snapshots", to="github.user"),
         ),
     ]
