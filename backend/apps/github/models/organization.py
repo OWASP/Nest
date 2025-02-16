@@ -16,6 +16,8 @@ class Organization(
 ):
     """Organization model."""
 
+    node_id = models.CharField(max_length=255)
+
     class Meta:
         db_table = "github_organizations"
         verbose_name_plural = "Organizations"

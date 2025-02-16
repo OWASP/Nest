@@ -18,6 +18,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
     objects = models.Manager()
     open_issues = OpenIssueManager()
+    node_id = models.CharField(max_length=255)
 
     class Meta:
         db_table = "github_issues"

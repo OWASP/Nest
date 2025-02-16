@@ -10,6 +10,8 @@ from apps.github.models.mixins.release import ReleaseIndexMixin
 class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     """Release model."""
 
+    node_id = models.CharField(max_length=255)
+
     class Meta:
         db_table = "github_releases"
         verbose_name_plural = "Releases"

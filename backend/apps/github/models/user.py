@@ -10,6 +10,8 @@ from apps.github.models.mixins.user import UserIndexMixin
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     """User model."""
 
+    node_id = models.CharField(max_length=255)
+
     class Meta:
         db_table = "github_users"
         verbose_name_plural = "Users"
