@@ -1,9 +1,10 @@
-import pytest
 from unittest import mock
+
+import pytest
 from django.utils import timezone
 
-from apps.owasp.management.commands.process_snapshots import Command
 from apps.owasp.exceptions import SnapshotProcessingError
+from apps.owasp.management.commands.process_snapshots import Command
 from apps.owasp.models.snapshot import Snapshot
 
 
@@ -26,20 +27,11 @@ class TestProcessSnapshots:
 
         with (
             mock.patch(
-                'apps.owasp.models.snapshot.Snapshot.objects.filter',
-                return_value=mock_queryset
+                "apps.owasp.models.snapshot.Snapshot.objects.filter", return_value=mock_queryset
             ),
-            mock.patch(
-                'django.db.transaction.atomic',
-                return_value=mock.MagicMock()
-            ),
-            mock.patch.object(
-                command,
-                'process_single_snapshot'
-            ) as mock_process,
-            mock.patch(
-                'apps.owasp.management.commands.process_snapshots.logger'
-            )
+            mock.patch("django.db.transaction.atomic", return_value=mock.MagicMock()),
+            mock.patch.object(command, "process_single_snapshot") as mock_process,
+            mock.patch("apps.owasp.management.commands.process_snapshots.logger"),
         ):
             command.process_pending_snapshots()
             mock_process.assert_called_once_with(mock_snapshot)
@@ -61,23 +53,14 @@ class TestProcessSnapshots:
 
         with (
             mock.patch(
-                'apps.owasp.models.snapshot.Snapshot.objects.filter',
-                return_value=mock_queryset
+                "apps.owasp.models.snapshot.Snapshot.objects.filter", return_value=mock_queryset
             ),
-            mock.patch(
-                'django.db.transaction.atomic',
-                return_value=mock.MagicMock()
-            ),
+            mock.patch("django.db.transaction.atomic", return_value=mock.MagicMock()),
             mock.patch.object(
-                command,
-                'process_single_snapshot',
-                side_effect=Exception(error_message)
+                command, "process_single_snapshot", side_effect=Exception(error_message)
             ),
-            mock.patch(
-                'apps.owasp.management.commands.process_snapshots.logger'
-            ) as mock_logger
+            mock.patch("apps.owasp.management.commands.process_snapshots.logger") as mock_logger,
         ):
-            
             command.process_pending_snapshots()
 
             # error handling
@@ -97,12 +80,9 @@ class TestProcessSnapshots:
 
         with (
             mock.patch(
-                'apps.owasp.models.snapshot.Snapshot.objects.filter',
-                return_value=mock_queryset
+                "apps.owasp.models.snapshot.Snapshot.objects.filter", return_value=mock_queryset
             ),
-            mock.patch(
-                'apps.owasp.management.commands.process_snapshots.logger'
-            ) as mock_logger
+            mock.patch("apps.owasp.management.commands.process_snapshots.logger") as mock_logger,
         ):
             command.handle()
             mock_logger.info.assert_called_once_with("No pending snapshots found")
@@ -114,11 +94,9 @@ class TestProcessSnapshots:
 
         with (
             mock.patch.object(
-                command,
-                'process_pending_snapshots',
-                side_effect=Exception(error_message)
+                command, "process_pending_snapshots", side_effect=Exception(error_message)
             ),
-            pytest.raises(SnapshotProcessingError) as exc_info
+            pytest.raises(SnapshotProcessingError) as exc_info,
         ):
             command.handle()
 
