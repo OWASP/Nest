@@ -1,6 +1,8 @@
-from unittest.mock import patch, Mock
+from unittest.mock import patch
+
 import pytest
 from django.utils.timezone import now, timedelta
+
 from apps.owasp.models.snapshot import Snapshot
 
 

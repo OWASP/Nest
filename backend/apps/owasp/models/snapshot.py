@@ -1,3 +1,5 @@
+"""OWASP app snapshot models."""
+
 from django.db import models
 
 
