@@ -1,10 +1,13 @@
+import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useState } from 'react';
+import { SCROLL_THRESHOLD } from '../constants';
 
 const ScrollUp: React.FC = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const toggleVisibility = (): void => {
-    if (window.pageYOffset > 300) {
+    if (window.pageYOffset > SCROLL_THRESHOLD) {
       setIsVisible(true);
     } else {
       setIsVisible(false);
@@ -30,10 +33,10 @@ const ScrollUp: React.FC = () => {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="scroll-up-btn"
+          className="scroll-up-button"
           aria-label="Scroll to top"
         >
-          ↑
+          <FontAwesomeIcon icon={faArrowUp} />
         </button>
       )}
     </>
