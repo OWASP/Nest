@@ -58,5 +58,3 @@ beforeEach(() => {
   global.runAnimationFrameCallbacks = jest.fn()
   global.removeAnimationFrameCallbacks = jest.fn()
 })
-
-jest.mock('@algolia/autocomplete-theme-classic', () => ({}))

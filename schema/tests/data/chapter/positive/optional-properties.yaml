@@ -1,5 +1,12 @@
 blog: https://blog.chapter.com
 country: India
+community:
+  - platform: slack
+    url: https://slack.com/example
+    description: Slack community
+  - platform: discord
+    url: https://discord.com/example
+    description: Discord community
 events:
   - https://example.com/event1
   - https://example.com/event2

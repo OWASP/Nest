@@ -1,5 +1,5 @@
 - name: Run Nest Production Data Sync
-  hosts: nest_production
+  hosts: production_nest
   tasks:
     - name: Sync Nest data
       async: 21600 # 6 hours

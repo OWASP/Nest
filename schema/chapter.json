@@ -2,6 +2,29 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/chapter.json",
   "$defs": {
+    "community": {
+      "type": "object",
+      "title": "Community",
+      "description": "A chapter community.",
+      "required": ["platform", "url"],
+      "properties": {
+        "description": {
+          "description": "A brief description of the community.",
+          "type": "string"
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["discord", "slack"],
+          "description": "The platform used by the community."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the community.",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    },
     "leader": {
       "type": "object",
       "title": "Leader",
@@ -138,6 +161,16 @@
       "type": [
         "string"
       ]
+    },
+    "community": {
+      "description": "A list of community platforms associated with the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/community"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
     },
     "country": {
       "description": "Country.",
