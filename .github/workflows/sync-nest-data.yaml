@@ -30,4 +30,4 @@ jobs:
 
       - name: Run make sync-data
         working-directory: .github/ansible
-        run: ansible-playbook -i inventory.yaml staging/sync-data.yaml
+        run: ansible-playbook -i inventory.yaml production/sync-data.yaml
