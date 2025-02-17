@@ -1,6 +1,16 @@
 audience: breaker
 blog: https://blog.projec.com
+community:
+  - platform: slack
+    description: Slack community
+    url: https://slack.com/example
+  - platform: discord
+    description: Discord community
+    url: https://discord.com/example
 demo: https://some-demo-url.com
+documentation:
+  - https://example.com/docs1
+  - https://example.com/docs2
 downloads:
   - https://abc.com/download1
   - https://abc.com/download2
@@ -15,6 +25,10 @@ leaders:
     slack: leader-2-slack
 level: 2
 license: MIT
+logo:
+  - small: https://example.com/smallLogo
+    medium: https://example.com/mediumLogo
+    large: https://example.com/largeLogo
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 repositories:
@@ -24,6 +38,10 @@ repositories:
   - description: Another repository with a valid URL.
     name: test-repo-2
     url: https://example.com/repo2
+social_media:
+  - description: A brief description of the social media platform
+    platform: youtube
+    url: https://www.youtube.com/channel/UC1234567890abc
 tags:
   - example-tag-1
   - example-tag-2

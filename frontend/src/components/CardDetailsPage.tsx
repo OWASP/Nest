@@ -53,9 +53,11 @@ const DetailsCard = ({
                   <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
                 </div>
               ))}
-            {socialLinks && type === 'chapter' && <SocialLinks urls={socialLinks || []} />}
+            {socialLinks && (type === 'chapter' || type === 'committee') && (
+              <SocialLinks urls={socialLinks || []} />
+            )}
           </SecondaryCard>
-          {(type === 'project' || type === 'repository') && (
+          {(type === 'project' || type === 'repository' || type === 'committee') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
@@ -63,12 +65,12 @@ const DetailsCard = ({
             </SecondaryCard>
           )}
           {type === 'chapter' && geolocationData && (
-            <SecondaryCard className="md:col-span-4">
+            <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
-                style={{ height: '200px', width: '100%', zIndex: '0' }}
+                style={{ height: '100%', width: '100%', zIndex: '0' }}
               />
-            </SecondaryCard>
+            </div>
           )}
         </div>
 

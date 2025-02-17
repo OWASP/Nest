@@ -1,22 +1,16 @@
 """A command to update OWASP Nest suggestions index."""
 
-from algoliasearch.query_suggestions.client import QuerySuggestionsClientSync
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
+from apps.common.index import IndexBase, is_indexable
 
 
 class Command(BaseCommand):
     help = "Create query suggestions for Algolia indices"
 
     def handle(self, *args, **kwargs):
-        if settings.ENVIRONMENT == "Local":
-            return
-
-        client = QuerySuggestionsClientSync(
-            settings.ALGOLIA_APPLICATION_ID,
-            settings.ALGOLIA_WRITE_API_KEY,
-            settings.ALGOLIA_APPLICATION_REGION,
-        )
+        client = IndexBase.get_suggestions_client()
 
         entity_configs = {
             "chapters": {
@@ -90,20 +84,21 @@ class Command(BaseCommand):
         }
 
         print("\nThe following query suggestion index were updated:")
+        environment = settings.ENVIRONMENT.lower()
         for entity, suggestion_settings in entity_configs.items():
-            source_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}"
-            suggestions_index_name = f"{settings.ENVIRONMENT.lower()}_{entity}_suggestions"
+            if not is_indexable(entity) or not is_indexable(f"{entity}_suggestions"):
+                continue  # Skip if the index name is excluded.
 
             configuration = {
                 "sourceIndices": [
                     {
-                        "indexName": source_index_name,
+                        "indexName": f"{environment}_{entity}",
                         **suggestion_settings,
                     }
                 ]
             }
             client.update_config(
-                index_name=suggestions_index_name,
+                index_name=f"{environment}_{entity}_suggestions",
                 configuration=configuration,
             )
             print(f"{7*' '} * {entity.capitalize()}")

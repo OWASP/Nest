@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from utils.validators import validate_data
+from utils.schema_validators import validate_data
 
 from tests.conftest import tests_data_dir
 
@@ -28,25 +28,47 @@ def test_positive(project_schema):
             "'hacker' is not one of ['breaker', 'builder', 'defender']",
         ),
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
-        ("audience-missing.yaml", "'audience' is a required property"),
-        ("blog-none.yaml", "None is not of type 'string'"),
-        ("demo-none.yaml", "None is not of type 'string'"),
+        ("audience-null.yaml", "None is not one of ['breaker', 'builder', 'defender']"),
+        ("audience-undefined.yaml", "'audience' is a required property"),
+        ("blog-invalid.yaml", "'https://invalid/' is not a 'uri'"),
+        ("blog-null.yaml", "None is not a 'uri'"),
+        ("community-empty.yaml", "[] should be non-empty"),
+        (
+            "community-invalid.yaml",
+            "'another-invalid-url' is not a 'uri'",
+        ),
+        ("community-null.yaml", "None is not of type 'array'"),
+        ("demo-invalid.yaml", "'https://invalid/' is not a 'uri'"),
+        ("demo-null.yaml", "None is not a 'uri'"),
+        ("documentation-empty.yaml", "[] should be non-empty"),
+        (
+            "documentation-invalid.yaml",
+            "'xyz-abc' is not a 'uri'",
+        ),
+        ("documentation-null.yaml", "None is not of type 'array'"),
         ("downloads-empty.yaml", "[] should be non-empty"),
+        (
+            "downloads-invalid.yaml",
+            "'xyz-abc' is not a 'uri'",
+        ),
         (
             "downloads-non-unique.yaml",
             "['https://abc.com/download', 'https://abc.com/download'] has non-unique elements",
         ),
+        ("downloads-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
         (
-            "events-non-unique-urls.yaml",
+            "events-non-unique.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
+        ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
+        ("events-null.yaml", "None is not of type 'array'"),
         (
-            "leader-email-empty.yaml",
+            "leaders-email-empty.yaml",
             "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
         ),
         (
-            "leader-email-missing.yaml",
+            "leaders-email-null.yaml",
             "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
         ),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
@@ -54,18 +76,40 @@ def test_positive(project_schema):
             "license-invalid-value.yaml",
             "'INVALID-LICENSE-VALUE' is not one of ['AGPL-3.0', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'CC-BY-4.0', 'CC-BY-SA-4.0', 'CC0-1.0', 'EUPL-1.2', 'GPL-2.0', 'GPL-3.0', 'LGPL-2.1', 'LGPL-3.0', 'MIT', 'MPL-2.0', 'OTHER']",
         ),
+        ("logo-large-empty.yaml", "'' is not a 'uri'"),
+        ("logo-large-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("logo-large-null.yaml", "None is not of type 'string'"),
+        ("logo-medium-empty.yaml", "'' is not a 'uri'"),
+        ("logo-medium-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("logo-medium-null.yaml", "None is not of type 'string'"),
+        ("logo-small-empty.yaml", "'' is not a 'uri'"),
+        ("logo-small-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("logo-small-null.yaml", "None is not of type 'string'"),
+        ("mailing-list-empty.yaml", "'' is not a 'uri'"),
+        ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("mailing-list-null.yaml", "None is not a 'uri'"),
         ("name-empty.yaml", "'' is too short"),
-        ("name-none.yaml", "None is not of type 'string'"),
+        ("name-null.yaml", "None is not of type 'string'"),
         ("repositories-empty.yaml", "[] should be non-empty"),
         (
             "repositories-non-unique.yaml",
             "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
         ),
-        ("repositories-missing-url.yaml", "'url' is a required property"),
-        ("sponsors-empty-list.yaml", "[] should be non-empty"),
-        ("sponsors-name-missing.yaml", "'name' is a required property"),
-        ("sponsors-url-missing.yaml", "'url' is a required property"),
-        ("website-none.yaml", "None is not of type 'string'"),
+        ("repositories-null.yaml", "None is not of type 'array'"),
+        ("social-media-empty.yaml", "[] should be non-empty"),
+        ("social-media-null.yaml", "None is not of type 'array'"),
+        (
+            "social-media-platform-invalid.yaml",
+            "'bitcoin' is not one of ['bluesky', 'linkedin', 'x', 'youtube']",
+        ),
+        ("social-media-url-empty.yaml", "'' is not a 'uri'"),
+        ("social-media-url-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("social-media-url-null.yaml", "None is not of type 'string'"),
+        ("sponsors-empty.yaml", "[] should be non-empty"),
+        ("sponsors-null.yaml", "None is not of type 'array'"),
+        ("sponsors-undefined.yaml", "'url' is a required property"),
+        ("website-empty.yaml", "'' is too short"),
+        ("website-null.yaml", "None is not of type 'string'"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):

@@ -21,12 +21,12 @@ omit = [
 ]
 
 [tool.poetry.dependencies]
-algoliasearch = "^4.13.0"
+algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
 django = "^5.1"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
-django-filter = "^24.3"
+django-filter = "^25.1"
 django-storages = { extras = ["s3"], version = "^1.14.4" }
 djangorestframework = "^3.15.2"
 geopy = "^2.4.1"

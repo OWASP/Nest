@@ -14,8 +14,10 @@ corsheaders
 csrfguard
 csrfprotector
 cva
+dismissable
 dsn
 env
+facebookexternalhit
 GBP
 geocoders
 geoloc
@@ -55,10 +57,14 @@ rsc
 RUF
 saft
 samm
+seo
+SEO
 slackbot
 SLF
 Truncator
 tsc
+Twitterbot
+usefixtures
 Whistleblower
 winsrdf
 wsgi

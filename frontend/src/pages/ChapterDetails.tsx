@@ -1,39 +1,49 @@
+import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { GET_CHAPTER_DATA } from 'api/queries/chapterQueries'
+import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { ChapterType } from 'types/chapter'
+import { ChapterTypeGraphQL } from 'types/chapter'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
-  const [chapter, setChapter] = useState<ChapterType>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [chapter, setChapter] = useState<ChapterTypeGraphQL>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  const { data, error: graphQLRequestError } = useQuery(GET_CHAPTER_DATA, {
+    variables: { key: chapterKey },
+  })
 
   useEffect(() => {
-    const fetchChapterData = async () => {
-      setIsLoading(true)
-      const { hits } = await fetchAlgoliaData('chapters', chapterKey, 1, chapterKey)
-      if (hits && hits.length > 0) {
-        setChapter(hits[0] as ChapterType)
-      }
+    if (data) {
+      setChapter(data?.chapter)
       setIsLoading(false)
     }
+    if (graphQLRequestError) {
+      toast({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        variant: 'destructive',
+      })
+      setIsLoading(false)
+    }
+  }, [data, graphQLRequestError, chapterKey])
 
-    fetchChapterData()
-  }, [chapterKey])
-
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
+  }
 
-  if (!chapter || !chapter.is_active)
+  if (!chapter && !isLoading)
     return (
       <ErrorDisplay
         statusCode={404}
@@ -43,8 +53,8 @@ export default function ChapterDetailsPage() {
     )
 
   const details = [
-    { label: 'Last Updated', value: formatDate(chapter.updated_at) },
-    { label: 'Location', value: chapter.suggested_location },
+    { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
+    { label: 'Location', value: chapter.suggestedLocation },
     { label: 'Region', value: chapter.region },
     {
       label: 'URL',
@@ -56,15 +66,17 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <DetailsCard
-      title={chapter.name}
-      socialLinks={chapter.related_urls}
-      is_active={chapter.is_active}
-      details={details}
-      summary={chapter.summary}
-      type="chapter"
-      topContributors={chapter.top_contributors}
-      geolocationData={chapter}
-    />
+    <MetadataManager pageTitle={chapter.name} description={chapter.summary} url={chapter.url}>
+      <DetailsCard
+        details={details}
+        geolocationData={chapter}
+        is_active={chapter.isActive}
+        socialLinks={chapter.relatedUrls}
+        summary={chapter.summary}
+        title={chapter.name}
+        topContributors={chapter.topContributors}
+        type="chapter"
+      />
+    </MetadataManager>
   )
 }
