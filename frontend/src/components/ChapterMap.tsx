@@ -1,114 +1,92 @@
 import L from 'leaflet'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
-import { useTheme } from './ThemeProvider'
+import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
-interface GeoLocData {
-  _geoloc: {
-    lat: number
-    lng: number
-  }
-  name: string
-  key: string
-}
-
-interface ChapterMapProps {
-  geoLocData?: GeoLocData[]
-  style?: React.CSSProperties
-}
-
-const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData = [], style }) => {
-  const { dark } = useTheme()
+const ChapterMap = ({
+  geoLocData,
+  style,
+}: {
+  geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
+  style: React.CSSProperties
+}) => {
   const mapRef = useRef<L.Map | null>(null)
-  const tileLayerRef = useRef<L.TileLayer | null>(null)
-  const markerClusterGroupRef = useRef<L.MarkerClusterGroup | null>(null)
-  const mapContainerRef = useRef<HTMLDivElement | null>(null)
+
+  const normalizedData = useMemo(() => {
+    return geoLocData.map((chapter) => ({
+      lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
+      lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
+      key: chapter.key,
+      name: chapter.name,
+    }))
+  }, [geoLocData])
 
   //for reference: https://leafletjs.com/reference.html#map-example
   useEffect(() => {
-    if (!mapContainerRef.current) return
-
     if (!mapRef.current) {
-      mapRef.current = L.map(mapContainerRef.current, {
-        center: [20, 0],
-        zoom: 2,
-        // minZoom: 2,
-        maxZoom: 10,
-      })
-    }
-  }, [])
+      mapRef.current = L.map('chapter-map', {
+        worldCopyJump: false, // Prevents the map from wrapping around the world
+        maxBounds: [
+          [-90, -180], // Southwest corner of the map bounds (latitude, longitude)
+          [90, 180], // Northeast corner of the map bounds (latitude, longitude)
+        ],
+        maxBoundsViscosity: 1.0,
+      }).setView([20, 0], 2)
 
-  useEffect(() => {
-    if (!mapRef.current) return
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        className: 'map-tiles',
+      }).addTo(mapRef.current)
+    }
+
     const map = mapRef.current
 
-    const tileLayerUrl = dark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-
-    if (tileLayerRef.current) {
-      map.removeLayer(tileLayerRef.current)
-    }
-    tileLayerRef.current = L.tileLayer(tileLayerUrl, {
-      attribution: '© OpenStreetMap contributors',
+    // Remove previous markers
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
+        map.removeLayer(layer)
+      }
     })
-    tileLayerRef.current.addTo(map)
-  }, [dark])
-
-  useEffect(() => {
-    if (!mapRef.current) return
-    const map = mapRef.current
-
-    if (markerClusterGroupRef.current) {
-      map.removeLayer(markerClusterGroupRef.current)
-    }
 
     const markerClusterGroup = L.markerClusterGroup()
-    markerClusterGroupRef.current = markerClusterGroup
-
-    let bounds: L.LatLngBounds | null = null
-    let validMarkers = 0
-
-    geoLocData.forEach((chapter) => {
-      if (!chapter._geoloc || isNaN(chapter._geoloc.lat) || isNaN(chapter._geoloc.lng)) return
-      const { lat, lng } = chapter._geoloc
-      const marker = L.marker([lat, lng])
-      marker.bindPopup(`<div>${chapter.name}</div>`)
+    const bounds: [number, number][] = []
+    normalizedData.forEach((chapter) => {
+      const markerIcon = new L.Icon({
+        iconAnchor: [12, 41], // Anchor point
+        iconRetinaUrl: '/img/marker-icon-2x.png',
+        iconSize: [25, 41], // Default size for Leaflet markers
+        iconUrl: '/img/marker-icon.png',
+        popupAnchor: [1, -34], // Popup position relative to marker
+        shadowSize: [41, 41], // Shadow size
+        shadowUrl: '/img/marker-shadow.png',
+      })
+      const marker = L.marker([chapter.lat, chapter.lng], {
+        icon: markerIcon,
+      })
+      const popup = L.popup()
+      const popupContent = document.createElement('div')
+      popupContent.className = 'popup-content'
+      popupContent.textContent = chapter.name
+      popupContent.addEventListener('click', () => {
+        window.location.href = `/chapters/${chapter.key}`
+      })
+      popup.setContent(popupContent)
+      marker.bindPopup(popup)
       markerClusterGroup.addLayer(marker)
-
-      if (!bounds) {
-        bounds = L.latLngBounds([lat, lng], [lat, lng])
-      } else {
-        bounds.extend([lat, lng])
-      }
-      validMarkers++
+      bounds.push([chapter.lat, chapter.lng])
     })
 
     map.addLayer(markerClusterGroup)
 
-    if (bounds && validMarkers > 0) {
-      map.fitBounds(bounds, { maxZoom: 10 })
-    } else {
-      map.setView([20, 0], 2) // Default view if no markers are present
+    if (bounds.length > 0) {
+      map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
     }
-  }, [geoLocData])
+  }, [normalizedData])
 
-  return (
-    <div
-      ref={mapContainerRef}
-      id="chapter-map"
-      className="rounded-2xl"
-      style={{
-        height: '500px',
-        width: '100%',
-        background: dark ? '#282d33' : '#F0F0F0', // Apply blue background only in dark mode
-        ...style,
-      }}
-    ></div>
-  )
+  return <div id="chapter-map" className="rounded-2xl dark:bg-[#212529]" style={style} />
 }
 
 export default ChapterMap
