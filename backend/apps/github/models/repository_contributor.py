@@ -11,6 +11,8 @@ TOP_CONTRIBUTORS_LIMIT = 15
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
     """Repository contributor model."""
 
+    node_id = models.CharField(max_length=255)
+
     class Meta:
         db_table = "github_repository_contributors"
         unique_together = ("repository", "user")

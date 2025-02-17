@@ -9,6 +9,8 @@ from apps.github.models.common import NodeModel
 class Label(BulkSaveModel, NodeModel, TimestampedModel):
     """Label model."""
 
+    node_id = models.CharField(max_length=255)
+
     class Meta:
         db_table = "github_labels"
         verbose_name_plural = "Labels"
