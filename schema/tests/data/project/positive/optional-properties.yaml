@@ -18,6 +18,10 @@ leaders:
     slack: leader-2-slack
 level: 2
 license: MIT
+logo:
+  - small: https://example.com/smallLogo
+    medium: https://example.com/mediumLogo
+    large: https://example.com/largeLogo
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 repositories:
@@ -37,7 +41,3 @@ tags:
   - example-tag-3
 type: code
 website: https://official-website.com
-logo:
-  - small: https://example.com/smallLogo
-    medium: https://example.com/mediumLogo
-    large: https://example.com/largeLogo
