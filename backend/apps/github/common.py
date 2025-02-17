@@ -2,7 +2,7 @@
 
 import logging
 
-from github.GithubException import UnknownObjectException
+from github.GithubException import GithubException, UnknownObjectException
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
@@ -59,7 +59,7 @@ def sync_repository(gh_repository, organization=None, user=None):
             "sort": "created",
             "state": "open",
         }
-        latest_issue = Issue.objects.filter(repository=repository).order_by("-updated_at").first()
+        latest_issue = repository.latest_issue
         if latest_issue:
             # Sync open/closed issues for subsequent runs.
             kwargs.update(
@@ -101,19 +101,30 @@ def sync_repository(gh_repository, organization=None, user=None):
             "sort": "created",
             "state": "open",
         }
-        latest_pull_request = (
-            PullRequest.objects.filter(repository=repository).order_by("-updated_at").first()
-        )
-        if latest_pull_request:
-            # Sync open/closed issues for subsequent runs.
-            kwargs.update(
-                {
-                    "since": latest_pull_request.updated_at,
-                    "state": "all",
-                }
-            )
 
-        for gh_pull_request in gh_repository.get_pulls(**kwargs):
+        open_gh_pull_requests = list(gh_repository.get_pulls(**kwargs))
+        open_pr_numbers = {gh_pull_request.number for gh_pull_request in open_gh_pull_requests}
+
+        closed_prs = PullRequest.objects.filter(repository=repository, state="open").exclude(
+            number__in=open_pr_numbers
+        )
+
+        for pr in closed_prs:
+            pr.state = "closed"
+            try:
+                gh_closed_pr = gh_repository.get_pull(pr.number)
+                pr.closed_at = gh_closed_pr.closed_at  # Correct closure time from GitHub
+                pr.merged_at = gh_closed_pr.merged_at  # Correct merge time if merged
+            except GithubException:
+                logger.warning(
+                    "Could not fetch closed PR details for %s, using updated_at instead.",
+                    pr.number,
+                )
+                pr.closed_at = pr.closed_at or pr.updated_at  # Fallback if API fails
+
+            pr.save()
+
+        for gh_pull_request in open_gh_pull_requests:
             author = (
                 User.update_data(gh_pull_request.user)
                 if gh_pull_request.user and gh_pull_request.user.type != "Bot"
@@ -135,7 +146,7 @@ def sync_repository(gh_repository, organization=None, user=None):
                 except UnknownObjectException:
                     logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
     else:
-        logger.info("Skipping issues sync for %s", repository.name)
+        logger.info("Skipping pull request sync for %s", repository.name)
 
     # GitHub repository releases.
     releases = []

@@ -1,9 +1,6 @@
 """GitHub app pull requests managers."""
 
-from datetime import timedelta as td
-
 from django.db import models
-from django.utils import timezone
 
 
 class OpenPullRequestManager(models.Manager):
@@ -21,8 +18,6 @@ class OpenPullRequestManager(models.Manager):
                 "assignees",
             )
             .filter(
-                created_at__gte=timezone.now() - td(days=90),
-                repository__project__isnull=False,
                 state="open",
             )
         )

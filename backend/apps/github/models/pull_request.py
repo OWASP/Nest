@@ -1,10 +1,7 @@
 """Github app pull requests model."""
 
-from functools import lru_cache
-
 from django.db import models
 
-from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
 from apps.github.models.managers.pullrequest import OpenPullRequestManager
@@ -19,7 +16,7 @@ class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     """Pull request Model."""
 
     class Meta:
-        db_table = "github_pullrequests"
+        db_table = "github_pull_requests"
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Pull Requests"
 
@@ -28,24 +25,18 @@ class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         CLOSED = "closed", "Closed"
 
     objects = models.Manager()
-    open_pullrequests = OpenPullRequestManager()
+    open_pull_requests = OpenPullRequestManager()
 
     title = models.CharField(verbose_name="Title", max_length=1000)
     body = models.TextField(verbose_name="Body", default="")
 
-    state = models.CharField(
-        verbose_name="State", max_length=20, choices=State, default=State.OPEN
-    )
+    state = models.CharField(verbose_name="State", max_length=6, choices=State, default=State.OPEN)
 
     url = models.URLField(verbose_name="URL", max_length=500, default="")
 
     number = models.PositiveBigIntegerField(verbose_name="Number", default=0)
 
     sequence_id = models.PositiveBigIntegerField(verbose_name="Pull Requests ID", default=0)
-
-    is_locked = models.BooleanField(verbose_name="Is Locked", default=False)
-
-    # comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
 
     closed_at = models.DateTimeField(verbose_name="Closed at", blank=True, null=True)
     created_at = models.DateTimeField(verbose_name="Created at")
@@ -124,20 +115,10 @@ class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         # Repository.
         self.repository = repository
 
-    def save(self, *args, **kwargs):
-        """Save pull request."""
-        super().save(*args, **kwargs)
-
     @staticmethod
     def bulk_save(pull_requests, fields=None):
         """Bulk save issues."""
         BulkSaveModel.bulk_save(PullRequest, pull_requests, fields=fields)
-
-    @staticmethod
-    @lru_cache
-    def open_pull_requests_count():
-        """Return open pull requests count."""
-        return IndexBase.get_total_count("pull_requests")
 
     @staticmethod
     def update_data(gh_pull_request, author=None, repository=None, save=True):
