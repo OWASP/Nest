@@ -8,7 +8,7 @@ leaders:
 level: 2
 logo:
   - small: https://example.com/smallLogo
-    medium: ""
+    medium: ''
     large: https://example.com/largeLogo
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project

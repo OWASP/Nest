@@ -9,7 +9,7 @@ level: 2
 logo:
   - small: https://example.com/smallLogo
     medium: https://example.com/mediumLogo
-    large: ""
+    large: ''
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 sponsors:

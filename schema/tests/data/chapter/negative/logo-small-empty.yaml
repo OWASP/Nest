@@ -6,7 +6,7 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 logo:
-  - small: ""
+  - small: ''
     medium: https://example.com/mediumLogo
     large: https://example.com/largeLogo
 name: OWASP Chapter

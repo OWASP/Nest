@@ -7,7 +7,7 @@ leaders:
     slack: leader-2-slack
 level: 2
 logo:
-  - small: ""
+  - small: ''
     medium: https://example.com/mediumLogo
     large: https://example.com/largeLogo
 name: OWASP Incubator Code Project

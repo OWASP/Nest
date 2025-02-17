@@ -8,7 +8,7 @@ leaders:
 logo:
   - small: https://example.com/smallLogo
     medium: https://example.com/mediumLogo
-    large: ""
+    large: ''
 name: OWASP Chapter
 social_media:
   - platform: youtube
