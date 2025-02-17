@@ -20,8 +20,8 @@ class Snapshot(models.Model):
     error_message = models.TextField(blank=True)
 
     # Many-to-Many relationships
-    new_chapters = models.ManyToManyField("Chapter", related_name="snapshots", blank=True)
-    new_projects = models.ManyToManyField("Project", related_name="snapshots", blank=True)
+    new_chapters = models.ManyToManyField("owasp.Chapter", related_name="snapshots", blank=True)
+    new_projects = models.ManyToManyField("owasp.Project", related_name="snapshots", blank=True)
     new_issues = models.ManyToManyField("github.Issue", related_name="snapshots", blank=True)
     new_releases = models.ManyToManyField("github.Release", related_name="snapshots", blank=True)
     new_users = models.ManyToManyField("github.User", related_name="snapshots", blank=True)
