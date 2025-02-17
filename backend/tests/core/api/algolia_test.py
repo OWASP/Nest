@@ -70,4 +70,4 @@ class TestAlgoliaSearch:
         response_data = json.loads(response.content)
 
         assert response.status_code == requests.codes.method_not_allowed
-        assert response_data["error"] == "Method not allowed"
+        assert response_data["error"] == "Method GET is not allowed"
