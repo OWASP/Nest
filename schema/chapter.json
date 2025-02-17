@@ -15,7 +15,6 @@
       "$ref": "./schema/definitions/sponsor.json"
     }
   },
-
   "additionalProperties": false,
   "description": "OWASP chapter schema.",
   "properties": {
@@ -57,6 +56,16 @@
       "minItems": 2,
       "uniqueItems": true
     },
+    "logo": {
+      "description": "Logo for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/logo"
+      },
+      "minItems": 1,
+      "additionalProperties": false,
+      "optional": true
+    },
     "meetup-group": {
       "description": "Meetup group.",
       "type": "string"
@@ -69,6 +78,15 @@
     "region": {
       "description": "Region.",
       "type": "string"
+    },
+    "social_media": {
+      "description": "Social media information for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/socialMedia"
+      },
+      "minItems": 1,
+      "additionalProperties": false
     },
     "sponsors": {
       "description": "Sponsors of the chapter.",

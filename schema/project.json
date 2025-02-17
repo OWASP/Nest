@@ -122,6 +122,16 @@
       ],
       "type": "string"
     },
+    "logo": {
+      "description": "Logo information for the project.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/logo"
+      },
+      "minItems": 1,
+      "additionalProperties": false,
+      "optional": true
+    },
     "mailing-list": {
       "description": "The optional mailing list associated with the project.",
       "format": "uri",
@@ -144,6 +154,15 @@
         "$ref": "#/$defs/repository"
       },
       "uniqueItems": true
+    },
+    "social_media": {
+      "description": "Social media information for the project",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/socialMedia"
+      },
+      "minItems": 1,
+      "additionalProperties": false
     },
     "sponsors": {
       "description": "Sponsors of the project.",
