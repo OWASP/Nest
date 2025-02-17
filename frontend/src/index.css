@@ -296,11 +296,6 @@ a {
 
 @layer components {
   .scroll-up-button {
-    @apply fixed bottom-20 right-8 h-10 w-10 rounded-full 
-           bg-primary text-primary-foreground 
-           flex items-center justify-center 
-           transition-all duration-300 
-           hover:opacity-90 hover:-translate-y-0.5 
-           dark:bg-primary dark:text-white z-50;
+    @apply fixed bottom-20 right-8 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90 dark:bg-primary dark:text-white;
   }
 }

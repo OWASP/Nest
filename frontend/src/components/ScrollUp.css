@@ -1,37 +1,37 @@
 .scroll-up-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
 /* Light theme (default) */
 .scroll-up-btn {
-    background-color: hsl(var(--primary-foreground));
-    color: hsl(var(--primary));
+  background-color: hsl(var(--primary-foreground));
+  color: hsl(var(--primary));
 }
 
 .scroll-up-btn:hover {
-    background-color: hsl(var(--primary-foreground) / 90%);
-    transform: translateY(-2px);
+  background-color: hsl(var(--primary-foreground) / 90%);
+  transform: translateY(-2px);
 }
 
 /* Dark theme */
-:root[class~="dark"] .scroll-up-btn {
-    background-color: hsl(var(--primary));
-    color: white;
+:root[class~='dark'] .scroll-up-btn {
+  background-color: hsl(var(--primary));
+  color: white;
 }
 
-:root[class~="dark"] .scroll-up-btn:hover {
-    background-color: hsl(var(--primary) / 90%);
-    transform: translateY(-2px);
+:root[class~='dark'] .scroll-up-btn:hover {
+  background-color: hsl(var(--primary) / 90%);
+  transform: translateY(-2px);
 }

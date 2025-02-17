@@ -1,46 +1,42 @@
-import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useEffect, useState } from 'react';
-import { SCROLL_THRESHOLD } from '../constants';
+import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import React, { useEffect, useState } from 'react'
+import { SCROLL_THRESHOLD } from '../constants'
 
 const ScrollUp: React.FC = () => {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(false)
 
   const toggleVisibility = (): void => {
     if (window.pageYOffset > SCROLL_THRESHOLD) {
-      setIsVisible(true);
+      setIsVisible(true)
     } else {
-      setIsVisible(false);
+      setIsVisible(false)
     }
-  };
+  }
 
   const scrollToTop = (): void => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
-    });
-  };
+      behavior: 'smooth',
+    })
+  }
 
   useEffect(() => {
-    window.addEventListener('scroll', toggleVisibility);
+    window.addEventListener('scroll', toggleVisibility)
     return () => {
-      window.removeEventListener('scroll', toggleVisibility);
-    };
-  }, []);
+      window.removeEventListener('scroll', toggleVisibility)
+    }
+  }, [])
 
   return (
     <>
       {isVisible && (
-        <button
-          onClick={scrollToTop}
-          className="scroll-up-button"
-          aria-label="Scroll to top"
-        >
+        <button onClick={scrollToTop} className="scroll-up-button" aria-label="Scroll to top">
           <FontAwesomeIcon icon={faArrowUp} />
         </button>
       )}
     </>
-  );
-};
+  )
+}
 
-export default ScrollUp;
+export default ScrollUp
