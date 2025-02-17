@@ -38,11 +38,12 @@ Before contributing, ensure you have the following installed:
 Follow these steps to set up the OWASP Nest application:
 
 1. **Clone the Repository**:
-    - Clone the repository code from your GitHub account using the following command:
 
-      ```bash
-      git clone https://github.com/<your-account>/<nest-fork>
-      ```
+   - Clone the repository code from your GitHub account using the following command:
+
+     ```bash
+     git clone https://github.com/<your-account>/<nest-fork>
+     ```
 
 1. **Create Environment Files**:
 
@@ -84,15 +85,15 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Set Up Algolia**:
 
-    - Go to [Algolia](https://www.algolia.com/) and create a free account.
-    - After creating an account, create an Algolia app.
-    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
+   - Go to [Algolia](https://www.algolia.com/) and create a free account.
+   - After creating an account, create an Algolia app.
+   - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
-     ```plaintext
-     DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
-     DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
-     DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
-     ```
+   ```plaintext
+   DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
+   DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
+   DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
+   ```
 
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
@@ -124,9 +125,9 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      ```
 
 1. **Verify API Endpoints**:
-    - Check that the data is available via these API endpoints:
-      - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
-      - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
+   - Check that the data is available via these API endpoints:
+     - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
+     - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
 
 ### Optional Steps
 
@@ -212,6 +213,16 @@ To setup NestBot development environment, follow these steps:
 1. **Set up Slack application**:
    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+
+## Contributing to Schema
+
+1. **Addition of an attribute to a schema should follow Alphabetical Order**
+
+2. **Test case for the attribute should be present**
+   - Should have positive test cases `optional-properties.yaml` / `required-properties.yaml`
+   - Should have negative test cases `empty.yaml` & `null.yaml`
+   - If required add `invalid.yaml` / `undefined.yaml` to negative test cases
+   - Prefer using single quotes in test cases
 
 ## Code Quality Checks
 
