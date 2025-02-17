@@ -1,0 +1,34 @@
+services:
+  nest-certbot:
+    container_name: nest-certbot
+    image: certbot/certbot
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./staging.conf:/etc/nginx/conf.d/staging.conf
+      - nest-certbot-webroot:/var/www/certbot
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
+
+  nest-nginx:
+    container_name: nest-nginx
+    image: nginx:latest
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./staging.conf:/etc/nginx/conf.d/staging.conf
+      - nest-certbot-webroot:/var/www/certbot
+    networks:
+      - production_nest-app-network
+      - staging_nest-app-network
+
+networks:
+  production_nest-app-network:
+    external: true
+  staging_nest-app-network:
+    external: true
+
+volumes:
+  nest-certbot-webroot:
