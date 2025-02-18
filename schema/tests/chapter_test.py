@@ -25,6 +25,15 @@ def test_positive(chapter_schema):
     [
         ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
+        (
+            "community-empty.yaml",
+            "Additional properties are not allowed ('level' was unexpected)",
+        ),
+        (
+            "community-invalid.yaml",
+            "'another-invalid-url' is not a 'uri'",
+        ),
+        ("community-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique.yaml",
@@ -38,10 +47,19 @@ def test_positive(chapter_schema):
             "leader-email-null.yaml",
             "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
         ),
-        ("mailing-list-empty.yaml", "'' is not a 'uri'"),
+        ("logo-large-empty.yaml", "'' is not a 'uri'"),
+        ("logo-large-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("logo-large-null.yaml", "None is not of type 'string'"),
+        ("logo-medium-empty.yaml", "'' is not a 'uri'"),
+        ("logo-medium-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("logo-medium-null.yaml", "None is not of type 'string'"),
+        ("logo-small-empty.yaml", "'' is not a 'uri'"),
+        ("logo-small-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("logo-small-null.yaml", "None is not of type 'string'"),
+          ("mailing-list-empty.yaml", "'' is not a 'uri'"),
         ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("mailing-list-null.yaml", "None is not a 'uri'"),
-        
+    
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
         ("social-media-empty.yaml", "[] should be non-empty"),
