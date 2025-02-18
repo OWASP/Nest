@@ -7,6 +7,7 @@ from pathlib import Path
 from algoliasearch.http.exceptions import AlgoliaException
 from algoliasearch.query_suggestions.client import QuerySuggestionsClientSync
 from algoliasearch.search.client import SearchClientSync
+from algoliasearch.search.config import SearchConfig
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register as algolia_register
 from django.conf import settings
@@ -94,12 +95,16 @@ class IndexBase(AlgoliaIndex):
     """Base index class."""
 
     @staticmethod
-    def get_client():
+    def get_client(ip_address=None):
         """Return an instance of search client."""
-        return SearchClientSync(
+        config = SearchConfig(
             settings.ALGOLIA_APPLICATION_ID,
             settings.ALGOLIA_WRITE_API_KEY,
         )
+        if ip_address is not None:
+            config.headers["X-Forwarded-For"] = ip_address
+
+        return SearchClientSync(config=config)
 
     @staticmethod
     def get_suggestions_client():
