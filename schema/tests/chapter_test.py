@@ -41,6 +41,7 @@ def test_positive(chapter_schema):
         ("mailing-list-empty.yaml", "'' is not a 'uri'"),
         ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("mailing-list-null.yaml", "None is not a 'uri'"),
+        
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
         ("social-media-empty.yaml", "[] should be non-empty"),
