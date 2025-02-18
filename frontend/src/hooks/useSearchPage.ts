@@ -9,6 +9,7 @@ interface UseSearchPageOptions {
   pageTitle: string
   defaultSortBy?: string
   defaultOrder?: string
+  hitsPerPage?: number
 }
 
 interface UseSearchPageReturn<T> {
@@ -30,6 +31,7 @@ export function useSearchPage<T>({
   pageTitle,
   defaultSortBy = '',
   defaultOrder = '',
+  hitsPerPage,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -45,13 +47,17 @@ export function useSearchPage<T>({
     if (searchParams) {
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'asc'
-
-      if (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam) {
+      const orderParam = searchParams.get('order') || 'desc'
+      if (
+        indexName === 'projects' &&
+        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
+      ) {
+        setCurrentPage(1)
+      } else if (searchQuery !== searchQueryParam) {
         setCurrentPage(1)
       }
     }
-  }, [searchQuery, sortBy, order, searchParams])
+  }, [searchQuery, sortBy, order, searchParams, indexName])
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -79,7 +85,8 @@ export function useSearchPage<T>({
             ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
             : indexName,
           searchQuery,
-          currentPage
+          currentPage,
+          hitsPerPage
         )
         setItems(data.hits)
         setTotalPages(data.totalPages)
@@ -90,7 +97,7 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, indexName, pageTitle, navigate])
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle, navigate])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)

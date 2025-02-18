@@ -7,6 +7,10 @@ def validate_data(schema, data):
     """Validate data against schema."""
     format_checker = FormatChecker()
 
+    @format_checker.checks("email")
+    def check_email_format(value):
+        return validators.email(value)
+
     @format_checker.checks("uri")
     def check_uri_format(value):
         return validators.url(value)
