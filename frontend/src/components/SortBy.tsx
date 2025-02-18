@@ -1,6 +1,6 @@
 import { Button } from '@chakra-ui/react'
 import {
-  faArrowDownShortWide,
+  faArrowDownWideShort,
   faArrowUpWideShort,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons'
@@ -88,12 +88,12 @@ const SortBy = ({
             >
               {selectedOrder === 'asc' ? (
                 <FontAwesomeIcon
-                  icon={faArrowDownShortWide}
+                  icon= {faArrowUpWideShort}
                   className="h-5 w-5 text-gray-600 dark:text-gray-200"
                 />
               ) : (
                 <FontAwesomeIcon
-                  icon={faArrowUpWideShort}
+                  icon={faArrowDownWideShort} 
                   className="h-5 w-5 text-gray-600 dark:text-gray-200"
                 />
               )}
