@@ -2,30 +2,25 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
   "$defs": {
-    "leader": {
+    "community": {
       "type": "object",
-      "title": "Leader",
-      "description": "A project leader.",
-      "required": ["github"],
+      "title": "Community",
+      "description": "A project community.",
+      "required": ["platform", "url"],
       "properties": {
-        "email": {
-          "description": "The leader's email address.",
-          "format": "email",
-          "type": ["string", "null"]
+        "description": {
+          "description": "A brief description of the community.",
+          "type": "string"
         },
-        "github": {
+        "platform": {
           "type": "string",
-          "description": "The GitHub username.",
-          "pattern": "^[a-zA-Z0-9-]{1,39}$"
+          "enum": ["discord", "slack"],
+          "description": "The platform used by the community."
         },
-        "name": {
-          "type": ["string", "null"],
-          "description": "Leader's name."
-        },
-        "slack": {
-          "type": ["string", "null"],
-          "description": "The Slack username.",
-          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
+        "url": {
+          "type": "string",
+          "description": "The URL of the community.",
+          "format": "uri"
         }
       },
       "additionalProperties": false
@@ -34,26 +29,41 @@
       "type": "object",
       "title": "Repository",
       "description": "A project repository.",
-      "required": ["url"],
+      "required": [
+        "url"
+      ],
       "properties": {
         "changelog": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Link to the changelog."
         },
         "code_of_conduct": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Link to the code of conduct."
         },
         "contribution_guide": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Link to the contribution guide."
         },
         "description": {
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Repository description."
         },
         "name": {
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Repository name."
         },
         "url": {
@@ -93,15 +103,45 @@
         }
       },
       "additionalProperties": false
+    },
+    "logo": {
+      "description": "A logo for the project",
+      "type": "object",
+      "properties": {
+        "small": {
+          "description": "Logo size should be 192x192 pixels.",
+          "type": "string",
+          "format": "uri"
+        },
+        "medium": {
+          "description": "Logo size should be 256x256 pixels.",
+          "type": "string",
+          "format": "uri"
+        },
+        "large": {
+          "description": "Logo size should be 512x512 pixels.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "additionalProperties": false
     }
   },
-
   "additionalProperties": false,
   "description": "OWASP schema.",
   "properties": {
     "audience": {
       "description": "The intended audience for the project.",
-      "enum": ["breaker", "builder", "defender"],
+      "enum": [
+        "breaker",
+        "builder",
+        "defender"
+      ],
       "enumDescriptions": [
         "Security testers and ethical hackers.",
         "Developers and engineers.",
@@ -113,6 +153,16 @@
       "description": "Project's blog.",
       "format": "uri",
       "type": "string"
+    },
+    "community": {
+      "description": "A list of community platforms associated with the project.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/community"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
     },
     "demo": {
       "description": "Optional URL to the project demo.",
@@ -155,7 +205,8 @@
       "description": "Leaders of the project.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/leader"
+        "$ref": "./common.json#/definitions/person"
+
       },
       "minItems": 2,
       "uniqueItems": true
@@ -163,7 +214,12 @@
     "level": {
       "default": 2,
       "description": "The numeric level of the project.",
-      "enum": [2, 3, 3.5, 4],
+      "enum": [
+        2,
+        3,
+        3.5,
+        4
+      ],
       "enumDescriptions": [
         "Incubator",
         "Lab",
@@ -194,6 +250,21 @@
       ],
       "type": "string"
     },
+    "logo": {
+      "description": "Logo information for the project.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/logo"
+      },
+      "minItems": 1,
+      "additionalProperties": false,
+      "optional": true
+    },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the project.",
+      "format": "uri",
+      "type": "string"
+    },
     "name": {
       "description": "The unique name of the project.",
       "minLength": 10,
@@ -211,6 +282,15 @@
         "$ref": "#/$defs/repository"
       },
       "uniqueItems": true
+    },
+    "social-media": {
+      "description": "Social media information for the project",
+      "type": "array",
+      "items": {
+        "$ref": "./common.json#/definitions/social-media"
+      },
+      "minItems": 1,
+      "additionalProperties": false
     },
     "sponsors": {
       "description": "Sponsors of the project.",
@@ -231,7 +311,11 @@
     },
     "type": {
       "description": "The type of the project: code, documentation or tool.",
-      "enum": ["code", "documentation", "tool"],
+      "enum": [
+        "code",
+        "documentation",
+        "tool"
+      ],
       "enumDescriptions": [
         "Code projects",
         "Documentation, standards, etc.",

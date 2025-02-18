@@ -38,10 +38,10 @@ const SortBy = ({
           }}
         >
           <div className="flex items-center gap-2">
-            <SelectLabel className="font-small text-sm text-gray-600 dark:text-gray-300">
-              Sort By:
-            </SelectLabel>
             <SelectTrigger className="width-auto text-sm">
+              <SelectLabel className="font-small cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                <span className="cursor-pointer">Sort By:</span>
+              </SelectLabel>
               <SelectValueText
                 paddingRight={'1.4rem'}
                 width={'auto'}

@@ -15,6 +15,7 @@ import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
@@ -82,14 +83,16 @@ export default function CommitteeDetailsPage() {
   ]
 
   return (
-    <DetailsCard
-      title={committee.name}
-      details={details}
-      stats={committeeStats}
-      socialLinks={committee.relatedUrls}
-      summary={committee.summary}
-      type="committee"
-      topContributors={committee.topContributors}
-    />
+    <MetadataManager pageTitle={committee.name} description={committee.summary} url={committee.url}>
+      <DetailsCard
+        details={details}
+        socialLinks={committee.relatedUrls}
+        stats={committeeStats}
+        summary={committee.summary}
+        title={committee.name}
+        topContributors={committee.topContributors}
+        type="committee"
+      />
+    </MetadataManager>
   )
 }

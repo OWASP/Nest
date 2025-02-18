@@ -13,9 +13,11 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ProjectTypeGraphql } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
+import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -72,27 +74,50 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-    { icon: faUsers, value: `${project?.contributorsCount || 'No'} Contributors` },
-    { icon: faCodeFork, value: `${project?.forksCount || 'No'} Forks` },
-    { icon: faStar, value: `${project?.starsCount || 'No'} Stars` },
-    { icon: faCode, value: `${project?.repositoriesCount || 'No'} Repositories` },
-    { icon: faExclamationCircle, value: `${project?.issuesCount || 'No'} Issues` },
+    {
+      icon: faUsers,
+      value: `${project?.contributorsCount || 'No'} ${pluralize(project.contributorsCount, 'Contributor')}`,
+    },
+    {
+      icon: faCodeFork,
+      value: `${project?.forksCount || 'No'} ${pluralize(project.forksCount, 'Fork')}`,
+    },
+    {
+      icon: faStar,
+      value: `${project?.starsCount || 'No'} ${pluralize(project.starsCount, 'Star')}`,
+    },
+    {
+      icon: faCode,
+      value: `${project?.repositoriesCount || 'No'} ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
+    },
+    {
+      icon: faExclamationCircle,
+      value: `${project?.issuesCount || 'No'} ${pluralize(project.issuesCount, 'Issue')}`,
+    },
   ]
   return (
-    <DetailsCard
-      title={project.name}
-      details={projectDetails}
-      is_active={project.isActive}
-      summary={project.summary}
-      stats={projectStats}
-      type="project"
-      topContributors={project.topContributors}
-      languages={project.languages}
-      topics={project.topics}
-      recentReleases={project.recentReleases}
-      recentIssues={project.recentIssues}
-      repositories={project.repositories}
-    />
+    <MetadataManager
+      description={project.summary}
+      keywords={project.topics}
+      pageTitle={project.name || projectKey}
+      type={project.type}
+      url={project.url}
+    >
+      <DetailsCard
+        details={projectDetails}
+        is_active={project.isActive}
+        languages={project.languages}
+        recentIssues={project.recentIssues}
+        recentReleases={project.recentReleases}
+        repositories={project.repositories}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={project.topContributors}
+        topics={project.topics}
+        type="project"
+      />
+    </MetadataManager>
   )
 }
 

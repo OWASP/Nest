@@ -9,6 +9,7 @@ interface UseSearchPageOptions {
   pageTitle: string
   defaultSortBy?: string
   defaultOrder?: string
+  hitsPerPage?: number
 }
 
 interface UseSearchPageReturn<T> {
@@ -30,6 +31,7 @@ export function useSearchPage<T>({
   pageTitle,
   defaultSortBy = '',
   defaultOrder = '',
+  hitsPerPage,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -40,6 +42,23 @@ export function useSearchPage<T>({
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (searchParams) {
+      const searchQueryParam = searchParams.get('q') || ''
+      const sortByParam = searchParams.get('sortBy') || 'default'
+      const orderParam = searchParams.get('order') || 'desc'
+      if (
+        indexName === 'projects' &&
+        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
+      ) {
+        setCurrentPage(1)
+      } else if (searchQuery !== searchQueryParam) {
+        setCurrentPage(1)
+      }
+    }
+  }, [searchQuery, sortBy, order, searchParams, indexName])
+
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
@@ -57,7 +76,6 @@ export function useSearchPage<T>({
   }, [searchQuery, order, currentPage, sortBy, setSearchParams])
 
   useEffect(() => {
-    document.title = pageTitle
     setIsLoaded(false)
 
     const fetchData = async () => {
@@ -67,7 +85,8 @@ export function useSearchPage<T>({
             ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
             : indexName,
           searchQuery,
-          currentPage
+          currentPage,
+          hitsPerPage
         )
         setItems(data.hits)
         setTotalPages(data.totalPages)
@@ -78,11 +97,10 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, indexName, pageTitle, navigate])
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle, navigate])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
-    setCurrentPage(1)
   }
 
   const handlePageChange = (page: number) => {
@@ -95,12 +113,12 @@ export function useSearchPage<T>({
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort)
-    setCurrentPage(1)
   }
+
   const handleOrderChange = (order: string) => {
     setOrder(order)
-    setCurrentPage(1)
   }
+
   return {
     items,
     isLoaded,
