@@ -2,30 +2,25 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/chapter.json",
   "$defs": {
-    "leader": {
+    "community": {
       "type": "object",
-      "title": "Leader",
-      "description": "A chapter leader.",
-      "required": ["github"],
+      "title": "Community",
+      "description": "A chapter community.",
+      "required": ["platform", "url"],
       "properties": {
-        "email": {
-          "description": "The leader's email address.",
-          "format": "email",
-          "type": ["string", "null"]
+        "description": {
+          "description": "A brief description of the community.",
+          "type": "string"
         },
-        "github": {
+        "platform": {
           "type": "string",
-          "description": "The GitHub username.",
-          "pattern": "^[a-zA-Z0-9-]{1,39}$"
+          "enum": ["discord", "slack"],
+          "description": "The platform used by the community."
         },
-        "name": {
-          "type": ["string", "null"],
-          "description": "Leader's name."
-        },
-        "slack": {
-          "type": ["string", "null"],
-          "description": "The Slack username.",
-          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
+        "url": {
+          "type": "string",
+          "description": "The URL of the community.",
+          "format": "uri"
         }
       },
       "additionalProperties": false
@@ -60,37 +55,53 @@
       },
       "additionalProperties": false
     },
-    "socialMedia": {
-      "description": "A social media platform for the chapter.",
+    "logo": {
+      "description": "A logo for the chapter",
       "type": "object",
       "properties": {
-          "description": {
-          "description": "Description of the social media platform",
-          "type": "string"
+        "small": {
+          "description": "Logo size should be 192x192 pixels.",
+          "type": "string",
+          "format": "uri"
         },
-        "platform": {
-          "description": "The type of social media platform.",
-          "enum": ["bluesky", "linkedin", "x", "youtube"],
-          "type": "string"
+        "medium": {
+          "description": "Logo size should be 256x256 pixels.",
+          "type": "string",
+          "format": "uri"
         },
-        "url": {
-          "description": "The URL of the social media profile.",
+        "large": {
+          "description": "Logo size should be 512x512 pixels.",
           "type": "string",
           "format": "uri"
         }
       },
-      "required": ["platform", "url"],
+      "required": [
+        "small",
+        "medium",
+        "large"
+      ],
       "additionalProperties": false
     }
   },
-
   "additionalProperties": false,
   "description": "OWASP chapter schema.",
   "properties": {
     "blog": {
       "description": "Chapter's blog.",
       "format": "uri",
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
+    },
+    "community": {
+      "description": "A list of community platforms associated with the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/community"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "optional": true
     },
     "country": {
       "description": "Country.",
@@ -110,10 +121,20 @@
       "description": "Leaders of the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/leader"
+        "$ref": "./common.json#/definitions/person"
       },
       "minItems": 2,
       "uniqueItems": true
+    },
+    "logo": {
+      "description": "Logo for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/logo"
+      },
+      "minItems": 1,
+      "additionalProperties": false,
+      "optional": true
     },
     "meetup-group": {
       "description": "Meetup group.",
@@ -124,7 +145,6 @@
       "format": "uri",
       "type": ["string", "null"]
     },
-
     "name": {
       "description": "The unique name of the chapter.",
       "minLength": 10,
@@ -133,6 +153,15 @@
     "region": {
       "description": "Region.",
       "type": "string"
+    },
+    "social-media": {
+      "description": "Social media information for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "./common.json#/definitions/social-media"
+      },
+      "minItems": 1,
+      "additionalProperties": false
     },
     "sponsors": {
       "description": "Sponsors of the chapter.",
@@ -155,17 +184,7 @@
       "description": "The official website of the chapter.",
       "type": "string",
       "format": "url"
-    },
-
-	  "social_media": {
-	  "description": "Social media information for the chapter.",
-	  "type": "array",
-	  "items": {
-		  "$ref": "#/$defs/socialMedia"
-	  },
-	  "minItems": 1,
-	  "additionalProperties": false
-	  }
+    }
   },
   "required": [
     "country",

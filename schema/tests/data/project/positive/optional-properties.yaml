@@ -38,7 +38,7 @@ repositories:
   - description: Another repository with a valid URL.
     name: test-repo-2
     url: https://example.com/repo2
-social_media:
+social-media:
   - description: A brief description of the social media platform
     platform: youtube
     url: https://www.youtube.com/channel/UC1234567890abc

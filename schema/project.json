@@ -25,45 +25,6 @@
       },
       "additionalProperties": false
     },
-    "leader": {
-      "type": "object",
-      "title": "Leader",
-      "description": "A project leader.",
-      "required": [
-        "github"
-      ],
-      "properties": {
-        "email": {
-          "description": "The leader's email address.",
-          "format": "email",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "github": {
-          "type": "string",
-          "description": "The GitHub username.",
-          "pattern": "^[a-zA-Z0-9-]{1,39}$"
-        },
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Leader's name."
-        },
-        "slack": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "The Slack username.",
-          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
-        }
-      },
-      "additionalProperties": false
-    },
     "repository": {
       "type": "object",
       "title": "Repository",
@@ -111,36 +72,6 @@
           "format": "uri"
         }
       },
-      "additionalProperties": false
-    },
-    "socialMedia": {
-      "description": "A social media platform for the project",
-      "type": "object",
-      "properties": {
-        "description": {
-          "description": "Description of the social media platform",
-          "type": "string"
-        },
-        "platform": {
-          "description": "The type of social media platform.",
-          "enum": [
-            "bluesky",
-            "linkedin",
-            "x",
-            "youtube"
-          ],
-          "type": "string"
-        },
-        "url": {
-          "description": "The URL of the social media profile.",
-          "type": "string",
-          "format": "uri"
-        }
-      },
-      "required": [
-        "platform",
-        "url"
-      ],
       "additionalProperties": false
     },
     "sponsor": {
@@ -274,7 +205,8 @@
       "description": "Leaders of the project.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/leader"
+        "$ref": "./common.json#/definitions/person"
+
       },
       "minItems": 2,
       "uniqueItems": true
@@ -351,11 +283,11 @@
       },
       "uniqueItems": true
     },
-    "social_media": {
+    "social-media": {
       "description": "Social media information for the project",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/socialMedia"
+        "$ref": "./common.json#/definitions/social-media"
       },
       "minItems": 1,
       "additionalProperties": false
