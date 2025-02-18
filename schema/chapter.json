@@ -25,45 +25,6 @@
       },
       "additionalProperties": false
     },
-    "leader": {
-      "type": "object",
-      "title": "Leader",
-      "description": "A chapter leader.",
-      "required": [
-        "github"
-      ],
-      "properties": {
-        "email": {
-          "description": "The leader's email address.",
-          "format": "email",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "github": {
-          "type": "string",
-          "description": "The GitHub username.",
-          "pattern": "^[a-zA-Z0-9-]{1,39}$"
-        },
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Leader's name."
-        },
-        "slack": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "The Slack username.",
-          "pattern": "^[a-zA-Z0-9._-]{1,21}$"
-        }
-      },
-      "additionalProperties": false
-    },
     "sponsor": {
       "type": "object",
       "title": "Sponsor",
@@ -92,36 +53,6 @@
           "format": "uri"
         }
       },
-      "additionalProperties": false
-    },
-    "socialMedia": {
-      "description": "A social media platform for the chapter.",
-      "type": "object",
-      "properties": {
-        "description": {
-          "description": "Description of the social media platform",
-          "type": "string"
-        },
-        "platform": {
-          "description": "The type of social media platform.",
-          "enum": [
-            "bluesky",
-            "linkedin",
-            "x",
-            "youtube"
-          ],
-          "type": "string"
-        },
-        "url": {
-          "description": "The URL of the social media profile.",
-          "type": "string",
-          "format": "uri"
-        }
-      },
-      "required": [
-        "platform",
-        "url"
-      ],
       "additionalProperties": false
     },
     "logo": {
@@ -190,7 +121,7 @@
       "description": "Leaders of the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/leader"
+        "$ref": "./common.json#/definitions/person"
       },
       "minItems": 2,
       "uniqueItems": true
@@ -218,11 +149,11 @@
       "description": "Region.",
       "type": "string"
     },
-    "social_media": {
+    "social-media": {
       "description": "Social media information for the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/socialMedia"
+        "$ref": "./common.json#/definitions/social-media"
       },
       "minItems": 1,
       "additionalProperties": false
