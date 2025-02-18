@@ -88,7 +88,7 @@
       "description": "Leaders of the project.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/leader"
+        "$ref": "./common.json#/definitions/person"
       },
       "minItems": 2,
       "uniqueItems": true
@@ -155,11 +155,11 @@
       },
       "uniqueItems": true
     },
-    "social_media": {
+    "social-media": {
       "description": "Social media information for the project",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/socialMedia"
+        "$ref": "./common.json#/definitions/social-media"
       },
       "minItems": 1,
       "additionalProperties": false
