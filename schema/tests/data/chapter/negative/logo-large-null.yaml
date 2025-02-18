@@ -5,6 +5,10 @@ leaders:
   - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
+logo:
+  - small: https://example.com/smallLogo
+    medium: https://example.com/mediumLogo
+    large:
 name: OWASP Chapter
 social-media:
   - platform: youtube

@@ -6,9 +6,12 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 level: 2
+logo:
+  - small: https://example.com/smallLogo
+    medium: ''
+    large: https://example.com/largeLogo
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
-social-media: []
 sponsors:
   - description: Sponsor 1 description
     logo: https://sponsor1.com/logo.png
