@@ -218,7 +218,9 @@ To setup NestBot development environment, follow these steps:
 
 1. **Addition of an attribute to a schema should follow Alphabetical Order**
 
-2. **Test case for the attribute should be present**
+2. **Prefer reusing code from `common.json` and `test/common`
+
+3. **Test case for the attribute should be present**
    - Should have positive test cases `optional-properties.yaml` / `required-properties.yaml`
    - Should have negative test cases `empty.yaml` & `null.yaml`
    - If required add `invalid.yaml` / `undefined.yaml` to negative test cases
