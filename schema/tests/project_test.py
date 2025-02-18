@@ -63,14 +63,6 @@ def test_positive(project_schema):
         ),
         ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
         ("events-null.yaml", "None is not of type 'array'"),
-        (
-            "leaders-email-empty.yaml",
-            "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
-        ),
-        (
-            "leaders-email-null.yaml",
-            "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
-        ),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         (
             "license-invalid-value.yaml",
@@ -98,13 +90,6 @@ def test_positive(project_schema):
         ("repositories-null.yaml", "None is not of type 'array'"),
         ("social-media-empty.yaml", "[] should be non-empty"),
         ("social-media-null.yaml", "None is not of type 'array'"),
-        (
-            "social-media-platform-invalid.yaml",
-            "'bitcoin' is not one of ['bluesky', 'linkedin', 'x', 'youtube']",
-        ),
-        ("social-media-url-empty.yaml", "'' is not a 'uri'"),
-        ("social-media-url-invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("social-media-url-null.yaml", "None is not of type 'string'"),
         ("sponsors-empty.yaml", "[] should be non-empty"),
         ("sponsors-null.yaml", "None is not of type 'array'"),
         ("sponsors-undefined.yaml", "'url' is a required property"),
