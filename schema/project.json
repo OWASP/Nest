@@ -38,21 +38,24 @@
             "string",
             "null"
           ],
-          "description": "Link to the changelog."
+          "description": "Link to the changelog.",
+          "format": "uri"
         },
         "code_of_conduct": {
           "type": [
             "string",
             "null"
           ],
-          "description": "Link to the code of conduct."
+          "description": "Link to the code of conduct.",
+          "format": "uri"
         },
         "contribution_guide": {
           "type": [
             "string",
             "null"
           ],
-          "description": "Link to the contribution guide."
+          "description": "Link to the contribution guide.",
+          "format": "uri"
         },
         "description": {
           "type": [
