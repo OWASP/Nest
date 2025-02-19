@@ -1,3 +1,4 @@
+---
 services:
   production-nest-backend:
     container_name: production-nest-backend
@@ -14,40 +15,32 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - nest-app-network
-      - nest-db-network
+    - nest-app-network
+    - nest-db-network
     volumes:
-      - ./data:/home/owasp/data
+    - ./data:/home/owasp/data
 
   production-nest-frontend:
     container_name: production-nest-frontend
     image: arkid15r/owasp-nest-frontend:production
     restart: unless-stopped
     networks:
-      - nest-app-network
+    - nest-app-network
 
   production-nest-db:
     container_name: production-nest-db
     image: postgres:16.4
     env_file: .env.db
     healthcheck:
-      test:
-        [
-          'CMD',
-          'pg_isready',
-          '-U',
-          'nest_user_production',
-          '-d',
-          'nest_db_production',
-        ]
+      test: [CMD, pg_isready, -U, nest_user_production, -d, nest_db_production]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
     volumes:
-      - ./volumes/db:/var/lib/postgresql/data
+    - ./volumes/db:/var/lib/postgresql/data
     networks:
-      - nest-db-network
+    - nest-db-network
 
 networks:
   nest-app-network:

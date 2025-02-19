@@ -1,18 +1,19 @@
-country: India
+---
+country  : India
 community:
-  - platform: slack
-    description: Slack community
-    url: invalid-url
-  - platform: discord
-    description: Discord community
-    url: another-invalid-url
-leaders:
-  - github: leader-1-github
-    name: Leader 1 Name
-  - github: leader-2-github
-    name: Leader 2 Name
-name: OWASP Chapter
-tags:
-  - example-tag-1
-  - example-tag-2
-  - example-tag-3
+- platform: slack
+  description: Slack community
+  url: invalid-url
+- platform: discord
+  description: Discord community
+  url: another-invalid-url
+leaders  :
+- github: leader-1-github
+  name: Leader 1 Name
+- github: leader-2-github
+  name: Leader 2 Name
+name     : OWASP Chapter
+tags     :
+- example-tag-1
+- example-tag-2
+- example-tag-3

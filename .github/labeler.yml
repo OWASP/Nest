@@ -1,80 +1,81 @@
-backend:
-  - all:
-      - changed-files:
-          - any-glob-to-any-file:
-              - 'backend/**'
-          - all-globs-to-all-files:
-              - '!backend/apps/slack/**'
-              - '!backend/tests/slack/**'
-
-backend-tests:
-  - all:
-      - changed-files:
-          - any-glob-to-any-file:
-              - 'backend/tests/**'
-          - all-globs-to-all-files:
-              - '!backend/tests/slack/**'
-
-ci:
+---
+backend       :
+- all:
   - changed-files:
-      - any-glob-to-any-file:
-          - '.github/workflows/**'
+    - any-glob-to-any-file:
+      - backend/**
+    - all-globs-to-all-files:
+      - '!backend/apps/slack/**'
+      - '!backend/tests/slack/**'
 
-deploy:
+backend-tests :
+- all:
   - changed-files:
-      - any-glob-to-any-file:
-          - '.github/ansible/**'
+    - any-glob-to-any-file:
+      - backend/tests/**
+    - all-globs-to-all-files:
+      - '!backend/tests/slack/**'
 
-docker:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'docker-*.yaml'
-          - '**/Dockerfile.*'
+ci            :
+- changed-files:
+  - any-glob-to-any-file:
+    - .github/workflows/**
 
-docs:
-  - changed-files:
-      - any-glob-to-any-file:
-          - '**/*.md'
+deploy        :
+- changed-files:
+  - any-glob-to-any-file:
+    - .github/ansible/**
 
-frontend:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'frontend/**'
+docker        :
+- changed-files:
+  - any-glob-to-any-file:
+    - docker-*.yaml
+    - '**/Dockerfile.*'
+
+docs          :
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*.md'
+
+frontend      :
+- changed-files:
+  - any-glob-to-any-file:
+    - frontend/**
 
 frontend-tests:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'frontend/__tests__/**'
+- changed-files:
+  - any-glob-to-any-file:
+    - frontend/__tests__/**
 
-makefile:
-  - changed-files:
-      - any-glob-to-any-file:
-          - '**/Makefile'
+makefile      :
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/Makefile'
 
-nestbot:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'backend/apps/slack/**'
+nestbot       :
+- changed-files:
+  - any-glob-to-any-file:
+    - backend/apps/slack/**
 
-nestbot-tests:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'backend/tests/slack/**'
+nestbot-tests :
+- changed-files:
+  - any-glob-to-any-file:
+    - backend/tests/slack/**
 
-nginx:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'nginx/**'
+nginx         :
+- changed-files:
+  - any-glob-to-any-file:
+    - nginx/**
 
-schema:
-  - all:
-    - changed-files:
-        - any-glob-to-any-file:
-            - 'schema/**'
-        - all-globs-to-all-files:
-            - '!schema/tests/**'
-
-schema-tests:
+schema        :
+- all:
   - changed-files:
-      - any-glob-to-any-file:
-          - 'schema/tests/**'
+    - any-glob-to-any-file:
+      - schema/**
+    - all-globs-to-all-files:
+      - '!schema/tests/**'
+
+schema-tests  :
+- changed-files:
+  - any-glob-to-any-file:
+    - schema/tests/**

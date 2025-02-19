@@ -1,3 +1,4 @@
-email: name@invalid
+---
+email : name@invalid
 github: leader-1-github
-name: Leader 1 Name
+name  : Leader 1 Name

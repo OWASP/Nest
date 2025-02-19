@@ -1,19 +1,20 @@
-country: India
-leaders:
-  - github: leader-1-github
-    name: Leader 1 Name
-  - github: leader-2-github
-    name: Leader 2 Name
-    slack: leader-2-slack
-logo:
-  - small: https://xyz
-    medium: https://example.com/mediumLogo
-    large: https://example.com/largeLogo
-name: OWASP Chapter
+---
+country     : India
+leaders     :
+- github: leader-1-github
+  name: Leader 1 Name
+- github: leader-2-github
+  name: Leader 2 Name
+  slack: leader-2-slack
+logo        :
+- small: https://xyz
+  medium: https://example.com/mediumLogo
+  large: https://example.com/largeLogo
+name        : OWASP Chapter
 social_media:
-  - platform: youtube
-    url: https://www.youtube.com/channel/UC1234567890abc
-tags:
-  - chapter-tag-1
-  - chapter-tag-2
-  - chapter-tag-3
+- platform: youtube
+  url: https://www.youtube.com/channel/UC1234567890abc
+tags        :
+- chapter-tag-1
+- chapter-tag-2
+- chapter-tag-3

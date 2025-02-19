@@ -1,7 +1,8 @@
+---
 name: Label Pull Requests
 
-on:
-  - pull_request_target
+on  :
+- pull_request_target
 
 jobs:
   labeler:
@@ -10,7 +11,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@v5
-        with:
-          configuration-path: .github/labeler.yml
-          sync-labels: true
+    - uses: actions/labeler@v5
+      with:
+        configuration-path: .github/labeler.yml
+        sync-labels: true

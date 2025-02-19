@@ -1,36 +1,43 @@
+---
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: check-ast
-      - id: check-builtin-literals
-      - id: check-yaml
-      - id: end-of-file-fixer
-        exclude_types:
-          - svg
-      - id: mixed-line-ending
-        args:
-          - --fix=lf
-      - id: name-tests-test
-        args:
-          - --pytest
-        exclude: (backend|schema)/tests/data
-        files: (backend|schema)/tests
-      - id: trailing-whitespace
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.6.0
+  hooks:
+  - id: check-ast
+  - id: check-builtin-literals
+  - id: check-yaml
+  - id: end-of-file-fixer
+    exclude_types:
+    - svg
+  - id: mixed-line-ending
+    args:
+    - --fix=lf
+  - id: name-tests-test
+    args:
+    - --pytest
+    exclude: (backend|schema)/tests/data
+    files: (backend|schema)/tests
+  - id: trailing-whitespace
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.7
-    hooks:
-      - id: ruff
-        args:
-          - '--fix'
-      - id: ruff-format
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.5.7
+  hooks:
+  - id: ruff
+    args:
+    - --fix
+  - id: ruff-format
 
-  - repo: https://github.com/djlint/djLint
-    rev: v1.35.2
-    hooks:
-      - id: djlint-reformat-django
-        files: 'templates/.*.html'
-        entry: djlint --reformat
-        types:
-          - html
+- repo: https://github.com/djlint/djLint
+  rev: v1.35.2
+  hooks:
+  - id: djlint-reformat-django
+    files: templates/.*.html
+    entry: djlint --reformat
+    types:
+    - html
+
+- repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  rev: 0.2.1
+  hooks:
+  - id: yamlfmt
+    args: [--mapping, '2', --sequence, '2', --offset, '0', --colons, --width, '150']
