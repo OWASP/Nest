@@ -54,14 +54,12 @@ export default function Home() {
         indexName: 'chapters',
         query: '',
         currentPage: 1,
-        filterKey: '',
         hitsPerPage: 25,
       }
       const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
-        searchParams.filterKey,
         searchParams.hitsPerPage
       )
       setGeoLocData(data.hits)
@@ -112,8 +110,7 @@ export default function Home() {
           <SearchComponent
             onSearch={() => {}}
             placeholder="Search for projects, chapters, and more..."
-            indexName="projects"
-            onReady={() => {}}
+            isLoaded={false}
           />
         </div>
       </div>
