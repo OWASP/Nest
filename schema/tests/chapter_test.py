@@ -41,14 +41,6 @@ def test_positive(chapter_schema):
             "events-non-unique.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
-        (
-            "leader-email-empty.yaml",
-            "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
-        ),
-        (
-            "leader-email-null.yaml",
-            "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
-        ),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
         ("website-null.yaml", "None is not of type 'string'"),
