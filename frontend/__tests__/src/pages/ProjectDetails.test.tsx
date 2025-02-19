@@ -179,12 +179,12 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       const levelElement = screen.getByText(/Level:/)
       expect(levelElement).toBeInTheDocument()
-      const levelValueElement = screen.queryByText('Intermediate')
+      const levelValueElement = screen.getByText('Intermediate')
       expect(levelValueElement).toBeInTheDocument()
 
       const typeElement = screen.getByText(/Type:/)
       expect(typeElement).toBeInTheDocument()
-      const typeValueElement = screen.queryByText('Open source')
+      const typeValueElement = screen.getByText('Open source')
       expect(typeValueElement).toBeInTheDocument()
     })
   })
