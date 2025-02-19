@@ -1,27 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
-  "$defs": {
-    "community": {
-      "$ref": "./schema/definitions/community.json"
-    },
-    "leader": {
-      "$ref": "./schema/definitions/person.json"
-    },
-    "repository": {
-      "$ref": "./schema/definitions/repository.json"
-    },
-    "socialMedia": {
-      "$ref": "./schema/definitions/socialMedia.json"
-    },
-    "socialMedia": {
-      "$ref": "./schema/definitions/socialMedia.json"
-    },
-    "sponsor": {
-      "$ref": "./schema/definitions/sponsor.json"
-    }
-  },
-
   "additionalProperties": false,
   "description": "OWASP schema.",
   "properties": {
@@ -91,7 +70,7 @@
       "description": "Leaders of the project.",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/person"
+        "$ref": "common.json#/definitions/person"
       },
       "minItems": 2,
       "uniqueItems": true
