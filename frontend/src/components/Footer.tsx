@@ -1,78 +1,65 @@
-import { Button, Link } from '@chakra-ui/react'
+import { Box, Button, Collapse, Container, Flex, Grid, Link, Stack, Text } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Section } from 'types/section'
 import { footerSections } from 'utils/constants'
 
 export default function Footer() {
-  // State to keep track of the open section in the footer
   const [openSection, setOpenSection] = useState<string | null>(null)
 
-  // Function to toggle the section open/closed
   const toggleSection = useCallback((title: string) => {
-    // If the section is already open, close it, otherwise open it
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
 
   return (
-    <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
-      <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
-        <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
-          {/* Iterate over footerSections to render each section */}
+    <Box as="footer" mt="auto" w="full" borderTop="1px" borderColor="gray.300" bg="gray.100" _dark={{ bg: 'gray.800', borderColor: 'gray.700' }}>
+      <Container maxW="container.xl" py={8}>
+        <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap={10}>
           {footerSections.map((section: Section) => (
-            <div key={section.title} className="space-y-4">
+            <Box key={section.title}>
               <Button
+                variant="ghost"
                 onClick={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
+                w="full"
+                justifyContent="space-between"
+                fontSize="lg"
+                fontWeight="semibold"
+                textAlign="left"
                 aria-expanded={openSection === section.title}
-                aria-controls={`footer-section-${section.title}`}
+                rightIcon={<FontAwesomeIcon icon={openSection === section.title ? faChevronUp : faChevronDown} />}
+                _focus={{ boxShadow: 'outline' }}
+                _hover={{ bg: 'gray.200' }}
               >
-                <h3>{section.title}</h3>
-                {/* Icon to indicate open/close state */}
-                <span className="transition-transform duration-200 lg:hidden">
-                  {openSection === section.title ? (
-                    <FontAwesomeIcon icon={faChevronUp} className="h-4 w-4" />
-                  ) : (
-                    <FontAwesomeIcon icon={faChevronDown} className="h-4 w-4" />
-                  )}
-                </span>
+                {section.title}
               </Button>
-              <ul
-                id={`footer-section-${section.title}`}
-                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
-                  openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
-                }`}
-              >
-                {/* Iterate through section links */}
-                {section.links.map((link, index) => (
-                  <li key={index} className="py-1">
-                    {link.isSpan ? (
-                      <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
-                    ) : (
-                      <Link
-                        target="_blank"
-                        className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-                        href={link.href}
-                      >
-                        {link.text}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <Collapse in={openSection === section.title} animateOpacity>
+                <Stack as="ul" spacing={2} mt={2} pl={4}>
+                  {section.links.map((link, index) => (
+                    <Box as="li" key={index}>
+                      {link.isSpan ? (
+                        <Text fontSize="sm" color="gray.600" _dark={{ color: 'gray.400' }}>
+                          {link.text}
+                        </Text>
+                      ) : (
+                        <Link href={link.href} isExternal fontSize="sm" color="blue.600" _dark={{ color: 'blue.300' }} _hover={{ textDecoration: 'underline' }}>
+                          {link.text}
+                        </Link>
+                      )}
+                    </Box>
+                  ))}
+                </Stack>
+              </Collapse>
+            </Box>
           ))}
-        </div>
-        {/* Footer bottom section with copyright and links */}
-        <div className="grid w-full place-content-center">
-          <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:text-left">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </div>
-    </footer>
+        </Grid>
+
+        <Flex justify="center" mt={6} textAlign="center">
+          <Text fontSize="sm" color="gray.600" _dark={{ color: 'gray.400' }}>
+            © {new Date().getFullYear()} OWASP Nest. All rights reserved.
+          </Text>
+        </Flex>
+      </Container>
+    </Box>
   )
 }
