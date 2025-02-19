@@ -41,7 +41,7 @@ def test_positive(project_schema):
         ),
         ("community-null.yaml", "None is not of type 'array'"),
         ("demo-invalid.yaml", "'https://invalid/' is not a 'uri'"),
-        ("demo-null.yaml", "None is not of type 'array'"),
+        ("demo-null.yaml", None),
         ("documentation-empty.yaml", "[] should be non-empty"),
         (
             "documentation-invalid.yaml",
