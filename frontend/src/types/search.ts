@@ -7,6 +7,7 @@ export interface MultiSearchBarProps {
 
 export interface Suggestion {
   indexName: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hits: any[]
   totalPages: number
 }

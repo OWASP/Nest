@@ -20,10 +20,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const pageCount = 1
   const suggestionCount = 3
 
-  useEffect(() => {
-    setSearchQuery(initialValue)
-  }, [initialValue])
-
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
@@ -66,6 +62,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     setShowSuggestions(false)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSuggestionClick = (suggestion: any, indexName: string) => {
     setSearchQuery(suggestion.name)
     setShowSuggestions(false)
