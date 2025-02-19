@@ -40,3 +40,4 @@ repos:
       hooks:
           - id: yamlfmt
             args: [--preserve-quotes, --implicit_start]
+            exclude: ".github/ISSUE_TEMPLATE/config.yml"
