@@ -44,7 +44,7 @@
       "description": "A list of community platforms associated with the project.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/community"
+        "$ref": "common.json#/definitions/community"
       },
       "minItems": 1,
       "uniqueItems": true,
@@ -129,13 +129,13 @@
       "description": "Logo information for the project.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/logo"
+        "$ref": "common.json#/definitions/logo"
       },
       "minItems": 1,
       "additionalProperties": false,
       "optional": true
     },
-    "mailing-list": {
+    "mailing_list": {
       "description": "The optional mailing list associated with the project.",
       "format": "uri",
       "type": "string"
@@ -154,15 +154,15 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "$ref": "#/$defs/repository"
+        "$ref": "common.json#/definitions/repository"
       },
       "uniqueItems": true
     },
-    "social-media": {
+    "social_media": {
       "description": "Social media information for the project",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/social-media"
+        "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
       "additionalProperties": false
@@ -171,7 +171,7 @@
       "description": "Sponsors of the project.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/sponsor"
+        "$ref": "common.json#/definitions/sponsor"
       },
       "minItems": 1
     },
@@ -199,15 +199,6 @@
       "format": "url",
       "minLength": 4,
       "type": "string"
-    },
-    "social_media": {
-      "description": "Social media information for the project",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/socialMedia"
-      },
-      "minItems": 1,
-      "additionalProperties": false
     }
   },
   "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],

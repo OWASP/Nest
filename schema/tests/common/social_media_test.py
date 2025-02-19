@@ -6,6 +6,8 @@ from tests.conftest import common_negative_test, common_positive_test
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
+        ("description-empty.yaml", "'' is not a description"),
+        ("description-null.yaml", "None is not of type 'string"),
         (
             "platform-empty.yaml",
             "'' is not one of ['bluesky', 'linkedin', 'x', 'youtube']",

@@ -27,7 +27,7 @@
       "description": "A list of community platforms associated with the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/community"
+        "$ref": "common.json#/definitions/community"
       },
       "minItems": 1,
       "uniqueItems": true,
@@ -51,7 +51,7 @@
       "description": "Leaders of the chapter.",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/person"
+        "$ref": "common.json#/definitions/person"
       },
       "minItems": 2,
       "uniqueItems": true
@@ -60,7 +60,7 @@
       "description": "Logo for the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/logo"
+        "$ref": "common.json#/definitions/logo"
       },
       "minItems": 1,
       "additionalProperties": false,
@@ -79,11 +79,11 @@
       "description": "Region.",
       "type": "string"
     },
-    "social-media": {
+    "social_media": {
       "description": "Social media information for the chapter.",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/social-media"
+        "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
       "additionalProperties": false
@@ -92,7 +92,7 @@
       "description": "Sponsors of the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/sponsor"
+        "$ref": "common.json#/definitions/sponsor"
       },
       "minItems": 1
     },
