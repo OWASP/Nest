@@ -15,6 +15,8 @@ MOCKED_SEARCH_RESULTS = {
     "nbPages": 5,
 }
 
+CLIENT_IP_ADDRESS = "127.0.0.1"
+
 
 @pytest.fixture()
 def _clear_cache():
@@ -44,6 +46,7 @@ class TestAlgoliaSearch:
             "apps.core.api.algolia.get_search_results", return_value=expected_result
         ) as mock_get_search_results:
             mock_request = Mock()
+            mock_request.META = {"HTTP_X_FORWARDED_FOR": CLIENT_IP_ADDRESS}
             mock_request.method = "POST"
             mock_request.body = json.dumps(
                 {
@@ -59,7 +62,9 @@ class TestAlgoliaSearch:
 
             assert response.status_code == requests.codes.ok
             assert response_data == expected_result
-            mock_get_search_results.assert_called_once_with(index_name, query, page, hits_per_page)
+            mock_get_search_results.assert_called_once_with(
+                index_name, query, page, hits_per_page, ip_address=CLIENT_IP_ADDRESS
+            )
 
     def test_algolia_search_invalid_method(self):
         """Test the scenario where the HTTP method is not POST."""

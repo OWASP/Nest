@@ -205,7 +205,7 @@
       "description": "Leaders of the project.",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/person"
+        "$ref": "common.json#/definitions/person"
 
       },
       "minItems": 2,
@@ -260,7 +260,7 @@
       "additionalProperties": false,
       "optional": true
     },
-    "mailing-list": {
+    "mailing_list": {
       "description": "The optional mailing list associated with the project.",
       "format": "uri",
       "type": "string"
@@ -283,11 +283,11 @@
       },
       "uniqueItems": true
     },
-    "social-media": {
+    "social_media": {
       "description": "Social media information for the project",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/social-media"
+        "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
       "additionalProperties": false
