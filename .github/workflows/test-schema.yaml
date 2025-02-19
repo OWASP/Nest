@@ -1,113 +1,112 @@
----
-name       : Test OWASP Schema
+name: Test OWASP Schema
 
-on         :
-  merge_group:
-  pull_request:
-    branches:
-    - main
-    paths:
-    - schema/**
-  push:
-    branches:
-    - main
-    paths:
-    - schema/**
-  workflow_dispatch:
+on:
+    merge_group:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - schema/**
+    push:
+        branches:
+            - main
+        paths:
+            - schema/**
+    workflow_dispatch:
 
 permissions:
-  contents: read
+    contents: read
 
 concurrency:
-  cancel-in-progress: true
-  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+    group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
 
-env        :
-  DOCKERHUB_USERNAME: arkid15r
-  FORCE_COLOR: 1
+env:
+    DOCKERHUB_USERNAME: arkid15r
+    FORCE_COLOR: 1
 
-jobs       :
-  pre-commit:
-    name: Run pre-commit
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out repository
-      uses: actions/checkout@v4
+jobs:
+    pre-commit:
+        name: Run pre-commit
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
 
-    - name: Install Poetry
-      run: pipx install poetry
+            - name: Install Poetry
+              run: pipx install poetry
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        cache: poetry
-        cache-dependency-path: schema/poetry.lock
-        python-version: '3.13'
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  cache: poetry
+                  cache-dependency-path: schema/poetry.lock
+                  python-version: '3.13'
 
-    - name: Run pre-commit
-      uses: pre-commit/action@v3.0.1
+            - name: Run pre-commit
+              uses: pre-commit/action@v3.0.1
 
-    - name: Check for uncommitted changes
-      run: |
-        git diff --exit-code || (echo 'Unstaged changes detected. \
-        Run `make check` and use `git add` to address it.' && exit 1)
+            - name: Check for uncommitted changes
+              run: |
+                  git diff --exit-code || (echo 'Unstaged changes detected. \
+                  Run `make check` and use `git add` to address it.' && exit 1)
 
-  code-ql:
-    name: CodeQL
-    permissions:
-      security-events: write
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        language:
-        - python
-    steps:
-    - name: Check out repository
-      uses: actions/checkout@v4
+    code-ql:
+        name: CodeQL
+        permissions:
+            security-events: write
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                language:
+                    - python
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: ${{ matrix.language }}
 
-    - name: Perform CodeQL analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: /language:${{ matrix.language }}
+            - name: Perform CodeQL analysis
+              uses: github/codeql-action/analyze@v3
+              with:
+                  category: /language:${{ matrix.language }}
 
-  spellcheck:
-    name: Run spell check
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out repository
-      uses: actions/checkout@v4
+    spellcheck:
+        name: Run spell check
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
 
-    - name: Run cspell
-      run: |
-        make spellcheck
+            - name: Run cspell
+              run: |
+                  make spellcheck
 
-  run-schema-tests:
-    name: Run schema tests
-    needs:
-    - pre-commit
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out repository
-      uses: actions/checkout@v4
+    run-schema-tests:
+        name: Run schema tests
+        needs:
+            - pre-commit
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
 
-    - name: Set up Docker buildx
-      uses: docker/setup-buildx-action@v3
+            - name: Set up Docker buildx
+              uses: docker/setup-buildx-action@v3
 
-    - name: Build schema test image
-      uses: docker/build-push-action@v6
-      with:
-        cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
-        context: schema
-        file: schema/Dockerfile.test
-        load: true
-        platforms: linux/amd64
-        tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest
+            - name: Build schema test image
+              uses: docker/build-push-action@v6
+              with:
+                  cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
+                  context: schema
+                  file: schema/Dockerfile.test
+                  load: true
+                  platforms: linux/amd64
+                  tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest
 
-    - name: Run schema tests
-      run: |
-        docker run ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest poetry run pytest
+            - name: Run schema tests
+              run: |
+                  docker run ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest poetry run pytest
