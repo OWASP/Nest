@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client'
-import { act, fireEvent, queryByText, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { toast } from 'hooks/useToast'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
