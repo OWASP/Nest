@@ -10,7 +10,7 @@ logo:
     medium: https://example.com/mediumLogo
     large: ''
 name: OWASP Chapter
-social-media:
+social_media:
   - platform: youtube
     url: https://www.youtube.com/channel/UC1234567890abc
 tags:

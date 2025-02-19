@@ -6,7 +6,7 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 name: OWASP Chapter
-social-media:
+social_media:
   - platform: youtube
     url:
 tags:
