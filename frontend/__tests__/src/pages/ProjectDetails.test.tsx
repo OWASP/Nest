@@ -170,8 +170,8 @@ describe('ProjectDetailsPage', () => {
 
   test('renders project details with correct capitalization', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
-    data: mockProjectDetailsData,
-    error: null,
+      data: mockProjectDetailsData,
+      error: null,
     })
 
     render(<ProjectDetailsPage />)
@@ -179,14 +179,13 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       const levelElement = screen.getByText(/Level:/)
       expect(levelElement).toBeInTheDocument()
-      const levelValueElement = screen.queryByText("Intermediate")
+      const levelValueElement = screen.queryByText('Intermediate')
       expect(levelValueElement).toBeInTheDocument()
 
       const typeElement = screen.getByText(/Type:/)
       expect(typeElement).toBeInTheDocument()
-      const typeValueElement = screen.queryByText("Open source")
+      const typeValueElement = screen.queryByText('Open source')
       expect(typeValueElement).toBeInTheDocument()
-
     })
   })
 

@@ -29,12 +29,17 @@
       "type": "object",
       "title": "Leader",
       "description": "A chapter leader.",
-      "required": ["github"],
+      "required": [
+        "github"
+      ],
       "properties": {
         "email": {
           "description": "The leader's email address.",
           "format": "email",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "github": {
           "type": "string",
@@ -42,11 +47,17 @@
           "pattern": "^[a-zA-Z0-9-]{1,39}$"
         },
         "name": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Leader's name."
         },
         "slack": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "The Slack username.",
           "pattern": "^[a-zA-Z0-9._-]{1,21}$"
         }
@@ -87,13 +98,18 @@
       "description": "A social media platform for the chapter.",
       "type": "object",
       "properties": {
-          "description": {
+        "description": {
           "description": "Description of the social media platform",
           "type": "string"
         },
         "platform": {
           "description": "The type of social media platform.",
-          "enum": ["bluesky", "linkedin", "x", "youtube"],
+          "enum": [
+            "bluesky",
+            "linkedin",
+            "x",
+            "youtube"
+          ],
           "type": "string"
         },
         "url": {
@@ -102,18 +118,49 @@
           "format": "uri"
         }
       },
-      "required": ["platform", "url"],
+      "required": [
+        "platform",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "logo": {
+      "description": "A logo for the chapter",
+      "type": "object",
+      "properties": {
+        "small": {
+          "description": "Logo size should be 192x192 pixels.",
+          "type": "string",
+          "format": "uri"
+        },
+        "medium": {
+          "description": "Logo size should be 256x256 pixels.",
+          "type": "string",
+          "format": "uri"
+        },
+        "large": {
+          "description": "Logo size should be 512x512 pixels.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "small",
+        "medium",
+        "large"
+      ],
       "additionalProperties": false
     }
   },
-
   "additionalProperties": false,
   "description": "OWASP chapter schema.",
   "properties": {
     "blog": {
       "description": "Chapter's blog.",
       "format": "uri",
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
     },
     "community": {
       "description": "A list of community platforms associated with the chapter.",
@@ -148,6 +195,16 @@
       "minItems": 2,
       "uniqueItems": true
     },
+    "logo": {
+      "description": "Logo for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/logo"
+      },
+      "minItems": 1,
+      "additionalProperties": false,
+      "optional": true
+    },
     "meetup-group": {
       "description": "Meetup group.",
       "type": "string"
@@ -160,6 +217,15 @@
     "region": {
       "description": "Region.",
       "type": "string"
+    },
+    "social_media": {
+      "description": "Social media information for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/socialMedia"
+      },
+      "minItems": 1,
+      "additionalProperties": false
     },
     "sponsors": {
       "description": "Sponsors of the chapter.",
@@ -182,16 +248,7 @@
       "description": "The official website of the chapter.",
       "type": "string",
       "format": "url"
-    },
-	  "social_media": {
-	  "description": "Social media information for the chapter.",
-	  "type": "array",
-	  "items": {
-		  "$ref": "#/$defs/socialMedia"
-	  },
-	  "minItems": 1,
-	  "additionalProperties": false
-	  }
+    }
   },
   "required": [
     "country",
