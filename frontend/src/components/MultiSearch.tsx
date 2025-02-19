@@ -5,19 +5,7 @@ import { debounce } from 'lodash'
 import type React from 'react'
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-interface MultiSearchBarProps {
-  isLoaded: boolean
-  placeholder: string
-  indexes: string[]
-  initialValue?: string
-}
-
-interface Suggestion {
-  indexName: string
-  hits: any[]
-  totalPages: number
-}
+import { MultiSearchBarProps, Suggestion } from 'types/search'
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -79,7 +67,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }
 
   const handleSuggestionClick = (suggestion: any, indexName: string) => {
-    setSearchQuery(suggestion.idx_name || suggestion.name)
+    setSearchQuery(suggestion.name)
     setShowSuggestions(false)
 
     switch (indexName) {
@@ -89,8 +77,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       case 'chapters':
         navigate(`/chapters/${suggestion.key}`)
         break
-      default:
-        throw new Error(`Unknown index name: ${indexName}`)
     }
   }
 
