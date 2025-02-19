@@ -1,20 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/chapter.json",
-  "$defs": {
-    "community": {
-      "$ref": "./schema/definitions/community.json"
-    },
-    "leader": {
-      "$ref": "./schema/definitions/person.json"
-    },
-    "socialMedia": {
-      "$ref": "./schema/definitions/socialMedia.json"
-    },
-    "sponsor": {
-      "$ref": "./schema/definitions/sponsor.json"
-    }
-  },
   "additionalProperties": false,
   "description": "OWASP chapter schema.",
   "properties": {
@@ -79,15 +65,6 @@
       "description": "Region.",
       "type": "string"
     },
-    "social_media": {
-      "description": "Social media information for the chapter.",
-      "type": "array",
-      "items": {
-        "$ref": "common.json#/definitions/social_media"
-      },
-      "minItems": 1,
-      "additionalProperties": false
-    },
     "sponsors": {
       "description": "Sponsors of the chapter.",
       "type": "array",
@@ -114,7 +91,7 @@
       "description": "Social media information for the chapter.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/socialMedia"
+        "$ref": "common.json#/definitions/socialMedia"
       },
       "minItems": 1,
       "additionalProperties": false
