@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client'
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, queryByText, screen, waitFor, within } from '@testing-library/react'
 import { toast } from 'hooks/useToast'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
@@ -166,6 +166,28 @@ describe('ProjectDetailsPage', () => {
 
     expect(setRecentReleasesMock).toHaveBeenCalledWith(undefined)
     expect(setRecentIssuesMock).toHaveBeenCalledWith(undefined)
+  })
+
+  test('renders project details with correct capitalization', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+    data: mockProjectDetailsData,
+    error: null,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      const levelElement = screen.getByText(/Level:/)
+      expect(levelElement).toBeInTheDocument()
+      const levelValueElement = screen.queryByText("Intermediate")
+      expect(levelValueElement).toBeInTheDocument()
+
+      const typeElement = screen.getByText(/Type:/)
+      expect(typeElement).toBeInTheDocument()
+      const typeValueElement = screen.queryByText("Open source")
+      expect(typeValueElement).toBeInTheDocument()
+
+    })
   })
 
   test('handles missing project stats gracefully', async () => {
