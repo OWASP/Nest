@@ -23,7 +23,7 @@ import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
-import SearchComponent from 'components/Search'
+import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 
@@ -95,7 +95,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl text-white">
+    <div className="mx-auto min-h-screen max-w-6xl text-gray-600 dark:text-gray-300">
       <div className="mb-20 pt-20 text-center">
         <div className="flex flex-col items-center py-10">
           <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
@@ -107,10 +107,10 @@ export default function Home() {
           </p>
         </div>
         <div className="mx-auto mb-8 flex max-w-2xl justify-center">
-          <SearchComponent
-            onSearch={() => {}}
-            placeholder="Search for projects, chapters, and more..."
-            isLoaded={false}
+          <MultiSearchBar
+            isLoaded={true}
+            placeholder="Search for projects, chapters, and more"
+            indexes={['projects', 'chapters']}
           />
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function Home() {
           title="Recent Issues"
           data={data.recentIssue}
           renderDetails={(item) => (
-            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
               <span>{formatDate(item.createdAt)}</span>
               <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
@@ -205,7 +205,7 @@ export default function Home() {
           title="Recent Releases"
           data={data.recentRelease}
           renderDetails={(item) => (
-            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
               <span>{formatDate(item.publishedAt)}</span>
               <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
@@ -220,7 +220,7 @@ export default function Home() {
             <div className="mb-2 text-3xl font-bold text-blue-400">
               <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
             </div>
-            <div className="text-gray-300">{stat.label}</div>
+            <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
           </SecondaryCard>
         ))}
       </div>
