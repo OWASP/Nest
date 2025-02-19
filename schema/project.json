@@ -168,10 +168,6 @@
       "description": "Optional URL to the project demo.",
       "oneOf": [
         {
-          "type":"string",
-          "format": "uri"
-        },
-        {
           "type":"array",
           "items": {
             "type": "string",
