@@ -4,7 +4,8 @@
     "www-project-devsecops-maturity-model",
     "www-project-juice-shop",
     "www-project-nest",
-    "www-project-nettacker"
+    "www-project-nettacker",
+    "www-project-pygoat"
   ],
   "tags": ["gsoc2025"]
 }

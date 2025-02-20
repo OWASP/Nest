@@ -14,11 +14,10 @@ export default defineConfig({
   plugins: [
     react(),
     EnvironmentPlugin({
-      VITE_ALGOLIA_APP_ID: process.env.VITE_ALGOLIA_APP_ID,
-      VITE_ALGOLIA_SEARCH_API_KEY: process.env.VITE_ALGOLIA_SEARCH_API_KEY,
       VITE_API_URL: process.env.VITE_API_URL,
       VITE_ENVIRONMENT: process.env.VITE_ENVIRONMENT,
       VITE_GRAPHQL_URL: process.env.VITE_GRAPHQL_URL,
+      VITE_IDX_URL: process.env.VITE_IDX_URL,
       VITE_SENTRY_DSN: process.env.VITE_SENTRY_DSN || '',
     }),
   ],

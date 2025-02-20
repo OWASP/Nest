@@ -1,13 +1,25 @@
 nest:
   hosts:
-    nest_production:
-      ansible_host: "{{ lookup('env', 'PRODUCTION_HOST_IP_ADDRESS') }}"
+    production_nest:
+      ansible_host: "{{ lookup('env', 'NEST_HOST_IP_ADDRESS') }}"
       ansible_python_interpreter: /usr/bin/python3
-      ansible_ssh_private_key_file: "{{ lookup('env', 'PRODUCTION_SSH_PRIVATE_KEY_PATH') }}"
+      ansible_ssh_private_key_file: "{{ lookup('env', 'NEST_SSH_PRIVATE_KEY_PATH') }}"
       ansible_user: production
 
-    nest_staging:
-      ansible_host: "{{ lookup('env', 'STAGING_HOST_IP_ADDRESS') }}"
+    production_nest_proxy:
+      ansible_host: "{{ lookup('env', 'PROXY_HOST_IP_ADDRESS') }}"
       ansible_python_interpreter: /usr/bin/python3
-      ansible_ssh_private_key_file: "{{ lookup('env', 'STAGING_SSH_PRIVATE_KEY_PATH') }}"
+      ansible_ssh_private_key_file: "{{ lookup('env', 'PROXY_SSH_PRIVATE_KEY_PATH') }}"
+      ansible_user: proxy
+
+    staging_nest:
+      ansible_host: "{{ lookup('env', 'NEST_HOST_IP_ADDRESS') }}"
+      ansible_python_interpreter: /usr/bin/python3
+      ansible_ssh_private_key_file: "{{ lookup('env', 'NEST_SSH_PRIVATE_KEY_PATH') }}"
       ansible_user: staging
+
+    staging_nest_proxy:
+      ansible_host: "{{ lookup('env', 'PROXY_HOST_IP_ADDRESS') }}"
+      ansible_python_interpreter: /usr/bin/python3
+      ansible_ssh_private_key_file: "{{ lookup('env', 'PROXY_SSH_PRIVATE_KEY_PATH') }}"
+      ansible_user: proxy

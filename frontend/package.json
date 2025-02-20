@@ -18,9 +18,6 @@
     "watch": "jest --watch"
   },
   "dependencies": {
-    "@algolia/autocomplete-js": "^1.17.9",
-    "@algolia/autocomplete-plugin-query-suggestions": "^1.17.9",
-    "@algolia/autocomplete-theme-classic": "^1.17.9",
     "@apollo/client": "^3.12.7",
     "@ark-ui/react": "^4.9.1",
     "@chakra-ui/react": "^3.7.0",
@@ -36,7 +33,6 @@
     "@sentry/react": "^9.0.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.14",
-    "algoliasearch": "^5.20.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "core-js": "^3.40.0",

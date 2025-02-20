@@ -142,7 +142,11 @@ class Project(
     @property
     def issues(self):
         """Return issues."""
-        return Issue.objects.filter(repository__in=self.repositories.all())
+        return Issue.objects.filter(
+            repository__in=self.repositories.all(),
+        ).select_related(
+            "repository",
+        )
 
     @property
     def nest_key(self):
@@ -157,7 +161,11 @@ class Project(
     @property
     def open_issues(self):
         """Return open issues."""
-        return Issue.open_issues.filter(repository__in=self.repositories.all())
+        return Issue.open_issues.filter(
+            repository__in=self.repositories.all(),
+        ).select_related(
+            "repository",
+        )
 
     @property
     def published_releases(self):
@@ -166,6 +174,8 @@ class Project(
             is_draft=False,
             published_at__isnull=False,
             repository__in=self.repositories.all(),
+        ).select_related(
+            "repository",
         )
 
     def deactivate(self):

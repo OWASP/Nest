@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ProjectTypeGraphql } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
+import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -60,9 +61,12 @@ const ProjectDetailsPage = () => {
     )
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
-    { label: 'Level', value: project.level[0].toUpperCase() + project.level.slice(1) },
+    {
+      label: 'Level',
+      value: project.level[0].toUpperCase() + project.level.slice(1).toLowerCase(),
+    },
     { label: 'Project Leaders', value: project.leaders.join(', ') },
-    { label: 'Type', value: project.type[0].toUpperCase() + project.type.slice(1) },
+    { label: 'Type', value: project.type[0].toUpperCase() + project.type.slice(1).toLowerCase() },
     {
       label: 'URL',
       value: (
@@ -73,11 +77,26 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-    { icon: faUsers, value: `${project?.contributorsCount || 'No'} Contributors` },
-    { icon: faCodeFork, value: `${project?.forksCount || 'No'} Forks` },
-    { icon: faStar, value: `${project?.starsCount || 'No'} Stars` },
-    { icon: faCode, value: `${project?.repositoriesCount || 'No'} Repositories` },
-    { icon: faExclamationCircle, value: `${project?.issuesCount || 'No'} Issues` },
+    {
+      icon: faUsers,
+      value: `${project?.contributorsCount || 'No'} ${pluralize(project.contributorsCount, 'Contributor')}`,
+    },
+    {
+      icon: faCodeFork,
+      value: `${project?.forksCount || 'No'} ${pluralize(project.forksCount, 'Fork')}`,
+    },
+    {
+      icon: faStar,
+      value: `${project?.starsCount || 'No'} ${pluralize(project.starsCount, 'Star')}`,
+    },
+    {
+      icon: faCode,
+      value: `${project?.repositoriesCount || 'No'} ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
+    },
+    {
+      icon: faExclamationCircle,
+      value: `${project?.issuesCount || 'No'} ${pluralize(project.issuesCount, 'Issue')}`,
+    },
   ]
   return (
     <MetadataManager

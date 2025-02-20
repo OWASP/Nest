@@ -34,8 +34,9 @@ CONTRIBUTE_GENERAL_INFORMATION_BLOCKS = (
         f"  • <{OWASP_PROJECT_NEST_CHANNEL_ID}> - project Nest.{NL}"
         f"  • <{OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID}> - project Thread Dragon.{NL}"
         f"{NL}"
-        "Some projects, like BLT or CycloneDX, also have their own Slack workspaces -- be sure "
-        "to check if the project you're interested in has additional communication channels."
+        "Some projects (e.g. Amass, CycloneDX, Dependency Track) also have their own Slack "
+        "workspaces or Discord servers -- be sure to check if the project you're interested in "
+        "has additional communication channels."
     ),
     markdown(
         f"👥 *Identifying Project Leaders, Contributors, and Ongoing Project Activity*{2*NL}"

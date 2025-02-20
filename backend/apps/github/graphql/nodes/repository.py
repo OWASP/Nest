@@ -44,7 +44,11 @@ class RepositoryNode(BaseNode):
 
     def resolve_issues(self, info):
         """Resolve recent issues."""
-        return self.issues.select_related("author").order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        return self.issues.select_related(
+            "author",
+        ).order_by(
+            "-created_at",
+        )[:RECENT_ISSUES_LIMIT]
 
     def resolve_languages(self, info):
         """Resolve languages."""
@@ -60,7 +64,9 @@ class RepositoryNode(BaseNode):
 
     def resolve_releases(self, info):
         """Resolve recent releases."""
-        return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+        return self.published_releases.order_by(
+            "-published_at",
+        )[:RECENT_RELEASES_LIMIT]
 
     def resolve_top_contributors(self, info):
         """Resolve top contributors."""

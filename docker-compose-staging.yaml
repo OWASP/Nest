@@ -14,26 +14,17 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - staging-nest-app-network
-      - staging-nest-db-network
+      - nest-app-network
+      - nest-db-network
     volumes:
       - ./data:/home/owasp/data
-
-  staging-nest-certbot:
-    container_name: staging-nest-certbot
-    image: certbot/certbot
-    volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./nginx/staging.conf:/etc/nginx/conf.d/staging.conf
-      - staging-nest-certbot-webroot:/var/www/certbot
-    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
 
   staging-nest-frontend:
     container_name: staging-nest-frontend
     image: arkid15r/owasp-nest-frontend:staging
     restart: unless-stopped
     networks:
-      - staging-nest-app-network
+      - nest-app-network
 
   staging-nest-db:
     container_name: staging-nest-db
@@ -56,27 +47,8 @@ services:
     volumes:
       - ./volumes/db:/var/lib/postgresql/data
     networks:
-      - staging-nest-db-network
-
-  staging-nest-nginx:
-    container_name: staging-nest-nginx
-    image: nginx:latest
-    ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - staging-nest-certbot-webroot:/var/www/certbot
-    depends_on:
-      - staging-nest-backend
-      - staging-nest-frontend
-    networks:
-      - staging-nest-app-network
+      - nest-db-network
 
 networks:
-  staging-nest-app-network:
-  staging-nest-db-network:
-
-volumes:
-  staging-nest-certbot-webroot:
+  nest-app-network:
+  nest-db-network:

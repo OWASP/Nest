@@ -40,7 +40,6 @@ index-data:
 	@CMD="poetry run python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="poetry run python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="poetry run python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
-	@CMD="poetry run python manage.py algolia_update_suggestions" $(MAKE) exec-backend-command
 
 load-data:
 	@echo "Loading Nest data"

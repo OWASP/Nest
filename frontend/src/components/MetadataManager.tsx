@@ -7,7 +7,7 @@ const DEFAULT_METADATA: DefaultMetadata = {
   defaultDescription:
     'OWASP Nest is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community.',
   twitterHandle: '@owasp',
-  defaultIcon: '/img/owasp_icon_white_background.png',
+  defaultIcon: 'https://nest.owasp.org/img/owasp_icon_white_background.png',
 }
 
 const MetadataManager: React.FC<MetadataManagerProps> = ({

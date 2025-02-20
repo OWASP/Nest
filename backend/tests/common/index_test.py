@@ -113,7 +113,6 @@ class TestIndexBase:
         with (
             patch("apps.common.index.settings") as self.mock_settings,
             patch("apps.common.index.SearchClientSync") as self.mock_search_client,
-            patch("apps.common.index.QuerySuggestionsClientSync") as self.mock_suggestions_client,
             patch("apps.common.index.logger") as self.mock_logger,
         ):
             self.mock_settings.ENVIRONMENT = "test"

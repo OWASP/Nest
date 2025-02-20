@@ -27,7 +27,7 @@ const ProjectsPage = () => {
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
-    defaultOrder: 'asc',
+    defaultOrder: 'desc',
   })
 
   const navigate = useNavigate()

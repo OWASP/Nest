@@ -17,6 +17,7 @@ cva
 dismissable
 dsn
 env
+facebookexternalhit
 GBP
 geocoders
 geoloc
@@ -62,6 +63,8 @@ slackbot
 SLF
 Truncator
 tsc
+Twitterbot
+usefixtures
 Whistleblower
 winsrdf
 wsgi

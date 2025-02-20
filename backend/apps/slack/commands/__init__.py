@@ -1,4 +1,4 @@
-from apps.slack.commands import (
+from . import (
     board,
     chapters,
     committees,
@@ -14,6 +14,7 @@ from apps.slack.commands import (
     owasp,
     policies,
     projects,
+    sponsor,
     sponsors,
     staff,
     users,
