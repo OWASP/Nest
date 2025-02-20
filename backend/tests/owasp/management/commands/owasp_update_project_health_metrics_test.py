@@ -1,14 +1,14 @@
-from unittest import mock
-from io import StringIO
-from datetime import datetime, timezone
 import sys
+from datetime import datetime, timezone
+from io import StringIO
+from unittest import mock
 
 import pytest
 
+from apps.owasp.management.commands.owasp_update_project_health_metrics import Command
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
-from apps.owasp.management.commands.owasp_update_project_health_metrics import Command
 
 
 class TestUpdateProjectHealthMetricsCommand:
@@ -31,15 +31,15 @@ class TestUpdateProjectHealthMetricsCommand:
         project.open_issues_count = 3
         project.releases_count = 5
         project.updated_at = datetime.now(timezone.utc)
-        
+
         project.repositories.all.return_value = []
         project.repositories.aggregate.return_value = {
-            'total_prs': 10,
-            'open_prs': 2,
-            'total_issues': 5,
-            'unanswered_issues': 1,
-            'unassigned_issues': 1,
-            'recent_releases': 2
+            "total_prs": 10,
+            "open_prs": 2,
+            "total_issues": 5,
+            "unanswered_issues": 1,
+            "unassigned_issues": 1,
+            "recent_releases": 2,
         }
         return project
 
@@ -71,8 +71,12 @@ class TestUpdateProjectHealthMetricsCommand:
             (1, 2),
         ],
     )
-    @mock.patch('apps.owasp.management.commands.owasp_update_project_health_metrics.ProjectHealthMetrics.objects.bulk_update')
-    def test_handle_successful_update(self, mock_bulk_update, command, mock_project, mock_requirements, offset, projects):
+    @mock.patch(
+        "apps.owasp.management.commands.owasp_update_project_health_metrics.ProjectHealthMetrics.objects.bulk_update"
+    )
+    def test_handle_successful_update(
+        self, mock_bulk_update, command, mock_project, mock_requirements, offset, projects
+    ):
         """Test successful metrics update for projects."""
         mock_projects = mock.MagicMock()
         mock_projects.__iter__.return_value = iter([mock_project] * projects)
@@ -86,8 +90,12 @@ class TestUpdateProjectHealthMetricsCommand:
         try:
             with (
                 mock.patch.object(Project, "active_projects", mock_projects),
-                mock.patch.object(ProjectHealthRequirements.objects, "get") as mock_get_requirements,
-                mock.patch.object(ProjectHealthMetrics.objects, "get_or_create") as mock_metrics_get_or_create,
+                mock.patch.object(
+                    ProjectHealthRequirements.objects, "get"
+                ) as mock_get_requirements,
+                mock.patch.object(
+                    ProjectHealthMetrics.objects, "get_or_create"
+                ) as mock_metrics_get_or_create,
             ):
                 mock_metrics = mock.Mock(spec=ProjectHealthMetrics)
                 mock_get_requirements.return_value = mock_requirements
@@ -101,12 +109,23 @@ class TestUpdateProjectHealthMetricsCommand:
                 assert mock_bulk_update.called
 
                 expected_fields = [
-                    "contributors_count", "created_at", "forks_count", "last_released_at",
-                    "last_committed_at", "open_issues_count", "open_pull_requests_count",
-                    "owasp_page_last_updated_at", "pull_request_last_created_at",
-                    "recent_releases_count", "score", "stars_count", "total_issues_count",
-                    "total_pull_request_count", "total_releases_count",
-                    "unanswered_issues_count", "unassigned_issues_count"
+                    "contributors_count",
+                    "created_at",
+                    "forks_count",
+                    "last_released_at",
+                    "last_committed_at",
+                    "open_issues_count",
+                    "open_pull_requests_count",
+                    "owasp_page_last_updated_at",
+                    "pull_request_last_created_at",
+                    "recent_releases_count",
+                    "score",
+                    "stars_count",
+                    "total_issues_count",
+                    "total_pull_request_count",
+                    "total_releases_count",
+                    "unanswered_issues_count",
+                    "unassigned_issues_count",
                 ]
                 mock_bulk_update.assert_called_once()
                 _, kwargs = mock_bulk_update.call_args
@@ -117,19 +136,19 @@ class TestUpdateProjectHealthMetricsCommand:
     @pytest.mark.parametrize(
         "error_message",
         [
-            "Database error",
-            "Network timeout",
-            "Invalid data",
+            ("Database error"),
+            ("Network timeout"),
+            ("Invalid data"),
         ],
     )
     def test_handle_exception(self, command, error_message):
         """Test handling of exceptions during update."""
         mock_projects = mock.MagicMock()
-        mock_projects.order_by.side_effect = Exception(error_message)
+        mock_projects.order_by.side_effect = RuntimeError(error_message)
 
         with (
             mock.patch.object(Project, "active_projects", mock_projects),
-            pytest.raises(Exception) as exc_info
+            pytest.raises(RuntimeError, match=error_message) as exc_info,
         ):
             command.handle(offset=0)
 

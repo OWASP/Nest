@@ -3,10 +3,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.management import call_command
+from django.core.management.base import CommandError
 
+from apps.owasp.management.commands.owasp_update_project_health_requirements import Command
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
-from apps.owasp.management.commands.owasp_update_project_health_requirements import Command
 
 
 class TestUpdateProjectHealthRequirementsCommand:
@@ -15,7 +16,9 @@ class TestUpdateProjectHealthRequirementsCommand:
         """Set up test environment."""
         self.stdout = StringIO()
         self.command = Command()
-        with patch("apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects") as requirements_patch:
+        with patch(
+            "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects"
+        ) as requirements_patch:
             self.mock_requirements = requirements_patch
             yield
 
@@ -46,15 +49,15 @@ class TestUpdateProjectHealthRequirementsCommand:
                 call_command("owasp_update_project_health_requirements", level=level)
             else:
                 call_command("owasp_update_project_health_requirements")
-            
+
             assert expected_output in fake_out.getvalue()
 
     def test_handle_exception(self):
         """Test handling of exceptions during update."""
         error_message = "Database error"
-        self.mock_requirements.get_or_create.side_effect = Exception(error_message)
+        self.mock_requirements.get_or_create.side_effect = CommandError(error_message)
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(CommandError, match=error_message) as exc_info:
             call_command("owasp_update_project_health_requirements")
 
         assert str(exc_info.value) == error_message
