@@ -2,5 +2,5 @@ formatter:
   indent: 2
   retain_line_breaks: true
   preserve_line_breaks: true
-  max_line_length: 80
+  max_line_length: 120
   allow_naked_scalars: false

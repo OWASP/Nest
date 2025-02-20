@@ -7,8 +7,8 @@ services:
       - ./production.conf:/etc/nginx/conf.d/production.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
-    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w
-      /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait
+      $${!}; done;'
 
   nest-nginx:
     container_name: nest-nginx
