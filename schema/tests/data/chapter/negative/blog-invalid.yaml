@@ -1,4 +1,4 @@
-blog: "invalid-blog-uri"
+blog: invalid-blog-uri
 country: India
 leaders:
   - github: leader-1-github
