@@ -10,6 +10,12 @@ class EventNode(BaseNode):
     class Meta:
         model = Event
         fields = (
+            "category",
+            "category_description",
+            "end_date",
+            "description",
+            "key",
             "name",
             "start_date",
+            "url",
         )

@@ -48,11 +48,11 @@ def events_handler(ack, command, client):
             if event.get("startDate"):
                 block_text += f" Start Date: {event['startDate']}{NL}"
 
-            if event.get("dates"):
-                block_text += f" Duration: {event['dates']}{NL}"
+            if event.get("endDate"):
+                block_text += f" End Date: {event['endDate']}{NL}"
 
-            if event.get("optionalText"):
-                block_text += f"_{event['optionalText']}_{NL}"
+            if event.get("description"):
+                block_text += f"_{event['description']}_{NL}"
 
             blocks.append(markdown(block_text))
 

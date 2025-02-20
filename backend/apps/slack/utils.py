@@ -94,10 +94,9 @@ def get_events_data():
             key
             name
             category
-            dates
+            endDate
             startDate
             url
-            optionalText
             description
             categoryDescription
         }

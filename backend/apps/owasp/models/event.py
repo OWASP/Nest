@@ -3,46 +3,44 @@
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.owasp.models.common import RepositoryBasedEntityModel
 
 
-class Event(BulkSaveModel, RepositoryBasedEntityModel, TimestampedModel):
+class EventCategory(models.TextChoices):
+    """Event category choices."""
+
+    GLOBAL = "global", "Global"
+    APPSEC_DAYS = "appsec_days", "AppSec Days"
+    PARTNER = "partner", "Partner"
+    OTHER = "other", "Other"
+
+
+class Event(BulkSaveModel, TimestampedModel):
     """Event model."""
 
     class Meta:
         db_table = "owasp_events"
         verbose_name_plural = "Events"
 
-    category = models.CharField(verbose_name="Category", max_length=100, default="", blank=True)
+    category = models.CharField(
+        verbose_name="Category",
+        max_length=20,
+        choices=EventCategory.choices,
+        default=EventCategory.OTHER,
+    )
+
     category_description = models.TextField(
         verbose_name="Category Description", default="", blank=True
     )
-    dates = models.CharField(verbose_name="Dates", max_length=100, default="", blank=True)
-    level = models.CharField(verbose_name="Level", max_length=5, default="", blank=True)
-    optional_text = models.TextField(verbose_name="Additional Text", default="", blank=True)
-    start_date = models.DateField(verbose_name="Start Date", null=True, blank=True)
+    end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
+    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    name = models.CharField(verbose_name="Name", max_length=100)
+    description = models.TextField(verbose_name="Description", default="", blank=True)
+    start_date = models.DateField(verbose_name="Start Date", default="2025-01-01", blank=True)
     url = models.URLField(verbose_name="URL", default="", blank=True)
-
-    owasp_repository = models.ForeignKey(
-        "github.Repository", on_delete=models.SET_NULL, blank=True, null=True
-    )
 
     def __str__(self):
         """Event human readable representation."""
         return f"{self.name or self.key}"
-
-    def from_github(self, repository):
-        """Update instance based on GitHub repository data."""
-        field_mapping = {
-            "description": "pitch",
-            "level": "level",
-            "name": "title",
-            "tags": "tags",
-        }
-        RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
-
-        # FKs.
-        self.owasp_repository = repository
 
     @staticmethod
     def bulk_save(events, fields=None):
