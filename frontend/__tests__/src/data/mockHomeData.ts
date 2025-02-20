@@ -1,4 +1,3 @@
-// mockHomeData.js
 export const mockGraphQLData = {
   recentProjects: [
     {
