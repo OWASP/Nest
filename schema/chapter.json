@@ -140,25 +140,14 @@
       "minItems": 2,
       "uniqueItems": true
     },
-    "level": {
-      "default": 2,
-      "description": "The numeric level of the chapter.",
-      "enum": [
-        2,
-        3,
-        3.5,
-        4
-      ],
-      "enumDescriptions": [
-        "Incubator",
-        "Lab",
-        "Production",
-        "Flagship"
-      ],
-      "title": "Chapter level.",
-      "type": "number"
+  "level": {
+  "default": 2,
+  "enum": [2, 3, 3.5, 4],
+  "description": "The numeric level of the chapter.",
+  "title": "Chapter level.",
+  "type": "number"
     },
-    "logo": {
+   "logo": {
       "description": "Logo for the chapter.",
       "type": "array",
       "items": {
