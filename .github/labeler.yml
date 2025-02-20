@@ -2,7 +2,7 @@ backend:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - 'backend/**'
+              - backend/**
           - all-globs-to-all-files:
               - '!backend/apps/slack/**'
               - '!backend/tests/slack/**'
@@ -11,24 +11,24 @@ backend-tests:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - 'backend/tests/**'
+              - backend/tests/**
           - all-globs-to-all-files:
               - '!backend/tests/slack/**'
 
 ci:
   - changed-files:
       - any-glob-to-any-file:
-          - '.github/workflows/**'
+          - .github/workflows/**
 
 deploy:
   - changed-files:
       - any-glob-to-any-file:
-          - '.github/ansible/**'
+          - .github/ansible/**
 
 docker:
   - changed-files:
       - any-glob-to-any-file:
-          - 'docker-*.yaml'
+          - docker-*.yaml
           - '**/Dockerfile.*'
 
 docs:
@@ -39,12 +39,12 @@ docs:
 frontend:
   - changed-files:
       - any-glob-to-any-file:
-          - 'frontend/**'
+          - frontend/**
 
 frontend-tests:
   - changed-files:
       - any-glob-to-any-file:
-          - 'frontend/__tests__/**'
+          - frontend/__tests__/**
 
 makefile:
   - changed-files:
@@ -54,27 +54,27 @@ makefile:
 nestbot:
   - changed-files:
       - any-glob-to-any-file:
-          - 'backend/apps/slack/**'
+          - backend/apps/slack/**
 
 nestbot-tests:
   - changed-files:
       - any-glob-to-any-file:
-          - 'backend/tests/slack/**'
+          - backend/tests/slack/**
 
 nginx:
   - changed-files:
       - any-glob-to-any-file:
-          - 'nginx/**'
+          - nginx/**
 
 schema:
   - all:
-    - changed-files:
-        - any-glob-to-any-file:
-            - 'schema/**'
-        - all-globs-to-all-files:
-            - '!schema/tests/**'
+      - changed-files:
+          - any-glob-to-any-file:
+              - schema/**
+          - all-globs-to-all-files:
+              - '!schema/tests/**'
 
 schema-tests:
   - changed-files:
       - any-glob-to-any-file:
-          - 'schema/tests/**'
+          - schema/tests/**
