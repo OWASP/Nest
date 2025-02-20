@@ -40,8 +40,13 @@ def test_positive(project_schema):
             "'another-invalid-url' is not a 'uri'",
         ),
         ("community-null.yaml", "None is not of type 'array'"),
+        ("demo-empty.yaml", "[] should be non-empty"),
         ("demo-invalid.yaml", "'https://invalid/' is not a 'uri'"),
-        ("demo-null.yaml", "None is not a 'uri'"),
+        (
+            "demo-non-unique.yaml",
+            "['https://example.com/', 'https://example.com/'] has non-unique elements",
+        ),
+        ("demo-null.yaml", "None is not of type 'array'"),
         ("documentation-empty.yaml", "[] should be non-empty"),
         (
             "documentation-invalid.yaml",
