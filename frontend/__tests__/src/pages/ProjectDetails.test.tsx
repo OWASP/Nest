@@ -65,7 +65,7 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
-      expect(screen.getByText('Intermediate')).toBeInTheDocument()
+      expect(screen.getByText('Lab')).toBeInTheDocument()
     })
     expect(screen.getByText('10 Forks')).toBeInTheDocument()
     expect(screen.getByText('10 Issues')).toBeInTheDocument()
@@ -179,16 +179,12 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       const levelElement = screen.getByText(/Level:/)
       expect(levelElement).toBeInTheDocument()
-      const levelContainer = levelElement.parentElement
-      expect(levelContainer).toBeInTheDocument()
-      const levelValueElement = within(levelContainer).getByText('Intermediate')
+      const levelValueElement = within(levelElement.parentElement).getByText('Lab')
       expect(levelValueElement).toBeInTheDocument()
 
       const typeElement = screen.getByText(/Type:/)
       expect(typeElement).toBeInTheDocument()
-      const typeContainer = typeElement.parentElement
-      expect(typeContainer).toBeInTheDocument()
-      const typeValueElement = within(typeContainer).getByText('Open source')
+      const typeValueElement = within(typeElement.parentElement).getByText('Tool')
       expect(typeValueElement).toBeInTheDocument()
     })
   })
