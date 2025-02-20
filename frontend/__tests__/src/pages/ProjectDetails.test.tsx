@@ -177,19 +177,19 @@ describe('ProjectDetailsPage', () => {
     render(<ProjectDetailsPage />)
 
     await waitFor(() => {
-      const levelElement = screen.getByText(/Level:/);
-      expect(levelElement).toBeInTheDocument();
-      const levelContainer = levelElement.parentElement;
-      expect(levelContainer).toBeInTheDocument();
-      const levelValueElement = within(levelContainer).getByText('Intermediate');
-      expect(levelValueElement).toBeInTheDocument();
+      const levelElement = screen.getByText(/Level:/)
+      expect(levelElement).toBeInTheDocument()
+      const levelContainer = levelElement.parentElement
+      expect(levelContainer).toBeInTheDocument()
+      const levelValueElement = within(levelContainer).getByText('Intermediate')
+      expect(levelValueElement).toBeInTheDocument()
 
-      const typeElement = screen.getByText(/Type:/);
-      expect(typeElement).toBeInTheDocument();
-      const typeContainer = typeElement.parentElement;
-      expect(typeContainer).toBeInTheDocument();
-      const typeValueElement = within(typeContainer).getByText('Open source');
-      expect(typeValueElement).toBeInTheDocument();
+      const typeElement = screen.getByText(/Type:/)
+      expect(typeElement).toBeInTheDocument()
+      const typeContainer = typeElement.parentElement
+      expect(typeContainer).toBeInTheDocument()
+      const typeValueElement = within(typeContainer).getByText('Open source')
+      expect(typeValueElement).toBeInTheDocument()
     })
   })
 
