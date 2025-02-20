@@ -15,6 +15,7 @@ const DetailsCard = ({
   title,
   is_active = true,
   summary,
+  bio,
   description,
   stats,
   details,
