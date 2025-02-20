@@ -14,10 +14,10 @@ class Snapshot(models.Model):
 
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    error_message = models.TextField(blank=True)
+    error_message = models.TextField(blank=True, default="")
 
     # Many-to-Many relationships
     new_chapters = models.ManyToManyField("owasp.Chapter", related_name="snapshots", blank=True)
@@ -27,11 +27,8 @@ class Snapshot(models.Model):
     new_users = models.ManyToManyField("github.User", related_name="snapshots", blank=True)
 
     class Meta:
-        ordering = ["-start_at"]
-        indexes = [
-            models.Index(fields=["status"]),
-            models.Index(fields=["start_at", "end_at"]),
-        ]
+        db_table = "owasp_snapshots"
+        verbose_name_plural = "Snapshots"
 
     def __str__(self):
         """Return a string representation of the snapshot."""

@@ -85,8 +85,6 @@ class Command(BaseCommand):
             error_msg = f"Failed to process snapshot: {e}"
             raise SnapshotProcessingError(error_msg) from e
 
-    def get_new_items(self, model, snapshot):
-        """Get only newly created items within the snapshot timeframe."""
-        return model.objects.filter(
-            created_at__gte=snapshot.start_at, created_at__lte=snapshot.end_at
-        )
+    def get_new_items(self, model, start_at, end_at):
+        """Get only newly created items within the given timeframe."""
+        return model.objects.filter(created_at__gte=start_at, created_at__lte=end_at)

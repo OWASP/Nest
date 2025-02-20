@@ -60,13 +60,6 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-class SnapshotAdmin(admin.ModelAdmin):
-    list_display = ("start_at", "end_at", "status", "created_at", "updated_at")
-    list_filter = ("status", "start_at", "end_at")
-    search_fields = ("status", "error_message")
-    ordering = ("-start_at",)
-
-
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     autocomplete_fields = (
         "organizations",
@@ -107,6 +100,26 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         return f"{obj.name or obj.key}"
 
     custom_field_name.short_description = "Name"
+
+
+class SnapshotAdmin(admin.ModelAdmin):
+    list_display = (
+        "start_at",
+        "end_at",
+        "status",
+        "created_at",
+        "updated_at",
+    )
+    list_filter = (
+        "status",
+        "start_at",
+        "end_at",
+    )
+    ordering = ("-start_at",)
+    search_fields = (
+        "status",
+        "error_message",
+    )
 
 
 admin.site.register(Chapter, ChapterAdmin)
