@@ -3,12 +3,9 @@ import {
   faBook,
   faCalendar,
   faCode,
-  faExclamationCircle,
   faFileCode,
-  faGlobe,
   faMapMarkerAlt,
   faTag,
-  faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -136,10 +133,6 @@ export default function Home() {
                     />
                     <span>{project.type}</span>
                   </div>
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faExclamationCircle} className="mr-2 h-4 w-4" />
-                    <span>{project.openIssuesCount} open issues</span>
-                  </div>
                   <div className="flex items-center">
                     <FontAwesomeIcon icon={faCode} className="mr-2 h-4 w-4" />
                     <span>
@@ -163,16 +156,12 @@ export default function Home() {
                 </h3>
                 <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
                   <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
-                    <span>{chapter.suggestedLocation}</span>
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(chapter.createdAt)}</span>
                   </div>
                   <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faGlobe} className="mr-2 h-4 w-4" />
-                    <span>{chapter.region}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
-                    <span>{chapter.topContributors.length} top contributors</span>
+                    <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
+                    <span>{chapter.suggestedLocation}</span>
                   </div>
                 </div>
               </div>
@@ -188,7 +177,7 @@ export default function Home() {
           style={{ height: '400px', width: '100%', zIndex: '0' }}
         />
       </div>
-      <>
+      <div className="grid gap-4 md:grid-cols-2">
         <ItemCardList
           title="Recent Issues"
           data={data.recentIssue}
@@ -213,7 +202,7 @@ export default function Home() {
             </div>
           )}
         />
-      </>
+      </div>
       <div className="mb-20 grid gap-6 md:grid-cols-4">
         {counterData.map((stat, index) => (
           <SecondaryCard key={index} className="text-center">

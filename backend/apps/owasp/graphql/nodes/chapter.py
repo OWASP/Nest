@@ -23,8 +23,9 @@ class ChapterNode(GenericEntityNode):
     class Meta:
         model = Chapter
         fields = (
-            "country",
+            "created_at",
             "is_active",
+            "country",
             "meetup_group",
             "name",
             "postal_code",

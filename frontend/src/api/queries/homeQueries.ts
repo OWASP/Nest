@@ -12,6 +12,7 @@ export const GET_MAIN_PAGE_DATA = gql`
     }
     recentChapters(limit: 5) {
       name
+      createdAt
       suggestedLocation
       region
       key

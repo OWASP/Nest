@@ -6,26 +6,27 @@ export type MainPageData = {
   recentIssue: ProjectIssuesType[]
   recentRelease: ProjectReleaseType[]
   countsOverview: {
-    chaptersCount: number
-    countriesCount: number
     activeProjectsCount: number
+    chaptersCount: number
     contributorsCount: number
+    countriesCount: number
   }
   recentChapters: {
     name: string
-    suggestedLocation: string
-    region: string
+    createdAt: string
     key: string
+    region: string
+    suggestedLocation: string
     topContributors: {
       name: string
     }[]
   }[]
   recentProjects: {
-    name: string
-    type: string
     createdAt: string
     key: string
+    name: string
     openIssuesCount: number
     repositoriesCount: number
+    type: string
   }[]
 }
