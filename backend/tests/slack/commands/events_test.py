@@ -12,18 +12,18 @@ mock_events = [
         "name": "OWASP Snow 2025",
         "category": "AppSec Days",
         "startDate": "2025-03-14",
-        "dates": "March 14, 2025",
+        "endDate": "March 14, 2025",
         "url": "https://example.com/snow",
-        "optionalText": "Regional conference",
+        "description": "Regional conference",
         "categoryDescription": "Local events description",
     },
     {
         "name": "OWASP Global AppSec EU 2025",
         "category": "Global",
         "startDate": "2025-05-26",
-        "dates": "May 26-30, 2025",
+        "endDate": "May 26-30, 2025",
         "url": "https://example.com/eu",
-        "optionalText": "Premier conference",
+        "description": "Premier conference",
         "categoryDescription": "Global events description",
     },
 ]
@@ -92,7 +92,7 @@ class TestEventsHandler:
             event_block = blocks[current_block]["text"]["text"]
             assert "*1. <https://example.com/snow|OWASP Snow 2025>*" in event_block
             assert "Start Date: 2025-03-14" in event_block
-            assert "Duration: March 14, 2025" in event_block
+            assert "End Date: March 14, 2025" in event_block
             assert "_Regional conference_" in event_block
             current_block += 1
 

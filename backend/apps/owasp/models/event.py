@@ -46,18 +46,3 @@ class Event(BulkSaveModel, TimestampedModel):
     def bulk_save(events, fields=None):
         """Bulk save events."""
         BulkSaveModel.bulk_save(Event, events, fields=fields)
-
-    @staticmethod
-    def update_data(gh_repository, repository, save=True):
-        """Update event data."""
-        key = gh_repository.name.lower()
-        try:
-            event = Event.objects.get(key=key)
-        except Event.DoesNotExist:
-            event = Event(key=key)
-
-        event.from_github(repository)
-        if save:
-            event.save()
-
-        return event
