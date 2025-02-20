@@ -7,7 +7,8 @@ community:
   - platform: discord
     description: Discord community
     url: https://discord.com/example
-demo: https://some-demo-url.com
+demo:
+  - https://some-demo-url.com
 documentation:
   - https://example.com/docs1
   - https://example.com/docs2
@@ -32,10 +33,16 @@ logo:
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 repositories:
-  - description: A repository with a valid URL.
+  - changelog: https://example.com/changelog1
+    code_of_conduct: https://example.com/code_of_conduct1
+    contribution_guide: https://example.com/contribution_guide1
+    description: A repository with a valid URL.
     name: test-repo
     url: https://example.com/repo1
-  - description: Another repository with a valid URL.
+  - changelog: https://example.com/changelog2
+    code_of_conduct: https://example.com/code_of_conduct2
+    contribution_guide: https://example.com/contribution_guide2
+    description: Another repository with a valid URL.
     name: test-repo-2
     url: https://example.com/repo2
 social-media:

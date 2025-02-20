@@ -18,18 +18,28 @@ const SkeletonBase = ({ indexName, loadingImageUrl }) => {
   let Component
   switch (indexName) {
     case 'chapters':
-      Component = () => <CardSkeleton showLevel={false} showIcons={1} showLink={false} />
+      Component = () => <CardSkeleton showLevel={false} showIcons={false} showLink={false} />
       break
     case 'issues':
       Component = () => (
-        <CardSkeleton showLevel={false} showIcons={2} showContributors={false} showSocial={false} />
+        <CardSkeleton
+          showLevel={false}
+          showIcons={true}
+          numIcons={2}
+          showContributors={false}
+          showSocial={false}
+        />
       )
       break
     case 'projects':
-      Component = () => <CardSkeleton showLink={false} showSocial={false} />
+      Component = () => (
+        <CardSkeleton showLink={false} showSocial={false} showIcons={true} numIcons={3} />
+      )
       break
     case 'committees':
-      Component = () => <CardSkeleton showLink={false} showLevel={false} showIcons={1} />
+      Component = () => (
+        <CardSkeleton showLink={false} showLevel={false} showIcons={true} numIcons={1} />
+      )
       break
     case 'users':
       return userCardRender()
