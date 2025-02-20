@@ -1,2 +1,2 @@
-platform: slack
-url: www.community.com
+platform: 'discord'
+url: 'https://discord.gg/example'
