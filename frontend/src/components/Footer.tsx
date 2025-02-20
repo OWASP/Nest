@@ -13,9 +13,20 @@ export default function Footer() {
   }, [])
 
   return (
-    <Box as="footer" mt="auto" w="full" borderTop="1px" borderColor="gray.300" bg="gray.100" _dark={{ bg: 'gray.800', borderColor: 'gray.700' }}>
+    <Box
+      as="footer"
+      mt="auto"
+      w="full"
+      borderTop="1px"
+      borderColor="gray.300"
+      bg="gray.100"
+      _dark={{ bg: 'gray.800', borderColor: 'gray.700' }}
+    >
       <Container maxW="container.xl" py={8}>
-        <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap={10}>
+        <Grid
+          templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }}
+          gap={10}
+        >
           {footerSections.map((section: Section) => (
             <Box key={section.title}>
               <Button
@@ -27,7 +38,11 @@ export default function Footer() {
                 fontWeight="semibold"
                 textAlign="left"
                 aria-expanded={openSection === section.title}
-                rightIcon={<FontAwesomeIcon icon={openSection === section.title ? faChevronUp : faChevronDown} />}
+                rightIcon={
+                  <FontAwesomeIcon
+                    icon={openSection === section.title ? faChevronUp : faChevronDown}
+                  />
+                }
                 _focus={{ boxShadow: 'outline' }}
                 _hover={{ bg: 'gray.200' }}
               >
@@ -42,7 +57,14 @@ export default function Footer() {
                           {link.text}
                         </Text>
                       ) : (
-                        <Link href={link.href} isExternal fontSize="sm" color="blue.600" _dark={{ color: 'blue.300' }} _hover={{ textDecoration: 'underline' }}>
+                        <Link
+                          href={link.href}
+                          isExternal
+                          fontSize="sm"
+                          color="blue.600"
+                          _dark={{ color: 'blue.300' }}
+                          _hover={{ textDecoration: 'underline' }}
+                        >
                           {link.text}
                         </Link>
                       )}
