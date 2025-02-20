@@ -21,11 +21,11 @@ def test_positive(chapter_schema):
     [
         ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
+        ("community-empty.yaml", "Additional properties are not allowed ('level' was unexpected)"),
+        ("community-invalid.yaml", "'another-invalid-url' is not a 'uri'"),
+        ("community-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
-        (
-            "events-non-unique.yaml",
-            "'https://example.com/event1' has non-unique elements",
-        ),
+        ("events-non-unique.yaml","events are non-unique",),
         ("name-empty.yaml", "'' is too short"),
         ("name-none.yaml", "None is not of type 'string'"),
         ("website-null.yaml", "None is not of type 'string'"),
