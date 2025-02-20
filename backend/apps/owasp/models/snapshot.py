@@ -29,6 +29,11 @@ class Snapshot(models.Model):
     class Meta:
         db_table = "owasp_snapshots"
         verbose_name_plural = "Snapshots"
+        ordering = ["-start_at"]
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["start_at", "end_at"]),
+        ]
 
     def __str__(self):
         """Return a string representation of the snapshot."""
