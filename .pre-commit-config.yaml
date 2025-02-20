@@ -1,22 +1,13 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
     hooks:
-      - id: check-ast
-      - id: check-builtin-literals
-      - id: check-yaml
-      - id: end-of-file-fixer
-        exclude_types:
-          - svg
-      - id: mixed-line-ending
+      - id: yamllint
         args:
-          - --fix=lf
-      - id: name-tests-test
-        args:
-          - --pytest
-        exclude: (backend|schema)/tests/data
-        files: (backend|schema)/tests
-      - id: trailing-whitespace
+          - --format
+          - parsable
+          - --strict
+        exclude: .github
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.7
@@ -36,7 +27,7 @@ repos:
           - html
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.1
+    rev: 0.2.3
     hooks:
       - id: yamlfmt
         args:
@@ -44,3 +35,22 @@ repos:
           - --mapping=2
           - --offset=2
           - --sequence=4
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude_types:
+          - svg
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+      - id: name-tests-test
+        args:
+          - --pytest
+        exclude: (backend|schema)/tests/data
+        files: (backend|schema)/tests
+      - id: trailing-whitespace
