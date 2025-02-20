@@ -1,13 +1,13 @@
 audience: builder
 leaders:
-    - github: leader-1-github
-    - github: leader-2-github
+  - github: leader-1-github
+  - github: leader-2-github
 level: 2
 license: INVALID-LICENSE-VALUE
 name: OWASP Project Invalid License
 pitch: A project with invalid license value
 tags:
-    - tag1
-    - tag2
-    - tag3
+  - tag1
+  - tag2
+  - tag3
 type: code
