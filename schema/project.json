@@ -339,6 +339,7 @@
     }
   },
   "required": [
+    "audience",
     "leaders",
     "level",
     "name",
