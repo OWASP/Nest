@@ -58,9 +58,13 @@ features:
       url: https://nest.owasp.org/integrations/slack/commands/
       description: Check out available job opportunities
       should_escape: false
+    - command: /sponsor
+      url: https://nest.owasp.org/integrations/slack/commands/
+      description: Coming soon
+      should_escape: false
     - command: /sponsors
       url: https://nest.owasp.org/integrations/slack/commands/
-      description: et a list of OWASP sponsors
+      description: Get a list of OWASP sponsors
       should_escape: false
     - command: /staff
       url: https://nest.owasp.org/integrations/slack/commands/
