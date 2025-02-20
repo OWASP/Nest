@@ -11,7 +11,7 @@ pitch: A very brief, one-line description of your project
 repositories:
   - changelog: https://example.com/changelog
     code_of_conduct: https://example.com/code_of_conduct
-    contribution_guide: ""
+    contribution_guide: ''
     description: A repository with a valid URL.
     name: test-repo
     url: https://example.com/repo

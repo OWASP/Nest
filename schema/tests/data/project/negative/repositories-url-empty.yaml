@@ -14,7 +14,7 @@ repositories:
     contribution_guide: https://example.com/contribution_guide
     description: A repository with a valid URL.
     name: test-repo
-    url: ""
+    url: ''
 sponsors:
   - description: Sponsor 1 description
     logo: https://sponsor1.com/logo.png

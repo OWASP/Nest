@@ -9,7 +9,7 @@ level: 2
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 repositories:
-  - changelog: ""
+  - changelog: ''
     code_of_conduct: https://example.com/code_of_conduct
     contribution_guide: https://example.com/contribution_guide
     description: A repository with a valid URL.
