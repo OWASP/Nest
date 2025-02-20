@@ -1,106 +1,106 @@
-- name: Deploy Nest to Production
-  hosts: production_nest
-  tasks:
-    - name: Copy docker-compose.yaml
-      ansible.builtin.copy:
-        src: '{{ github_workspace }}/docker-compose-production.yaml'
-        dest: ~/docker-compose.yaml
-        mode: '0644'
+  - name: Deploy Nest to Production
+    hosts: production_nest
+    tasks:
+      - name: Copy docker-compose.yaml
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/docker-compose-production.yaml'
+          dest: ~/docker-compose.yaml
+          mode: '0644'
 
-    - name: Ensure backend directory exists
-      ansible.builtin.file:
-        path: ~/backend
-        state: directory
-        mode: '0755'
+      - name: Ensure backend directory exists
+        ansible.builtin.file:
+          path: ~/backend
+          state: directory
+          mode: '0755'
 
-    - name: Copy backend makefile
-      ansible.builtin.copy:
-        src: '{{ github_workspace }}/backend/Makefile'
-        dest: ~/backend/Makefile
-        mode: '0644'
+      - name: Copy backend makefile
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/backend/Makefile'
+          dest: ~/backend/Makefile
+          mode: '0644'
 
-    - name: Update backend makefile for the production environment
-      shell:
-        cmd: "sed -i 's/\\bnest-backend\\b/production-nest-backend/' ~/backend/Makefile"
+      - name: Update backend makefile for the production environment
+        shell:
+          cmd: "sed -i 's/\bnest-backend\b/production-nest-backend/' ~/backend/Makefile"
 
-    - name: Ensure cspell directory exists
-      ansible.builtin.file:
-        path: ~/cspell
-        state: directory
-        mode: '0755'
+      - name: Ensure cspell directory exists
+        ansible.builtin.file:
+          path: ~/cspell
+          state: directory
+          mode: '0755'
 
-    - name: Copy cspell makefile
-      ansible.builtin.copy:
-        src: '{{ github_workspace }}/cspell/Makefile'
-        dest: ~/cspell/Makefile
-        mode: '0644'
+      - name: Copy cspell makefile
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/cspell/Makefile'
+          dest: ~/cspell/Makefile
+          mode: '0644'
 
-    - name: Ensure frontend directory exists
-      ansible.builtin.file:
-        path: ~/frontend
-        state: directory
-        mode: '0755'
+      - name: Ensure frontend directory exists
+        ansible.builtin.file:
+          path: ~/frontend
+          state: directory
+          mode: '0755'
 
-    - name: Copy frontend makefile
-      ansible.builtin.copy:
-        src: '{{ github_workspace }}/frontend/Makefile'
-        dest: ~/frontend/Makefile
-        mode: '0644'
+      - name: Copy frontend makefile
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/frontend/Makefile'
+          dest: ~/frontend/Makefile
+          mode: '0644'
 
-    - name: Update frontend makefile for the production environment
-      shell:
-        cmd: "sed -i 's/\\bnest-frontend\\b/production-nest-frontend/' ~/frontend/Makefile"
+      - name: Update frontend makefile for the production environment
+        shell:
+          cmd: sed -i 's/\bnest-frontend\b/production-nest-frontend/' ~/frontend/Makefile
 
-    - name: Copy main makefile
-      ansible.builtin.copy:
-        src: '{{ github_workspace }}/Makefile'
-        dest: ~/Makefile
-        mode: '0644'
+      - name: Copy main makefile
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/Makefile'
+          dest: ~/Makefile
+          mode: '0644'
 
-    - name: Ensure schema directory exists
-      ansible.builtin.file:
-        path: ~/schema
-        state: directory
-        mode: '0755'
+      - name: Ensure schema directory exists
+        ansible.builtin.file:
+          path: ~/schema
+          state: directory
+          mode: '0755'
 
-    - name: Copy schema makefile
-      ansible.builtin.copy:
-        src: '{{ github_workspace }}/schema/Makefile'
-        dest: ~/schema/Makefile
-        mode: '0644'
+      - name: Copy schema makefile
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/schema/Makefile'
+          dest: ~/schema/Makefile
+          mode: '0644'
 
-    - name: Copy directory recursively
-      copy:
-        src: '{{ github_workspace }}/backend/data'
-        dest: ~/
-        mode: '0755'
+      - name: Copy directory recursively
+        copy:
+          src: '{{ github_workspace }}/backend/data'
+          dest: ~/
+          mode: '0755'
 
-    - name: Copy .env.backend
-      copy:
-        src: '{{ github_workspace }}/.env.backend'
-        dest: ~/
-        mode: '0400'
+      - name: Copy .env.backend
+        copy:
+          src: '{{ github_workspace }}/.env.backend'
+          dest: ~/
+          mode: '0400'
 
-    - name: Copy .env.db
-      copy:
-        src: '{{ github_workspace }}/.env.db'
-        dest: ~/
-        mode: '0400'
+      - name: Copy .env.db
+        copy:
+          src: '{{ github_workspace }}/.env.db'
+          dest: ~/
+          mode: '0400'
 
-    - name: Prune docker images
-      shell:
-        cmd: docker image prune -f
+      - name: Prune docker images
+        shell:
+          cmd: docker image prune -f
 
-    - name: Update Docker images
-      shell:
-        cmd: docker compose pull
+      - name: Update Docker images
+        shell:
+          cmd: docker compose pull
 
-    - name: Retart services
-      shell:
-        cmd: docker compose up -d
+      - name: Retart services
+        shell:
+          cmd: docker compose up -d
 
-    - name: Index data
-      async: 1800 # 30 minutes
-      poll: 0
-      shell: |
-        make index-data > /var/log/nest/production/index-data.log 2>&1
+      - name: Index data
+        async: 1800 # 30 minutes
+        poll: 0
+        shell: |
+          make index-data > /var/log/nest/production/index-data.log 2>&1

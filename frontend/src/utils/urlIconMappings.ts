@@ -3,7 +3,7 @@ import {
   faInstagram,
   faLinkedin,
   faYoutube,
-  faTwitter as faXTwitter,
+  faXTwitter,
   faMeetup,
   faSlack,
 } from '@fortawesome/free-brands-svg-icons'

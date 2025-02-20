@@ -2,7 +2,7 @@ name: Sync Nest data
 
 on:
   schedule:
-    - cron: '17 5 * * *'
+    - cron: 17 5 * * *
   workflow_dispatch:
 
 env:
@@ -13,9 +13,9 @@ jobs:
     name: Run data sync
     if: github.repository == 'OWASP/Nest'
     env:
-      ANSIBLE_HOST_KEY_CHECKING: False
-      NEST_HOST_IP_ADDRESS: '${{ secrets.NEST_HOST_IP_ADDRESS }}'
-      NEST_SSH_PRIVATE_KEY_PATH: '${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}'
+      ANSIBLE_HOST_KEY_CHECKING: false
+      NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
+      NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
     environment: production
     runs-on: ubuntu-latest
     steps:
