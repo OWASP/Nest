@@ -104,6 +104,7 @@ export default function Header() {
             defaultIconColor="#b55f95"
             hoverIconColor="#d9156c"
             text="Sponsor"
+            className="hidden"
           />
           <ModeToggle />
           <div className="md:hidden">
@@ -159,6 +160,23 @@ export default function Header() {
               {link.text}
             </NavLink>
           ))}
+          <NavButton
+            href="https://github.com/OWASP/Nest"
+            defaultIcon={faRegularStar}
+            hoverIcon={faSolidStar}
+            defaultIconColor="text-white"
+            hoverIconColor="text-yellow-400"
+            text="Star"
+          />
+
+          <NavButton
+            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+            defaultIcon={faRegularHeart}
+            hoverIcon={faSolidHeart}
+            defaultIconColor="#b55f95"
+            hoverIconColor="#d9156c"
+            text="Sponsor"
+          />
         </div>
       </div>
     </header>
