@@ -121,7 +121,7 @@
       "description": "Leaders of the chapter.",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/person"
+        "$ref": "common.json#/definitions/person"
       },
       "minItems": 2,
       "uniqueItems": true
@@ -149,11 +149,11 @@
       "description": "Region.",
       "type": "string"
     },
-    "social-media": {
+    "social_media": {
       "description": "Social media information for the chapter.",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/social-media"
+        "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
       "additionalProperties": false
