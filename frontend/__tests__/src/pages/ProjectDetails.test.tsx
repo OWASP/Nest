@@ -65,7 +65,7 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
-      expect(screen.getByText('Intermediate')).toBeInTheDocument()
+      expect(screen.getByText('Lab')).toBeInTheDocument()
     })
     expect(screen.getByText('10 Forks')).toBeInTheDocument()
     expect(screen.getByText('10 Issues')).toBeInTheDocument()
@@ -166,6 +166,27 @@ describe('ProjectDetailsPage', () => {
 
     expect(setRecentReleasesMock).toHaveBeenCalledWith(undefined)
     expect(setRecentIssuesMock).toHaveBeenCalledWith(undefined)
+  })
+
+  test('renders project details with correct capitalization', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      const levelElement = screen.getByText(/Level:/)
+      expect(levelElement).toBeInTheDocument()
+      const levelValueElement = within(levelElement.parentElement).getByText('Lab')
+      expect(levelValueElement).toBeInTheDocument()
+
+      const typeElement = screen.getByText(/Type:/)
+      expect(typeElement).toBeInTheDocument()
+      const typeValueElement = within(typeElement.parentElement).getByText('Tool')
+      expect(typeValueElement).toBeInTheDocument()
+    })
   })
 
   test('handles missing project stats gracefully', async () => {
