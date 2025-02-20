@@ -27,6 +27,7 @@ def owasp_handler(ack, command, client):
         leaders,
         news,
         projects,
+        sponsor,
         sponsors,
         staff,
         users,
@@ -53,6 +54,7 @@ def owasp_handler(ack, command, client):
                 f"• `{COMMAND} leaders` -- Chapter and project leaders search{NL}"
                 f"• `{COMMAND} news` -- OWASP news{NL}"
                 f"• `{COMMAND} projects` -- Explore OWASP projects{NL}"
+                f"• `{COMMAND} sponsor` -- Coming soon{NL}"
                 f"• `{COMMAND} sponsors` -- Get a list of OWASP sponsors{NL}"
                 f"• `{COMMAND} staff` -- OWASP corporate structure{NL}"
                 f"• `{COMMAND} users` -- OWASP contributors{NL}"
@@ -92,6 +94,8 @@ def owasp_handler(ack, command, client):
                 news.news_handler(ack, command, client)
             case "projects":
                 projects.projects_handler(ack, command, client)
+            case "sponsor":
+                sponsor.sponsor_handler(ack, command, client)
             case "sponsors":
                 sponsors.sponsors_handler(ack, command, client)
             case "staff":
