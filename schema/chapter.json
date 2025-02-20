@@ -86,6 +86,20 @@
   "additionalProperties": false,
   "description": "OWASP chapter schema.",
   "properties": {
+    "audience": {
+      "description": "The intended audience for the chapter.",
+      "enum": [
+        "breaker",
+        "builder",
+        "defender"
+      ],
+      "enumDescriptions": [
+        "Security testers and ethical hackers.",
+        "Developers and engineers.",
+        "Security professionals and defenders."
+      ],
+      "type": "string"
+    },
     "blog": {
       "description": "Chapter's blog.",
       "format": "uri",
@@ -126,6 +140,24 @@
       "minItems": 2,
       "uniqueItems": true
     },
+    "level": {
+      "default": 2,
+      "description": "The numeric level of the chapter.",
+      "enum": [
+        2,
+        3,
+        3.5,
+        4
+      ],
+      "enumDescriptions": [
+        "Incubator",
+        "Lab",
+        "Production",
+        "Flagship"
+      ],
+      "title": "Chapter level.",
+      "type": "number"
+    },
     "logo": {
       "description": "Logo for the chapter.",
       "type": "array",
@@ -139,7 +171,12 @@
     "meetup-group": {
       "description": "Meetup group.",
       "type": "string"
+    }, "pitch": {
+      "description": "The Chapter pitch.",
+      "type": "string"
     },
+    
+   
     "mailing-list": {
       "description": "The optional mailing list associated with the chapter.",
       "format": "uri",
@@ -181,6 +218,20 @@
       "minItems": 3,
       "uniqueItems": true
     },
+    "type": {
+      "description": "The type of the chapter: code, documentation or tool.",
+      "enum": [
+        "code",
+        "documentation",
+        "tool"
+      ],
+      "enumDescriptions": [
+        "Code chapters",
+        "Documentation, standards, etc.",
+        "Tools"
+      ],
+      "type": "string"
+    },
     "website": {
       "description": "The official website of the chapter.",
       "type": "string",
@@ -191,7 +242,11 @@
     "country",
     "leaders",
     "name",
-    "tags"
+    "tags",
+    "audience",
+    "level",
+    "pitch",
+    "type"
   ],
   "title": "OWASP Chapter",
   "type": "object"
