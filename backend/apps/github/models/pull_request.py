@@ -116,8 +116,9 @@ class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         self.repository = repository
 
     def save(self, *args, **kwargs):
+        """Save method for PullRequest model."""
         super().save(*args, **kwargs)
-        
+
     @staticmethod
     def bulk_save(pull_requests, fields=None):
         """Bulk save issues."""

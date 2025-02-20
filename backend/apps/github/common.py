@@ -2,7 +2,7 @@
 
 import logging
 
-from github.GithubException import GithubException, UnknownObjectException
+from github.GithubException import UnknownObjectException
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
@@ -146,7 +146,6 @@ def sync_repository(gh_repository, organization=None, user=None):
                     logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
     else:
         logger.info("Skipping pull request sync for %s", repository.name)
-
 
     # GitHub repository releases.
     releases = []
