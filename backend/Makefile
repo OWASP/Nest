@@ -44,7 +44,6 @@ index-data:
 load-data:
 	@echo "Loading Nest data"
 	@CMD="poetry run python manage.py load_data" $(MAKE) exec-backend-command
-	@CMD="poetry run python manage.py load_sponsor_data" $(MAKE) exec-backend-command
 
 merge-migrations:
 	@CMD="poetry run python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -83,6 +82,10 @@ owasp-scrape-projects:
 	@echo "Scraping OWASP site projects data"
 	@CMD="poetry run python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
 
+owasp-update-sponsors:
+	@echo "Getting OWASP sponsors data"
+	@CMD="poetry run python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
+
 poetry-update:
 	@CMD="poetry update" $(MAKE) exec-backend-command
 
@@ -113,4 +116,5 @@ update-data: \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
 	github-update-project-related-repositories \
-	owasp-aggregate-projects
+	owasp-aggregate-projects \
+	owasp-update-sponsors
