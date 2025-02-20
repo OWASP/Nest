@@ -1,5 +1,12 @@
 blog: https://blog.chapter.com
 country: India
+community:
+  - platform: slack
+    url: https://slack.com/example
+    description: Slack community
+  - platform: discord
+    url: https://discord.com/example
+    description: Discord community
 events:
   - https://example.com/event1
   - https://example.com/event2
@@ -9,6 +16,10 @@ leaders:
   - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
+logo:
+  - small: https://example.com/smallLogo
+    medium: https://example.com/mediumLogo
+    large: https://example.com/largeLogo
 name: OWASP Chapter
 social_media:
   - description: A brief description of the social media platform

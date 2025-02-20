@@ -5,8 +5,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from algoliasearch.http.exceptions import AlgoliaException
-from algoliasearch.query_suggestions.client import QuerySuggestionsClientSync
 from algoliasearch.search.client import SearchClientSync
+from algoliasearch.search.config import SearchConfig
 from algoliasearch_django import AlgoliaIndex
 from algoliasearch_django.decorators import register as algolia_register
 from django.conf import settings
@@ -16,20 +16,14 @@ from apps.common.constants import NL
 logger = logging.getLogger(__name__)
 
 EXCLUDED_LOCAL_INDEX_NAMES = (
-    "chapters_suggestions",
-    "committees_suggestions",
-    "issues_suggestions",
     "projects_contributors_count_asc",
     "projects_contributors_count_desc",
     "projects_forks_count_asc",
     "projects_forks_count_desc",
     "projects_name_asc",
     "projects_name_desc",
-    "projects_query_suggestions",
     "projects_stars_count_asc",
     "projects_stars_count_desc",
-    "projects_suggestions",
-    "users_suggestions",
 )
 IS_LOCAL_BUILD = settings.ENVIRONMENT == "Local"
 LOCAL_INDEX_LIMIT = 1000
@@ -94,21 +88,16 @@ class IndexBase(AlgoliaIndex):
     """Base index class."""
 
     @staticmethod
-    def get_client():
+    def get_client(ip_address=None):
         """Return an instance of search client."""
-        return SearchClientSync(
+        config = SearchConfig(
             settings.ALGOLIA_APPLICATION_ID,
             settings.ALGOLIA_WRITE_API_KEY,
         )
+        if ip_address is not None:
+            config.headers["X-Forwarded-For"] = ip_address
 
-    @staticmethod
-    def get_suggestions_client():
-        """Get suggestions client."""
-        return QuerySuggestionsClientSync(
-            settings.ALGOLIA_APPLICATION_ID,
-            settings.ALGOLIA_WRITE_API_KEY,
-            getattr(settings, "ALGOLIA_APPLICATION_REGION", None),
-        )
+        return SearchClientSync(config=config)
 
     @staticmethod
     def configure_replicas(index_name: str, replicas: dict):

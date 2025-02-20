@@ -13,9 +13,24 @@ python = "^3.13"
 pyyaml = "^6.0.2"
 validators = "^0.34.0"
 
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
+
+[tool.ruff]
+line-length = 99
+target-version = "py313"
+
+[tool.ruff.lint]
+extend-select = ["I"]
+ignore = [
+    "ANN",
+    "D103",
+]
+select = ["ALL"]
+
+[tool.ruff.per-file-ignores]
+"**/__init__.py" = ["D104"]
+"**/*.py" = ["S101"]
 
 [build-system]
 requires = ["poetry-core"]

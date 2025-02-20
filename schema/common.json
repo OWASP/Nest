@@ -1,0 +1,180 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/common.json",
+    "definitions": {
+        "community": {
+            "additionalProperties": false,
+            "description": "A project community.",
+            "properties": {
+                "description": {
+                    "description": "A brief description of the community.",
+                    "type": "string"
+                },
+                "platform": {
+                    "description": "The platform used by the community",
+                    "enum": [
+                        "discord",
+                        "slack"
+                    ],
+                    "type": "string"
+
+                },
+                "url": {
+                    "description": "The URL of the community.",
+                    "format": "uri",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "platform",
+                "url"
+            ],
+            "title": "Community",
+            "type": "object"
+        },
+
+        "person": {
+            "additionalProperties": false,
+            "description": "Person",
+            "properties": {
+                "email": {
+                    "description": "E-mail address",
+                    "format": "email",
+                    "type": "string"
+                },
+                "github": {
+                    "description": "GitHub username",
+                    "pattern": "^[a-zA-Z0-9-]{1,39}$",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Full name",
+                    "type": "string"
+                },
+                "slack": {
+                    "description": "Slack username",
+                    "pattern": "^[a-zA-Z0-9._-]{1,21}$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "github"
+            ],
+            "title": "Person",
+            "type": "object"
+
+        },
+
+        "repository": {
+            "type": "object",
+            "title": "Repository",
+            "description": "A project repository.",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "changelog": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Link to the changelog."
+                },
+                "code_of_conduct": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Link to the code of conduct."
+                },
+                "contribution_guide": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Link to the contribution guide."
+                },
+                "description": {
+                    "type": [
+                        "string"
+                    ],
+                    "description": "Repository description."
+                },
+                "name": {
+                    "type": [
+                        "string"
+                    ],
+                    "description": "Repository name."
+                },
+                "url": {
+                    "type": "string",
+                    "description": "The repository URL.",
+                    "format": "uri"
+                }
+            },
+            "additionalProperties": false
+        },
+
+        "social_media": {
+            "description": "A social media platform for the project",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Description of the social media platform",
+                    "type": "string"
+                },
+                "platform": {
+                    "description": "The type of social media platform.",
+                    "enum": [
+                        "bluesky",
+                        "linkedin",
+                        "x",
+                        "youtube"
+                    ],
+                    "type": "string"
+                },
+                "url": {
+                    "description": "The URL of the social media profile.",
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "required": [
+                "platform",
+                "url"
+            ],
+            "additionalProperties": false
+        },
+
+        "sponsor": {
+            "type": "object",
+            "title": "Sponsor",
+            "description": "A project sponsor.",
+            "required": [
+                "name",
+                "url"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "A brief description of the sponsor."
+                },
+                "logo": {
+                    "type": "string",
+                    "description": "The URL of the sponsor's logo.",
+                    "format": "uri"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of the sponsor or organization."
+                },
+                "url": {
+                    "type": "string",
+                    "description": "The URL of the sponsor.",
+                    "format": "uri"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

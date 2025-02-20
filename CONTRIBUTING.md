@@ -94,13 +94,6 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
      ```
 
-   - Update your `frontend/.env` file with the following keys from your Algolia app (use **search** API key for frontend):
-
-     ```plaintext
-     VITE_ALGOLIA_APP_ID=<your-algolia-application-id>
-     VITE_ALGOLIA_SEARCH_API_KEY=<your-algolia-search-api-key>
-     ```
-
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
 1. **Run the Application**:

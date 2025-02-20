@@ -64,6 +64,7 @@ SLF
 Truncator
 tsc
 Twitterbot
+usefixtures
 Whistleblower
 winsrdf
 wsgi
