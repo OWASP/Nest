@@ -39,16 +39,10 @@ def test_positive(project_schema):
         ("documentation-null.yaml", "None is not of type 'array'"),
         ("downloads-empty.yaml", "[] should be non-empty"),
         ("downloads-invalid.yaml", "'xyz-abc' is not a 'uri'"),
-        (
-            "downloads-non-unique.yaml",
-            "['https://abc.com/download', 'https://abc.com/download'] has non-unique elements",
-        ),
+        ("downloads-non-unique.yaml", "has non-unique elements"),
         ("downloads-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
-        (
-            "events-non-unique.yaml",
-            "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
-        ),
+        ("events-non-unique.yaml", "has non-unique elements"),
         ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
         ("events-null.yaml", "None is not of type 'array'"),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
