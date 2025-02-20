@@ -17,6 +17,7 @@ export const mockGraphQLData = {
       suggestedLocation: 'Sivagangai, Tamil Nadu, India',
       region: 'Asia',
       key: 'sivagangai',
+      createdAt: '2024-12-14T06:44:54+00:00',
       topContributors: [
         {
           name: 'P.ARUN',
