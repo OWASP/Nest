@@ -12,8 +12,8 @@ from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
 from apps.core.utils.params_mapping import get_params_for_index
 
-CACHE_DURATION = 3600  # 1hr
-CACHE_PREFIX = "algolia_proxy:"
+CACHE_PREFIX = "algolia_proxy"
+CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 
 
 def get_search_results(index_name, query, page, hits_per_page, ip_address=None):
@@ -28,7 +28,6 @@ def get_search_results(index_name, query, page, hits_per_page, ip_address=None):
         }
     )
 
-    # Perform search
     client = IndexBase.get_client(ip_address=ip_address)
     response = client.search(search_method_params={"requests": [search_params]})
     search_result = response.results[0].to_dict()
@@ -54,8 +53,11 @@ def algolia_search(request):
         limit = int(data.get("hitsPerPage", 25))
         page = int(data.get("page", 1))
         query = data.get("query", "")
+        ip_address = get_user_ip_address(request)
 
-        cache_key = f"{CACHE_PREFIX}{index_name}:{query}:{page}:{limit}"
+        cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
+        if index_name == "chapters":
+            cache_key = f"{cache_key}:{ip_address}"
 
         result = cache.get(cache_key)
         if result is not None:
@@ -66,9 +68,9 @@ def algolia_search(request):
             query,
             page,
             limit,
-            ip_address=get_user_ip_address(request),
+            ip_address=ip_address,
         )
-        cache.set(cache_key, result, CACHE_DURATION)
+        cache.set(cache_key, result, CACHE_TTL_IN_SECONDS)
 
         return JsonResponse(result)
     except (AlgoliaException, json.JSONDecodeError):
