@@ -18,6 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@tests/*": ["__tests__/src/*"],
+      "@constants/*": ["src/constants/*"],
       "*": ["src/*"]
     }
   },

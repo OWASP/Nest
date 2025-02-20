@@ -1,7 +1,7 @@
+import { SCROLL_THRESHOLD } from '@constants'
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useState } from 'react'
-import { SCROLL_THRESHOLD } from '../constants'
 
 const ScrollUp: React.FC = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false)
