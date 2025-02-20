@@ -67,7 +67,7 @@ export default function Home() {
     fetchData()
   }, [])
 
-  if (isLoading || !data || !geoLocData) {
+  if (isLoading || !graphQLData || !geoLocData) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
