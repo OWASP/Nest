@@ -175,8 +175,6 @@
       "description": "The Chapter pitch.",
       "type": "string"
     },
-    
-   
     "mailing-list": {
       "description": "The optional mailing list associated with the chapter.",
       "format": "uri",
