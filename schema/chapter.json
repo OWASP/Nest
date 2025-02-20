@@ -240,10 +240,7 @@
     "country",
     "leaders",
     "name",
-    "tags",
-    "level",
-    "pitch",
-    "type"
+    "tags"
   ],
   "title": "OWASP Chapter",
   "type": "object"
