@@ -96,49 +96,48 @@ def sync_repository(gh_repository, organization=None, user=None):
     else:
         logger.info("Skipping issues sync for %s", repository.name)
     if not repository.is_archived and repository.project:
+        # Fetch both open and closed PRs from GitHub
         kwargs = {
             "direction": "asc",
             "sort": "created",
             "state": "open",
         }
 
-        open_gh_pull_requests = list(gh_repository.get_pulls(**kwargs))
-        open_pr_numbers = {gh_pull_request.number for gh_pull_request in open_gh_pull_requests}
+        latest_pull_request = repository.latest_pull_request
+        if latest_pull_request:
+            kwargs["state"] = "all"
 
-        closed_prs = PullRequest.objects.filter(repository=repository, state="open").exclude(
-            number__in=open_pr_numbers
-        )
+        gh_pull_requests = gh_repository.get_pulls(**kwargs)
 
-        for pr in closed_prs:
-            pr.state = "closed"
-            try:
-                gh_closed_pr = gh_repository.get_pull(pr.number)
-                pr.closed_at = gh_closed_pr.closed_at  # Correct closure time from GitHub
-                pr.merged_at = gh_closed_pr.merged_at  # Correct merge time if merged
-            except GithubException:
-                logger.warning(
-                    "Could not fetch closed PR details for %s, using updated_at instead.",
-                    pr.number,
-                )
-                pr.closed_at = pr.closed_at or pr.updated_at  # Fallback if API fails
+        for gh_pull_request in gh_pull_requests:
+            if gh_pull_request.state == "closed":
+                # Check if this PR already exists in the database and is open
+                existing_open_pr = PullRequest.objects.filter(
+                    repository=repository, state="open", number=gh_pull_request.number
+                ).first()
+                # If the PR does not exist and we have previously synced PRs, skip it
+                # This ensures we only track open PRs from the first run
+                if not existing_open_pr:
+                    continue  # Skip closed PRs from previous syncs
 
-            pr.save()
-
-        for gh_pull_request in open_gh_pull_requests:
+            # Extract author details
             author = (
                 User.update_data(gh_pull_request.user)
                 if gh_pull_request.user and gh_pull_request.user.type != "Bot"
                 else None
             )
 
+            # Update PR data
             pull_request = PullRequest.update_data(
                 gh_pull_request, author=author, repository=repository
             )
 
+            # Clear and update assignees
             pull_request.assignees.clear()
             for gh_pull_request_assignee in gh_pull_request.assignees:
                 pull_request.assignees.add(User.update_data(gh_pull_request_assignee))
 
+            # Clear and update labels
             pull_request.labels.clear()
             for gh_pull_request_label in gh_pull_request.labels:
                 try:
@@ -147,6 +146,7 @@ def sync_repository(gh_repository, organization=None, user=None):
                     logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
     else:
         logger.info("Skipping pull request sync for %s", repository.name)
+
 
     # GitHub repository releases.
     releases = []
