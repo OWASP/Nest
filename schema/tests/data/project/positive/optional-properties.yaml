@@ -8,7 +8,7 @@ community:
     description: Discord community
     url: https://discord.com/example
 demo:
-  - "https://some-demo-url.com"
+  - https://some-demo-url.com
 documentation:
   - https://example.com/docs1
   - https://example.com/docs2

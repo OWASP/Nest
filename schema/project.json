@@ -165,17 +165,14 @@
       "optional": true
     },
     "demo": {
-      "description": "Optional URL to the project demo.",
-      "oneOf": [
-        {
-          "type":"array",
-          "items": {
-            "type": "string",
-            "format": "uri"
-          },
-          "minItems": 1
-        }
-      ]
+      "description": "Optional URLs to the project demo.",
+      "minItems": 1,
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
     },
     "documentation": {
       "description": "Optional URLs to project documentation.",
