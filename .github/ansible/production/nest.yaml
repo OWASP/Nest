@@ -21,7 +21,7 @@
 
     - name: Update backend makefile for the production environment
       shell:
-        cmd: sed -i 's/\bnest-backend\b/production-nest-backend/' ~/backend/Makefile
+        cmd: "sed -i 's/\\bnest-backend\\b/production-nest-backend/' ~/backend/Makefile"
 
     - name: Ensure cspell directory exists
       ansible.builtin.file:
