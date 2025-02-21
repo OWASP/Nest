@@ -9,6 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
 import { toast } from 'hooks/useToast'
+import millify from 'millify'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ProjectTypeGraphql } from 'types/project'
@@ -18,7 +19,6 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
-import millify from 'millify'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -80,23 +80,23 @@ const ProjectDetailsPage = () => {
   const projectStats = [
     {
       icon: faUsers,
-      value: `${millify(project?.contributorsCount, {precision: 1}) || 'No'} ${pluralize(project.contributorsCount, 'Contributor')}`,
+      value: `${typeof project?.contributorsCount === 'number' && project?.contributorsCount > 0 ? millify(project?.contributorsCount, { precision: 1 }) : 'No'} ${pluralize(project.contributorsCount, 'Contributor')}`,
     },
     {
       icon: faCodeFork,
-      value: `${millify(project?.forksCount, {precision: 1}) || 'No'} ${pluralize(project.forksCount, 'Fork')}`,
+      value: `${typeof project?.forksCount === 'number' && project?.forksCount > 0 ? millify(project?.forksCount, { precision: 1 }) : 'No'} ${pluralize(project.forksCount, 'Fork')}`,
     },
     {
       icon: faStar,
-      value: `${millify(project?.starsCount, {precision: 1}) || 'No'} ${pluralize(project.starsCount, 'Star')}`,
+      value: `${typeof project?.starsCount === 'number' && project?.starsCount > 0 ? millify(project?.starsCount, { precision: 1 }) : 'No'} ${pluralize(project.starsCount, 'Star')}`,
     },
     {
       icon: faCode,
-      value: `${millify(project?.repositoriesCount, {precision: 1}) || 'No'} ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
+      value: `${typeof project?.repositoriesCount === 'number' && project?.repositoriesCount > 0 ? millify(project?.repositoriesCount, { precision: 1 }) : 'No'} ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
     },
     {
       icon: faExclamationCircle,
-      value: `${millify(project?.issuesCount, {precision: 1}) || 'No'} ${pluralize(project.issuesCount, 'Issue')}`,
+      value: `${typeof project?.issuesCount === 'number' && project?.issuesCount > 0 ? millify(project?.issuesCount, { precision: 1 }) : 'No'} ${pluralize(project.issuesCount, 'Issue')}`,
     },
   ]
   return (
