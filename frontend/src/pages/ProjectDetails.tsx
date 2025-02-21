@@ -61,9 +61,12 @@ const ProjectDetailsPage = () => {
     )
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
-    { label: 'Level', value: project.level[0].toUpperCase() + project.level.slice(1) },
+    {
+      label: 'Level',
+      value: project.level[0].toUpperCase() + project.level.slice(1).toLowerCase(),
+    },
     { label: 'Project Leaders', value: project.leaders.join(', ') },
-    { label: 'Type', value: project.type[0].toUpperCase() + project.type.slice(1) },
+    { label: 'Type', value: project.type[0].toUpperCase() + project.type.slice(1).toLowerCase() },
     {
       label: 'URL',
       value: (
