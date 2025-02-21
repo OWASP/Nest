@@ -140,12 +140,12 @@
       "minItems": 2,
       "uniqueItems": true
     },
-  "level": {
-  "default": 2,
-  "enum": [2, 3, 3.5, 4],
-  "description": "The numeric level of the chapter.",
-  "title": "Chapter level.",
-  "type": "number"
+    "level": {
+      "default": 2,
+      "enum": [2, 3, 3.5, 4],
+      "description": "The numeric level of the chapter.",
+      "title": "Chapter level.",
+      "type": "number"
     },
    "logo": {
       "description": "Logo for the chapter.",

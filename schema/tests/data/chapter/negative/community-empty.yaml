@@ -5,6 +5,7 @@ leaders:
     name: Leader 1 Name
   - github: leader-2-github
     name: Leader 2 Name
+level: 2
 name: OWASP Chapter
 tags:
   - example-tag-1
