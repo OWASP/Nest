@@ -8,7 +8,7 @@ from tests.conftest import common_negative_test, common_positive_test
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("description-empty.yaml", "'' is not a description"),
+        ("description-empty.yaml", "'' is not of type 'string'"),
         ("description-null.yaml", "None is not of type 'string'"),
         ("platform-empty.yaml", "'' is not one of ['discord', 'slack']"),
         ("platform-invalid.yaml", "'telegram' is not one of ['discord', 'slack']"),

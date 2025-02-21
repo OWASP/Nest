@@ -65,6 +65,15 @@
       "description": "Region.",
       "type": "string"
     },
+    "social_media": {
+      "description": "Social media information for the chapter.",
+      "type": "array",
+      "items": {
+        "$ref": "common.json#/definitions/socialMedia"
+      },
+      "minItems": 1,
+      "additionalProperties": false
+    },
     "sponsors": {
       "description": "Sponsors of the chapter.",
       "type": "array",
@@ -86,15 +95,6 @@
       "description": "The official website of the chapter.",
       "type": "string",
       "format": "url"
-    },
-    "social_media": {
-      "description": "Social media information for the chapter.",
-      "type": "array",
-      "items": {
-        "$ref": "common.json#/definitions/socialMedia"
-      },
-      "minItems": 1,
-      "additionalProperties": false
     }
   },
   "required": ["country", "leaders", "name", "tags"],

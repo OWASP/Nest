@@ -8,9 +8,9 @@ from tests.conftest import common_negative_test, common_positive_test
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("changelog-invalid.yaml", "'changes.md' is not a 'uri'"),
-        ("code_of_conduct-invalid.yaml", "'conduct.md' is not a 'uri'"),
-        ("contribution_guide-invalid.yaml", "'contribute.md' is not a 'uri'"),
+        ("changelog-empty.yaml", "'' is not of type 'string'"),
+        ("code_of_conduct-empty.yaml", "'' is not of type 'string'"),
+        ("contribution_guide-empty.yaml", "'' is not of type 'string'"),
         ("description-null.yaml", "None is not of type 'string'"),
         ("name-null.yaml", "None is not of type 'string'"),
         ("url-empty.yaml", "'' is not a 'uri'"),
