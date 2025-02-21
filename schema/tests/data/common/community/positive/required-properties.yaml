@@ -1,2 +1,2 @@
-platform: 'discord'
-url: 'https://discord.gg/example'
+platform: discord
+url: https://discord.gg/example

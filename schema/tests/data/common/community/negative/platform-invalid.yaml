@@ -1,2 +1,2 @@
-platform: 'telegram'
-url: 'https://discord.gg/example'
+platform: telegram
+url: https://discord.gg/example
