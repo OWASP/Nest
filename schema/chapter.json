@@ -144,7 +144,7 @@
       "default": 2,
       "enum": [2, 3, 3.5, 4],
       "description": "The numeric level of the chapter.",
-      "title": "Chapter level.",
+      "title": "Chapter level",
       "type": "number"
     },
    "logo": {
