@@ -12,8 +12,8 @@ class SnapshotModelMockTest(SimpleTestCase):
         """Set up a mocked snapshot object."""
         self.snapshot = MagicMock(spec=Snapshot)  # Mock entire model
         self.snapshot.id = 1  # Set an ID to avoid ManyToMany errors
-        self.snapshot.start_at = "2025-02-21 12:00:00"
-        self.snapshot.end_at = "2025-02-21 14:00:00"
+        self.snapshot.start_at = "2025-02-21"
+        self.snapshot.end_at = "2025-02-21"
         self.snapshot.status = Snapshot.Status.PROCESSING
 
         # Mock ManyToMany relations

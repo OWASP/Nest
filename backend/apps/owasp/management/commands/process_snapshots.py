@@ -5,10 +5,11 @@ import logging
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from apps.github.models.issue import Issue
+from apps.github.models.release import Release
+from apps.github.models.user import User
 from apps.owasp.exceptions import SnapshotProcessingError
 from apps.owasp.models.chapter import Chapter
-from apps.owasp.models.committee import Committee
-from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot import Snapshot
 
@@ -57,16 +58,18 @@ class Command(BaseCommand):
 
         try:
             # Fetch new data for each model type
-            new_chapters = self.get_new_items(Chapter, snapshot)
-            new_committees = self.get_new_items(Committee, snapshot)
-            new_events = self.get_new_items(Event, snapshot)
-            new_projects = self.get_new_items(Project, snapshot)
+            new_chapters = self.get_new_items(Chapter, snapshot.start_at, snapshot.end_at)
+            new_projects = self.get_new_items(Project, snapshot.start_at, snapshot.end_at)
+            new_issues = self.get_new_items(Issue, snapshot.start_at, snapshot.end_at)
+            new_releases = self.get_new_items(Release, snapshot.start_at, snapshot.end_at)
+            new_users = self.get_new_items(User, snapshot.start_at, snapshot.end_at)
 
             # Add items to snapshot
             snapshot.new_chapters.add(*new_chapters)
-            snapshot.new_committees.add(*new_committees)
-            snapshot.new_events.add(*new_events)
             snapshot.new_projects.add(*new_projects)
+            snapshot.new_issues.add(*new_issues)
+            snapshot.new_releases.add(*new_releases)
+            snapshot.new_users.add(*new_users)
 
             # Update status to completed
             snapshot.status = Snapshot.Status.COMPLETED
@@ -74,11 +77,12 @@ class Command(BaseCommand):
 
             logger.info("Successfully processed snapshot %s", snapshot.id)
             logger.info(
-                "Added: %s chapters, %s committees, %s events, %s projects",
+                "Added: %s chapters, %s projects, %s issues, %s releases, %s users",
                 new_chapters.count(),
-                new_committees.count(),
-                new_events.count(),
                 new_projects.count(),
+                new_issues.count(),
+                new_releases.count(),
+                new_users.count(),
             )
 
         except Exception as e:
