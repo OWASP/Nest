@@ -115,7 +115,7 @@
             "additionalProperties": false
         },
 
-        "social-media": {
+        "social_media": {
             "description": "A social media platform for the project",
             "type": "object",
             "properties": {

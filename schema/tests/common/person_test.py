@@ -1,6 +1,10 @@
+"""Person schema tests."""
+
 import pytest
 
 from tests.conftest import common_negative_test, common_positive_test
+
+SCHEMA_NAME = "person"
 
 
 @pytest.mark.parametrize(
@@ -15,8 +19,8 @@ from tests.conftest import common_negative_test, common_positive_test
     ],
 )
 def test_negative(common_schema, file_path, error_message):
-    common_negative_test(common_schema, "person", file_path, error_message)
+    common_negative_test(common_schema, SCHEMA_NAME, file_path, error_message)
 
 
 def test_positive(common_schema):
-    common_positive_test(common_schema, "person")
+    common_positive_test(common_schema, SCHEMA_NAME)

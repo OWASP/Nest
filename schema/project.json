@@ -38,21 +38,24 @@
             "string",
             "null"
           ],
-          "description": "Link to the changelog."
+          "description": "Link to the changelog.",
+          "format": "uri"
         },
         "code_of_conduct": {
           "type": [
             "string",
             "null"
           ],
-          "description": "Link to the code of conduct."
+          "description": "Link to the code of conduct.",
+          "format": "uri"
         },
         "contribution_guide": {
           "type": [
             "string",
             "null"
           ],
-          "description": "Link to the contribution guide."
+          "description": "Link to the contribution guide.",
+          "format": "uri"
         },
         "description": {
           "type": [
@@ -165,9 +168,14 @@
       "optional": true
     },
     "demo": {
-      "description": "Optional URL to the project demo.",
-      "format": "uri",
-      "type": "string"
+      "description": "Optional URLs to the project demo.",
+      "minItems": 1,
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
     },
     "documentation": {
       "description": "Optional URLs to project documentation.",
@@ -205,7 +213,7 @@
       "description": "Leaders of the project.",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/person"
+        "$ref": "common.json#/definitions/person"
 
       },
       "minItems": 2,
@@ -260,7 +268,7 @@
       "additionalProperties": false,
       "optional": true
     },
-    "mailing-list": {
+    "mailing_list": {
       "description": "The optional mailing list associated with the project.",
       "format": "uri",
       "type": "string"
@@ -283,11 +291,11 @@
       },
       "uniqueItems": true
     },
-    "social-media": {
+    "social_media": {
       "description": "Social media information for the project",
       "type": "array",
       "items": {
-        "$ref": "./common.json#/definitions/social-media"
+        "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
       "additionalProperties": false
