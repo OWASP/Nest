@@ -96,7 +96,7 @@ export default function Home() {
       <div className="mb-20 pt-20 text-center">
         <div className="flex flex-col items-center py-10">
           <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
-            Welcome to OWASP Community
+            Welcome to OWASP Nest
           </h1>
           <p className="max-w-[700px] pt-6 text-muted-foreground md:text-xl">
             OWASP is a nonprofit organization that aims to improve software security through
