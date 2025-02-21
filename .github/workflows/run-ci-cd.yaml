@@ -112,7 +112,7 @@ jobs:
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:${{ matrix.language }}'
+          category: /language:${{ matrix.language }}
 
   spellcheck:
     name: Run spell check
@@ -238,9 +238,9 @@ jobs:
   deploy-staging-nest:
     name: Deploy Nest Staging
     env:
-      ANSIBLE_HOST_KEY_CHECKING: False
-      NEST_HOST_IP_ADDRESS: '${{ secrets.NEST_HOST_IP_ADDRESS }}'
-      NEST_SSH_PRIVATE_KEY_PATH: '${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}'
+      ANSIBLE_HOST_KEY_CHECKING: false
+      NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
+      NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -294,8 +294,8 @@ jobs:
   deploy-staging-nest-proxy:
     name: Deploy Staging Nest Proxy
     env:
-      ANSIBLE_HOST_KEY_CHECKING: False
-      PROXY_HOST_IP_ADDRESS: '${{ secrets.PROXY_HOST_IP_ADDRESS }}'
+      ANSIBLE_HOST_KEY_CHECKING: false
+      PROXY_HOST_IP_ADDRESS: ${{ secrets.PROXY_HOST_IP_ADDRESS }}
       PROXY_SSH_PRIVATE_KEY_PATH: ${{ vars.PROXY_SSH_PRIVATE_KEY_PATH }}
     environment: staging
     if: |
@@ -362,7 +362,7 @@ jobs:
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.production
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.production
           echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env.production
-          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env.production
+          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env.production
           echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env.production
 
       - name: Build frontend image
@@ -379,9 +379,9 @@ jobs:
   deploy-production-nest:
     name: Deploy Nest to Production
     env:
-      ANSIBLE_HOST_KEY_CHECKING: False
-      NEST_HOST_IP_ADDRESS: '${{ secrets.NEST_HOST_IP_ADDRESS }}'
-      NEST_SSH_PRIVATE_KEY_PATH: '${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}'
+      ANSIBLE_HOST_KEY_CHECKING: false
+      NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
+      NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
     environment: production
     if: |
       github.event_name == 'release' &&
@@ -415,7 +415,7 @@ jobs:
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
-          echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> .env.backend
+          echo "DJANGO_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
@@ -435,8 +435,8 @@ jobs:
   deploy-production-nest-proxy:
     name: Deploy Production Nest Proxy
     env:
-      ANSIBLE_HOST_KEY_CHECKING: False
-      PROXY_HOST_IP_ADDRESS: '${{ secrets.PROXY_HOST_IP_ADDRESS }}'
+      ANSIBLE_HOST_KEY_CHECKING: false
+      PROXY_HOST_IP_ADDRESS: ${{ secrets.PROXY_HOST_IP_ADDRESS }}
       PROXY_SSH_PRIVATE_KEY_PATH: ${{ vars.PROXY_SSH_PRIVATE_KEY_PATH }}
     environment: production
     if: |
