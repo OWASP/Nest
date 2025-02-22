@@ -211,7 +211,7 @@ export default function Home() {
           )}
         />
       </div>
-      <div className="mb-20 grid gap-6 md:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-4">
         {counterData.map((stat, index) => (
           <SecondaryCard key={index} className="text-center">
             <div className="mb-2 text-3xl font-bold text-blue-400">
@@ -220,6 +220,23 @@ export default function Home() {
             <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
           </SecondaryCard>
         ))}
+      </div>
+
+      <div className="mb-20 mt-8">
+        <SecondaryCard className="text-center">
+          <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
+          <p className="mb-6 text-gray-600 dark:text-gray-300">
+            Join OWASP and be part of the global cybersecurity community.
+          </p>
+          <a
+            href="https://owasp.glueup.com/organization/6727/memberships/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block rounded bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600"
+          >
+            Join OWASP Now
+          </a>
+        </SecondaryCard>
       </div>
     </div>
   )
