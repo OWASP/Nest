@@ -23,6 +23,7 @@ from apps.slack.constants import (
     OWASP_MENTORS_CHANNEL_ID,
     OWASP_PROJECT_JUICE_SHOP_CHANNEL_ID,
     OWASP_PROJECT_NEST_CHANNEL_ID,
+    OWASP_SPONSORSHIP_CHANNEL_ID,
     OWASP_THREAT_MODELING_CHANNEL_ID,
 )
 from apps.slack.utils import get_text
@@ -50,7 +51,7 @@ def team_join_handler(event, client, ack):
         markdown(
             f"*Welcome to the OWASP Slack Community, <@{user_id}>!*{NL}"
             "We're excited to have you join us! Whether you're a newcomer to OWASP or "
-            "a seasoned contributor, this is the space to connect, collaborate, "
+            "a seasoned professional, this is the space to connect, collaborate, "
             f"and learn together!{2*NL}"
         ),
         markdown(
@@ -59,7 +60,8 @@ def team_join_handler(event, client, ack):
             "check out <https://nest.owasp.org|*OWASP Nest*>. It's your gateway to "
             "discovering ways to contribute, stay informed, and connect with the OWASP "
             "community. From finding projects aligned with your interests to engaging with "
-            "chapters in your area, OWASP Nest makes it easier to navigate and get involved."
+            f"chapters in your area, OWASP Nest makes it easier to navigate and get involved.{NL}"
+            f"Join <{OWASP_PROJECT_NEST_CHANNEL_ID}> to stay updated on OWASP Nest."
         ),
         markdown(
             f"*Connect and Grow:*{NL}"
@@ -80,6 +82,8 @@ def team_join_handler(event, client, ack):
             f"*Learn and Engage:*{NL}"
             f"  • Explore <{OWASP_CONTRIBUTE_CHANNEL_ID}> for opportunities to get involved "
             f"in OWASP projects and initiatives.{2*NL}"
+            f"  • Leverage <{OWASP_SPONSORSHIP_CHANNEL_ID}> program to earn compensation "
+            f"for impactful contributions to OWASP projects.{2*NL}"
             f"  • Join leadership channels: <{OWASP_LEADERS_CHANNEL_ID}> and "
             f"<{OWASP_MENTORS_CHANNEL_ID}> to connect with OWASP leaders and mentors.{2*NL}"
             f"  • Learn about OWASP's participation in Google Summer of Code in "
@@ -90,7 +94,7 @@ def team_join_handler(event, client, ack):
         markdown(
             "We're here to support your journey in making software security visible and "
             "strengthening the security of the software we all depend on. Have questions or "
-            "need help? Don't hesitate to ask—this community thrives on collaboration!"
+            "need help? Don't hesitate to ask -- this community thrives on collaboration!"
         ),
         markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
     ]
