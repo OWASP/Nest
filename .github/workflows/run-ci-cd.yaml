@@ -73,7 +73,7 @@ jobs:
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check` and use `git add` to address it.' && exit 1)
+          Run `make check-all` and use `git add` to address it.' && exit 1)
 
   code-ql:
     name: CodeQL

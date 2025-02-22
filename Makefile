@@ -6,10 +6,17 @@ include schema/Makefile
 build:
 	@docker compose build
 
-check: \
+check-all: \
+	check-code-style \
+	check-spelling
+
+check-code-style: \
 	pre-commit \
-	check-frontend \
-	spellcheck
+	check-code-style-frontend
+
+check-test-all: \
+	check-all \
+	test-all
 
 pre-commit:
 	@pre-commit run -a
@@ -18,14 +25,10 @@ run:
 	@docker compose build
 	@docker compose up
 
-test: \
+test-all: \
+	test-nest-app \
+	test-schema \
+
+test-nest-app: \
 	test-backend \
 	test-frontend
-
-test-all: \
-	test-backend \
-	test-frontend \
-	test-schema \
-	pre-commit \
-	check-frontend \
-	spellcheck
