@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Pagination from 'components/Pagination'
-import SearchBar from 'components/Search'
 import SkeletonBase from 'components/SkeletonsBase'
+import SearchBar from './Search'
 
 interface SearchPageLayoutProps {
   isLoaded: boolean
@@ -34,24 +34,23 @@ const SearchPageLayout = ({
   sortChildren,
   children,
 }: SearchPageLayoutProps) => {
-  const [isSearchBarReady, setIsSearchBarReady] = useState(false)
-
-  const handleSearchBarReady = () => {
-    setIsSearchBarReady(true)
-  }
-
+  const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true)
+  useEffect(() => {
+    if (isLoaded && isFirstLoad) {
+      setIsFirstLoad(false)
+    }
+  }, [isLoaded, isFirstLoad])
   return (
     <div className="mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
       <div className="flex w-full items-center justify-center">
         <SearchBar
-          indexName={indexName}
+          isLoaded={isFirstLoad}
           onSearch={onSearch}
           placeholder={searchPlaceholder}
           initialValue={searchQuery}
-          onReady={handleSearchBarReady}
         />
       </div>
-      {!isSearchBarReady || !isLoaded ? (
+      {!isLoaded ? (
         <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
       ) : (
         <>

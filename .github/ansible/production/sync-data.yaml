@@ -1,8 +1,8 @@
-- name: Run Nest Production Data Sync
-  hosts: nest_production
-  tasks:
-    - name: Sync Nest data
-      async: 21600 # 6 hours
-      poll: 0
-      shell: |
-        make sync-data > /var/log/nest/production/sync-data.log 2>&1
+  - name: Run Nest Production Data Sync
+    hosts: production_nest
+    tasks:
+      - name: Sync Nest data
+        async: 21600 # 6 hours
+        poll: 0
+        shell: |
+          make sync-data > /var/log/nest/production/sync-data.log 2>&1
