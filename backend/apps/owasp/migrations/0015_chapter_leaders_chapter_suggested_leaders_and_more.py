@@ -4,41 +4,70 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0015_alter_release_author'),
-        ('owasp', '0014_project_custom_tags'),
+        ("github", "0015_alter_release_author"),
+        ("owasp", "0014_project_custom_tags"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='chapter',
-            name='leaders',
-            field=models.ManyToManyField(blank=True, related_name='normal_%(class)s', to='github.user', verbose_name='Leaders'),
+            model_name="chapter",
+            name="leaders",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="normal_%(class)s",
+                to="github.user",
+                verbose_name="Leaders",
+            ),
         ),
         migrations.AddField(
-            model_name='chapter',
-            name='suggested_leaders',
-            field=models.ManyToManyField(blank=True, related_name='exact_matched_%(class)s', to='github.user', verbose_name='Exact Match Users'),
+            model_name="chapter",
+            name="suggested_leaders",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="exact_matched_%(class)s",
+                to="github.user",
+                verbose_name="Exact Match Users",
+            ),
         ),
         migrations.AddField(
-            model_name='committee',
-            name='leaders',
-            field=models.ManyToManyField(blank=True, related_name='normal_%(class)s', to='github.user', verbose_name='Leaders'),
+            model_name="committee",
+            name="leaders",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="normal_%(class)s",
+                to="github.user",
+                verbose_name="Leaders",
+            ),
         ),
         migrations.AddField(
-            model_name='committee',
-            name='suggested_leaders',
-            field=models.ManyToManyField(blank=True, related_name='exact_matched_%(class)s', to='github.user', verbose_name='Exact Match Users'),
+            model_name="committee",
+            name="suggested_leaders",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="exact_matched_%(class)s",
+                to="github.user",
+                verbose_name="Exact Match Users",
+            ),
         ),
         migrations.AddField(
-            model_name='project',
-            name='leaders',
-            field=models.ManyToManyField(blank=True, related_name='normal_%(class)s', to='github.user', verbose_name='Leaders'),
+            model_name="project",
+            name="leaders",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="normal_%(class)s",
+                to="github.user",
+                verbose_name="Leaders",
+            ),
         ),
         migrations.AddField(
-            model_name='project',
-            name='suggested_leaders',
-            field=models.ManyToManyField(blank=True, related_name='exact_matched_%(class)s', to='github.user', verbose_name='Exact Match Users'),
+            model_name="project",
+            name="suggested_leaders",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="exact_matched_%(class)s",
+                to="github.user",
+                verbose_name="Exact Match Users",
+            ),
         ),
     ]
