@@ -84,7 +84,7 @@ export default function Home() {
       case 'tool':
         return faTag
       default:
-        return null
+        return faFileCode
     }
   }
 
