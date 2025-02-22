@@ -121,7 +121,7 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('div')?.click()
+    screen.getByText('Contributor 1').closest('p')?.click()
 
     expect(navigateMock).toHaveBeenCalledWith('/community/users/contributor1')
   })
