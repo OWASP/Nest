@@ -24,8 +24,8 @@ class ChapterNode(GenericEntityNode):
         model = Chapter
         fields = (
             "created_at",
-            "is_active",
             "country",
+            "is_active",
             "meetup_group",
             "name",
             "postal_code",

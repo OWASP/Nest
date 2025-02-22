@@ -3,14 +3,8 @@ import { ProjectIssuesType, ProjectReleaseType } from './project'
 
 export type MainPageData = {
   topContributors: TopContributorsTypeGraphql[]
-  recentIssue: ProjectIssuesType[]
-  recentRelease: ProjectReleaseType[]
-  countsOverview: {
-    activeProjectsCount: number
-    chaptersCount: number
-    contributorsCount: number
-    countriesCount: number
-  }
+  recentIssues: ProjectIssuesType[]
+  recentReleases: ProjectReleaseType[]
   recentChapters: {
     name: string
     createdAt: string
@@ -29,4 +23,10 @@ export type MainPageData = {
     repositoriesCount: number
     type: string
   }[]
+  statsOverview: {
+    activeChaptersStats: number
+    activeProjectsStats: number
+    contributorsStats: number
+    countriesStats: number
+  }
 }

@@ -52,7 +52,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByText('Welcome to OWASP Community')).toBeInTheDocument()
+      expect(screen.getByText('Welcome to OWASP Nest')).toBeInTheDocument()
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
       expect(screen.getByText('DOCUMENTATION')).toBeInTheDocument()
     })
@@ -89,7 +89,7 @@ describe('Home', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByPlaceholderText('Search for projects, chapters, and more')
+        screen.getByPlaceholderText('Search the OWASP community')
       ).toBeInTheDocument()
     })
   })
@@ -116,7 +116,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByText('OWASP Chapters Worldwide')).toBeInTheDocument()
+      expect(screen.getByText('OWASP Chapters Nearby')).toBeInTheDocument()
     })
   })
 
@@ -150,7 +150,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByText('Welcome to OWASP Community')).toBeInTheDocument()
+      expect(screen.getByText('Welcome to OWASP Nest')).toBeInTheDocument()
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
       expect(screen.getByText('DOCUMENTATION')).toBeInTheDocument()
     })

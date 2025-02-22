@@ -20,13 +20,15 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
     }
-    topContributors(limit: 15) {
+    topContributors(limit: 18) {
       name
       login
       contributionsCount
       avatarUrl
+      repositoryName
+      repositoryUrl
     }
-    recentIssue(limit: 5) {
+    recentIssues(limit: 5) {
       commentsCount
       createdAt
       number
@@ -36,7 +38,7 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
     }
-    recentRelease(limit: 5) {
+    recentReleases(limit: 5) {
       author {
         avatarUrl
         name
@@ -46,11 +48,11 @@ export const GET_MAIN_PAGE_DATA = gql`
       publishedAt
       tagName
     }
-    countsOverview {
-      chaptersCount
-      countriesCount
-      activeProjectsCount
-      contributorsCount
+    statsOverview {
+      activeChaptersStats
+      activeProjectsStats
+      contributorsStats
+      countriesStats
     }
   }
 `

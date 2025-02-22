@@ -23,7 +23,13 @@ class RepositoryContributorQuery(BaseQuery):
 
         top_contributors_data = (
             RepositoryContributor.objects.exclude(user__login__in=non_indexable_logins)
-            .values("user__avatar_url", "user__login", "user__name")
+            .values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+                "repository__name",
+                "repository__owner__login",
+            )
             .annotate(total_contributions=Sum("contributions_count"))
             .order_by("-total_contributions")[:limit]
         )
@@ -34,6 +40,8 @@ class RepositoryContributorQuery(BaseQuery):
                 contributions_count=contrib["total_contributions"],
                 login=contrib["user__login"],
                 name=contrib["user__name"],
+                repository_name=contrib["repository__name"],
+                repository_url=f"https://github.com/{contrib['repository__owner__login']}/{contrib['repository__name']}",
             )
             for contrib in top_contributors_data
         ]

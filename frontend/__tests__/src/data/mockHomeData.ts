@@ -7,7 +7,6 @@ export const mockGraphQLData = {
       key: 'gamesec-framework',
       openIssuesCount: 0,
       repositoriesCount: 1,
-      __typename: 'ProjectNode',
     },
   ],
   recentChapters: [
@@ -20,10 +19,8 @@ export const mockGraphQLData = {
       topContributors: [
         {
           name: 'P.ARUN',
-          __typename: 'RepositoryContributorNode',
         },
       ],
-      __typename: 'ChapterNode',
     },
   ],
   topContributors: [
@@ -32,10 +29,9 @@ export const mockGraphQLData = {
       login: 'OWASPFoundation',
       contributionsCount: 27952,
       avatarUrl: 'https://avatars.githubusercontent.com/u/7461777?v=4',
-      __typename: 'RepositoryContributorNode',
     },
   ],
-  recentIssue: [
+  recentIssues: [
     {
       commentsCount: 1,
       createdAt: '2024-12-14T06:44:54+00:00',
@@ -44,27 +40,23 @@ export const mockGraphQLData = {
       author: {
         avatarUrl: 'https://avatars.githubusercontent.com/u/134638667?v=4',
         name: 'Raj gupta',
-        __typename: 'UserNode',
       },
-      __typename: 'IssueNode',
     },
   ],
-  recentRelease: [
+  recentReleases: [
     {
       author: null,
       isPreRelease: false,
       name: 'v0.9.2',
       publishedAt: '2024-12-13T14:43:46+00:00',
       tagName: 'v0.9.2',
-      __typename: 'ReleaseNode',
     },
   ],
-  countsOverview: {
-    chaptersCount: 540,
-    countriesCount: 95,
-    activeProjectsCount: 245,
-    contributorsCount: 9673,
-    __typename: 'CountsType',
+  statsOverview: {
+    activeChaptersStats: 540,
+    activeProjectsStats: 95,
+    countriesStats: 245,
+    contributorsStats: 9673,
   },
 }
 

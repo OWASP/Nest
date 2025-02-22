@@ -75,19 +75,19 @@ export default function Home() {
   const counterData = [
     {
       label: 'Active Projects',
-      value: data.countsOverview.activeProjectsCount.toString().concat('+'),
+      value: data.statsOverview.activeProjectsStats.toString().concat('+'),
     },
     {
       label: 'Contributors',
-      value: data.countsOverview.contributorsCount.toString().concat('+'),
+      value: data.statsOverview.contributorsStats.toString().concat('+'),
     },
     {
       label: 'Local Chapters',
-      value: data.countsOverview.chaptersCount.toString().concat('+'),
+      value: data.statsOverview.activeChaptersStats.toString().concat('+'),
     },
     {
       label: 'Countries',
-      value: data.countsOverview.countriesCount.toString().concat('+'),
+      value: data.statsOverview.countriesStats.toString().concat('+'),
     },
   ]
 
@@ -99,52 +99,18 @@ export default function Home() {
             Welcome to OWASP Nest
           </h1>
           <p className="max-w-[700px] pt-6 text-muted-foreground md:text-xl">
-            OWASP is a nonprofit organization that aims to improve software security through
-            education, tools, and collaboration.
+            Your gateway to OWASP. Discover, engage, and help shape the future!
           </p>
         </div>
         <div className="mx-auto mb-8 flex max-w-2xl justify-center">
           <MultiSearchBar
             isLoaded={true}
-            placeholder="Search for projects, chapters, and more"
+            placeholder="Search the OWASP community"
             indexes={['projects', 'chapters']}
           />
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <SecondaryCard title="Recent Projects">
-          <div className="space-y-4">
-            {data.recentProjects.map((project) => (
-              <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold">
-                  <a href={`/projects/${project.key}`} className="hover:underline">
-                    {project.name}
-                  </a>
-                </h3>
-                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                    <span>{formatDate(project.createdAt)}</span>
-                  </div>
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon
-                      icon={project.type === 'DOCUMENTATION' ? faBook : faCode}
-                      className="mr-2 h-4 w-4"
-                    />
-                    <span>{project.type}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <FontAwesomeIcon icon={faCode} className="mr-2 h-4 w-4" />
-                    <span>
-                      {project.repositoriesCount}{' '}
-                      {project.repositoriesCount === 1 ? 'repository' : 'repositories'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SecondaryCard>
         <SecondaryCard title="Recent Chapters">
           <div className="space-y-4">
             {data.recentChapters.map((chapter) => (
@@ -168,10 +134,36 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
+        <SecondaryCard title="Recent Projects">
+          <div className="space-y-4">
+            {data.recentProjects.map((project) => (
+              <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                <h3 className="mb-2 text-lg font-semibold">
+                  <a href={`/projects/${project.key}`} className="hover:underline">
+                    {project.name}
+                  </a>
+                </h3>
+                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(project.createdAt)}</span>
+                  </div>
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon
+                      icon={project.type === 'DOCUMENTATION' ? faBook : faCode}
+                      className="mr-2 h-4 w-4"
+                    />
+                    <span>{project.type}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
       </div>
-      <TopContributors contributors={data.topContributors} maxInitialDisplay={6} />
+      <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
       <div className="mb-20">
-        <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Worldwide</h2>
+        <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Nearby</h2>
         <ChapterMap
           geoLocData={geoLocData}
           style={{ height: '400px', width: '100%', zIndex: '0' }}
@@ -180,7 +172,7 @@ export default function Home() {
       <div className="grid gap-4 md:grid-cols-2">
         <ItemCardList
           title="Recent Issues"
-          data={data.recentIssue}
+          data={data.recentIssues}
           renderDetails={(item) => (
             <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -192,7 +184,7 @@ export default function Home() {
         />
         <ItemCardList
           title="Recent Releases"
-          data={data.recentRelease}
+          data={data.recentReleases}
           renderDetails={(item) => (
             <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
