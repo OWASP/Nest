@@ -4,7 +4,7 @@ import pytest
 from django.utils import timezone
 
 from apps.owasp.exceptions import SnapshotProcessingError
-from apps.owasp.management.commands.process_snapshots import Command
+from apps.owasp.management.commands.owasp_process_snapshots import Command
 from apps.owasp.models.snapshot import Snapshot
 
 
@@ -33,7 +33,7 @@ class TestProcessSnapshots:
             mock.patch.object(command, "process_single_snapshot") as mock_process,
             mock.patch("apps.owasp.management.commands.process_snapshots.logger"),
         ):
-            command.process_pending_snapshots()
+            command.process_snapshots()
             mock_process.assert_called_once_with(mock_snapshot)
 
     def test_process_pending_snapshots_error(self):
@@ -61,7 +61,7 @@ class TestProcessSnapshots:
             ),
             mock.patch("apps.owasp.management.commands.process_snapshots.logger") as mock_logger,
         ):
-            command.process_pending_snapshots()
+            command.process_snapshots()
 
             # error handling
             assert mock_snapshot.status == "error"

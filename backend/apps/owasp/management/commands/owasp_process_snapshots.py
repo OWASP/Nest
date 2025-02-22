@@ -21,12 +21,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            self.process_pending_snapshots()
+            self.process_snapshots()
         except Exception as e:
             error_msg = f"Failed to process snapshot: {e}"
             raise SnapshotProcessingError(error_msg) from e
 
-    def process_pending_snapshots(self):
+    def process_snapshots(self):
         pending_snapshots = Snapshot.objects.filter(status=Snapshot.Status.PENDING)
 
         if not pending_snapshots.exists():
@@ -36,7 +36,7 @@ class Command(BaseCommand):
         for snapshot in pending_snapshots:
             try:
                 with transaction.atomic():
-                    self.process_single_snapshot(snapshot)
+                    self.process_snapshot(snapshot)
             except Exception as e:
                 error_msg = f"Error processing snapshot {snapshot.id}: {e!s}"
                 logger.exception(error_msg)
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 snapshot.error_message = error_msg
                 snapshot.save()
 
-    def process_single_snapshot(self, snapshot):
+    def process_snapshot(self, snapshot):
         logger.info(
             "Processing snapshot %s (%s to %s)",
             snapshot.id,
@@ -59,15 +59,15 @@ class Command(BaseCommand):
         try:
             # Fetch new data for each model type
             new_chapters = self.get_new_items(Chapter, snapshot.start_at, snapshot.end_at)
-            new_projects = self.get_new_items(Project, snapshot.start_at, snapshot.end_at)
             new_issues = self.get_new_items(Issue, snapshot.start_at, snapshot.end_at)
+            new_projects = self.get_new_items(Project, snapshot.start_at, snapshot.end_at)
             new_releases = self.get_new_items(Release, snapshot.start_at, snapshot.end_at)
             new_users = self.get_new_items(User, snapshot.start_at, snapshot.end_at)
 
             # Add items to snapshot
             snapshot.new_chapters.add(*new_chapters)
-            snapshot.new_projects.add(*new_projects)
             snapshot.new_issues.add(*new_issues)
+            snapshot.new_projects.add(*new_projects)
             snapshot.new_releases.add(*new_releases)
             snapshot.new_users.add(*new_users)
 

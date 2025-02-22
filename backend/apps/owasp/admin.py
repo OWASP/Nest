@@ -103,6 +103,13 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
 
 
 class SnapshotAdmin(admin.ModelAdmin):
+    autocomplete_fields = (
+        "new_chapters",
+        "new_issues",
+        "new_projects",
+        "new_releases",
+        "new_users",
+    )
     list_display = (
         "start_at",
         "end_at",
