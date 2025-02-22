@@ -3,6 +3,7 @@ Agsoc
 Aissue
 algoliasearch
 ansa
+arithmatex
 arkid15r
 askowasp
 Aupdated
@@ -28,12 +29,16 @@ GTM
 gunicorn
 hsl
 igoat
+inlinehilite
 jumpstart
+kasya
 linkify
 lxml
+mamicidal
 markdownit
 markercluster
 mastg
+mdfile
 mern
 millify
 mpim
@@ -50,6 +55,7 @@ PLR
 psycopg
 pygithub
 pygoat
+pymdownx
 PYTHONUNBUFFERED
 pyyaml
 repositorycontributor
@@ -61,6 +67,7 @@ seo
 SEO
 slackbot
 SLF
+superfences
 Truncator
 tsc
 Twitterbot
@@ -74,10 +81,3 @@ xdg
 xdist
 xsser
 zsc
-kasya
-mamicidal
-mdfile
-inlinehilite
-arithmatex
-superfences
-pymdownx

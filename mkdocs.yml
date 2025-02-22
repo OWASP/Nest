@@ -1,4 +1,4 @@
-site_name: OWASP NEST Docs
+site_name: OWASP NEST Documentation
 nav:
   - Home: index.md
   - Code of Conduct: code-of-conduct.md
@@ -38,7 +38,7 @@ theme:
 markdown_extensions:
   - pymdownx.tasklist
   - pymdownx.tabbed:
-        alternate_style: true
+      alternate_style: true
   - md_in_html
   - pymdownx.highlight:
       anchor_linenums: true

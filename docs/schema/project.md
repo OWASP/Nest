@@ -2,42 +2,58 @@
 
 - [1. Property `OWASP Project > audience`](#audience)
 - [2. Property `OWASP Project > blog`](#blog)
-- [3. Property `OWASP Project > demo`](#demo)
-- [4. Property `OWASP Project > documentation`](#documentation)
-  - [4.1. OWASP Project > documentation > documentation items](#documentation_items)
-- [5. Property `OWASP Project > downloads`](#downloads)
-  - [5.1. OWASP Project > downloads > downloads items](#downloads_items)
-- [6. Property `OWASP Project > events`](#events)
-  - [6.1. OWASP Project > events > events items](#events_items)
-- [7. Property `OWASP Project > leaders`](#leaders)
-  - [7.1. OWASP Project > leaders > Leader](#leaders_items)
-    - [7.1.1. Property `OWASP Project > leaders > Leader > email`](#leaders_items_email)
-    - [7.1.2. Property `OWASP Project > leaders > Leader > github`](#leaders_items_github)
-    - [7.1.3. Property `OWASP Project > leaders > Leader > name`](#leaders_items_name)
-    - [7.1.4. Property `OWASP Project > leaders > Leader > slack`](#leaders_items_slack)
-- [8. Property `OWASP Project > level`](#level)
-- [9. Property `OWASP Project > license`](#license)
-- [10. Property `OWASP Project > mailing-list`](#mailing-list)
-- [11. Property `OWASP Project > name`](#name)
-- [12. Property `OWASP Project > pitch`](#pitch)
-- [13. Property `OWASP Project > repositories`](#repositories)
-  - [13.1. OWASP Project > repositories > Repository](#repositories_items)
-    - [13.1.1. Property `OWASP Project > repositories > Repository > changelog`](#repositories_items_changelog)
-    - [13.1.2. Property `OWASP Project > repositories > Repository > code_of_conduct`](#repositories_items_code_of_conduct)
-    - [13.1.3. Property `OWASP Project > repositories > Repository > contribution_guide`](#repositories_items_contribution_guide)
-    - [13.1.4. Property `OWASP Project > repositories > Repository > description`](#repositories_items_description)
-    - [13.1.5. Property `OWASP Project > repositories > Repository > name`](#repositories_items_name)
-    - [13.1.6. Property `OWASP Project > repositories > Repository > url`](#repositories_items_url)
-- [14. Property `OWASP Project > sponsors`](#sponsors)
-  - [14.1. OWASP Project > sponsors > Sponsor](#sponsors_items)
-    - [14.1.1. Property `OWASP Project > sponsors > Sponsor > description`](#sponsors_items_description)
-    - [14.1.2. Property `OWASP Project > sponsors > Sponsor > logo`](#sponsors_items_logo)
-    - [14.1.3. Property `OWASP Project > sponsors > Sponsor > name`](#sponsors_items_name)
-    - [14.1.4. Property `OWASP Project > sponsors > Sponsor > url`](#sponsors_items_url)
-- [15. Property `OWASP Project > tags`](#tags)
-  - [15.1. OWASP Project > tags > tags items](#tags_items)
-- [16. Property `OWASP Project > type`](#type)
-- [17. Property `OWASP Project > website`](#website)
+- [3. Property `OWASP Project > community`](#community)
+  - [3.1. OWASP Project > community > Community](#community_items)
+    - [3.1.1. Property `OWASP Project > community > Community > description`](#community_items_description)
+    - [3.1.2. Property `OWASP Project > community > Community > platform`](#community_items_platform)
+    - [3.1.3. Property `OWASP Project > community > Community > url`](#community_items_url)
+- [4. Property `OWASP Project > demo`](#demo)
+  - [4.1. OWASP Project > demo > demo items](#demo_items)
+- [5. Property `OWASP Project > documentation`](#documentation)
+  - [5.1. OWASP Project > documentation > documentation items](#documentation_items)
+- [6. Property `OWASP Project > downloads`](#downloads)
+  - [6.1. OWASP Project > downloads > downloads items](#downloads_items)
+- [7. Property `OWASP Project > events`](#events)
+  - [7.1. OWASP Project > events > events items](#events_items)
+- [8. Property `OWASP Project > leaders`](#leaders)
+  - [8.1. OWASP Project > leaders > Person](#leaders_items)
+    - [8.1.1. Property `OWASP Project > leaders > Person > email`](#leaders_items_email)
+    - [8.1.2. Property `OWASP Project > leaders > Person > github`](#leaders_items_github)
+    - [8.1.3. Property `OWASP Project > leaders > Person > name`](#leaders_items_name)
+    - [8.1.4. Property `OWASP Project > leaders > Person > slack`](#leaders_items_slack)
+- [9. Property `OWASP Project > level`](#level)
+- [10. Property `OWASP Project > license`](#license)
+- [11. Property `OWASP Project > logo`](#logo)
+  - [11.1. OWASP Project > logo > logo](#logo_items)
+    - [11.1.1. Property `OWASP Project > logo > logo items > small`](#logo_items_small)
+    - [11.1.2. Property `OWASP Project > logo > logo items > medium`](#logo_items_medium)
+    - [11.1.3. Property `OWASP Project > logo > logo items > large`](#logo_items_large)
+- [12. Property `OWASP Project > mailing_list`](#mailing_list)
+- [13. Property `OWASP Project > name`](#name)
+- [14. Property `OWASP Project > pitch`](#pitch)
+- [15. Property `OWASP Project > repositories`](#repositories)
+  - [15.1. OWASP Project > repositories > Repository](#repositories_items)
+    - [15.1.1. Property `OWASP Project > repositories > Repository > changelog`](#repositories_items_changelog)
+    - [15.1.2. Property `OWASP Project > repositories > Repository > code_of_conduct`](#repositories_items_code_of_conduct)
+    - [15.1.3. Property `OWASP Project > repositories > Repository > contribution_guide`](#repositories_items_contribution_guide)
+    - [15.1.4. Property `OWASP Project > repositories > Repository > description`](#repositories_items_description)
+    - [15.1.5. Property `OWASP Project > repositories > Repository > name`](#repositories_items_name)
+    - [15.1.6. Property `OWASP Project > repositories > Repository > url`](#repositories_items_url)
+- [16. Property `OWASP Project > social_media`](#social_media)
+  - [16.1. OWASP Project > social_media > social_media](#social_media_items)
+    - [16.1.1. Property `OWASP Project > social_media > social_media items > description`](#social_media_items_description)
+    - [16.1.2. Property `OWASP Project > social_media > social_media items > platform`](#social_media_items_platform)
+    - [16.1.3. Property `OWASP Project > social_media > social_media items > url`](#social_media_items_url)
+- [17. Property `OWASP Project > sponsors`](#sponsors)
+  - [17.1. OWASP Project > sponsors > Sponsor](#sponsors_items)
+    - [17.1.1. Property `OWASP Project > sponsors > Sponsor > description`](#sponsors_items_description)
+    - [17.1.2. Property `OWASP Project > sponsors > Sponsor > logo`](#sponsors_items_logo)
+    - [17.1.3. Property `OWASP Project > sponsors > Sponsor > name`](#sponsors_items_name)
+    - [17.1.4. Property `OWASP Project > sponsors > Sponsor > url`](#sponsors_items_url)
+- [18. Property `OWASP Project > tags`](#tags)
+  - [18.1. OWASP Project > tags > tags items](#tags_items)
+- [19. Property `OWASP Project > type`](#type)
+- [20. Property `OWASP Project > website`](#website)
 
 **Title:** OWASP Project
 
@@ -49,25 +65,28 @@
 
 **Description:** OWASP schema.
 
-| Property                           | Pattern | Type                        | Deprecated | Definition | Title/Description                                      |
-| ---------------------------------- | ------- | --------------------------- | ---------- | ---------- | ------------------------------------------------------ |
-| + [audience](#audience )           | No      | enum (of string)            | No         | -          | The intended audience for the project.                 |
-| - [blog](#blog )                   | No      | string                      | No         | -          | Project's blog.                                        |
-| - [demo](#demo )                   | No      | string                      | No         | -          | Optional URL to the project demo.                      |
-| - [documentation](#documentation ) | No      | array of string             | No         | -          | Optional URLs to project documentation.                |
-| - [downloads](#downloads )         | No      | array of string             | No         | -          | Optional list of download URLs.                        |
-| - [events](#events )               | No      | array of string             | No         | -          | Event URLs related to the project.                     |
-| + [leaders](#leaders )             | No      | array                       | No         | -          | Leaders of the project.                                |
-| + [level](#level )                 | No      | enum (of integer or number) | No         | -          | Project level.                                         |
-| - [license](#license )             | No      | enum (of string)            | No         | -          | The license of the project.                            |
-| - [mailing-list](#mailing-list )   | No      | string                      | No         | -          | The optional mailing list associated with the project. |
-| + [name](#name )                   | No      | string                      | No         | -          | The unique name of the project.                        |
-| + [pitch](#pitch )                 | No      | string                      | No         | -          | The project pitch.                                     |
-| - [repositories](#repositories )   | No      | array                       | No         | -          | Repositories associated with the project.              |
-| - [sponsors](#sponsors )           | No      | array                       | No         | -          | Sponsors of the project.                               |
-| + [tags](#tags )                   | No      | array of string             | No         | -          | Tags for the project                                   |
-| + [type](#type )                   | No      | enum (of string)            | No         | -          | The type of the project: code, documentation or tool.  |
-| - [website](#website )             | No      | string                      | No         | -          | The official website of the project.                   |
+| Property                           | Pattern | Type                        | Deprecated | Definition | Title/Description                                          |
+| ---------------------------------- | ------- | --------------------------- | ---------- | ---------- | ---------------------------------------------------------- |
+| + [audience](#audience )           | No      | enum (of string)            | No         | -          | The intended audience for the project.                     |
+| - [blog](#blog )                   | No      | string                      | No         | -          | Project's blog.                                            |
+| - [community](#community )         | No      | array                       | No         | -          | A list of community platforms associated with the project. |
+| - [demo](#demo )                   | No      | array of string             | No         | -          | Optional URLs to the project demo.                         |
+| - [documentation](#documentation ) | No      | array of string             | No         | -          | Optional URLs to project documentation.                    |
+| - [downloads](#downloads )         | No      | array of string             | No         | -          | Optional list of download URLs.                            |
+| - [events](#events )               | No      | array of string             | No         | -          | Event URLs related to the project.                         |
+| + [leaders](#leaders )             | No      | array                       | No         | -          | Leaders of the project.                                    |
+| + [level](#level )                 | No      | enum (of integer or number) | No         | -          | Project level.                                             |
+| - [license](#license )             | No      | enum (of string)            | No         | -          | The license of the project.                                |
+| - [logo](#logo )                   | No      | array                       | No         | -          | Logo information for the project.                          |
+| - [mailing_list](#mailing_list )   | No      | string                      | No         | -          | The optional mailing list associated with the project.     |
+| + [name](#name )                   | No      | string                      | No         | -          | The unique name of the project.                            |
+| + [pitch](#pitch )                 | No      | string                      | No         | -          | The project pitch.                                         |
+| - [repositories](#repositories )   | No      | array                       | No         | -          | Repositories associated with the project.                  |
+| - [social_media](#social_media )   | No      | array                       | No         | -          | Social media information for the project                   |
+| - [sponsors](#sponsors )           | No      | array                       | No         | -          | Sponsors of the project.                                   |
+| + [tags](#tags )                   | No      | array of string             | No         | -          | Tags for the project                                       |
+| + [type](#type )                   | No      | enum (of string)            | No         | -          | The type of the project: code, documentation or tool.      |
+| - [website](#website )             | No      | string                      | No         | -          | The official website of the project.                       |
 
 ## <a name="audience"></a>1. Property `OWASP Project > audience`
 
@@ -93,7 +112,100 @@ Must be one of:
 
 **Description:** Project's blog.
 
-## <a name="demo"></a>3. Property `OWASP Project > demo`
+## <a name="community"></a>3. Property `OWASP Project > community`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** A list of community platforms associated with the project.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | True               |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be | Description          |
+| ------------------------------- | -------------------- |
+| [Community](#community_items)   | A project community. |
+
+### <a name="community_items"></a>3.1. OWASP Project > community > Community
+
+**Title:** Community
+
+|                           |                   |
+| ------------------------- | ----------------- |
+| **Type**                  | `object`          |
+| **Required**              | No                |
+| **Additional properties** | Not allowed       |
+| **Defined in**            | #/$defs/community |
+
+**Description:** A project community.
+
+| Property                                       | Pattern | Type             | Deprecated | Definition | Title/Description                     |
+| ---------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ------------------------------------- |
+| - [description](#community_items_description ) | No      | string           | No         | -          | A brief description of the community. |
+| + [platform](#community_items_platform )       | No      | enum (of string) | No         | -          | The platform used by the community.   |
+| + [url](#community_items_url )                 | No      | string           | No         | -          | The URL of the community.             |
+
+#### <a name="community_items_description"></a>3.1.1. Property `OWASP Project > community > Community > description`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** A brief description of the community.
+
+#### <a name="community_items_platform"></a>3.1.2. Property `OWASP Project > community > Community > platform`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | Yes                |
+
+**Description:** The platform used by the community.
+
+Must be one of:
+* "discord"
+* "slack"
+
+#### <a name="community_items_url"></a>3.1.3. Property `OWASP Project > community > Community > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+| **Format**   | `uri`    |
+
+**Description:** The URL of the community.
+
+## <a name="demo"></a>4. Property `OWASP Project > demo`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Optional URLs to the project demo.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | True               |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be | Description |
+| ------------------------------- | ----------- |
+| [demo items](#demo_items)       | -           |
+
+### <a name="demo_items"></a>4.1. OWASP Project > demo > demo items
 
 |              |          |
 | ------------ | -------- |
@@ -101,9 +213,7 @@ Must be one of:
 | **Required** | No       |
 | **Format**   | `uri`    |
 
-**Description:** Optional URL to the project demo.
-
-## <a name="documentation"></a>4. Property `OWASP Project > documentation`
+## <a name="documentation"></a>5. Property `OWASP Project > documentation`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -124,7 +234,7 @@ Must be one of:
 | ------------------------------------------- | ----------- |
 | [documentation items](#documentation_items) | -           |
 
-### <a name="documentation_items"></a>4.1. OWASP Project > documentation > documentation items
+### <a name="documentation_items"></a>5.1. OWASP Project > documentation > documentation items
 
 |              |          |
 | ------------ | -------- |
@@ -132,7 +242,7 @@ Must be one of:
 | **Required** | No       |
 | **Format**   | `uri`    |
 
-## <a name="downloads"></a>5. Property `OWASP Project > downloads`
+## <a name="downloads"></a>6. Property `OWASP Project > downloads`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -153,7 +263,7 @@ Must be one of:
 | ----------------------------------- | ----------- |
 | [downloads items](#downloads_items) | -           |
 
-### <a name="downloads_items"></a>5.1. OWASP Project > downloads > downloads items
+### <a name="downloads_items"></a>6.1. OWASP Project > downloads > downloads items
 
 |              |          |
 | ------------ | -------- |
@@ -161,7 +271,7 @@ Must be one of:
 | **Required** | No       |
 | **Format**   | `uri`    |
 
-## <a name="events"></a>6. Property `OWASP Project > events`
+## <a name="events"></a>7. Property `OWASP Project > events`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -182,7 +292,7 @@ Must be one of:
 | ------------------------------- | ----------- |
 | [events items](#events_items)   | -           |
 
-### <a name="events_items"></a>6.1. OWASP Project > events > events items
+### <a name="events_items"></a>7.1. OWASP Project > events > events items
 
 |              |          |
 | ------------ | -------- |
@@ -190,7 +300,7 @@ Must be one of:
 | **Required** | No       |
 | **Format**   | `uri`    |
 
-## <a name="leaders"></a>7. Property `OWASP Project > leaders`
+## <a name="leaders"></a>8. Property `OWASP Project > leaders`
 
 |              |         |
 | ------------ | ------- |
@@ -207,76 +317,76 @@ Must be one of:
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be | Description       |
-| ------------------------------- | ----------------- |
-| [Leader](#leaders_items)        | A project leader. |
+| Each item of this array must be | Description |
+| ------------------------------- | ----------- |
+| [Person](#leaders_items)        | Person      |
 
-### <a name="leaders_items"></a>7.1. OWASP Project > leaders > Leader
+### <a name="leaders_items"></a>8.1. OWASP Project > leaders > Person
 
-**Title:** Leader
+**Title:** Person
 
-|                           |                |
-| ------------------------- | -------------- |
-| **Type**                  | `object`       |
-| **Required**              | No             |
-| **Additional properties** | Not allowed    |
-| **Defined in**            | #/$defs/leader |
+|                           |                                 |
+| ------------------------- | ------------------------------- |
+| **Type**                  | `object`                        |
+| **Required**              | No                              |
+| **Additional properties** | Not allowed                     |
+| **Defined in**            | common.json#/definitions/person |
 
-**Description:** A project leader.
+**Description:** Person
 
-| Property                           | Pattern | Type           | Deprecated | Definition | Title/Description           |
-| ---------------------------------- | ------- | -------------- | ---------- | ---------- | --------------------------- |
-| - [email](#leaders_items_email )   | No      | string or null | No         | -          | The leader's email address. |
-| + [github](#leaders_items_github ) | No      | string         | No         | -          | The GitHub username.        |
-| - [name](#leaders_items_name )     | No      | string or null | No         | -          | Leader's name.              |
-| - [slack](#leaders_items_slack )   | No      | string or null | No         | -          | The Slack username.         |
+| Property                           | Pattern | Type   | Deprecated | Definition | Title/Description |
+| ---------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
+| - [email](#leaders_items_email )   | No      | string | No         | -          | E-mail address    |
+| + [github](#leaders_items_github ) | No      | string | No         | -          | GitHub username   |
+| - [name](#leaders_items_name )     | No      | string | No         | -          | Full name         |
+| - [slack](#leaders_items_slack )   | No      | string | No         | -          | Slack username    |
 
-#### <a name="leaders_items_email"></a>7.1.1. Property `OWASP Project > leaders > Leader > email`
+#### <a name="leaders_items_email"></a>8.1.1. Property `OWASP Project > leaders > Person > email`
 
-|              |                  |
-| ------------ | ---------------- |
-| **Type**     | `string or null` |
-| **Required** | No               |
-| **Format**   | `email`          |
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+| **Format**   | `email`  |
 
-**Description:** The leader's email address.
+**Description:** E-mail address
 
-#### <a name="leaders_items_github"></a>7.1.2. Property `OWASP Project > leaders > Leader > github`
+#### <a name="leaders_items_github"></a>8.1.2. Property `OWASP Project > leaders > Person > github`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** The GitHub username.
+**Description:** GitHub username
 
 | Restrictions                      |                                                                                                   |
 | --------------------------------- | ------------------------------------------------------------------------------------------------- |
 | **Must match regular expression** | ```^[a-zA-Z0-9-]{1,39}$``` [Test](https://regex101.com/?regex=%5E%5Ba-zA-Z0-9-%5D%7B1%2C39%7D%24) |
 
-#### <a name="leaders_items_name"></a>7.1.3. Property `OWASP Project > leaders > Leader > name`
+#### <a name="leaders_items_name"></a>8.1.3. Property `OWASP Project > leaders > Person > name`
 
-|              |                  |
-| ------------ | ---------------- |
-| **Type**     | `string or null` |
-| **Required** | No               |
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
 
-**Description:** Leader's name.
+**Description:** Full name
 
-#### <a name="leaders_items_slack"></a>7.1.4. Property `OWASP Project > leaders > Leader > slack`
+#### <a name="leaders_items_slack"></a>8.1.4. Property `OWASP Project > leaders > Person > slack`
 
-|              |                  |
-| ------------ | ---------------- |
-| **Type**     | `string or null` |
-| **Required** | No               |
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
 
-**Description:** The Slack username.
+**Description:** Slack username
 
 | Restrictions                      |                                                                                                       |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | **Must match regular expression** | ```^[a-zA-Z0-9._-]{1,21}$``` [Test](https://regex101.com/?regex=%5E%5Ba-zA-Z0-9._-%5D%7B1%2C21%7D%24) |
 
-## <a name="level"></a>8. Property `OWASP Project > level`
+## <a name="level"></a>9. Property `OWASP Project > level`
 
 **Title:** Project level.
 
@@ -294,7 +404,7 @@ Must be one of:
 * 3.5
 * 4
 
-## <a name="license"></a>9. Property `OWASP Project > license`
+## <a name="license"></a>10. Property `OWASP Project > license`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -320,7 +430,75 @@ Must be one of:
 * "MPL-2.0"
 * "OTHER"
 
-## <a name="mailing-list"></a>10. Property `OWASP Project > mailing-list`
+## <a name="logo"></a>11. Property `OWASP Project > logo`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Logo information for the project.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be | Description            |
+| ------------------------------- | ---------------------- |
+| [logo](#logo_items)             | A logo for the project |
+
+### <a name="logo_items"></a>11.1. OWASP Project > logo > logo
+
+|                           |              |
+| ------------------------- | ------------ |
+| **Type**                  | `object`     |
+| **Required**              | No           |
+| **Additional properties** | Not allowed  |
+| **Defined in**            | #/$defs/logo |
+
+**Description:** A logo for the project
+
+| Property                        | Pattern | Type   | Deprecated | Definition | Title/Description                   |
+| ------------------------------- | ------- | ------ | ---------- | ---------- | ----------------------------------- |
+| + [small](#logo_items_small )   | No      | string | No         | -          | Logo size should be 192x192 pixels. |
+| + [medium](#logo_items_medium ) | No      | string | No         | -          | Logo size should be 256x256 pixels. |
+| + [large](#logo_items_large )   | No      | string | No         | -          | Logo size should be 512x512 pixels. |
+
+#### <a name="logo_items_small"></a>11.1.1. Property `OWASP Project > logo > logo items > small`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+| **Format**   | `uri`    |
+
+**Description:** Logo size should be 192x192 pixels.
+
+#### <a name="logo_items_medium"></a>11.1.2. Property `OWASP Project > logo > logo items > medium`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+| **Format**   | `uri`    |
+
+**Description:** Logo size should be 256x256 pixels.
+
+#### <a name="logo_items_large"></a>11.1.3. Property `OWASP Project > logo > logo items > large`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+| **Format**   | `uri`    |
+
+**Description:** Logo size should be 512x512 pixels.
+
+## <a name="mailing_list"></a>12. Property `OWASP Project > mailing_list`
 
 |              |          |
 | ------------ | -------- |
@@ -330,7 +508,7 @@ Must be one of:
 
 **Description:** The optional mailing list associated with the project.
 
-## <a name="name"></a>11. Property `OWASP Project > name`
+## <a name="name"></a>13. Property `OWASP Project > name`
 
 |              |          |
 | ------------ | -------- |
@@ -343,7 +521,7 @@ Must be one of:
 | -------------- | -- |
 | **Min length** | 10 |
 
-## <a name="pitch"></a>12. Property `OWASP Project > pitch`
+## <a name="pitch"></a>14. Property `OWASP Project > pitch`
 
 |              |          |
 | ------------ | -------- |
@@ -352,7 +530,7 @@ Must be one of:
 
 **Description:** The project pitch.
 
-## <a name="repositories"></a>13. Property `OWASP Project > repositories`
+## <a name="repositories"></a>15. Property `OWASP Project > repositories`
 
 |              |         |
 | ------------ | ------- |
@@ -373,7 +551,7 @@ Must be one of:
 | --------------------------------- | --------------------- |
 | [Repository](#repositories_items) | A project repository. |
 
-### <a name="repositories_items"></a>13.1. OWASP Project > repositories > Repository
+### <a name="repositories_items"></a>15.1. OWASP Project > repositories > Repository
 
 **Title:** Repository
 
@@ -395,34 +573,37 @@ Must be one of:
 | - [name](#repositories_items_name )                             | No      | string         | No         | -          | Repository name.                |
 | + [url](#repositories_items_url )                               | No      | string         | No         | -          | The repository URL.             |
 
-#### <a name="repositories_items_changelog"></a>13.1.1. Property `OWASP Project > repositories > Repository > changelog`
+#### <a name="repositories_items_changelog"></a>15.1.1. Property `OWASP Project > repositories > Repository > changelog`
 
 |              |                  |
 | ------------ | ---------------- |
 | **Type**     | `string or null` |
 | **Required** | No               |
+| **Format**   | `uri`            |
 
 **Description:** Link to the changelog.
 
-#### <a name="repositories_items_code_of_conduct"></a>13.1.2. Property `OWASP Project > repositories > Repository > code_of_conduct`
+#### <a name="repositories_items_code_of_conduct"></a>15.1.2. Property `OWASP Project > repositories > Repository > code_of_conduct`
 
 |              |                  |
 | ------------ | ---------------- |
 | **Type**     | `string or null` |
 | **Required** | No               |
+| **Format**   | `uri`            |
 
 **Description:** Link to the code of conduct.
 
-#### <a name="repositories_items_contribution_guide"></a>13.1.3. Property `OWASP Project > repositories > Repository > contribution_guide`
+#### <a name="repositories_items_contribution_guide"></a>15.1.3. Property `OWASP Project > repositories > Repository > contribution_guide`
 
 |              |                  |
 | ------------ | ---------------- |
 | **Type**     | `string or null` |
 | **Required** | No               |
+| **Format**   | `uri`            |
 
 **Description:** Link to the contribution guide.
 
-#### <a name="repositories_items_description"></a>13.1.4. Property `OWASP Project > repositories > Repository > description`
+#### <a name="repositories_items_description"></a>15.1.4. Property `OWASP Project > repositories > Repository > description`
 
 |              |          |
 | ------------ | -------- |
@@ -431,7 +612,7 @@ Must be one of:
 
 **Description:** Repository description.
 
-#### <a name="repositories_items_name"></a>13.1.5. Property `OWASP Project > repositories > Repository > name`
+#### <a name="repositories_items_name"></a>15.1.5. Property `OWASP Project > repositories > Repository > name`
 
 |              |          |
 | ------------ | -------- |
@@ -440,7 +621,7 @@ Must be one of:
 
 **Description:** Repository name.
 
-#### <a name="repositories_items_url"></a>13.1.6. Property `OWASP Project > repositories > Repository > url`
+#### <a name="repositories_items_url"></a>15.1.6. Property `OWASP Project > repositories > Repository > url`
 
 |              |          |
 | ------------ | -------- |
@@ -450,7 +631,79 @@ Must be one of:
 
 **Description:** The repository URL.
 
-## <a name="sponsors"></a>14. Property `OWASP Project > sponsors`
+## <a name="social_media"></a>16. Property `OWASP Project > social_media`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Social media information for the project
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be     | Description                             |
+| ----------------------------------- | --------------------------------------- |
+| [social_media](#social_media_items) | A social media platform for the project |
+
+### <a name="social_media_items"></a>16.1. OWASP Project > social_media > social_media
+
+|                           |                                       |
+| ------------------------- | ------------------------------------- |
+| **Type**                  | `object`                              |
+| **Required**              | No                                    |
+| **Additional properties** | Not allowed                           |
+| **Defined in**            | common.json#/definitions/social_media |
+
+**Description:** A social media platform for the project
+
+| Property                                          | Pattern | Type             | Deprecated | Definition | Title/Description                        |
+| ------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ---------------------------------------- |
+| - [description](#social_media_items_description ) | No      | string           | No         | -          | Description of the social media platform |
+| + [platform](#social_media_items_platform )       | No      | enum (of string) | No         | -          | The type of social media platform.       |
+| + [url](#social_media_items_url )                 | No      | string           | No         | -          | The URL of the social media profile.     |
+
+#### <a name="social_media_items_description"></a>16.1.1. Property `OWASP Project > social_media > social_media items > description`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Description of the social media platform
+
+#### <a name="social_media_items_platform"></a>16.1.2. Property `OWASP Project > social_media > social_media items > platform`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | Yes                |
+
+**Description:** The type of social media platform.
+
+Must be one of:
+* "bluesky"
+* "linkedin"
+* "x"
+* "youtube"
+
+#### <a name="social_media_items_url"></a>16.1.3. Property `OWASP Project > social_media > social_media items > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+| **Format**   | `uri`    |
+
+**Description:** The URL of the social media profile.
+
+## <a name="sponsors"></a>17. Property `OWASP Project > sponsors`
 
 |              |         |
 | ------------ | ------- |
@@ -471,7 +724,7 @@ Must be one of:
 | ------------------------------- | ------------------ |
 | [Sponsor](#sponsors_items)      | A project sponsor. |
 
-### <a name="sponsors_items"></a>14.1. OWASP Project > sponsors > Sponsor
+### <a name="sponsors_items"></a>17.1. OWASP Project > sponsors > Sponsor
 
 **Title:** Sponsor
 
@@ -491,7 +744,7 @@ Must be one of:
 | + [name](#sponsors_items_name )               | No      | string | No         | -          | The name of the sponsor or organization. |
 | + [url](#sponsors_items_url )                 | No      | string | No         | -          | The URL of the sponsor.                  |
 
-#### <a name="sponsors_items_description"></a>14.1.1. Property `OWASP Project > sponsors > Sponsor > description`
+#### <a name="sponsors_items_description"></a>17.1.1. Property `OWASP Project > sponsors > Sponsor > description`
 
 |              |          |
 | ------------ | -------- |
@@ -500,7 +753,7 @@ Must be one of:
 
 **Description:** A brief description of the sponsor.
 
-#### <a name="sponsors_items_logo"></a>14.1.2. Property `OWASP Project > sponsors > Sponsor > logo`
+#### <a name="sponsors_items_logo"></a>17.1.2. Property `OWASP Project > sponsors > Sponsor > logo`
 
 |              |          |
 | ------------ | -------- |
@@ -510,7 +763,7 @@ Must be one of:
 
 **Description:** The URL of the sponsor's logo.
 
-#### <a name="sponsors_items_name"></a>14.1.3. Property `OWASP Project > sponsors > Sponsor > name`
+#### <a name="sponsors_items_name"></a>17.1.3. Property `OWASP Project > sponsors > Sponsor > name`
 
 |              |          |
 | ------------ | -------- |
@@ -519,7 +772,7 @@ Must be one of:
 
 **Description:** The name of the sponsor or organization.
 
-#### <a name="sponsors_items_url"></a>14.1.4. Property `OWASP Project > sponsors > Sponsor > url`
+#### <a name="sponsors_items_url"></a>17.1.4. Property `OWASP Project > sponsors > Sponsor > url`
 
 |              |          |
 | ------------ | -------- |
@@ -529,7 +782,7 @@ Must be one of:
 
 **Description:** The URL of the sponsor.
 
-## <a name="tags"></a>15. Property `OWASP Project > tags`
+## <a name="tags"></a>18. Property `OWASP Project > tags`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -550,14 +803,14 @@ Must be one of:
 | ------------------------------- | ----------- |
 | [tags items](#tags_items)       | -           |
 
-### <a name="tags_items"></a>15.1. OWASP Project > tags > tags items
+### <a name="tags_items"></a>18.1. OWASP Project > tags > tags items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-## <a name="type"></a>16. Property `OWASP Project > type`
+## <a name="type"></a>19. Property `OWASP Project > type`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -571,7 +824,7 @@ Must be one of:
 * "documentation"
 * "tool"
 
-## <a name="website"></a>17. Property `OWASP Project > website`
+## <a name="website"></a>20. Property `OWASP Project > website`
 
 |              |          |
 | ------------ | -------- |
