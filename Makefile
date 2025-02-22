@@ -21,3 +21,11 @@ run:
 test: \
 	test-backend \
 	test-frontend
+
+test-all: \
+	test-backend \
+	test-frontend \
+	test-schema \
+	pre-commit \
+	check-frontend \
+	spellcheck
