@@ -59,6 +59,23 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     }
   }, [debouncedSearch])
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowSuggestions(false)
+      }
+      if (event.key === 'Enter' && searchQuery.trim().length > 0) {
+        setShowSuggestions(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [searchQuery])
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
     setSearchQuery(newQuery)
@@ -158,6 +175,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 </ul>
               </div>
             ))}
+            <button
+              className="w-full border-t p-2 text-center text-sm text-muted-foreground hover:bg-accent"
+              onClick={() => setShowSuggestions(false)}
+            >
+              Press{' '}
+              <kbd className="rounded border bg-muted px-1 py-0.5 text-xs font-semibold">Esc</kbd>{' '}
+              to close
+            </button>
           </div>
         )}
       </div>
