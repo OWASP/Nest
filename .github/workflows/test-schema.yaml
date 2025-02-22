@@ -83,7 +83,7 @@ jobs:
 
       - name: Run cspell
         run: |
-          make spellcheck
+          make check-spelling
 
   run-schema-tests:
     name: Run schema tests
