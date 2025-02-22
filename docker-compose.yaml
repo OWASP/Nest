@@ -21,7 +21,7 @@ services:
       DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
     ports:
-      - '127.0.0.1:8000:8000'
+      - 127.0.0.1:8000:8000
     volumes:
       - ./backend:/home/owasp
 
@@ -33,15 +33,7 @@ services:
       POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
       POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_dev}
     healthcheck:
-      test:
-        [
-          'CMD',
-          'pg_isready',
-          '-U',
-          '${DJANGO_DB_USER:-nest_user_dev}',
-          '-d',
-          '${DJANGO_DB_NAME:-nest_db_dev}',
-        ]
+      test: [CMD, pg_isready, -U, '${DJANGO_DB_USER:-nest_user_dev}', -d, '${DJANGO_DB_NAME:-nest_db_dev}']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -59,7 +51,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.local
     ports:
-      - '127.0.0.1:3000:3000'
+      - 127.0.0.1:3000:3000
     volumes:
       - ./frontend:/home/owasp
     environment:
