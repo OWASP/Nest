@@ -88,9 +88,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText('Search the OWASP community')
-      ).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search the OWASP community')).toBeInTheDocument()
     })
   })
 
