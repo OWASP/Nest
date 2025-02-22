@@ -54,7 +54,7 @@ describe('Home', () => {
     await waitFor(() => {
       expect(screen.getByText('Welcome to OWASP Nest')).toBeInTheDocument()
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
-      expect(screen.getByText('DOCUMENTATION')).toBeInTheDocument()
+      expect(screen.getByText('Documentation')).toBeInTheDocument()
     })
   })
 
@@ -150,7 +150,7 @@ describe('Home', () => {
     await waitFor(() => {
       expect(screen.getByText('Welcome to OWASP Nest')).toBeInTheDocument()
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
-      expect(screen.getByText('DOCUMENTATION')).toBeInTheDocument()
+      expect(screen.getByText('Documentation')).toBeInTheDocument()
     })
   })
 })
