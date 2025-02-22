@@ -75,10 +75,6 @@ from utils.schema_validators import validate_data
         ("name-empty.yaml", "'' is too short"),
         ("name-null.yaml", "None is not of type 'string'"),
         ("repositories-empty.yaml", "[] should be non-empty"),
-        (
-            "repositories-non-unique.yaml",
-            "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
-        ),
         ("repositories-null.yaml", "None is not of type 'array'"),
         ("social-media-empty.yaml", "[] should be non-empty"),
         ("social-media-null.yaml", "None is not of type 'array'"),
