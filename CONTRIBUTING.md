@@ -234,7 +234,7 @@ Please follow these contribution guidelines for OWASP Schema-related changes:
 Nest enforces code quality standards to ensure consistency and maintainability. You can run automated checks locally before pushing your changes:
 
 ```bash
-make check
+make check-all
 ```
 
 This command runs linters and other static analysis tools for both the frontend and backend.
@@ -245,7 +245,7 @@ This command runs linters and other static analysis tools for both the frontend 
 Our CI/CD pipelines automatically run tests against every Pull Request. You can run tests locally before submitting a PR:
 
 ```bash
-make test
+make test-all
 ```
 
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
@@ -281,16 +281,10 @@ git checkout -b feature/my-feature-name
 - Check that your commits include only related and intended changes. Do not include unrelated files.
 - Follow best practices for code style and testing.
 - Add tests for any new functionality or changes to ensure proper coverage.
-- Run the code quality checks:
+- Run the code quality checks and tests:
 
   ```bash
-  make check
-  ```
-
-- Run tests to ensure everything works correctly:
-
-  ```bash
-  make test
+  make check-test-all
   ```
 
 - Write meaningful commit messages:
