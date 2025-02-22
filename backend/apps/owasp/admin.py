@@ -7,8 +7,8 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
-from apps.owasp.models.sponsor import Sponsor
 from apps.owasp.models.snapshot import Snapshot
+from apps.owasp.models.sponsor import Sponsor
 
 
 class GenericEntityAdminMixin:
@@ -102,7 +102,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
 
     custom_field_name.short_description = "Name"
 
-    
+
 class SnapshotAdmin(admin.ModelAdmin):
     autocomplete_fields = (
         "new_chapters",
@@ -128,8 +128,8 @@ class SnapshotAdmin(admin.ModelAdmin):
         "status",
         "error_message",
     )
-    
-    
+
+
 class SponsorAdmin(admin.ModelAdmin):
     """Admin configuration for Sponsor model."""
 
@@ -158,6 +158,7 @@ class SponsorAdmin(admin.ModelAdmin):
         ("URLs and Images", {"fields": ("url", "job_url", "image_path")}),
         ("Status", {"fields": ("is_member", "member_type", "sponsor_type")}),
     )
+
 
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
