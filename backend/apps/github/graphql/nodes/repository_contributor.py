@@ -10,3 +10,5 @@ class RepositoryContributorNode(graphene.ObjectType):
     contributions_count = graphene.Int()
     login = graphene.String()
     name = graphene.String()
+    repository_name = graphene.String()
+    repository_url = graphene.String()
