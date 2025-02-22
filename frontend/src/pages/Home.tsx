@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faBook,
   faCalendar,
@@ -70,6 +71,21 @@ export default function Home() {
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
+  }
+
+  const getProjectIcon = (projectType: string) => {
+    switch (projectType.toLowerCase()) {
+      case 'code':
+        return faCode
+      case 'documentation':
+        return faBook
+      case 'other':
+        return faFileCode
+      case 'tool':
+        return faTag
+      default:
+        return null
+    }
   }
 
   const counterData = [
@@ -150,10 +166,10 @@ export default function Home() {
                   </div>
                   <div className="mr-4 flex items-center">
                     <FontAwesomeIcon
-                      icon={project.type === 'DOCUMENTATION' ? faBook : faCode}
+                      icon={getProjectIcon(project.type) as IconProp}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>{project.type}</span>
+                    <span>{project.type.charAt(0) + project.type.slice(1).toLowerCase()}</span>
                   </div>
                 </div>
               </div>
