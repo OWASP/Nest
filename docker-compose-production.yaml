@@ -31,15 +31,7 @@ services:
     image: postgres:16.4
     env_file: .env.db
     healthcheck:
-      test:
-        [
-          'CMD',
-          'pg_isready',
-          '-U',
-          'nest_user_production',
-          '-d',
-          'nest_db_production',
-        ]
+      test: [CMD, pg_isready, -U, nest_user_production, -d, nest_db_production]
       interval: 5s
       timeout: 5s
       retries: 5
