@@ -1,3 +1,7 @@
+import { ChapterTypeAlgolia } from './chapter'
+import { ProjectTypeAlgolia } from './project'
+import { User } from './user'
+
 export interface MultiSearchBarProps {
   isLoaded: boolean
   placeholder: string
@@ -7,7 +11,6 @@ export interface MultiSearchBarProps {
 
 export interface Suggestion {
   indexName: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hits: any[]
+  hits: ChapterTypeAlgolia[] | ProjectTypeAlgolia[] | User[]
   totalPages: number
 }

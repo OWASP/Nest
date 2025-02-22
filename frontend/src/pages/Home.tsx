@@ -106,7 +106,7 @@ export default function Home() {
           <MultiSearchBar
             isLoaded={true}
             placeholder="Search the OWASP community"
-            indexes={['projects', 'chapters']}
+            indexes={['chapters', 'projects', 'users']}
           />
         </div>
       </div>

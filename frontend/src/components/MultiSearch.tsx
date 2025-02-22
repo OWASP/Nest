@@ -1,11 +1,20 @@
-import { faSearch, faTimes, faProjectDiagram, faBook } from '@fortawesome/free-solid-svg-icons'
+import {
+  faSearch,
+  faTimes,
+  faProjectDiagram,
+  faBook,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { debounce } from 'lodash'
 import type React from 'react'
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChapterTypeAlgolia } from 'types/chapter'
+import { ProjectTypeAlgolia } from 'types/project'
 import { MultiSearchBarProps, Suggestion } from 'types/search'
+import { User } from 'types/user'
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -29,7 +38,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
               return {
                 indexName: index,
-                hits: data.hits,
+                hits: data.hits as ChapterTypeAlgolia[] | ProjectTypeAlgolia[] | User[],
                 totalPages: data.totalPages,
               }
             })
@@ -62,27 +71,33 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     setShowSuggestions(false)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSuggestionClick = (suggestion: any, indexName: string) => {
+  const handleSuggestionClick = (
+    suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User,
+    indexName: string
+  ) => {
     setSearchQuery(suggestion.name)
     setShowSuggestions(false)
 
     switch (indexName) {
-      case 'projects':
-        navigate(`/projects/${suggestion.key}`)
-        break
       case 'chapters':
         navigate(`/chapters/${suggestion.key}`)
         break
+      case 'projects':
+        navigate(`/projects/${suggestion.key}`)
+        break
+      case 'users':
+        navigate(`/community/users/${suggestion.key}`)
     }
   }
 
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
-      case 'projects':
-        return faProjectDiagram
       case 'chapters':
         return faBook
+      case 'projects':
+        return faProjectDiagram
+      case 'users':
+        return faUser
       default:
         return faSearch
     }
@@ -102,7 +117,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black transition duration-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
