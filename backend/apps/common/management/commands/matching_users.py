@@ -74,12 +74,12 @@ class Command(BaseCommand):
 
         for leader in leaders_raw:
             try:
-                leaderdata = User.objects.filter(
+                leaders_data = User.objects.filter(
                     models.Q(login__iexact=leader) | models.Q(name__iexact=leader)
                 ).first()
-                if leaderdata:
-                    exact_matches.append(leaderdata)
-                    self.stdout.write(f"Exact match found for {leader}: {leaderdata}")
+                if leaders_data:
+                    exact_matches.append(leaders_data)
+                    self.stdout.write(f"Exact match found for {leader}: {leaders_data}")
                     continue
 
                 matches = [
