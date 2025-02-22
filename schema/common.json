@@ -8,6 +8,7 @@
       "properties": {
         "description": {
           "description": "A brief description of the community.",
+          "minLength": 10,
           "type": "string"
         },
         "platform": {
@@ -57,6 +58,7 @@
         "email": {
           "description": "E-mail address",
           "format": "email",
+          "minLength": 5,
           "type": "string"
         },
         "github": {
@@ -66,6 +68,7 @@
         },
         "name": {
           "description": "Full name",
+          "minLength": 5,
           "type": "string"
         },
         "slack": {
@@ -85,29 +88,35 @@
       "description": "A project repository.",
       "properties": {
         "changelog": {
-          "type": ["string", "null"],
-          "description": "Link to the changelog."
+          "description": "Link to the changelog",
+          "minLength": 5,
+          "type": "string"
         },
         "code_of_conduct": {
-          "type": ["string", "null"],
-          "description": "Link to the code of conduct."
+          "description": "Link to the code of conduct",
+          "minLength": 5,
+          "type": "string"
         },
         "contribution_guide": {
-          "type": ["string", "null"],
-          "description": "Link to the contribution guide."
+          "description": "Link to the contribution guide",
+          "minLength": 5,
+          "type": "string"
         },
         "description": {
-          "type": ["string"],
-          "description": "Repository description."
+          "description": "Repository description",
+          "minLength": 5,
+          "type": "string"
         },
         "name": {
-          "type": ["string"],
-          "description": "Repository name."
+          "description": "Repository name",
+          "minLength": 5,
+          "type": "string"
         },
         "url": {
-          "type": "string",
           "description": "The repository URL.",
-          "format": "uri"
+          "format": "uri",
+          "minLength": 5,
+          "type": "string"
         }
       },
       "required": ["url"],
@@ -120,6 +129,7 @@
       "properties": {
         "description": {
           "description": "Description of the social media platform",
+          "minLength": 5,
           "type": "string"
         },
         "platform": {
@@ -138,31 +148,32 @@
     },
 
     "sponsor": {
-      "type": "object",
-      "title": "Sponsor",
+      "additionalProperties": false,
       "description": "A project sponsor.",
       "properties": {
         "description": {
-          "type": "string",
-          "description": "A brief description of the sponsor."
+          "description": "A brief description of the sponsor",
+          "type": "string"
         },
         "logo": {
-          "type": "string",
-          "description": "The URL of the sponsor's logo.",
-          "format": "uri"
+          "description": "The URL of the sponsor's logo",
+          "format": "uri",
+          "type": "string"
         },
         "name": {
-          "type": "string",
-          "description": "The name of the sponsor or organization."
+          "description": "The name of the sponsor or organization",
+          "minLength": 5,
+          "type": "string"
         },
         "url": {
-          "type": "string",
           "description": "The URL of the sponsor.",
-          "format": "uri"
+          "format": "uri",
+          "type": "string"
         }
       },
       "required": ["name", "url"],
-      "additionalProperties": false
+      "title": "Sponsor",
+      "type": "object"
     }
   }
 }

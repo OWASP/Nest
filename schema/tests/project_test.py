@@ -9,19 +9,6 @@ from tests.conftest import tests_data_dir
 from utils.schema_validators import validate_data
 
 
-def test_positive(project_schema):
-    for file_path in Path(tests_data_dir / "project/positive").rglob("*.yaml"):
-        assert (
-            validate_data(
-                project_schema,
-                yaml.safe_load(
-                    file_path.read_text(),
-                ),
-            )
-            is None
-        )
-
-
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
@@ -34,6 +21,8 @@ def test_positive(project_schema):
         ("audience-undefined.yaml", "'audience' is a required property"),
         ("blog-invalid.yaml", "'https://invalid/' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
+        ("community-empty.yaml", "[] should be non-empty"),
+        ("community-null.yaml", "None is not of type 'array'"),
         ("demo-empty.yaml", "[] should be non-empty"),
         ("demo-invalid.yaml", "'https://invalid/' is not a 'uri'"),
         (
@@ -76,6 +65,16 @@ def test_positive(project_schema):
         ("mailing-list-null.yaml", "None is not a 'uri'"),
         ("name-empty.yaml", "'' is too short"),
         ("name-null.yaml", "None is not of type 'string'"),
+        ("repositories-empty.yaml", "[] should be non-empty"),
+        (
+            "repositories-non-unique.yaml",
+            "['https://example.com/repo1', 'https://example.com/repo1'] has non-unique elements",
+        ),
+        ("repositories-null.yaml", "None is not of type 'array'"),
+        ("social-media-empty.yaml", "[] should be non-empty"),
+        ("social-media-null.yaml", "None is not of type 'array'"),
+        ("sponsors-empty.yaml", "[] should be non-empty"),
+        ("sponsors-null.yaml", "None is not of type 'array'"),
         ("website-empty.yaml", "'' is too short"),
         ("website-null.yaml", "None is not of type 'string'"),
     ],
@@ -90,3 +89,16 @@ def test_negative(project_schema, file_path, error_message):
         )
         == error_message
     )
+
+
+def test_positive(project_schema):
+    for file_path in Path(tests_data_dir / "project/positive").rglob("*.yaml"):
+        assert (
+            validate_data(
+                project_schema,
+                yaml.safe_load(
+                    file_path.read_text(),
+                ),
+            )
+            is None
+        )

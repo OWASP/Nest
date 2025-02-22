@@ -4,6 +4,8 @@ import pytest
 
 from tests.conftest import common_negative_test, common_positive_test
 
+SCHEMA_NAME = "logo"
+
 
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
@@ -21,9 +23,9 @@ from tests.conftest import common_negative_test, common_positive_test
 )
 def test_negative(common_schema, file_path, error_message):
     """Test invalid logo schema cases."""
-    common_negative_test(common_schema, "logo", file_path, error_message)
+    common_negative_test(common_schema, SCHEMA_NAME, file_path, error_message)
 
 
 def test_positive(common_schema):
     """Test valid logo schema cases."""
-    common_positive_test(common_schema, "logo")
+    common_positive_test(common_schema, SCHEMA_NAME)

@@ -4,11 +4,13 @@ import pytest
 
 from tests.conftest import common_negative_test, common_positive_test
 
+SCHEMA_NAME = "social_media"
+
 
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("description-empty.yaml", "'' is not of type 'string'"),
+        ("description-empty.yaml", "'' is too short"),
         ("description-null.yaml", "None is not of type 'string'"),
         (
             "platform-empty.yaml",
@@ -31,9 +33,9 @@ from tests.conftest import common_negative_test, common_positive_test
 )
 def test_negative(common_schema, file_path, error_message):
     """Test invalid cases for the social-media schema."""
-    common_negative_test(common_schema, "social_media", file_path, error_message)
+    common_negative_test(common_schema, SCHEMA_NAME, file_path, error_message)
 
 
 def test_positive(common_schema):
     """Test valid cases for the social-media schema."""
-    common_positive_test(common_schema, "social_media")
+    common_positive_test(common_schema, SCHEMA_NAME)

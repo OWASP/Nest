@@ -52,7 +52,7 @@
       "additionalProperties": false,
       "optional": true
     },
-    "meetup-group": {
+    "meetup_group": {
       "description": "Meetup group.",
       "type": "string"
     },
@@ -69,7 +69,7 @@
       "description": "Social media information for the chapter.",
       "type": "array",
       "items": {
-        "$ref": "common.json#/definitions/socialMedia"
+        "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
       "additionalProperties": false
