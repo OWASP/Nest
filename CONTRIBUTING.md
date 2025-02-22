@@ -214,17 +214,20 @@ To setup NestBot development environment, follow these steps:
    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
-## Contributing to Schema
+#### OWASP Schema Development
 
-1. **Addition of an attribute to a schema should follow Alphabetical Order**
+The OWASP Schema files are located in the `schema` directory. This is a standalone `pyproject.toml` project with its own test suite.
 
-2. **Prefer reusing code from `common.json` and `test/common`
+Please follow these contribution guidelines for OWASP Schema-related changes:
 
-3. **Test case for the attribute should be present**
-   - Should have positive test cases `optional-properties.yaml` / `required-properties.yaml`
-   - Should have negative test cases `empty.yaml` & `null.yaml`
-   - If required add `invalid.yaml` / `undefined.yaml` to negative test cases
-   - Prefer using single quotes in test cases
+- Order all schema attributes alphabetically where applicable.
+- Use the `common.json` definition file for shared object definitions (e.g., chapter, project).
+- Include all schema attributes in both required and optional positive test cases.
+- Add negative tests for all mandatory attributes, covering empty, invalid, null, and undefined cases.
+- Always set `additionalProperties` to `false` and list all mandatory fields in the `required` section.
+- Always add `minItems`, `minLength`, and `uniqueItems` where applicable
+- When referencing definitions from `common.json`, test both the object's internal structure (in the `common` section) and its references in actual schemas (e.g., chapter, project).
+- Run `make check` and `make test-schema` before submitting a PR.
 
 ## Code Quality Checks
 
