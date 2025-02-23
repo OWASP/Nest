@@ -1,8 +1,8 @@
 import {
-  Avatar,
   Box,
   Button,
-  Divider,
+  Avatar as ChakraAvatar,
+  Divider as ChakraDivider,
   Flex,
   Grid,
   GridItem,
@@ -10,14 +10,24 @@ import {
   Link,
   Text,
   VStack,
+  useColorModeValue,
 } from '@chakra-ui/react'
+import React from 'react' // ✅ Added React import
 import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa'
+import { UserDetailsProps } from 'types/user'
 
-const UserDetailsPage = ({ user }) => {
+interface UserDetailsPageProps {
+  user: UserDetailsProps
+}
+
+const UserDetailsPage: React.FC<UserDetailsPageProps> = ({ user }) => {
+  const bgColor = useColorModeValue('white', 'gray.800')
+  const textColor = useColorModeValue('gray.800', 'gray.200')
+
   return (
-    <Box maxW="4xl" mx="auto" p={6}>
-      <Flex alignItems="center" justifyContent="center" direction="column">
-        <Avatar size="2xl" name={user.name} src={user.avatarUrl} mb={4} />
+    <Box maxW="4xl" mx="auto" p={6} bg={bgColor} color={textColor}>
+      <Flex alignItems="center" justifyContent="center" flexDirection="column">
+        <ChakraAvatar size="2xl" name={user.name} src={user.avatarUrl} mb={4} />
         <Text fontSize="2xl" fontWeight="bold">
           {user.name}
         </Text>
@@ -26,39 +36,60 @@ const UserDetailsPage = ({ user }) => {
         </Text>
       </Flex>
 
-      <Divider my={6} />
+      <ChakraDivider my={6} />
 
-      <VStack spacing={4} align="start">
+      <VStack spacing="4" align="flex-start">
         <Text fontSize="lg" fontWeight="semibold">
           Bio
         </Text>
         <Text color="gray.600">{user.bio}</Text>
       </VStack>
 
-      <Divider my={6} />
+      <ChakraDivider my={6} />
 
-      <VStack spacing={4} align="start">
+      <VStack spacing="4" align="flex-start">
         <Text fontSize="lg" fontWeight="semibold">
           Social Links
         </Text>
-        <HStack spacing={4}>
+        <HStack spacing="4">
           {user.github && (
-            <Link href={user.github} isExternal>
-              <Button leftIcon={<FaGithub />} colorScheme="gray" variant="outline">
+            <Link href={user.github} target="_blank" rel="noopener noreferrer">
+              <Button
+                display="flex"
+                alignItems="center"
+                gap={2}
+                colorScheme="gray"
+                variant="outline"
+              >
+                <FaGithub />
                 GitHub
               </Button>
             </Link>
           )}
           {user.linkedin && (
-            <Link href={user.linkedin} isExternal>
-              <Button leftIcon={<FaLinkedin />} colorScheme="blue" variant="outline">
+            <Link href={user.linkedin} target="_blank" rel="noopener noreferrer">
+              <Button
+                display="flex"
+                alignItems="center"
+                gap={2}
+                colorScheme="blue"
+                variant="outline"
+              >
+                <FaLinkedin />
                 LinkedIn
               </Button>
             </Link>
           )}
           {user.twitter && (
-            <Link href={user.twitter} isExternal>
-              <Button leftIcon={<FaTwitter />} colorScheme="twitter" variant="outline">
+            <Link href={user.twitter} target="_blank" rel="noopener noreferrer">
+              <Button
+                display="flex"
+                alignItems="center"
+                gap={2}
+                colorScheme="twitter"
+                variant="outline"
+              >
+                <FaTwitter />
                 Twitter
               </Button>
             </Link>
@@ -66,7 +97,7 @@ const UserDetailsPage = ({ user }) => {
         </HStack>
       </VStack>
 
-      <Divider my={6} />
+      <ChakraDivider my={6} />
 
       <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={6}>
         <GridItem>
