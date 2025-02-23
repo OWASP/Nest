@@ -1,11 +1,10 @@
 import { Button } from '@chakra-ui/react'
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
-import { faBars, faS, faStar, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
 import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSlack } from '@fortawesome/free-brands-svg-icons'
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
@@ -129,73 +128,58 @@ export default function Header() {
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-<div className="space-y-1 px-2 pb-3 pt-2">
-  {/* Logo */}
-  <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
-    <div className="flex h-full items-center">
-      <img
-        src={'/img/owasp_icon_white_sm.png'}
-        className="hidden h-16 dark:block"
-        alt="OWASP Logo"
-      ></img>
-      <img
-        src={'/img/owasp_icon_black_sm.png'}
-        className="block h-16 dark:hidden"
-        alt="OWASP Logo"
-      ></img>
-      <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-        Nest
-      </div>
-    </div>
-  </NavLink>
+        <div className="space-y-1 px-2 pb-3 pt-2">
+          {/* Logo */}
+          <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
+            <div className="flex h-full items-center">
+              <img
+                src={'/img/owasp_icon_white_sm.png'}
+                className="hidden h-16 dark:block"
+                alt="OWASP Logo"
+              ></img>
+              <img
+                src={'/img/owasp_icon_black_sm.png'}
+                className="block h-16 dark:hidden"
+                alt="OWASP Logo"
+              ></img>
+              <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                Nest
+              </div>
+            </div>
+          </NavLink>
+          {headerLinks.map((link, i) => (
+            <NavLink
+              key={i}
+              to={link.href}
+              className={cn(
+                'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+              )}
+              onClick={toggleMobileMenu}
+            >
+              {link.text}
+            </NavLink>
+          ))}
 
-  {headerLinks.map((link, i) => (
-    <NavLink
-      key={i}
-      to={link.href}
-      className={cn(
-        'navlink flex items-center gap-2 px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-        location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-      )}
-      onClick={toggleMobileMenu}
-    >
-      {link.text}
-    </NavLink>
-  ))}
-
-  {/* Divider */}
-  <div className="border-t border-gray-300 dark:border-gray-600 my-2"></div>
-
-  {/* External Links with Icons */}
-  <NavLink
-    to="https://github.com/OWASP/Nest"
-    target="_blank"
-    className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200"
-  >
-    <FontAwesomeIcon icon={faStar} className="text-yellow-400" />
-    Star on GitHub
-  </NavLink>
-
-  <NavLink
-    to="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-    target="_blank"
-    className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200"
-  >
-    <FontAwesomeIcon icon={faSolidHeart} className="text-red-500" />
-    Sponsor OWASP Nest
-  </NavLink>
-
-  <NavLink
-    to="https://owasp.slack.com/?redir=%2Farchives%2Fproject-nest%3Fname%3Dproject-nest"
-    target="_blank"
-    className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200"
-  >
-    <FontAwesomeIcon icon={faSlack} className="text-purple-400" />
-    Join Slack
-  </NavLink>
-</div>
-
-
+          <div className="flex flex-col gap-y-2 items-center justify-center" style={{ marginTop: '180%' }}>
+            <NavButton
+              href="https://github.com/OWASP/Nest"
+              defaultIcon={faRegularStar}
+              hoverIcon={faSolidStar}
+              defaultIconColor="text-white"
+              hoverIconColor="text-yellow-400"
+              text="Star On Github"
+            />
+            <NavButton
+              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+              defaultIcon={faRegularHeart}
+              hoverIcon={faSolidHeart}
+              defaultIconColor="#b55f95"
+              hoverIconColor="#d9156c"
+              text="Sponsor OWASP Nest"
+            />
+          </div>
+        </div>
       </div>
     </header>
   )
