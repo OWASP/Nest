@@ -7,7 +7,7 @@ export const mockProjectDetailsData = {
     key: 'example-project',
     languages: ['Python', 'GraphQL', 'JavaScript'],
     leaders: ['alice', 'bob'],
-    level: 'Intermediate',
+    level: 'Lab',
     name: 'Test Project',
     repositoriesCount: 3,
     starsCount: 10,
@@ -19,7 +19,7 @@ export const mockProjectDetailsData = {
       name: `Contributor ${i + 1}`,
     })),
     topics: ['graphql', 'django', 'backend'],
-    type: 'Open Source',
+    type: 'Tool',
     updatedAt: '2025-02-07T12:34:56Z',
     url: 'https://github.com/example-project',
     recentReleases: [

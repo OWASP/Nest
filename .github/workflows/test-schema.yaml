@@ -49,7 +49,7 @@ jobs:
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check` and use `git add` to address it.' && exit 1)
+          Run `make check-all` and use `git add` to address it.' && exit 1)
 
   code-ql:
     name: CodeQL
@@ -72,7 +72,7 @@ jobs:
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:${{ matrix.language }}'
+          category: /language:${{ matrix.language }}
 
   spellcheck:
     name: Run spell check
@@ -83,7 +83,7 @@ jobs:
 
       - name: Run cspell
         run: |
-          make spellcheck
+          make check-spelling
 
   run-schema-tests:
     name: Run schema tests

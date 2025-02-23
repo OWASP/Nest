@@ -40,7 +40,6 @@ index-data:
 	@CMD="poetry run python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="poetry run python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="poetry run python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
-	@CMD="poetry run python manage.py algolia_update_suggestions" $(MAKE) exec-backend-command
 
 load-data:
 	@echo "Loading Nest data"
@@ -70,6 +69,10 @@ owasp-enrich-committees:
 owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="poetry run python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
+
+owasp-process-snapshots:
+	@echo "Processing OWASP snapshots"
+	@CMD="poetry run python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
 
 owasp-scrape-chapters:
 	@echo "Scraping OWASP site chapters data"
