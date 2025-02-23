@@ -10,4 +10,6 @@ export type TopContributorsTypeGraphql = {
   contributionsCount: number
   login: string
   name: string
+  repositoryName?: string
+  repositoryUrl?: string
 }
