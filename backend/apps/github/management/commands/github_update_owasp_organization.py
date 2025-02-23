@@ -68,10 +68,12 @@ class Command(BaseCommand):
         for idx, gh_repository in enumerate(gh_repositories[offset:]):
             prefix = f"{idx + offset + 1} of {gh_repositories_count}"
             entity_key = gh_repository.name.lower()
-            print(f"{prefix:<12} https://owasp.org/{entity_key}")
+            print(f"{prefix:<12} https://github.com/OWASP/{entity_key}")
 
             owasp_organization, repository = sync_repository(
-                gh_repository, organization=owasp_organization, user=owasp_user
+                gh_repository,
+                organization=owasp_organization,
+                user=owasp_user,
             )
 
             # OWASP chapters.
