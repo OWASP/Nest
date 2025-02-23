@@ -60,10 +60,10 @@ from utils.schema_validators import validate_data
             "'BSD-3-Clause', 'CC-BY-4.0', 'CC-BY-SA-4.0', 'CC0-1.0', 'EUPL-1.2', 'GPL-2.0', "
             "'GPL-3.0', 'LGPL-2.1', 'LGPL-3.0', 'MIT', 'MPL-2.0', 'OTHER']",
         ),
-        ("leader-empty.yaml", "[] should be non-empty"),
-        ("leader-null.yaml", "None is not of type 'string'"),
+        ("leader-empty.yaml", "[] is too short"),
+        ("leader-null.yaml", "None is not of type 'array'"),
         ("logo-empty.yaml", "[] should be non-empty"),
-        ("logo-null.yaml", "None is not of type 'string'"),
+        ("logo-null.yaml", "None is not of type 'array'"),
         ("mailing-list-empty.yaml", "'' is not a 'uri'"),
         ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("mailing-list-null.yaml", "None is not a 'uri'"),
