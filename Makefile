@@ -27,7 +27,7 @@ run:
 
 test-all: \
 	test-nest-app \
-	test-schema \
+	test-schema
 
 test-nest-app: \
 	test-backend \

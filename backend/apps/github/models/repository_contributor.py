@@ -4,12 +4,15 @@ from django.db import models
 from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.github.models.managers.repository_contributor import RepositoryContributorManager
 
 TOP_CONTRIBUTORS_LIMIT = 15
 
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
     """Repository contributor model."""
+
+    objects = RepositoryContributorManager()
 
     class Meta:
         db_table = "github_repository_contributors"

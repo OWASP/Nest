@@ -1,12 +1,11 @@
 """OWASP repository contributor GraphQL queries."""
 
 import graphene
-from django.db.models import Sum
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
 from apps.common.graphql.queries import BaseQuery
-from apps.github.constants import OWASP_FOUNDATION_LOGIN
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
-from apps.github.models.organization import Organization
 from apps.github.models.repository_contributor import RepositoryContributor
 
 
@@ -19,29 +18,36 @@ class RepositoryContributorQuery(BaseQuery):
 
     def resolve_top_contributors(root, info, limit):
         """Resolve top contributors."""
-        non_indexable_logins = ["ghost", OWASP_FOUNDATION_LOGIN, *list(Organization.get_logins())]
-
-        top_contributors_data = (
-            RepositoryContributor.objects.exclude(user__login__in=non_indexable_logins)
+        top_repository_contributors = (
+            RepositoryContributor.objects.by_humans()
+            .to_community_repositories()
+            .annotate(
+                rank=Window(
+                    expression=Rank(),
+                    order_by=F("contributions_count").desc(),
+                    partition_by=F("user__login"),
+                )
+            )
+            .filter(rank=1)  # Keep only the highest contribution per user
             .values(
+                "contributions_count",
+                "repository__name",
+                "repository__owner__login",
                 "user__avatar_url",
                 "user__login",
                 "user__name",
-                "repository__name",
-                "repository__owner__login",
             )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:limit]
+            .order_by("-contributions_count")[:limit]
         )
 
         return [
             RepositoryContributorNode(
-                avatar_url=contrib["user__avatar_url"],
-                contributions_count=contrib["total_contributions"],
-                login=contrib["user__login"],
-                name=contrib["user__name"],
-                repository_name=contrib["repository__name"],
-                repository_url=f"https://github.com/{contrib['repository__owner__login']}/{contrib['repository__name']}",
+                avatar_url=trc["user__avatar_url"],
+                contributions_count=trc["contributions_count"],
+                login=trc["user__login"],
+                name=trc["user__name"],
+                repository_name=trc["repository__name"],
+                repository_url=f"https://github.com/{trc['repository__owner__login']}/{trc['repository__name']}",
             )
-            for contrib in top_contributors_data
+            for trc in top_repository_contributors
         ]
