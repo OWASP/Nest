@@ -86,7 +86,7 @@ const ChapterMap = ({
     }
   }, [normalizedData])
 
-  return <div id="chapter-map" className="rounded-2xl dark:bg-[#212529] rounded-lg" style={style} />
+  return <div id="chapter-map" className="rounded-lg dark:bg-[#212529]" style={style} />
 }
 
 export default ChapterMap
