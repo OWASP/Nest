@@ -52,31 +52,19 @@ def sync_repository(gh_repository, organization=None, user=None):
         and repository.project
         and repository.project.track_issues
     ):
-        # Sync open issues for the first run.
         kwargs = {
             "direction": "asc",
             "sort": "created",
-            "state": "open",
         }
-        latest_issue = Issue.objects.filter(repository=repository).order_by("-updated_at").first()
-        if latest_issue:
-            # Sync open/closed issues for subsequent runs.
-            kwargs.update(
-                {
-                    "since": latest_issue.updated_at,
-                    "state": "all",
-                }
-            )
+        if latest_updated_issue := repository.latest_updated_issue:
+            # Get only what has been updated after the latest sync.
+            kwargs.update({"since": latest_updated_issue.updated_at})
+
         for gh_issue in gh_repository.get_issues(**kwargs):
-            # Skip pull requests.
-            if gh_issue.pull_request:
+            if gh_issue.pull_request:  # Skip pull requests.
                 continue
 
-            author = (
-                User.update_data(gh_issue.user)
-                if gh_issue.user and gh_issue.user.type != "Bot"
-                else None
-            )
+            author = User.update_data(gh_issue.user)
             issue = Issue.update_data(gh_issue, author=author, repository=repository)
 
             # Assignees.
@@ -107,26 +95,20 @@ def sync_repository(gh_repository, organization=None, user=None):
             if release_node_id in existing_release_node_ids:
                 break
 
-            author = (
-                User.update_data(gh_release.author)
-                if gh_release.author and gh_release.author.type != "Bot"
-                else None
-            )
+            author = User.update_data(gh_release.author)
             releases.append(Release.update_data(gh_release, author=author, repository=repository))
     Release.bulk_save(releases)
 
     # GitHub repository contributors.
-    repository_contributors = []
-    for gh_contributor in gh_repository.get_contributors():
-        user = (
-            User.update_data(gh_contributor)
-            if gh_contributor and gh_contributor.type != "Bot"
-            else None
-        )
-        if user:
-            repository_contributors.append(
-                RepositoryContributor.update_data(gh_contributor, repository=repository, user=user)
+    RepositoryContributor.bulk_save(
+        [
+            RepositoryContributor.update_data(
+                gh_contributor,
+                repository=repository,
+                user=User.update_data(gh_contributor),
             )
-    RepositoryContributor.bulk_save(repository_contributors)
+            for gh_contributor in gh_repository.get_contributors()
+        ]
+    )
 
     return organization, repository
