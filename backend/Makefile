@@ -86,6 +86,10 @@ owasp-scrape-projects:
 	@echo "Scraping OWASP site projects data"
 	@CMD="poetry run python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
 
+owasp-update-sponsors:
+	@echo "Getting OWASP sponsors data"
+	@CMD="poetry run python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
+
 poetry-update:
 	@CMD="poetry update" $(MAKE) exec-backend-command
 
@@ -116,4 +120,5 @@ update-data: \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
 	github-update-project-related-repositories \
-	owasp-aggregate-projects
+	owasp-aggregate-projects \
+	owasp-update-sponsors
