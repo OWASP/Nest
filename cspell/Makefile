@@ -1,3 +1,5 @@
+check-spelling: cspell-check
+
 cspell-install:
 	@docker build cspell -t cspell
 
@@ -17,5 +19,3 @@ cspell-update-deps: cspell-install
 		--workdir=/nest/cspell \
 		--rm \
 		cspell -c "npm install && npm upgrade && rm -rf ./node_modules"
-
-spellcheck: cspell-check

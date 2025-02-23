@@ -1,5 +1,6 @@
 a2eeef
 Agsoc
+Aichi
 Aissue
 algoliasearch
 ansa
@@ -18,6 +19,7 @@ dismissable
 dsn
 env
 facebookexternalhit
+gamesec
 GBP
 geocoders
 geoloc
@@ -28,6 +30,7 @@ GTM
 gunicorn
 hsl
 igoat
+isanori
 jumpstart
 linkify
 lxml
@@ -37,6 +40,7 @@ mastg
 mern
 millify
 mpim
+Nadu
 navlink
 nestbot
 NETTACKER
@@ -56,9 +60,11 @@ repositorycontributor
 rsc
 RUF
 saft
+sakanashi
 samm
 seo
 SEO
+Sivagangai
 slackbot
 SLF
 Truncator

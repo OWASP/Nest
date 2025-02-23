@@ -1,5 +1,7 @@
 """Github app organization model."""
 
+from functools import lru_cache
+
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -40,6 +42,7 @@ class Organization(
             if value is not None:
                 setattr(self, model_field, value)
 
+    @lru_cache
     @staticmethod
     def get_logins():
         """Retrieve all organization logins."""

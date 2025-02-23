@@ -1,4 +1,4 @@
-check-frontend: \
+check-code-style-frontend: \
 	format-frontend-code \
 	lint-frontend-code
 

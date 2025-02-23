@@ -70,6 +70,10 @@ owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="poetry run python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
 
+owasp-process-snapshots:
+	@echo "Processing OWASP snapshots"
+	@CMD="poetry run python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
+
 owasp-scrape-chapters:
 	@echo "Scraping OWASP site chapters data"
 	@CMD="poetry run python manage.py owasp_scrape_chapters" $(MAKE) exec-backend-command

@@ -28,10 +28,12 @@ class ProjectNode(GenericEntityNode):
         model = Project
         fields = (
             "contributors_count",
+            "created_at",
             "forks_count",
             "is_active",
             "level",
             "name",
+            "open_issues_count",
             "stars_count",
             "summary",
             "type",

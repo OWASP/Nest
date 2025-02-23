@@ -136,7 +136,8 @@ class RepositoryBasedEntityModel(models.Model):
                 "login": tc["user__login"],
                 "name": tc["user__name"],
             }
-            for tc in RepositoryContributor.objects.filter(repository__in=repositories)
+            for tc in RepositoryContributor.objects.by_humans()
+            .filter(repository__in=repositories)
             .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
             .values(
                 "user__avatar_url",
