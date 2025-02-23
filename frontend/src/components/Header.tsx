@@ -124,48 +124,46 @@ export default function Header() {
       </div>
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800 ',
+          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="space-y-1 px-2 pb-3 pt-2 flex flex-col justify-between h-full">
+        <div className="flex h-full flex-col justify-between space-y-1 px-2 pb-3 pt-2">
           {/* Logo */}
-          <div className='flex flex-col gap-1 justify-center'>
-          <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
-            <div className="flex h-full items-center">
-              <img
-                src={'/img/owasp_icon_white_sm.png'}
-                className="hidden h-16 dark:block"
-                alt="OWASP Logo"
-              ></img>
-              <img
-                src={'/img/owasp_icon_black_sm.png'}
-                className="block h-16 dark:hidden"
-                alt="OWASP Logo"
-              ></img>
-              <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-                Nest
+          <div className="flex flex-col justify-center gap-1">
+            <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
+              <div className="flex h-full items-center">
+                <img
+                  src={'/img/owasp_icon_white_sm.png'}
+                  className="hidden h-16 dark:block"
+                  alt="OWASP Logo"
+                ></img>
+                <img
+                  src={'/img/owasp_icon_black_sm.png'}
+                  className="block h-16 dark:hidden"
+                  alt="OWASP Logo"
+                ></img>
+                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                  Nest
+                </div>
               </div>
-            </div>
-          </NavLink>
-          {headerLinks.map((link, i) => (
-            <NavLink
-              key={i}
-              to={link.href}
-              className={cn(
-                'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-              )}
-              onClick={toggleMobileMenu}
-            >
-              {link.text}
             </NavLink>
-          ))}
+            {headerLinks.map((link, i) => (
+              <NavLink
+                key={i}
+                to={link.href}
+                className={cn(
+                  'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                  location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                )}
+                onClick={toggleMobileMenu}
+              >
+                {link.text}
+              </NavLink>
+            ))}
           </div>
 
-          <div
-            className="flex flex-col gap-y-2"
-          >
+          <div className="flex flex-col gap-y-2">
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={faRegularStar}
