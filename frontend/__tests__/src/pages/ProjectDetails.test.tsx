@@ -3,6 +3,7 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { toast } from 'hooks/useToast'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
+import { capitalize } from 'utils/capitalize'
 import { render } from 'wrappers/testUtil'
 import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
 
@@ -179,12 +180,12 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       const levelElement = screen.getByText(/Level:/)
       expect(levelElement).toBeInTheDocument()
-      const levelValueElement = within(levelElement.parentElement).getByText('Lab')
+      const levelValueElement = within(levelElement.parentElement).getByText(capitalize('lab'))
       expect(levelValueElement).toBeInTheDocument()
 
       const typeElement = screen.getByText(/Type:/)
       expect(typeElement).toBeInTheDocument()
-      const typeValueElement = within(typeElement.parentElement).getByText('Tool')
+      const typeValueElement = within(typeElement.parentElement).getByText(capitalize('tool'))
       expect(typeValueElement).toBeInTheDocument()
     })
   })
