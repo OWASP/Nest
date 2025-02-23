@@ -161,7 +161,10 @@ export default function Header() {
             </NavLink>
           ))}
 
-          <div className="flex flex-col gap-y-2 items-center justify-center" style={{ marginTop: '180%' }}>
+          <div
+            className="flex flex-col items-center justify-center gap-y-2"
+            style={{ marginTop: '180%' }}
+          >
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={faRegularStar}
