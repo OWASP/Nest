@@ -17,15 +17,23 @@ describe('capitalize function', () => {
     expect(capitalize('')).toBe('')
   })
 
+  test('handles null', () => {
+    expect(capitalize(null)).toBe(null)
+  })
+
+  test('handles undefined', () => {
+    expect(capitalize(undefined)).toBe(undefined)
+  })
+
   test('capitalizes a single letter', () => {
     expect(capitalize('a')).toBe('A')
   })
 
-  test('capitalizes the first letter and lowercases the rest of the characters in the word', () => {
-    expect(capitalize('wOrD')).toBe('Word')
+  test('capitalizes the first letter and keeps rest of the characters in the word', () => {
+    expect(capitalize('wOrD')).toBe('WOrD')
   })
 
   test('handles strings with only uppercase letters', () => {
-    expect(capitalize('WORD')).toBe('Word')
+    expect(capitalize('WORD')).toBe('WORD')
   })
 })

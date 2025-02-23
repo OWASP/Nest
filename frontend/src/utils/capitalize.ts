@@ -1,4 +1,4 @@
-export function capitalize(str: string): string {
-  if (!str) return ''
-  return str[0].toUpperCase() + str.slice(1).toLowerCase()
+export function capitalize(value: string): string {
+  if (!value) return value
+  return value.charAt(0).toUpperCase() + value.slice(1)
 }
