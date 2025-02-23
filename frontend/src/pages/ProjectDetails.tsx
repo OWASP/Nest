@@ -12,13 +12,13 @@ import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ProjectTypeGraphql } from 'types/project'
+import { capitalizeFirstLetter } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
-import { capitalizeFirstLetter } from '../utils/capitalize'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
