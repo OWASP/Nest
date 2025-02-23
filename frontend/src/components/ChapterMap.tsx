@@ -4,15 +4,16 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
+import { desktopViewMinWidth } from 'utils/constants'
 import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
+import { Tooltip } from 'components/ui/tooltip'
 
-const ChapterMap = ({
-  geoLocData,
-  style,
-}: {
+interface ChapterMapProps {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
   style: React.CSSProperties
-}) => {
+}
+
+const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
   const mapRef = useRef<L.Map | null>(null)
 
   const normalizedData = useMemo(() => {
@@ -84,9 +85,48 @@ const ChapterMap = ({
     if (bounds.length > 0) {
       map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
     }
+
+    // Enable Ctrl-to-zoom only on desktop
+    const isDesktop = window.innerWidth >= desktopViewMinWidth
+    if (isDesktop) {
+      map.scrollWheelZoom.disable()
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.ctrlKey) {
+          map.scrollWheelZoom.enable()
+        }
+      }
+
+      const handleKeyUp = (e: KeyboardEvent) => {
+        if (!e.ctrlKey) {
+          map.scrollWheelZoom.disable()
+        }
+      }
+
+      window.addEventListener('keydown', handleKeyDown)
+      window.addEventListener('keyup', handleKeyUp)
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown)
+        window.removeEventListener('keyup', handleKeyUp)
+      }
+    }
   }, [normalizedData])
 
-  return <div id="chapter-map" className="rounded-2xl dark:bg-[#212529]" style={style} />
+  return (
+    <Tooltip
+      content="Press Ctrl while scrolling to zoom"
+      closeDelay={100}
+      openDelay={100}
+      showArrow
+      positioning={{ placement: 'top' }}
+      disabled={window.innerWidth < desktopViewMinWidth}
+    >
+      <div style={{ position: 'relative' }}>
+        <div id="chapter-map" style={style} />
+      </div>
+    </Tooltip>
+  )
 }
 
 export default ChapterMap
