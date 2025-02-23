@@ -5,7 +5,6 @@ leaders:
     name: Leader Name 1
   - github: leader-name-2
     name: Leader Name 2
-level: 2
 mailing-list:
 name: Valid Chapter Name
 pitch: A very brief, one-line description of your Chapter
