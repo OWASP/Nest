@@ -6,6 +6,7 @@ from functools import lru_cache
 from html import escape as escape_html
 from urllib.parse import urljoin
 
+import graphene
 import requests
 import yaml
 from lxml import html
@@ -81,6 +82,32 @@ def get_staff_data(timeout=30):
         )
     except (RequestException, yaml.scanner.ScannerError):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
+
+
+def get_events_data():
+    """Get raw events data via GraphQL."""
+    from apps.owasp.graphql.queries.event import EventQuery
+
+    query = """
+    query {
+        events {
+            key
+            name
+            category
+            endDate
+            startDate
+            url
+            description
+            categoryDescription
+        }
+    }
+    """
+    try:
+        result = graphene.Schema(query=EventQuery).execute(query)
+        return result.data["events"]
+    except Exception as e:
+        logger.exception("Failed to fetch events data via GraphQL", extra={"error": str(e)})
+        return None
 
 
 def get_text(blocks):
