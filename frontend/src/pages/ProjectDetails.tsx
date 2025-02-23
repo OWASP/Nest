@@ -18,6 +18,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { capitalizeFirstLetter } from '../utils/capitalize'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -63,10 +64,10 @@ const ProjectDetailsPage = () => {
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     {
       label: 'Level',
-      value: project.level[0].toUpperCase() + project.level.slice(1).toLowerCase(),
+      value: capitalizeFirstLetter(project.level),
     },
     { label: 'Project Leaders', value: project.leaders.join(', ') },
-    { label: 'Type', value: project.type[0].toUpperCase() + project.type.slice(1).toLowerCase() },
+    { label: 'Type', value: capitalizeFirstLetter(project.type) },
     {
       label: 'URL',
       value: (
