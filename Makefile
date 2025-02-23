@@ -27,8 +27,12 @@ run:
 
 test-all: \
 	test-nest-app \
-	test-schema \
+	test-schema
 
 test-nest-app: \
 	test-backend \
 	test-frontend
+
+update-nest-app-dependencies: \
+	update-backend-dependencies \
+	update-frontend-dependencies
