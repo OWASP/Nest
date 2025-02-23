@@ -55,6 +55,7 @@ def sync_repository(gh_repository, organization=None, user=None):
         kwargs = {
             "direction": "asc",
             "sort": "created",
+            "state": "all",
         }
         if latest_updated_issue := repository.latest_updated_issue:
             # Get only what has been updated after the latest sync.
