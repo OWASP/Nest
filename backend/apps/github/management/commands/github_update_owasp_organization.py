@@ -71,7 +71,9 @@ class Command(BaseCommand):
             print(f"{prefix:<12} https://github.com/OWASP/{entity_key}")
 
             owasp_organization, repository = sync_repository(
-                gh_repository, organization=owasp_organization, user=owasp_user
+                gh_repository,
+                organization=owasp_organization,
+                user=owasp_user,
             )
 
             # OWASP chapters.
