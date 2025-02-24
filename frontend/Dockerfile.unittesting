@@ -1,0 +1,22 @@
+FROM node:22-slim
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV FORCE_COLOR=1
+RUN groupadd owasp && \
+    useradd --create-home --home-dir /home/owasp -g owasp owasp && \
+    apt-get update && apt-get upgrade -y && \
+    apt-get clean -y && rm -rf /var/lib/apt/lists/*
+WORKDIR /home/owasp
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY src src
+COPY public public
+COPY jest.setup.ts jest.setup.ts
+COPY jest.config.ts jest.config.ts
+COPY tsconfig.json tsconfig.json
+COPY __tests__ __tests__
+
+
+USER owasp

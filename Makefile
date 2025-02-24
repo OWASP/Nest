@@ -39,7 +39,8 @@ test-all: \
 
 test-nest-app: \
 	test-backend \
-	test-frontend
+	unittest-frontend \
+	e2etest-frontend
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \

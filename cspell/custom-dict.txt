@@ -18,6 +18,8 @@ cva
 dismissable
 dsn
 env
+etest
+etesting
 facebookexternalhit
 gamesec
 GBP

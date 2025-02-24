@@ -151,8 +151,8 @@ jobs:
         run: |
           docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest poetry run pytest
 
-  run-frontend-tests:
-    name: Run frontend tests
+  run-frontend-unit-tests:
+    name: Run frontend unit tests
     needs:
       - pre-commit
     runs-on: ubuntu-latest
@@ -166,16 +166,42 @@ jobs:
       - name: Build frontend test image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:cache
           context: frontend
-          file: frontend/Dockerfile.test
+          file: frontend/Dockerfile.unittesting
           load: true
           platforms: linux/amd64
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:latest
 
-      - name: Run frontend tests
+      - name: Run frontend unit tests
         run: |
-          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest npm run test:all
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:latest npm run test:jest
+
+  run-frontend-e2e-tests:
+    name: Run frontend end-to-end tests
+    needs:
+      - pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build frontend test image
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:cache
+          context: frontend
+          file: frontend/Dockerfile.e2etesting
+          load: true
+          platforms: linux/amd64
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:latest
+
+      - name: Run frontend end-to-end tests
+        run: |
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:latest npm run test:playwright
 
   build-docker-staging-images:
     name: Build Docker Staging Images
@@ -186,7 +212,8 @@ jobs:
     needs:
       - code-ql
       - run-backend-tests
-      - run-frontend-tests
+      - run-frontend-unit-tests
+      - run-frontend-e2e-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -327,7 +354,8 @@ jobs:
     needs:
       - code-ql
       - run-backend-tests
-      - run-frontend-tests
+      - run-frontend-unit-tests
+      - run-frontend-e2e-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

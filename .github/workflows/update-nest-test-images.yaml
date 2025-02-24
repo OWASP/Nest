@@ -37,16 +37,27 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
-      - name: Update frontend test image
+      - name: Update frontend unittest image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.test
+          file: frontend/Dockerfile.unittesting
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:latest
+
+      - name: Update frontend e2etest image
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:cache,mode=max
+          context: frontend
+          file: frontend/Dockerfile.e2etesting
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:latest
 
       - name: Update schema test image
         uses: docker/build-push-action@v6
