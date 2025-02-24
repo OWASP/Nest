@@ -261,10 +261,11 @@ import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
 
-export default function UserDetailsPage() {
+const UserDetailsPage = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [imageLink, setImageLink] = useState('')
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
     variables: { key: userKey },
@@ -285,6 +286,7 @@ export default function UserDetailsPage() {
     }
   }, [graphQLData, graphQLRequestError, userKey])
 
+
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -301,26 +303,21 @@ export default function UserDetailsPage() {
         message="Sorry, the user you're looking for doesn't exist"
       />
     )
-
-  // const details = [
-  //   { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
-  //   { label: 'Location', value: chapter.suggestedLocation },
-  //   { label: 'Region', value: chapter.region },
-  //   {
-  //     label: 'URL',
-  //     value: (
-  //       <Link href={chapter.url} className="hover:underline dark:text-sky-600">
-  //         {chapter.url}
-  //       </Link>
-  //     ),
-  //   },
-  //]
   return (
-    <MetadataManager pageTitle={user.name} description={user.bio} url={user.url}>
+    <MetadataManager
+    pageTitle={user.name || userKey}
+    description={user.bio}
+    url={user.url}
+    >
       <DetailsCard
-        title={user.name}
+        title={user.login}
+        summary={user.bio}
+        topContributors={[]}
         type="user"
       />
     </MetadataManager>
   )
 }
+
+
+export default UserDetailsPage
