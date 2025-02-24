@@ -1,10 +1,10 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
+import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 import { toast } from 'hooks/useToast'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import UserDetailsPage from 'pages/UserDetails'
-import { mockUserDetailsData } from '@tests/data/mockUserDetails'
 import '@testing-library/jest-dom'
 
 jest.mock('hooks/useToast', () => ({

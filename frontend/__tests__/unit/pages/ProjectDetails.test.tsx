@@ -1,10 +1,10 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { toast } from 'hooks/useToast'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
 
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),

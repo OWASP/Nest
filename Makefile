@@ -24,7 +24,8 @@ check-test-backend: \
 
 check-test-frontend: \
 	check-frontend \
-	test-frontend
+	unittest-frontend \
+	e2etest-frontend
 
 pre-commit:
 	@pre-commit run -a

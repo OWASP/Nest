@@ -1,8 +1,8 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { mockContributeData } from '@unit/data/mockContributeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
 import ContributePage from 'pages/Contribute'
-import { mockContributeData } from '@tests/data/mockContributeData'
 
 jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),

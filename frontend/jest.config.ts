@@ -33,7 +33,7 @@ export default {
     '^.+\\.tsx?$': '@swc/jest',
   },
   moduleNameMapper: {
-    '^@tests/(.*)$': '<rootDir>/__tests__/unit/$1',
+    '^@unit/(.*)$': '<rootDir>/__tests__/unit/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(scss|sass|css)$': 'identity-obj-proxy',
   },

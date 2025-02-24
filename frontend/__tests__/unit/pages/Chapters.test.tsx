@@ -1,11 +1,11 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
+import { mockChapterData } from '@unit/data/mockChapterData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 
 import ChaptersPage from 'pages/Chapters'
-import { mockChapterData } from '@tests/data/mockChapterData'
 
 jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
