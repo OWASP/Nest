@@ -5,7 +5,6 @@ import pytest
 from apps.github.management.commands.github_update_project_related_repositories import (
     GITHUB_ITEMS_PER_PAGE,
     Command,
-    Issue,
     Project,
 )
 
@@ -76,11 +75,11 @@ def test_handle(
     )
     mock_active_projects.order_by.return_value = mock_active_projects
 
-    with mock.patch.object(Project, "active_projects", mock_active_projects), mock.patch.object(
-        Issue, "bulk_save"
-    ) as mock_issue_bulk_save, mock.patch.object(
-        Project, "bulk_save"
-    ) as mock_project_bulk_save, mock.patch("builtins.print") as mock_print:
+    with (
+        mock.patch.object(Project, "active_projects", mock_active_projects),
+        mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
+        mock.patch("builtins.print") as mock_print,
+    ):
         command.handle(offset=offset)
 
         mock_github.assert_called_once_with("test-token", per_page=GITHUB_ITEMS_PER_PAGE)
@@ -93,7 +92,6 @@ def test_handle(
 
         assert mock_sync_repository.call_count == projects - offset
 
-        mock_issue_bulk_save.assert_called_once()
         mock_project_bulk_save.assert_called_once()
 
         assert mock_print.call_count > 0

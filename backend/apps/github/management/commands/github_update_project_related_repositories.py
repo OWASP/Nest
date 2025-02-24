@@ -9,7 +9,6 @@ from github.GithubException import UnknownObjectException
 
 from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
-from apps.github.models.issue import Issue
 from apps.github.utils import get_repository_path
 from apps.owasp.models.project import Project
 
@@ -27,10 +26,8 @@ class Command(BaseCommand):
         active_projects_count = active_projects.count()
         gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
 
-        issues = []
-        projects = []
-
         offset = options["offset"]
+        projects = []
         for idx, project in enumerate(active_projects[offset:]):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
             print(f"{prefix:<10} {project.owasp_url}")
@@ -60,5 +57,4 @@ class Command(BaseCommand):
             projects.append(project)
 
         # Bulk save data.
-        Issue.bulk_save(issues)
         Project.bulk_save(projects)
