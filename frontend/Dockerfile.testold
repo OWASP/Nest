@@ -1,4 +1,5 @@
-FROM mcr.microsoft.com/playwright:v1.50.1-noble
+FROM node:22-slim
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV FORCE_COLOR=1
@@ -13,8 +14,12 @@ WORKDIR /home/owasp
 COPY package.json package-lock.json ./
 RUN npm install
 
-COPY  . .
+COPY src src
+COPY public public
+COPY jest.setup.ts jest.setup.ts
+COPY jest.config.ts jest.config.ts
+COPY tsconfig.json tsconfig.json
+COPY __tests__ __tests__
 
-RUN chmod -R 777 /home/owasp
 
 USER owasp

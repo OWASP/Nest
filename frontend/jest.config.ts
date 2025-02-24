@@ -28,12 +28,12 @@ export default {
   preset: 'ts-jest',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',
-  testPathIgnorePatterns: ['<rootDir>/__tests__/src/data/'],
+  testPathIgnorePatterns: ['<rootDir>/__tests__/unit/data/', '<rootDir>/__tests__/e2e/'],
   transform: {
     '^.+\\.tsx?$': '@swc/jest',
   },
   moduleNameMapper: {
-    '^@tests/(.*)$': '<rootDir>/__tests__/src/$1',
+    '^@tests/(.*)$': '<rootDir>/__tests__/unit/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(scss|sass|css)$': 'identity-obj-proxy',
   },

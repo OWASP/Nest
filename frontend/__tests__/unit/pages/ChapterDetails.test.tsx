@@ -3,7 +3,6 @@ import { screen, waitFor } from '@testing-library/react'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
 import { mockChapterDetailsData } from '@tests/data/mockChapterDetailsData'
-
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),
 }))

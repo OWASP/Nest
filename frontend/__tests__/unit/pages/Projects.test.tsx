@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 
 import ProjectsPage from 'pages/Projects'
-import { mockProjectData } from '@tests/data/mockProjectData'
+import mockProjectData from '@tests/data/mockProjectData'
 
 jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),

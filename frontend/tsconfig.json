@@ -17,7 +17,8 @@
     "inlineSources": true,
     "baseUrl": ".",
     "paths": {
-      "@tests/*": ["__tests__/src/*"],
+      "@tests/*": ["__tests__/unit/*"],
+      "@e2e/*": ["__tests__/e2e/*"],
       "*": ["src/*"]
     }
   },

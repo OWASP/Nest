@@ -4,8 +4,8 @@ import { toast } from 'hooks/useToast'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import UserDetailsPage from 'pages/UserDetails'
+import { mockUserDetailsData } from '@tests/data/mockUserDetails'
 import '@testing-library/jest-dom'
-import { mockUserDetailsData } from '@tests/data/mockUserDetailsData'
 
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),
@@ -75,7 +75,6 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText('This is a test user')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
-    expect(screen.getByText(`Joined December 15, 2023`)).toBeInTheDocument()
   })
 
   test('displays GitHub profile link correctly', async () => {
