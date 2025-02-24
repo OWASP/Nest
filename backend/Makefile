@@ -70,6 +70,10 @@ owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="poetry run python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
 
+owasp-process-snapshots:
+	@echo "Processing OWASP snapshots"
+	@CMD="poetry run python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
+
 owasp-scrape-chapters:
 	@echo "Scraping OWASP site chapters data"
 	@CMD="poetry run python manage.py owasp_scrape_chapters" $(MAKE) exec-backend-command
@@ -81,9 +85,6 @@ owasp-scrape-committees:
 owasp-scrape-projects:
 	@echo "Scraping OWASP site projects data"
 	@CMD="poetry run python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
-
-poetry-update:
-	@CMD="poetry update" $(MAKE) exec-backend-command
 
 purge-data:
 	@CMD="poetry run python manage.py purge_data" $(MAKE) exec-backend-command
@@ -105,6 +106,9 @@ sync-data: update-data enrich-data index-data
 test-backend:
 	@docker build -f backend/Dockerfile.test backend -t nest-test-backend
 	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend poetry run pytest
+
+update-backend-dependencies:
+	@CMD="poetry update" $(MAKE) exec-backend-command
 
 update-data: \
 	github-update-owasp-organization \

@@ -117,6 +117,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.published_releases.order_by("-published_at").first()
 
     @property
+    def latest_updated_issue(self):
+        """Repository latest updated issue."""
+        return self.issues.order_by("-updated_at").first()
+
+    @property
     def nest_key(self):
         """Return repository Nest key."""
         return f"{self.owner.login}-{self.name}"
