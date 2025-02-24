@@ -5,6 +5,7 @@ import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 import { mockProjectDetailsData } from '@tests/data/mockProjectDetailsData'
+import millify from 'millify'
 
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),
@@ -211,5 +212,23 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('No Issues')).toBeInTheDocument()
       expect(screen.getByText('No Stars')).toBeInTheDocument()
     })
+  })
+})
+test('renders project stats correctly', async () => {
+  ;(useQuery as jest.Mock).mockReturnValue({
+    data: mockProjectDetailsData,
+    error: null,
+  })
+
+  render(<ProjectDetailsPage />)
+
+  await waitFor(() => {
+    const stats = mockProjectDetailsData.project
+
+    expect(screen.getByText(`${millify(stats.contributorsCount, { precision: 1 })} Contributors`)).toBeInTheDocument()
+    expect(screen.getByText(`${millify(stats.forksCount, { precision: 1 })} Forks`)).toBeInTheDocument()
+    expect(screen.getByText(`${millify(stats.starsCount, { precision: 1 })} Stars`)).toBeInTheDocument()
+    expect(screen.getByText(`${millify(stats.repositoriesCount, { precision: 1 })} Repositories`)).toBeInTheDocument()
+    expect(screen.getByText(`${millify(stats.issuesCount, { precision: 1 })} Issues`)).toBeInTheDocument()
   })
 })
