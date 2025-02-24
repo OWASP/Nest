@@ -8,6 +8,9 @@
 
 ![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&?label=Build&style=for-the-badge) ![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge)
 
+![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)
+![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)
+
 ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors)
 ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=for-the-badge&label=Last%20commit)
 
