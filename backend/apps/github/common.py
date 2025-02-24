@@ -59,15 +59,11 @@ def sync_repository(gh_repository, organization=None, user=None):
             "sort": "created",
             "state": "open",
         }
-        latest_issue = repository.latest_issue
-        if latest_issue:
-            # Sync open/closed issues for subsequent runs.
-            kwargs.update(
-                {
-                    "since": latest_issue.updated_at,
-                    "state": "all",
-                }
-            )
+        
+        if latest_updated_issue := repository.latest_updated_issue:
+            # Get only what has been updated after the latest sync.
+            kwargs.update({"since": latest_updated_issue.updated_at})
+
         for gh_issue in gh_repository.get_issues(**kwargs):
             # Skip pull requests.
             if gh_issue.pull_request:
