@@ -2,9 +2,11 @@ FROM node:lts-alpine
 
 WORKDIR /opt/node
 
-COPY package-lock.json package.json ./
+RUN npm install -g pnpm
 
-RUN npm install
+COPY pnpm-lock.yaml package.json ./
+
+RUN pnpm install
 
 WORKDIR /nest
 
