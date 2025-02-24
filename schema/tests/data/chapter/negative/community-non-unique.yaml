@@ -1,10 +1,10 @@
 community:
   - platform: discord
-    description: 'Discord community'
-    url: 'https://discord.com/example'
+    description: Discord community
+    url: https://discord.com/example
   - platform: discord
-    description: 'Duplicate Discord community'
-    url: 'https://discord.com/example'
+    description: Duplicate Discord community
+    url: https://discord.com/example
 country: India
 leaders:
   - github: leader-1-github

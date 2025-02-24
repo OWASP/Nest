@@ -1,7 +1,7 @@
 audience: breaker
 documentation:
-  - 'https://example.com/docs'
-  - 'https://example.com/docs'
+  - https://example.com/docs
+  - https://example.com/docs
 leaders:
   - github: leader-1-github
     name: Leader 1 Name

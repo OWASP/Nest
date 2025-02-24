@@ -1,9 +1,9 @@
 audience: breaker
 community:
   - platform: discord
-    url: 'https://discord.com/example'
+    url: https://discord.com/example
   - platform: discord
-    url: 'https://discord.com/example'
+    url: https://discord.com/example
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
