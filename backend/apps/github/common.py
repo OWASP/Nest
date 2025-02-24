@@ -59,7 +59,6 @@ def sync_repository(gh_repository, organization=None, user=None):
             "sort": "created",
             "state": "open",
         }
-        
         if latest_updated_issue := repository.latest_updated_issue:
             # Get only what has been updated after the latest sync.
             kwargs.update({"since": latest_updated_issue.updated_at})
