@@ -105,7 +105,7 @@ sync-data: update-data enrich-data index-data
 
 test-backend:
 	@docker build -f backend/Dockerfile.test backend -t nest-test-backend
-	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend poetry run pytest
+	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend pytest
 
 update-backend-dependencies:
 	@CMD="poetry update" $(MAKE) exec-backend-command

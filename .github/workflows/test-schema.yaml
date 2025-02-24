@@ -109,4 +109,4 @@ jobs:
 
       - name: Run schema tests
         run: |
-          docker run ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest poetry run pytest
+          docker run ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest pytest
