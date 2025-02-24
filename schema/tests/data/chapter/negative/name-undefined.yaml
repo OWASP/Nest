@@ -1,0 +1,10 @@
+country: India
+leaders:
+  - github: leader-1
+    name: 'Leader One'
+  - github: leader-1
+    name: 'Duplicate Leader One'
+tags:
+  - chapter-tag-1
+  - chapter-tag-2
+  - chapter-tag-3

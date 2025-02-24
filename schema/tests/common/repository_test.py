@@ -18,6 +18,7 @@ SCHEMA_NAME = "repository"
         ("url-empty.yaml", "'' is not a 'uri'"),
         ("url-invalid.yaml", "'github/repo' is not a 'uri'"),
         ("url-null.yaml", "None is not a 'uri'"),
+        ("url-undefined.yaml", "'url' is a required property"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):

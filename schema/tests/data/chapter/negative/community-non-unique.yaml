@@ -1,3 +1,10 @@
+community:
+  - platform: discord
+    description: 'Discord community'
+    url: 'https://discord.com/example'
+  - platform: discord
+    description: 'Duplicate Discord community'
+    url: 'https://discord.com/example'
 country: India
 leaders:
   - github: leader-1-github
@@ -6,7 +13,6 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 name: OWASP Chapter
-sponsors:
 tags:
   - chapter-tag-1
   - chapter-tag-2

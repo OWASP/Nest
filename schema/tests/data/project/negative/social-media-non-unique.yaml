@@ -8,6 +8,11 @@ leaders:
 level: 2
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
+social_media:
+  - platform: youtube
+    url: 'https://youtube.com/channel/123'
+  - platform: youtube
+    url: 'https://youtube.com/channel/123'
 tags:
   - example-tag-1
   - example-tag-2

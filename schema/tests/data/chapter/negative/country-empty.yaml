@@ -1,4 +1,4 @@
-country: India
+country: ''
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -6,7 +6,6 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 name: OWASP Chapter
-sponsors:
 tags:
   - chapter-tag-1
   - chapter-tag-2

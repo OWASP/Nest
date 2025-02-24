@@ -13,12 +13,15 @@ SCHEMA_NAME = "logo"
         ("large-empty.yaml", "'' is not a 'uri'"),
         ("large-invalid.yaml", "'image/large.png' is not a 'uri'"),
         ("large-null.yaml", "None is not of type 'string'"),
+        ("large-undefined.yaml", "'large' is a required property"),
         ("medium-empty.yaml", "'' is not a 'uri'"),
         ("medium-invalid.yaml", "'image/medium.png' is not a 'uri'"),
         ("medium-null.yaml", "None is not of type 'string'"),
+        ("medium-undefined.yaml", "'medium' is a required property"),
         ("small-empty.yaml", "'' is not a 'uri'"),
         ("small-invalid.yaml", "'image/small.png' is not a 'uri'"),
         ("small-null.yaml", "None is not of type 'string'"),
+        ("small-undefined.yaml", "'small' is a required property"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):

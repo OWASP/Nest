@@ -179,8 +179,16 @@ const UserDetailsPage: React.FC = () => {
             </div>
             <div className="grid grid-cols-3 gap-4 bg-gray-200 p-6 dark:bg-gray-900 sm:grid-cols-3">
               {[
-                { icon: faUser, label: 'Followers', value: user.followersCount },
-                { icon: faUserPlus, label: 'Following', value: user.followingCount },
+                {
+                  icon: faUser,
+                  label: 'Followers',
+                  value: user.followersCount,
+                },
+                {
+                  icon: faUserPlus,
+                  label: 'Following',
+                  value: user.followingCount,
+                },
                 {
                   icon: faCodeBranch,
                   label: 'Repositories',
