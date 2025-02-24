@@ -37,6 +37,8 @@ RUN groupadd owasp && \
     apt-get install -y libpq-dev && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
+RUN python -m pip install --no-cache-dir poetry
+
 ENV FORCE_COLOR=1
 ENV PYTHONUNBUFFERED=1
 
@@ -45,5 +47,3 @@ WORKDIR /home/owasp
 USER owasp
 
 COPY --from=builder /home/owasp /home/owasp
-
-CMD ["/bin/bash", "-c", "VENV_DIR=$(ls -d /home/owasp/.cache/pypoetry/virtualenvs/*) && $VENV_DIR/bin/pytest"]

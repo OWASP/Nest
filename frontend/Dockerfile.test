@@ -40,5 +40,3 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/__tests__ ./__tests__
 
 USER owasp
-
-CMD ["npm" , "run" , "test"]
