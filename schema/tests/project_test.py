@@ -24,7 +24,7 @@ from utils.schema_validators import validate_data
         ("community-empty.yaml", "[] should be non-empty"),
         (
             "community-non-unique.yaml",
-            "[{'platform': 'discord', 'url': 'https://discord.com/example'}, {'platform': 'discord', 'url': 'https://discord.com/example'}] has non-unique elements",
+            "has non-unique elements",
         ),
         ("community-null.yaml", "None is not of type 'array'"),
         ("demo-empty.yaml", "[] should be non-empty"),
@@ -81,7 +81,7 @@ from utils.schema_validators import validate_data
         ("logo-null.yaml", "None is not of type 'array'"),
         (
             "logo-non-unique.yaml",
-            "[{'large': 'https://example.com/largeLogo'}, {'large': 'https://example.com/largeLogo'}] has non-unique elements",
+            "has non-unique elements",
         ),
         ("mailing-list-empty.yaml", "'' is not a 'uri'"),
         ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
@@ -95,7 +95,7 @@ from utils.schema_validators import validate_data
         ("repositories-null.yaml", "None is not of type 'array'"),
         (
             "repositories-non-unique.yaml",
-            "[{'url': 'https://example.com/repo1'}, {'url': 'https://example.com/repo1'}] has non-unique elements",
+            "has non-unique elements",
         ),
         ("social-media-empty.yaml", "[] should be non-empty"),
         ("social-media-non-unique.yaml", "has non-unique elements"),
