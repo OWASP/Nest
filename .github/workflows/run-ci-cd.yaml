@@ -38,9 +38,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install Poetry
-        run: pipx install poetry
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -149,7 +146,7 @@ jobs:
 
       - name: Run backend tests
         run: |
-          docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest poetry run pytest
+          docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest
 
   run-frontend-tests:
     name: Run frontend tests
