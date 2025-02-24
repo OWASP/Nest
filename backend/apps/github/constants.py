@@ -8,4 +8,5 @@ GITHUB_REPOSITORY_RE = re.compile("^https://github.com/([^/]+)/([^/]+)(/.*)?$")
 GITHUB_USER_RE = re.compile("^https://github.com/([^/]+)/?$")
 
 OWASP_FOUNDATION_LOGIN = "OWASPFoundation"
+OWASP_GITHUB_IO = "owasp.github.io"
 OWASP_LOGIN = "owasp"

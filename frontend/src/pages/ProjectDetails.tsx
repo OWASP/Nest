@@ -13,6 +13,7 @@ import millify from 'millify'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ProjectTypeGraphql } from 'types/project'
+import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
@@ -64,10 +65,10 @@ const ProjectDetailsPage = () => {
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     {
       label: 'Level',
-      value: project.level[0].toUpperCase() + project.level.slice(1).toLowerCase(),
+      value: capitalize(project.level),
     },
     { label: 'Project Leaders', value: project.leaders.join(', ') },
-    { label: 'Type', value: project.type[0].toUpperCase() + project.type.slice(1).toLowerCase() },
+    { label: 'Type', value: capitalize(project.type) },
     {
       label: 'URL',
       value: (
