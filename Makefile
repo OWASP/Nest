@@ -7,16 +7,24 @@ build:
 	@docker compose build
 
 check-all: \
-	check-code-style \
+	check-backend \
+	check-frontend \
 	check-spelling
 
-check-code-style: \
-	pre-commit \
-	check-code-style-frontend
+check-backend: \
+	pre-commit
 
 check-test-all: \
 	check-all \
 	test-all
+
+check-test-backend: \
+	pre-commit \
+	test-backend
+
+check-test-frontend: \
+	check-frontend \
+	test-frontend
 
 pre-commit:
 	@pre-commit run -a
