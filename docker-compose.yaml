@@ -44,8 +44,8 @@ services:
     container_name: nest-frontend
     command: >
       bash -c "
-        npm install &&
-        npm run dev
+        pnpm install &&
+        pnpm run dev
       "
     build:
       context: ./frontend
@@ -54,6 +54,7 @@ services:
       - 127.0.0.1:3000:3000
     volumes:
       - ./frontend:/home/owasp
+      # - /home/owasp/node_modules
     environment:
       NODE_ENV: local
 

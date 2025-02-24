@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "test": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest",
     "test:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
-    "watch": "jest --watch"
+    "watch": "jest --watch",
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "@apollo/client": "^3.12.7",
