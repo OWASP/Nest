@@ -9,7 +9,9 @@ RUN groupadd owasp && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/* && \
     python -m pip install --no-cache-dir poetry
 
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV PYTHONUNBUFFERED=1
+
 WORKDIR /home/owasp
 
 USER owasp
@@ -33,6 +35,7 @@ RUN groupadd owasp && \
     apt-get install -y libpq-dev && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
+ENV PATH="/home/owasp/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
