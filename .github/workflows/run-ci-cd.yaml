@@ -175,7 +175,7 @@ jobs:
 
       - name: Run frontend tests
         run: |
-          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest npm run test
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest npm run test:all
 
   build-docker-staging-images:
     name: Build Docker Staging Images
