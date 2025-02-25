@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timezone
+from django.utils import timezone
 from io import StringIO
 from unittest import mock
 
@@ -23,14 +23,14 @@ class TestUpdateProjectHealthMetricsCommand:
         project.owasp_url = "https://test.com"
         project.level = Project.ProjectLevel.FLAGSHIP
         project.contributors_count = 5
-        project.created_at = datetime.now(timezone.utc)
+        project.created_at = timezone.now()
         project.forks_count = 10
         project.stars_count = 100
-        project.pushed_at = datetime.now(timezone.utc)
-        project.released_at = datetime.now(timezone.utc)
+        project.pushed_at = timezone.now()
+        project.released_at = timezone.now()
         project.open_issues_count = 3
         project.releases_count = 5
-        project.updated_at = datetime.now(timezone.utc)
+        project.updated_at = timezone.now()
 
         project.repositories.all.return_value = []
         project.repositories.aggregate.return_value = {
