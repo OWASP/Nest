@@ -43,6 +43,10 @@ test-nest-app: \
 	unittest-frontend \
 	e2etest-frontend
 
+update-dependencies: \
+	update-nest-app-dependencies \
+	update-schema-dependencies
+
 update-nest-app-dependencies: \
 	update-backend-dependencies \
 	update-frontend-dependencies
