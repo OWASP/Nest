@@ -21,15 +21,15 @@ test.describe('Home Page', () => {
     await page.getByRole('textbox', { name: 'Search the OWASP community' }).fill('owasp')
   })
 
-  test('should have recent chapters', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Chapters' })).toBeVisible()
+  test('should have new chapters', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'chapter 1' })).toBeVisible()
     await expect(page.getByText('February 20,').first()).toBeVisible()
     await page.getByRole('link', { name: 'chapter 1' }).click()
     expect(page.url()).toContain('chapters/chapter-1')
   })
-  test('should have recent projects', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Projects' })).toBeVisible()
+  test('should have new projects', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'New Projects' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 1' })).toBeVisible()
     await expect(page.getByText('January 1,').first()).toBeVisible()
     await page.getByRole('link', { name: 'Project 1' }).click()
