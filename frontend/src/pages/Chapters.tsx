@@ -95,7 +95,7 @@ const ChaptersPage = () => {
             style={{ height: '400px', width: '100%', zIndex: '0' }}
           />
         )}
-        {chapters && chapters.map(renderChapterCard)}
+        {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
       </SearchPageLayout>
     </MetadataManager>
   )
