@@ -1,12 +1,13 @@
 <div align="center">
 
-<img src="https://nest.owasp.org/img/owasp_icon_white_sm.png" alt="OWASP Icon" width="200" height="200">
+<img src="https://nest.owasp.org/img/owasp_icon_white_sm.png" alt="OWASP Logo" width="200" height="200">
 
-# OWASP Nest [Website](https://owasp.org/www-project-nest/)
+# [OWASP Nest](https://nest.owasp.org/)
 
 [![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue?style=for-the-badge)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue?style=for-the-badge) [![Project-Nest](https://img.shields.io/badge/OWASP-%23project--nest-8E44AD?logo=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
 
-![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&?label=Build&style=for-the-badge) ![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge)
+![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&?label=Build&style=for-the-badge)
+![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge)
 
 ![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)
 ![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)
@@ -14,12 +15,10 @@
 ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors)
 ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=for-the-badge&label=Last%20commit)
 
-<img src='https://img.shields.io/github/issues/owasp/nest?style=for-the-badge' alt='Nest Issues'>
-<img src='https://img.shields.io/github/issues-pr/owasp/nest?style=for-the-badge' alt='Nest PRs'>
+![Issues](https://img.shields.io/github/issues/owasp/nest?style=for-the-badge&label=Issues)
+![PRs](https://img.shields.io/github/issues-pr/owasp/nest?style=for-the-badge&label=PRs)
 
 </div>
-
-#
 
 **OWASP Nest** is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
