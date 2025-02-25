@@ -18,7 +18,11 @@ dump-data:
 	@CMD="python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json
 	@gzip backend/data/nest.json
 
-enrich-data: github-enrich-issues owasp-enrich-chapters owasp-enrich-committees owasp-enrich-projects
+enrich-data: \
+	github-enrich-issues \
+	owasp-enrich-chapters \
+	owasp-enrich-committees \
+	owasp-enrich-projects
 
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
@@ -101,7 +105,10 @@ setup:
 shell-backend:
 	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
 
-sync-data: update-data enrich-data index-data
+sync-data: \
+	update-data \
+	enrich-data \
+	index-data
 
 test-backend:
 	@docker build -f backend/Dockerfile.test backend -t nest-test-backend
