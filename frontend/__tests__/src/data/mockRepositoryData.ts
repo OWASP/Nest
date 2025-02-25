@@ -7,9 +7,9 @@ export const mockRepositoryData = {
     url: 'https://github.com/test-repo',
     commitsCount: 10,
     contributorsCount: 5,
-    forksCount: 3,
+    forksCount: 3000,
     openIssuesCount: 2,
-    starsCount: 50,
+    starsCount: 50000,
     topContributors: Array.from({ length: 15 }, (_, i) => ({
       avatarUrl: `https://example.com/avatar${i + 1}.jpg`,
       contributionsCount: 30 - i,

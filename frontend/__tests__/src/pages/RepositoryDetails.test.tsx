@@ -68,9 +68,9 @@ describe('RepositoryDetailsPage', () => {
     })
     expect(screen.getByText('10 Commits')).toBeInTheDocument()
     expect(screen.getByText('5 Contributors')).toBeInTheDocument()
-    expect(screen.getByText('3 Forks')).toBeInTheDocument()
+    expect(screen.getByText('3K Forks')).toBeInTheDocument()
     expect(screen.getByText('2 Issues')).toBeInTheDocument()
-    expect(screen.getByText('50 Stars')).toBeInTheDocument()
+    expect(screen.getByText('50K Stars')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {

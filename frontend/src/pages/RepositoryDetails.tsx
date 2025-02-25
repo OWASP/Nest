@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_REPOSITORY_DATA } from 'api/queries/repositoryQueries'
 import { toast } from 'hooks/useToast'
+import millify from 'millify'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
@@ -83,23 +84,23 @@ const RepositoryDetailsPage = () => {
   const RepositoryStats = [
     {
       icon: faHistory,
-      value: `${repository?.commitsCount || 'No'} ${pluralize(repository.commitsCount, 'Commit')}`,
+      value: `${repository.commitsCount ? millify(repository.commitsCount, { precision: 1 }) : 'No'} ${pluralize(repository.commitsCount, 'Commit')}`,
     },
     {
       icon: faUsers,
-      value: `${repository?.contributorsCount || 'No'} ${pluralize(repository.contributorsCount, 'Contributor')}`,
+      value: `${repository.contributorsCount ? millify(repository.contributorsCount, { precision: 1 }) : 'No'} ${pluralize(repository.contributorsCount, 'Contributor')}`,
     },
     {
       icon: faCodeFork,
-      value: `${repository?.forksCount || 'No'} ${pluralize(repository.forksCount, 'Fork')}`,
+      value: `${repository.forksCount ? millify(repository.forksCount, { precision: 1 }) : 'No'} ${pluralize(repository.forksCount, 'Fork')}`,
     },
     {
       icon: faExclamationCircle,
-      value: `${repository?.openIssuesCount || 'No'} ${pluralize(repository.openIssuesCount, 'Issue')}`,
+      value: `${repository.openIssuesCount ? millify(repository.openIssuesCount, { precision: 1 }) : 'No'} ${pluralize(repository.openIssuesCount, 'Issue')}`,
     },
     {
       icon: faStar,
-      value: `${repository?.starsCount || 'No'} ${pluralize(repository.starsCount, 'Star')}`,
+      value: `${repository.starsCount ? millify(repository.starsCount, { precision: 1 }) : 'No'} ${pluralize(repository.starsCount, 'Star')}`,
     },
   ]
   return (
