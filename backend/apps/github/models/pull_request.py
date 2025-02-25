@@ -4,12 +4,8 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
-from apps.github.models.managers.pullrequest import OpenPullRequestManager
+from apps.github.models.managers.pull_request import OpenPullRequestManager
 from apps.github.models.mixins import IssueIndexMixin
-
-# AI to create summary or hint!
-# from apps.common.open_ai import OpenAi
-# from apps.core.models.prompt import Prompt
 
 
 class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
@@ -92,15 +88,15 @@ class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         """Update instance based on GitHub issue data."""
         field_mapping = {
             "body": "body",
+            "closed_at": "closed_at",
+            "created_at": "created_at",
+            "merged_at": "merged_at",
             "number": "number",
             "sequence_id": "id",
             "state": "state",
             "title": "title",
-            "url": "html_url",
-            "created_at": "created_at",
             "updated_at": "updated_at",
-            "merged_at": "merged_at",
-            "closed_at": "closed_at",
+            "url": "html_url",
         }
 
         # Direct fields.
@@ -114,10 +110,6 @@ class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
         # Repository.
         self.repository = repository
-
-    def save(self, *args, **kwargs):
-        """Save method for PullRequest model."""
-        super().save(*args, **kwargs)
 
     @staticmethod
     def bulk_save(pull_requests, fields=None):
@@ -136,4 +128,5 @@ class PullRequest(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         pull_request.from_github(gh_pull_request, author=author, repository=repository)
         if save:
             pull_request.save()
+
         return pull_request
