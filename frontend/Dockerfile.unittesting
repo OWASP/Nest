@@ -26,21 +26,9 @@ RUN groupadd owasp && \
     apt-get update && apt-get upgrade -y && \
     apt-get clean -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /home/owasp
-<<<<<<< HEAD:frontend/Dockerfile.unittesting
-COPY package.json package-lock.json ./
-RUN npm install
-
-COPY src src
-COPY public public
-COPY jest.setup.ts jest.setup.ts
-COPY jest.config.ts jest.config.ts
-COPY tsconfig.json tsconfig.json
-COPY __tests__ __tests__
-=======
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
->>>>>>> upstream/main:frontend/Dockerfile.test
 
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/public ./public
