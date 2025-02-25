@@ -83,24 +83,37 @@ const RepositoryDetailsPage = () => {
 
   const RepositoryStats = [
     {
-      icon: faHistory,
-      value: `${repository.commitsCount ? millify(repository.commitsCount, { precision: 1 }) : 'No'} ${pluralize(repository.commitsCount, 'Commit')}`,
-    },
-    {
-      icon: faUsers,
-      value: `${repository.contributorsCount ? millify(repository.contributorsCount, { precision: 1 }) : 'No'} ${pluralize(repository.contributorsCount, 'Contributor')}`,
+      icon: faStar,
+      value: `${
+        repository.starsCount ? millify(repository.starsCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.starsCount, 'Star')}`,
     },
     {
       icon: faCodeFork,
-      value: `${repository.forksCount ? millify(repository.forksCount, { precision: 1 }) : 'No'} ${pluralize(repository.forksCount, 'Fork')}`,
+      value: `${
+        repository.forksCount ? millify(repository.forksCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.forksCount, 'Fork')}`,
     },
+    {
+      icon: faUsers,
+      value: `${
+        repository.contributorsCount
+          ? millify(repository.contributorsCount, { precision: 1 })
+          : 'No'
+      } ${pluralize(repository.contributorsCount, 'Contributor')}`,
+    },
+
     {
       icon: faExclamationCircle,
-      value: `${repository.openIssuesCount ? millify(repository.openIssuesCount, { precision: 1 }) : 'No'} ${pluralize(repository.openIssuesCount, 'Issue')}`,
+      value: `${
+        repository.openIssuesCount ? millify(repository.openIssuesCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.openIssuesCount, 'Issue')}`,
     },
     {
-      icon: faStar,
-      value: `${repository.starsCount ? millify(repository.starsCount, { precision: 1 }) : 'No'} ${pluralize(repository.starsCount, 'Star')}`,
+      icon: faHistory,
+      value: `${
+        repository.commitsCount ? millify(repository.commitsCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.commitsCount, 'Commit')}`,
     },
   ]
   return (
