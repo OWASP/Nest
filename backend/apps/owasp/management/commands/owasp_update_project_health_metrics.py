@@ -1,10 +1,10 @@
 """A command to update OWASP project health metrics data."""
 
 from datetime import timedelta
-from django.utils import timezone
 
 from django.core.management.base import BaseCommand
 from django.db.models import Count, Q
+from django.utils import timezone
 
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
