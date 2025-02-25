@@ -26,8 +26,8 @@
         "$ref": "common.json#/definitions/community"
       },
       "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
+      "optional": true,
+      "uniqueItems": true
     },
     "demo": {
       "description": "Optional URLs to the project demo.",
@@ -117,7 +117,8 @@
       },
       "minItems": 1,
       "additionalProperties": false,
-      "optional": true
+      "optional": true,
+      "uniqueItems": true
     },
     "mailing_list": {
       "description": "The optional mailing list associated with the project.",
@@ -149,7 +150,7 @@
         "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
-      "additionalProperties": false
+      "uniqueItems": true
     },
     "sponsors": {
       "description": "Sponsors of the project.",
@@ -157,7 +158,8 @@
       "items": {
         "$ref": "common.json#/definitions/sponsor"
       },
-      "minItems": 1
+      "minItems": 1,
+      "uniqueItems": true
     },
     "tags": {
       "description": "Tags for the project",

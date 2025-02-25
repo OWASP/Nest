@@ -9,12 +9,8 @@ name: OWASP Chapter
 sponsors:
   - name: CyberSec Corp
     url: https://cybersec.com
-    logo: https://cybersec.com/logo.png
-    description: A cybersecurity sponsor
   - name: CyberSec Corp
     url: https://cybersec.com
-    logo: https://cybersec.com/logo.png
-    description: Duplicate sponsor entry
 tags:
   - chapter-tag-1
   - chapter-tag-2

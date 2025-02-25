@@ -1,9 +1,7 @@
 community:
   - platform: discord
-    description: Discord community
     url: https://discord.com/example
   - platform: discord
-    description: Duplicate Discord community
     url: https://discord.com/example
 country: India
 leaders:

@@ -9,10 +9,10 @@ level: 2
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 sponsors:
-  - name: Sponsor A
-    url: https://sponsor.com
-  - name: Sponsor A
-    url: https://sponsor.com
+  - name: CyberSec Corp
+    url: https://cybersec.com
+  - name: CyberSec Corp
+    url: https://cybersec.com
 tags:
   - example-tag-1
   - example-tag-2

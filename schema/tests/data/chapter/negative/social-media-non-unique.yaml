@@ -9,10 +9,8 @@ name: OWASP Chapter
 social_media:
   - platform: youtube
     url: https://youtube.com/channel/123
-    description: YouTube Channel
   - platform: youtube
     url: https://youtube.com/channel/123
-    description: Duplicate YouTube Channel
 tags:
   - chapter-tag-1
   - chapter-tag-2

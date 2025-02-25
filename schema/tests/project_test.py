@@ -24,6 +24,8 @@ from utils.schema_validators import validate_data
         ("community-empty.yaml", "[] should be non-empty"),
         (
             "community-non-unique.yaml",
+            "[{'platform': 'discord', 'url': 'https://discord.com/example'}, "
+            "{'platform': 'discord', 'url': 'https://discord.com/example'}] "
             "has non-unique elements",
         ),
         ("community-null.yaml", "None is not of type 'array'"),
@@ -55,12 +57,11 @@ from utils.schema_validators import validate_data
         ),
         ("downloads-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
+        ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
         (
             "events-non-unique.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
-        ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
-        ("events-non-unique.yaml", "has non-unique elements"),
         ("events-null.yaml", "None is not of type 'array'"),
         ("leader-empty.yaml", "[] is too short"),
         (
@@ -81,7 +82,12 @@ from utils.schema_validators import validate_data
         ("logo-null.yaml", "None is not of type 'array'"),
         (
             "logo-non-unique.yaml",
-            "has non-unique elements",
+            "[{'small': 'https://example.com/smallLogo.png', "
+            "'medium': 'https://example.com/mediumLogo.png', "
+            "'large': 'https://example.com/largeLogo.png'}, "
+            "{'small': 'https://example.com/smallLogo.png', "
+            "'medium': 'https://example.com/mediumLogo.png', "
+            "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
         ),
         ("mailing-list-empty.yaml", "'' is not a 'uri'"),
         ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
@@ -95,12 +101,21 @@ from utils.schema_validators import validate_data
         ("repositories-null.yaml", "None is not of type 'array'"),
         (
             "repositories-non-unique.yaml",
-            "has non-unique elements",
+            "[{'url': 'https://repo1.com'}, {'url': 'https://repo1.com'}] has non-unique elements",
         ),
         ("social-media-empty.yaml", "[] should be non-empty"),
-        ("social-media-non-unique.yaml", "has non-unique elements"),
+        (
+            "social-media-non-unique.yaml",
+            "[{'platform': 'x', 'url': 'https://x.com'}, "
+            "{'platform': 'x', 'url': 'https://x.com'}] has non-unique elements",
+        ),
         ("social-media-null.yaml", "None is not of type 'array'"),
         ("sponsors-empty.yaml", "[] should be non-empty"),
+        (
+            "sponsors-non-unique.yaml",
+            "[{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}, "
+            "{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}] has non-unique elements",
+        ),
         ("sponsors-null.yaml", "None is not of type 'array'"),
         ("tags-empty.yaml", "[] is too short"),
         ("tags-null.yaml", "None is not of type 'array'"),
