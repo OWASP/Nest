@@ -67,9 +67,9 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
       expect(screen.getByText('Lab')).toBeInTheDocument()
     })
+    expect(screen.getByText('2.2K Stars')).toBeInTheDocument()
     expect(screen.getByText('10 Forks')).toBeInTheDocument()
     expect(screen.getByText('10 Issues')).toBeInTheDocument()
-    expect(screen.getByText('2.2K Stars')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {
@@ -222,9 +222,9 @@ test('renders project stats correctly', async () => {
   render(<ProjectDetailsPage />)
 
   await waitFor(() => {
-    expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
-    expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
     expect(screen.getByText(`2.2K Stars`)).toBeInTheDocument()
+    expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
+    expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
     expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
     expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
   })

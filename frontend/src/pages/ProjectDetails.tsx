@@ -80,24 +80,33 @@ const ProjectDetailsPage = () => {
   ]
   const projectStats = [
     {
-      icon: faUsers,
-      value: `${project.contributorsCount ? millify(project.contributorsCount, { precision: 1 }) : 'No'} ${pluralize(project.contributorsCount, 'Contributor')}`,
+      icon: faStar,
+      value: `${project.starsCount ? millify(project.starsCount, { precision: 1 }) : 'No'}
+        ${pluralize(project.starsCount, 'Star')}`,
     },
     {
       icon: faCodeFork,
-      value: `${project.forksCount ? millify(project.forksCount, { precision: 1 }) : 'No'} ${pluralize(project.forksCount, 'Fork')}`,
+      value: `${project.forksCount ? millify(project.forksCount, { precision: 1 }) : 'No'}
+        ${pluralize(project.forksCount, 'Fork')}`,
     },
     {
-      icon: faStar,
-      value: `${project.starsCount ? millify(project.starsCount, { precision: 1 }) : 'No'} ${pluralize(project.starsCount, 'Star')}`,
-    },
-    {
-      icon: faCode,
-      value: `${project.repositoriesCount ? millify(project.repositoriesCount, { precision: 1 }) : 'No'} ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
+      icon: faUsers,
+      value: `${
+        project.contributorsCount ? millify(project.contributorsCount, { precision: 1 }) : 'No'
+      }
+        ${pluralize(project.contributorsCount, 'Contributor')}`,
     },
     {
       icon: faExclamationCircle,
-      value: `${project.issuesCount ? millify(project.issuesCount, { precision: 1 }) : 'No'} ${pluralize(project.issuesCount, 'Issue')}`,
+      value: `${project.issuesCount ? millify(project.issuesCount, { precision: 1 }) : 'No'}
+        ${pluralize(project.issuesCount, 'Issue')}`,
+    },
+    {
+      icon: faCode,
+      value: `${
+        project.repositoriesCount ? millify(project.repositoriesCount, { precision: 1 }) : 'No'
+      }
+        ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
     },
   ]
   return (
