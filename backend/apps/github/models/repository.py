@@ -102,11 +102,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.path
 
     @property
-    def latest_issue(self):
-        """Repository latest issue."""
-        return self.issues.order_by("-updated_at").first()
-
-    @property
     def latest_pull_request(self):
         """Repository latest pull request."""
         return self.pull_requests.order_by("-created_at").first()
