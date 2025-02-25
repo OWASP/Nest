@@ -1,3 +1,21 @@
+FROM node:22-slim AS builder
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV FORCE_COLOR=1
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY src src
+COPY public public
+COPY jest.setup.ts jest.setup.ts
+COPY jest.config.ts jest.config.ts
+COPY tsconfig.json tsconfig.json
+COPY __tests__ __tests__
+
 FROM node:22-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -11,15 +29,14 @@ RUN groupadd owasp && \
 
 WORKDIR /home/owasp
 
-COPY package.json package-lock.json ./
-RUN npm install
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 
-COPY src src
-COPY public public
-COPY jest.setup.ts jest.setup.ts
-COPY jest.config.ts jest.config.ts
-COPY tsconfig.json tsconfig.json
-COPY __tests__ __tests__
-
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/jest.setup.ts ./jest.setup.ts
+COPY --from=builder /app/jest.config.ts ./jest.config.ts
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/__tests__ ./__tests__
 
 USER owasp
