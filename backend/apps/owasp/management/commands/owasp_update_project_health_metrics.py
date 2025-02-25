@@ -1,6 +1,7 @@
 """A command to update OWASP project health metrics data."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
+from django.utils import timezone
 
 from django.core.management.base import BaseCommand
 from django.db.models import Count, Q
@@ -19,7 +20,7 @@ class Command(BaseCommand):
     def calculate_health_score(self, metrics, requirements):
         """Calculate health score based on various metrics and thresholds using all parameters."""
         score = 0
-        now = datetime.now(timezone.utc)
+        now = timezone.now()
         weight = 100 / 15  # 15 conditions, equal weighting
 
         if metrics.contributors_count >= requirements.contributors_count:
@@ -106,7 +107,7 @@ class Command(BaseCommand):
 
     def get_issue_metrics(self, project, requirements):
         """Aggregate issue metrics across all repositories."""
-        now = datetime.now(timezone.utc)
+        now = timezone.now()
         window_start = now - timedelta(days=requirements.recent_releases_window)
 
         return project.repositories.aggregate(
