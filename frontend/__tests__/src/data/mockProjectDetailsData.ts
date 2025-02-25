@@ -1,6 +1,6 @@
 export const mockProjectDetailsData = {
   project: {
-    contributorsCount: 120,
+    contributorsCount: 1200,
     forksCount: 10,
     issuesCount: 10,
     isActive: true,
@@ -10,7 +10,7 @@ export const mockProjectDetailsData = {
     level: 'Lab',
     name: 'Test Project',
     repositoriesCount: 3,
-    starsCount: 10,
+    starsCount: 2200,
     summary: 'An example project showcasing GraphQL and Django integration.',
     topContributors: Array.from({ length: 15 }, (_, i) => ({
       avatarUrl: `https://example.com/avatar${i + 1}.jpg`,
