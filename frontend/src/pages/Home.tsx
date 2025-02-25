@@ -127,7 +127,7 @@ export default function Home() {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <SecondaryCard title="Recent Chapters">
+        <SecondaryCard title="New Chapters">
           <div className="space-y-4">
             {data.recentChapters.map((chapter) => (
               <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -150,7 +150,7 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
-        <SecondaryCard title="Recent Projects">
+        <SecondaryCard title="New Projects">
           <div className="space-y-4">
             {data.recentProjects.map((project) => (
               <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">

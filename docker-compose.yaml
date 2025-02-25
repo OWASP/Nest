@@ -23,6 +23,7 @@ services:
       - 127.0.0.1:8000:8000
     volumes:
       - ./backend:/home/owasp
+      - /home/owasp/.venv
 
   db:
     container_name: nest-db
