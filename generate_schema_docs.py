@@ -1,36 +1,39 @@
-import os
+from pathlib import Path
 import subprocess
 
-INPUT_DIR = "./schema"
-OUTPUT_DIR = "./docs/schema"
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+def generate_schema_docs():
+    INPUT_DIR = Path("./schema")
+    OUTPUT_DIR = Path("./docs/schema")
 
-for schema_file in os.listdir(INPUT_DIR):
-    if schema_file.endswith(".json"):
-        schema_path = os.path.join(INPUT_DIR, schema_file)
-        base_name = os.path.splitext(schema_file)[0]
-        output_file = os.path.join(OUTPUT_DIR, f"{base_name}.md")
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-        print(f"Processing {schema_path} -> {output_file}")
+    for schema_file in INPUT_DIR.iterdir():
+        if (
+            schema_file.suffix == ".json" and schema_file.name != "common.json"
+        ):  # Exclude common.json
+            base_name = schema_file.stem
+            output_file = OUTPUT_DIR / f"{base_name}.md"
 
-        # Generate the schema documentation
-        subprocess.run(
-            [
-                "generate-schema-doc",
-                "--config",
-                "template_name=md",
-                schema_path,
-                output_file,
-            ],
-            check=True,
-        )
+            print(f"Processing {schema_file} -> {output_file}")
 
-        # Post-process: Remove the auto-generated header line
-        with open(output_file, "r", encoding="utf-8") as f:
-            lines = f.readlines()
+            # Generate the schema documentation
+            subprocess.run(
+                [
+                    "generate-schema-doc",
+                    "--config",
+                    "template_name=md",
+                    str(schema_file),
+                    str(output_file),
+                ],
+                check=True,
+            )
 
-        with open(output_file, "w", encoding="utf-8") as f:
-            for line in lines:
-                if "Generated using" not in line:
-                    f.write(line)
+            # Post-process: Remove the auto-generated header line
+            lines = output_file.read_text(encoding="utf-8").splitlines()
+            filtered_lines = [line for line in lines if "Generated using" not in line]
+            output_file.write_text("\n".join(filtered_lines) + "\n", encoding="utf-8")
+
+
+if __name__ == "__main__":
+    generate_schema_docs()

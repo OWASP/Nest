@@ -1,4 +1,4 @@
-site_name: OWASP NEST Documentation
+site_name: OWASP Nest Documentation
 nav:
   - Home: index.md
   - Code of Conduct: code-of-conduct.md

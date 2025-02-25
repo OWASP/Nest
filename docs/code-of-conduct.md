@@ -19,11 +19,11 @@
 
 We encourage behaviors that contribute to a positive environment:
 
-- ✨ Demonstrating empathy and kindness toward other people
-- 🤝 Being respectful of differing opinions, viewpoints, and experiences
-- 💭 Giving and gracefully accepting constructive feedback
-- 🎓 Accepting responsibility and apologizing for mistakes
-- 🌟 Focusing on what is best for the overall community
+-  Demonstrating empathy and kindness toward other people
+-  Being respectful of differing opinions, viewpoints, and experiences
+-  Giving and gracefully accepting constructive feedback
+-  Accepting responsibility and apologizing for mistakes
+-  Focusing on what is best for the overall community
 
 ### Unacceptable Behaviors
 
