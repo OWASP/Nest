@@ -41,6 +41,10 @@ test-nest-app: \
 	test-backend \
 	test-frontend
 
+update-dependencies: \
+	update-nest-app-dependencies \
+	update-schema-dependencies
+
 update-nest-app-dependencies: \
 	update-backend-dependencies \
 	update-frontend-dependencies

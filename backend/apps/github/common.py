@@ -81,9 +81,9 @@ def sync_repository(gh_repository, organization=None, user=None):
                     issue.labels.add(Label.update_data(gh_issue_label))
                 except UnknownObjectException:
                     logger.info("Couldn't get GitHub issue label %s", issue.url)
-    # GitHub Pull Requests Part!
     else:
         logger.info("Skipping issues sync for %s", repository.name)
+
     if not repository.is_archived and repository.project:
         # Fetch both open and closed PRs from GitHub
         kwargs = {
@@ -133,8 +133,6 @@ def sync_repository(gh_repository, organization=None, user=None):
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
                     logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
-    else:
-        logger.info("Skipping pull request sync for %s", repository.name)
 
     # GitHub repository releases.
     releases = []

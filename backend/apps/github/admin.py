@@ -18,13 +18,11 @@ class LabelAdmin(admin.ModelAdmin):
 
 
 class PullRequestAdmin(admin.ModelAdmin):
-    """Admin settings for Pull Requests."""
-
     autocomplete_fields = (
-        "repository",
-        "author",
         "assignees",
+        "author",
         "labels",
+        "repository",
     )
     list_display = (
         "repository",
@@ -38,7 +36,11 @@ class PullRequestAdmin(admin.ModelAdmin):
         "state",
         "merged_at",
     )
-    search_fields = ("title", "author__login", "repository__name")
+    search_fields = (
+        "author__login",
+        "repository__name",
+        "title",
+    )
 
     def custom_field_github_url(self, obj):
         """Pull Request GitHub URL."""
