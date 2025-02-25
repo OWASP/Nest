@@ -1,9 +1,9 @@
 import sys
-from django.utils import timezone
 from io import StringIO
 from unittest import mock
 
 import pytest
+from django.utils import timezone
 
 from apps.owasp.management.commands.owasp_update_project_health_metrics import Command
 from apps.owasp.models.project import Project
