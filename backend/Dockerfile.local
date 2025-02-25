@@ -28,8 +28,7 @@ RUN groupadd owasp && \
     useradd --create-home --home-dir /home/owasp -g owasp owasp && \
     apt-get update && \
     apt-get install -y libpq-dev && \
-    apt-get clean -y && rm -rf /var/lib/apt/lists/* && \
-    python -m pip install --no-cache-dir poetry
+    apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/home/owasp/.venv/bin:$PATH"
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
