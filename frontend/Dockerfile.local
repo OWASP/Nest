@@ -2,6 +2,8 @@ FROM node:22-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+RUN npm install -g pnpm
+
 RUN mkdir -p /home/owasp && \
     chown -R node:node /home/owasp && \
     apt-get update && apt-get upgrade -y && \
