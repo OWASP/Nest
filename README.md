@@ -4,7 +4,7 @@
 
 # OWASP Nest [Website](https://owasp.org/www-project-nest/)
 
-[![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue?style=for-the-badge)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue?style=for-the-badge) [![Project-Nest](https://img.shields.io/badge/OWASP-Join%20%23project--nest-8E44AD?logo=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
+[![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue?style=for-the-badge)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue?style=for-the-badge) [![Project-Nest](https://img.shields.io/badge/OWASP-%23project--nest-8E44AD?logo=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
 
 ![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&?label=Build&style=for-the-badge) ![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge)
 
