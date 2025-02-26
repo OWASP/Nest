@@ -15,7 +15,6 @@ __pycache__
 .vscode
 venv/
 *.code-workspace
-*.local
 *.log
 backend/.venv
 backend/staticfiles

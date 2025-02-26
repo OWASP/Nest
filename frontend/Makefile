@@ -18,7 +18,7 @@ shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
 test-frontend:
-	@docker build -f frontend/Dockerfile.test frontend -t nest-test-frontend
+	@docker build -f frontend/docker/Dockerfile.test frontend -t nest-test-frontend
 	@docker run --env-file frontend/.env.example nest-test-frontend npm run test
 
 update-frontend-dependencies:
