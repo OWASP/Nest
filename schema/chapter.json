@@ -86,6 +86,20 @@
   "additionalProperties": false,
   "description": "OWASP chapter schema.",
   "properties": {
+    "audience": {
+      "description": "The intended audience for the chapter.",
+      "enum": [
+        "breaker",
+        "builder",
+        "defender"
+      ],
+      "enumDescriptions": [
+        "Security testers and ethical hackers.",
+        "Developers and engineers.",
+        "Security professionals and defenders."
+      ],
+      "type": "string"
+    },
     "blog": {
       "description": "Chapter's blog.",
       "format": "uri",
@@ -126,7 +140,7 @@
       "minItems": 2,
       "uniqueItems": true
     },
-    "logo": {
+   "logo": {
       "description": "Logo for the chapter.",
       "type": "array",
       "items": {
@@ -139,7 +153,16 @@
     "meetup-group": {
       "description": "Meetup group.",
       "type": "string"
+    }, "pitch": {
+      "description": "The Chapter pitch.",
+      "type": "string"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the chapter.",
+      "format": "uri",
+      "type":["string", "null"]
+    },
+
     "name": {
       "description": "The unique name of the chapter.",
       "minLength": 10,
@@ -174,6 +197,20 @@
       },
       "minItems": 3,
       "uniqueItems": true
+    },
+    "type": {
+      "description": "The type of the chapter: code, documentation or tool.",
+      "enum": [
+        "code",
+        "documentation",
+        "tool"
+      ],
+      "enumDescriptions": [
+        "Code chapters",
+        "Documentation, standards, etc.",
+        "Tools"
+      ],
+      "type": "string"
     },
     "website": {
       "description": "The official website of the chapter.",
