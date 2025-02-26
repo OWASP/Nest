@@ -56,20 +56,13 @@ export type User = {
 }
 
 export interface UserDetailsProps {
-  avatarUrl: string
-  bio: string | null
-  company: string | null
-  createdAt: string
-  email: string | null
-  followersCount: number
-  followingCount: number
-  issues?: Issue[]
-  issuesCount: number
-  location: string | null
-  login: string
-  name: string | null
-  publicRepositoriesCount: number
-  releases?: Release[]
-  releasesCount: number
-  url: string
+  name: string
+  email?: string
+  avatarUrl?: string
+  bio?: string
+  github?: string
+  linkedin?: string
+  twitter?: string
+  location?: string
+  company?: string
 }
