@@ -20,18 +20,22 @@ const ItemCardList = ({
     {data && data.length > 0 ? (
       <div className="h-64 overflow-y-auto pr-2">
         {data.map((item, index) => (
-          <div key={index} className="mb-4  rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-            <h3 className="font-semibold text-ellipsis overflow-hidden whitespace-nowrap">{item.title || item.name}</h3>
-            <div className='flex flex-grow-0 flex-col lg:flex-row justify-between'>
+          <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+            <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
+              {item.title || item.name}
+            </h3>
+            <div className="flex flex-grow-0 flex-col justify-between lg:flex-row">
               <div className="mt-2 flex items-center">
-                {item?.author?.name && <img
-                  src={item?.author?.avatarUrl}
-                  alt={item?.author?.name}
-                  className="mr-2 h-6 w-6 rounded-full"
-                />}
+                {item?.author?.name && (
+                  <img
+                    src={item?.author?.avatarUrl}
+                    alt={item?.author?.name}
+                    className="mr-2 h-6 w-6 rounded-full"
+                  />
+                )}
                 <span>{item?.author?.name || item?.author?.login}</span>
               </div>
-               <div>{renderDetails(item)}</div>
+              <div>{renderDetails(item)}</div>
             </div>
           </div>
         ))}
