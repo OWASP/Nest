@@ -39,6 +39,7 @@ export const mockGraphQLData = {
       title: 'Documentation : Project Setup Documentation Update',
       author: {
         avatarUrl: 'https://avatars.githubusercontent.com/u/134638667?v=4',
+        url: 'https://github.com/arkid15r',
         name: 'Raj gupta',
       },
     },

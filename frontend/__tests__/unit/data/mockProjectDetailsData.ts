@@ -43,6 +43,7 @@ export const mockProjectDetailsData = {
         author: {
           avatarUrl: 'https://example.com/avatar4.png',
           login: 'dave_debugger',
+          url: 'https://github.com/arkid15r',
           name: 'Dave Debugger',
         },
       },

@@ -21,6 +21,7 @@ class TestIssueNode:
             "created_at",
             "number",
             "state",
+            "url",
             "title",
         }
         assert set(IssueNode._meta.fields) == expected_fields

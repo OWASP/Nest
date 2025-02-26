@@ -128,6 +128,7 @@ export const mockHomeData = {
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4',
           name: 'Author 1',
+          url: 'https://github.com/arkid15r',
           __typename: 'UserNode',
         },
         __typename: 'IssueNode',
@@ -140,6 +141,7 @@ export const mockHomeData = {
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/2?v=4',
           name: 'Author 2',
+          url: 'https://github.com/arkid15r',
           __typename: 'UserNode',
         },
         __typename: 'IssueNode',
