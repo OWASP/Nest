@@ -1,10 +1,10 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
+import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { toast } from 'hooks/useToast'
 import { Home } from 'pages'
 import { render } from 'wrappers/testUtil'
-import { mockAlgoliaData, mockGraphQLData } from '@tests/data/mockHomeData'
 
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),

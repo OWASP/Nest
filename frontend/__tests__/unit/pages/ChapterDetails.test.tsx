@@ -1,9 +1,8 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
+import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
-import { mockChapterDetailsData } from '@tests/data/mockChapterDetailsData'
-
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),
 }))

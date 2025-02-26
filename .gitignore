@@ -19,11 +19,15 @@ venv/
 backend/.venv
 backend/staticfiles
 frontend/.npm
+frontend/blob-report/
 frontend/coverage
 frontend/dist
 frontend/node_modules
 frontend/npm-debug.log*
+frontend/playwright-report/
+frontend/playwright/.cache/
 frontend/pnpm-debug.log*
+frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 schema/.venv
