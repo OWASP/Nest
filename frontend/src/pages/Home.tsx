@@ -33,6 +33,7 @@ export default function Home() {
 
   useEffect(() => {
     if (graphQLData) {
+      console.log('graph data ',graphQLData);
       setData(graphQLData)
       setIsLoading(false)
     }
@@ -190,7 +191,7 @@ export default function Home() {
           title="Recent Issues"
           data={data.recentIssues}
           renderDetails={(item) => (
-            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
+            <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
               <span>{formatDate(item.createdAt)}</span>
               <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
@@ -202,11 +203,14 @@ export default function Home() {
           title="Recent Releases"
           data={data.recentReleases}
           renderDetails={(item) => (
-            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
+            <div className="mt-2 flex flex-shrink-0 text-sm text-gray-600 dark:text-gray-300">
+              <div className=''>
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-              <span>{formatDate(item.publishedAt)}</span>
-              <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
-              <span>{item.tagName}</span>
+              <span className=''>{formatDate(item.publishedAt)}</span>
+              </div>
+             <div className=' text-ellipsis overflow-hidden whitespace-nowrap flex flex-row'>
+             <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-1/5" />
+               <span className='w-[100px] text-ellipsis overflow-hidden whitespace-nowrap flex-grow-0 flex-col lg:flex-row justify-between'>{item.tagName}</span></div>
             </div>
           )}
         />
