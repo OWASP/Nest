@@ -4,7 +4,7 @@
   "definitions": {
     "community": {
       "additionalProperties": false,
-      "description": "A project community.",
+      "description": "Community",
       "properties": {
         "description": {
           "description": "A brief description of the community.",
@@ -28,7 +28,7 @@
     },
 
     "logo": {
-      "description": "A logo for the chapter",
+      "description": "A logo",
       "type": "object",
       "properties": {
         "small": {
@@ -85,20 +85,23 @@
     "repository": {
       "type": "object",
       "title": "Repository",
-      "description": "A project repository.",
+      "description": "A repository",
       "properties": {
         "changelog": {
           "description": "Link to the changelog",
+          "format": "uri",
           "minLength": 5,
           "type": "string"
         },
         "code_of_conduct": {
           "description": "Link to the code of conduct",
+          "format": "uri",
           "minLength": 5,
           "type": "string"
         },
         "contribution_guide": {
           "description": "Link to the contribution guide",
+          "format": "uri",
           "minLength": 5,
           "type": "string"
         },
@@ -149,10 +152,11 @@
 
     "sponsor": {
       "additionalProperties": false,
-      "description": "A project sponsor.",
+      "description": "A sponsor entity",
       "properties": {
         "description": {
           "description": "A brief description of the sponsor",
+          "minLength": 5,
           "type": "string"
         },
         "logo": {

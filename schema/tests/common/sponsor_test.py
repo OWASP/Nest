@@ -10,6 +10,7 @@ SCHEMA_NAME = "sponsor"
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
+        ("description-empty.yaml", "'' is too short"),
         ("description-null.yaml", "None is not of type 'string'"),
         ("logo-empty.yaml", "'' is not a 'uri'"),
         ("logo-null.yaml", "None is not a 'uri'"),

@@ -19,6 +19,7 @@ from utils.schema_validators import validate_data
         ("audience-empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience-null.yaml", "None is not one of ['breaker', 'builder', 'defender']"),
         ("audience-undefined.yaml", "'audience' is a required property"),
+        ("blog-empty.yaml", "'' is not a 'uri'"),
         ("blog-invalid.yaml", "'https://invalid/' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
         ("community-empty.yaml", "[] should be non-empty"),
@@ -63,21 +64,21 @@ from utils.schema_validators import validate_data
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
         ("events-null.yaml", "None is not of type 'array'"),
-        ("leader-empty.yaml", "[] is too short"),
+        ("leaders-empty.yaml", "[] is too short"),
         (
-            "leader-non-unique.yaml",
+            "leaders-non-unique.yaml",
             "[{'github': 'leader1'}, {'github': 'leader1'}] has non-unique elements",
         ),
-        ("leader-null.yaml", "None is not of type 'array'"),
-        ("leader-undefined.yaml", "'leaders' is a required property"),
+        ("leaders-null.yaml", "None is not of type 'array'"),
+        ("leaders-undefined.yaml", "'leaders' is a required property"),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
+        ("level-undefined.yaml", "'level' is a required property"),
         (
             "license-invalid.yaml",
             "'INVALID-LICENSE-VALUE' is not one of ['AGPL-3.0', 'Apache-2.0', 'BSD-2-Clause', "
             "'BSD-3-Clause', 'CC-BY-4.0', 'CC-BY-SA-4.0', 'CC0-1.0', 'EUPL-1.2', 'GPL-2.0', "
             "'GPL-3.0', 'LGPL-2.1', 'LGPL-3.0', 'MIT', 'MPL-2.0', 'OTHER']",
         ),
-        ("level-undefined.yaml", "'level' is a required property"),
         ("logo-empty.yaml", "[] should be non-empty"),
         ("logo-null.yaml", "None is not of type 'array'"),
         (
@@ -95,14 +96,15 @@ from utils.schema_validators import validate_data
         ("name-empty.yaml", "'' is too short"),
         ("name-null.yaml", "None is not of type 'string'"),
         ("name-undefined.yaml", "'name' is a required property"),
+        ("pitch-empty.yaml", "'' is too short"),
         ("pitch-null.yaml", "None is not of type 'string'"),
         ("pitch-undefined.yaml", "'pitch' is a required property"),
         ("repositories-empty.yaml", "[] should be non-empty"),
-        ("repositories-null.yaml", "None is not of type 'array'"),
         (
             "repositories-non-unique.yaml",
             "[{'url': 'https://repo1.com'}, {'url': 'https://repo1.com'}] has non-unique elements",
         ),
+        ("repositories-null.yaml", "None is not of type 'array'"),
         ("social-media-empty.yaml", "[] should be non-empty"),
         (
             "social-media-non-unique.yaml",

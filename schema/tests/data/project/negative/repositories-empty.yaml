@@ -9,11 +9,6 @@ level: 2
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 repositories: []
-sponsors:
-  - description: Sponsor 1 description
-    logo: https://sponsor1.com/logo.png
-    name: Sponsor 1
-    url: https://sponsor1.com
 tags:
   - example-tag-1
   - example-tag-2

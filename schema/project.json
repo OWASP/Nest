@@ -26,7 +26,6 @@
         "$ref": "common.json#/definitions/community"
       },
       "minItems": 1,
-      "optional": true,
       "uniqueItems": true
     },
     "demo": {
@@ -132,6 +131,7 @@
     },
     "pitch": {
       "description": "The project pitch.",
+      "minLength": 10,
       "type": "string"
     },
     "repositories": {

@@ -10,10 +10,15 @@ SCHEMA_NAME = "repository"
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("changelog-empty.yaml", "'' is too short"),
-        ("code_of_conduct-empty.yaml", "'' is too short"),
-        ("contribution_guide-empty.yaml", "'' is too short"),
+        ("changelog-empty.yaml", "'' is not a 'uri'"),
+        ("changelog-null.yaml", "None is not a 'uri'"),
+        ("code_of_conduct-empty.yaml", "'' is not a 'uri'"),
+        ("code_of_conduct-null.yaml", "None is not a 'uri'"),
+        ("contribution_guide-empty.yaml", "'' is not a 'uri'"),
+        ("contribution_guide-null.yaml", "None is not a 'uri'"),
+        ("description-empty.yaml", "'' is too short"),
         ("description-null.yaml", "None is not of type 'string'"),
+        ("name-empty.yaml", "'' is too short"),
         ("name-null.yaml", "None is not of type 'string'"),
         ("url-empty.yaml", "'' is not a 'uri'"),
         ("url-invalid.yaml", "'github/repo' is not a 'uri'"),

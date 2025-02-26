@@ -12,6 +12,7 @@ from utils.schema_validators import validate_data
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
+        ("blog-empty.yaml", "'' is not a 'uri'"),
         ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
         ("community-empty.yaml", "[] should be non-empty"),
@@ -22,6 +23,7 @@ from utils.schema_validators import validate_data
             "has non-unique elements",
         ),
         ("community-null.yaml", "None is not of type 'array'"),
+        ("country-empty.yaml", "'' should be non-empty"),
         ("country-null.yaml", "None is not of type 'string'"),
         ("country-undefined.yaml", "'country' is a required property"),
         ("events-empty.yaml", "[] should be non-empty"),
@@ -29,9 +31,14 @@ from utils.schema_validators import validate_data
             "events-non-unique.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
-        ("events-null.yaml", "[] should be non-empty"),
-        ("leader-empty.yaml", "[] is too short"),
-        ("leader-undefined.yaml", "'leaders' is a required property"),
+        ("events-null.yaml", "None is not of type 'array'"),
+        ("leaders-empty.yaml", "[] is too short"),
+        (
+            "leaders-non-unique.yaml",
+            "[{'github': 'leader1'}, {'github': 'leader1'}] has non-unique elements",
+        ),
+        ("leaders-null.yaml", "None is not of type 'array'"),
+        ("leaders-undefined.yaml", "'leaders' is a required property"),
         ("logo-empty.yaml", "[] should be non-empty"),
         (
             "logo-non-unique.yaml",
@@ -43,9 +50,13 @@ from utils.schema_validators import validate_data
             "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
         ),
         ("logo-null.yaml", "None is not of type 'array'"),
+        ("meetup_group-empty.yaml", "'' should be non-empty"),
+        ("meetup_group-null.yaml", "None is not of type 'string'"),
         ("name-empty.yaml", "'' is too short"),
-        ("name-none.yaml", "None is not of type 'string'"),
+        ("name-null.yaml", "None is not of type 'string'"),
         ("name-undefined.yaml", "'name' is a required property"),
+        ("region-empty.yaml", "'' should be non-empty"),
+        ("region-null.yaml", "None is not of type 'string'"),
         ("social-media-empty.yaml", "[] should be non-empty"),
         (
             "social-media-non-unique.yaml",
