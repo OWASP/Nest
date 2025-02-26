@@ -1,23 +1,25 @@
 import {
-  Home,
-  ProjectsPage,
-  CommitteesPage,
-  ChaptersPage,
-  ContributePage,
-  ProjectDetailsPage,
-  CommitteeDetailsPage,
   ChapterDetailsPage,
-  UsersPage,
-  UserDetailsPage,
+  ChaptersPage,
+  CommitteeDetailsPage,
+  CommitteesPage,
+  ContributePage,
+  Home,
+  ProjectDetailsPage,
+  ProjectsPage,
   RepositoryDetailsPage,
+  UserDetailsPage,
+  UsersPage,
 } from 'pages'
 import { useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
-import { ErrorDisplay, ERROR_CONFIGS } from 'wrappers/ErrorWrapper'
+import { Route, Routes, useLocation } from 'react-router-dom'
+import { ERROR_CONFIGS, ErrorDisplay } from 'wrappers/ErrorWrapper'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
 import { Toaster } from 'components/ui/Toaster'
+import ScrollUp from './components/ScrollUp'
+import './components/ScrollUp.css'
 
 function App() {
   const location = useLocation()
@@ -48,6 +50,7 @@ function App() {
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />
+      <ScrollUp />
     </main>
   )
 }
