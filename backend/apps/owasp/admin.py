@@ -11,14 +11,22 @@ from apps.owasp.models.snapshot import Snapshot
 
 
 class GenericEntityAdminMixin:
+    def get_queryset(self, request):
+        """Get queryset."""
+        return super().get_queryset(request).prefetch_related("repositories")
+
     def custom_field_github_urls(self, obj):
         """Entity GitHub URLs."""
+        if not hasattr(obj, "repositories"):
+            return mark_safe(  # noqa: S308
+                f"<a href='https://github.com/{obj.owasp_repository.owner.login}/"
+                f"{obj.owasp_repository.key}' target='_blank'>↗️</a>"
+            )
+
         urls = [
             f"<a href='https://github.com/{repository.owner.login}/"
             f"{repository.key}' target='_blank'>↗️</a>"
-            for repository in (
-                obj.repositories.all() if hasattr(obj, "repositories") else [obj.owasp_repository]
-            )
+            for repository in obj.repositories.all()
         ]
 
         return mark_safe(" ".join(urls))  # noqa: S308

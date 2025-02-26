@@ -123,7 +123,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
       disabled={window.innerWidth < desktopViewMinWidth}
     >
       <div style={{ position: 'relative' }}>
-        <div id="chapter-map" style={style} />
+        <div id="chapter-map" className="rounded-lg dark:bg-[#212529]" style={style} />
       </div>
     </Tooltip>
   )
