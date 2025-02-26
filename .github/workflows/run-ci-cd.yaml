@@ -178,7 +178,7 @@ jobs:
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest npm run test:unit
 
   run-frontend-e2e-tests:
-    name: Run frontend end-to-end tests
+    name: Run frontend e2e tests
     needs:
       - pre-commit
     runs-on: ubuntu-latest
