@@ -26,7 +26,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends libpq-dev && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --system owasp && \
-    useradd --system --create-home --home-dir /home/owasp -g owasp owasp
+    useradd --system --create-home --home-dir /home/owasp -g owasp owasp && \
+    python -m pip install --no-cache-dir poetry
 
 ENV PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
