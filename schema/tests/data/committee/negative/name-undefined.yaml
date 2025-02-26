@@ -1,0 +1,13 @@
+description: This committee is missing the name property.
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+scope: test scope and purpose of the project
+tags:
+  - development
+  - education
+  - security

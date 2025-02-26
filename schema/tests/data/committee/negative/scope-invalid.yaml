@@ -1,0 +1,13 @@
+description: This committee has no scope defined.
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+name: OWASP Committee
+tags:
+  - development
+  - education
+  - security

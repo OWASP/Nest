@@ -1,0 +1,52 @@
+community:
+  - platform: slack
+    url: https://example.com/slack
+  - platform: discord
+    url: https://example.com/discord
+description: This committee supports development initiatives.
+events:
+  - title: Development Workshop
+    date: '2023-12-01'
+    location: Online
+    description: Workshop on development best practices.
+    url: https://example.com/workshop
+leaders:
+  - name: Alice Johnson
+    role: chair
+    github: Person-1
+    email: alice@example.com
+  - name: Bob Smith
+    role: vice chair
+    email: bob@example.com
+    github: Person-2
+logo:
+  - small: https://example.com/smallLogoDev
+    medium: https://example.com/mediumLogoDev
+    large: https://example.com/largeLogoDev
+mailing_list: https://example.com/mailing-list
+meeting_minutes:
+  - date: '2023-01-15'
+    url: https://example.com/minutes/2023-01-15
+name: OWASP Development Committee
+pitch: Advancing secure development through collaboration.
+resources:
+  - type: guide
+    title: Security Best Practices
+    url: https://example.com/security-guide
+scope: test scope and purpose of the project
+social_media:
+  - platform: x
+    url: https://x.com/owasp-dev
+  - platform: linkedin
+    url: https://linkedin.com/company/owasp-dev
+sponsors:
+  - name: Sponsor One
+    url: https://sponsor1.com
+  - name: Sponsor Two
+    url: https://sponsor2.com
+tags:
+  - development
+  - collaboration
+  - security
+  - OWASP
+website: https://example.com/owasp-dev

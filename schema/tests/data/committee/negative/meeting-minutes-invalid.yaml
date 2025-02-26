@@ -1,0 +1,17 @@
+description: This committee has an invalid meeting minute date.
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+meeting_minutes:
+  - date: '2024-02-26'
+    url: https://xyz
+name: OWASP Committee
+scope: test scope and purpose of project
+tags:
+  - security
+  - education
+  - development

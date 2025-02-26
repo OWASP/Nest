@@ -1,0 +1,8 @@
+description: This committee has null leaders.
+leaders:
+name: OWASP Committee
+scope: test scope and purpose of the project
+tags:
+  - security
+  - education
+  - development
