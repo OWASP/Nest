@@ -210,7 +210,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
           context: backend
-          file: backend/Dockerfile.staging
+          file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
@@ -230,7 +230,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.staging
+          file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
@@ -351,7 +351,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
           context: backend
-          file: backend/Dockerfile.production
+          file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
@@ -371,7 +371,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.production
+          file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
