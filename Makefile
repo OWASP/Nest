@@ -24,8 +24,7 @@ check-test-backend: \
 
 check-test-frontend: \
 	check-frontend \
-	unittest-frontend \
-	e2etest-frontend
+	test-frontend
 
 pre-commit:
 	@pre-commit run -a
@@ -40,8 +39,7 @@ test-all: \
 
 test-nest-app: \
 	test-backend \
-	unittest-frontend \
-	e2etest-frontend
+	test-frontend
 
 update-dependencies: \
 	update-nest-app-dependencies \

@@ -1,20 +1,12 @@
-FROM mcr.microsoft.com/playwright:v1.50.1-noble
+FROM mcr.microsoft.com/playwright:v1.50.1-noble AS builder
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV FORCE_COLOR=1
 
-RUN groupadd owasp && \
-    useradd --create-home --home-dir /home/owasp -g owasp owasp && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get clean -y && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /home/owasp
+WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm install
 
-COPY  . .
-
-RUN chmod -R 777 /home/owasp
-
-USER owasp
+COPY . .

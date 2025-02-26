@@ -12,9 +12,9 @@
     "lint:check": "eslint . --config eslint.config.js --max-warnings=0",
     "preview": "vite preview",
     "test:all": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest && npx playwright test",
-    "test:jest": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest",
-    "test:jest-coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
-    "test:playwright": "npx playwright test",
+    "test:e2e": "npx playwright test",
+    "test:unit:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
+    "test:unit": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest",
     "watch": "jest --watch"
   },
   "dependencies": {

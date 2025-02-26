@@ -17,17 +17,17 @@ lint-frontend-code:
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
-test-e2e-frontend:
-	@docker build -f frontend/Dockerfile.e2e.test frontend -t nest-e2e-test-frontend
-	@docker run --env-file frontend/.env.example nest-e2etesting-frontend npm run test:e2e
-
 test-frontend: \
-	test-unit-frontend \
-	test-e2e-frontend
+	test-frontend-e2e \
+	test-frontend-unit
 
-test-unit-frontend:
-	@docker build -f frontend/docker/Dockerfile.unit.test frontend -t nest-unit-test-frontend
-	@docker run --env-file frontend/.env.example nest-test-frontend npm run test:unit
+test-frontend-e2e:
+	@docker build -f frontend/docker/Dockerfile.e2e.test frontend -t nest-test-frontend-e2e
+	@docker run --env-file frontend/.env.example nest-test-frontend-e2e npm run test:e2e
+
+test-frontend-unit:
+	@docker build -f frontend/docker/Dockerfile.unit.test frontend -t nest-test-frontend-unit
+	@docker run --env-file frontend/.env.example nest-test-frontend-unit npm run test:unit
 
 update-frontend-dependencies:
 	@CMD="npm update" $(MAKE) exec-frontend-command-it

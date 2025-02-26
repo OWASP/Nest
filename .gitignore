@@ -24,8 +24,8 @@ frontend/coverage
 frontend/dist
 frontend/node_modules
 frontend/npm-debug.log*
-frontend/playwright/.cache/
 frontend/playwright-report/
+frontend/playwright/.cache/
 frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
