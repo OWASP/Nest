@@ -142,7 +142,7 @@ jobs:
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           context: backend
-          file: backend/Dockerfile.test
+          file: backend/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
@@ -168,14 +168,14 @@ jobs:
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:cache
           context: frontend
-          file: frontend/Dockerfile.unittesting
+          file: frontend/docker/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unit-test-frontend:latest
 
       - name: Run frontend unit tests
         run: |
-          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:latest npm run test:jest
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unit-test-frontend:latest npm run test:unit
 
   run-frontend-e2e-tests:
     name: Run frontend end-to-end tests
@@ -192,16 +192,16 @@ jobs:
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:cache
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2e-test-frontend:cache
           context: frontend
-          file: frontend/Dockerfile.e2etesting
+          file: frontend/docker/Dockerfile.e2e.test
           load: true
           platforms: linux/amd64
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2e-test-frontend:latest
 
       - name: Run frontend end-to-end tests
         run: |
-          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:latest npm run test:playwright
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2e-test-frontend:latest npm run test:e2e
 
   build-docker-staging-images:
     name: Build Docker Staging Images
@@ -237,19 +237,19 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
           context: backend
-          file: backend/Dockerfile.staging
+          file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.staging
-          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
-          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.staging
-          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env.staging
-          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env.staging
-          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env.staging
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env
+          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
@@ -257,7 +257,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.staging
+          file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
@@ -379,19 +379,19 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
           context: backend
-          file: backend/Dockerfile.production
+          file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.production
-          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.production
-          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.production
-          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env.production
-          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env.production
-          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env.production
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
+          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
@@ -399,7 +399,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.production
+          file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production

@@ -1,4 +1,4 @@
-name: Update Nest test images
+name: Update Nest Test Images
 
 on:
   schedule:
@@ -32,7 +32,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.test
+          file: frontend/docker/Dockerfile.test
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
@@ -43,18 +43,18 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.unittesting
+          file: frontend/docker/Dockerfile.unit.test
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unittesting-frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-unit-test-frontend:latest
 
       - name: Update frontend end-to-end test image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2e-test-frontend:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2e-test-frontend:cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.e2etesting
+          file: frontend/docker/Dockerfile.e2e.test
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-e2etesting-frontend:latest
@@ -65,7 +65,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache,mode=max
           context: schema
-          file: schema/Dockerfile.test
+          file: schema/docker/Dockerfile.test
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest
