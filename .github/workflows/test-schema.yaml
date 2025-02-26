@@ -102,7 +102,7 @@ jobs:
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
           context: schema
-          file: schema/Dockerfile.test
+          file: schema/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest

@@ -1,14 +1,24 @@
-# OWASP Nest
+<div align="center">
 
-[![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue) [![Slack](https://img.shields.io/badge/OWASP-Slack-blue.svg)](https://owasp.slack.com/messages/project-nest)
+<img src="https://nest.owasp.org/img/owasp_icon_white_sm.png" alt="OWASP Logo" width="200" height="200">
 
-![Python 3.13](https://img.shields.io/badge/Python-3.13-41BE4A.svg) ![Django 5](https://img.shields.io/badge/Django-5-41BE4A.svg) ![Ruff](https://img.shields.io/badge/Ruff-0.8.4-41BE4A) ![PyTest](https://img.shields.io/badge/PyTest-8.3.4-41BE4A)
+# [OWASP Nest](https://nest.owasp.org/)
 
-![Node 22](https://img.shields.io/badge/Node-22-blue.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg) ![Code Style](https://img.shields.io/badge/ESLint-9.17-blue) ![Code Style](https://img.shields.io/badge/Prettier-3.4.2-blue)
+[![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue?style=for-the-badge)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue?style=for-the-badge) [![Project-Nest](https://img.shields.io/badge/OWASP-%23project--nest-8E44AD?logo=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
 
-![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/ci-cd.yaml?branch=main&color=41BE41&style=flat&label=Build) ![GitHub License](https://img.shields.io/github/license/owasp/nest?style=flat&color=41BE4A&label=License) ![GitHub contributors](https://img.shields.io/github/contributors/owasp/nest?style=flat&label=Contributors) ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=flat&label=Last%20commit)
+![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&?label=Build&style=for-the-badge)
+![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge)
 
-![GitHub Forks](https://img.shields.io/github/stars/owasp/nest?color=blue&style=flat&label=Stars) ![GitHub forks](https://img.shields.io/github/forks/owasp/nest?style=flat&color=blue&label=Forks) ![Issues](https://img.shields.io/github/issues/owasp/nest?style=flat&color=blue&label=Issues) ![Pull Requests](https://img.shields.io/github/issues-pr/owasp/nest?style=flat&color=blue&label=Pull%20Requests)
+![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)
+![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)
+
+![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors)
+![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=for-the-badge&label=Last%20commit)
+
+![Issues](https://img.shields.io/github/issues/owasp/nest?style=for-the-badge&label=Issues)
+![PRs](https://img.shields.io/github/issues-pr/owasp/nest?style=for-the-badge&label=PRs)
+
+</div>
 
 **OWASP Nest** is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
