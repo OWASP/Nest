@@ -1,0 +1,15 @@
+description: This committee has an empty mailing list.
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+mailing_list: ''
+name: OWASP Committee
+scope: test scope and purpose of the project
+tags:
+  - security
+  - education
+  - development

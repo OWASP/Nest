@@ -1,0 +1,17 @@
+description: This committee has an invalid sponsor URL.
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+name: OWASP Committee
+scope: test scope and purpose of the project
+sponsors:
+  - name: Invalid Sponsor
+    url: https://xyz
+tags:
+  - security
+  - education
+  - development

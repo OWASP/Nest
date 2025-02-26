@@ -1,0 +1,18 @@
+description: This committee has an invalid resource.
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+name: OWASP Committee
+resources:
+  - type: guide
+    title: ''
+    url: https://xyz
+scope: test scope and purpose of the project
+tags:
+  - development
+  - education
+  - security

@@ -1,0 +1,255 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/committee.json",
+  "$defs": {
+    "event": {
+      "description": "An event organized or sponsored by the committee.",
+      "properties": {
+        "date": {
+          "description": "Date of the event.",
+          "format": "date",
+          "type": "string"
+        },
+        "description": {
+          "description": "Brief description of the event.",
+          "type": "string"
+        },
+        "location": {
+          "description": "Location where the event will be held.",
+          "type": "string"
+        },
+        "title": {
+          "description": "Title of the event.",
+          "type": "string"
+        },
+        "url": {
+          "description": "Link to more details about the event.",
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "date",
+        "url"
+      ],
+      "title": "Event",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "logo": {
+      "description": "A logo for the committee",
+      "properties": {
+        "large": {
+          "description": "Logo size should be 512x512 pixels.",
+          "format": "uri",
+          "type": "string"
+        },
+        "medium": {
+          "description": "Logo size should be 256x256 pixels.",
+          "format": "uri",
+          "type": "string"
+        },
+        "small": {
+          "description": "Logo size should be 192x192 pixels.",
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "meeting_minute": {
+      "description": "An archived meeting minute of the committee.",
+      "properties": {
+        "date": {
+          "description": "Date of the meeting.",
+          "format": "date",
+          "type": "string"
+        },
+        "url": {
+          "description": "Link to the document containing the meeting minutes.",
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "url"
+      ],
+      "title": "Meeting Minute",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "OWASP Committee Schema",
+  "properties": {
+    "community": {
+      "description": "A list of community platforms associated with the committee.",
+      "items": {
+        "$ref": "common.json#/definitions/community"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "description": {
+      "description": "Detailed description of the committee's purpose and activities.",
+      "type": "string"
+    },
+    "events": {
+      "description": "List of events organized or sponsored by the committee.",
+      "items": {
+        "$ref": "#/$defs/event"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "leaders": {
+      "additionalProperties": true,
+      "description": "Leaders of the committee.",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "common.json#/definitions/person"
+          },
+          {
+            "properties": {
+              "role": {
+                "description": "Role of the leader.",
+                "enum": [
+                  "chair",
+                  "vice chair",
+                  "Secretary"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "role"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "minItems": 2,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "logo": {
+      "additionalProperties": false,
+      "description": "Logo for the committee.",
+      "items": {
+        "$ref": "#/$defs/logo"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "mailing_list": {
+      "description": "The optional mailing list associated with the committee.",
+      "format": "uri",
+      "type": "string"
+    },
+    "meeting_minutes": {
+      "description": "Archived meeting minutes of the committee.",
+      "items": {
+        "$ref": "#/$defs/meeting_minute"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "name": {
+      "description": "The unique name of the committee.",
+      "minLength": 8,
+      "type": "string"
+    },
+    "pitch": {
+      "description": "A short pitch or tagline summarizing the committee's mission and objectives.",
+      "minLength": 8,
+      "type": "string"
+    },
+    "resources": {
+      "description": "General resources provided by the committee.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "description": "Title of the resource.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of resource (e.g., 'guide', 'tool').",
+            "type": "string"
+          },
+          "url": {
+            "description": "Link to access the resource.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "url"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "scope": {
+      "description": "Scope and purpose of committee",
+      "items": {
+        "type": "string"
+      },
+      "type": "string"
+    },
+    "social_media": {
+      "additionalProperties": false,
+      "description": "Social media information for the committee.",
+      "items": {
+        "$ref": "common.json#/definitions/social_media"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "sponsors": {
+      "description": "Sponsors of the committee.",
+      "items": {
+        "$ref": "common.json#/definitions/sponsor"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "tags": {
+      "description": "Tags for the committee.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "website": {
+      "description": "The official website of the committee.",
+      "format": "uri",
+      "minLength": 4,
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "leaders",
+    "name",
+    "scope",
+    "tags"
+  ],
+  "title": "OWASP Committee Schema",
+  "type": "object"
+}

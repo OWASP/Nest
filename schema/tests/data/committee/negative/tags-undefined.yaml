@@ -1,0 +1,10 @@
+description: This committee is missing the tags property.
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+name: OWASP Committee
+scope: test scope and purpose of the project

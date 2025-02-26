@@ -1,0 +1,20 @@
+description: This committee has an invalid event URL.
+events:
+  - title: Invalid Event
+    date: 2023-12-01
+    location: Online
+    description: Event with an invalid URL.
+    url: https://xyz
+leaders:
+  - github: leader1-github
+    name: Leader One
+    role: chair
+  - github: leader2-github
+    name: Leader Two
+    role: vice chair
+name: OWASP Committee
+scope: test scope and purpose of the project
+tags:
+  - security
+  - education
+  - development
