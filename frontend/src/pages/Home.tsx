@@ -33,7 +33,6 @@ export default function Home() {
 
   useEffect(() => {
     if (graphQLData) {
-      console.log('graph data ',graphQLData);
       setData(graphQLData)
       setIsLoading(false)
     }
