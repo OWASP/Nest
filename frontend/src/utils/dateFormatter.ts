@@ -10,7 +10,7 @@ export const formatDate = (input: number | string) => {
 
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   })
 }
