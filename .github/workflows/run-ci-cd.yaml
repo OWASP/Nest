@@ -167,6 +167,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
@@ -193,6 +194,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
