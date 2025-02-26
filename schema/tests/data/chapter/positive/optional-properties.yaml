@@ -20,11 +20,18 @@ logo:
   - small: https://example.com/smallLogo
     medium: https://example.com/mediumLogo
     large: https://example.com/largeLogo
+meetup_group: OWASP Meetup
 name: OWASP Chapter
+region: Asia
 social_media:
   - description: A brief description of the social media platform
     platform: youtube
     url: https://www.youtube.com/channel/UC1234567890abc
+sponsors:
+  - description: Sponsor 1 description
+    logo: https://sponsor1.com/logo.png
+    name: Sponsor 1
+    url: https://sponsor1.com
 tags:
   - example-tag-1
   - example-tag-2
