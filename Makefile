@@ -30,8 +30,8 @@ pre-commit:
 	@pre-commit run -a
 
 run:
-	@docker compose build
-	@docker compose up
+	@docker compose -f docker/docker-compose-local.yaml build
+	@docker compose -f docker/docker-compose-local.yaml up --remove-orphans
 
 test-all: \
 	test-nest-app \

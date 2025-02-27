@@ -1,10 +1,10 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { toast } from 'hooks/useToast'
 import { RepositoryDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-import { mockRepositoryData } from '@tests/data/mockRepositoryData'
 jest.mock('hooks/useToast', () => ({
   toast: jest.fn(),
 }))
@@ -66,11 +66,11 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('Test Repo')).toBeInTheDocument()
       expect(screen.getByText('MIT')).toBeInTheDocument()
     })
+    expect(screen.getByText('50K Stars')).toBeInTheDocument()
+    expect(screen.getByText('3K Forks')).toBeInTheDocument()
     expect(screen.getByText('10 Commits')).toBeInTheDocument()
     expect(screen.getByText('5 Contributors')).toBeInTheDocument()
-    expect(screen.getByText('3 Forks')).toBeInTheDocument()
     expect(screen.getByText('2 Issues')).toBeInTheDocument()
-    expect(screen.getByText('50 Stars')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {

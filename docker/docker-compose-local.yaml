@@ -7,12 +7,12 @@ services:
         python manage.py runserver 0.0.0.0:8000
       "
     build:
-      context: ./backend
-      dockerfile: Dockerfile.local
+      context: ../backend
+      dockerfile: docker/Dockerfile.local
     depends_on:
       db:
         condition: service_healthy
-    env_file: backend/.env
+    env_file: ../backend/.env
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
@@ -22,7 +22,7 @@ services:
     ports:
       - 127.0.0.1:8000:8000
     volumes:
-      - ./backend:/home/owasp
+      - ../backend:/home/owasp
       - /home/owasp/.venv
 
   db:
@@ -48,13 +48,12 @@ services:
         pnpm run dev
       "
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.local
+      context: ../frontend
+      dockerfile: docker/Dockerfile.local
     ports:
       - 127.0.0.1:3000:3000
     volumes:
-      - ./frontend:/home/owasp
-      # - /home/owasp/node_modules
+      - ../frontend:/home/owasp
     environment:
       NODE_ENV: local
 

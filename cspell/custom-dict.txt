@@ -37,6 +37,7 @@ lxml
 markdownit
 markercluster
 mastg
+mcr
 mern
 millify
 mpim

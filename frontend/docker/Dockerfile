@@ -7,13 +7,12 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
 COPY . .
-COPY .env.staging .env.staging
-RUN pnpm run build:staging
+
+RUN pnpm run build
 
 FROM nginx:stable-alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
-
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 3000

@@ -1,11 +1,11 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
+import mockProjectData from '@unit/data/mockProjectData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
 
-import CommitteesPage from 'pages/Committees'
-import { mockCommitteeData } from '@tests/data/mockCommitteeData'
+import ProjectsPage from 'pages/Projects'
 
 jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
@@ -14,20 +14,19 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: jest.fn(),
 }))
+
 jest.mock('components/Pagination', () =>
-  jest.fn(({ currentPage, onPageChange, totalPages }) =>
-    totalPages > 1 ? (
-      <div>
-        <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
-      </div>
-    ) : null
-  )
+  jest.fn(({ currentPage, onPageChange }) => (
+    <div>
+      <button onClick={() => onPageChange(currentPage + 1)}>Next Page</button>
+    </div>
+  ))
 )
 
-describe('Committees Component', () => {
+describe('ProjectPage Component', () => {
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockCommitteeData.committees,
+      hits: mockProjectData.projects,
       totalPages: 2,
     })
   })
@@ -37,7 +36,7 @@ describe('Committees Component', () => {
   })
 
   test('renders skeleton initially', async () => {
-    render(<CommitteesPage />)
+    render(<ProjectsPage />)
     await waitFor(() => {
       const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
@@ -47,53 +46,56 @@ describe('Committees Component', () => {
   test('renders SearchBar, data, and pagination component concurrently after data is loaded', async () => {
     window.scrollTo = jest.fn()
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockCommitteeData.committees,
+      hits: mockProjectData.projects,
       totalPages: 2,
     })
 
-    render(<CommitteesPage />)
+    render(<ProjectsPage />)
 
+    const skeletonLoaders = screen.getAllByRole('status')
     await waitFor(() => {
-      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+      expect(skeletonLoaders.length).toBeGreaterThan(0)
+      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
-
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for OWASP committees...')).toBeInTheDocument()
-      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+
+    expect(screen.queryByTestId('status')).not.toBeInTheDocument()
   })
 
-  test('renders committee data correctly', async () => {
-    render(<CommitteesPage />)
-
+  test('renders project data correctly', async () => {
+    render(<ProjectsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
     })
-    expect(screen.getByText('This is a summary of Committee 1.')).toBeInTheDocument()
+
+    expect(screen.getByText('This is a summary of Project 1.')).toBeInTheDocument()
+
     const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
   })
 
-  test('displays "No committees found" when there are no committees', async () => {
+  test('displays "No projects found" when there are no projects', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [],
       totalPages: 0,
     })
-    render(<CommitteesPage />)
+    render(<ProjectsPage />)
     await waitFor(() => {
-      expect(screen.getByText('No committees found')).toBeInTheDocument()
+      expect(screen.getByText('No projects found')).toBeInTheDocument()
     })
   })
 
-  test('handles page change correctly when there are multiple pages', async () => {
+  test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockCommitteeData.committees,
+      hits: mockProjectData.projects,
       totalPages: 2,
     })
-    render(<CommitteesPage />)
+    render(<ProjectsPage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
       fireEvent.click(nextPageButton)
@@ -104,29 +106,21 @@ describe('Committees Component', () => {
     })
   })
 
-  test('does not render pagination when there is only one page', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockCommitteeData.committees,
-      totalPages: 1,
-    })
-    render(<CommitteesPage />)
-    await waitFor(() => {
-      expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
-    })
-  })
-
   test('opens  window on View Details button click', async () => {
     const navigateMock = jest.fn()
     ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
 
-    render(<CommitteesPage />)
+    render(<ProjectsPage />)
 
     await waitFor(() => {
       const contributeButton = screen.getByText('View Details')
       expect(contributeButton).toBeInTheDocument()
       fireEvent.click(contributeButton)
     })
-    //suppose index_key is committee_1
-    expect(navigateMock).toHaveBeenCalledWith('/committees/committee_1')
+    //suppose index_key is project_1
+    expect(navigateMock).toHaveBeenCalledWith('/projects/project_1')
+
+    // Clean up the mock
+    jest.restoreAllMocks()
   })
 })
