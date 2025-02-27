@@ -9,49 +9,49 @@ from tests.conftest import tests_data_dir
 from utils.schema_validators import validate_data
 
 
-def test_positive(chapter_schema):
-    for file_path in Path(tests_data_dir / "chapter/positive").rglob("*.yaml"):
-        assert (
-            validate_data(
-                chapter_schema,
-                yaml.safe_load(
-                    file_path.read_text(),
-                ),
-            )
-            is None
-        )
-
-
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
+        ("blog-empty.yaml", "'' is not a 'uri'"),
         ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
         ("blog-null.yaml", "None is not a 'uri'"),
+        ("community-empty.yaml", "[] should be non-empty"),
         (
-            "community-empty.yaml",
-            "Additional properties are not allowed ('level' was unexpected)",
-        ),
-        (
-            "community-invalid.yaml",
-            "'another-invalid-url' is not a 'uri'",
+            "community-non-unique.yaml",
+            "[{'platform': 'discord', 'url': 'https://discord.com/example'}, "
+            "{'platform': 'discord', 'url': 'https://discord.com/example'}] "
+            "has non-unique elements",
         ),
         ("community-null.yaml", "None is not of type 'array'"),
+        ("country-empty.yaml", "'' should be non-empty"),
+        ("country-null.yaml", "None is not of type 'string'"),
+        ("country-undefined.yaml", "'country' is a required property"),
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
+        ("events-null.yaml", "None is not of type 'array'"),
+        ("leaders-empty.yaml", "[] is too short"),
         (
-            "leader-email-empty.yaml",
-            "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+            "leaders-non-unique.yaml",
+            "[{'github': 'leader1'}, {'github': 'leader1'}] has non-unique elements",
         ),
-        (
-            "leader-email-null.yaml",
-            "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
-        ),
+        ("leaders-null.yaml", "None is not of type 'array'"),
+        ("leaders-undefined.yaml", "'leaders' is a required property"),    
         (
             "leader-email-invalid.yaml",
             "[{'email': 'leader1@invalid', 'github': 'leader1', 'name': 'Name'}] is too short",
+        ),
+        ("logo-empty.yaml", "[] should be non-empty"),
+        (
+            "logo-non-unique.yaml",
+            "[{'small': 'https://example.com/smallLogo.png', "
+            "'medium': 'https://example.com/mediumLogo.png', "
+            "'large': 'https://example.com/largeLogo.png'}, "
+            "{'small': 'https://example.com/smallLogo.png', "
+            "'medium': 'https://example.com/mediumLogo.png', "
+            "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
         ),
         ("logo-large-empty.yaml", "'' is not a 'uri'"),
         ("logo-large-invalid.yaml", "'https://xyz' is not a 'uri'"),
@@ -62,20 +62,34 @@ def test_positive(chapter_schema):
         ("logo-small-empty.yaml", "'' is not a 'uri'"),
         ("logo-small-invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("logo-small-null.yaml", "None is not of type 'string'"),
+        ("logo-null.yaml", "None is not of type 'array'"),
+        ("meetup_group-empty.yaml", "'' should be non-empty"),
+        ("meetup_group-null.yaml", "None is not of type 'string'"),
         ("name-empty.yaml", "'' is too short"),
-        ("name-none.yaml", "None is not of type 'string'"),
+        ("name-null.yaml", "None is not of type 'string'"),
+        ("name-undefined.yaml", "'name' is a required property"),
+        ("region-empty.yaml", "'' should be non-empty"),
+        ("region-null.yaml", "None is not of type 'string'"),
         ("social-media-empty.yaml", "[] should be non-empty"),
-        ("social-media-null.yaml", "None is not of type 'array'"),
         (
-            "social-media-platform-invalid.yaml",
-            "'bitcoin' is not one of ['bluesky', 'linkedin', 'x', 'youtube']",
+            "social-media-non-unique.yaml",
+            "[{'platform': 'youtube', 'url': 'https://youtube.com/channel/123'}, "
+            "{'platform': 'youtube', 'url': 'https://youtube.com/channel/123'}] "
+            "has non-unique elements",
         ),
-        ("social-media-url-empty.yaml", "'' is not a 'uri'"),
-        ("social-media-url-invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("social-media-url-null.yaml", "None is not of type 'string'"),
+        ("social-media-null.yaml", "None is not of type 'array'"),
         ("sponsors-empty.yaml", "[] should be non-empty"),
-        ("sponsors-name-undefined.yaml", "'name' is a required property"),
-        ("sponsors-undefined.yaml", "'url' is a required property"),
+        (
+            "sponsors-non-unique.yaml",
+            "[{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}, "
+            "{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}] has non-unique elements",
+        ),
+        ("sponsors-null.yaml", "None is not of type 'array'"),
+        ("tags-empty.yaml", "[] is too short"),
+        ("tags-non-unique.yaml", "['chapter-tag-1', 'chapter-tag-1'] is too short"),
+        ("tags-null.yaml", "None is not of type 'array'"),
+        ("tags-undefined.yaml", "'tags' is a required property"),
+        ("website-empty.yaml", "['example-tag-1'] is too short"),
         ("website-null.yaml", "None is not of type 'string'"),
     ],
 )
@@ -89,3 +103,16 @@ def test_negative(chapter_schema, file_path, error_message):
         )
         == error_message
     )
+
+
+def test_positive(chapter_schema):
+    for file_path in Path(tests_data_dir / "chapter/positive").rglob("*.yaml"):
+        assert (
+            validate_data(
+                chapter_schema,
+                yaml.safe_load(
+                    file_path.read_text(),
+                ),
+            )
+            is None
+        )
