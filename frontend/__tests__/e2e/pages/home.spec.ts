@@ -24,14 +24,14 @@ test.describe('Home Page', () => {
   test('should have new chapters', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'chapter 1' })).toBeVisible()
-    await expect(page.getByText('February 20,').first()).toBeVisible()
+    await expect(page.getByText('Feb 20,').first()).toBeVisible()
     await page.getByRole('link', { name: 'chapter 1' }).click()
     expect(page.url()).toContain('chapters/chapter-1')
   })
   test('should have new projects', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Projects' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 1' })).toBeVisible()
-    await expect(page.getByText('January 1,').first()).toBeVisible()
+    await expect(page.getByText('Jan 1,').first()).toBeVisible()
     await page.getByRole('link', { name: 'Project 1' }).click()
     expect(page.url()).toContain('projects/project-1')
   })
@@ -48,14 +48,14 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Issue 1' })).toBeVisible()
     await expect(page.getByText('Author 1').first()).toBeVisible()
-    await expect(page.getByText('February 24,').first()).toBeVisible()
+    await expect(page.getByText('Feb 24,').first()).toBeVisible()
     await expect(page.getByText('5 comments')).toBeVisible()
   })
 
   test('should have recent Releases', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Release 1' })).toBeVisible()
-    await expect(page.getByText('February 22,')).toBeVisible()
+    await expect(page.getByText('Feb 22,')).toBeVisible()
     await expect(page.getByText('v1', { exact: true })).toBeVisible()
   })
 
