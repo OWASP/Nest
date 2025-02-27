@@ -16,18 +16,18 @@
     - [5.1.3. Property `OWASP Chapter > leaders > Person > name`](#leaders_items_name)
     - [5.1.4. Property `OWASP Chapter > leaders > Person > slack`](#leaders_items_slack)
 - [6. Property `OWASP Chapter > logo`](#logo)
-  - [6.1. OWASP Chapter > logo > logo](#logo_items)
-    - [6.1.1. Property `OWASP Chapter > logo > logo items > small`](#logo_items_small)
-    - [6.1.2. Property `OWASP Chapter > logo > logo items > medium`](#logo_items_medium)
-    - [6.1.3. Property `OWASP Chapter > logo > logo items > large`](#logo_items_large)
-- [7. Property `OWASP Chapter > meetup-group`](#meetup-group)
+  - [6.1. OWASP Chapter > logo > Logo](#logo_items)
+    - [6.1.1. Property `OWASP Chapter > logo > Logo > small`](#logo_items_small)
+    - [6.1.2. Property `OWASP Chapter > logo > Logo > medium`](#logo_items_medium)
+    - [6.1.3. Property `OWASP Chapter > logo > Logo > large`](#logo_items_large)
+- [7. Property `OWASP Chapter > meetup_group`](#meetup_group)
 - [8. Property `OWASP Chapter > name`](#name)
 - [9. Property `OWASP Chapter > region`](#region)
 - [10. Property `OWASP Chapter > social_media`](#social_media)
-  - [10.1. OWASP Chapter > social_media > social_media](#social_media_items)
-    - [10.1.1. Property `OWASP Chapter > social_media > social_media items > description`](#social_media_items_description)
-    - [10.1.2. Property `OWASP Chapter > social_media > social_media items > platform`](#social_media_items_platform)
-    - [10.1.3. Property `OWASP Chapter > social_media > social_media items > url`](#social_media_items_url)
+  - [10.1. OWASP Chapter > social_media > Social media](#social_media_items)
+    - [10.1.1. Property `OWASP Chapter > social_media > Social media > description`](#social_media_items_description)
+    - [10.1.2. Property `OWASP Chapter > social_media > Social media > platform`](#social_media_items_platform)
+    - [10.1.3. Property `OWASP Chapter > social_media > Social media > url`](#social_media_items_url)
 - [11. Property `OWASP Chapter > sponsors`](#sponsors)
   - [11.1. OWASP Chapter > sponsors > Sponsor](#sponsors_items)
     - [11.1.1. Property `OWASP Chapter > sponsors > Sponsor > description`](#sponsors_items_description)
@@ -46,7 +46,7 @@
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-**Description:** OWASP chapter schema.
+**Description:** OWASP chapter schema
 
 | Property                         | Pattern | Type            | Deprecated | Definition | Title/Description                                          |
 | -------------------------------- | ------- | --------------- | ---------- | ---------- | ---------------------------------------------------------- |
@@ -56,7 +56,7 @@
 | - [events](#events )             | No      | array of string | No         | -          | Event URLs related to the chapter.                         |
 | + [leaders](#leaders )           | No      | array           | No         | -          | Leaders of the chapter.                                    |
 | - [logo](#logo )                 | No      | array           | No         | -          | Logo for the chapter.                                      |
-| - [meetup-group](#meetup-group ) | No      | string          | No         | -          | Meetup group.                                              |
+| - [meetup_group](#meetup_group ) | No      | string          | No         | -          | Meetup group.                                              |
 | + [name](#name )                 | No      | string          | No         | -          | The unique name of the chapter.                            |
 | - [region](#region )             | No      | string          | No         | -          | Region.                                                    |
 | - [social_media](#social_media ) | No      | array           | No         | -          | Social media information for the chapter.                  |
@@ -91,27 +91,27 @@
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be | Description          |
-| ------------------------------- | -------------------- |
-| [Community](#community_items)   | A chapter community. |
+| Each item of this array must be | Description |
+| ------------------------------- | ----------- |
+| [Community](#community_items)   | Community   |
 
 ### <a name="community_items"></a>2.1. OWASP Chapter > community > Community
 
 **Title:** Community
 
-|                           |                   |
-| ------------------------- | ----------------- |
-| **Type**                  | `object`          |
-| **Required**              | No                |
-| **Additional properties** | Not allowed       |
-| **Defined in**            | #/$defs/community |
+|                           |                                    |
+| ------------------------- | ---------------------------------- |
+| **Type**                  | `object`                           |
+| **Required**              | No                                 |
+| **Additional properties** | Not allowed                        |
+| **Defined in**            | common.json#/definitions/community |
 
-**Description:** A chapter community.
+**Description:** Community
 
 | Property                                       | Pattern | Type             | Deprecated | Definition | Title/Description                     |
 | ---------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ------------------------------------- |
 | - [description](#community_items_description ) | No      | string           | No         | -          | A brief description of the community. |
-| + [platform](#community_items_platform )       | No      | enum (of string) | No         | -          | The platform used by the community.   |
+| + [platform](#community_items_platform )       | No      | enum (of string) | No         | -          | The platform used by the community    |
 | + [url](#community_items_url )                 | No      | string           | No         | -          | The URL of the community.             |
 
 #### <a name="community_items_description"></a>2.1.1. Property `OWASP Chapter > community > Community > description`
@@ -123,6 +123,10 @@
 
 **Description:** A brief description of the community.
 
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
 #### <a name="community_items_platform"></a>2.1.2. Property `OWASP Chapter > community > Community > platform`
 
 |              |                    |
@@ -130,7 +134,7 @@
 | **Type**     | `enum (of string)` |
 | **Required** | Yes                |
 
-**Description:** The platform used by the community.
+**Description:** The platform used by the community
 
 Must be one of:
 * "discord"
@@ -154,6 +158,10 @@ Must be one of:
 | **Required** | Yes      |
 
 **Description:** Country.
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 1 |
 
 ## <a name="events"></a>4. Property `OWASP Chapter > events`
 
@@ -235,6 +243,10 @@ Must be one of:
 
 **Description:** E-mail address
 
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
+
 #### <a name="leaders_items_github"></a>5.1.2. Property `OWASP Chapter > leaders > Person > github`
 
 |              |          |
@@ -256,6 +268,10 @@ Must be one of:
 | **Required** | No       |
 
 **Description:** Full name
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
 
 #### <a name="leaders_items_slack"></a>5.1.4. Property `OWASP Chapter > leaders > Person > slack`
 
@@ -283,24 +299,26 @@ Must be one of:
 | -------------------- | ------------------ |
 | **Min items**        | 1                  |
 | **Max items**        | N/A                |
-| **Items unicity**    | False              |
+| **Items unicity**    | True               |
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be | Description            |
-| ------------------------------- | ---------------------- |
-| [logo](#logo_items)             | A logo for the chapter |
+| Each item of this array must be | Description |
+| ------------------------------- | ----------- |
+| [Logo](#logo_items)             | A logo      |
 
-### <a name="logo_items"></a>6.1. OWASP Chapter > logo > logo
+### <a name="logo_items"></a>6.1. OWASP Chapter > logo > Logo
 
-|                           |              |
-| ------------------------- | ------------ |
-| **Type**                  | `object`     |
-| **Required**              | No           |
-| **Additional properties** | Not allowed  |
-| **Defined in**            | #/$defs/logo |
+**Title:** Logo
 
-**Description:** A logo for the chapter
+|                           |                               |
+| ------------------------- | ----------------------------- |
+| **Type**                  | `object`                      |
+| **Required**              | No                            |
+| **Additional properties** | Not allowed                   |
+| **Defined in**            | common.json#/definitions/logo |
+
+**Description:** A logo
 
 | Property                        | Pattern | Type   | Deprecated | Definition | Title/Description                   |
 | ------------------------------- | ------- | ------ | ---------- | ---------- | ----------------------------------- |
@@ -308,7 +326,7 @@ Must be one of:
 | + [medium](#logo_items_medium ) | No      | string | No         | -          | Logo size should be 256x256 pixels. |
 | + [large](#logo_items_large )   | No      | string | No         | -          | Logo size should be 512x512 pixels. |
 
-#### <a name="logo_items_small"></a>6.1.1. Property `OWASP Chapter > logo > logo items > small`
+#### <a name="logo_items_small"></a>6.1.1. Property `OWASP Chapter > logo > Logo > small`
 
 |              |          |
 | ------------ | -------- |
@@ -318,7 +336,7 @@ Must be one of:
 
 **Description:** Logo size should be 192x192 pixels.
 
-#### <a name="logo_items_medium"></a>6.1.2. Property `OWASP Chapter > logo > logo items > medium`
+#### <a name="logo_items_medium"></a>6.1.2. Property `OWASP Chapter > logo > Logo > medium`
 
 |              |          |
 | ------------ | -------- |
@@ -328,7 +346,7 @@ Must be one of:
 
 **Description:** Logo size should be 256x256 pixels.
 
-#### <a name="logo_items_large"></a>6.1.3. Property `OWASP Chapter > logo > logo items > large`
+#### <a name="logo_items_large"></a>6.1.3. Property `OWASP Chapter > logo > Logo > large`
 
 |              |          |
 | ------------ | -------- |
@@ -338,7 +356,7 @@ Must be one of:
 
 **Description:** Logo size should be 512x512 pixels.
 
-## <a name="meetup-group"></a>7. Property `OWASP Chapter > meetup-group`
+## <a name="meetup_group"></a>7. Property `OWASP Chapter > meetup_group`
 
 |              |          |
 | ------------ | -------- |
@@ -346,6 +364,10 @@ Must be one of:
 | **Required** | No       |
 
 **Description:** Meetup group.
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 1 |
 
 ## <a name="name"></a>8. Property `OWASP Chapter > name`
 
@@ -369,6 +391,10 @@ Must be one of:
 
 **Description:** Region.
 
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 1 |
+
 ## <a name="social_media"></a>10. Property `OWASP Chapter > social_media`
 
 |              |         |
@@ -382,15 +408,17 @@ Must be one of:
 | -------------------- | ------------------ |
 | **Min items**        | 1                  |
 | **Max items**        | N/A                |
-| **Items unicity**    | False              |
+| **Items unicity**    | True               |
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
 | Each item of this array must be     | Description                             |
 | ----------------------------------- | --------------------------------------- |
-| [social_media](#social_media_items) | A social media platform for the project |
+| [Social media](#social_media_items) | A social media platform for the project |
 
-### <a name="social_media_items"></a>10.1. OWASP Chapter > social_media > social_media
+### <a name="social_media_items"></a>10.1. OWASP Chapter > social_media > Social media
+
+**Title:** Social media
 
 |                           |                                       |
 | ------------------------- | ------------------------------------- |
@@ -407,7 +435,7 @@ Must be one of:
 | + [platform](#social_media_items_platform )       | No      | enum (of string) | No         | -          | The type of social media platform.       |
 | + [url](#social_media_items_url )                 | No      | string           | No         | -          | The URL of the social media profile.     |
 
-#### <a name="social_media_items_description"></a>10.1.1. Property `OWASP Chapter > social_media > social_media items > description`
+#### <a name="social_media_items_description"></a>10.1.1. Property `OWASP Chapter > social_media > Social media > description`
 
 |              |          |
 | ------------ | -------- |
@@ -416,7 +444,11 @@ Must be one of:
 
 **Description:** Description of the social media platform
 
-#### <a name="social_media_items_platform"></a>10.1.2. Property `OWASP Chapter > social_media > social_media items > platform`
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
+
+#### <a name="social_media_items_platform"></a>10.1.2. Property `OWASP Chapter > social_media > Social media > platform`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -431,7 +463,7 @@ Must be one of:
 * "x"
 * "youtube"
 
-#### <a name="social_media_items_url"></a>10.1.3. Property `OWASP Chapter > social_media > social_media items > url`
+#### <a name="social_media_items_url"></a>10.1.3. Property `OWASP Chapter > social_media > Social media > url`
 
 |              |          |
 | ------------ | -------- |
@@ -454,33 +486,33 @@ Must be one of:
 | -------------------- | ------------------ |
 | **Min items**        | 1                  |
 | **Max items**        | N/A                |
-| **Items unicity**    | False              |
+| **Items unicity**    | True               |
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be | Description        |
-| ------------------------------- | ------------------ |
-| [Sponsor](#sponsors_items)      | A chapter sponsor. |
+| Each item of this array must be | Description      |
+| ------------------------------- | ---------------- |
+| [Sponsor](#sponsors_items)      | A sponsor entity |
 
 ### <a name="sponsors_items"></a>11.1. OWASP Chapter > sponsors > Sponsor
 
 **Title:** Sponsor
 
-|                           |                 |
-| ------------------------- | --------------- |
-| **Type**                  | `object`        |
-| **Required**              | No              |
-| **Additional properties** | Not allowed     |
-| **Defined in**            | #/$defs/sponsor |
+|                           |                                  |
+| ------------------------- | -------------------------------- |
+| **Type**                  | `object`                         |
+| **Required**              | No                               |
+| **Additional properties** | Not allowed                      |
+| **Defined in**            | common.json#/definitions/sponsor |
 
-**Description:** A chapter sponsor.
+**Description:** A sponsor entity
 
-| Property                                      | Pattern | Type   | Deprecated | Definition | Title/Description                        |
-| --------------------------------------------- | ------- | ------ | ---------- | ---------- | ---------------------------------------- |
-| - [description](#sponsors_items_description ) | No      | string | No         | -          | A brief description of the sponsor.      |
-| - [logo](#sponsors_items_logo )               | No      | string | No         | -          | The URL of the sponsor's logo.           |
-| + [name](#sponsors_items_name )               | No      | string | No         | -          | The name of the sponsor or organization. |
-| + [url](#sponsors_items_url )                 | No      | string | No         | -          | The URL of the sponsor.                  |
+| Property                                      | Pattern | Type   | Deprecated | Definition | Title/Description                       |
+| --------------------------------------------- | ------- | ------ | ---------- | ---------- | --------------------------------------- |
+| - [description](#sponsors_items_description ) | No      | string | No         | -          | A brief description of the sponsor      |
+| - [logo](#sponsors_items_logo )               | No      | string | No         | -          | The URL of the sponsor's logo           |
+| + [name](#sponsors_items_name )               | No      | string | No         | -          | The name of the sponsor or organization |
+| + [url](#sponsors_items_url )                 | No      | string | No         | -          | The URL of the sponsor.                 |
 
 #### <a name="sponsors_items_description"></a>11.1.1. Property `OWASP Chapter > sponsors > Sponsor > description`
 
@@ -489,7 +521,11 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-**Description:** A brief description of the sponsor.
+**Description:** A brief description of the sponsor
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
 
 #### <a name="sponsors_items_logo"></a>11.1.2. Property `OWASP Chapter > sponsors > Sponsor > logo`
 
@@ -499,7 +535,7 @@ Must be one of:
 | **Required** | No       |
 | **Format**   | `uri`    |
 
-**Description:** The URL of the sponsor's logo.
+**Description:** The URL of the sponsor's logo
 
 #### <a name="sponsors_items_name"></a>11.1.3. Property `OWASP Chapter > sponsors > Sponsor > name`
 
@@ -508,7 +544,11 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** The name of the sponsor or organization.
+**Description:** The name of the sponsor or organization
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
 
 #### <a name="sponsors_items_url"></a>11.1.4. Property `OWASP Chapter > sponsors > Sponsor > url`
 
