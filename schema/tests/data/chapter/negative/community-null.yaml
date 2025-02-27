@@ -1,5 +1,5 @@
-country: India
 community:
+country: India
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -8,6 +8,6 @@ leaders:
     slack: leader-2-slack
 name: OWASP Chapter
 tags:
-  - example-tag-1
-  - example-tag-2
-  - example-tag-3
+  - chapter-tag-1
+  - chapter-tag-2
+  - chapter-tag-3
