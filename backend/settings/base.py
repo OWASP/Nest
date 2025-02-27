@@ -19,6 +19,7 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
+    GITHUB_TOKEN = values.Value(environ_name="GITHUB_TOKEN")
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
     SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
     SITE_NAME = "localhost"
@@ -45,6 +46,7 @@ class Base(Configuration):
         "apps.common",
         "apps.core",
         "apps.github",
+        "apps.nest",
         "apps.owasp",
         "apps.slack",
     )
