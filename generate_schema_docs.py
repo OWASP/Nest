@@ -9,9 +9,7 @@ def generate_schema_docs():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     for schema_file in INPUT_DIR.iterdir():
-        if (
-            schema_file.suffix == ".json" and schema_file.name != "common.json"
-        ):  # Exclude common.json
+        if schema_file.suffix == ".json" and schema_file.name != "common.json":
             base_name = schema_file.stem
             output_file = OUTPUT_DIR / f"{base_name}.md"
 

@@ -7,34 +7,40 @@ nav:
       - Overview: schema/index.md
       - Chapter: schema/chapter.md
       - Project: schema/project.md
+repo_url: https://github.com/owasp/Nest
 theme:
   name: material
+  logo: owasp_icon_white_sm.png
   features:
     - navigation.tabs
+    - navigation.instant
     - navigation.sections
     - navigation.expand
-    - toc.integrate
     - navigation.top
+    - navigation.tracking
+    - toc.integrate
     - search.suggest
     - search.highlight
-    - content.tabs.link
     - content.code.annotation
     - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
   language: en
   palette:
     - scheme: default
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/lightbulb-outline
         name: Switch to dark mode
       primary: teal
-      accent: purple
+      accent: amber
     - scheme: slate
       toggle:
-        icon: material/toggle-switch
+        icon: material/weather-night
         name: Switch to light mode
       primary: teal
-      accent: lime
-
+      accent: cyan
 markdown_extensions:
   - pymdownx.tasklist
   - pymdownx.tabbed:
@@ -47,14 +53,18 @@ markdown_extensions:
   - admonition
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
   - footnotes
-  - pymdownx.details
-  - pymdownx.superfences
-  - pymdownx.mark
   - attr_list
-  - pymdownx.emoji:
-      emoji_generator: pymdownx.emoji.to_svg
+  - def_list
+  - abbr
 
 plugins:
   - search
-  - mkdocstrings
+  - minify:
+      minify_html: true
+  - mkdocstrings:
+      default_handler: python
+  - tags
