@@ -70,6 +70,18 @@ def test_positive(project_schema):
         ),
         ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
         ("events-null.yaml", "None is not of type 'array'"),
+        (
+            "leader-email-empty.yaml",
+            "[{'email': '', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+        ),
+        (
+            "leader-email-null.yaml",
+            "[{'email': None, 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+        ),
+        (
+            "leader-email-invalid.yaml",
+            "[{'email': 'leader1@invalid', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+        ),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         (
             "license-invalid-value.yaml",
