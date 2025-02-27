@@ -11,18 +11,11 @@
     "lint": "eslint . --config eslint.config.js --fix --max-warnings=0",
     "lint:check": "eslint . --config eslint.config.js --max-warnings=0",
     "preview": "vite preview",
-<<<<<<< HEAD
-    "test": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest",
-    "test:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
-    "watch": "jest --watch",
-    "preinstall": "npx only-allow pnpm"
-=======
     "test:all": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest && npx playwright test",
     "test:e2e": "npx playwright test",
     "test:unit:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
     "test:unit": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest",
     "watch": "jest --watch"
->>>>>>> main
   },
   "dependencies": {
     "@apollo/client": "^3.12.7",

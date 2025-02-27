@@ -1,10 +1,10 @@
 FROM node:22 AS builder
 
-RUN npm install -g pnpm
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+RUN npm install -g pnpm  && \
+    pnpm install
 
 COPY . .
 
