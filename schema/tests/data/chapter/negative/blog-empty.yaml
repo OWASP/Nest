@@ -1,0 +1,12 @@
+blog: ''
+country: India
+leaders:
+  - github: leader-1-github
+    name: Leader 1 Name
+  - github: leader-2-github
+    name: Leader 2 Name
+name: OWASP Chapter
+tags:
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
