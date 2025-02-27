@@ -35,7 +35,7 @@ repos:
           - --mapping=2
           - --offset=2
           - --sequence=4
-        exclude: frontend/pnpm-lock.yaml
+        exclude: (.github|frontend/pnpm-lock.yaml)
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
