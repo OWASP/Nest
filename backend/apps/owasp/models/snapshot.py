@@ -17,7 +17,7 @@ class Snapshot(models.Model):
         COMPLETED = "completed", "Completed"
         ERROR = "error", "Error"
 
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, default="")
     key = models.CharField(max_length=7, unique=True)  # Format: YYYY-mm
 
     created_at = models.DateTimeField(auto_now_add=True)

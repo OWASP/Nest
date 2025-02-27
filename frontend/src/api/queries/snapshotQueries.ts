@@ -22,8 +22,9 @@ export const GET_SNAPSHOT_DETAILS = gql`
         forksCount
         repositoriesCount
         topContributors {
-          key
           name
+      login
+      contributionsCount
         }
       }
       newChapters {
