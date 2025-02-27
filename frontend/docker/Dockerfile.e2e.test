@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/playwright:v1.50.1-noble AS builder
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV FORCE_COLOR=1
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY . .
