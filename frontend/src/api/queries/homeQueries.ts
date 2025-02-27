@@ -36,6 +36,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
       author {
         avatarUrl
+        login
         name
         url
       }
