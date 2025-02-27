@@ -41,6 +41,7 @@ mamicidal
 markdownit
 markercluster
 mastg
+mcr
 mdfile
 mern
 millify

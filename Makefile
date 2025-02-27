@@ -30,8 +30,8 @@ pre-commit:
 	@pre-commit run -a
 
 run:
-	@docker compose build
-	@docker compose up
+	@docker compose -f docker/docker-compose-local.yaml build
+	@docker compose -f docker/docker-compose-local.yaml up --remove-orphans
 
 test-all: \
 	test-nest-app \
@@ -40,6 +40,10 @@ test-all: \
 test-nest-app: \
 	test-backend \
 	test-frontend
+
+update-dependencies: \
+	update-nest-app-dependencies \
+	update-schema-dependencies
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \
