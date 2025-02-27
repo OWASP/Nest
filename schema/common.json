@@ -28,8 +28,8 @@
     },
 
     "logo": {
+      "additionalProperties": false,
       "description": "A logo",
-      "type": "object",
       "properties": {
         "small": {
           "description": "Logo size should be 192x192 pixels.",
@@ -48,7 +48,8 @@
         }
       },
       "required": ["small", "medium", "large"],
-      "additionalProperties": false
+      "title": "Logo",
+      "type": "object"
     },
 
     "person": {
@@ -83,8 +84,7 @@
     },
 
     "repository": {
-      "type": "object",
-      "title": "Repository",
+      "additionalProperties": false,
       "description": "A repository",
       "properties": {
         "changelog": {
@@ -123,12 +123,13 @@
         }
       },
       "required": ["url"],
-      "additionalProperties": false
+      "title": "Repository",
+      "type": "object"
     },
 
     "social_media": {
+      "additionalProperties": false,
       "description": "A social media platform for the project",
-      "type": "object",
       "properties": {
         "description": {
           "description": "Description of the social media platform",
@@ -147,7 +148,9 @@
         }
       },
       "required": ["platform", "url"],
-      "additionalProperties": false
+      "title": "Social media",
+      "type": "object"
+
     },
 
     "sponsor": {
