@@ -51,7 +51,7 @@ def test_positive(chapter_schema):
         ),
         (
             "leader-email-invalid.yaml",
-            "[{'email': 'leader1@invalid', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+            "[{'email': 'leader1@invalid', 'github': 'leader1', 'name': 'Name'}] is too short",
         ),
         ("logo-large-empty.yaml", "'' is not a 'uri'"),
         ("logo-large-invalid.yaml", "'https://xyz' is not a 'uri'"),

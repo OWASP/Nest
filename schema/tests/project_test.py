@@ -80,7 +80,7 @@ def test_positive(project_schema):
         ),
         (
             "leader-email-invalid.yaml",
-            "[{'email': 'leader1@invalid', 'github': 'leader-1-github', 'name': 'Leader 1 Name'}] is too short",
+            "[{'email': 'leader1@invalid', 'github': 'leader1', 'name': 'name'}] is too short",
         ),
         ("level-invalid.yaml", "2.5 is not one of [2, 3, 3.5, 4]"),
         (
