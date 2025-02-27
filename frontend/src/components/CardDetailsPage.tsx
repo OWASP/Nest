@@ -57,7 +57,7 @@ const DetailsCard = ({
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
-          {(type === 'project' || type === 'repository' || type === 'committee') && (
+          {(type === 'project' || type === 'repository' || type === 'committee' || type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />

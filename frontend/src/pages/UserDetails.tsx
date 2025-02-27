@@ -250,12 +250,20 @@
 
 import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
+import {
+  faCode,
+  faCodeFork,
+  faExclamationCircle,
+  faStar,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons'
 import { GET_USER_DATA } from 'api/queries/userQueries'
 import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
+import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -265,15 +273,14 @@ const UserDetailsPage = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [imageLink, setImageLink] = useState('')
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+  const { data, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
     variables: { key: userKey },
   })
 
   useEffect(() => {
-    if (graphQLData) {
-      setUser(graphQLData?.user)
+    if (data) {
+      setUser(data?.user)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -284,7 +291,31 @@ const UserDetailsPage = () => {
       })
       setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, userKey])
+  }, [data, graphQLRequestError, userKey])
+
+  const userStats = [
+      {
+        icon: faUsers,
+        value: `${user?.publicRepositoriesCount || 'No'} ${pluralize(user.publicRepositoriesCount, 'Follower')}`,
+      },
+      // {
+      //   icon: faCodeFork,
+      //   value: `${project?.forksCount || 'No'} ${pluralize(project.forksCount, 'Fork')}`,
+      // },
+      // {
+      //   icon: faStar,
+      //   value: `${project?.starsCount || 'No'} ${pluralize(project.starsCount, 'Star')}`,
+      // },
+      // {
+      //   icon: faCode,
+      //   value: `${project?.repositoriesCount || 'No'} ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
+      // },
+      // {
+      //   icon: faExclamationCircle,
+      //   value: `${project?.issuesCount || 'No'} ${pluralize(project.issuesCount, 'Issue')}`,
+      // },
+    ]
+
 
 
   if (isLoading) {
@@ -303,6 +334,7 @@ const UserDetailsPage = () => {
         message="Sorry, the user you're looking for doesn't exist"
       />
     )
+
   return (
     <MetadataManager
     pageTitle={user.name || userKey}
@@ -311,6 +343,7 @@ const UserDetailsPage = () => {
     >
       <DetailsCard
         title={user.login}
+        stats={userStats}
         summary={user.bio}
         topContributors={[]}
         type="user"
