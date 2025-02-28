@@ -157,10 +157,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const handleFocusSearch = () => {
     if (searchQuery.trim().length > 0 && !showSuggestions) {
       setShowSuggestions(true)
-  }else{
-    setHighlightedIndex(null)
+    } else {
+      setHighlightedIndex(null)
+    }
   }
-}
 
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
