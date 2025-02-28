@@ -47,13 +47,13 @@ class TestUpdateProjectHealthMetricsCommand:
     def mock_requirements(self):
         requirements = mock.Mock(spec=ProjectHealthRequirements)
         requirements.contributors_count = 3
-        requirements.creation_days = 30
+        requirements.age_days = 30
         requirements.forks_count = 5
         requirements.last_release_days = 365
         requirements.last_commit_days = 90
         requirements.open_issues_count = 5
         requirements.open_pull_requests_count = 3
-        requirements.owasp_page_update_days = 30
+        requirements.owasp_page_last_update_days = 30
         requirements.last_pull_request_days = 30
         requirements.recent_releases_count = 2
         requirements.stars_count = 50
@@ -61,7 +61,7 @@ class TestUpdateProjectHealthMetricsCommand:
         requirements.total_releases_count = 5
         requirements.unanswered_issues_count = 3
         requirements.unassigned_issues_count = 3
-        requirements.recent_releases_window = 90
+        requirements.recent_releases_time_window_days = 90
         return requirements
 
     @pytest.mark.parametrize(

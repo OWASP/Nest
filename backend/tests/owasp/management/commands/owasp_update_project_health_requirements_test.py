@@ -72,13 +72,28 @@ class TestUpdateProjectHealthRequirementsCommand:
             Project.ProjectLevel.OTHER,
         ],
     )
-    def test_get_default_requirements(self, level):
+    def test_get_level_requirements(self, level):
         """Test default requirements generation for different project levels."""
-        defaults = self.command.get_default_requirements(level)
+        defaults = self.command.get_level_requirements(level)
 
         assert isinstance(defaults, dict)
         assert "contributors_count" in defaults
-        assert "creation_days" in defaults
+        assert "age_days" in defaults
         assert "forks_count" in defaults
         assert "last_release_days" in defaults
         assert "last_commit_days" in defaults
+        assert "open_issues_count" in defaults
+        assert "open_pull_requests_count" in defaults
+        assert "owasp_page_last_update_days" in defaults
+        assert "last_pull_request_days" in defaults
+        assert "recent_releases_count" in defaults
+        assert "recent_releases_time_window_days" in defaults
+        assert "stars_count" in defaults
+        assert "total_pull_requests_count" in defaults
+        assert "total_releases_count" in defaults
+        assert "unanswered_issues_count" in defaults
+        assert "unassigned_issues_count" in defaults
+
+        command_defaults = Command.level_requirements.get(level, {})
+        for key, value in command_defaults.items():
+            assert defaults[key] == value

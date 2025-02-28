@@ -26,7 +26,7 @@ class Command(BaseCommand):
         if metrics.contributors_count >= requirements.contributors_count:
             score += weight
 
-        if metrics.created_at and (now - metrics.created_at).days >= requirements.creation_days:
+        if metrics.created_at and (now - metrics.created_at).days >= requirements.age_days:
             score += weight
 
         if metrics.forks_count >= requirements.forks_count:
@@ -53,7 +53,7 @@ class Command(BaseCommand):
         if (
             metrics.owasp_page_last_updated_at
             and (now - metrics.owasp_page_last_updated_at).days
-            <= requirements.owasp_page_update_days
+            <= requirements.owasp_page_last_update_days
         ):
             score += weight
 
@@ -108,7 +108,7 @@ class Command(BaseCommand):
     def get_issue_metrics(self, project, requirements):
         """Aggregate issue metrics across all repositories."""
         now = timezone.now()
-        window_start = now - timedelta(days=requirements.recent_releases_window)
+        window_start = now - timedelta(days=requirements.recent_releases_time_window_days)
 
         return project.repositories.aggregate(
             total_issues=Count("issues"),

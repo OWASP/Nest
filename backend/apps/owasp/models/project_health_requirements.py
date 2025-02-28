@@ -15,51 +15,41 @@ class ProjectHealthRequirements(TimestampedModel):
         ordering = ["level"]
 
     level = models.CharField(
-        max_length=20,
+        max_length=10,
         choices=Project.ProjectLevel.choices,
         unique=True,
         verbose_name="Project Level",
     )
 
-    contributors_count = models.PositiveIntegerField(
-        verbose_name="Minimum Contributors", default=0
-    )
-    creation_days = models.PositiveIntegerField(
-        verbose_name="Minimum Project Age (days)", default=0
-    )
-    forks_count = models.PositiveIntegerField(verbose_name="Minimum Forks", default=0)
+    age_days = models.PositiveIntegerField(verbose_name="Project age (days)", default=0)
+    contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
+    forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
     last_release_days = models.PositiveIntegerField(
-        verbose_name="Max Days Since Last Release", default=0
+        verbose_name="Days since last release", default=0
     )
     last_commit_days = models.PositiveIntegerField(
-        verbose_name="Max Days Since Last Commit", default=0
+        verbose_name="Days since last commit", default=0
     )
-    open_issues_count = models.PositiveIntegerField(verbose_name="Max Open Issues", default=0)
-    open_pull_requests_count = models.PositiveIntegerField(verbose_name="Max Open PRs", default=0)
-    owasp_page_update_days = models.PositiveIntegerField(
-        verbose_name="Max Days Since OWASP Update", default=0
+    open_issues_count = models.PositiveIntegerField(verbose_name="Open issues", default=0)
+    open_pull_requests_count = models.PositiveIntegerField(verbose_name="Open PRs", default=0)
+    owasp_page_last_update_days = models.PositiveIntegerField(
+        verbose_name="Days since OWASP update", default=0
     )
     last_pull_request_days = models.PositiveIntegerField(
-        verbose_name="Max Days Since Last PR", default=0
+        verbose_name="Days since last PR", default=0
     )
-    recent_releases_count = models.PositiveIntegerField(
-        verbose_name="Min Recent Releases", default=0
+    recent_releases_count = models.PositiveIntegerField(verbose_name="Recent releases", default=0)
+    recent_releases_time_window_days = models.PositiveIntegerField(
+        verbose_name="Recent releases window", default=0
     )
-    recent_releases_window = models.PositiveIntegerField(
-        verbose_name="Recent Releases Window", default=0
-    )
-    stars_count = models.PositiveIntegerField(verbose_name="Minimum Stars", default=0)
-    total_pull_requests_count = models.PositiveIntegerField(
-        verbose_name="Min Total PRs", default=0
-    )
-    total_releases_count = models.PositiveIntegerField(
-        verbose_name="Min Total Releases", default=0
-    )
+    stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)
+    total_pull_requests_count = models.PositiveIntegerField(verbose_name="Total PRs", default=0)
+    total_releases_count = models.PositiveIntegerField(verbose_name="Total releases", default=0)
     unanswered_issues_count = models.PositiveIntegerField(
-        verbose_name="Max Unanswered Issues", default=0
+        verbose_name="Unanswered issues", default=0
     )
     unassigned_issues_count = models.PositiveIntegerField(
-        verbose_name="Max Unassigned Issues", default=0
+        verbose_name="Unassigned issues", default=0
     )
 
     def __str__(self):
