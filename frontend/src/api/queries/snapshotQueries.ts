@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client'
 
 export const GET_SNAPSHOT_DETAILS = gql`
   query GetSnapshotDetails($key: String!) {
@@ -24,7 +24,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
         topContributors {
           name
           login
-      contributionsCount
+          contributionsCount
         }
       }
       newChapters {
@@ -37,4 +37,4 @@ export const GET_SNAPSHOT_DETAILS = gql`
       }
     }
   }
-`;
+`
