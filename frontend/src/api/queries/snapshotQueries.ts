@@ -23,7 +23,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
         repositoriesCount
         topContributors {
           name
-      login
+          login
       contributionsCount
         }
       }
