@@ -64,6 +64,20 @@ from utils.schema_validators import validate_data
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
         ("events-null.yaml", "None is not of type 'array'"),
+        (
+            "leaders-email-empty.yaml",
+            "[{'email': '', 'github': 'leader1-github', 'name': 'Leader 1'}] is too short",
+        ),
+        (
+            "leaders-email-invalid.yaml",
+            "[{'email': 'leader1-email@invalid', "
+            "'github': 'leader1-github', "
+            "'name': 'Leader 1'}] is too short",
+        ),
+        (
+            "leaders-email-null.yaml",
+            "[{'email': None, 'github': 'leader1-github', 'name': 'Leader 1'}] is too short",
+        ),
         ("leaders-empty.yaml", "[] is too short"),
         (
             "leaders-non-unique.yaml",

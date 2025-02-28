@@ -1,0 +1,10 @@
+country: India
+leaders:
+  - email: leader1-email@invalid
+    github: leader1-github
+    name: Leader 1
+name: OWASP Chapter
+tags:
+  - chapter-tag-1
+  - chapter-tag-2
+  - chapter-tag-3
