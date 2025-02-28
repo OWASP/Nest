@@ -35,7 +35,7 @@ class Event(BulkSaveModel, TimestampedModel):
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     name = models.CharField(verbose_name="Name", max_length=100)
     description = models.TextField(verbose_name="Description", default="", blank=True)
-    start_date = models.DateField(verbose_name="Start Date", default="2025-01-01", blank=True)
+    start_date = models.DateField(verbose_name="Start Date")
     url = models.URLField(verbose_name="URL", default="", blank=True)
 
     def __str__(self):
