@@ -44,8 +44,8 @@ services:
     container_name: nest-frontend
     command: >
       bash -c "
-        npm install &&
-        npm run dev
+        pnpm install &&
+        pnpm run dev
       "
     build:
       context: ../frontend

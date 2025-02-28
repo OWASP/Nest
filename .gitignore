@@ -8,6 +8,8 @@ __pycache__
 .idea
 .local
 .mypy_cache
+.npm/
+.pnpm-store/
 .pytest_cache
 .python_history
 .python-version
@@ -18,7 +20,6 @@ venv/
 *.log
 backend/.venv
 backend/staticfiles
-frontend/.npm
 frontend/blob-report/
 frontend/coverage
 frontend/dist

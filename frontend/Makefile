@@ -9,10 +9,10 @@ exec-frontend-command-it:
 	@docker exec -it nest-frontend $(CMD)
 
 format-frontend-code:
-	@CMD="npm run format" $(MAKE) exec-frontend-command
+	@CMD="pnpm run format" $(MAKE) exec-frontend-command
 
 lint-frontend-code:
-	@CMD="npm run lint" $(MAKE) exec-frontend-command
+	@CMD="pnpm run lint" $(MAKE) exec-frontend-command
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
@@ -30,4 +30,4 @@ test-frontend-unit:
 	@docker run --env-file frontend/.env.example nest-test-frontend-unit npm run test:unit
 
 update-frontend-dependencies:
-	@CMD="npm update" $(MAKE) exec-frontend-command-it
+	@CMD="pnpm update" $(MAKE) exec-frontend-command-it
