@@ -6,7 +6,8 @@ ENV FORCE_COLOR=1
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm && \
+    pnpm install
 
 COPY . .
