@@ -17,7 +17,4 @@ class OpenPullRequestManager(models.Manager):
             .prefetch_related(
                 "assignees",
             )
-            .filter(
-                state="open",
-            )
         )
