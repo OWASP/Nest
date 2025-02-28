@@ -7,25 +7,36 @@ from django.conf import settings
 
 from apps.slack.commands.events import events_handler
 
+
+# Define a mock event class to simulate the new event object structure
+class MockEvent:
+    def __init__(self, name, category, start_date, end_date, url, description):
+        self.name = name
+        self.category = category
+        self.start_date = start_date
+        self.end_date = end_date
+        self.url = url
+        self.description = description
+
+
+# Mock event data as objects
 mock_events = [
-    {
-        "name": "OWASP Snow 2025",
-        "category": "AppSec Days",
-        "startDate": "2025-03-14",
-        "endDate": "March 14, 2025",
-        "url": "https://example.com/snow",
-        "description": "Regional conference",
-        "categoryDescription": "Local events description",
-    },
-    {
-        "name": "OWASP Global AppSec EU 2025",
-        "category": "Global",
-        "startDate": "2025-05-26",
-        "endDate": "May 26-30, 2025",
-        "url": "https://example.com/eu",
-        "description": "Premier conference",
-        "categoryDescription": "Global events description",
-    },
+    MockEvent(
+        name="OWASP Snow 2025",
+        category="AppSec Days",
+        start_date="2025-03-14",
+        end_date="March 14, 2025",
+        url="https://example.com/snow",
+        description="Regional conference",
+    ),
+    MockEvent(
+        name="OWASP Global AppSec EU 2025",
+        category="Global",
+        start_date="2025-05-26",
+        end_date="May 26-30, 2025",
+        url="https://example.com/eu",
+        description="Premier conference",
+    ),
 ]
 
 
@@ -85,8 +96,7 @@ class TestEventsHandler:
         if has_events_data:
             current_block = 2
 
-            assert "*AppSec Days Events:*" in blocks[current_block]["text"]["text"]
-            assert "Local events description" in blocks[current_block]["text"]["text"]
+            assert "*Category: Appsec Days*" in blocks[current_block]["text"]["text"]
             current_block += 1
 
             event_block = blocks[current_block]["text"]["text"]
@@ -99,8 +109,15 @@ class TestEventsHandler:
             assert blocks[current_block]["type"] == "divider"
             current_block += 1
 
-            assert "*Global Events:*" in blocks[current_block]["text"]["text"]
-            assert "Global events description" in blocks[current_block]["text"]["text"]
+            assert "*Category: Global*" in blocks[current_block]["text"]["text"]
+            current_block += 1
+
+            event_block = blocks[current_block]["text"]["text"]
+            assert "*1. <https://example.com/eu|OWASP Global AppSec EU 2025>*" in event_block
+            assert "Start Date: 2025-05-26" in event_block
+            assert "End Date: May 26-30, 2025" in event_block
+            assert "_Premier conference_" in event_block
+            current_block += 1
 
             footer_block = blocks[-1]["text"]["text"]
             assert "🔍 For more information about upcoming events" in footer_block
