@@ -251,11 +251,9 @@
 import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
 import {
-  faCode,
-  faCodeFork,
-  faExclamationCircle,
-  faStar,
-  faUsers,
+  faUserPlus,
+  faCodeBranch,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_USER_DATA } from 'api/queries/userQueries'
 import { toast } from 'hooks/useToast'
@@ -293,31 +291,6 @@ const UserDetailsPage = () => {
     }
   }, [data, graphQLRequestError, userKey])
 
-  const userStats = [
-      {
-        icon: faUsers,
-        value: `${user?.publicRepositoriesCount || 'No'} ${pluralize(user.publicRepositoriesCount, 'Follower')}`,
-      },
-      // {
-      //   icon: faCodeFork,
-      //   value: `${project?.forksCount || 'No'} ${pluralize(project.forksCount, 'Fork')}`,
-      // },
-      // {
-      //   icon: faStar,
-      //   value: `${project?.starsCount || 'No'} ${pluralize(project.starsCount, 'Star')}`,
-      // },
-      // {
-      //   icon: faCode,
-      //   value: `${project?.repositoriesCount || 'No'} ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
-      // },
-      // {
-      //   icon: faExclamationCircle,
-      //   value: `${project?.issuesCount || 'No'} ${pluralize(project.issuesCount, 'Issue')}`,
-      // },
-    ]
-
-
-
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -335,16 +308,37 @@ const UserDetailsPage = () => {
       />
     )
 
+  const UserDetails = [
+    { label: 'Summary', value: (user.bio)},
+    { label: 'Joined', value: formatDate(user.createdAt) },
+    { label: 'Company', value: (user.company) },
+    { label: 'Email', value: (user.email)}
+  ].filter(detail => detail.value);
+
+  const userStats = [
+      {
+        icon: faUser,
+        value: `${user?.publicRepositoriesCount || 'No'} ${pluralize(user?.publicRepositoriesCount, 'Follower')}`,
+      },
+      {
+        icon: faUserPlus,
+        value: `${user?.followersCount || 'No'} ${pluralize(user?.followersCount, 'Following')}`,
+      },
+      {
+        icon: faCodeBranch,
+        value: `${user?.publicRepositoriesCount || 'No'} ${pluralize(user?.publicRepositoriesCount, 'Repository', 'Repositories')}`,
+      },
+    ]
+
   return (
     <MetadataManager
     pageTitle={user.name || userKey}
-    description={user.bio}
     url={user.url}
     >
       <DetailsCard
-        title={user.login}
+        details={UserDetails}
+        title={user?.name || user?.login}
         stats={userStats}
-        summary={user.bio}
         topContributors={[]}
         type="user"
       />
