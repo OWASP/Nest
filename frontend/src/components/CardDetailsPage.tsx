@@ -1,4 +1,4 @@
-import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFileCode, faLink, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
@@ -38,13 +38,39 @@ const DetailsCard = ({
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
-        <SecondaryCard title="Summary">
+        <SecondaryCard
+          title={
+            <div id="summary" className="relative scroll-mt-20">
+              <div className="items-top group relative flex">
+                Summary
+                <a
+                  href="#summary"
+                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                </a>
+              </div>
+            </div>
+          }
+        >
           <p>{summary}</p>
         </SecondaryCard>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+            title={
+              <div id={`${type}-details`} className="relative scroll-mt-20">
+                <div className="group relative flex items-center">
+                  {`${type[0].toUpperCase() + type.slice(1)} Details`}
+                  <a
+                    href={`#${type}-details`}
+                    className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  >
+                    <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                  </a>
+                </div>
+              </div>
+            }
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
@@ -58,7 +84,22 @@ const DetailsCard = ({
             )}
           </SecondaryCard>
           {(type === 'project' || type === 'repository' || type === 'committee') && (
-            <SecondaryCard title="Statistics" className="md:col-span-2">
+            <SecondaryCard
+              title={
+                <div id="statistics" className="relative scroll-mt-20">
+                  <div className="items-top group relative flex">
+                    Statistics
+                    <a
+                      href="#statistics"
+                      className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    >
+                      <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                    </a>
+                  </div>
+                </div>
+              }
+              className="md:col-span-2"
+            >
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
               ))}
@@ -78,8 +119,42 @@ const DetailsCard = ({
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages.length !== 0 && (
+              <ToggleableList
+                items={languages}
+                label={
+                  <div id="languages" className="relative scroll-mt-20">
+                    <div className="group relative flex items-center">
+                      Languages
+                      <a
+                        href="#languages"
+                        className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                      >
+                        <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                      </a>
+                    </div>
+                  </div>
+                }
+              />
+            )}
+            {topics.length !== 0 && (
+              <ToggleableList
+                items={topics}
+                label={
+                  <div id="topics" className="relative scroll-mt-20">
+                    <div className="group relative flex items-center">
+                      Topics
+                      <a
+                        href="#topics"
+                        className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                      >
+                        <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                      </a>
+                    </div>
+                  </div>
+                }
+              />
+            )}
           </div>
         )}
 
@@ -88,7 +163,19 @@ const DetailsCard = ({
         {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList
-              title="Recent Issues"
+              title={
+                <div id="recent-issues" className="relative scroll-mt-20">
+                  <div className="group relative flex items-center">
+                    Recent Issues
+                    <a
+                      href="#recent-issues"
+                      className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    >
+                      <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                    </a>
+                  </div>
+                </div>
+              }
               data={recentIssues}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -100,7 +187,19 @@ const DetailsCard = ({
               )}
             />
             <ItemCardList
-              title="Recent Releases"
+              title={
+                <div id="recent-releases" className="relative scroll-mt-20">
+                  <div className="group relative flex items-center">
+                    Recent Releases
+                    <a
+                      href="#recent-releases"
+                      className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    >
+                      <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                    </a>
+                  </div>
+                </div>
+              }
               data={recentReleases}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -114,7 +213,22 @@ const DetailsCard = ({
           </>
         )}
         {type === 'project' && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
+          <SecondaryCard
+            title={
+              <div id="repositories" className="relative scroll-mt-20">
+                <div className="items-top group relative flex">
+                  Repositories
+                  <a
+                    href="#repositories"
+                    className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  >
+                    <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                  </a>
+                </div>
+              </div>
+            }
+            className="mt-6"
+          >
             <RepositoriesCard repositories={repositories} />
           </SecondaryCard>
         )}

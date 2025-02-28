@@ -5,6 +5,7 @@ import {
   faCalendar,
   faCode,
   faFileCode,
+  faLink,
   faMapMarkerAlt,
   faTag,
 } from '@fortawesome/free-solid-svg-icons'
@@ -127,7 +128,21 @@ export default function Home() {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <SecondaryCard title="New Chapters">
+        <SecondaryCard
+          title={
+            <div id="new-chapters" className="relative scroll-mt-20">
+              <div className="items-top group relative flex">
+                New Chapters
+                <a
+                  href="#new-chapters"
+                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                </a>
+              </div>
+            </div>
+          }
+        >
           <div className="space-y-4">
             {data.recentChapters.map((chapter) => (
               <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -150,7 +165,21 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
-        <SecondaryCard title="New Projects">
+        <SecondaryCard
+          title={
+            <div id="new-Projects" className="relative scroll-mt-20">
+              <div className="items-top group relative flex">
+                New Projects
+                <a
+                  href="#new-Projects"
+                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                </a>
+              </div>
+            </div>
+          }
+        >
           <div className="space-y-4">
             {data.recentProjects.map((project) => (
               <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -179,7 +208,18 @@ export default function Home() {
       </div>
       <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
       <div className="mb-20">
-        <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Nearby</h2>
+        <div id="chapters-nearby" className="relative scroll-mt-20">
+          <div className="items-top group relative flex">
+            <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Nearby</h2>
+            <a
+              href="#chapters-nearby"
+              className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+            >
+              <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+            </a>
+          </div>
+        </div>
+
         <ChapterMap
           geoLocData={geoLocData}
           style={{ height: '400px', width: '100%', zIndex: '0' }}
@@ -187,7 +227,19 @@ export default function Home() {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <ItemCardList
-          title="Recent Issues"
+          title={
+            <div id="recent-issues" className="relative scroll-mt-20">
+              <div className="group relative flex items-center">
+                Recent Issues
+                <a
+                  href="#recent-issues"
+                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                </a>
+              </div>
+            </div>
+          }
           data={data.recentIssues}
           renderDetails={(item) => (
             <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
@@ -199,7 +251,19 @@ export default function Home() {
           )}
         />
         <ItemCardList
-          title="Recent Releases"
+          title={
+            <div id="recent-releases" className="relative scroll-mt-20">
+              <div className="group relative flex items-center">
+                Recent Releases
+                <a
+                  href="#recent-releases"
+                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+                </a>
+              </div>
+            </div>
+          }
           data={data.recentReleases}
           renderDetails={(item) => (
             <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">

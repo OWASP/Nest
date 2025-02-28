@@ -293,3 +293,11 @@ a {
     transform: rotate(360deg);
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+.inherit-color {
+  color: inherit;
+}

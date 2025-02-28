@@ -1,5 +1,5 @@
 import { Button } from '@chakra-ui/react'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { faChevronDown, faChevronUp, faLink } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -29,7 +29,17 @@ const TopContributors = ({
   }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
-      <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
+      <div id="top-contributors" className="relative scroll-mt-20">
+        <div className="items-top group relative flex">
+          <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
+          <a
+            href="#top-contributors"
+            className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+          >
+            <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+          </a>
+        </div>
+      </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {displayContributors.map((contributor, index) => (
           <div
