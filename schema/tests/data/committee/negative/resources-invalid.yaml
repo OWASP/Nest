@@ -2,10 +2,10 @@ description: This committee has an invalid resource.
 leaders:
   - github: leader1-github
     name: Leader One
-    role: chair
+    role: Chair
   - github: leader2-github
     name: Leader Two
-    role: vice chair
+    role: Vice Chair
 name: OWASP Committee
 resources:
   - type: guide

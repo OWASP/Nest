@@ -1,15 +1,12 @@
-description: This committee has an invalid medium logo.
+community: []
+description: This committee has an invalid community URL.
 leaders:
   - github: leader1-github
     name: Leader One
-    role: chair
+    role: Chair
   - github: leader2-github
     name: Leader Two
-    role: vice chair
-logo:
-  - large: https://example.com/largeLogo
-    medium: https://xyz
-    small: https://example.com/smallLogo
+    role: Vice Chair
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:

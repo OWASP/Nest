@@ -2,10 +2,10 @@ description: This committee has null meeting minutes.
 leaders:
   - github: leader1-github
     name: Leader One
-    role: chair
+    role: Chair
   - github: leader2-github
     name: Leader Two
-    role: vice chair
+    role: Vice Chair
 meeting_minutes:
 name: OWASP Committee
 scope: test scope and purpose of the project

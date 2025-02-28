@@ -1,15 +1,12 @@
-description: This committee has an empty medium logo.
+description: This committee has an invalid event URL.
+events: []
 leaders:
   - github: leader1-github
     name: Leader One
-    role: chair
+    role: Chair
   - github: leader2-github
     name: Leader Two
-    role: vice chair
-logo:
-  - small: https://example.com/smallLogo
-    medium: ''
-    large: https://example.com/largeLogo
+    role: Vice Chair
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:

@@ -9,40 +9,40 @@ from tests.conftest import tests_data_dir
 from utils.schema_validators import validate_data
 
 
-def test_positive(committee_schema):
-    for file_path in Path(tests_data_dir / "committee/positive").rglob("*.yaml"):
-        assert (
-            validate_data(
-                committee_schema,
-                yaml.safe_load(
-                    file_path.read_text(),
-                ),
-            )
-            is None
-        )
-
-
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("community-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("community-empty.yaml", "[] should be non-empty"),
+        (
+            "community-non-unique.yaml",
+            "[{'platform': 'discord', 'url': 'https://discord.com/example'}, "
+            "{'platform': 'discord', 'url': 'https://discord.com/example'}] "
+            "has non-unique elements",
+        ),
         ("community-null.yaml", "None is not of type 'array'"),
         ("description-null.yaml", "None is not of type 'string'"),
         ("description-undefined.yaml", "'description' is a required property"),
-        ("events-invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("events-empty.yaml", "[] should be non-empty"),
+        ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
+        (
+            "events-non-unique.yaml",
+            "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
+        ),
         ("events-null.yaml", "None is not of type 'array'"),
         ("leaders-empty.yaml", "[] is too short"),
         ("leaders-null.yaml", "None is not of type 'array'"),
         ("leaders-undefined.yaml", "'leaders' is a required property"),
-        ("logo-large-empty.yaml", "'' is not a 'uri'"),
-        ("logo-large-invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("logo-large-null.yaml", "None is not a 'uri'"),
-        ("logo-medium-empty.yaml", "'' is not a 'uri'"),
-        ("logo-medium-invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("logo-medium-null.yaml", "None is not a 'uri'"),
-        ("logo-small-empty.yaml", "'' is not a 'uri'"),
-        ("logo-small-invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("logo-small-null.yaml", "None is not a 'uri'"),
+        ("logo-empty.yaml", "[] should be non-empty"),
+        ("logo-null.yaml", "None is not of type 'array'"),
+        (
+            "logo-non-unique.yaml",
+            "[{'small': 'https://example.com/smallLogo.png', "
+            "'medium': 'https://example.com/mediumLogo.png', "
+            "'large': 'https://example.com/largeLogo.png'}, "
+            "{'small': 'https://example.com/smallLogo.png', "
+            "'medium': 'https://example.com/mediumLogo.png', "
+            "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
+        ),
         ("mailing-list-empty.yaml", "'' is not a 'uri'"),
         ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("mailing-list-null.yaml", "None is not a 'uri'"),
@@ -50,7 +50,6 @@ def test_positive(committee_schema):
         ("meeting-minutes-invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("name-empty.yaml", "'' is too short"),
         ("name-undefined.yaml", "'name' is a required property"),
-        ("pitch-empty.yaml", "'' is too short"),
         ("resources-invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("resources-null.yaml", "None is not of type 'array'"),
         ("scope-null.yaml", "None is not of type 'string'"),
@@ -79,3 +78,16 @@ def test_negative(committee_schema, file_path, error_message):
         )
         == error_message
     )
+
+
+def test_positive(committee_schema):
+    for file_path in Path(tests_data_dir / "committee/positive").rglob("*.yaml"):
+        assert (
+            validate_data(
+                committee_schema,
+                yaml.safe_load(
+                    file_path.read_text(),
+                ),
+            )
+            is None
+        )

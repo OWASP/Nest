@@ -2,69 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/committee.json",
   "$defs": {
-    "event": {
-      "description": "An event organized or sponsored by the committee.",
-      "properties": {
-        "date": {
-          "description": "Date of the event.",
-          "format": "date",
-          "type": "string"
-        },
-        "description": {
-          "description": "Brief description of the event.",
-          "type": "string"
-        },
-        "location": {
-          "description": "Location where the event will be held.",
-          "type": "string"
-        },
-        "title": {
-          "description": "Title of the event.",
-          "type": "string"
-        },
-        "url": {
-          "description": "Link to more details about the event.",
-          "format": "uri",
-          "type": "string"
-        }
-      },
-      "required": [
-        "title",
-        "date",
-        "url"
-      ],
-      "title": "Event",
-      "type": "object",
-      "additionalProperties": false
-    },
-    "logo": {
-      "description": "A logo for the committee",
-      "properties": {
-        "large": {
-          "description": "Logo size should be 512x512 pixels.",
-          "format": "uri",
-          "type": "string"
-        },
-        "medium": {
-          "description": "Logo size should be 256x256 pixels.",
-          "format": "uri",
-          "type": "string"
-        },
-        "small": {
-          "description": "Logo size should be 192x192 pixels.",
-          "format": "uri",
-          "type": "string"
-        }
-      },
-      "required": [
-        "small",
-        "medium",
-        "large"
-      ],
-      "type": "object",
-      "additionalProperties": false
-    },
-    "meeting_minute": {
+    "meeting_minutes": {
       "description": "An archived meeting minute of the committee.",
       "properties": {
         "date": {
@@ -82,7 +20,7 @@
         "date",
         "url"
       ],
-      "title": "Meeting Minute",
+      "title": "Meeting Minutes",
       "type": "object"
     }
   },
@@ -105,8 +43,10 @@
     "events": {
       "description": "List of events organized or sponsored by the committee.",
       "items": {
-        "$ref": "#/$defs/event"
+        "format": "uri",
+        "type": "string"
       },
+      "minItems": 1,
       "type": "array",
       "uniqueItems": true
     },
@@ -123,8 +63,8 @@
               "role": {
                 "description": "Role of the leader.",
                 "enum": [
-                  "chair",
-                  "vice chair",
+                  "Chair",
+                  "Vice Chair",
                   "Secretary"
                 ],
                 "type": "string"
@@ -142,13 +82,13 @@
       "uniqueItems": true
     },
     "logo": {
-      "additionalProperties": false,
-      "description": "Logo for the committee.",
+      "description": "Logo information for the project.",
       "items": {
-        "$ref": "#/$defs/logo"
+        "$ref": "common.json#/definitions/logo"
       },
       "minItems": 1,
-      "type": "array"
+      "type": "array",
+      "uniqueItems": true
     },
     "mailing_list": {
       "description": "The optional mailing list associated with the committee.",
@@ -158,18 +98,13 @@
     "meeting_minutes": {
       "description": "Archived meeting minutes of the committee.",
       "items": {
-        "$ref": "#/$defs/meeting_minute"
+        "$ref": "#/$defs/meeting_minutes"
       },
       "type": "array",
       "uniqueItems": true
     },
     "name": {
       "description": "The unique name of the committee.",
-      "minLength": 8,
-      "type": "string"
-    },
-    "pitch": {
-      "description": "A short pitch or tagline summarizing the committee's mission and objectives.",
       "minLength": 8,
       "type": "string"
     },
@@ -205,9 +140,6 @@
     },
     "scope": {
       "description": "Scope and purpose of committee",
-      "items": {
-        "type": "string"
-      },
       "type": "string"
     },
     "social_media": {
