@@ -120,7 +120,6 @@ class SnapshotAdmin(admin.ModelAdmin):
     )
     list_display = (
         "title",
-        "key",
         "start_at",
         "end_at",
         "status",
