@@ -28,9 +28,6 @@ class Event(BulkSaveModel, TimestampedModel):
         default=EventCategory.OTHER,
     )
 
-    category_description = models.TextField(
-        verbose_name="Category Description", default="", blank=True
-    )
     end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     name = models.CharField(verbose_name="Name", max_length=100)

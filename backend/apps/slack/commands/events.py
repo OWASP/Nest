@@ -19,15 +19,14 @@ def events_handler(ack, command, client):
 
     events_data = get_events_data()
 
-    valid_events = [event for event in events_data if event.get("startDate")]
-    sorted_events = sorted(valid_events, key=lambda x: x["startDate"])
+    valid_events = [event for event in events_data if event.start_date]
+    sorted_events = sorted(valid_events, key=lambda x: x.start_date)
 
     categorized_events = {}
     for event in sorted_events:
-        category = event.get("category") or "Other"
+        category = event.category or "Other"
         if category not in categorized_events:
             categorized_events[category] = {
-                "description": event.get("categoryDescription", ""),
                 "events": [],
             }
         categorized_events[category]["events"].append(event)
@@ -37,22 +36,21 @@ def events_handler(ack, command, client):
     blocks.append({"type": "divider"})
 
     for category, category_data in categorized_events.items():
-        blocks.append(markdown(f"*{category} Events:*{NL}{category_data['description']}{NL}"))
+        blocks.append(markdown(f"*Category: {category.replace('_', ' ').title()}*"))
 
         for idx, event in enumerate(category_data["events"], 1):
-            if event.get("url"):
-                block_text = f"*{idx}. <{event['url']}|{event['name']}>*{NL}"
+            if event.url:
+                block_text = f"*{idx}. <{event.url}|{event.name}>*{NL}"
             else:
-                block_text = f"*{idx}. {event['name']}*{NL}"
+                block_text = f"*{idx}. {event.name}*{NL}"
 
-            if event.get("startDate"):
-                block_text += f" Start Date: {event['startDate']}{NL}"
+            block_text += f" Start Date: {event.start_date}{NL}"
 
-            if event.get("endDate"):
-                block_text += f" End Date: {event['endDate']}{NL}"
+            if event.end_date:
+                block_text += f" End Date: {event.end_date}{NL}"
 
-            if event.get("description"):
-                block_text += f"_{event['description']}_{NL}"
+            if event.description:
+                block_text += f"_{event.description}_{NL}"
 
             blocks.append(markdown(block_text))
 

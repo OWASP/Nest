@@ -20,7 +20,6 @@ class Command(BaseCommand):
 
         for category in data:
             category_name = category.get("category", "")
-            category_description = category.get("description", "")
 
             for event_data in category["events"]:
                 event_name_slug = slugify(event_data.get("name", ""))
@@ -31,7 +30,6 @@ class Command(BaseCommand):
 
                 fields = {
                     "category": get_event_category(category_name),
-                    "category_description": category_description,
                     "end_date": end_date,
                     "key": key,
                     "name": event_data.get("name", ""),

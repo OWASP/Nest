@@ -1,6 +1,6 @@
 """OWASP event GraphQL queries."""
 
-from datetime import datetime, timezone
+from datetime import timezone
 
 import graphene
 
@@ -16,8 +16,8 @@ class EventQuery(BaseQuery):
 
     def resolve_events(root, info):
         """Resolve all events."""
-        today = datetime.now(timezone.utc).date()
+        today = timezone.now()
 
-        base_query = Event.objects.exclude(start_date__isnull=True).filter(start_date__gte=today)
+        base_query = Event.objects.filter(start_date__gte=today)
 
         return base_query.order_by("start_date")

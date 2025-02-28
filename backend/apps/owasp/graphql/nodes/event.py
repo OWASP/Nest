@@ -11,7 +11,6 @@ class EventNode(BaseNode):
         model = Event
         fields = (
             "category",
-            "category_description",
             "end_date",
             "description",
             "key",
