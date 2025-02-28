@@ -87,25 +87,28 @@ def sync_repository(gh_repository, organization=None, user=None):
     if not repository.is_archived and repository.project:
         # Fetch both open and closed PRs from GitHub
         kwargs = {
-            "direction": "asc",
+            "direction": "desc",
             "sort": "created",
             "state": "open",
         }
 
         latest_pull_request = repository.latest_pull_request
         if latest_pull_request:
+            gh_first_pr = PullRequest.objects.order_by("created_at").first().created_at
             kwargs["state"] = "all"
 
         gh_pull_requests = gh_repository.get_pulls(**kwargs)
 
         for gh_pull_request in gh_pull_requests:
-            if gh_pull_request.state == "closed":
+            if latest_pull_request and gh_pull_request.state == "closed":
+                # Skipping closed PR before first sync
+                if gh_first_pr > gh_pull_request.created_at:
+                    break
                 # Check if this PR already exists in the database and is open
                 existing_open_pr = PullRequest.objects.filter(
                     repository=repository, state="open", number=gh_pull_request.number
                 ).first()
-                # If the PR does not exist and we have previously synced PRs, skip it
-                # This ensures we only track open PRs from the first run
+
                 if not existing_open_pr:
                     continue  # Skip closed PRs from previous syncs
 
