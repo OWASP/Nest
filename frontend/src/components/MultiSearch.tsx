@@ -88,16 +88,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       if (event.key === 'Escape') {
         setShowSuggestions(false)
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
-        const { index, subIndex } = highlightedIndex
-        const suggestion = suggestions[index].hits[subIndex]
+        const { index, subIndex } = highlighted       const suggestion = suggestions[index].hits[subIndex]
         handleSuggestionClick(suggestion, suggestions[index].indexName)
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
         if (highlightedIndex === null) {
           setHighlightedIndex({ index: 0, subIndex: 0 })
         } else {
-          const { index, subIndex } = highlightedIndex
-          if (subIndex < suggestions[index].hits.length - 1) {
+          const { index, subIndex } = highlighted         if (subIndex < suggestions[index].hits.length - 1) {
             setHighlightedIndex({ index, subIndex: subIndex + 1 })
           } else if (index < suggestions.length - 1) {
             setHighlightedIndex({ index: index + 1, subIndex: 0 })
