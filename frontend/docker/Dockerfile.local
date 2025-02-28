@@ -1,0 +1,15 @@
+FROM node:22-slim
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apt-get update && apt-get install -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /home/owasp && \
+    chown -R node:node /home/owasp && \
+    npm install -g pnpm
+
+EXPOSE 3000
+
+USER node
+
+WORKDIR /home/owasp
