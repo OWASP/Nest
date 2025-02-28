@@ -6,7 +6,6 @@
     <link rel="icon" type="image/png" href="https://owasp.org/www--site-theme/favicon.ico">
     <title>OWASP Nest</title>
     <style>
-        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -20,11 +19,12 @@
             align-items: center;
             min-height: 100vh;
             background-color: #f8f9fa;
+            text-align: center;
         }
 
         #root {
             width: 100%;
-            max-width: 600px; 
+            max-width: 600px;
             padding: 10px;
         }
 
@@ -38,30 +38,23 @@
             overflow: hidden;
         }
 
-        
-        .contribute {
+        .section {
             width: 100%;
-            max-width: 100%;
             padding: 16px;
-            background: #f1f1f1;
             border-radius: 8px;
-            text-align: center;
+            margin-top: 10px;
         }
 
         .projects {
-            width: 100%;
-            max-width: 100%;
-            padding: 16px;
             background: #e3e3e3;
-            border-radius: 8px;
-            text-align: center;
         }
 
-        
+        .contribute {
+            background: #f1f1f1;
+        }
+
         @media (max-width: 768px) {
-            .container, .contribute, .projects {
-                width: 100%;
-                max-width: 100%;
+            .container, .section {
                 padding: 12px;
             }
         }
@@ -71,11 +64,11 @@
     <div id="root">
         <div class="container">
             <h1>Welcome to OWASP Nest</h1>
-            <div class="projects">
+            <div class="section projects">
                 <h2>Projects</h2>
                 <p>Explore various security projects.</p>
             </div>
-            <div class="contribute">
+            <div class="section contribute">
                 <h2>Contribute</h2>
                 <p>Join and contribute to the community.</p>
             </div>
