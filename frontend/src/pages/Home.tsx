@@ -242,7 +242,7 @@ export default function Home() {
           }
           data={data.recentIssues}
           renderDetails={(item) => (
-            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
+            <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
               <span>{formatDate(item.createdAt)}</span>
               <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
@@ -266,11 +266,15 @@ export default function Home() {
           }
           data={data.recentReleases}
           renderDetails={(item) => (
-            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
+            <div className="mt-2 flex flex-shrink-0 text-sm text-gray-600 dark:text-gray-300">
               <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
               <span>{formatDate(item.publishedAt)}</span>
-              <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
-              <span>{item.tagName}</span>
+              <div className="flex flex-row overflow-hidden text-ellipsis whitespace-nowrap">
+                <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-1/5" />
+                <span className="w-[100px] flex-grow-0 flex-col justify-between overflow-hidden text-ellipsis whitespace-nowrap lg:flex-row">
+                  {item.tagName}
+                </span>
+              </div>
             </div>
           )}
         />

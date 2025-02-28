@@ -109,7 +109,13 @@ const DetailsCard = ({
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
-                style={{ height: '100%', width: '100%', zIndex: '0' }}
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  zIndex: '0',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                }}
               />
             </div>
           )}

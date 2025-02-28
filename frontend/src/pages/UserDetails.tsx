@@ -151,21 +151,35 @@ const UserDetailsPage: React.FC = () => {
             </div>
             <div className="px-6 py-6">
               {user.bio && <p className="text-lg text-gray-700 dark:text-gray-300">{user.bio}</p>}
-
               <div className="mt-4 space-y-3">
                 {user.company && (
                   <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faBuildingUser} className="text-sm" />
-                    <span>{user.company}</span>
+                    <span>
+                      <Link
+                        href={`https://github.com/${user.company.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
+                      >
+                        {user.company}
+                      </Link>
+                    </span>
                   </div>
                 )}
                 {user.location && (
                   <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                    <FontAwesomeIcon icon={faLocationDot} className="text-sm" />
-                    <span>{user.location}</span>
+                    <Link
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(user.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
+                    >
+                      <FontAwesomeIcon icon={faLocationDot} className="text-sm" />
+                      <span>{user.location}</span>
+                    </Link>
                   </div>
                 )}
-
                 {user.email && (
                   <Link
                     href={`mailto:${user.email}`}
