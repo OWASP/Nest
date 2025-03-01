@@ -88,11 +88,11 @@ owasp-scrape-committees:
 
 owasp-scrape-projects:
 	@echo "Scraping OWASP site projects data"
-	@CMD="poetry run python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
 
 owasp-update-events:
 	@echo "Getting OWASP events data"
-	@CMD="poetry run python manage.py owasp_update_events" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_update_events" $(MAKE) exec-backend-command
 
 purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
@@ -101,7 +101,7 @@ recreate-schema:
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
 	  	$(MAKE) exec-db-command 2>/dev/null
-	$(MAKE) migrateNestBot goes directly to the DB
+	$(MAKE) migrate
 
 setup:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
