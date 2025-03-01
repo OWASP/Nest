@@ -81,3 +81,9 @@ xdg
 xdist
 xsser
 zsc
+bsky
+slideshare
+Slideshare
+speakerdeck
+Tiktok
+tiktok
