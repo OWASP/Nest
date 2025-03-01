@@ -33,6 +33,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const pageCount = 1
   const suggestionCount = 3
   const searchBarRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const debouncedSearch = useMemo(
     () =>
@@ -87,6 +88,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setShowSuggestions(false)
+        inputRef.current?.blur()
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
@@ -187,6 +189,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             <input
               type="text"
               value={searchQuery}
+              ref={inputRef}
               onChange={handleSearchChange}
               onFocus={handleFocusSearch}
               placeholder={placeholder}
