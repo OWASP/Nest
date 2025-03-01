@@ -44,8 +44,12 @@ def sync_issue(issue_link):
     owner = path_parts[0]
     repo_name = path_parts[1]
 
-    gh_repo = github_client.get_repo(f"{owner}/{repo_name}")
-    gh_issue = gh_repo.get_issue(issue_number)
+    try:
+        gh_repo = github_client.get_repo(f"{owner}/{repo_name}")
+        gh_issue = gh_repo.get_issue(issue_number)
+    except Exception as error:
+        raise ValidationError(FETCH_ISSUE_ERROR.format(error=error)) from error
+
     try:
         author = User.objects.get(login=gh_issue.user.login)
     except User.DoesNotExist:
