@@ -57,5 +57,17 @@ services:
     environment:
       NODE_ENV: local
 
+  typesense:
+    image: typesense/typesense:0.25.0
+    container_name: nest-typesense
+    environment:
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY:-nest_typesense_dev}
+      - TYPESENSE_DATA_DIR=/data
+    ports:
+      - 8108:8108
+    volumes:
+      - typesense-data:/data
+
 volumes:
   db-data:
+  typesense-data:

@@ -2663,6 +2663,21 @@ slack = ["slack-sdk"]
 telegram = ["requests"]
 
 [[package]]
+name = "typesense"
+version = "0.21.0"
+description = "Python client for Typesense, an open source and typo tolerant search engine."
+optional = false
+python-versions = ">=3"
+groups = ["main"]
+files = [
+    {file = "typesense-0.21.0-py3-none-any.whl", hash = "sha256:e4330f103a40af98ba2b0ffd817392a84a537e04816221c9a283faadea7718f0"},
+    {file = "typesense-0.21.0.tar.gz", hash = "sha256:24470525b577300bd81fe43029dddd9269b942b20b49236edf049f6ecead7c8e"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -2915,4 +2930,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "826daea6bad6281b7716210d47a83bcf408a6e0ab48e97acc71207712e596fb8"
+content-hash = "d7fc7df5d4756479567142432c518a5dd4824a99e9675dee971b84bbbd03653f"

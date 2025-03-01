@@ -1,7 +1,9 @@
 """Common app utils."""
 
 from datetime import datetime, timezone
+from functools import lru_cache
 
+import requests
 from django.conf import settings
 from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
@@ -11,6 +13,20 @@ from humanize import intword, naturaltime
 def get_absolute_url(path):
     """Return absolute URL for a view."""
     return f"{settings.SITE_URL}/{path}"
+
+
+@lru_cache(maxsize=1024)
+def get_geolocation(ip_address):
+    """Fetch latitude and longitude from an IP address."""
+    url = f"https://ipinfo.io/{ip_address}/json"
+    try:
+        response = requests.get(url, timeout=5)
+        data = response.json()
+        if "loc" in data:
+            lat, lng = data["loc"].split(",")
+            return float(lat), float(lng)
+    except (KeyError, ValueError):
+        return None, None
 
 
 def get_nest_user_agent():
