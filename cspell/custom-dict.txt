@@ -55,6 +55,7 @@ PLR
 psycopg
 pygithub
 pygoat
+pygraphviz
 PYTHONUNBUFFERED
 pyyaml
 repositorycontributor

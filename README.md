@@ -52,4 +52,11 @@ OWASP Nest thrives on community contributions. Whether you are a developer, desi
 - Issue Reporting: Identify and report bugs or suggest improvements.
 - Engagement: Share feedback, participate in discussions, or promote the project in your network.
 
+## Django Models Graph
+
+The following is an auto-generated visualization of our Django models:
+
+![Django Models Graph](backend_models.png)
+
+
 To get started, visit the [OWASP Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).
