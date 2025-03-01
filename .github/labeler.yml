@@ -1,4 +1,4 @@
-backend:
+bbackend:
   - all:
       - changed-files:
           - any-glob-to-any-file:
@@ -78,3 +78,16 @@ schema-tests:
   - changed-files:
       - any-glob-to-any-file:
           - schema/tests/**
+
+
+bug:
+  - title: ['bug', 'error', 'failure', 'not working']
+  - body: ['unexpected behavior', 'crash', 'stopped working']
+
+enhancement:
+  - title: ['feature request', 'improve', 'add']
+  - body: ['enhancement', 'new functionality', 'extend']
+
+question:
+  - title: ['how to', 'help', 'clarification']
+  - body: ['need help', 'question about', 'understanding']
