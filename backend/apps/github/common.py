@@ -55,9 +55,9 @@ def sync_issue(issue_link):
         repository = Repository.objects.get(node_id=gh_repo.id)
     except Repository.DoesNotExist:
         try:
-            owner = User.objects.get(login=gh_repo.owner.login)
+            repo_owner = User.objects.get(login=gh_repo.owner.login)
         except User.DoesNotExist:
-            owner = User.update_data(gh_repo.owner)
+            repo_owner = User.update_data(gh_repo.owner)
         try:
             organization = Organization.objects.get(node_id=gh_repo.organization.id)
         except Organization.DoesNotExist:
@@ -69,7 +69,7 @@ def sync_issue(issue_link):
             contributors=gh_repo.get_contributors(),
             languages=gh_repo.get_languages(),
             organization=organization,
-            user=owner,
+            user=repo_owner,
         )
 
     return Issue.update_data(gh_issue, author=author, repository=repository)
