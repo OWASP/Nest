@@ -57,6 +57,11 @@
       "minLength": 1,
       "type": "string"
     },
+    "mailing-list": {
+      "description": "The optional mailing list associated with the chapter.",
+      "format": "uri",
+      "type": "string"
+    },
     "name": {
       "description": "The unique name of the chapter.",
       "minLength": 10,
