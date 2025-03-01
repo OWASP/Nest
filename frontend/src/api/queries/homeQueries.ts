@@ -33,9 +33,12 @@ export const GET_MAIN_PAGE_DATA = gql`
       createdAt
       number
       title
+      url
       author {
         avatarUrl
+        login
         name
+        url
       }
     }
     recentReleases(limit: 5) {
