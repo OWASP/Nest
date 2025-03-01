@@ -57,7 +57,7 @@
       "minLength": 1,
       "type": "string"
     },
-    "mailing-list": {
+    "mailing_list": {
       "description": "The optional mailing list associated with the chapter.",
       "format": "uri",
       "type": "string"
