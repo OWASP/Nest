@@ -8,13 +8,7 @@ from django.db import transaction
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
-from apps.slack.utils import (
-    get_or_create_issue,
-    get_text,
-    validate_deadline,
-    validate_github_issue_link,
-    validate_price,
-)
+from apps.slack.utils import get_text
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +24,7 @@ TIME_INDEX = 5
 
 def sponsor_handler(ack, command, client):
     """Slack /sponsor command handler."""
+    from apps.github.common import sync_issue
     from apps.nest.models.sponsorship import Sponsorship
 
     ack()
@@ -56,12 +51,12 @@ def sponsor_handler(ack, command, client):
                 if len(parts) > TIME_INDEX:
                     deadline_str += " " + parts[TIME_INDEX]
 
-            validate_github_issue_link(issue_link)
-            validated_price = validate_price(price)
-            deadline = validate_deadline(deadline_str) if deadline_str else None
+            Sponsorship.validate_github_issue_link(issue_link)
+            validated_price = Sponsorship.validate_price(price)
+            deadline = Sponsorship.validate_deadline(deadline_str) if deadline_str else None
 
             with transaction.atomic():
-                issue = get_or_create_issue(issue_link)
+                issue = sync_issue(issue_link)
                 sponsorship, created = Sponsorship.objects.get_or_create(
                     issue=issue,
                     defaults={

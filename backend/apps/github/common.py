@@ -1,7 +1,11 @@
 """GitHub app common module."""
 
 import logging
+import os
+from urllib.parse import urlparse
 
+from django.core.exceptions import ValidationError
+from github import Github
 from github.GithubException import UnknownObjectException
 
 from apps.github.models.issue import Issue
@@ -13,7 +17,62 @@ from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
 
+INVALID_ISSUE_LINK_FORMAT = "Invalid GitHub issue link format."
+FETCH_ISSUE_ERROR = "Failed to fetch issue from GitHub: {error}"
+MIN_PARTS_LENGTH = 4
+
+
 logger = logging.getLogger(__name__)
+
+
+def sync_issue(issue_link):
+    """Sync GitHub issue data."""
+    try:
+        return Issue.objects.get(url=issue_link)
+    except Issue.DoesNotExist:
+        pass
+
+    parsed_url = urlparse(issue_link)
+    path_parts = parsed_url.path.strip("/").split("/")
+    if len(path_parts) < MIN_PARTS_LENGTH or path_parts[2] != "issues":
+        raise ValidationError(INVALID_ISSUE_LINK_FORMAT)
+
+    github_token = os.getenv("GITHUB_TOKEN")
+    github_client = Github(github_token)
+
+    issue_number = int(path_parts[3])
+    owner = path_parts[0]
+    repo_name = path_parts[1]
+
+    gh_repo = github_client.get_repo(f"{owner}/{repo_name}")
+    gh_issue = gh_repo.get_issue(issue_number)
+    try:
+        author = User.objects.get(login=gh_issue.user.login)
+    except User.DoesNotExist:
+        author = User.update_data(gh_issue.user)
+
+    try:
+        repository = Repository.objects.get(node_id=gh_repo.id)
+    except Repository.DoesNotExist:
+        try:
+            owner = User.objects.get(login=gh_repo.owner.login)
+        except User.DoesNotExist:
+            owner = User.update_data(gh_repo.owner)
+        try:
+            organization = Organization.objects.get(node_id=gh_repo.organization.id)
+        except Organization.DoesNotExist:
+            organization = Organization.update_data(gh_repo.organization)
+
+        repository = Repository.update_data(
+            gh_repository=gh_repo,
+            commits=gh_repo.get_commits(),
+            contributors=gh_repo.get_contributors(),
+            languages=gh_repo.get_languages(),
+            organization=organization,
+            user=owner,
+        )
+
+    return Issue.update_data(gh_issue, author=author, repository=repository)
 
 
 def sync_repository(gh_repository, organization=None, user=None):

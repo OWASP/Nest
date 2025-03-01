@@ -151,7 +151,7 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
         prompt = (
             Prompt.get_github_issue_documentation_project_summary()
-            if self.project.is_documentation_type
+            if self.project and self.project.is_documentation_type
             else Prompt.get_github_issue_project_summary()
         )
         if not prompt:

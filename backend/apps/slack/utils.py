@@ -2,36 +2,18 @@
 
 import logging
 import re
-from datetime import datetime
 from functools import lru_cache
 from html import escape as escape_html
 from urllib.parse import urljoin
 
 import requests
 import yaml
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-from github import Github
 from lxml import html
 from requests.exceptions import RequestException
 
 from apps.common.constants import NL, OWASP_NEWS_URL
 
 logger = logging.getLogger(__name__)
-
-
-ISSUES_INDEX = 5
-GITHUB_COM_INDEX = 2
-MIN_PARTS_LENGTH = 4
-
-DEADLINE_FORMAT_ERROR = "Invalid deadline format. Use YYYY-MM-DD or YYYY-MM-DD HH:MM."
-DEADLINE_FUTURE_ERROR = "Deadline must be in the future."
-FETCH_ISSUE_ERROR = "Failed to fetch issue from GitHub: {error}"
-INVALID_ISSUE_LINK_FORMAT = "Invalid GitHub issue link format."
-ISSUE_LINK_ERROR = "Issue link must belong to an OWASP repository."
-PRICE_POSITIVE_ERROR = "Price must be a positive value."
-PRICE_VALID_ERROR = "Price must be a valid number."
 
 
 def escape(content):
@@ -81,48 +63,6 @@ def get_news_data(limit=10, timeout=30):
             break
 
     return items
-
-
-def get_or_create_issue(issue_link):
-    """Fetch or create an Issue instance from the GitHub API."""
-    from apps.github.models.issue import Issue
-    from apps.github.models.repository import Repository
-    from apps.github.models.user import User
-
-    logger.info("Fetching or creating issue for link: %s", issue_link)
-
-    # Extract repository owner, repo name, and issue number from the issue link
-    # Example: https://github.com/OWASP/Nest/issues/XYZ
-    parts = issue_link.strip("/").split("/")
-    if (
-        len(parts) < MIN_PARTS_LENGTH
-        or parts[GITHUB_COM_INDEX] != "github.com"
-        or parts[ISSUES_INDEX] != "issues"
-    ):
-        raise ValidationError(INVALID_ISSUE_LINK_FORMAT)
-
-    try:
-        return Issue.objects.get(url=issue_link)
-    except Issue.DoesNotExist:
-        pass
-
-    github_client = Github(settings.GITHUB_TOKEN)
-    issue_number = int(parts[6])
-    owner = parts[3]
-    repo_name = parts[4]
-
-    try:
-        # Fetch the repository and issue from GitHub
-        gh_repo = github_client.get_repo(f"{owner}/{repo_name}")
-        gh_issue = gh_repo.get_issue(issue_number)
-        repository = Repository.objects.get(name=repo_name)
-        author = User.objects.get(login=gh_issue.user.login)
-
-        # Update or create the issue in the database
-        return Issue.update_data(gh_issue, author=author, repository=repository)
-    except Exception as e:
-        logger.exception("Failed to fetch issue from GitHub: %s")
-        raise ValidationError(FETCH_ISSUE_ERROR.format(error=e)) from e
 
 
 @lru_cache
@@ -192,43 +132,3 @@ def strip_markdown(text):
     """Strip markdown formatting."""
     slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
     return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")
-
-
-def validate_deadline(deadline_str):
-    """Validate that the deadline is in a valid datetime format."""
-    try:
-        # Try parsing the deadline in YYYY-MM-DD format
-        deadline = datetime.strptime(deadline_str, "%Y-%m-%d").replace(
-            tzinfo=timezone.get_current_timezone()
-        )
-    except ValueError:
-        try:
-            # Try parsing the deadline in YYYY-MM-DD HH:MM format
-            deadline = datetime.strptime(deadline_str, "%Y-%m-%d %H:%M").replace(
-                tzinfo=timezone.get_current_timezone()
-            )
-        except ValueError as e:
-            raise ValidationError(DEADLINE_FORMAT_ERROR) from e
-
-    if deadline < timezone.now():
-        raise ValidationError(DEADLINE_FUTURE_ERROR)
-
-    return deadline
-
-
-def validate_github_issue_link(issue_link):
-    """Validate that the issue link belongs to a valid OWASP-related repository."""
-    if not issue_link.startswith("https://github.com/OWASP"):
-        raise ValidationError(ISSUE_LINK_ERROR)
-    return issue_link
-
-
-def validate_price(price):
-    """Validate that the price is a positive float value."""
-    try:
-        price = float(price)
-        if price <= 0:
-            raise ValidationError(PRICE_POSITIVE_ERROR)
-    except ValueError as e:
-        raise ValidationError(PRICE_VALID_ERROR) from e
-    return price
