@@ -7,6 +7,7 @@ ansa
 arkid15r
 askowasp
 Aupdated
+bsky
 certbot
 Chakra
 collectstatic
@@ -68,6 +69,9 @@ SEO
 Sivagangai
 slackbot
 SLF
+slideshare
+speakerdeck
+tiktok
 Truncator
 tsc
 Twitterbot
@@ -81,7 +85,3 @@ xdg
 xdist
 xsser
 zsc
-bsky
-slideshare
-speakerdeck
-tiktok
