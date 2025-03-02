@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  generate-graph:
+  generate-model-graph:
     runs-on: ubuntu-latest
 
     steps:
@@ -63,12 +63,9 @@ jobs:
           poetry install --no-interaction --no-root --with dev
           poetry add pydotplus  # Ensure pydotplus is installed
           
-      - name: Generate Models Graph using `pydotplus`
+      - name: Generate Models Graph
         run: |
-          cd backend
-          set -a
-          source .env.backend
-          set +a
+       
           poetry run python manage.py graph_models -a -g -o backend_models.png
 
       - name: Commit and push changes
