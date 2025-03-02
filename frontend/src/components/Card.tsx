@@ -14,9 +14,6 @@ import DisplayIcon from 'components/DisplayIcon'
 import Markdown from 'components/MarkdownWrapper'
 import { Tooltip } from 'components/ui/tooltip'
 
-// Initial check for mobile screen size
-const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < desktopViewMinWidth
-
 const Card = ({
   title,
   url,
@@ -30,17 +27,6 @@ const Card = ({
   social,
   tooltipLabel,
 }: CardProps) => {
-  const [isMobile, setIsMobile] = useState(isMobileInitial)
-
-  // Resize listener to adjust display based on screen width
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < desktopViewMinWidth
-      setIsMobile(mobile)
-    }
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   const hasSocial = social && social.length > 0
   const hasContributors = topContributors && topContributors.length > 0
