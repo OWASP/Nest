@@ -34,6 +34,17 @@ jobs:
       - name: Debug Environment Variables
         run: cat backend/.env.backend | grep -v DJANGO_DB_PASSWORD | grep -v DJANGO_SECRET_KEY
 
+      - name: Debug .env file
+        run: |
+          if [ -f backend/.env ]; then
+            echo ".env file found!"
+            cat backend/.env | grep -v DJANGO_DB_PASSWORD | grep -v DJANGO_SECRET_KEY
+          else
+            echo "ERROR: .env file not found!"
+            ls -la backend  # List backend directory contents
+          fi
+
+
 
       - name: Prepare secrets
         run: |
