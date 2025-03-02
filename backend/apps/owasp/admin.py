@@ -65,7 +65,6 @@ class CommitteeAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("owasp_repository",)
     list_display = ("name",)
     search_fields = ("name",)
 
