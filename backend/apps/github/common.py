@@ -7,6 +7,7 @@ from github.GithubException import UnknownObjectException
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
 from apps.github.models.organization import Organization
+from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -82,6 +83,59 @@ def sync_repository(gh_repository, organization=None, user=None):
                     logger.info("Couldn't get GitHub issue label %s", issue.url)
     else:
         logger.info("Skipping issues sync for %s", repository.name)
+
+    if not repository.is_archived and repository.project:
+        # Fetch both open and closed PRs from GitHub
+        kwargs = {
+            "direction": "desc",
+            "sort": "created",
+            "state": "open",
+        }
+
+        latest_pull_request = repository.latest_pull_request
+        if latest_pull_request:
+            gh_first_pr = PullRequest.objects.order_by("created_at").first().created_at
+            kwargs["state"] = "all"
+
+        gh_pull_requests = gh_repository.get_pulls(**kwargs)
+
+        for gh_pull_request in gh_pull_requests:
+            if latest_pull_request and gh_pull_request.state == "closed":
+                # Skipping closed PR before first sync
+                if gh_first_pr > gh_pull_request.created_at:
+                    break
+                # Check if this PR already exists in the database and is open
+                existing_open_pr = PullRequest.objects.filter(
+                    repository=repository, state="open", number=gh_pull_request.number
+                ).first()
+
+                if not existing_open_pr:
+                    continue  # Skip closed PRs from previous syncs
+
+            # Extract author details
+            author = (
+                User.update_data(gh_pull_request.user)
+                if gh_pull_request.user and gh_pull_request.user.type != "Bot"
+                else None
+            )
+
+            # Update PR data
+            pull_request = PullRequest.update_data(
+                gh_pull_request, author=author, repository=repository
+            )
+
+            # Clear and update assignees
+            pull_request.assignees.clear()
+            for gh_pull_request_assignee in gh_pull_request.assignees:
+                pull_request.assignees.add(User.update_data(gh_pull_request_assignee))
+
+            # Clear and update labels
+            pull_request.labels.clear()
+            for gh_pull_request_label in gh_pull_request.labels:
+                try:
+                    pull_request.labels.add(Label.update_data(gh_pull_request_label))
+                except UnknownObjectException:
+                    logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
 
     # GitHub repository releases.
     releases = []
