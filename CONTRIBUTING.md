@@ -266,7 +266,9 @@ If you are adding new functionality, include relevant test cases.
 ### 1. Find Something to Work On
 
 - Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)
-- If you want to work on something specific, create a new issue or comment on an existing one to let others know.
+- Found a bug or have a feature request? Open a new issue.
+- Want to work on an existing issue? Ask the maintainers to assign it to you before submitting a pull request.
+- New to the project? Start with issues labeled `good first issue` for an easier onboarding experience.
 
 ### 2. Create a Branch
 
