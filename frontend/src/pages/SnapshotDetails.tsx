@@ -155,14 +155,6 @@ const SnapshotDetailsPage: React.FC = () => {
           </div>
         )}
 
-        {snapshot.newChapters && snapshot.newChapters.length > 0 && (
-          <div className="mb-8">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-              Chapters Map
-            </h2>
-          </div>
-        )}
-
         {snapshot.newProjects && snapshot.newProjects.length > 0 && (
           <div className="mb-8">
             <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
