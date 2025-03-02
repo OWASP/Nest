@@ -186,7 +186,7 @@ class Base(Configuration):
     DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = values.SecretValue()
+    SECRET_KEY = values.Value()
 
     # https://docs.djangoproject.com/en/5.1/ref/settings/#data-upload-max-number-fields
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
