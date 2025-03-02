@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Apply Labels to Issues
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7.0.1
         with:
           script: |
             const issue = context.payload.issue;
