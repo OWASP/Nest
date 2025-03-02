@@ -76,7 +76,7 @@ jobs:
           set -a
           source .env.backend
           set +a
-          poetry run python manage.py graph_models -a -g -o backend_models.png --pydotplus
+          poetry run python manage.py graph_models -a -g -o backend_models.png
 
       - name: Commit and push changes
         env:
