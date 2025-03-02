@@ -46,7 +46,7 @@ def get_repository_path(url):
 
 
 def normalize_url(url, check_path=False):
-    """Normalize GitHub URL."""
+    """Normalize URL."""
     parsed_url = urlparse(url)
     if not parsed_url.netloc or (check_path and not parsed_url.path):
         return None
