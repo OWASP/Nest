@@ -1,6 +1,8 @@
 import { HStack, Link } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useState, useEffect } from 'react'
 import { CardProps } from 'types/card'
+import { desktopViewMinWidth } from 'utils/constants'
 import { Icons } from 'utils/data'
 import { TooltipRecipe } from 'utils/theme'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -11,6 +13,9 @@ import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
 import Markdown from 'components/MarkdownWrapper'
 import { Tooltip } from 'components/ui/tooltip'
+
+// Initial check for mobile screen size
+const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < desktopViewMinWidth
 
 const Card = ({
   title,
@@ -25,6 +30,18 @@ const Card = ({
   social,
   tooltipLabel,
 }: CardProps) => {
+  const [isMobile, setIsMobile] = useState(isMobileInitial)
+
+  // Resize listener to adjust display based on screen width
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < desktopViewMinWidth
+      setIsMobile(mobile)
+    }
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   const hasSocial = social && social.length > 0
   const hasContributors = topContributors && topContributors.length > 0
 
