@@ -15,5 +15,3 @@ class Local(Base):
     LOGGING = {}
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-
-    INSTALLED_APPS = (*Base.INSTALLED_APPS, "django_extensions")

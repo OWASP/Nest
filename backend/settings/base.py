@@ -31,7 +31,6 @@ class Base(Configuration):
         "django.contrib.sessions",
         "django.contrib.messages",
         "django.contrib.staticfiles",
-        "django_extensions",
     )
 
     THIRD_PARTY_APPS = (
@@ -40,6 +39,7 @@ class Base(Configuration):
         "graphene_django",
         "rest_framework",
         "storages",
+        "django_extensions",
     )
 
     LOCAL_APPS = (

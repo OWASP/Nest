@@ -29,7 +29,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y graphviz graphviz-dev
+          sudo apt install -y graphviz
 
       - name: Prepare secrets
         run: |
@@ -45,21 +45,22 @@ jobs:
           cd backend
           export $(grep -v '^#' .env.backend | xargs)
           poetry install --no-interaction --no-root --with dev
+          poetry add pydotplus  # Ensure pydotplus is installed
 
-      - name: Verify `django-extensions` is installed
+      - name: Verify `django-extensions` and `pydotplus` are installed
         run: |
           cd backend
           export $(grep -v '^#' .env.backend | xargs)
           poetry run python -m pip show django-extensions || poetry run pip install django-extensions
+          poetry run python -m pip show pydotplus || poetry run pip install pydotplus
 
-      - name: Generate Models Graph
+      - name: Generate Models Graph using `pydotplus`
         run: |
           cd backend
           set -a
           source .env.backend
           set +a
-          poetry run python manage.py graph_models -a -g -o backend_models.png
-
+          poetry run python manage.py graph_models -a -g -o backend_models.png --pydotplus
 
       - name: Commit and push changes
         env:

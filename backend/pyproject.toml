@@ -47,10 +47,11 @@ slack-bolt = "^1.22.0"
 
 [tool.poetry.group.dev.dependencies]
 django-extensions = "^3.2.3"
-pygraphviz = "^1.11"
+pydotplus = "^2.0.2"
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
 ruff = "^0.9.5"
+
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
