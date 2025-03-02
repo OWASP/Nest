@@ -25,14 +25,13 @@ const Card = ({
   social,
   tooltipLabel,
 }: CardProps) => {
-
   const hasSocial = social && social.length > 0
   const hasContributors = topContributors && topContributors.length > 0
 
   return (
     <div
       className={cn(
-        "relative mb-4 mt-6 flex w-full flex-col items-start rounded-lg border border-border bg-white p-2 sm:p-3 shadow-sm transition-all duration-300 dark:bg-slate-800 md:max-w-6xl",
+        'relative mb-4 mt-6 flex w-full flex-col items-start rounded-lg border border-border bg-white p-2 shadow-sm transition-all duration-300 dark:bg-slate-800 sm:p-3 md:max-w-6xl'
       )}
     >
       <div className="flex w-full flex-col items-start gap-1.5">
@@ -48,7 +47,7 @@ const Card = ({
             >
               <span
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-full text-xs sm:text-sm shadow-md ring-2 ring-white dark:ring-slate-700 flex-shrink-0'
+                  'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs shadow-md ring-2 ring-white dark:ring-slate-700 sm:text-sm'
                 )}
                 style={{ backgroundColor: level.color }}
               >
@@ -62,9 +61,9 @@ const Card = ({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex-1 no-underline w-full"
+            className="group w-full flex-1 no-underline"
           >
-            <h1 className="max-w-full text-lg sm:text-xl md:text-2xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
+            <h1 className="max-w-full text-lg font-bold text-gray-800 transition-colors duration-300 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 sm:text-xl md:text-2xl">
               {title}
             </h1>
           </Link>
@@ -74,7 +73,7 @@ const Card = ({
           <Link
             href={projectLink}
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 sm:text-sm"
           >
             <FontAwesomeIconWrapper icon="link" className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
             {projectName}
@@ -83,7 +82,7 @@ const Card = ({
 
         {/* Technology Icons*/}
         {icons && Object.keys(Icons).some((key) => icons[key]) && (
-          <div className="flex flex-wrap py-1 overflow-x-auto -ml-1 sm:-ml-1.5 mt-1">
+          <div className="-ml-1 mt-1 flex flex-wrap overflow-x-auto py-1 sm:-ml-1.5">
             {Object.keys(Icons).map((key, index) =>
               icons[key] ? (
                 <DisplayIcon
@@ -97,10 +96,11 @@ const Card = ({
         )}
 
         {/* Summary section */}
-        <div className={cn(
-          'w-full rounded-md my-1 p-1 sm:p-3 bg-gray-50 dark:bg-slate-700/30'
-        )}>
-          <Markdown content={summary} className="prose prose-xs sm:prose-sm max-w-none text-gray-700 dark:prose-invert dark:text-gray-200" />
+        <div className={cn('my-1 w-full rounded-md bg-gray-50 p-1 dark:bg-slate-700/30 sm:p-3')}>
+          <Markdown
+            content={summary}
+            className="prose prose-xs sm:prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
+          />
         </div>
 
         {/* Footer section */}
@@ -138,7 +138,7 @@ const Card = ({
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-blue-100 hover:text-blue-600 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-blue-900 dark:hover:text-blue-300"
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-blue-100 hover:text-blue-600 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-blue-900 dark:hover:text-blue-300 sm:h-8 sm:w-8"
                     >
                       <FontAwesomeIcon icon={getSocialIcon(item.url)} className="h-5 w-5" />
                     </Link>
