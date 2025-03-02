@@ -59,8 +59,11 @@ jobs:
       - name: Generate Models Graph
         run: |
           cd backend
-          export $(grep -v '^#' .env.backend | xargs)
+          set -a
+          source .env.backend
+          set +a
           poetry run python manage.py graph_models -a -g -o backend_models.png
+
 
       - name: Commit and push changes
         env:
