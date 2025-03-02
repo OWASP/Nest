@@ -7,6 +7,8 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
+from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 from apps.owasp.models.snapshot import Snapshot
 
 
@@ -63,7 +65,6 @@ class CommitteeAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("owasp_repository",)
     list_display = ("name",)
     search_fields = ("name",)
 
@@ -141,4 +142,6 @@ admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Project, ProjectAdmin)
+admin.site.register(ProjectHealthMetrics)
+admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)

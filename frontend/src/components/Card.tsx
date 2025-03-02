@@ -1,10 +1,11 @@
 import { HStack, Link } from '@chakra-ui/react'
-import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect } from 'react'
 import { CardProps } from 'types/card'
 import { desktopViewMinWidth } from 'utils/constants'
 import { Icons } from 'utils/data'
 import { TooltipRecipe } from 'utils/theme'
+import { getSocialIcon } from 'utils/urlIconMappings'
 import { cn } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import ActionButton from 'components/ActionButton'
@@ -100,7 +101,6 @@ const Card = ({
       )}
       {/* Render project summary using Markdown */}
       <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
-
       <div
         className={
           social && social.length > 0
@@ -152,12 +152,11 @@ const Card = ({
                       alignItems="center"
                       gap={2}
                     >
-                      <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
+                      <FontAwesomeIcon icon={getSocialIcon(item.url)} className="h-5 w-5" />
                     </Link>
                   ))}
                 </HStack>
               )}
-
               {/* Action Button */}
               <div className="flex items-center">
                 <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
