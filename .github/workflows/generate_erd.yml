@@ -36,7 +36,7 @@ jobs:
           touch backend/.env  # Ensure the file exists
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> backend/.env
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env
-          echo "SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> backend/.env
           echo "DJANGO_CONFIGURATION=Test" >> backend/.env
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> backend/.env
           echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> backend/.env
