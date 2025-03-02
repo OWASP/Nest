@@ -8,5 +8,7 @@ from .snapshot import SnapshotQuery
 from .stats import StatsQuery
 
 
-class OwaspQuery(ChapterQuery, CommitteeQuery, EventQuery, ProjectQuery, SnapshotQuery, StatsQuery):
+class OwaspQuery(
+    ChapterQuery, CommitteeQuery, EventQuery, ProjectQuery, SnapshotQuery, StatsQuery
+):
     """OWASP queries."""
