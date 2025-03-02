@@ -153,16 +153,17 @@ const UserDetailsPage: React.FC = () => {
               {user.bio && (
                 <p className="text-lg text-gray-700 dark:text-gray-300">
                   {user.bio.split(' ').map((word, index) => {
-                    if (word.startsWith('@')) {
+                    const mentionMatch = word.match(/^@(\w+)/)
+                    if (mentionMatch) {
                       return (
                         <Link
                           key={index}
-                          href={`https://github.com/${word.substring(1)}`}
+                          href={`https://github.com/${mentionMatch[1]}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:underline"
                         >
-                          {word}
+                          {word}{' '}
                         </Link>
                       )
                     }
