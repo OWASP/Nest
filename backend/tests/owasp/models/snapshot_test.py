@@ -12,6 +12,8 @@ class SnapshotModelMockTest(SimpleTestCase):
         """Set up a mocked snapshot object."""
         self.snapshot = MagicMock(spec=Snapshot)  # Mock entire model
         self.snapshot.id = 1  # Set an ID to avoid ManyToMany errors
+        self.snapshot.title = "Mock Snapshot Title"
+        self.snapshot.key = "2025-02"
         self.snapshot.start_at = "2025-02-21"
         self.snapshot.end_at = "2025-02-21"
         self.snapshot.status = Snapshot.Status.PROCESSING
@@ -27,3 +29,8 @@ class SnapshotModelMockTest(SimpleTestCase):
         """Test ManyToMany relationships using mocks."""
         self.snapshot.new_chapters.set(["Mock Chapter"])
         self.snapshot.new_chapters.set.assert_called_once_with(["Mock Chapter"])
+
+    def test_snapshot_attributes(self):
+        """Test that title and key are correctly assigned."""
+        assert self.snapshot.title == "Mock Snapshot Title"
+        assert self.snapshot.key == "2025-02"
