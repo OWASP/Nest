@@ -35,7 +35,7 @@ const ItemCardList = ({
                     className="mr-2 h-6 w-6 rounded-full"
                   />
                   <a
-                    href={item?.author?.url}
+                    href={`/community/users/${item?.author?.login}`}
                     className="text-blue-400 hover:underline dark:text-blue-200"
                   >
                     {item?.author?.name || item?.author?.login}
