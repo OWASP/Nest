@@ -47,14 +47,13 @@ jobs:
           ls -la backend  # Check if the .env file exists
           cat backend/.env | grep -v DJANGO_DB_PASSWORD | grep -v DJANGO_SECRET_KEY
 
-
-
       - name: Prepare secrets
         run: |
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env.backend
           echo "DJANGO_SETTINGS_MODULE=settings.test" >> backend/.env.backend
-          echo "DJANGO_CONFIGURATION=Local"
+          echo "DJANGO_CONFIGURATION=Test"
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> backend/.env
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> backend/.env.backend
 
       - name: Install dependencies
