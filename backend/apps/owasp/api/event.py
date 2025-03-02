@@ -15,8 +15,6 @@ class EventSerializer(serializers.HyperlinkedModelSerializer):
             "name",
             "description",
             "url",
-            "created_at",
-            "updated_at",
         )
 
 
