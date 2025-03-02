@@ -94,6 +94,6 @@ class TestUpdateProjectHealthRequirementsCommand:
         assert "unanswered_issues_count" in defaults
         assert "unassigned_issues_count" in defaults
 
-        command_defaults = Command.level_requirements.get(level, {})
+        command_defaults = Command.LEVEL_REQUIREMENTS.get(level, {})
         for key, value in command_defaults.items():
             assert defaults[key] == value

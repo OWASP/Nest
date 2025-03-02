@@ -100,7 +100,4 @@ class Migration(migrations.Migration):
                 "ordering": ["level"],
             },
         ),
-        migrations.DeleteModel(
-            name="ProjectHealthMetrics",
-        ),
     ]
