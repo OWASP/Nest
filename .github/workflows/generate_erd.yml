@@ -39,7 +39,8 @@ jobs:
           echo "DJANGO_DB_NAME=${{ secrets.DJANGO_DB_NAME }}" >> backend/.env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> backend/.env.backend
           echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> backend/.env.backend
-          echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> backend/.env.backend
+          echo "DJANGO_SETTINGS_MODULE=settings.test" >> backend/.env.backend
+
           echo "DJANGO_CONFIGURATION=${{ secrets.DJANGO_CONFIGURATION }}" >> backend/.env.backend
           echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> backend/.env.backend
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> backend/.env.backend
