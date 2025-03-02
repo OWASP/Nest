@@ -122,7 +122,9 @@ class Event(BulkSaveModel, TimestampedModel):
             "description": data.get("optional-text", ""),
             "end_date": Event.parse_dates(data.get("dates", ""), data.get("start-date")),
             "name": data["name"],
-            "start_date": data["start-date"],
+            "start_date": parser.parse(data["start-date"]).date()
+            if isinstance(data["start-date"], str)
+            else data["start-date"],
             "url": normalize_url(data.get("url", "")) or "",
         }
 
