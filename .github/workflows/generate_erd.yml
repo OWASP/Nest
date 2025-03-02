@@ -33,7 +33,7 @@ jobs:
 
       - name: Prepare secrets
         run: |
-          echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" > backend/.env.backend
+          echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env.backend
           echo "DJANGO_SETTINGS_MODULE=settings.test" >> backend/.env.backend
           echo "DJANGO_CONFIGURATION=${{ secrets.DJANGO_CONFIGURATION }}" >> backend/.env.backend
