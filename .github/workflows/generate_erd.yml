@@ -39,6 +39,8 @@ jobs:
           echo "DJANGO_CONFIGURATION=${{ secrets.DJANGO_CONFIGURATION }}" >> backend/.env.backend
           echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> backend/.env.backend
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> backend/.env.backend
+          
+          echo "SENTRY_DSN=" >> backend/.env.backend
 
       - name: Install dependencies
         run: |
