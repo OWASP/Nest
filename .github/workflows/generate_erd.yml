@@ -31,23 +31,29 @@ jobs:
           sudo apt update
           sudo apt install -y graphviz graphviz-dev
 
-      - name: Set Environment Variables
+      - name: Prepare secrets
         run: |
-          echo "DJANGO_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> $GITHUB_ENV
-          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> $GITHUB_ENV
-          echo "DJANGO_DEBUG=False" >> $GITHUB_ENV
+          echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" > backend/.env.backend
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env.backend
+          echo "DJANGO_DB_HOST=${{ secrets.DJANGO_DB_HOST }}" >> backend/.env.backend
+          echo "DJANGO_DB_NAME=${{ secrets.DJANGO_DB_NAME }}" >> backend/.env.backend
+          echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> backend/.env.backend
+          echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> backend/.env.backend
+          echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> backend/.env.backend
+          echo "DJANGO_CONFIGURATION=${{ secrets.DJANGO_CONFIGURATION }}" >> backend/.env.backend
+          echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> backend/.env.backend
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> backend/.env.backend
 
       - name: Install dependencies
-        env:
-          POETRY_HTTP_BASIC_USERNAME: ${{ secrets.POETRY_HTTP_BASIC_USERNAME }}
-          POETRY_HTTP_BASIC_PASSWORD: ${{ secrets.POETRY_HTTP_BASIC_PASSWORD }}
         run: |
           cd backend
+          export $(grep -v '^#' .env.backend | xargs)  # Load .env.backend into environment
           poetry install --no-interaction --no-root
 
       - name: Generate Models Graph
         run: |
           cd backend
+          export $(grep -v '^#' .env.backend | xargs)  # Load .env.backend before running Django
           poetry run python manage.py graph_models -a -g -o backend_models.png
 
       - name: Commit and push changes
