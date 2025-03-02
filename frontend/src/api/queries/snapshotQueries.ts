@@ -5,14 +5,17 @@ export const GET_SNAPSHOT_DETAILS = gql`
     snapshot(key: $key) {
       title
       key
-      createdAt
       updatedAt
+      createdAt
       startAt
       endAt
+      status
+      errorMessage
       newReleases {
         name
-        version
-        releaseDate
+        publishedAt
+        tagName
+        projectName
       }
       newProjects {
         key
@@ -20,20 +23,38 @@ export const GET_SNAPSHOT_DETAILS = gql`
         summary
         starsCount
         forksCount
+        contributorsCount
+        level
+        isActive
         repositoriesCount
         topContributors {
-          name
-          login
+          avatarUrl
           contributionsCount
+          login
+          name
         }
       }
       newChapters {
         key
         name
+        createdAt
+        suggestedLocation
+        region
+        summary
+        topContributors {
+          avatarUrl
+          contributionsCount
+          login
+          name
+        }
+        updatedAt
+        url
+        relatedUrls
         geoLocation {
           lat
           lng
         }
+        isActive
       }
     }
   }

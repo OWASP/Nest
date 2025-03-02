@@ -11,6 +11,7 @@ import Home from './Home'
 import ProjectDetailsPage from './ProjectDetails'
 import ProjectsPage from './Projects'
 import RepositoryDetailsPage from './RepositoryDetails'
+import SnapshotDetailsPage from './SnapshotDetails'
 import UserDetailsPage from './UserDetails'
 import UsersPage from './Users'
 export {
@@ -25,4 +26,5 @@ export {
   RepositoryDetailsPage,
   UsersPage,
   UserDetailsPage,
+  SnapshotDetailsPage,
 }

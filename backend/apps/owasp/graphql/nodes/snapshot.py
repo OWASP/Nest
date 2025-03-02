@@ -10,10 +10,7 @@ from apps.owasp.graphql.nodes.common import GenericEntityNode
 from apps.owasp.graphql.nodes.project import ProjectNode
 from apps.owasp.models.snapshot import Snapshot
 
-RECENT_ISSUES_LIMIT = 10
-RECENT_RELEASES_LIMIT = 10
-RECENT_PROJECTS_LIMIT = 10
-RECENT_USERS_LIMIT = 10
+RECENT_ISSUES_LIMIT = 100
 
 
 class SnapshotNode(GenericEntityNode):
@@ -27,15 +24,17 @@ class SnapshotNode(GenericEntityNode):
     new_projects = graphene.List(ProjectNode)
     new_releases = graphene.List(ReleaseNode)
     new_users = graphene.List(UserNode)
+    updated_at = graphene.DateTime()
 
     class Meta:
         model = Snapshot
         fields = (
             "title",
             "created_at",
-            "updated_at",
             "start_at",
+            "status",
             "end_at",
+            "error_message",
         )
 
     def resolve_key(self, info):
@@ -60,12 +59,16 @@ class SnapshotNode(GenericEntityNode):
 
     def resolve_new_projects(self, info):
         """Resolve recent new projects."""
-        return self.new_projects.order_by("-created_at")[:RECENT_PROJECTS_LIMIT]
+        return self.new_projects.order_by("-created_at")
 
     def resolve_new_releases(self, info):
         """Resolve recent new releases."""
-        return self.new_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+        return self.new_releases.order_by("-published_at")
 
     def resolve_new_users(self, info):
         """Resolve recent new users."""
-        return self.new_users.order_by("-created_at")[:RECENT_USERS_LIMIT]
+        return self.new_users.order_by("-created_at")
+
+    def resolve_updated_at(self, info):
+        """Resolve updated at."""
+        return self.updated_at
