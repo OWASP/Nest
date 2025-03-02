@@ -36,7 +36,7 @@ jobs:
           touch backend/.env  # Ensure the file exists
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> backend/.env
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env
-          echo "DJANGO_CONFIGURATION=Local" >> backend/.env
+          echo "DJANGO_CONFIGURATION=Test" >> backend/.env
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> backend/.env
           echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> backend/.env
           echo "DJANGO_ALLOWED_HOSTS=*" >> backend/.env  # Example of a non-secret variable
@@ -62,14 +62,7 @@ jobs:
           export $(grep -v '^#' .env.backend | xargs)
           poetry install --no-interaction --no-root --with dev
           poetry add pydotplus  # Ensure pydotplus is installed
-
-      - name: Verify `django-extensions` and `pydotplus` are installed
-        run: |
-          cd backend
-          export $(grep -v '^#' .env.backend | xargs)
-          poetry run python -m pip show django-extensions || poetry run pip install django-extensions
-          poetry run python -m pip show pydotplus || poetry run pip install pydotplus
-
+          
       - name: Generate Models Graph using `pydotplus`
         run: |
           cd backend
