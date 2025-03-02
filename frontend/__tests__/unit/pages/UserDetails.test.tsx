@@ -72,7 +72,8 @@ describe('UserDetailsPage', () => {
 
     expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText(`@testuser`)).toBeInTheDocument()
-    expect(screen.getByText('This is a test user')).toBeInTheDocument()
+    expect(screen.getByText('Test')).toBeInTheDocument()
+    expect(screen.getByText('@User')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
   })
