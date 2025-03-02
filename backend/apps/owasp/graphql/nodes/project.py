@@ -23,6 +23,8 @@ class ProjectNode(GenericEntityNode):
     repositories = graphene.List(RepositoryNode)
     repositories_count = graphene.Int()
     topics = graphene.List(graphene.String)
+    type = graphene.String()
+    level = graphene.String()
 
     class Meta:
         model = Project
@@ -70,3 +72,11 @@ class ProjectNode(GenericEntityNode):
     def resolve_topics(self, info):
         """Resolve topics."""
         return self.idx_topics
+
+    def resolve_type(self, info):
+        """Resolve type."""
+        return self.idx_type
+
+    def resolve_level(self, info):
+        """Resolve level."""
+        return self.idx_level
