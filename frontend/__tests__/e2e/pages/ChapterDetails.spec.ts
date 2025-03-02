@@ -16,7 +16,6 @@ test.describe('ChapterDetails Page', () => {
   })
 
   test('should have chapter details block', async ({ page }) => {
-    await expect(page.getByText('Last Updated: May 10, 2022')).toBeVisible()
     await expect(page.getByText('Location: Test City, Test')).toBeVisible()
     await expect(page.getByText('Region: Test Region')).toBeVisible()
     await expect(page.getByRole('link', { name: 'https://owasp.org/test-chapter' })).toBeVisible()

@@ -12,10 +12,10 @@ test.describe('ContributePage Component', () => {
         }),
       })
     })
+    await page.goto('/projects/contribute')
   })
 
   test('renders issue data correctly', async ({ page }) => {
-    await page.goto('/projects/contribute')
     await expect(page.getByRole('link', { name: 'Contribution 1' })).toBeVisible()
     await expect(page.getByText('2 months ago')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Owasp Nest' })).toBeVisible()
@@ -30,20 +30,17 @@ test.describe('ContributePage Component', () => {
         body: JSON.stringify({ hits: [], totalPages: 0 }),
       })
     })
-
     await page.goto('/projects/contribute')
     await expect(page.getByText('No issues found')).toBeVisible()
   })
 
   test('handles page change correctly', async ({ page }) => {
-    await page.goto('/projects/contribute')
     const nextPageButton = await page.getByRole('button', { name: '2' })
     await nextPageButton.click()
     expect(await page.url()).toContain('page=2')
   })
 
   test('opens dialog on View Details button click', async ({ page }) => {
-    await page.goto('/projects/contribute')
     const contributeButton = await page.getByRole('button', { name: 'Read More' })
     await expect(contributeButton).toBeVisible()
     await contributeButton.click()
@@ -61,7 +58,6 @@ test.describe('ContributePage Component', () => {
   })
 
   test('closes dialog on close button click', async ({ page }) => {
-    await page.goto('/projects/contribute')
     const contributeButton = await page.getByRole('button', { name: 'Read More' })
     await expect(contributeButton).toBeVisible()
     await contributeButton.click()

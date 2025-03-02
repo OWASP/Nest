@@ -70,7 +70,7 @@ test.describe('RepositoryDetails Page', () => {
   })
 
   test('should have recent releases', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'v1.0.0' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Test User 2' })).toBeVisible()
     await expect(page.getByText('Test User 2')).toBeVisible()
