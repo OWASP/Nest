@@ -30,7 +30,7 @@ test.describe('ChaptersPage Component', () => {
       })
     })
     await page.goto('/chapters')
-    await expect(page.getByText('No Chapters Found')).toBeVisible()
+    await expect(page.getByText('No chapters found')).toBeVisible()
   })
 
   test('handles page change correctly', async ({ page }) => {
