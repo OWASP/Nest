@@ -20,7 +20,7 @@ class Base(Configuration):
     ALLOWED_HOSTS = values.ListValue()
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
-    SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
+    SENTRY_DSN = values.Value(environ_name="SENTRY_DSN")
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
@@ -111,12 +111,12 @@ class Base(Configuration):
 
     WSGI_APPLICATION = "wsgi.application"
 
-    ALGOLIA_APPLICATION_ID = values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID")
-    ALGOLIA_APPLICATION_REGION = values.SecretValue(environ_name="ALGOLIA_APPLICATION_REGION")
+    ALGOLIA_APPLICATION_ID = values.Value(environ_name="ALGOLIA_APPLICATION_ID")
+    ALGOLIA_APPLICATION_REGION = values.Value(environ_name="ALGOLIA_APPLICATION_REGION")
     ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES = values.Value(
         environ_name="ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES"
     )
-    ALGOLIA_WRITE_API_KEY = values.SecretValue(environ_name="ALGOLIA_WRITE_API_KEY")
+    ALGOLIA_WRITE_API_KEY = values.Value(environ_name="ALGOLIA_WRITE_API_KEY")
 
     ALGOLIA = {
         "API_KEY": ALGOLIA_WRITE_API_KEY,
@@ -136,7 +136,7 @@ class Base(Configuration):
             "ENGINE": "django.db.backends.postgresql",
             "NAME": values.Value(environ_name="DB_NAME"),
             "USER": values.Value(environ_name="DB_USER"),
-            "PASSWORD": values.SecretValue(environ_name="DB_PASSWORD"),
+            "PASSWORD": values.Value(environ_name="DB_PASSWORD"),
             "HOST": values.Value(environ_name="DB_HOST"),
             "PORT": values.Value(environ_name="DB_PORT"),
         },
@@ -186,16 +186,16 @@ class Base(Configuration):
     DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = values.SecretValue()
+    SECRET_KEY = values.Value()
 
     # https://docs.djangoproject.com/en/5.1/ref/settings/#data-upload-max-number-fields
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
 
-    OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
+    OPEN_AI_SECRET_KEY = values.Value(environ_name="OPEN_AI_SECRET_KEY")
 
-    SLACK_BOT_TOKEN = values.SecretValue()
+    SLACK_BOT_TOKEN = values.Value()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-    SLACK_SIGNING_SECRET = values.SecretValue()
+    SLACK_SIGNING_SECRET = values.Value()
