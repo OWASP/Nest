@@ -31,18 +31,20 @@ jobs:
           sudo apt update
           sudo apt install -y graphviz
       
-      - name: Debug Environment Variables
-        run: cat backend/.env | grep -v DJANGO_DB_PASSWORD | grep -v DJANGO_SECRET_KEY
+      - name: Create and Populate .env File
+        run: |
+          touch backend/.env  # Ensure the file exists
+          echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> backend/.env
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env
+          echo "DJANGO_CONFIGURATION=Local" >> backend/.env
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> backend/.env
+          echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> backend/.env
+          echo "DJANGO_ALLOWED_HOSTS=*" >> backend/.env  # Example of a non-secret variable
 
       - name: Debug .env file
         run: |
-          if [ -f backend/.env ]; then
-            echo ".env file found!"
-            cat backend/.env | grep -v DJANGO_DB_PASSWORD | grep -v DJANGO_SECRET_KEY
-          else
-            echo "ERROR: .env file not found!"
-            ls -la backend  # List backend directory contents
-          fi
+          ls -la backend  # Check if the .env file exists
+          cat backend/.env | grep -v DJANGO_DB_PASSWORD | grep -v DJANGO_SECRET_KEY
 
 
 
