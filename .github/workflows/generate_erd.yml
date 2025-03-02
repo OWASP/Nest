@@ -48,7 +48,7 @@ jobs:
         run: |
           cd backend
           export $(grep -v '^#' .env.backend | xargs)
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction --no-root --with dev
 
       - name: Verify `django-extensions` is installed
         run: |
