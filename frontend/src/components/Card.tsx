@@ -1,8 +1,6 @@
 import { HStack, Link } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState, useEffect } from 'react'
 import { CardProps } from 'types/card'
-import { desktopViewMinWidth } from 'utils/constants'
 import { Icons } from 'utils/data'
 import { TooltipRecipe } from 'utils/theme'
 import { getSocialIcon } from 'utils/urlIconMappings'
