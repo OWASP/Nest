@@ -26,21 +26,26 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install poetry
 
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y graphviz graphviz-dev
+
       - name: Install dependencies
         run: |
           cd backend
           poetry install --no-interaction --no-root
-          sudo apt-get install -y graphviz
 
       - name: Generate Models Graph
         run: |
+          cd backend
           poetry run python manage.py graph_models -a -g -o backend_models.png
 
       - name: Commit and Push Updated Image
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add backend_models.png
+          git add backend/backend_models.png
           git commit -m "chore: update Django models graph [CI skip]" || echo "No changes to commit"
           git push origin ${{ github.ref }} || echo "No changes to push"
 
@@ -48,4 +53,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: backend-models-graph
-          path: backend_models.png
+          path: backend/backend_models.png
