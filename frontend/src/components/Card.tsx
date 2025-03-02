@@ -52,9 +52,7 @@ const Card = ({
       )}
     >
       <div className="flex w-full flex-col items-start gap-1.5">
-        {/* Project Title with Level Icon positioned to the left */}
         <div className="flex w-full items-center gap-2">
-          {/* Level Badge - now positioned to the left of the title */}
           {level && (
             <Tooltip
               id="level-tooltip"
@@ -75,7 +73,7 @@ const Card = ({
             </Tooltip>
           )}
 
-          {/* Project Title with Hover Effect */}
+          {/* Project Title */}
           <Link
             href={url}
             target="_blank"
@@ -88,7 +86,6 @@ const Card = ({
           </Link>
         </div>
 
-        {/* Project Link with Styled Appearance */}
         {projectName && (
           <Link
             href={projectLink}
@@ -115,14 +112,14 @@ const Card = ({
           </div>
         )}
 
-        {/* Summary section with added light background */}
+        {/* Summary section */}
         <div className={cn(
           'w-full rounded-md my-1 p-1 sm:p-3 bg-gray-50 dark:bg-slate-700/30'
         )}>
           <Markdown content={summary} className="prose prose-xs sm:prose-sm max-w-none text-gray-700 dark:prose-invert dark:text-gray-200" />
         </div>
 
-        {/* Footer section based on whether we have both social links and contributors, or just one of them */}
+        {/* Footer section */}
         {hasSocial ? (
           <div className="mt-2 w-full">
             {/* First row: Contributors only when social links are present */}
@@ -173,7 +170,6 @@ const Card = ({
             </div>
           </div>
         ) : (
-          // If no social links, only show contributors and align button next to them
           <div className="mt-2 flex w-full items-end justify-between">
             {hasContributors ? (
               <div className="flex flex-col gap-1">
