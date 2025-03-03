@@ -38,10 +38,10 @@ test.describe('Users Page', () => {
   })
 
   test('opens window on button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', {
+    const userButton = await page.getByRole('button', {
       name: 'John Doe John Doe OWASP View',
     })
-    await contributeButton.click()
+    await userButton.click()
     expect(await page.url()).toContain('community/users/user_1')
   })
 })

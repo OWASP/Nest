@@ -21,7 +21,7 @@ test.describe('Projects Page', () => {
     await expect(page.getByRole('button', { name: 'View Details' })).toBeVisible()
   })
 
-  test('displays "No Project found" when there are no project', async ({ page }) => {
+  test('displays "No Projects found" when there are no projects', async ({ page }) => {
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
