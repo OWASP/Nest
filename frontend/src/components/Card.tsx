@@ -28,13 +28,6 @@ const Card = ({
   const hasSocial = social && social.length > 0
   const hasContributors = topContributors && topContributors.length > 0
 
-  // Helper function to safely handle icons
-  const safeIcon = (icon: any) => {
-    if (typeof icon === 'string') return icon;
-    // For test environment, return a fallback icon name
-    return 'circle';
-  };
-
   return (
     <div
       className={cn(
@@ -58,8 +51,7 @@ const Card = ({
                 )}
                 style={{ backgroundColor: level.color }}
               >
-                {/* Use safeIcon to handle potential object icons */}
-                <FontAwesomeIconWrapper icon={safeIcon(level.icon)} className="text-white" />
+                <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
               </span>
             </Tooltip>
           )}
@@ -155,8 +147,7 @@ const Card = ({
               </div>
               <div className="flex-shrink-0 self-end">
                 <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
-                  {/* Handle button icon safely */}
-                  {typeof button.icon === 'string' ? <FontAwesomeIconWrapper icon={button.icon} /> : button.icon}
+                  {button.icon}
                   {button.label}
                 </ActionButton>
               </div>
@@ -183,8 +174,7 @@ const Card = ({
             )}
             <div className="flex-shrink-0 self-end">
               <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
-                {/* Handle button icon safely */}
-                {typeof button.icon === 'string' ? <FontAwesomeIconWrapper icon={button.icon} /> : button.icon}
+                {button.icon}
                 {button.label}
               </ActionButton>
             </div>
