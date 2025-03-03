@@ -1,11 +1,13 @@
+import { TYPESENSE_URL } from 'utils/credentials'
 import { AppError } from 'wrappers/ErrorWrapper'
+import { removeIdxPrefix } from './utility'
 
 export interface TypesenseResponseType<T> {
   hits: T[]
   totalPages: number
 }
 
-const TYPESENSE_URL = 'http://localhost:8000/search/'
+
 
 export const fetchTypesenseData = async <T>(
   indexName: string,
@@ -32,11 +34,11 @@ export const fetchTypesenseData = async <T>(
     }
 
     const results = await response.json()
-    if (results && results.hits && results.hits.length > 0) {
+    if (results && results?.hits.length > 0) {
       const { hits, nbPages } = results
-
+      const cleanedHits = hits.map((hit) => removeIdxPrefix(hit))
       return {
-        hits: hits as T[],
+        hits: cleanedHits as T[],
         totalPages: nbPages || 0,
       }
     } else {
