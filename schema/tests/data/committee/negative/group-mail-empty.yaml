@@ -1,12 +1,12 @@
-description: This committee has an invalid mailing list URL.
-leaders:
+description: This committee has null events.
+group_mail: ''
+members:
   - github: leader1-github
     name: Leader One
     role: Chair
   - github: leader2-github
     name: Leader Two
     role: Vice Chair
-mailing_list: https://xyz
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:

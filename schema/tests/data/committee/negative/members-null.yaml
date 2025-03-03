@@ -1,5 +1,5 @@
-description: This committee has null leaders.
-leaders:
+description: This committee has null members.
+members:
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:

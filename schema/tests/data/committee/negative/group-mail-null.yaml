@@ -1,12 +1,12 @@
-description: This committee has a null mailing list.
-leaders:
+description: This committee has null events.
+group_mail: null
+members:
   - github: leader1-github
     name: Leader One
     role: Chair
-  - github: leader1-github
-    name: Leader One
-    role: Chair
-mailing_list:
+  - github: leader2-github
+    name: Leader Two
+    role: Vice Chair
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:

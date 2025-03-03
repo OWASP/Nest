@@ -3,15 +3,15 @@
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/committee.json",
   "$defs": {
     "meeting_minutes": {
-      "description": "An archived meeting minute of the committee.",
+      "description": "Meeting minutes of the committee.",
       "properties": {
         "date": {
-          "description": "Date of the meeting.",
+          "description": "Date of the meeting",
           "format": "date",
           "type": "string"
         },
         "url": {
-          "description": "Link to the document containing the meeting minutes.",
+          "description": "Link to the meeting minutes",
           "format": "uri",
           "type": "string"
         }
@@ -22,13 +22,57 @@
       ],
       "title": "Meeting Minutes",
       "type": "object"
+    },
+    "members": {
+      "description": "Leaders of the committee.",
+      "properties": {
+        "email": {
+          "description": "E-mail address",
+          "format": "email",
+          "type": "string"
+        },
+        "github": {
+          "description": "GitHub username",
+          "pattern": "^[a-zA-Z0-9-]{1,39}$",
+          "type": "string"
+        },
+        "name": {
+          "description": "Full name",
+          "type": "string",
+          "minLength": 3
+        },
+        "role": {
+          "description": "Role of leader",
+          "enum": [
+            "Board Representative",
+            "Board Of Director member",
+            "Chair",
+            "Member",
+            "Vice Chair",
+            "Secretary",
+            "Staff Contact"
+          ],
+          "type": "string"
+        },
+        "slack": {
+          "description": "Slack username",
+          "pattern": "^[a-zA-Z0-9._-]{1,21}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "role"
+      ],
+      "title": "Leader",
+      "type": "object"
     }
   },
   "additionalProperties": false,
   "description": "OWASP Committee Schema",
   "properties": {
     "community": {
-      "description": "A list of community platforms associated with the committee.",
+      "description": "Community platforms associated with the committee.",
       "items": {
         "$ref": "common.json#/definitions/community"
       },
@@ -37,11 +81,11 @@
       "uniqueItems": true
     },
     "description": {
-      "description": "Detailed description of the committee's purpose and activities.",
+      "description": "Description of the committee's purpose and activities.",
       "type": "string"
     },
     "events": {
-      "description": "List of events organized or sponsored by the committee.",
+      "description": "Events organized or sponsored by the committee.",
       "items": {
         "format": "uri",
         "type": "string"
@@ -50,35 +94,10 @@
       "type": "array",
       "uniqueItems": true
     },
-    "leaders": {
-      "additionalProperties": true,
-      "description": "Leaders of the committee.",
-      "items": {
-        "allOf": [
-          {
-            "$ref": "common.json#/definitions/person"
-          },
-          {
-            "properties": {
-              "role": {
-                "description": "Role of the leader.",
-                "enum": [
-                  "Chair",
-                  "Vice Chair",
-                  "Secretary"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "role"
-            ],
-            "type": "object"
-          }
-        ]
-      },
-      "minItems": 2,
-      "type": "array",
+    "group_mail": {
+      "description": "Group mail of the committee.",
+      "format": "email",
+      "type": "string",
       "uniqueItems": true
     },
     "logo": {
@@ -90,39 +109,43 @@
       "type": "array",
       "uniqueItems": true
     },
-    "mailing_list": {
-      "description": "The optional mailing list associated with the committee.",
-      "format": "uri",
-      "type": "string"
-    },
     "meeting_minutes": {
-      "description": "Archived meeting minutes of the committee.",
+      "description": "Meeting minutes of the committee.",
       "items": {
         "$ref": "#/$defs/meeting_minutes"
       },
       "type": "array",
       "uniqueItems": true
     },
+    "members": {
+      "description": "Members of the committee.",
+      "items": {
+        "$ref": "#/$defs/members"
+      },
+      "minItems": 2,
+      "type": "array",
+      "uniqueItems": true
+    },
     "name": {
-      "description": "The unique name of the committee.",
+      "description": "Name of the committee.",
       "minLength": 8,
       "type": "string"
     },
     "resources": {
-      "description": "General resources provided by the committee.",
+      "description": "Resources provided by the committee.",
       "items": {
         "additionalProperties": false,
         "properties": {
           "title": {
-            "description": "Title of the resource.",
+            "description": "Title of the resource",
             "type": "string"
           },
           "type": {
-            "description": "Type of resource (e.g., 'guide', 'tool').",
+            "description": "Type of resource (e.g., 'guide', 'tool')",
             "type": "string"
           },
           "url": {
-            "description": "Link to access the resource.",
+            "description": "Link to access the resource",
             "format": "uri",
             "type": "string"
           }
@@ -139,17 +162,18 @@
       "uniqueItems": true
     },
     "scope": {
-      "description": "Scope and purpose of committee",
+      "description": "Scope and purpose of committee.",
       "type": "string"
     },
     "social_media": {
       "additionalProperties": false,
-      "description": "Social media information for the committee.",
+      "description": "Social media information of the committee.",
       "items": {
         "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
-      "type": "array"
+      "type": "array",
+      "uniqueItems": true
     },
     "sponsors": {
       "description": "Sponsors of the committee.",
@@ -160,7 +184,7 @@
       "type": "array"
     },
     "tags": {
-      "description": "Tags for the committee.",
+      "description": "Tags associated with the committee.",
       "items": {
         "type": "string"
       },
@@ -169,7 +193,7 @@
       "uniqueItems": true
     },
     "website": {
-      "description": "The official website of the committee.",
+      "description": "Official website of the committee.",
       "format": "uri",
       "minLength": 4,
       "type": "string"
@@ -177,7 +201,7 @@
   },
   "required": [
     "description",
-    "leaders",
+    "members",
     "name",
     "scope",
     "tags"

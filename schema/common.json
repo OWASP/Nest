@@ -53,7 +53,7 @@
     },
 
         "person": {
-            "additionalProperties": true,
+            "additionalProperties": false,
             "description": "Person",
             "properties": {
                 "email": {

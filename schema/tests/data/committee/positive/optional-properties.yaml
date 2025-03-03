@@ -9,20 +9,17 @@ description: This committee supports development initiatives.
 events:
   - https://example.com/event1
   - https://example.com/event2
-leaders:
-  - name: Alice Johnson
+members:
+  - github: leader1-github
+    name: Leader One
     role: Chair
-    github: Person-1
-    email: alice@example.com
-  - name: Bob Smith
+  - github: leader2-github
+    name: Leader Two
     role: Vice Chair
-    email: bob@example.com
-    github: Person-2
 logo:
   - small: https://example.com/smallLogoDev
     medium: https://example.com/mediumLogoDev
     large: https://example.com/largeLogoDev
-mailing_list: https://example.com/mailing-list
 meeting_minutes:
   - date: '2023-01-15'
     url: https://example.com/minutes/2023-01-15

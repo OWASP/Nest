@@ -1,4 +1,4 @@
-description: This committee is missing the leaders property.
+description: This committee is missing the members property.
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:
