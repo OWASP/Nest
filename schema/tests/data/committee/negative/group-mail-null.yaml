@@ -1,5 +1,5 @@
 description: This committee has null events.
-group_mail:
+group_mail: null
 members:
   - github: leader1-github
     name: Leader One
