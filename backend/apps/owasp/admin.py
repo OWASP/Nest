@@ -65,7 +65,6 @@ class CommitteeAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("owasp_repository",)
     list_display = ("name",)
     search_fields = ("name",)
 
@@ -121,6 +120,7 @@ class SnapshotAdmin(admin.ModelAdmin):
         "new_users",
     )
     list_display = (
+        "title",
         "start_at",
         "end_at",
         "status",
@@ -134,6 +134,8 @@ class SnapshotAdmin(admin.ModelAdmin):
     )
     ordering = ("-start_at",)
     search_fields = (
+        "title",
+        "key",
         "status",
         "error_message",
     )
