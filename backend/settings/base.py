@@ -39,7 +39,6 @@ class Base(Configuration):
         "graphene_django",
         "rest_framework",
         "storages",
-        "django_extensions",
     )
 
     LOCAL_APPS = (

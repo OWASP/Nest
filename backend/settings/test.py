@@ -7,3 +7,5 @@ class Test(Base):
     """Test configuration."""
 
     DEBUG = False
+
+INSTALLED_APPS = + ('django_extensions',)
