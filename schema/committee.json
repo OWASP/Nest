@@ -97,8 +97,7 @@
     "group_mail": {
       "description": "Group mail of the committee.",
       "format": "email",
-      "type": "string",
-      "uniqueItems": true
+      "type": "string"
     },
     "logo": {
       "description": "Logo information for the project.",
