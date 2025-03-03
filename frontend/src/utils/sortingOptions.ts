@@ -7,5 +7,6 @@ export const sortOptionsProject = createListCollection({
     { label: 'Forks', value: 'forks_count' },
     { label: 'Name', value: 'name' },
     { label: 'Stars', value: 'stars_count' },
+    { label: 'Last Updated', value: 'updated_at' },
   ],
 })
