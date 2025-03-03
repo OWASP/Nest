@@ -18,7 +18,7 @@ class Snapshot(models.Model):
         ERROR = "error", "Error"
 
     title = models.CharField(max_length=255, default="")
-    key = models.CharField(max_length=7, unique=True)  # Format: YYYY-mm
+    key = models.CharField(max_length=10, unique=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,12 +35,13 @@ class Snapshot(models.Model):
     new_releases = models.ManyToManyField("github.Release", related_name="snapshots", blank=True)
     new_users = models.ManyToManyField("github.User", related_name="snapshots", blank=True)
 
-    def save(self, *args, **kwargs):
-        """Automatically set the key in YYYY-mm format before saving."""
-        if not self.key:
-            self.key = now().strftime("%Y-%m")
-        super().save(*args, **kwargs)
-
     def __str__(self):
         """Return a string representation of the snapshot."""
-        return f"Snapshot {self.start_at} to {self.end_at} ({self.status})"
+        return self.title
+
+    def save(self, *args, **kwargs):
+        """Save snapshot."""
+        if not self.key:  # automatically set the key
+            self.key = now().strftime("%Y-%m")
+
+        super().save(*args, **kwargs)

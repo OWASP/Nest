@@ -17,37 +17,24 @@ class SnapshotNode(GenericEntityNode):
     """Snapshot node."""
 
     key = graphene.String()
-    status = graphene.String()
-    error_message = graphene.String()
     new_chapters = graphene.List(ChapterNode)
     new_issues = graphene.List(IssueNode)
     new_projects = graphene.List(ProjectNode)
     new_releases = graphene.List(ReleaseNode)
     new_users = graphene.List(UserNode)
-    updated_at = graphene.DateTime()
 
     class Meta:
         model = Snapshot
         fields = (
-            "title",
             "created_at",
-            "start_at",
-            "status",
             "end_at",
-            "error_message",
+            "start_at",
+            "title",
         )
 
     def resolve_key(self, info):
         """Resolve key."""
         return self.key
-
-    def resolve_status(self, info):
-        """Resolve status."""
-        return self.status
-
-    def resolve_error_message(self, info):
-        """Resolve error message."""
-        return self.error_message
 
     def resolve_new_chapters(self, info):
         """Resolve new chapters."""
@@ -68,7 +55,3 @@ class SnapshotNode(GenericEntityNode):
     def resolve_new_users(self, info):
         """Resolve recent new users."""
         return self.new_users.order_by("-created_at")
-
-    def resolve_updated_at(self, info):
-        """Resolve updated at."""
-        return self.updated_at

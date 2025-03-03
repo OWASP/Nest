@@ -5,6 +5,7 @@ import graphene
 from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.user import UserNode
 from apps.github.models.release import Release
+from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 
 
 class ReleaseNode(BaseNode):
@@ -25,4 +26,4 @@ class ReleaseNode(BaseNode):
 
     def resolve_project_name(self, info):
         """Return project name."""
-        return self.idx_project
+        return self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)

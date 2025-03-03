@@ -15,16 +15,16 @@ import SnapshotDetailsPage from './SnapshotDetails'
 import UserDetailsPage from './UserDetails'
 import UsersPage from './Users'
 export {
-  Home,
-  ProjectsPage,
-  CommitteesPage,
-  ChaptersPage,
-  ContributePage,
-  CommitteeDetailsPage,
   ChapterDetailsPage,
+  ChaptersPage,
+  CommitteeDetailsPage,
+  CommitteesPage,
+  ContributePage,
+  Home,
   ProjectDetailsPage,
+  ProjectsPage,
   RepositoryDetailsPage,
-  UsersPage,
-  UserDetailsPage,
   SnapshotDetailsPage,
+  UserDetailsPage,
+  UsersPage,
 }
