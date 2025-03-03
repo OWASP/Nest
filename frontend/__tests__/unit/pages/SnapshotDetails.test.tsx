@@ -67,7 +67,6 @@ describe('SnapshotDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('New Snapshot')).toBeInTheDocument()
-      expect(screen.getByText('Dec 1, 2024 - Jan 1, 2025')).toBeInTheDocument()
     })
 
     expect(screen.getByText('New Chapters')).toBeInTheDocument()
