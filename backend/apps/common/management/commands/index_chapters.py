@@ -3,14 +3,16 @@
 import typesense
 from django.core.management.base import BaseCommand
 
-from apps.common.typesense_client import chapters_schema, client
+from apps.common.typesense_client import Typesense
 from apps.owasp.models.chapter import Chapter
+from apps.owasp.schema.chapters import chapters_schema
 
 
 class Command(BaseCommand):
     help = "Index chapters to Typesense"
 
     def handle(self, *args, **kwargs):
+        client = Typesense.get_client()
         try:
             client.collections["chapters"].delete()
             self.stdout.write(self.style.SUCCESS("Chapters collection deleted successfully."))
