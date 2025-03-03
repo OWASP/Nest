@@ -44,7 +44,7 @@ class PullRequestAdmin(admin.ModelAdmin):
 
     def custom_field_github_url(self, obj):
         """Pull Request GitHub URL."""
-        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
+        return mark_safe(f"<a href='{obj.url}' target='_blank' rel='noopener noreferrer'>↗️</a>")
 
     custom_field_github_url.short_description = "GitHub 🔗"
 
@@ -69,7 +69,7 @@ class IssueAdmin(admin.ModelAdmin):
 
     def custom_field_github_url(self, obj):
         """Issue GitHub URL."""
-        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
+        return mark_safe(f"<a href='{obj.url}' target='_blank' rel='noopener noreferrer'>↗️</a>")
 
     custom_field_github_url.short_description = "GitHub 🔗"
 

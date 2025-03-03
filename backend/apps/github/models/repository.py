@@ -118,7 +118,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
 
     @property
     def latest_updated_pull_request(self):
-        """Repository latest updated pull request."""
+        """Repository latest updated pull request (most recently modified)."""
         return self.pull_requests.order_by("-updated_at").first()
 
     @property

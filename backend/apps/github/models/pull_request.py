@@ -52,7 +52,7 @@ class PullRequest(GenericIssueModel):
     )
 
     def from_github(self, gh_pull_request, author=None, repository=None):
-        """Update instance based on GitHub issue data."""
+        """Update instance based on GitHub pull request data."""
         field_mapping = {
             "body": "body",
             "closed_at": "closed_at",
@@ -84,7 +84,7 @@ class PullRequest(GenericIssueModel):
 
     @staticmethod
     def bulk_save(pull_requests, fields=None):
-        """Bulk save issues."""
+        """Bulk save pull requests."""
         BulkSaveModel.bulk_save(PullRequest, pull_requests, fields=fields)
 
     @staticmethod
