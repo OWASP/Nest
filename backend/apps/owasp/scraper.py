@@ -1,12 +1,15 @@
 """OWASP scraper."""
 
 import logging
+import re
 from urllib.parse import urlparse
 
 import requests
 from lxml import etree, html
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
+from apps.github.utils import get_repository_file_content
 
 logger = logging.getLogger(__name__)
 
@@ -55,15 +58,24 @@ class OwaspScraper:
             else self.page_tree.xpath("//div[@class='sidebar']//a/@href")
         )
 
-    def get_leaders(self):
-        """Get leaders."""
-        leaders_header = self.page_tree.xpath("//div[@class='sidebar']//*[@id='leaders']")
-        if leaders_header:
-            leaders_ul = leaders_header[0].getnext()
-            if leaders_ul is not None and leaders_ul.tag == "ul":
-                return sorted(name.strip() for name in leaders_ul.xpath(".//li/a/text()"))
-
-        return []
+    def get_leaders(self, repository):
+        """Get leaders from leaders.md file on GitHub."""
+        content = get_repository_file_content(
+            f"https://raw.githubusercontent.com/OWASP/{repository.key}/{repository.default_branch}/leaders.md"
+        )
+        leaders = []
+        try:
+            lines = content.split("\n")
+            logger.debug("Content: %s", content)
+            for line in lines:
+                logger.debug("Processing line: %s", line)
+                match = re.findall(r"\* \[([^\]]+)\]", line)
+                leaders.extend(match)
+        except AttributeError:
+            logger.exception(
+                "Unable to parse leaders.md content", extra={"repository": repository.name}
+            )
+        return leaders
 
     def verify_url(self, url):
         """Verify URL."""
