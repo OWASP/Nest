@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { mockContributeData } from '@unit/data/mockContributeData'
 
-test.describe('ContributePage Component', () => {
+test.describe('Contribute Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/idx/', async (route) => {
       await route.fulfill({

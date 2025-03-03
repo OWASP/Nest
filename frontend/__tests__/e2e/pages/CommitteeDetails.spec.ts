@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
-test.describe('CommitteeDetails Page', () => {
+
+test.describe('Committee Details Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/graphql/', async (route) => {
       await route.fulfill({
@@ -10,6 +11,7 @@ test.describe('CommitteeDetails Page', () => {
     })
     await page.goto('/committees/test-committee')
   })
+
   test('should have a heading and summary', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Test Committee' })).toBeVisible()
     await expect(page.getByText('This is a test committee')).toBeVisible()

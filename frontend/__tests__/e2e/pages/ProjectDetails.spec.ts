@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-test.describe('ProjectDetails Page', () => {
+
+test.describe('Project Details Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/graphql/', async (route) => {
       await route.fulfill({
@@ -10,6 +11,7 @@ test.describe('ProjectDetails Page', () => {
     })
     await page.goto('/projects/test-project')
   })
+
   test('should have a heading and summary', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Test Project' })).toBeVisible()
     await expect(
@@ -46,6 +48,7 @@ test.describe('ProjectDetails Page', () => {
     await expect(page.getByText('GraphQL', { exact: true })).toBeVisible()
     await expect(page.getByText('JavaScript', { exact: true })).toBeVisible()
   })
+
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()

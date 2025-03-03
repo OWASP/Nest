@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
-test.describe('UserDetails Page', () => {
+
+test.describe('User Details Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/graphql/', async (route) => {
       await route.fulfill({
@@ -10,6 +11,7 @@ test.describe('UserDetails Page', () => {
     })
     await page.goto('community/users/test-user')
   })
+
   test('should have a user name and avatar', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible()
     await expect(page.getByRole('link', { name: '@testuser' })).toBeVisible()
