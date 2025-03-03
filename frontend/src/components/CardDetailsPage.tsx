@@ -41,7 +41,6 @@ const DetailsCard = ({
         <SecondaryCard title="Summary">
           <p>{summary}</p>
         </SecondaryCard>
-
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             title={`${type[0].toUpperCase() + type.slice(1)} Details`}
@@ -68,12 +67,17 @@ const DetailsCard = ({
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
-                style={{ height: '100%', width: '100%', zIndex: '0' }}
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  zIndex: '0',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                }}
               />
             </div>
           )}
         </div>
-
         {(type === 'project' || type === 'repository') && (
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
@@ -82,9 +86,7 @@ const DetailsCard = ({
             {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
           </div>
         )}
-
         <TopContributors contributors={topContributors} maxInitialDisplay={6} />
-
         {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList

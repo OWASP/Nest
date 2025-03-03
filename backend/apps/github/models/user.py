@@ -18,6 +18,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     is_hireable = models.BooleanField(verbose_name="Is hireable", default=False)
     twitter_username = models.CharField(verbose_name="Twitter username", max_length=50, default="")
 
+    is_bot = models.BooleanField(verbose_name="Is bot", default=False)
+
     def __str__(self):
         """User human readable representation."""
         return f"{self.name or self.login}"
@@ -47,6 +49,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             value = getattr(gh_user, gh_field)
             if value is not None:
                 setattr(self, model_field, value)
+
+        self.is_bot = gh_user.type == "Bot"
 
     @staticmethod
     def update_data(gh_user, save=True):
