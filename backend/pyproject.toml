@@ -39,6 +39,7 @@ openai = "^1.60.1"
 psycopg = "^3.2.4"
 pygithub = "^2.5.0"
 python = "^3.13"
+python-dateutil = "^2.9.0.post0"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
