@@ -1,7 +1,7 @@
 display_information:
   name: OWASP Nest
   description: Your gateway to OWASP
-  background_color: '#293559'
+  background_color: "#293559"
 features:
   app_home:
     home_tab_enabled: true

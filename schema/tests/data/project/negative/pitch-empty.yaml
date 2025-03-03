@@ -7,7 +7,7 @@ leaders:
     slack: leader-2-slack
 level: 2
 name: OWASP Incubator Code Project
-pitch: ''
+pitch: ""
 tags:
   - example-tag-1
   - example-tag-2

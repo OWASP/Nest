@@ -5,7 +5,7 @@ leaders:
   - github: leader-name-2
     name: Leader Name 2
 level: 2
-name: ''
+name: ""
 pitch: A very brief, one-line description of your project
 tags:
   - example-tag-1
