@@ -9,14 +9,10 @@ export interface ReleaseType {
 }
 
 export interface SnapshotDetailsProps {
-  title: string
-  key: string
-  updatedAt: string
-  createdAt: string
-  startAt: string
   endAt: string
-  status: string
-  errorMessage: string
+  key: string
+  startAt: string
+  title: string
   newReleases: ReleaseType[]
   newProjects: ProjectTypeGraphql[]
   newChapters: ChapterTypeGraphQL[]

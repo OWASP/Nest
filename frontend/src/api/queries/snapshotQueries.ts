@@ -3,14 +3,10 @@ import { gql } from '@apollo/client'
 export const GET_SNAPSHOT_DETAILS = gql`
   query GetSnapshotDetails($key: String!) {
     snapshot(key: $key) {
-      title
-      key
-      updatedAt
-      createdAt
-      startAt
       endAt
-      status
-      errorMessage
+      key
+      startAt
+      title
       newReleases {
         name
         publishedAt
