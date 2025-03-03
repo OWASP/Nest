@@ -2,11 +2,12 @@ import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
+import { ChapterTypeGraphQL } from 'types/chapter'
 
 import { CommitteeTypeAlgolia } from 'types/committee'
 import { IconType } from 'types/icon'
 import { IssueType } from 'types/issue'
-import { ProjectTypeAlgolia } from 'types/project'
+import { ProjectTypeAlgolia, ProjectTypeGraphql } from 'types/project'
 import { IconKeys, Icons, urlMappings } from 'utils/data'
 
 dayjs.extend(relativeTime)
@@ -21,6 +22,24 @@ export const getFilteredIcons = (project: projectType, params: string[]): IconTy
   const filteredIcons = params.reduce((acc: IconType, key) => {
     if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       if (key === 'created_at') {
+        acc[key] = dayjs.unix(project[key as keyof projectType] as number).fromNow()
+      } else {
+        acc[key] = project[key as keyof typeof project] as number
+      }
+    }
+    return acc
+  }, {})
+
+  return filteredIcons
+}
+
+export const getFilteredIconsGraphql = (
+  project: ProjectTypeGraphql | ChapterTypeGraphQL,
+  params: string[]
+): IconType => {
+  const filteredIcons = params.reduce((acc: IconType, key) => {
+    if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
+      if (key === 'createdAt') {
         acc[key] = dayjs.unix(project[key as keyof projectType] as number).fromNow()
       } else {
         acc[key] = project[key as keyof typeof project] as number
