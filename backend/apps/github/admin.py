@@ -147,10 +147,10 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ("login", "name")
 
 
-admin.site.register(PullRequest, PullRequestAdmin)
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Label, LabelAdmin)
 admin.site.register(Organization, OrganizationAdmin)
+admin.site.register(PullRequest, PullRequestAdmin)
 admin.site.register(Release, ReleaseAdmin)
 admin.site.register(Repository, RepositoryAdmin)
 admin.site.register(RepositoryContributor, RepositoryContributorAdmin)

@@ -37,6 +37,11 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
         return f"{self.title} by {self.author}"
 
     @property
+    def is_open(self):
+        """Return whether issue is open."""
+        return self.state == self.State.OPEN
+
+    @property
     def project(self):
         """Return project."""
         return self.repository.project

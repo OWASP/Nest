@@ -1,7 +1,9 @@
 """GitHub app common module."""
 
 import logging
+from datetime import timedelta as td
 
+from django.utils import timezone
 from github.GithubException import UnknownObjectException
 
 from apps.github.models.issue import Issue
@@ -46,96 +48,76 @@ def sync_repository(gh_repository, organization=None, user=None):
         user=user,
     )
 
-    # GitHub repository issues.
-    if (
-        not repository.is_archived
-        and repository.track_issues
-        and repository.project
-        and repository.project.track_issues
-    ):
-        kwargs = {
-            "direction": "asc",
-            "sort": "created",
-            "state": "all",
-        }
-        if latest_updated_issue := repository.latest_updated_issue:
-            # Get only what has been updated after the latest sync.
-            kwargs.update({"since": latest_updated_issue.updated_at})
+    if not repository.is_archived:
+        # GitHub repository issues.
+        project_track_issues = repository.project.track_issues if repository.project else True
+        if repository.track_issues and project_track_issues:
+            kwargs = {
+                "direction": "asc",
+                "sort": "created",
+                "state": "all",
+            }
+            if latest_updated_issue := repository.latest_updated_issue:
+                # Get only what has been updated after the latest sync.
+                kwargs.update({"since": latest_updated_issue.updated_at})
 
-        for gh_issue in gh_repository.get_issues(**kwargs):
-            if gh_issue.pull_request:  # Skip pull requests.
-                continue
+            for gh_issue in gh_repository.get_issues(**kwargs):
+                if gh_issue.pull_request:  # Skip pull requests.
+                    continue
 
-            author = User.update_data(gh_issue.user)
-            issue = Issue.update_data(gh_issue, author=author, repository=repository)
+                author = User.update_data(gh_issue.user)
+                issue = Issue.update_data(gh_issue, author=author, repository=repository)
 
-            # Assignees.
-            issue.assignees.clear()
-            for gh_issue_assignee in gh_issue.assignees:
-                issue.assignees.add(User.update_data(gh_issue_assignee))
+                # Assignees.
+                issue.assignees.clear()
+                for gh_issue_assignee in gh_issue.assignees:
+                    issue.assignees.add(User.update_data(gh_issue_assignee))
 
-            # Labels.
-            issue.labels.clear()
-            for gh_issue_label in gh_issue.labels:
-                try:
-                    issue.labels.add(Label.update_data(gh_issue_label))
-                except UnknownObjectException:
-                    logger.info("Couldn't get GitHub issue label %s", issue.url)
-    else:
-        logger.info("Skipping issues sync for %s", repository.name)
+                # Labels.
+                issue.labels.clear()
+                for gh_issue_label in gh_issue.labels:
+                    try:
+                        issue.labels.add(Label.update_data(gh_issue_label))
+                    except UnknownObjectException:
+                        logger.info("Couldn't get GitHub issue label %s", issue.url)
+        else:
+            logger.info("Skipping issues sync for %s", repository.name)
 
-    if not repository.is_archived and repository.project:
-        # Fetch both open and closed PRs from GitHub
+        # GitHub repository pull requests.
         kwargs = {
             "direction": "desc",
-            "sort": "created",
-            "state": "open",
+            "sort": "updated",
+            "state": "all",
         }
 
-        latest_pull_request = repository.latest_pull_request
-        if latest_pull_request:
-            gh_first_pr = PullRequest.objects.order_by("created_at").first().created_at
-            kwargs["state"] = "all"
-
-        gh_pull_requests = gh_repository.get_pulls(**kwargs)
-
-        for gh_pull_request in gh_pull_requests:
-            if latest_pull_request and gh_pull_request.state == "closed":
-                # Skipping closed PR before first sync
-                if gh_first_pr > gh_pull_request.created_at:
-                    break
-                # Check if this PR already exists in the database and is open
-                existing_open_pr = PullRequest.objects.filter(
-                    repository=repository, state="open", number=gh_pull_request.number
-                ).first()
-
-                if not existing_open_pr:
-                    continue  # Skip closed PRs from previous syncs
-
-            # Extract author details
-            author = (
-                User.update_data(gh_pull_request.user)
-                if gh_pull_request.user and gh_pull_request.user.type != "Bot"
-                else None
-            )
-
-            # Update PR data
+        pull_request_cut_off_at = timezone.now() - td(days=30)
+        latest_updated_pull_request = repository.latest_updated_pull_request
+        for gh_pull_request in gh_repository.get_pulls(**kwargs):
+            author = User.update_data(gh_issue.user)
             pull_request = PullRequest.update_data(
                 gh_pull_request, author=author, repository=repository
             )
 
-            # Clear and update assignees
+            # Assignees.
             pull_request.assignees.clear()
             for gh_pull_request_assignee in gh_pull_request.assignees:
                 pull_request.assignees.add(User.update_data(gh_pull_request_assignee))
 
-            # Clear and update labels
+            # Labels.
             pull_request.labels.clear()
             for gh_pull_request_label in gh_pull_request.labels:
                 try:
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
                     logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
+
+            pull_request_cut_off = pull_request.updated_at <= pull_request_cut_off_at
+            pull_request_seen = (
+                latest_updated_pull_request
+                and pull_request.updated_at <= latest_updated_pull_request.updated_at
+            )
+            if pull_request_seen or pull_request_cut_off:
+                break
 
     # GitHub repository releases.
     releases = []

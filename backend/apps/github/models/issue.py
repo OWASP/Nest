@@ -133,11 +133,12 @@ class Issue(GenericIssueModel):
 
     def save(self, *args, **kwargs):
         """Save issue."""
-        if not self.hint:
-            self.generate_hint()
+        if self.is_open:
+            if not self.hint:
+                self.generate_hint()
 
-        if not self.summary:
-            self.generate_summary()
+            if not self.summary:
+                self.generate_summary()
 
         super().save(*args, **kwargs)
 
