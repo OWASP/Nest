@@ -101,7 +101,7 @@ owasp-scrape-projects:
 owasp-update-events:
 	@echo "Getting OWASP events data"
 	@CMD="python manage.py owasp_update_events" $(MAKE) exec-backend-command
-  
+
 owasp-update-sponsors:
 	@echo "Getting OWASP sponsors data"
 	@CMD="python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
