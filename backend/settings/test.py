@@ -8,4 +8,5 @@ class Test(Base):
 
     DEBUG = False
 
-INSTALLED_APPS = + ('django_extensions',)
+
+INSTALLED_APPS = +("django_extensions",)

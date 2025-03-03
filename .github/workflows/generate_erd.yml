@@ -30,7 +30,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y graphviz
-      
+
       - name: Create and Populate .env File
         run: |
           touch backend/.env  # Ensure the file exists
@@ -62,7 +62,7 @@ jobs:
           export $(grep -v '^#' .env.backend | xargs)
           poetry install --no-interaction --no-root --with dev
           poetry add pydotplus  # Ensure pydotplus is installed
-          
+
       - name: Generate Models Graph
         run: |
           cd backend
