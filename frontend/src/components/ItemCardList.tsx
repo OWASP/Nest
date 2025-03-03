@@ -20,29 +20,26 @@ const ItemCardList = ({
     {data && data.length > 0 ? (
       <div className="h-64 overflow-y-auto pr-2">
         {data.map((item, index) => (
-          <div key={index} className="mb-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-            <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-              <a href={item?.url} className="text-blue-500 hover:underline dark:text-blue-400">
-                {item.title || item.name}
-              </a>
-            </h3>
-            <div className="flex flex-grow-0 flex-col justify-between lg:flex-row">
-              <div className="mt-2 flex items-center">
-                <div className="flex items-center">
+          <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+            <div className="flex w-full flex-col justify-between">
+              <div className="flex w-full items-center">
+                <a
+                  href={`/community/users/${item?.author?.login}`}
+                  className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                >
                   <img
                     src={item?.author?.avatarUrl}
                     alt={item?.author?.name}
                     className="mr-2 h-6 w-6 rounded-full"
                   />
-                  <a
-                    href={`/community/users/${item?.author?.login}`}
-                    className="text-blue-400 hover:underline dark:text-blue-200"
-                  >
-                    {item?.author?.name || item?.author?.login}
+                </a>
+                <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
+                  <a href={item?.url} className="text-blue-500 hover:underline dark:text-blue-400">
+                    {item.title || item.name}
                   </a>
-                </div>
+                </h3>
               </div>
-              <div>{renderDetails(item)}</div>
+              <div className="ml-0.5 w-full">{renderDetails(item)}</div>
             </div>
           </div>
         ))}
