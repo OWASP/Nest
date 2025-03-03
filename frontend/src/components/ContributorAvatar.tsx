@@ -10,7 +10,12 @@ type ContributorProps = {
 const isAlgoliaContributor = (
   contributor: TopContributorsTypeAlgolia | TopContributorsTypeGraphql
 ): contributor is TopContributorsTypeAlgolia => {
-  return 'avatar_url' in contributor && 'contributions_count' in contributor
+  return (
+    typeof contributor === 'object' &&
+    contributor !== null &&
+    'avatar_url' in contributor &&
+    'contributions_count' in contributor
+  )
 }
 
 const ContributorAvatar = memo(({ contributor }: ContributorProps) => {
