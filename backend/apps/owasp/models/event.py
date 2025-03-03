@@ -26,7 +26,7 @@ class Event(BulkSaveModel, TimestampedModel):
 
     category = models.CharField(
         verbose_name="Category",
-        max_length=20,
+        max_length=11,
         choices=Category.choices,
         default=Category.OTHER,
     )
