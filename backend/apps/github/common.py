@@ -93,7 +93,7 @@ def sync_repository(gh_repository, organization=None, user=None):
         pull_request_cut_off_at = timezone.now() - td(days=30)
         latest_updated_pull_request = repository.latest_updated_pull_request
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
-            author = User.update_data(gh_issue.user)
+            author = User.update_data(gh_pull_request.user)
             pull_request = PullRequest.update_data(
                 gh_pull_request, author=author, repository=repository
             )
