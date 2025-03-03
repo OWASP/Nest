@@ -41,6 +41,7 @@ github-update-project-related-repositories:
 
 index-data:
 	@echo "Indexing Nest data"
+	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
