@@ -26,16 +26,16 @@ repos:
         types:
           - html
 
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.3
-    hooks:
-      - id: yamlfmt
-        args:
-          - --implicit_start
-          - --mapping=2
-          - --offset=2
-          - --sequence=4
-        exclude: (.github|frontend/pnpm-lock.yaml)
+  # - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  #   rev: 0.2.3
+  #   hooks:
+  #     - id: yamlfmt
+  #       args:
+  #         - --implicit_start
+  #         - --mapping=2
+  #         - --offset=2
+  #         - --sequence=4
+  #       exclude: (.github|frontend/pnpm-lock.yaml)
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

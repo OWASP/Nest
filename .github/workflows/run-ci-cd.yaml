@@ -44,9 +44,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          cache: 'poetry'
+          cache: "poetry"
           cache-dependency-path: backend/poetry.lock
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
@@ -61,7 +61,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install frontend dependencies
@@ -113,7 +113,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies for frontend

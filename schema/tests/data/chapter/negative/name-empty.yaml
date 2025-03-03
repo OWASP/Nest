@@ -4,7 +4,7 @@ leaders:
     name: Leader Name 1
   - github: leader-name-2
     name: Leader Name 2
-name: ''
+name: ""
 tags:
   - example-tag-1
   - example-tag-2
