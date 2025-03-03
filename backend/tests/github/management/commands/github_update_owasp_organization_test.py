@@ -6,7 +6,6 @@ from apps.github.management.commands.github_update_owasp_organization import (
     Chapter,
     Command,
     Committee,
-    Event,
     Project,
     Repository,
 )
@@ -52,22 +51,22 @@ def mock_gh_repo():
         (
             "www-project-test",
             0,
-            {"project": 1, "chapter": 0, "committee": 0, "event": 0},
+            {"project": 1, "chapter": 0, "committee": 0},
         ),
         (
             "www-chapter-test",
             0,
-            {"project": 0, "chapter": 1, "committee": 0, "event": 0},
+            {"project": 0, "chapter": 1, "committee": 0},
         ),
         (
             "www-committee-test",
             0,
-            {"project": 0, "chapter": 0, "committee": 1, "event": 0},
+            {"project": 0, "chapter": 0, "committee": 1},
         ),
         (
             "www-event-test",
             0,
-            {"project": 0, "chapter": 0, "committee": 0, "event": 1},
+            {"project": 0, "chapter": 0, "committee": 0},
         ),
         (None, 0, {"project": 1, "chapter": 1, "committee": 1, "event": 1}),
         (None, 1, {"project": 0, "chapter": 1, "committee": 1, "event": 1}),
@@ -99,7 +98,6 @@ def test_handle(
         create_mock_repo("www-project-test"),
         create_mock_repo("www-chapter-test"),
         create_mock_repo("www-committee-test"),
-        create_mock_repo("www-event-test"),
         create_mock_repo("www-other-test"),
     ]
 
@@ -131,27 +129,22 @@ def test_handle(
         mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
         mock.patch.object(Chapter, "bulk_save") as mock_chapter_bulk_save,
         mock.patch.object(Committee, "bulk_save") as mock_committee_bulk_save,
-        mock.patch.object(Event, "bulk_save") as mock_event_bulk_save,
         mock.patch.object(Project, "update_data") as mock_project_update,
         mock.patch.object(Chapter, "update_data") as mock_chapter_update,
         mock.patch.object(Committee, "update_data") as mock_committee_update,
-        mock.patch.object(Event, "update_data") as mock_event_update,
         mock.patch.object(Project, "objects") as mock_project_objects,
         mock.patch.object(Chapter, "objects") as mock_chapter_objects,
         mock.patch.object(Committee, "objects") as mock_committee_objects,
-        mock.patch.object(Event, "objects") as mock_event_objects,
         mock.patch.object(Repository, "objects") as mock_repository_objects,
         mock.patch("builtins.print") as mock_print,
     ):
         mock_project_update.return_value = mock_repository
         mock_chapter_update.return_value = mock_repository
         mock_committee_update.return_value = mock_repository
-        mock_event_update.return_value = mock_repository
 
         mock_project_objects.all.return_value = []
         mock_chapter_objects.all.return_value = []
         mock_committee_objects.all.return_value = []
-        mock_event_objects.all.return_value = []
         mock_repository_objects.filter.return_value.count.return_value = 1
 
         command.handle(repository=repository_name, offset=offset)
@@ -173,12 +166,9 @@ def test_handle(
                 assert mock_chapter_update.call_count == expected_calls["chapter"]
             elif repository_name.startswith("www-committee-"):
                 assert mock_committee_update.call_count == expected_calls["committee"]
-            elif repository_name.startswith("www-event-"):
-                assert mock_event_update.call_count == expected_calls["event"]
         else:
             assert mock_print.call_count > 0
 
         mock_project_bulk_save.assert_called_once()
         mock_chapter_bulk_save.assert_called_once()
         mock_committee_bulk_save.assert_called_once()
-        mock_event_bulk_save.assert_called_once()
