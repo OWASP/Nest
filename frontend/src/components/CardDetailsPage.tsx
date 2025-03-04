@@ -4,6 +4,7 @@ import { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ChapterMap from 'components/ChapterMap'
+import HeatMap from 'components/HeatMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
@@ -15,6 +16,8 @@ const DetailsCard = ({
   title,
   is_active = true,
   summary,
+  avatarUrl,
+  name = null,
   description,
   stats,
   details,
@@ -38,9 +41,31 @@ const DetailsCard = ({
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
-        <SecondaryCard title="Summary">
-          <p>{summary}</p>
-        </SecondaryCard>
+        {(type === 'project' || type === 'chapter') && (
+          <SecondaryCard title="Summary">
+            <p>{summary}</p>
+          </SecondaryCard>
+        )}
+
+          {type === 'user' && (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
+              <div className="mb-8 rounded-lg bg-gray-100 p-2 shadow-md dark:bg-gray-800 md:col-span-1 gap-2">
+                <img
+                className="h-50 w-50 rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
+                src={avatarUrl}
+                alt={name}
+                />
+              </div>
+              <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
+                <div id="heat-map" className="rounded-2xl dark:bg-[#212529] leaflet-container">
+                  <HeatMap/>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
