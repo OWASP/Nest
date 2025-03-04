@@ -35,7 +35,6 @@ const TopContributors = ({
         {displayContributors.map((contributor, index) => (
           <div
             key={index}
-            onClick={() => navigate(`/community/users/${contributor.login}`)}
             className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             <img
@@ -44,12 +43,29 @@ const TopContributors = ({
               className="mr-3 h-10 w-10 rounded-full"
             />
             <div>
-              <p className="font-semibold text-blue-600 hover:underline dark:text-sky-400">
+              <p
+                onClick={() => navigate(`/community/users/${contributor.login}`)}
+                className="font-semibold text-blue-600 hover:underline dark:text-sky-400"
+              >
                 {contributor.name || contributor.login}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {contributor?.contributionsCount} contributions
-              </p>
+              {contributor?.repositoryName ? (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <a
+                    href={contributor.repositoryUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline dark:text-sky-400"
+                  >
+                    {contributor.repositoryName}
+                  </a>{' '}
+                  - {contributor.contributionsCount} contributions
+                </p>
+              ) : (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {contributor?.contributionsCount} contributions
+                </p>
+              )}
             </div>
           </div>
         ))}

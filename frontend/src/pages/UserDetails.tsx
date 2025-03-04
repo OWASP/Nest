@@ -92,7 +92,6 @@ const UserDetailsPage = () => {
         stats={userStats}
         topContributors={[]}
         type="user"
-
       />
     </MetadataManager>
   )

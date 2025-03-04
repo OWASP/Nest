@@ -1,147 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
-  "$defs": {
-    "community": {
-      "type": "object",
-      "title": "Community",
-      "description": "A project community.",
-      "required": ["platform", "url"],
-      "properties": {
-        "description": {
-          "description": "A brief description of the community.",
-          "type": "string"
-        },
-        "platform": {
-          "type": "string",
-          "enum": ["discord", "slack"],
-          "description": "The platform used by the community."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the community.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
-    },
-    "repository": {
-      "type": "object",
-      "title": "Repository",
-      "description": "A project repository.",
-      "required": [
-        "url"
-      ],
-      "properties": {
-        "changelog": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Link to the changelog."
-        },
-        "code_of_conduct": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Link to the code of conduct."
-        },
-        "contribution_guide": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Link to the contribution guide."
-        },
-        "description": {
-          "type": [
-            "string"
-          ],
-          "description": "Repository description."
-        },
-        "name": {
-          "type": [
-            "string"
-          ],
-          "description": "Repository name."
-        },
-        "url": {
-          "type": "string",
-          "description": "The repository URL.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
-    },
-    "sponsor": {
-      "type": "object",
-      "title": "Sponsor",
-      "description": "A project sponsor.",
-      "required": [
-        "name",
-        "url"
-      ],
-      "properties": {
-        "description": {
-          "type": "string",
-          "description": "A brief description of the sponsor."
-        },
-        "logo": {
-          "type": "string",
-          "description": "The URL of the sponsor's logo.",
-          "format": "uri"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the sponsor or organization."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the sponsor.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
-    },
-    "logo": {
-      "description": "A logo for the project",
-      "type": "object",
-      "properties": {
-        "small": {
-          "description": "Logo size should be 192x192 pixels.",
-          "type": "string",
-          "format": "uri"
-        },
-        "medium": {
-          "description": "Logo size should be 256x256 pixels.",
-          "type": "string",
-          "format": "uri"
-        },
-        "large": {
-          "description": "Logo size should be 512x512 pixels.",
-          "type": "string",
-          "format": "uri"
-        }
-      },
-      "required": [
-        "small",
-        "medium",
-        "large"
-      ],
-      "additionalProperties": false
-    }
-  },
   "additionalProperties": false,
-  "description": "OWASP schema.",
+  "description": "OWASP project schema",
   "properties": {
     "audience": {
       "description": "The intended audience for the project.",
-      "enum": [
-        "breaker",
-        "builder",
-        "defender"
-      ],
+      "enum": ["breaker", "builder", "defender"],
       "enumDescriptions": [
         "Security testers and ethical hackers.",
         "Developers and engineers.",
@@ -158,16 +23,20 @@
       "description": "A list of community platforms associated with the project.",
       "type": "array",
       "items": {
-        "$ref": "#/$defs/community"
+        "$ref": "common.json#/definitions/community"
       },
       "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
+      "uniqueItems": true
     },
     "demo": {
-      "description": "Optional URL to the project demo.",
-      "format": "uri",
-      "type": "string"
+      "description": "Optional URLs to the project demo.",
+      "minItems": 1,
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
     },
     "documentation": {
       "description": "Optional URLs to project documentation.",
@@ -206,7 +75,6 @@
       "type": "array",
       "items": {
         "$ref": "common.json#/definitions/person"
-
       },
       "minItems": 2,
       "uniqueItems": true
@@ -214,18 +82,8 @@
     "level": {
       "default": 2,
       "description": "The numeric level of the project.",
-      "enum": [
-        2,
-        3,
-        3.5,
-        4
-      ],
-      "enumDescriptions": [
-        "Incubator",
-        "Lab",
-        "Production",
-        "Flagship"
-      ],
+      "enum": [2, 3, 3.5, 4],
+      "enumDescriptions": ["Incubator", "Lab", "Production", "Flagship"],
       "title": "Project level.",
       "type": "number"
     },
@@ -252,13 +110,12 @@
     },
     "logo": {
       "description": "Logo information for the project.",
-      "type": "array",
       "items": {
-        "$ref": "#/$defs/logo"
+        "$ref": "common.json#/definitions/logo"
       },
       "minItems": 1,
-      "additionalProperties": false,
-      "optional": true
+      "type": "array",
+      "uniqueItems": true
     },
     "mailing_list": {
       "description": "The optional mailing list associated with the project.",
@@ -272,15 +129,16 @@
     },
     "pitch": {
       "description": "The project pitch.",
+      "minLength": 10,
       "type": "string"
     },
     "repositories": {
       "description": "Repositories associated with the project.",
-      "type": "array",
-      "minItems": 1,
       "items": {
-        "$ref": "#/$defs/repository"
+        "$ref": "common.json#/definitions/repository"
       },
+      "minItems": 1,
+      "type": "array",
       "uniqueItems": true
     },
     "social_media": {
@@ -290,32 +148,29 @@
         "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
-      "additionalProperties": false
+      "uniqueItems": true
     },
     "sponsors": {
       "description": "Sponsors of the project.",
-      "type": "array",
       "items": {
-        "$ref": "#/$defs/sponsor"
+        "$ref": "common.json#/definitions/sponsor"
       },
-      "minItems": 1
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     },
     "tags": {
       "description": "Tags for the project",
-      "type": "array",
       "items": {
         "type": "string"
       },
       "minItems": 3,
+      "type": "array",
       "uniqueItems": true
     },
     "type": {
       "description": "The type of the project: code, documentation or tool.",
-      "enum": [
-        "code",
-        "documentation",
-        "tool"
-      ],
+      "enum": ["code", "documentation", "tool"],
       "enumDescriptions": [
         "Code projects",
         "Documentation, standards, etc.",
@@ -330,15 +185,7 @@
       "type": "string"
     }
   },
-  "required": [
-    "audience",
-    "leaders",
-    "level",
-    "name",
-    "pitch",
-    "tags",
-    "type"
-  ],
+  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
   "title": "OWASP Project",
   "type": "object"
 }

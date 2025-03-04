@@ -38,11 +38,12 @@ Before contributing, ensure you have the following installed:
 Follow these steps to set up the OWASP Nest application:
 
 1. **Clone the Repository**:
-    - Clone the repository code from your GitHub account using the following command:
 
-      ```bash
-      git clone https://github.com/<your-account>/<nest-fork>
-      ```
+   - Clone the repository code from your GitHub account using the following command:
+
+     ```bash
+     git clone https://github.com/<your-account>/<nest-fork>
+     ```
 
 1. **Create Environment Files**:
 
@@ -84,15 +85,15 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Set Up Algolia**:
 
-    - Go to [Algolia](https://www.algolia.com/) and create a free account.
-    - After creating an account, create an Algolia app.
-    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
+   - Go to [Algolia](https://www.algolia.com/) and create a free account.
+   - After creating an account, create an Algolia app.
+   - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
-     ```plaintext
-     DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
-     DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
-     DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
-     ```
+   ```plaintext
+   DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
+   DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
+   DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
+   ```
 
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
 
@@ -124,9 +125,9 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      ```
 
 1. **Verify API Endpoints**:
-    - Check that the data is available via these API endpoints:
-      - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
-      - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
+   - Check that the data is available via these API endpoints:
+     - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
+     - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
 
 ### Optional Steps
 
@@ -213,12 +214,27 @@ To setup NestBot development environment, follow these steps:
    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
+#### OWASP Schema Development
+
+The OWASP Schema files are located in the `schema` directory. This is a standalone `pyproject.toml` project with its own test suite.
+
+Please follow these contribution guidelines for OWASP Schema-related changes:
+
+- Order all schema attributes alphabetically where applicable.
+- Use the `common.json` definition file for shared object definitions (e.g., chapter, project).
+- Include all schema attributes in both required and optional positive test cases.
+- Add negative tests for all mandatory attributes, covering empty, invalid, null, and undefined cases.
+- Always set `additionalProperties` to `false` and list all mandatory fields in the `required` section.
+- Always add `minItems`, `minLength`, and `uniqueItems` where applicable
+- When referencing definitions from `common.json`, test both the object's internal structure (in the `common` section) and its references in actual schemas (e.g., chapter, project).
+- Run `make check` and `make test-schema` before submitting a PR.
+
 ## Code Quality Checks
 
 Nest enforces code quality standards to ensure consistency and maintainability. You can run automated checks locally before pushing your changes:
 
 ```bash
-make check
+make check-all
 ```
 
 This command runs linters and other static analysis tools for both the frontend and backend.
@@ -229,7 +245,7 @@ This command runs linters and other static analysis tools for both the frontend 
 Our CI/CD pipelines automatically run tests against every Pull Request. You can run tests locally before submitting a PR:
 
 ```bash
-make test
+make test-all
 ```
 
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
@@ -250,7 +266,9 @@ If you are adding new functionality, include relevant test cases.
 ### 1. Find Something to Work On
 
 - Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)
-- If you want to work on something specific, create a new issue or comment on an existing one to let others know.
+- Found a bug or have a feature request? Open a new issue.
+- Want to work on an existing issue? Ask the maintainers to assign it to you before submitting a pull request.
+- New to the project? Start with issues labeled `good first issue` for an easier onboarding experience.
 
 ### 2. Create a Branch
 
@@ -265,16 +283,10 @@ git checkout -b feature/my-feature-name
 - Check that your commits include only related and intended changes. Do not include unrelated files.
 - Follow best practices for code style and testing.
 - Add tests for any new functionality or changes to ensure proper coverage.
-- Run the code quality checks:
+- Run the code quality checks and tests:
 
   ```bash
-  make check
-  ```
-
-- Run tests to ensure everything works correctly:
-
-  ```bash
-  make test
+  make check-test-all
   ```
 
 - Write meaningful commit messages:
