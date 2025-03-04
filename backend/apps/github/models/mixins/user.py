@@ -1,5 +1,7 @@
 """GitHub user model mixins for index-related functionality."""
 
+from django.db.models import Sum
+
 from apps.github.models.organization import Organization
 from apps.github.models.repository_contributor import RepositoryContributor
 
@@ -106,6 +108,16 @@ class UserIndexMixin:
             .order_by("-contributions_count")
             .select_related("repository")[:TOP_REPOSITORY_CONTRIBUTORS_LIMIT]
         ]
+
+    @property
+    def idx_contributions_count(self):
+        """Return contributions count for indexing."""
+        return (
+            RepositoryContributor.objects.filter(user=self).aggregate(
+                total_contributions=Sum("contributions_count")
+            )["total_contributions"]
+            or 0
+        )
 
     @property
     def idx_issues(self):
