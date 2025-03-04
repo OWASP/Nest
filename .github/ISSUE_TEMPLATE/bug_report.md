@@ -2,9 +2,8 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: ['bug']
 assignees: ''
-
 ---
 
 **Describe the bug**
@@ -22,7 +21,9 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Are you going to work on fixing this?**
-No.
+
+- [ ] Yes
+- [x] No
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
