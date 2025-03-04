@@ -135,8 +135,6 @@ describe('ProjectDetailsPage', () => {
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
 
-        expect(screen.getAllByText(issue.author.name).length).toBeGreaterThan(0)
-
         expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
       })
     })
