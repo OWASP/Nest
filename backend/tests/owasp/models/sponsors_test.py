@@ -47,11 +47,6 @@ class TestSponsorModel:
         sponsor = Sponsor(member_type=member_type)
         assert sponsor.readable_member_type == expected_label
 
-    def test_is_indexable(self):
-        """Test the is_indexable property."""
-        sponsor = Sponsor()
-        assert sponsor.is_indexable is True
-
     def test_bulk_save(self):
         """Test the bulk_save method."""
         mock_sponsors = [Mock(id=None), Mock(id=1)]
