@@ -64,12 +64,12 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     @property
     def readable_member_type(self):
         """Get human-readable member type."""
-        return self.MemberType(str(self.member_type)).label
+        return self.MemberType(self.member_type).label
 
     @property
     def readable_sponsor_type(self):
         """Get human-readable sponsor type."""
-        return self.SponsorType(str(self.sponsor_type)).label
+        return self.SponsorType(self.sponsor_type).label
 
     @staticmethod
     def bulk_save(sponsors, fields=None):
@@ -86,6 +86,7 @@ class Sponsor(BulkSaveModel, TimestampedModel):
             sponsor = Sponsor(key=key)
 
         sponsor.from_dict(data)
+
         if save:
             sponsor.save()
 
@@ -95,6 +96,9 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         """Update instance based on the dict data."""
         image_path = data.get("image", "").lstrip("/")
         image_url = f"{OWASP_ORGANIZATION_DATA_URL}/{image_path}"
+
+        sponsor_key = str(data.get("sponsor", "-1"))
+        member_key = str(data.get("membertype", "4"))
 
         member_type_mapping = {
             "2": self.MemberType.PLATINUM,
@@ -111,12 +115,8 @@ class Sponsor(BulkSaveModel, TimestampedModel):
             "-1": self.SponsorType.NOT_SPONSOR,
         }
 
-        sponsor_type_label = sponsor_type_mapping.get(
-            data.get("sponsor", "-1") or "-1", self.SponsorType.NOT_SPONSOR
-        )
-        member_type_label = member_type_mapping.get(
-            data.get("membertype", "4") or "4", self.MemberType.SILVER
-        )
+        sponsor_type_label = sponsor_type_mapping.get(sponsor_key, self.SponsorType.NOT_SPONSOR)
+        member_type_label = member_type_mapping.get(member_key, self.MemberType.SILVER)
 
         fields = {
             "name": data.get("name", ""),
@@ -125,7 +125,7 @@ class Sponsor(BulkSaveModel, TimestampedModel):
             "url": normalize_url(data.get("url", "")) or "",
             "job_url": normalize_url(data.get("job_url", "")) or "",
             "image_url": image_url,
-            "is_member": data.get("member", False),
+            "is_member": bool(data.get("member", False)),
             "sponsor_type": sponsor_type_label,
             "member_type": member_type_label,
         }
