@@ -64,7 +64,7 @@ class Command(BaseCommand):
                     logger.info("Skipped related URL %s", verified_url)
 
             repository = committee.owasp_repository
-            committee.leaders_raw = scraper.get_leaders(repository)
+            committee.leaders_raw = committee.get_leaders(repository)
             committee.invalid_urls = sorted(invalid_urls)
             committee.related_urls = sorted(related_urls)
 
