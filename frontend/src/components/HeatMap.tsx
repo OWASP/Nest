@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 
