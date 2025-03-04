@@ -48,7 +48,7 @@ const ChapterMap = ({
         distance: getDistance(userLocation.lat, userLocation.lng, chapter.lat, chapter.lng),
       }))
       .sort((a, b) => a.distance - b.distance)
-      .slice(0, 5) // Get the 5 nearest chapters
+      .slice(0, 5)
   }, [userLocation, normalizedData])
 
   useEffect(() => {
@@ -69,7 +69,6 @@ const ChapterMap = ({
 
     const map = mapRef.current
 
-    // Clear previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
         map.removeLayer(layer)
@@ -125,16 +124,11 @@ const ChapterMap = ({
           map.fitBounds(nearestBounds, { maxZoom: 10 })
         } else if (bounds.length > 0) {
           map.fitBounds(bounds)
-        } else {
-          console.warn('No valid bounds found for the map')
         }
       } else if (bounds.length > 0) {
         map.fitBounds(bounds)
-      } else {
-        console.warn('No bounds available for the map')
       }
     } catch (error) {
-      console.error('Error fitting map bounds:', error)
       // Fallback to default view if bounds fitting fails
       map.setView([20, 0], 2)
     }
