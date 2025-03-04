@@ -13,7 +13,7 @@ export const mockGraphQLData = {
     {
       name: 'OWASP Foundation',
       imageUrl: 'https://example.com/owasp-foundation.png',
-    }
+    },
   ],
   recentChapters: [
     {
