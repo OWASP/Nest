@@ -1,9 +1,5 @@
 import { useQuery } from '@apollo/client'
-import {
-  faUserPlus,
-  faCodeBranch,
-  faUser,
-} from '@fortawesome/free-solid-svg-icons'
+import { faUserPlus, faCodeBranch, faUser } from '@fortawesome/free-solid-svg-icons'
 import { GET_USER_DATA } from 'api/queries/userQueries'
 import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
@@ -58,32 +54,29 @@ const UserDetailsPage = () => {
     )
 
   const UserDetails = [
-    { label: 'Summary', value: (user.bio)},
+    { label: 'Summary', value: user.bio },
     { label: 'Joined', value: formatDate(user.createdAt) },
-    { label: 'Company', value: (user.company) },
-    { label: 'Email', value: (user.email)}
-  ].filter(detail => detail.value);
+    { label: 'Company', value: user.company },
+    { label: 'Email', value: user.email },
+  ].filter((detail) => detail.value)
 
   const userStats = [
-      {
-        icon: faUser,
-        value: `${user?.publicRepositoriesCount || 'No'} ${pluralize(user?.publicRepositoriesCount, 'Follower')}`,
-      },
-      {
-        icon: faUserPlus,
-        value: `${user?.followersCount || 'No'} ${pluralize(user?.followersCount, 'Following')}`,
-      },
-      {
-        icon: faCodeBranch,
-        value: `${user?.publicRepositoriesCount || 'No'} ${pluralize(user?.publicRepositoriesCount, 'Repository', 'Repositories')}`,
-      },
-    ]
+    {
+      icon: faUser,
+      value: `${user?.followersCount || 'No'} ${pluralize(user?.followersCount, 'Follower')}`,
+    },
+    {
+      icon: faUserPlus,
+      value: `${user?.followingCount || 'No'} ${pluralize(user?.followingCount, 'Following')}`,
+    },
+    {
+      icon: faCodeBranch,
+      value: `${user?.publicRepositoriesCount || 'No'} ${pluralize(user?.publicRepositoriesCount, 'Repository', 'Repositories')}`,
+    },
+  ]
 
   return (
-    <MetadataManager
-    pageTitle={user.name || userKey}
-    url={user.url}
-    >
+    <MetadataManager pageTitle={user.name || userKey} url={user.url}>
       <DetailsCard
         details={UserDetails}
         avatarUrl={user?.avatarUrl}
@@ -96,6 +89,5 @@ const UserDetailsPage = () => {
     </MetadataManager>
   )
 }
-
 
 export default UserDetailsPage

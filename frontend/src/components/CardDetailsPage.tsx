@@ -16,7 +16,7 @@ const DetailsCard = ({
   title,
   is_active = true,
   summary,
-  avatarUrl,
+  avatarUrl = '',
   name = null,
   description,
   stats,
@@ -47,63 +47,59 @@ const DetailsCard = ({
           </SecondaryCard>
         )}
 
-
         <div className="grid grid-cols-7 gap-6 md:grid-cols-7">
           <div className="col-span-2">
             {type === 'user' && (
               <div className="mb-8 rounded-lg bg-gray-100 p-2 shadow-md dark:bg-gray-800 md:col-span-1">
-                    <img
-                    className="h-[300px] w-[300px] rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
-                    src={avatarUrl}
-                    alt={name}
-                    />
-                  </div>
-
+                <img
+                  className="h-[300px] w-[300px] rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
+                  src={avatarUrl}
+                  alt={name}
+                />
+              </div>
             )}
           </div>
 
           <div className="col-span-5">
             {type === 'user' && (
               <SecondaryCard
-                  title={`${type[0].toUpperCase() + type.slice(1)} Details`}
-                  className={'md:col-span-5 gap-2'}
+                title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+                className={'gap-2 md:col-span-5'}
               >
-                {details && details.map((detail, index) => (
-                  <div key={index}>
-                    <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
-                  </div>
+                {details &&
+                  details.map((detail, index) => (
+                    <div key={index}>
+                      <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
+                    </div>
                   ))}
               </SecondaryCard>
-          )}
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
-          {(type !== 'user') && (
+          {type !== 'user' && (
             <SecondaryCard
-            title={`${type[0].toUpperCase() + type.slice(1)} Details`}
-            className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
-          >
-            {details &&
-              details.map((detail, index) => (
-                <div key={index}>
-                  <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
-                </div>
-              ))}
-            {socialLinks && (type === 'chapter' || type === 'committee') && (
-              <SocialLinks urls={socialLinks || []} />
-            )}
-          </SecondaryCard>
-          )}
-          {(type === 'user') && (
-            <HeatMap className={'md:col-span-5 gap-2'}
+              title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+              className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
             >
-            </HeatMap>
+              {details &&
+                details.map((detail, index) => (
+                  <div key={index}>
+                    <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
+                  </div>
+                ))}
+              {socialLinks && (type === 'chapter' || type === 'committee') && (
+                <SocialLinks urls={socialLinks || []} />
+              )}
+            </SecondaryCard>
           )}
+          {type === 'user' && <HeatMap className={'gap-2 md:col-span-5'}></HeatMap>}
 
-
-
-          {(type === 'project' || type === 'repository' || type === 'committee' || type === 'user') && (
+          {(type === 'project' ||
+            type === 'repository' ||
+            type === 'committee' ||
+            type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />

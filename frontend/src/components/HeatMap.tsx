@@ -1,22 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
-import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react'
+import { useParams } from 'react-router-dom'
+import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
 
-
-const HeatMap = ({
-  className= '',
-} : {
-  className?: string
-}
-) => {
-
-  const { userKey } = useParams();
-  const [data, setData] = useState<HeatmapData | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [imageLink, setImageLink] = useState('');
-  const [username, setUsername] = useState('');
-  const [privateContributor, setPrivateContributor] = useState(false);
-  const theme = 'blue';
+const HeatMap = ({ className = '' }: { className?: string }) => {
+  const { userKey } = useParams()
+  const [data, setData] = useState<HeatmapData | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const [imageLink, setImageLink] = useState('')
+  const [username, setUsername] = useState('')
+  const [privateContributor, setPrivateContributor] = useState(false)
+  const theme = 'blue'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,27 +32,26 @@ const HeatMap = ({
     }
   }, [username, data])
 
-
   return (
-    <div className={`bg-#10151c relative h-32 items-center justify-center ${className}`}>
+    <div className={`bg-gray-900 relative h-32 items-center justify-center ${className}`}>
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-          {privateContributor ? (
-            <div className="h-32 bg-owasp-blue"></div>
-          ) : imageLink ? (
-            <div className="bg-#10151c h-32">
-              <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
-            </div>
-          ) : (
-            <div className="bg-#10151c relative h-32 items-center justify-center">
-              <img
-                src="/img/heatmapBackground.png"
-                className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
-              />
-              <div className="heatmap-loader"></div>
-            </div>
-          )}
+      {privateContributor ? (
+        <div className="h-32 bg-owasp-blue"></div>
+      ) : imageLink ? (
+        <div className="bg-#10151c h-32">
+          <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
+        </div>
+      ) : (
+        <div className="bg-#10151c relative h-32 items-center justify-center">
+          <img
+            src="/img/heatmapBackground.png"
+            className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+          />
+          <div className="heatmap-loader"></div>
+        </div>
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default HeatMap;
+export default HeatMap

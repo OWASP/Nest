@@ -42,8 +42,8 @@ export interface DetailsCardProps {
   topContributors?: TopContributorsTypeGraphql[]
   topics?: string[]
   type: string
-  avatarUrl: string
-  name: string
+  avatarUrl?: string
+  name?: string
 }
 
 export interface UserCardProps {
