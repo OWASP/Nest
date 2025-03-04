@@ -112,10 +112,12 @@ class UserIndexMixin:
     @property
     def idx_contributions_count(self):
         """Return contributions count for indexing."""
-        counts = RepositoryContributor.objects.filter(user=self).aggregate(
-            total_contributions=Sum("contributions_count")
-        )["total_contributions"]
-        return counts if counts else 0
+        return (
+            RepositoryContributor.objects.filter(user=self).aggregate(
+                total_contributions=Sum("contributions_count")
+            )["total_contributions"]
+            or 0
+        )
 
     @property
     def idx_issues(self):
