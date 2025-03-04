@@ -1,4 +1,4 @@
-blog: ""
+blog: "https://example.com"  # Ensure blog is not empty
 country: India
 leaders:
   - github: leader-1-github
@@ -9,4 +9,4 @@ name: OWASP Chapter
 tags:
   - example-tag-1
   - example-tag-2
-  - example-tag-3
+  - unique-example-tag

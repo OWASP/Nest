@@ -1,0 +1,224 @@
+* [33m67326b9[m[33m ([m[1;31mupstream/main[m[33m, [m[1;31mupstream/HEAD[m[33m)[m Update CI/CD
+* [33m2ef920b[m[33m ([m[1;33mtag: [m[1;33m0.1.12[m[33m)[m Update synonyms syntax
+* [33m2e0bc95[m Address OpenCRE discoverability issue
+* [33m1dc1236[m Rank OWASP Nest community users using total contributions. (#1000)
+* [33me6f44f8[m Update dependencies
+* [33m2360b30[m Rename all YAML test files to be snake_case. (#1002)
+[31m|[m *   [33m10de8e7[m[33m ([m[1;31morigin/srinjoy933/issue-969[m[33m)[m Merge branch 'srinjoy933/issue-969' of https://github.com/srinjoy933/Nest into srinjoy933/issue-969 git commit -m"nedded to avoid complexity"
+[31m|[m [32m|[m[33m\[m
+[31m|[m [32m|[m * [33m168cfdb[m Fixed YAML formatting and disabled yamlfmt
+[31m|[m [32m|[m *   [33me56ba92[m Merge branch 'main' into srinjoy933/issue-969
+[31m|[m [32m|[m [34m|[m[35m\[m
+[31m|[m * [34m|[m [35m|[m [33m1090725[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32msrinjoy933/issue-969[m[33m)[m Fixed YAML formatting and disabled yamlfmt
+[31m|[m * [34m|[m [35m|[m [33mc625a8f[m Update dependencies
+[31m|[m [34m|[m[34m/[m [35m/[m
+[31m|[m * [35m|[m [33m7abb0d5[m some changes in issue#969
+[31m|[m * [35m|[m [33mda72ff1[m Fix pnpm warning,issue#969
+[31m|[m [35m|[m [35m|[m * [33mc379fad[m[33m ([m[1;31mupstream/827-improve-user-details-page[m[33m)[m remve import react
+[31m|[m [35m|[m [35m|[m * [33m2672975[m import React
+[31m|[m [35m|[m [35m|[m * [33m9fd62ac[m reorder imports
+[31m|[m [35m|[m [35m|[m * [33m623668d[m fix coderabbit
+[31m|[m [35m|[m [35m|[m * [33mc221f0a[m fix coderabbit
+[31m|[m [35m|[m [35m|[m *   [33m3dd2c8b[m Merge branch 'main' into 827-improve-user-details-page
+[31m|[m [35m|[m [35m|[m [1;31m|[m[31m\[m
+[31m|[m [35m|[m[31m_[m[35m|[m[31m_[m[1;31m|[m[31m/[m
+[31m|[m[31m/[m[35m|[m [35m|[m [1;31m|[m
+* [35m|[m [35m|[m [1;31m|[m [33m76b9347[m Update issue templates
+[1;32m|[m [35m|[m [35m|[m * [33m12a217f[m Rearange heatmap and userdetails containers
+[1;32m|[m [35m|[m [35m|[m * [33m54a60c2[m Modify User Details Page
+[1;32m|[m [35m|[m [35m|[m * [33ma4dc346[m Add statistic block
+[1;32m|[m [35m|[m [35m|[m * [33me2d0c9d[m wip
+[1;32m|[m [35m|[m [35m|[m * [33m5436751[m[33m ([m[1;31morigin/827-improve-user-details-page[m[33m, [m[1;32m827-improve-user-details-page[m[33m)[m wip
+[1;32m|[m [35m|[m [35m|[m * [33m62b0c36[m wip
+[1;32m|[m [35m|[m [35m|[m [1;32m|[m * [33meffe4e4[m[33m ([m[1;31mupstream/update-issue-templates[m[33m)[m Update issue templates
+[1;32m|[m [35m|[m[1;32m_[m[35m|[m[1;32m_[m[1;32m|[m[1;32m/[m
+[1;32m|[m[1;32m/[m[35m|[m [35m|[m [1;32m|[m
+* [35m|[m [35m|[m [1;32m|[m [33m6188367[m Implementation Of Committee Schema (#942)
+* [35m|[m [35m|[m [1;32m|[m [33mc55e7ee[m[33m ([m[1;33mtag: [m[1;33m0.1.11[m[33m)[m updated metadata for the static page (#986)
+* [35m|[m [35m|[m [1;32m|[m [33m99f47e7[m Added updated_at attribute in sortBy component (#988)
+* [35m|[m [35m|[m [1;32m|[m [33m165d36b[m Update snapshot processing logic
+* [35m|[m [35m|[m [1;32m|[m [33m555c66b[m Added End-to-End test cases for All pages (#978)
+* [35m|[m [35m|[m [1;32m|[m [33me24224f[m Update dependencies
+* [35m|[m [35m|[m [1;32m|[m [33mb211b46[m Update backend data
+* [35m|[m [35m|[m [1;32m|[m [33m98af4c1[m frontend for snapshotDetailsPage (#981)
+* [35m|[m [35m|[m [1;32m|[m [33m33f42d6[m Fix test image update workflow
+* [35m|[m [35m|[m [1;32m|[m [33m9ca8527[m Add missing migrations
+[35m|[m [35m|[m[35m/[m [1;32m/[m
+[35m|[m[35m/[m[35m|[m [1;32m|[m
+* [35m|[m [1;32m|[m [33mefa0ec4[m Update dependencies
+[35m|[m[35m/[m [1;32m/[m
+* [1;32m|[m [33mc579719[m Improved NestBot /events command (#657)
+* [1;32m|[m [33m7728724[m Add more guidlines to the CONTRIUBITING.md. (#979)
+* [1;32m|[m [33mbfba31f[m Update backend graphQL resolvers for Project level/type (#976)
+* [1;32m|[m [33m759b86b[m Add Project Health Dashboard models (#904)
+* [1;32m|[m [33m5ba7b39[m Apply labels automatically at issue creation ,issue no.888 (#968)
+[1;33m|[m [1;32m|[m *   [33m5075673[m[33m ([m[1;35mrefs/stash[m[33m)[m On srinjoy933/issue--919: !!GitHub_Desktop<srinjoy933/issue--919>
+[1;33m|[m [1;32m|[m [1;34m|[m[1;35m\[m
+[1;33m|[m [1;32m|[m [1;34m|[m * [33m4410851[m index on srinjoy933/issue--919: 3447639 Merge branch 'main' into srinjoy933/issue--919
+[1;33m|[m [1;32m|[m [1;34m|[m[1;34m/[m
+[1;33m|[m [1;32m|[m *   [33m3447639[m[33m ([m[1;31morigin/srinjoy933/issue--919[m[33m, [m[1;32msrinjoy933/issue--919[m[33m)[m Merge branch 'main' into srinjoy933/issue--919
+[1;33m|[m [1;32m|[m [1;36m|[m[31m\[m
+[1;33m|[m [1;32m|[m * [31m|[m [33m542a6d4[m Update MultiSearch.tsx
+[1;33m|[m [1;32m|[m * [31m|[m [33m77dcf10[m updated#issue no.919
+[1;33m|[m [1;32m|[m * [31m|[m [33m11259fc[m updated changes for the issue#919
+[1;33m|[m [1;32m|[m * [31m|[m   [33m1cc0d25[m Merge branch 'main' into srinjoy933/issue--919
+[1;33m|[m [1;32m|[m [32m|[m[33m\[m [31m\[m
+[1;33m|[m [1;32m|[m * [33m|[m [31m|[m [33mf48dfa3[m Contribute element container exceeds screen width on mobile #919
+[1;33m|[m [1;32m|[m [33m|[m [33m|[m [31m|[m * [33m13ca039[m[33m ([m[1;31morigin/srinjoy933/issue#888[m[33m, [m[1;32msrinjoy933/issue#888[m[33m)[m Update code
+[1;33m|[m [1;32m|[m [33m|[m [33m|[m [31m|[m * [33m6d521e9[m Update code
+[1;33m|[m [1;32m|[m [33m|[m [33m|[m [31m|[m *   [33ma193a57[m Merge branch 'main' into srinjoy933/issue#888
+[1;33m|[m [1;32m|[m [33m|[m [33m|[m [31m|[m [35m|[m[1;33m\[m
+[1;33m|[m [1;32m|[m[1;33m_[m[33m|[m[1;33m_[m[33m|[m[1;33m_[m[31m|[m[1;33m_[m[35m|[m[1;33m/[m
+[1;33m|[m[1;33m/[m[1;32m|[m [33m|[m [33m|[m [31m|[m [35m|[m
+* [1;32m|[m [33m|[m [33m|[m [31m|[m [35m|[m [33ma55415d[m Fixed and added new social media icons on chapters (#964)
+* [1;32m|[m [33m|[m [33m|[m [31m|[m [35m|[m [33m7996008[m added focus functionality on home page search bar (#962)
+[31m|[m [1;32m|[m[31m_[m[33m|[m[31m_[m[33m|[m[31m/[m [35m/[m
+[31m|[m[31m/[m[1;32m|[m [33m|[m [33m|[m [35m|[m
+[31m|[m [1;32m|[m [33m|[m [33m|[m * [33m107050f[m Update code
+[31m|[m [1;32m|[m [33m|[m [33m|[m *   [33m68a3c6e[m Merge branch 'main' into pr/srinjoy933/968
+[31m|[m [1;32m|[m [33m|[m [33m|[m [1;31m|[m[31m\[m
+[31m|[m [1;32m|[m[31m_[m[33m|[m[31m_[m[33m|[m[31m_[m[1;31m|[m[31m/[m
+[31m|[m[31m/[m[1;32m|[m [33m|[m [33m|[m [1;31m|[m
+* [1;32m|[m [33m|[m [33m|[m [1;31m|[m [33ma7cb6ad[m Add code rabbit config
+* [1;32m|[m [33m|[m [33m|[m [1;31m|[m [33m3e41cd8[m Update dependencies
+[33m|[m [1;32m|[m[33m_[m[33m|[m[33m/[m [1;31m/[m
+[33m|[m[33m/[m[1;32m|[m [33m|[m [1;31m|[m
+[33m|[m [1;32m|[m [33m|[m * [33m727dc98[m Apply labels aApply labels automatically at issue creation #888utomatically at issue creation, issue #888
+[33m|[m [1;32m|[m[33m_[m[33m|[m[33m/[m
+[33m|[m[33m/[m[1;32m|[m [33m|[m
+* [1;32m|[m [33m|[m [33m126b0b1[m[33m ([m[1;33mtag: [m[1;33m0.1.10[m[33m, [m[1;32msrinjoy933/issue[m[33m)[m Update dependencies
+[33m|[m [1;32m|[m[33m/[m
+[33m|[m[33m/[m[1;32m|[m
+[33m|[m [1;32m|[m * [33m8521eea[m[33m ([m[1;31morigin/dependabot/pip/backend/main/ruff-0.9.8[m[33m)[m Bump ruff from 0.9.7 to 0.9.8 in /backend
+[33m|[m [1;32m|[m[33m/[m
+[33m|[m[33m/[m[1;32m|[m
+[33m|[m [1;32m|[m * [33m0fbeede[m[33m ([m[1;31morigin/dependabot/pip/backend/main/openai-1.65.1[m[33m)[m Bump openai from 1.64.0 to 1.65.1 in /backend
+[33m|[m [1;32m|[m[33m/[m
+[33m|[m[33m/[m[1;32m|[m
+[33m|[m [1;32m|[m * [33mea33132[m[33m ([m[1;31morigin/dependabot/npm_and_yarn/frontend/main/eslint-config-prettier-10.0.2[m[33m)[m Bump eslint-config-prettier from 10.0.1 to 10.0.2 in /frontend
+[33m|[m [1;32m|[m[33m/[m
+[33m|[m[33m/[m[1;32m|[m
+[33m|[m [1;32m|[m * [33mce487bf[m[33m ([m[1;31morigin/dependabot/npm_and_yarn/frontend/main/swc/core-1.11.4[m[33m)[m Bump @swc/core from 1.10.18 to 1.11.4 in /frontend
+[33m|[m [1;32m|[m[33m/[m
+[33m|[m[33m/[m[1;32m|[m
+[33m|[m [1;32m|[m * [33md520dfb[m[33m ([m[1;31morigin/dependabot/npm_and_yarn/frontend/main/typescript-eslint-8.25.0[m[33m)[m Bump typescript-eslint from 8.24.1 to 8.25.0 in /frontend
+[33m|[m [1;32m|[m[33m/[m
+[33m|[m[33m/[m[1;32m|[m
+* [1;32m|[m [33m6b35f69[m[33m ([m[1;31morigin/srinjoy933/issue933[m[33m, [m[1;31morigin/srinjoy933/issue919[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Added url for user and issue on project detail page (#941)
+* [1;32m|[m [33m3f167d4[m fix: clickable org and location (#948)
+* [1;32m|[m [33mbdd753c[m Migrate frontend from npm to pnpm (#932)
+* [1;32m|[m [33ma60f6fa[m Clean up e2e directory
+* [1;32m|[m [33m92a8780[m Extraction of common object definitions from chapter/projects schema (#859)
+* [1;32m|[m [33mb807c0b[m fix alignment of issue/release card component (#943)
+* [1;32m|[m [33m8e0582d[m Update dependencies
+* [1;32m|[m [33mb0fcd2d[m Update makefiles
+* [1;32m|[m [33me76c1e2[m Update local allowed CORS origins
+* [1;32m|[m [33ma06bc41[m Update dependencies
+* [1;32m|[m [33m8d045d9[m Disable cache-to for test images
+* [1;32m|[m [33m0418d1f[m Resolve owasp admin N+1
+* [1;32m|[m [33m4407871[m Add docker test images cache
+* [1;32m|[m [33m36af403[m[33m ([m[1;33mtag: [m[1;33m0.1.9[m[33m)[m Added End-to-End Testing (#931)
+* [1;32m|[m [33m0b21982[m Update CI/CD workflows
+* [1;32m|[m [33m06999d4[m Refactor docer files
+* [1;32m|[m [33m2b5048c[m Improved counters format consistency (#939)
+* [1;32m|[m [33m9db2ad6[m 918: Consistent Border Radius (#920)
+* [1;32m|[m [33m83de16c[m Fix local .venv location
+* [1;32m|[m [33m0ad3c35[m Fixed entity detail number formatting (#883)
+* [1;32m|[m [33m0ffd6c9[m Improved readme, added badges and centered Nest logo (#902)
+* [1;32m|[m [33m1e862ba[m Fix/sidebar UI (#921)
+* [1;32m|[m [33m75e05cb[m Update makefile
+* [1;32m|[m [33meb2c70a[m Update dependencies
+* [1;32m|[m [33mc3a4868[m Update Nest dependencies
+* [1;32m|[m [33m4e1fda9[m[33m ([m[1;33mtag: [m[1;33m0.1.8[m[33m)[m Update home and chapters pages
+* [1;32m|[m [33m8787337[m Use multi-stage build for local development
+* [1;32m|[m [33m3086083[m Docker-Multi Stage Build (#770)
+* [1;32m|[m [33mc6ade0b[m Update dependencies
+* [1;32m|[m [33mb917d3c[m Update data/nest.json.gz
+* [1;32m|[m [33m0d2981a[m Update makefiles
+* [1;32m|[m [33mdf9a423[m Refactor: Add capitalize utility function and use it in ProjectDetailsPage (#917)
+* [1;32m|[m [33m0e3e016[m Update makefiles
+* [1;32m|[m [33mbc9b30a[m Update Nest dependencies
+* [1;32m|[m [33m968e558[m Update sync process
+* [1;32m|[m [33me3931d0[m Initialize e2e
+* [1;32m|[m [33mc2d0410[m Update production deploy
+* [1;32m|[m [33m39e0727[m[33m ([m[1;33mtag: [m[1;33m0.1.7[m[33m)[m Update sync process
+* [1;32m|[m [33me3ab8c6[m Added navigation throught keys in suggestion (#914)
+* [1;32m|[m [33ma567284[m Fixed sort button not triggering dropdown (#912)
+* [1;32m|[m [33m47414b1[m Added test-all command (#911)
+* [1;32m|[m [33m9dd1035[m Added main page (#885)
+* [1;32m|[m [33mfb3ff03[m Add snapshot model (#809)
+* [1;32m|[m [33m953f7bb[m Update schema development documentation (#875)
+* [1;32m|[m [33m0c8088e[m[33m ([m[1;33mtag: [m[1;33m0.1.6[m[33m)[m Bump globals from 15.15.0 to 16.0.0 in /frontend (#906)
+* [1;32m|[m [33m07edef7[m Run npm-update
+* [1;32m|[m [33m04e3688[m Run poetry-update
+* [1;32m|[m [33m486d8e5[m Updated sorting icon functionality in SortBy.tsx (#884)
+* [1;32m|[m [33m018d043[m Update NestBot event handlers
+* [1;32m|[m [33me6da9f9[m[33m ([m[1;33mtag: [m[1;33m0.1.5[m[33m)[m fix: new twitter icon (#903)
+* [1;32m|[m [33mdf1dfa1[m added yaml file checks (#891)
+* [1;32m|[m [33m9768ac1[m Fix capitalization in project details block (#866)
+* [1;32m|[m [33mc77bcad[m Run npm-update
+* [1;32m|[m [33m33f0aee[m Run poetry-update
+* [1;32m|[m [33md37c317[m Updated card skeleton and header button (#872)
+* [1;32m|[m [33md9d1450[m[33m ([m[1;33mtag: [m[1;33m0.1.4[m[33m)[m Updated the test cases and Extended the demo Schema (#892)
+* [1;32m|[m [33m5d84f2e[m Fixed repository definition (#894)
+[1;32m|[m[1;32m/[m
+* [33m8d7e9b8[m Update Sentry release tag
+* [33m6624fd8[m Add sponsor command placeholder
+* [33mea527a9[m[33m ([m[1;33mtag: [m[1;33m0.1.3[m[33m)[m Improve chapters page (fix #889)
+* [33m3def48f[m Refactor OWASP schema
+* [33m72bb823[m Optimize project/repository queries
+* [33me5ccf69[m Update code (#882)
+* [33m19e9ad5[m[33m ([m[1;33mtag: [m[1;33m0.1.2[m[33m)[m Fix #876
+* [33m398350b[m Run npm-update
+* [33mdd6debf[m Run poetry-update
+* [33mcbefe2a[m Refactor chapter/project schema
+* [33m8110118[m Add common schema
+* [33m6aafa4d[m 720:Updated the map and map background for better visibility in dark mode (#795)
+* [33m7226836[m Added optional logo attribute to projects/chapters schema (#855)
+* [33m8a7ba5b[m Update NestBot /contribute command
+* [33meb294fd[m Update GSoC 2025 project list
+* [33mdcf18dc[m Update sync data job
+* [33m4b024e1[m[33m ([m[1;33mtag: [m[1;33m0.1.1[m[33m)[m Bump django-filter from 24.3 to 25.1 in /backend (#861)
+* [33m5ceba3b[m Run npm-update
+* [33m5ffd9c9[m Run poetry-update
+* [33m2a680e9[m fix params logic (#857)
+* [33m2642b44[m[33m ([m[1;33mtag: [m[1;33m0.1.0[m[33m)[m Update proxy restart instructions
+* [33mfd8554d[m Update Nest proxy
+* [33mebc41a4[m Update algolia proxy logic
+* [33m059a038[m Introduce release process
+* [33m113208f[m Routing Algolia Requests through the Backend Instead of Directly from frontend  (#810)
+* [33m66d71f9[m Add community attribute to project schema and update tests (#838)
+* [33m1baf6ba[m Update sorting order to descending and enhance Sort By label styling (#849)
+* [33mf19faed[m Add staging deploy
+* [33ma20db06[m Update deployment process
+* [33mac4b648[m Map container is removed (#837)
+* [33m404ad9b[m Implement pluralize functionality (#788)
+* [33m43d4100[m Add feature: Added social media attribute to project schema (#811)
+* [33mae72e95[m fixed robot txt to allow scrapper facebook or twitter (#839)
+* [33mf59d8b2[m fixed image not rendering in the links preview (#828)
+* [33m5de4bfc[m Run poetry-update
+* [33m0885a37[m Run npm-update
+* [33mdd2eebb[m Update NestBot /owasp command
+* [33ma5d397d[m Improve NestBot /users command (#768)
+* [33m0d3a11e[m fixes (#824)
+* [33ma5917cf[m Add mailing list attribute to project schema  (#808)
+* [33mb976fbc[m Added meta data and the useful info (#796)
+* [33mb7d3573[m Feature/contributing formatting update (#822)
+* [33m282defa[m fixed makefile bug  (#823)
+* [33m200c56a[m Fixed Card Skeleton (#817)
+* [33m9aef608[m Fix frontend test warnings (#797)
+* [33m9eeab77[m fix map and improve it using memoisation (#821)
+* [33m9ee64d9[m Run poetry update
+* [33m550e08a[m Run npm update
+* [33m0279f17[m Update NestBot endpoints
+* [33mb7cd66e[m Deploy to production
+* [33m12b723b[m Migrated entity detail page to graphql (#758)
+* [33m8557843[m Update CI/CD
+* [33m4d28104[m Add documentation attribute to project schema and update tests (#814)
+* [33m58090e2[m Run npm update
+* [33m5ead2a2[m Added Issue and Releases Field (#625)
+* [33m88625c4[m Bump @sentry/react from 8.54.0 to 9.0.0 in /frontend (#804)
+* [33m54b15d6[m Update production configuration
+* [33m5faaac9[m Update production deploy process
+* [33m9f624bc[m Update data/nest.json.gz
+* [33m07705ca[m Bump cryptography from 44.0.0 to 44.0.1 in /backend (#807)
