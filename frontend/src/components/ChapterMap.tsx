@@ -128,7 +128,7 @@ const ChapterMap = ({
       } else if (bounds.length > 0) {
         map.fitBounds(bounds)
       }
-    } catch (error) {
+    } catch{
       // Fallback to default view if bounds fitting fails
       map.setView([20, 0], 2)
     }

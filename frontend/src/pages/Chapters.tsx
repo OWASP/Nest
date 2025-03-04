@@ -56,9 +56,6 @@ const ChaptersPage = () => {
               lng: position.coords.longitude,
             })
           },
-          () => {
-            console.error('Error fetching user location')
-          }
         )
       }
     }
