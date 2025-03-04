@@ -29,7 +29,7 @@ describe('Contribute Component', () => {
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
     jest.spyOn(console, 'warn').mockImplementation(() => {})
-    
+
     // Reset mocks before each test
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockContributeData)
     ;(FontAwesomeIcon as jest.Mock).mockReturnValue(<div>Icon</div>)
@@ -62,7 +62,7 @@ describe('Contribute Component', () => {
       expect(screen.getByText('Contribution 1')).toBeInTheDocument()
     })
     expect(screen.getByText('This is a summary of Contribution 1')).toBeInTheDocument()
-    
+
     const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
     expect(readMoreButtons.length).toBeGreaterThan(0)
   })
