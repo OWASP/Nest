@@ -14,7 +14,7 @@ SUMMARY_TRUNCATION_LIMIT = 300
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
