@@ -1,9 +1,9 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockContributeData } from '@unit/data/mockContributeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
 import ContributePage from 'pages/Contribute'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 // Mock dependencies
 jest.mock('api/fetchAlgoliaData', () => ({
