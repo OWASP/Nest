@@ -201,19 +201,25 @@ describe('Contribute Component', () => {
     customRender(<ContributePage />)
 
     // Wait for read more buttons with increased timeout
-    await waitFor(() => {
-      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-      expect(readMoreButtons.length).toBeGreaterThan(0)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+        expect(readMoreButtons.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
     await user.click(readMoreButtons[0])
 
     // More flexible close button check
-    await waitFor(() => {
-      const closeButtons = screen.queryAllByRole('button', { name: /close/i })
-      expect(closeButtons.length).toBeGreaterThan(0)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const closeButtons = screen.queryAllByRole('button', { name: /close/i })
+        expect(closeButtons.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
   })
 
   test('closes modal when onClose is called', async () => {
@@ -227,28 +233,37 @@ describe('Contribute Component', () => {
     customRender(<ContributePage />)
 
     // Wait for read more buttons with increased timeout
-    await waitFor(() => {
-      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-      expect(readMoreButtons.length).toBeGreaterThan(0)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+        expect(readMoreButtons.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
     await user.click(readMoreButtons[0])
 
     // More flexible close button check
-    await waitFor(() => {
-      const closeButtons = screen.queryAllByRole('button', { name: /close/i })
-      expect(closeButtons.length).toBeGreaterThan(0)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const closeButtons = screen.queryAllByRole('button', { name: /close/i })
+        expect(closeButtons.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     const closeButtons = screen.getAllByRole('button', { name: /close/i })
     await user.click(closeButtons[0])
 
     // Verify modal closed or content is still present
-    await waitFor(() => {
-      const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
-      expect(modalTitle).toBeInTheDocument()
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
+        expect(modalTitle).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
   })
 
   test('handles modal state for multiple cards', async () => {
@@ -264,10 +279,13 @@ describe('Contribute Component', () => {
     customRender(<ContributePage />)
 
     // Wait for both cards to be rendered
-    await waitFor(() => {
-      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-      expect(readMoreButtons).toHaveLength(2)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+        expect(readMoreButtons).toHaveLength(2)
+      },
+      { timeout: 3000 }
+    )
 
     // Click first card's Read More button
     const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
@@ -276,35 +294,47 @@ describe('Contribute Component', () => {
     await user.click(readMoreButtons[0])
 
     // Verify first modal is open with more flexible waiting
-    await waitFor(() => {
-      const hintText = screen.queryByText('Hint 1')
-      expect(hintText).toBeInTheDocument()
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const hintText = screen.queryByText('Hint 1')
+        expect(hintText).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
 
     // More flexible button selection
-    await waitFor(() => {
-      const viewIssueButtons = screen.queryAllByRole('button', {
-        name: /view issue/i
-      })
-      expect(viewIssueButtons.length).toBeGreaterThan(0)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const viewIssueButtons = screen.queryAllByRole('button', {
+          name: /view issue/i,
+        })
+        expect(viewIssueButtons.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     const viewIssueButtons = screen.getAllByRole('button', { name: /view issue/i })
     await user.click(viewIssueButtons[0])
 
     // Click close button with more flexibility
-    await waitFor(() => {
-      const closeButtons = screen.queryAllByRole('button', { name: /close/i })
-      expect(closeButtons.length).toBeGreaterThan(0)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const closeButtons = screen.queryAllByRole('button', { name: /close/i })
+        expect(closeButtons.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     const closeButtons = screen.getAllByRole('button', { name: /close/i })
     await user.click(closeButtons[0])
 
     // Verify modal closed or content is still present
-    await waitFor(() => {
-      const modalTitle = screen.queryByText(mockMultipleIssues.hits[0].title)
-      expect(modalTitle).toBeInTheDocument()
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        const modalTitle = screen.queryByText(mockMultipleIssues.hits[0].title)
+        expect(modalTitle).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
   })
 })
