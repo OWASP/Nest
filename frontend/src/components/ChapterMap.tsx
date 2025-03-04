@@ -6,11 +6,26 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
+
+const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c 
+}
+
 const ChapterMap = ({
   geoLocData,
+  userLocation,
   style,
 }: {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
+  userLocation: { lat: number; lng: number } | null
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
@@ -24,27 +39,38 @@ const ChapterMap = ({
     }))
   }, [geoLocData])
 
-  //for reference: https://leafletjs.com/reference.html#map-example
+  const nearestChapters = useMemo(() => {
+    if (!userLocation) return normalizedData
+
+    // Sort chapters by distance from user location
+    return normalizedData
+      .map((chapter) => ({
+        ...chapter,
+        distance: getDistance(userLocation.lat, userLocation.lng, chapter.lat, chapter.lng),
+      }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 5) // Get the 5 nearest chapters
+  }, [userLocation, normalizedData])
+
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
-        worldCopyJump: false, // Prevents the map from wrapping around the world
+        worldCopyJump: false,
         maxBounds: [
-          [-90, -180], // Southwest corner of the map bounds (latitude, longitude)
-          [90, 180], // Northeast corner of the map bounds (latitude, longitude)
+          [-90, -180],
+          [90, 180],
         ],
         maxBoundsViscosity: 1.0,
       }).setView([20, 0], 2)
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        className: 'map-tiles',
       }).addTo(mapRef.current)
     }
 
     const map = mapRef.current
 
-    // Remove previous markers
+    // Clear previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
         map.removeLayer(layer)
@@ -53,19 +79,18 @@ const ChapterMap = ({
 
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
+
     normalizedData.forEach((chapter) => {
       const markerIcon = new L.Icon({
-        iconAnchor: [12, 41], // Anchor point
+        iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
-        iconSize: [25, 41], // Default size for Leaflet markers
+        iconSize: [25, 41],
         iconUrl: '/img/marker-icon.png',
-        popupAnchor: [1, -34], // Popup position relative to marker
-        shadowSize: [41, 41], // Shadow size
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
         shadowUrl: '/img/marker-shadow.png',
       })
-      const marker = L.marker([chapter.lat, chapter.lng], {
-        icon: markerIcon,
-      })
+      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
       const popup = L.popup()
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
@@ -81,12 +106,14 @@ const ChapterMap = ({
 
     map.addLayer(markerClusterGroup)
 
-    if (bounds.length > 0) {
-      map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
+    if (userLocation && nearestChapters.length > 0) {
+      map.fitBounds(nearestChapters.map((chapter) => [chapter.lat, chapter.lng] as [number, number]), { maxZoom: 10 })
+    } else {
+      map.fitBounds(bounds)
     }
-  }, [normalizedData])
+  }, [normalizedData, nearestChapters, userLocation])
 
-  return <div id="chapter-map" className="rounded-lg dark:bg-[#212529]" style={style} />
+  return <div id="chapter-map" style={style} />
 }
 
 export default ChapterMap

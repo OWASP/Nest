@@ -14,6 +14,8 @@ import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  
   const {
     items: chapters,
     isLoaded,
@@ -27,6 +29,7 @@ const ChaptersPage = () => {
     pageTitle: 'OWASP Chapters',
   })
 
+  // Fetch chapter data and user location
   useEffect(() => {
     const fetchData = async () => {
       const searchParams = {
@@ -43,7 +46,25 @@ const ChaptersPage = () => {
       )
       setGeoLocData(data.hits)
     }
+
+    const fetchUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            })
+          },
+          () => {
+            console.error('Error fetching user location')
+          }
+        )
+      }
+    }
+
     fetchData()
+    fetchUserLocation()
   }, [])
 
   const navigate = useNavigate()
@@ -92,6 +113,7 @@ const ChaptersPage = () => {
         {chapters.length > 0 && (
           <ChapterMap
             geoLocData={searchQuery ? chapters : geoLocData}
+            userLocation={userLocation}
             style={{ height: '400px', width: '100%', zIndex: '0' }}
           />
         )}
