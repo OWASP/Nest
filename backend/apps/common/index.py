@@ -24,6 +24,8 @@ EXCLUDED_LOCAL_INDEX_NAMES = (
     "projects_name_desc",
     "projects_stars_count_asc",
     "projects_stars_count_desc",
+    "projects_updated_at_asc",
+    "projects_updated_at_desc",
 )
 IS_LOCAL_BUILD = settings.ENVIRONMENT == "Local"
 LOCAL_INDEX_LIMIT = 1000

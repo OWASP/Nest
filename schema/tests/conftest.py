@@ -32,6 +32,12 @@ def project_schema():
         yield json.load(file)
 
 
+@pytest.fixture()
+def committee_schema():
+    with Path(schema_dir / "committee.json").open() as file:
+        yield json.load(file)
+
+
 # Base functions.
 def common_negative_test(common_schema, attribute_name, file_path, error_message):
     assert (

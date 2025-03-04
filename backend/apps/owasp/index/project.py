@@ -88,6 +88,8 @@ class ProjectIndex(IndexBase):
             "name_desc": ["desc(idx_name)"],
             "stars_count_asc": ["asc(idx_stars_count)"],
             "stars_count_desc": ["desc(idx_stars_count)"],
+            "updated_at_asc": ["asc(idx_updated_at)"],
+            "updated_at_desc": ["desc(idx_updated_at)"],
         }
 
         IndexBase.configure_replicas("projects", replicas)

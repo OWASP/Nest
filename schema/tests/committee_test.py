@@ -1,4 +1,4 @@
-"""Chapter schema tests."""
+"""Committee schema tests."""
 
 from pathlib import Path
 
@@ -12,9 +12,6 @@ from utils.schema_validators import validate_data
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("blog_empty.yaml", "'' is not a 'uri'"),
-        ("blog_invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
-        ("blog_null.yaml", "None is not a 'uri'"),
         ("community_empty.yaml", "[] should be non-empty"),
         (
             "community_non_unique.yaml",
@@ -23,23 +20,22 @@ from utils.schema_validators import validate_data
             "has non-unique elements",
         ),
         ("community_null.yaml", "None is not of type 'array'"),
-        ("country_empty.yaml", "'' should be non-empty"),
-        ("country_null.yaml", "None is not of type 'string'"),
-        ("country_undefined.yaml", "'country' is a required property"),
+        ("description_null.yaml", "None is not of type 'string'"),
+        ("description_undefined.yaml", "'description' is a required property"),
         ("events_empty.yaml", "[] should be non-empty"),
+        ("events_invalid.yaml", "'xyz-abc' is not a 'uri'"),
         (
             "events_non_unique.yaml",
             "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
         ),
         ("events_null.yaml", "None is not of type 'array'"),
-        ("leaders_empty.yaml", "[] is too short"),
-        (
-            "leaders_non_unique.yaml",
-            "[{'github': 'leader1'}, {'github': 'leader1'}] has non-unique elements",
-        ),
-        ("leaders_null.yaml", "None is not of type 'array'"),
-        ("leaders_undefined.yaml", "'leaders' is a required property"),
+        ("group_mail_empty.yaml", "'' is not a 'email'"),
+        ("group_mail_null.yaml", "None is not a 'email'"),
+        ("members_empty.yaml", "[] is too short"),
+        ("members_null.yaml", "None is not of type 'array'"),
+        ("members_undefined.yaml", "'members' is a required property"),
         ("logo_empty.yaml", "[] should be non-empty"),
+        ("logo_null.yaml", "None is not of type 'array'"),
         (
             "logo_non_unique.yaml",
             "[{'small': 'https://example.com/smallLogo.png', "
@@ -49,54 +45,45 @@ from utils.schema_validators import validate_data
             "'medium': 'https://example.com/mediumLogo.png', "
             "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
         ),
-        ("logo_null.yaml", "None is not of type 'array'"),
-        ("meetup_group_empty.yaml", "'' should be non-empty"),
-        ("meetup_group_null.yaml", "None is not of type 'string'"),
+        ("meeting_minutes_null.yaml", "None is not of type 'array'"),
+        ("meeting_minutes_invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("name_empty.yaml", "'' is too short"),
-        ("name_null.yaml", "None is not of type 'string'"),
         ("name_undefined.yaml", "'name' is a required property"),
-        ("region_empty.yaml", "'' should be non-empty"),
-        ("region_null.yaml", "None is not of type 'string'"),
+        ("resources_invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("resources_null.yaml", "None is not of type 'array'"),
+        ("scope_null.yaml", "None is not of type 'string'"),
+        ("scope_invalid.yaml", "'scope' is a required property"),
         ("social_media_empty.yaml", "[] should be non-empty"),
-        (
-            "social_media_non_unique.yaml",
-            "[{'platform': 'youtube', 'url': 'https://youtube.com/channel/123'}, "
-            "{'platform': 'youtube', 'url': 'https://youtube.com/channel/123'}] "
-            "has non-unique elements",
-        ),
+        ("social_media_invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("social_media_null.yaml", "None is not of type 'array'"),
         ("sponsors_empty.yaml", "[] should be non-empty"),
-        (
-            "sponsors_non_unique.yaml",
-            "[{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}, "
-            "{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}] has non-unique elements",
-        ),
+        ("sponsors_invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("sponsors_null.yaml", "None is not of type 'array'"),
         ("tags_empty.yaml", "[] is too short"),
-        ("tags_non_unique.yaml", "['chapter-tag-1', 'chapter-tag-1'] is too short"),
         ("tags_null.yaml", "None is not of type 'array'"),
         ("tags_undefined.yaml", "'tags' is a required property"),
-        ("website_empty.yaml", "['example-tag-1'] is too short"),
-        ("website_null.yaml", "None is not of type 'string'"),
+        ("website_empty.yaml", "'' is not a 'uri'"),
+        ("website_invalid_url.yaml", "'https://xyz' is not a 'uri'"),
+        ("website_null.yaml", "None is not a 'uri'"),
     ],
 )
-def test_negative(chapter_schema, file_path, error_message):
+def test_negative(committee_schema, file_path, error_message):
     assert (
         validate_data(
-            chapter_schema,
+            committee_schema,
             yaml.safe_load(
-                Path(tests_data_dir / "chapter/negative" / file_path).read_text(),
+                Path(tests_data_dir / "committee/negative" / file_path).read_text(),
             ),
         )
         == error_message
     )
 
 
-def test_positive(chapter_schema):
-    for file_path in Path(tests_data_dir / "chapter/positive").rglob("*.yaml"):
+def test_positive(committee_schema):
+    for file_path in Path(tests_data_dir / "committee/positive").rglob("*.yaml"):
         assert (
             validate_data(
-                chapter_schema,
+                committee_schema,
                 yaml.safe_load(
                     file_path.read_text(),
                 ),
