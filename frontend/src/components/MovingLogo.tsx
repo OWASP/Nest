@@ -16,7 +16,6 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
     if (scrollerRef.current) {
       const scrollContainer = scrollerRef.current
 
-      // Duplicate the sponsors to create a seamless loop
       scrollContainer.innerHTML += scrollContainer.innerHTML
     }
   }, [sponsors])
@@ -36,7 +35,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
             <div className="relative mb-4 flex h-16 w-full items-center justify-center">
               {sponsor.imageUrl ? (
                 <img
-                  src={sponsor.imageUrl || `${sponsor.name} logo`}
+                  src={sponsor.imageUrl}
                   alt={`${sponsor.name} logo`}
                   className="h-full w-full object-cover"
                   loading="lazy"
