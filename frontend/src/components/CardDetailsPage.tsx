@@ -47,28 +47,42 @@ const DetailsCard = ({
           </SecondaryCard>
         )}
 
-          {type === 'user' && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
-              <div className="mb-8 rounded-lg bg-gray-100 p-2 shadow-md dark:bg-gray-800 md:col-span-1 gap-2">
-                <img
-                className="h-50 w-50 rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
-                src={avatarUrl}
-                alt={name}
-                />
-              </div>
-              <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
-                <div id="heat-map" className="rounded-2xl dark:bg-[#212529] leaflet-container">
-                  <HeatMap/>
-                </div>
 
-              </div>
-            </div>
+        <div className="grid grid-cols-7 gap-6 md:grid-cols-7">
+          <div className="col-span-2">
+            {type === 'user' && (
+              <div className="mb-8 rounded-lg bg-gray-100 p-2 shadow-md dark:bg-gray-800 md:col-span-1">
+                    <img
+                    className="h-[300px] w-[300px] rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
+                    src={avatarUrl}
+                    alt={name}
+                    />
+                  </div>
+
+            )}
+          </div>
+
+          <div className="col-span-5">
+            {type === 'user' && (
+              <SecondaryCard
+                  title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+                  className={'md:col-span-5 gap-2'}
+              >
+                {details && details.map((detail, index) => (
+                  <div key={index}>
+                    <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
+                  </div>
+                  ))}
+              </SecondaryCard>
           )}
+          </div>
+        </div>
 
 
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
-          <SecondaryCard
+          {(type !== 'user') && (
+            <SecondaryCard
             title={`${type[0].toUpperCase() + type.slice(1)} Details`}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
@@ -82,6 +96,15 @@ const DetailsCard = ({
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
+          )}
+          {(type === 'user') && (
+            <HeatMap className={'md:col-span-5 gap-2'}
+            >
+            </HeatMap>
+          )}
+
+
+
           {(type === 'project' || type === 'repository' || type === 'committee' || type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (

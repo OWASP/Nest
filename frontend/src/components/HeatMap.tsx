@@ -4,7 +4,11 @@ import { useParams } from 'react-router-dom';
 
 
 const HeatMap = ({
-}) => {
+  className= '',
+} : {
+  className?: string
+}
+) => {
 
   const { userKey } = useParams();
   const [data, setData] = useState<HeatmapData | null>(null);
@@ -37,7 +41,7 @@ const HeatMap = ({
 
 
   return (
-    <div className="bg-#10151c relative h-32 items-center justify-center">
+    <div className={`bg-#10151c relative h-32 items-center justify-center ${className}`}>
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
           {privateContributor ? (
             <div className="h-32 bg-owasp-blue"></div>
