@@ -2,6 +2,7 @@
 
 from apps.github.models.organization import Organization
 from apps.github.models.repository_contributor import RepositoryContributor
+from django.db.models import Sum
 
 ISSUES_LIMIT = 6
 RELEASES_LIMIT = 6
@@ -110,10 +111,8 @@ class UserIndexMixin:
     @property
     def idx_contributions_count(self):
         """Return contributions count for indexing."""
-        contributions_counts = [
-            rc.contributions_count for rc in RepositoryContributor.objects.filter(user=self)
-        ]
-        return sum(contributions_counts)
+        counts =  RepositoryContributor.objects.filter(user=self).aggregate(total_contributions=Sum('contributions_count'))['total_contributions']
+        return counts if counts else 0
 
     @property
     def idx_issues(self):
