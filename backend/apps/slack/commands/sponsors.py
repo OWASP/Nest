@@ -2,10 +2,11 @@
 
 from django.conf import settings
 
+from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
-from apps.slack.common.handlers.sponsor import get_blocks
-from apps.slack.common.presentation import EntityPresentation
-from apps.slack.utils import get_text
+from apps.slack.blocks import markdown
+from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.utils import get_sponsors_data, get_text
 
 COMMAND = "/sponsors"
 
@@ -16,23 +17,35 @@ def sponsors_handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    search_query = command["text"].strip()
-    blocks = get_blocks(
-        search_query=search_query,
-        limit=10,
-        presentation=EntityPresentation(
-            include_feedback=True,
-            include_metadata=True,
-            include_pagination=False,
-            include_timestamps=True,
-            name_truncation=80,
-            summary_truncation=300,
-        ),
-    )
+    sponsors = get_sponsors_data()
+    if not sponsors:
+        client.chat_postMessage(
+            channel=command["user_id"], text="Failed to get OWASP sponsor data."
+        )
+        return
 
-    fallback_text = "OWASP Sponsors Information"
-    if search_query:
-        fallback_text += f" - Search results for: {search_query}"
+    blocks = []
+    blocks.append(markdown("*OWASP Sponsors:*"))
+
+    for idx, sponsor in enumerate(sponsors, start=1):
+        if sponsor.url:
+            block_text = f"*{idx}. <{sponsor.url}|{sponsor.name}>*{NL}"
+        else:
+            block_text = f"*{idx}. {sponsor.name}*{NL}"
+
+        block_text += f"Member Type: {sponsor.member_type}{NL}"
+        block_text += f"{sponsor.description}{NL}"
+
+        blocks.append(markdown(block_text))
+
+    blocks.append({"type": "divider"})
+    blocks.append(
+        markdown(
+            f"* Please visit the <{OWASP_WEBSITE_URL}/supporters|OWASP supporters>"
+            f" for more information about the sponsors*{NL}"
+            f"{FEEDBACK_CHANNEL_MESSAGE}"
+        )
+    )
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(

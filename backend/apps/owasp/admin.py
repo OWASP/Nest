@@ -10,7 +10,7 @@ from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 from apps.owasp.models.snapshot import Snapshot
-from apps.owasp.models.sponsor import Sponsor
+from apps.owasp.models.sponsors import Sponsor
 
 
 class GenericEntityAdminMixin:

@@ -1,9 +1,8 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from backend.apps.owasp.models.sponsors import Sponsor
 from django.core.exceptions import ValidationError
-
-from apps.owasp.models.sponsor import Sponsor
 
 
 class TestSponsorModel:
