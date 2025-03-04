@@ -91,6 +91,27 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
+  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+    let mentionMatch = word.match(/^@([\w-.]+)$/)
+    if (mentionMatch) {
+      // Removed dot at the end of the mention
+      if (mentionMatch[0].endsWith('.')) mentionMatch[0] = mentionMatch[0].slice(0, -1)
+      return (
+        <Link
+          key={index}
+          href={`https://github.com/${mentionMatch[1]}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          {mentionMatch[0]}
+          <span> </span>
+        </Link>
+      )
+    }
+    return <span key={index}>{word} </span>
+  })
+
   return (
     <MetadataManager pageTitle={user?.name || user?.login} description={user?.bio} url={user.url}>
       <div className="mt-24 min-h-screen w-full p-4">
@@ -150,7 +171,9 @@ const UserDetailsPage: React.FC = () => {
               </div>
             </div>
             <div className="px-6 py-6">
-              {user.bio && <p className="text-lg text-gray-700 dark:text-gray-300">{user.bio}</p>}
+              {user.bio && (
+                <p className="text-lg text-gray-700 dark:text-gray-300">{formattedBio}</p>
+              )}
               <div className="mt-4 space-y-3">
                 {user.company && (
                   <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
@@ -229,7 +252,6 @@ const UserDetailsPage: React.FC = () => {
                   </div>
                 </div>
               )}
-
               {user.releases && user.releases.length > 0 && (
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
