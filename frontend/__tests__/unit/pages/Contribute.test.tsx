@@ -41,7 +41,7 @@ describe('Contribute Component', () => {
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
     jest.spyOn(console, 'warn').mockImplementation(() => {})
-    
+
     // Reset mocks before each test
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockContributeData)
     ;(FontAwesomeIcon as jest.Mock).mockReturnValue(<div>Icon</div>)
@@ -74,7 +74,7 @@ describe('Contribute Component', () => {
       expect(screen.getByText('Contribution 1')).toBeInTheDocument()
     })
     expect(screen.getByText('This is a summary of Contribution 1')).toBeInTheDocument()
-    
+
     const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
     expect(readMoreButtons.length).toBeGreaterThan(0)
   })
@@ -271,7 +271,7 @@ describe('Contribute Component', () => {
 
     // Click first card's Read More button
     const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-    
+
     // Use user-event for more reliable interactions
     await user.click(readMoreButtons[0])
 
@@ -283,8 +283,8 @@ describe('Contribute Component', () => {
 
     // More flexible button selection
     await waitFor(() => {
-      const viewIssueButtons = screen.queryAllByRole('button', { 
-        name: /view issue/i 
+      const viewIssueButtons = screen.queryAllByRole('button', {
+        name: /view issue/i
       })
       expect(viewIssueButtons.length).toBeGreaterThan(0)
     }, { timeout: 3000 })
