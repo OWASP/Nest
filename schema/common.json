@@ -52,38 +52,36 @@
       "type": "object"
     },
 
-        "person": {
-            "additionalProperties": false,
-            "description": "Person",
-            "properties": {
-                "email": {
-                    "description": "E-mail address",
-                    "format": "email",
-                    "type": "string"
-                },
-                "github": {
-                    "description": "GitHub username",
-                    "pattern": "^[a-zA-Z0-9-]{1,39}$",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "Full name",
-                    "type": "string",
-                    "minLength": 3
-                },
-                "slack": {
-                    "description": "Slack username",
-                    "pattern": "^[a-zA-Z0-9._-]{1,21}$",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "github"
-            ],
-            "title": "Person",
-            "type": "object"
-
+    "person": {
+      "additionalProperties": false,
+      "description": "Person",
+      "properties": {
+        "email": {
+          "description": "E-mail address",
+          "format": "email",
+          "minLength": 5,
+          "type": "string"
         },
+        "github": {
+          "description": "GitHub username",
+          "pattern": "^[a-zA-Z0-9-]{1,39}$",
+          "type": "string"
+        },
+        "name": {
+          "description": "Full name",
+          "minLength": 5,
+          "type": "string"
+        },
+        "slack": {
+          "description": "Slack username",
+          "pattern": "^[a-zA-Z0-9._-]{1,21}$",
+          "type": "string"
+        }
+      },
+      "required": ["github"],
+      "title": "Person",
+      "type": "object"
+    },
 
     "repository": {
       "additionalProperties": false,
