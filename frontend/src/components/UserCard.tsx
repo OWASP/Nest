@@ -28,7 +28,7 @@ const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
             {name}
           </h3>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-          <span style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>{company || ''}</span>
+            <span style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>{company || ''}</span>
           </p>
         </div>
       </div>
