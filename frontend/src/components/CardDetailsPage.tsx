@@ -12,6 +12,7 @@ import TitleWithIcon from 'components/TitleWithIcon'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
 
+
 const DetailsCard = ({
   title,
   is_active = true,
