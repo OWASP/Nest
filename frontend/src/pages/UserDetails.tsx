@@ -54,10 +54,10 @@ const UserDetailsPage = () => {
     )
 
   const UserDetails = [
-    { label: 'Summary', value: user.bio },
+    { label: 'Summary', value: user?.bio || '' },
     { label: 'Joined', value: formatDate(user.createdAt) },
-    { label: 'Company', value: user.company },
-    { label: 'Email', value: user.email },
+    { label: 'Company', value: user?.company || '' },
+    { label: 'Email', value: user?.email || ''},
   ].filter((detail) => detail.value)
 
   const userStats = [
