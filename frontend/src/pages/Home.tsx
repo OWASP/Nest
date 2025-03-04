@@ -24,6 +24,7 @@ import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
+import TitleWithIcon from 'components/TitleWithIcon'
 import TopContributors from 'components/ToggleContributors'
 
 export default function Home() {
@@ -130,17 +131,11 @@ export default function Home() {
       <div className="grid gap-4 md:grid-cols-2">
         <SecondaryCard
           title={
-            <div id="new-chapters" className="relative scroll-mt-20">
-              <div className="items-top group relative flex">
-                New Chapters
-                <a
-                  href="#new-chapters"
-                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                >
-                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                </a>
-              </div>
-            </div>
+            <TitleWithIcon
+              href="#new-chapters"
+              icon={faLink}
+              title="New Chapters"
+            />
           }
         >
           <div className="space-y-4">
@@ -167,17 +162,11 @@ export default function Home() {
         </SecondaryCard>
         <SecondaryCard
           title={
-            <div id="new-Projects" className="relative scroll-mt-20">
-              <div className="items-top group relative flex">
-                New Projects
-                <a
-                  href="#new-Projects"
-                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                >
-                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                </a>
-              </div>
-            </div>
+            <TitleWithIcon
+              href="#new-Projects"
+              icon={faLink}
+              title="New Projects"
+            />
           }
         >
           <div className="space-y-4">
@@ -208,18 +197,11 @@ export default function Home() {
       </div>
       <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
       <div className="mb-20">
-        <div id="chapters-nearby" className="relative scroll-mt-20">
-          <div className="items-top group relative flex">
-            <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Nearby</h2>
-            <a
-              href="#chapters-nearby"
-              className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            >
-              <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-            </a>
-          </div>
-        </div>
-
+        <TitleWithIcon
+          href="#chapters-nearby"
+          icon={faLink}
+          title="OWASP Chapters Nearby"
+        />
         <ChapterMap
           geoLocData={geoLocData}
           style={{ height: '400px', width: '100%', zIndex: '0' }}
@@ -228,17 +210,11 @@ export default function Home() {
       <div className="grid gap-4 md:grid-cols-2">
         <ItemCardList
           title={
-            <div id="recent-issues" className="relative scroll-mt-20">
-              <div className="group relative flex items-center">
-                Recent Issues
-                <a
-                  href="#recent-issues"
-                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                >
-                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                </a>
-              </div>
-            </div>
+            <TitleWithIcon
+              href="#recent-issues"
+              icon={faLink}
+              title="Recent Issues"
+            />
           }
           data={data.recentIssues}
           renderDetails={(item) => (
@@ -252,17 +228,11 @@ export default function Home() {
         />
         <ItemCardList
           title={
-            <div id="recent-releases" className="relative scroll-mt-20">
-              <div className="group relative flex items-center">
-                Recent Releases
-                <a
-                  href="#recent-releases"
-                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                >
-                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                </a>
-              </div>
-            </div>
+            <TitleWithIcon
+              href="#recent-releases"
+              icon={faLink}
+              title="Recent Releases"
+            />
           }
           data={data.recentReleases}
           renderDetails={(item) => (

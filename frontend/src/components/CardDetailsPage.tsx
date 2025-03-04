@@ -10,6 +10,7 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
+import TitleWithIcon from 'components/TitleWithIcon'
 
 const DetailsCard = ({
   title,
@@ -40,17 +41,11 @@ const DetailsCard = ({
         )}
         <SecondaryCard
           title={
-            <div id="summary" className="relative scroll-mt-20">
-              <div className="items-top group relative flex">
-                Summary
-                <a
-                  href="#summary"
-                  className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                >
-                  <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                </a>
-              </div>
-            </div>
+            <TitleWithIcon
+              href="#summary"
+              icon={faLink}
+              title="Summary"
+            />
           }
         >
           <p>{summary}</p>
@@ -59,17 +54,11 @@ const DetailsCard = ({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             title={
-              <div id={`${type}-details`} className="relative scroll-mt-20">
-                <div className="group relative flex items-center">
-                  {`${type[0].toUpperCase() + type.slice(1)} Details`}
-                  <a
-                    href={`#${type}-details`}
-                    className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  >
-                    <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                  </a>
-                </div>
-              </div>
+              <TitleWithIcon
+                href={`#${type}-details`}
+                icon={faLink}
+                title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+              />
             }
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
@@ -86,17 +75,11 @@ const DetailsCard = ({
           {(type === 'project' || type === 'repository' || type === 'committee') && (
             <SecondaryCard
               title={
-                <div id="statistics" className="relative scroll-mt-20">
-                  <div className="items-top group relative flex">
-                    Statistics
-                    <a
-                      href="#statistics"
-                      className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                    >
-                      <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                    </a>
-                  </div>
-                </div>
+                <TitleWithIcon
+                  href="#statistics"
+                  icon={faLink}
+                  title="Statistics"
+                />
               }
               className="md:col-span-2"
             >
@@ -129,17 +112,11 @@ const DetailsCard = ({
               <ToggleableList
                 items={languages}
                 label={
-                  <div id="languages" className="relative scroll-mt-20">
-                    <div className="group relative flex items-center">
-                      Languages
-                      <a
-                        href="#languages"
-                        className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                      >
-                        <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                      </a>
-                    </div>
-                  </div>
+                  <TitleWithIcon
+                    href="#languages"
+                    icon={faLink}
+                    title="Languages"
+                  />
                 }
               />
             )}
@@ -147,17 +124,11 @@ const DetailsCard = ({
               <ToggleableList
                 items={topics}
                 label={
-                  <div id="topics" className="relative scroll-mt-20">
-                    <div className="group relative flex items-center">
-                      Topics
-                      <a
-                        href="#topics"
-                        className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                      >
-                        <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                      </a>
-                    </div>
-                  </div>
+                  <TitleWithIcon
+                    href="#topics"
+                    icon={faLink}
+                    title="Topics"
+                  />
                 }
               />
             )}
@@ -170,17 +141,11 @@ const DetailsCard = ({
           <>
             <ItemCardList
               title={
-                <div id="recent-issues" className="relative scroll-mt-20">
-                  <div className="group relative flex items-center">
-                    Recent Issues
-                    <a
-                      href="#recent-issues"
-                      className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                    >
-                      <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                    </a>
-                  </div>
-                </div>
+                <TitleWithIcon
+                  href="#recent-issues"
+                  icon={faLink}
+                  title="Recent Issues"
+                />
               }
               data={recentIssues}
               renderDetails={(item) => (
@@ -194,17 +159,11 @@ const DetailsCard = ({
             />
             <ItemCardList
               title={
-                <div id="recent-releases" className="relative scroll-mt-20">
-                  <div className="group relative flex items-center">
-                    Recent Releases
-                    <a
-                      href="#recent-releases"
-                      className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                    >
-                      <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                    </a>
-                  </div>
-                </div>
+                <TitleWithIcon
+                  href="#recent-releases"
+                  icon={faLink}
+                  title="Recent Releases"
+                />
               }
               data={recentReleases}
               renderDetails={(item) => (
@@ -221,17 +180,11 @@ const DetailsCard = ({
         {type === 'project' && repositories.length > 0 && (
           <SecondaryCard
             title={
-              <div id="repositories" className="relative scroll-mt-20">
-                <div className="items-top group relative flex">
-                  Repositories
-                  <a
-                    href="#repositories"
-                    className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  >
-                    <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
-                  </a>
-                </div>
-              </div>
+              <TitleWithIcon
+                href="#repositories"
+                icon={faLink}
+                title="Repositories"
+              />
             }
             className="mt-6"
           >
