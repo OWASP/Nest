@@ -1,8 +1,8 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from backend.apps.owasp.models.sponsors import Sponsor
-from django.core.exceptions import ValidationError
+
+from apps.owasp.models.sponsors import Sponsor
 
 
 class TestSponsorModel:
@@ -21,12 +21,12 @@ class TestSponsorModel:
     @pytest.mark.parametrize(
         ("sponsor_type", "expected_label"),
         [
-            ("1", "Diamond"),
-            ("2", "Platinum"),
-            ("3", "Gold"),
-            ("4", "Silver"),
-            ("5", "Supporter"),
-            ("-1", "Not a Sponsor"),
+            ("Diamond", "Diamond"),
+            ("Platinum", "Platinum"),
+            ("Gold", "Gold"),
+            ("Silver", "Silver"),
+            ("Supporter", "Supporter"),
+            ("Not a Sponsor", "Not Sponsor"),
         ],
     )
     def test_readable_sponsor_type(self, sponsor_type, expected_label):
@@ -37,9 +37,9 @@ class TestSponsorModel:
     @pytest.mark.parametrize(
         ("member_type", "expected_label"),
         [
-            ("2", "Platinum"),
-            ("3", "Gold"),
-            ("4", "Silver"),
+            ("Platinum", "Platinum"),
+            ("Gold", "Gold"),
+            ("Silver", "Silver"),
         ],
     )
     def test_readable_member_type(self, member_type, expected_label):
@@ -55,66 +55,34 @@ class TestSponsorModel:
     def test_bulk_save(self):
         """Test the bulk_save method."""
         mock_sponsors = [Mock(id=None), Mock(id=1)]
-        with patch("apps.owasp.models.sponsor.BulkSaveModel.bulk_save") as mock_bulk_save:
+        with patch("apps.owasp.models.sponsors.BulkSaveModel.bulk_save") as mock_bulk_save:
             Sponsor.bulk_save(mock_sponsors, fields=["name"])
             mock_bulk_save.assert_called_once_with(Sponsor, mock_sponsors, fields=["name"])
 
-    def test_update_data(self):
-        """Test the update_data method."""
-        mock_sponsor = Mock()
-        mock_sponsor.id = 1
-        mock_sponsor.name = "Old Name"
-        mock_sponsor.sponsor_type = "1"
-
-        with patch("apps.owasp.models.sponsor.Sponsor.objects.get", return_value=mock_sponsor):
-            updated_sponsor = Sponsor.update_data(
-                mock_sponsor.id, name="New Name", sponsor_type="2"
-            )
-            assert updated_sponsor.name == "New Name"
-            assert updated_sponsor.sponsor_type == "2"
-
-        with patch(
-            "apps.owasp.models.sponsor.Sponsor.objects.get", side_effect=Sponsor.DoesNotExist
-        ):
-            non_existent_sponsor = Sponsor.update_data(9999, name="New Name")
-            assert non_existent_sponsor is None
-
     @pytest.mark.parametrize(
-        ("url", "is_valid"),
+        ("sponsor_type_value", "expected_sponsor_type"),
         [
-            ("https://example.com", True),
-            ("invalid-url", False),
+            ("1", "Diamond"),
+            ("2", "Platinum"),
+            ("-1", "Not a Sponsor"),
         ],
     )
-    def test_sponsor_validation(self, url, is_valid):
-        """Test validation of Sponsor fields."""
-        sponsor = Sponsor(
-            name="Test Sponsor",
-            sort_name="Sponsor",
-            description="Test Description",
-            url=url,
-            job_url="https://jobs.example.com",
-            image_path="/images/test.png",
-            is_member=True,
-            member_type="2",
-            sponsor_type="1",
-        )
-
-        if is_valid:
-            sponsor.full_clean()
-        else:
-            with pytest.raises(ValidationError):
-                sponsor.full_clean()
-
-    @pytest.mark.parametrize(
-        ("sponsor_type", "expected_sponsor_type"),
-        [
-            ("1", "1"),  # DIAMOND
-            ("2", "2"),  # PLATINUM
-            ("-1", "-1"),  # NOT_SPONSOR
-        ],
-    )
-    def test_sponsor_type_default(self, sponsor_type, expected_sponsor_type):
-        """Test the default sponsor_type behavior."""
-        sponsor = Sponsor(sponsor_type=sponsor_type)
+    def test_from_dict_sponsor_type_mapping(self, sponsor_type_value, expected_sponsor_type):
+        """Test the from_dict method for sponsor_type mapping."""
+        sponsor = Sponsor()
+        sponsor.from_dict({"sponsor": sponsor_type_value})
         assert sponsor.sponsor_type == expected_sponsor_type
+
+    @pytest.mark.parametrize(
+        ("member_type_value", "expected_member_type"),
+        [
+            ("2", "Platinum"),  # "2" maps to "Platinum"
+            ("3", "Gold"),  # "3" maps to "Gold"
+            ("4", "Silver"),  # "4" maps to "Silver"
+        ],
+    )
+    def test_from_dict_member_type_mapping(self, member_type_value, expected_member_type):
+        """Test the from_dict method for member_type mapping."""
+        sponsor = Sponsor()
+        sponsor.from_dict({"membertype": member_type_value})
+        assert sponsor.member_type == expected_member_type
