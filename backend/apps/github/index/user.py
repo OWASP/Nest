@@ -16,6 +16,7 @@ class UserIndex(IndexBase):
         "idx_bio",
         "idx_company",
         "idx_contributions",
+        "idx_contributions_count",
         "idx_created_at",
         "idx_email",
         "idx_followers_count",
@@ -40,6 +41,7 @@ class UserIndex(IndexBase):
         "attributeForDistinct": "idx_login",
         "minProximity": 4,
         "customRanking": [
+            "desc(idx_contributions_count)",
             "desc(idx_created_at)",
             "desc(idx_followers_count)",
         ],
