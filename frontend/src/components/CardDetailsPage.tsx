@@ -8,9 +8,9 @@ import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
+import TitleWithIcon from 'components/TitleWithIcon'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
-import TitleWithIcon from 'components/TitleWithIcon'
 
 const DetailsCard = ({
   title,
