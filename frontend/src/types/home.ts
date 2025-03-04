@@ -23,10 +23,16 @@ export type MainPageData = {
     repositoriesCount: number
     type: string
   }[]
+  sponsors: SponsorType[]
   statsOverview: {
     activeChaptersStats: number
     activeProjectsStats: number
     contributorsStats: number
     countriesStats: number
   }
+}
+
+export type SponsorType = {
+  imageUrl: string
+  name: string
 }

@@ -205,7 +205,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             )}
           </>
         ) : (
-          <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          <div className="animate-pulse h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>
         )}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">

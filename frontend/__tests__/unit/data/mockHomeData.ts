@@ -9,6 +9,12 @@ export const mockGraphQLData = {
       repositoriesCount: 1,
     },
   ],
+  sponsors: [
+    {
+      name: 'OWASP Foundation',
+      imageUrl: 'https://example.com/owasp-foundation.png',
+    },
+  ],
   recentChapters: [
     {
       name: 'OWASP Sivagangai',

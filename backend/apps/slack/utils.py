@@ -85,13 +85,27 @@ def get_staff_data(timeout=30):
 
 
 def get_events_data():
-    """Get raw events data via GraphQL."""
+    """Get raw events data via Database."""
     from apps.owasp.models.event import Event
 
     try:
         return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
     except Exception as e:
         logger.exception("Failed to fetch events data via database", extra={"error": str(e)})
+        return None
+
+
+MAX_SPONSORS = 10
+
+
+def get_sponsors_data():
+    """Get raw sponsors data via Database."""
+    from apps.owasp.models.sponsors import Sponsor
+
+    try:
+        return Sponsor.objects.all()[:MAX_SPONSORS]
+    except Exception as e:
+        logger.exception("Failed to fetch sponsors data via database", extra={"error": str(e)})
         return None
 
 

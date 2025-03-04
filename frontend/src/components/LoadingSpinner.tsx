@@ -8,7 +8,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ imageUrl }) => {
   const dark = imageUrl.replace('white', 'black')
   return (
     <div
-      className="relative h-16 w-16 animate-spin rounded-full border-4 border-[#98AFC7] dark:border-white"
+      className="animate-spin relative h-16 w-16 rounded-full border-4 border-[#98AFC7] dark:border-white"
       style={{
         borderTopColor: 'transparent',
       }}
