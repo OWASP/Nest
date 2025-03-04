@@ -21,6 +21,7 @@ import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MovingLogos from 'components/MovingLogo'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
@@ -215,7 +216,12 @@ export default function Home() {
           )}
         />
       </div>
-      <div className="grid gap-6 md:grid-cols-4">
+
+      <SecondaryCard>
+        <MovingLogos sponsors={data.sponsors} />
+      </SecondaryCard>
+
+      <div className="mt-10 grid gap-6 md:grid-cols-4">
         {counterData.map((stat, index) => (
           <SecondaryCard key={index} className="text-center">
             <div className="mb-2 text-3xl font-bold text-blue-400">

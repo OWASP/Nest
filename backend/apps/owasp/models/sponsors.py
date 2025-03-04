@@ -5,6 +5,7 @@ from django.db import models
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import slugify
 from apps.github.utils import normalize_url
+from apps.owasp.constants import OWASP_ORGANIZATION_DATA_URL
 
 
 class Sponsor(BulkSaveModel, TimestampedModel):
@@ -38,7 +39,7 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     # URLs and images
     url = models.URLField(verbose_name="Website URL", blank=True)
     job_url = models.URLField(verbose_name="Job URL", blank=True)
-    image_path = models.CharField(verbose_name="Image Path", max_length=255, blank=True)
+    image_url = models.CharField(verbose_name="Image Path", max_length=255, blank=True)
 
     # Status fields
     is_member = models.BooleanField(verbose_name="Is Corporate Sponsor", default=False)
@@ -61,19 +62,14 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         return f"{self.name}"
 
     @property
-    def readable_sponsor_type(self):
-        """Get human-readable sponsor type."""
-        return self.SponsorType(str(self.sponsor_type)).label
-
-    @property
     def readable_member_type(self):
         """Get human-readable member type."""
         return self.MemberType(str(self.member_type)).label
 
     @property
-    def is_indexable(self):
-        """Determine if the sponsor should be indexed in Algolia."""
-        return True
+    def readable_sponsor_type(self):
+        """Get human-readable sponsor type."""
+        return self.SponsorType(str(self.sponsor_type)).label
 
     @staticmethod
     def bulk_save(sponsors, fields=None):
@@ -97,6 +93,15 @@ class Sponsor(BulkSaveModel, TimestampedModel):
 
     def from_dict(self, data):
         """Update instance based on the dict data."""
+        image_path = data.get("image", "").lstrip("/")
+        image_url = f"{OWASP_ORGANIZATION_DATA_URL}/{image_path}"
+
+        member_type_mapping = {
+            "2": self.MemberType.PLATINUM,
+            "3": self.MemberType.GOLD,
+            "4": self.MemberType.SILVER,
+        }
+
         sponsor_type_mapping = {
             "1": self.SponsorType.DIAMOND,
             "2": self.SponsorType.PLATINUM,
@@ -104,12 +109,6 @@ class Sponsor(BulkSaveModel, TimestampedModel):
             "4": self.SponsorType.SILVER,
             "5": self.SponsorType.SUPPORTER,
             "-1": self.SponsorType.NOT_SPONSOR,
-        }
-
-        member_type_mapping = {
-            "2": self.MemberType.PLATINUM,
-            "3": self.MemberType.GOLD,
-            "4": self.MemberType.SILVER,
         }
 
         sponsor_type_label = sponsor_type_mapping.get(
@@ -125,7 +124,7 @@ class Sponsor(BulkSaveModel, TimestampedModel):
             "description": data.get("description", ""),
             "url": normalize_url(data.get("url", "")) or "",
             "job_url": normalize_url(data.get("job_url", "")) or "",
-            "image_path": data.get("image", ""),
+            "image_url": image_url,
             "is_member": data.get("member", False),
             "sponsor_type": sponsor_type_label,
             "member_type": member_type_label,

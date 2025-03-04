@@ -167,7 +167,7 @@ class SponsorAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Basic Information", {"fields": ("name", "sort_name", "description")}),
-        ("URLs and Images", {"fields": ("url", "job_url", "image_path")}),
+        ("URLs and Images", {"fields": ("url", "job_url", "image_url")}),
         ("Status", {"fields": ("is_member", "member_type", "sponsor_type")}),
     )
 
