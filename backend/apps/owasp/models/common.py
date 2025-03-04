@@ -4,6 +4,7 @@ import logging
 import re
 from urllib.parse import urlparse
 
+import requests
 import yaml
 from django.db import models
 from django.db.models import Sum
@@ -147,6 +148,39 @@ class RepositoryBasedEntityModel(models.Model):
             .annotate(total_contributions=Sum("contributions_count"))
             .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
         ]
+
+    def get_leaders(self, repository):
+        """Get leaders from leaders.md file on GitHub."""
+        try:
+            content = get_repository_file_content(
+                f"https://raw.githubusercontent.com/OWASP/{repository.key}/{repository.default_branch}/leaders.md"
+            )
+        except (requests.exceptions.RequestException, ValueError) as e:
+            logger.exception(
+                "Failed to fetch leaders.md file",
+                extra={"repository": repository.name, "error": str(e)},
+            )
+            return []
+        leaders = []
+        try:
+            if not content:
+                logger.warning("Empty leaders.md content", extra={"repository": repository.name})
+                return leaders
+            lines = content.split("\n")
+            logger.debug("Content length: %d characters", len(content))
+            small_size = 500
+            if len(content) < small_size:  # Only log full content if it's reasonably small
+                logger.debug("Content: %s", content)
+            for line in lines:
+                logger.debug("Processing line: %s", line)
+                # Match both standard Markdown list items with links and variations
+                match = re.findall(r"\*\s*\[([^\]]+)\](?:\([^)]*\))?", line)
+                leaders.extend(match)
+        except AttributeError:
+            logger.exception(
+                "Unable to parse leaders.md content", extra={"repository": repository.name}
+            )
+        return leaders
 
 
 class GenericEntityModel(models.Model):

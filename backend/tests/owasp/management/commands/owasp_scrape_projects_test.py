@@ -47,7 +47,6 @@ class TestOwaspScrapeProjects:
             "https://invalid.com/repo3",
         ]
         mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
-        mock_scraper.get_leaders.return_value = "Leaders data"
         mock_scraper.page_tree = True
 
         mock_github_instance = mock.Mock()
@@ -107,4 +106,3 @@ class TestOwaspScrapeProjects:
             ]
             assert project.invalid_urls == sorted(expected_invalid_urls)
             assert project.related_urls == sorted(expected_related_urls)
-            assert project.leaders_raw == "Leaders data"

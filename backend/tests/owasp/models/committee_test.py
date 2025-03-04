@@ -97,3 +97,20 @@ class TestCommitteeModel:
         )
 
         assert committee.name == repository_mock.title
+
+    @patch("apps.owasp.models.common.get_repository_file_content")
+    def test_get_leaders(self, mock_get_content):
+        # Mock the content of the leaders.md file
+        mock_get_content.return_value = (
+            "* [Leader1](https://github.com/leader1)\n* [Leader2](https://github.com/leader2)"
+        )
+
+        # Create a mock repository
+        repository = Repository(key="test-repo", default_branch="main")
+
+        # Instantiate the model and call the get_leaders method
+        committee = Committee()
+        leaders = committee.get_leaders(repository)
+
+        # Assert the leaders list
+        assert leaders == ["Leader1", "Leader2"]
