@@ -108,6 +108,14 @@ class UserIndexMixin:
         ]
 
     @property
+    def idx_contributions_count(self):
+        """Return contributions count for indexing."""
+        contributions_counts = [
+            rc.contributions_count for rc in RepositoryContributor.objects.filter(user=self)
+        ]
+        return sum(contributions_counts)
+
+    @property
     def idx_issues(self):
         """Return issues for indexing."""
         return [
