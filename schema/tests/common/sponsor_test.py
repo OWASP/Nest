@@ -10,16 +10,16 @@ SCHEMA_NAME = "sponsor"
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("description-empty.yaml", "'' is too short"),
-        ("description-null.yaml", "None is not of type 'string'"),
-        ("logo-empty.yaml", "'' is not a 'uri'"),
-        ("logo-null.yaml", "None is not a 'uri'"),
-        ("name-empty.yaml", "'' is too short"),
-        ("name-null.yaml", "None is not of type 'string'"),
-        ("name-undefined.yaml", "'name' is a required property"),
-        ("url-empty.yaml", "'' is not a 'uri'"),
-        ("url-null.yaml", "None is not a 'uri'"),
-        ("url-undefined.yaml", "'url' is a required property"),
+        ("description_empty.yaml", "'' is too short"),
+        ("description_null.yaml", "None is not of type 'string'"),
+        ("logo_empty.yaml", "'' is not a 'uri'"),
+        ("logo_null.yaml", "None is not a 'uri'"),
+        ("name_empty.yaml", "'' is too short"),
+        ("name_null.yaml", "None is not of type 'string'"),
+        ("name_undefined.yaml", "'name' is a required property"),
+        ("url_empty.yaml", "'' is not a 'uri'"),
+        ("url_null.yaml", "None is not a 'uri'"),
+        ("url_undefined.yaml", "'url' is a required property"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):
