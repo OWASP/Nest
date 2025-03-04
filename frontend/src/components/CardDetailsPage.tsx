@@ -1,4 +1,4 @@
-import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFileCode, faLink, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
@@ -8,8 +8,10 @@ import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
+import TitleWithIcon from 'components/TitleWithIcon'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
+
 
 const DetailsCard = ({
   title,
@@ -38,12 +40,26 @@ const DetailsCard = ({
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
-        <SecondaryCard title="Summary">
+        <SecondaryCard
+          title={
+            <TitleWithIcon
+              href="#summary"
+              icon={faLink}
+              title="Summary"
+            />
+          }
+        >
           <p>{summary}</p>
         </SecondaryCard>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+            title={
+              <TitleWithIcon
+                href={`#${type}-details`}
+                icon={faLink}
+                title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+              />
+            }
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
@@ -57,7 +73,16 @@ const DetailsCard = ({
             )}
           </SecondaryCard>
           {(type === 'project' || type === 'repository' || type === 'committee') && (
-            <SecondaryCard title="Statistics" className="md:col-span-2">
+            <SecondaryCard
+              title={
+                <TitleWithIcon
+                  href="#statistics"
+                  icon={faLink}
+                  title="Statistics"
+                />
+              }
+              className="md:col-span-2"
+            >
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
               ))}
@@ -82,15 +107,43 @@ const DetailsCard = ({
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages.length !== 0 && (
+              <ToggleableList
+                items={languages}
+                label={
+                  <TitleWithIcon
+                    href="#languages"
+                    icon={faLink}
+                    title="Languages"
+                  />
+                }
+              />
+            )}
+            {topics.length !== 0 && (
+              <ToggleableList
+                items={topics}
+                label={
+                  <TitleWithIcon
+                    href="#topics"
+                    icon={faLink}
+                    title="Topics"
+                  />
+                }
+              />
+            )}
           </div>
         )}
         <TopContributors contributors={topContributors} maxInitialDisplay={6} />
         {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList
-              title="Recent Issues"
+              title={
+                <TitleWithIcon
+                  href="#recent-issues"
+                  icon={faLink}
+                  title="Recent Issues"
+                />
+              }
               data={recentIssues}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -102,7 +155,13 @@ const DetailsCard = ({
               )}
             />
             <ItemCardList
-              title="Recent Releases"
+              title={
+                <TitleWithIcon
+                  href="#recent-releases"
+                  icon={faLink}
+                  title="Recent Releases"
+                />
+              }
               data={recentReleases}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -116,7 +175,16 @@ const DetailsCard = ({
           </>
         )}
         {type === 'project' && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
+          <SecondaryCard
+            title={
+              <TitleWithIcon
+                href="#repositories"
+                icon={faLink}
+                title="Repositories"
+              />
+            }
+            className="mt-6"
+          >
             <RepositoriesCard repositories={repositories} />
           </SecondaryCard>
         )}

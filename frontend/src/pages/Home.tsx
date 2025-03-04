@@ -5,6 +5,7 @@ import {
   faCalendar,
   faCode,
   faFileCode,
+  faLink,
   faMapMarkerAlt,
   faTag,
 } from '@fortawesome/free-solid-svg-icons'
@@ -23,6 +24,7 @@ import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
+import TitleWithIcon from 'components/TitleWithIcon'
 import TopContributors from 'components/ToggleContributors'
 
 export default function Home() {
@@ -127,7 +129,15 @@ export default function Home() {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <SecondaryCard title="New Chapters">
+        <SecondaryCard
+          title={
+            <TitleWithIcon
+              href="#new-chapters"
+              icon={faLink}
+              title="New Chapters"
+            />
+          }
+        >
           <div className="space-y-4">
             {data.recentChapters.map((chapter) => (
               <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -150,7 +160,15 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
-        <SecondaryCard title="New Projects">
+        <SecondaryCard
+          title={
+            <TitleWithIcon
+              href="#new-Projects"
+              icon={faLink}
+              title="New Projects"
+            />
+          }
+        >
           <div className="space-y-4">
             {data.recentProjects.map((project) => (
               <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -179,7 +197,11 @@ export default function Home() {
       </div>
       <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
       <div className="mb-20">
-        <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Nearby</h2>
+        <TitleWithIcon
+          href="#chapters-nearby"
+          icon={faLink}
+          title="OWASP Chapters Nearby"
+        />
         <ChapterMap
           geoLocData={geoLocData}
           style={{ height: '400px', width: '100%', zIndex: '0' }}
@@ -187,7 +209,13 @@ export default function Home() {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <ItemCardList
-          title="Recent Issues"
+          title={
+            <TitleWithIcon
+              href="#recent-issues"
+              icon={faLink}
+              title="Recent Issues"
+            />
+          }
           data={data.recentIssues}
           renderDetails={(item) => (
             <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
@@ -199,7 +227,13 @@ export default function Home() {
           )}
         />
         <ItemCardList
-          title="Recent Releases"
+          title={
+            <TitleWithIcon
+              href="#recent-releases"
+              icon={faLink}
+              title="Recent Releases"
+            />
+          }
           data={data.recentReleases}
           renderDetails={(item) => (
             <div className="mt-2 flex flex-shrink-0 text-sm text-gray-600 dark:text-gray-300">

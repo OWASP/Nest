@@ -2,6 +2,7 @@ import { Button } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
+import React from 'react'
 
 const ToggleableList = ({
   items,
@@ -9,7 +10,7 @@ const ToggleableList = ({
   limit = 10,
 }: {
   items: string[]
-  label: string
+  label: React.ReactNode
   limit?: number
 }) => {
   const [showAll, setShowAll] = useState(false)
