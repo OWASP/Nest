@@ -24,9 +24,13 @@ enrich-data: \
 	owasp-enrich-committees \
 	owasp-enrich-projects
 
-index-chapters:
+load-index:
 	@echo "Indexing OWASP chapters"
-	@CMD="poetry run python manage.py index_chapters" $(MAKE) exec-backend-command
+	@CMD="poetry run python manage.py load_index" $(MAKE) exec-backend-command
+
+populate-index:
+	@CMD="python manage.py populate_data" $(MAKE) exec-backend-command
+
 
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command

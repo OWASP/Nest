@@ -5,7 +5,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
-from apps.common.typesense_client import Typesense
+from apps.common.typesense import Typesense
 from apps.common.utils import get_geolocation
 
 
