@@ -6,7 +6,6 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
-
 const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
@@ -16,7 +15,7 @@ const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => 
     Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
     Math.sin(dLng / 2) * Math.sin(dLng / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c 
+  return R * c
 }
 
 const ChapterMap = ({
@@ -80,7 +79,19 @@ const ChapterMap = ({
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
 
-    normalizedData.forEach((chapter) => {
+    // Validate and filter out invalid coordinates
+    const validChapters = normalizedData.filter(chapter =>
+      chapter.lat !== null &&
+      chapter.lng !== null &&
+      !isNaN(chapter.lat) &&
+      !isNaN(chapter.lng) &&
+      chapter.lat >= -90 &&
+      chapter.lat <= 90 &&
+      chapter.lng >= -180 &&
+      chapter.lng <= 180
+    )
+
+    validChapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
@@ -106,10 +117,26 @@ const ChapterMap = ({
 
     map.addLayer(markerClusterGroup)
 
-    if (userLocation && nearestChapters.length > 0) {
-      map.fitBounds(nearestChapters.map((chapter) => [chapter.lat, chapter.lng] as [number, number]), { maxZoom: 10 })
-    } else {
-      map.fitBounds(bounds)
+    // Add fallback for fitting bounds
+    try {
+      if (userLocation && nearestChapters.length > 0) {
+        const nearestBounds = nearestChapters.map((chapter) => [chapter.lat, chapter.lng] as [number, number])
+        if (nearestBounds.length > 0) {
+          map.fitBounds(nearestBounds, { maxZoom: 10 })
+        } else if (bounds.length > 0) {
+          map.fitBounds(bounds)
+        } else {
+          console.warn('No valid bounds found for the map')
+        }
+      } else if (bounds.length > 0) {
+        map.fitBounds(bounds)
+      } else {
+        console.warn('No bounds available for the map')
+      }
+    } catch (error) {
+      console.error('Error fitting map bounds:', error)
+      // Fallback to default view if bounds fitting fails
+      map.setView([20, 0], 2)
     }
   }, [normalizedData, nearestChapters, userLocation])
 

@@ -15,7 +15,7 @@ import SearchPageLayout from 'components/SearchPageLayout'
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  
+
   const {
     items: chapters,
     isLoaded,
