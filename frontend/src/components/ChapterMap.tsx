@@ -6,27 +6,11 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
-const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLng = ((lng2 - lng1) * Math.PI) / 180
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
-}
-
 const ChapterMap = ({
   geoLocData,
-  userLocation = null,
   style,
 }: {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
-  userLocation?: { lat: number; lng: number } | null
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
@@ -41,20 +25,7 @@ const ChapterMap = ({
     }))
   }, [geoLocData])
 
-  const nearestChapters = useMemo(() => {
-    if (!userLocation) return normalizedData
-
-    return normalizedData
-      .map((chapter) => ({
-        ...chapter,
-        distance: getDistance(userLocation.lat, userLocation.lng, chapter.lat, chapter.lng),
-      }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 5)
-  }, [userLocation, normalizedData])
-
   useEffect(() => {
-    // Initialize map if not created
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
@@ -72,16 +43,16 @@ const ChapterMap = ({
 
     const map = mapRef.current
 
-    // Remove existing marker cluster group
-    if (markerClusterRef.current) {
-      map.removeLayer(markerClusterRef.current)
-    }
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
+        map.removeLayer(layer)
+      }
+    })
 
-    // Create new marker cluster group
+    // Create a new marker cluster group
     const markerClusterGroup = L.markerClusterGroup()
-    markerClusterRef.current = markerClusterGroup
-
     const bounds: [number, number][] = []
+    markerClusterRef.current = markerClusterGroup
 
     // Validate and filter out invalid coordinates
     const validChapters = normalizedData.filter(
@@ -123,26 +94,34 @@ const ChapterMap = ({
 
     map.addLayer(markerClusterGroup)
 
-    // Determine map view
+    // Determine map view based on 6th index (index 5)
     try {
-      if (userLocation && nearestChapters.length > 0) {
-        // Prioritize fitting bounds to nearest chapters
-        const nearestBounds = nearestChapters.map(
-          (chapter) => [chapter.lat, chapter.lng] as [number, number]
-        )
-        map.fitBounds(nearestBounds, {
-          maxZoom: 10, // Ensure not too zoomed in
-          padding: [50, 50], // Add some padding
-        })
+      if (validChapters.length >= 6) {
+        // Specifically target the 6th chapter (index 5)
+        const sixthChapter = validChapters[5]
+
+        // Take the first 6 chapters for bounds
+        const localChapters = validChapters.slice(0, 6)
+        const latLngs = localChapters.map((ch) => [ch.lat, ch.lng])
+        const localBounds = L.latLngBounds(latLngs)
+
+        // Set view to 6th chapter and fit bounds of first 6
+        map.setView([sixthChapter.lat, sixthChapter.lng], 6)
+        map.fitBounds(localBounds, { maxZoom: 10 })
+      } else if (validChapters.length > 0) {
+        // Fallback if fewer than 6 chapters
+        const firstChapter = validChapters[0]
+        map.setView([firstChapter.lat, firstChapter.lng], 6)
       } else if (bounds.length > 0) {
-        // Fallback to all chapters bounds
         map.fitBounds(bounds)
+      } else {
+        map.setView([20, 0], 2)
       }
-    } catch {
-      // Fallback to default view if bounds fitting fails
+    } catch (error) {
+      console.error('Error setting map view:', error)
       map.setView([20, 0], 2)
     }
-  }, [normalizedData, nearestChapters, userLocation])
+  }, [normalizedData])
 
   return <div id="chapter-map" style={style} />
 }
