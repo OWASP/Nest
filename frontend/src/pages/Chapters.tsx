@@ -32,19 +32,23 @@ const ChaptersPage = () => {
   // Fetch chapter data and user location
   useEffect(() => {
     const fetchData = async () => {
-      const searchParams = {
-        indexName: 'chapters',
-        query: '',
-        currentPage: 1,
-        hitsPerPage: 1000,
+      try {
+        const searchParams = {
+          indexName: 'chapters',
+          query: '',
+          currentPage: 1,
+          hitsPerPage: 1000,
+        }
+        const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+          searchParams.indexName,
+          searchParams.query,
+          searchParams.currentPage,
+          searchParams.hitsPerPage
+        )
+        setGeoLocData(data.hits)
+      } catch (error) {
+        // Handle fetch error if needed
       }
-      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
-        searchParams.indexName,
-        searchParams.query,
-        searchParams.currentPage,
-        searchParams.hitsPerPage
-      )
-      setGeoLocData(data.hits)
     }
 
     const fetchUserLocation = () => {
@@ -56,8 +60,9 @@ const ChaptersPage = () => {
               lng: position.coords.longitude,
             })
           },
-          () => {
-
+          (error) => {
+            // Handle error (e.g., user denied access to location)
+            setUserLocation(null)
           }
         )
       }
@@ -70,20 +75,17 @@ const ChaptersPage = () => {
   const navigate = useNavigate()
 
   const renderChapterCard = (chapter: ChapterTypeAlgolia) => {
-    const params: string[] = ['updated_at']
-    const filteredIcons = getFilteredIcons(chapter, params)
+    const filteredIcons = getFilteredIcons(chapter, ['updated_at'])
     const formattedUrls = handleSocialUrls(chapter.related_urls)
-
     const handleButtonClick = () => {
       navigate(`/chapters/${chapter.key}`)
     }
 
     const SubmitButton = {
       label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket " />,
       onclick: handleButtonClick,
     }
-
     return (
       <Card
         key={chapter.objectID}
@@ -98,7 +100,6 @@ const ChaptersPage = () => {
     )
   }
 
-  // Determine which data to use for the map
   const mapData = useMemo(() => {
     return searchQuery ? chapters : geoLocData
   }, [searchQuery, chapters, geoLocData])
@@ -123,7 +124,7 @@ const ChaptersPage = () => {
             style={{ height: '400px', width: '100%', zIndex: '0' }}
           />
         )}
-        {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
+        {chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
       </SearchPageLayout>
     </MetadataManager>
   )
