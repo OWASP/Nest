@@ -105,7 +105,6 @@ const ChapterMap = ({
         const temp = localChapters.map((ch) => [ch.lat, ch.lng])
         const localBounds = L.latLngBounds(temp)
 
-        // Set view to 6th chapter and fit bounds of first 6
         map.setView([sixthChapter.lat, sixthChapter.lng], 6)
         map.fitBounds(localBounds, { maxZoom: 10 })
       } else if (validChapters.length > 0) {
