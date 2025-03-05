@@ -31,24 +31,20 @@ const ChaptersPage = () => {
 
   // Fetch chapter data and user location
   useEffect(() => {
-    const fetchChapterData = async () => {
-      try {
-        const searchParams = {
-          indexName: 'chapters',
-          query: '',
-          currentPage: 1,
-          hitsPerPage: 1000,
-        }
-        const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
-          searchParams.indexName,
-          searchParams.query,
-          searchParams.currentPage,
-          searchParams.hitsPerPage
-        )
-        setGeoLocData(data.hits)
-      } catch (error) {
-        console.error('Failed to fetch chapter data:', error)
+    const fetchData = async () => {
+      const searchParams = {
+        indexName: 'chapters',
+        query: '',
+        currentPage: 1,
+        hitsPerPage: 1000,
       }
+      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+        searchParams.indexName,
+        searchParams.query,
+        searchParams.currentPage,
+        searchParams.hitsPerPage
+      )
+      setGeoLocData(data.hits)
     }
 
     const fetchUserLocation = () => {
@@ -60,14 +56,14 @@ const ChaptersPage = () => {
               lng: position.coords.longitude,
             })
           },
-          (error) => {
-            console.warn('Geolocation error:', error)
+          () => {
+
           }
         )
       }
     }
 
-    fetchChapterData()
+    fetchData()
     fetchUserLocation()
   }, [])
 
