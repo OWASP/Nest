@@ -165,6 +165,12 @@ export const mockHomeData = {
         __typename: 'ReleaseNode',
       },
     ],
+    sponsors: [
+      {
+        name: 'Sponsor 1',
+        imageUrl: 'https://avatars.githubusercontent.com/u/1?v=4',
+      },
+    ],
     statsOverview: {
       activeChaptersStats: 100,
       activeProjectsStats: 100,

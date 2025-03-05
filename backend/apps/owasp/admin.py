@@ -10,6 +10,7 @@ from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 from apps.owasp.models.snapshot import Snapshot
+from apps.owasp.models.sponsor import Sponsor
 
 
 class GenericEntityAdminMixin:
@@ -141,6 +142,36 @@ class SnapshotAdmin(admin.ModelAdmin):
     )
 
 
+class SponsorAdmin(admin.ModelAdmin):
+    """Admin configuration for Sponsor model."""
+
+    list_display = (
+        "name",
+        "sort_name",
+        "sponsor_type",
+        "is_member",
+        "member_type",
+    )
+
+    search_fields = (
+        "name",
+        "sort_name",
+        "description",
+    )
+
+    list_filter = (
+        "sponsor_type",
+        "is_member",
+        "member_type",
+    )
+
+    fieldsets = (
+        ("Basic Information", {"fields": ("name", "sort_name", "description")}),
+        ("URLs and Images", {"fields": ("url", "job_url", "image_url")}),
+        ("Status", {"fields": ("is_member", "member_type", "sponsor_type")}),
+    )
+
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
@@ -148,3 +179,4 @@ admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectHealthMetrics)
 admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)
+admin.site.register(Sponsor, SponsorAdmin)

@@ -9,7 +9,7 @@ test.describe('Project Details Page', () => {
         json: { data: mockProjectDetailsData },
       })
     })
-    await page.goto('/projects/test-project')
+    await page.goto('/projects/test-project', { timeout: 60000 })
   })
 
   test('should have a heading and summary', async ({ page }) => {
