@@ -54,14 +54,20 @@ class IndexBase:
     schema = {}
 
     def get_model(self):
+        """Retrieve the Django model associated with the index name."""
         for app_config in apps.get_app_configs():
             try:
-                model = app_config.get_model(self.index_name)
+                if self.index_name == "user":
+                    model = apps.get_model("github", "User")
+                else:
+                    model = app_config.get_model(self.index_name)
+
                 if model:
                     return model
+
             except LookupError:
-                continue 
-            raise ValueError(f"Model '{self.index_name}' not found in Django apps.")
+                continue
+        raise ValueError(f"Model '{self.index_name}' not found in Django apps.")
 
     def create_collection(self):
         """Create collection if it doesn't exist."""
@@ -94,7 +100,6 @@ class IndexBase:
             response = client.collections[self.index_name].documents.import_(
                 data, {"action": "upsert"}
             )
-            print(f"Typesense Import Response for {self.index_name}: {response}")
             logging.info(f"Populated '{self.index_name}' with {len(data)} records.")
             logging.info(f"Found {len(queryset)} records in Django for {self.index_name}")
         except Exception as e:

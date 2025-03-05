@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+import apps.github.schema
 import apps.owasp.schema  # noqa
 from apps.common.typesense import REGISTERED_INDEXES
 
@@ -8,7 +9,6 @@ class Command(BaseCommand):
     help = "Populate all Typesense indexes with database data"
 
     def handle(self, *args, **kwargs):
-        print(REGISTERED_INDEXES.items())
         for index_name, index_instance in REGISTERED_INDEXES.items():
             self.stdout.write(f"Populating '{index_name}'...")
 
