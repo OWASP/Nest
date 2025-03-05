@@ -71,7 +71,7 @@ export const mockGraphQLData = {
       description: 'Sample event description',
       endDate: '2024-12-24',
       name: 'Event 1',
-      startDate: '2024-12-14',
+      startDate: '2024-12-15',
       url: 'https://example.com/event1',
     },
   ],

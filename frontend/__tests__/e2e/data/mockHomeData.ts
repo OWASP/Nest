@@ -178,5 +178,25 @@ export const mockHomeData = {
       countriesStats: 100,
       __typename: 'StatsNode',
     },
+    upcomingEvents: [
+      {
+        category: 'Category 1',
+        description: 'Description 1',
+        endDate: '2025-02-28',
+        name: 'Event 1',
+        startDate: '2025-02-27',
+        url: 'https://nest.owasp.org/events/event-1',
+        __typename: 'EventNode',
+      },
+      {
+        category: 'Category 2',
+        description: 'Description 2',
+        endDate: '2025-03-11',
+        name: 'Event 2',
+        startDate: '2025-03-10',
+        url: 'https://nest.owasp.org/events/event-2',
+        __typename: 'EventNode',
+      },
+    ],
   },
 }
