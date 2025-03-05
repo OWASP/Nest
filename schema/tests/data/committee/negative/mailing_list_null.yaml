@@ -1,5 +1,5 @@
 description: This committee has null events.
-mailing_list: null
+mailing_list:
 members:
   - github: leader1-github
     name: Leader One
@@ -7,7 +7,7 @@ members:
   - github: leader2-github
     name: Leader Two
     role: Vice Chair
-name: 
+name:
   - value: OWASP Committee
 scope: test scope and purpose of the project
 tags:
