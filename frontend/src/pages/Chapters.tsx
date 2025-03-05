@@ -1,6 +1,6 @@
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { useSearchPage } from 'hooks/useSearchPage'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
@@ -31,38 +31,48 @@ const ChaptersPage = () => {
 
   // Fetch chapter data and user location
   useEffect(() => {
-    const fetchData = async () => {
-      const searchParams = {
-        indexName: 'chapters',
-        query: '',
-        currentPage: 1,
-        hitsPerPage: 1000,
+    const fetchChapterData = async () => {
+      try {
+        const searchParams = {
+          indexName: 'chapters',
+          query: '',
+          currentPage: 1,
+          hitsPerPage: 1000,
+        }
+        const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+          searchParams.indexName,
+          searchParams.query,
+          searchParams.currentPage,
+          searchParams.hitsPerPage
+        )
+        setGeoLocData(data.hits)
+      } catch (error) {
+        console.error('Failed to fetch chapter data:', error)
       }
-      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
-        searchParams.indexName,
-        searchParams.query,
-        searchParams.currentPage,
-        searchParams.hitsPerPage
-      )
-      setGeoLocData(data.hits)
     }
 
     const fetchUserLocation = () => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          })
-        })
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            })
+          },
+          (error) => {
+            console.warn('Geolocation error:', error)
+          }
+        )
       }
     }
 
-    fetchData()
+    fetchChapterData()
     fetchUserLocation()
   }, [])
 
   const navigate = useNavigate()
+
   const renderChapterCard = (chapter: ChapterTypeAlgolia) => {
     const params: string[] = ['updated_at']
     const filteredIcons = getFilteredIcons(chapter, params)
@@ -74,7 +84,7 @@ const ChaptersPage = () => {
 
     const SubmitButton = {
       label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket " />,
+      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
     }
 
@@ -92,6 +102,11 @@ const ChaptersPage = () => {
     )
   }
 
+  // Determine which data to use for the map
+  const mapData = useMemo(() => {
+    return searchQuery ? chapters : geoLocData
+  }, [searchQuery, chapters, geoLocData])
+
   return (
     <MetadataManager {...METADATA_CONFIG.chapters}>
       <SearchPageLayout
@@ -105,9 +120,9 @@ const ChaptersPage = () => {
         searchQuery={searchQuery}
         totalPages={totalPages}
       >
-        {chapters.length > 0 && (
+        {mapData.length > 0 && (
           <ChapterMap
-            geoLocData={searchQuery ? chapters : geoLocData}
+            geoLocData={mapData}
             userLocation={userLocation}
             style={{ height: '400px', width: '100%', zIndex: '0' }}
           />

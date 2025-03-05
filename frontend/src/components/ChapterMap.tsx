@@ -22,14 +22,15 @@ const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => 
 
 const ChapterMap = ({
   geoLocData,
-  userLocation,
+  userLocation = null,
   style,
 }: {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
-  userLocation: { lat: number; lng: number } | null
+  userLocation?: { lat: number; lng: number } | null
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
+  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
   const normalizedData = useMemo(() => {
     return geoLocData.map((chapter) => ({
@@ -43,7 +44,6 @@ const ChapterMap = ({
   const nearestChapters = useMemo(() => {
     if (!userLocation) return normalizedData
 
-    // Sort chapters by distance from user location
     return normalizedData
       .map((chapter) => ({
         ...chapter,
@@ -54,13 +54,11 @@ const ChapterMap = ({
   }, [userLocation, normalizedData])
 
   useEffect(() => {
+    // Initialize map if not created
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
-        maxBounds: [
-          [-90, -180],
-          [90, 180],
-        ],
+        maxBounds: [[-90, -180], [90, 180]],
         maxBoundsViscosity: 1.0,
       }).setView([20, 0], 2)
 
@@ -71,13 +69,15 @@ const ChapterMap = ({
 
     const map = mapRef.current
 
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
-        map.removeLayer(layer)
-      }
-    })
+    // Remove existing marker cluster group
+    if (markerClusterRef.current) {
+      map.removeLayer(markerClusterRef.current)
+    }
 
+    // Create new marker cluster group
     const markerClusterGroup = L.markerClusterGroup()
+    markerClusterRef.current = markerClusterGroup
+
     const bounds: [number, number][] = []
 
     // Validate and filter out invalid coordinates
@@ -93,6 +93,7 @@ const ChapterMap = ({
         chapter.lng <= 180
     )
 
+    // Create markers for all chapters
     validChapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
@@ -119,18 +120,19 @@ const ChapterMap = ({
 
     map.addLayer(markerClusterGroup)
 
-    // Add fallback for fitting bounds
+    // Determine map view
     try {
       if (userLocation && nearestChapters.length > 0) {
+        // Prioritize fitting bounds to nearest chapters
         const nearestBounds = nearestChapters.map(
           (chapter) => [chapter.lat, chapter.lng] as [number, number]
         )
-        if (nearestBounds.length > 0) {
-          map.fitBounds(nearestBounds, { maxZoom: 10 })
-        } else if (bounds.length > 0) {
-          map.fitBounds(bounds)
-        }
+        map.fitBounds(nearestBounds, {
+          maxZoom: 10,  // Ensure not too zoomed in
+          padding: [50, 50]  // Add some padding
+        })
       } else if (bounds.length > 0) {
+        // Fallback to all chapters bounds
         map.fitBounds(bounds)
       }
     } catch {
