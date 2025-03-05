@@ -1,4 +1,4 @@
-blog: "https://example.com"  # Ensure blog is not empty
+blog: "https://example.com"
 country: India
 leaders:
   - github: leader-1-github
