@@ -117,8 +117,7 @@ const ChapterMap = ({
       } else {
         map.setView([20, 0], 2)
       }
-    } catch (error) {
-      console.error('Error setting map view:', error)
+    } catch {
       map.setView([20, 0], 2)
     }
   }, [normalizedData])
