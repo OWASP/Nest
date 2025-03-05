@@ -1,11 +1,12 @@
 import logging
-from django.core.management.base import BaseCommand
-import apps.owasp.schema
 
+from django.core.management.base import BaseCommand
+
+import apps.owasp.schema  # noqa
 from apps.common.typesense import REGISTERED_INDEXES
 
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 
 class Command(BaseCommand):
     help = "Create Typesense indexes"

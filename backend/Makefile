@@ -25,7 +25,7 @@ enrich-data: \
 	owasp-enrich-projects
 
 load-index:
-	@echo "Indexing OWASP chapters"
+	@echo "Indexing Nest data"
 	@CMD="poetry run python manage.py load_index" $(MAKE) exec-backend-command
 
 populate-index:

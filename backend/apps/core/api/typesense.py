@@ -31,7 +31,7 @@ def typesense_search(request):
             "prioritize_exact_match": True,  # Rank exact matches higher
         }
         client = Typesense.get_client()
-        search_result = client.collections["chapters"].documents.search(search_parameters)
+        search_result = client.collections["chapter"].documents.search(search_parameters)
 
         return JsonResponse(
             {
