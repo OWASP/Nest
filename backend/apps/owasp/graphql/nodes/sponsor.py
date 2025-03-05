@@ -12,4 +12,5 @@ class SponsorNode(BaseNode):
         fields = (
             "image_url",
             "name",
+            "url",
         )

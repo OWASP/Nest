@@ -54,6 +54,7 @@ export const GET_MAIN_PAGE_DATA = gql`
     sponsors {
       imageUrl
       name
+      url
     }
     statsOverview {
       activeChaptersStats

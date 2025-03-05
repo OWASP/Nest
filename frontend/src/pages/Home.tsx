@@ -218,10 +218,6 @@ export default function Home() {
         />
       </div>
 
-      <SecondaryCard>
-        <MovingLogos sponsors={data.sponsors} />
-      </SecondaryCard>
-
       <div className="mt-10 grid gap-6 md:grid-cols-4">
         {counterData.map((stat, index) => (
           <SecondaryCard key={index} className="text-center">
@@ -247,6 +243,10 @@ export default function Home() {
           >
             Join OWASP Now
           </a>
+        </SecondaryCard>
+
+        <SecondaryCard>
+          <MovingLogos sponsors={data.sponsors} />
         </SecondaryCard>
       </div>
     </div>

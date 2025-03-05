@@ -1,9 +1,5 @@
 import { useEffect, useRef } from 'react'
-
-interface SponsorType {
-  imageUrl?: string
-  name: string
-}
+import { SponsorType } from 'types/home'
 
 interface MovingLogosProps {
   sponsors: SponsorType[]
@@ -30,20 +26,27 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
         {sponsors.map((sponsor, index) => (
           <div
             key={`${sponsor.name}-${index}`}
-            className="flex min-w-[220px] flex-shrink-0 flex-col items-center rounded-lg p-5 shadow-sm hover:shadow-lg"
+            className="flex min-w-[220px] flex-shrink-0 flex-col items-center rounded-lg p-5"
           >
-            <div className="relative mb-4 flex h-16 w-full items-center justify-center">
-              {sponsor.imageUrl ? (
-                <img
-                  src={sponsor.imageUrl}
-                  alt={`${sponsor.name} logo`}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center"></div>
-              )}
-            </div>
+            <a
+              href={sponsor.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-full w-full flex-col items-center justify-center"
+            >
+              <div className="relative mb-4 flex h-16 w-full items-center justify-center">
+                {sponsor.imageUrl ? (
+                  <img
+                    src={sponsor.imageUrl}
+                    alt={`${sponsor.name} logo`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center"></div>
+                )}
+              </div>
+            </a>
           </div>
         ))}
       </div>
