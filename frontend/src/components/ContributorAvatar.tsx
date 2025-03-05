@@ -33,8 +33,8 @@ const ContributorAvatar = memo(({ contributor }: ContributorProps) => {
   const displayName = name || login
 
   const repositoryInfo =
-    !isAlgolia && (contributor as TopContributorsTypeGraphql).repositoryName
-      ? ` in ${(contributor as TopContributorsTypeGraphql).repositoryName}`
+    !isAlgolia && (contributor as TopContributorsTypeGraphql).projectName
+      ? ` in ${(contributor as TopContributorsTypeGraphql).projectName}`
       : ''
 
   return (
