@@ -12,8 +12,10 @@ const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => 
   const dLng = ((lng2 - lng1) * Math.PI) / 180
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
 }
@@ -79,15 +81,16 @@ const ChapterMap = ({
     const bounds: [number, number][] = []
 
     // Validate and filter out invalid coordinates
-    const validChapters = normalizedData.filter(chapter =>
-      chapter.lat !== null &&
-      chapter.lng !== null &&
-      !isNaN(chapter.lat) &&
-      !isNaN(chapter.lng) &&
-      chapter.lat >= -90 &&
-      chapter.lat <= 90 &&
-      chapter.lng >= -180 &&
-      chapter.lng <= 180
+    const validChapters = normalizedData.filter(
+      (chapter) =>
+        chapter.lat !== null &&
+        chapter.lng !== null &&
+        !isNaN(chapter.lat) &&
+        !isNaN(chapter.lng) &&
+        chapter.lat >= -90 &&
+        chapter.lat <= 90 &&
+        chapter.lng >= -180 &&
+        chapter.lng <= 180
     )
 
     validChapters.forEach((chapter) => {
@@ -119,7 +122,9 @@ const ChapterMap = ({
     // Add fallback for fitting bounds
     try {
       if (userLocation && nearestChapters.length > 0) {
-        const nearestBounds = nearestChapters.map((chapter) => [chapter.lat, chapter.lng] as [number, number])
+        const nearestBounds = nearestChapters.map(
+          (chapter) => [chapter.lat, chapter.lng] as [number, number]
+        )
         if (nearestBounds.length > 0) {
           map.fitBounds(nearestBounds, { maxZoom: 10 })
         } else if (bounds.length > 0) {
@@ -128,13 +133,13 @@ const ChapterMap = ({
       } else if (bounds.length > 0) {
         map.fitBounds(bounds)
       }
-    } catch{
+    } catch {
       // Fallback to default view if bounds fitting fails
       map.setView([20, 0], 2)
     }
   }, [normalizedData, nearestChapters, userLocation])
 
-  return (<div id="chapter-map" style={style} />)
+  return <div id="chapter-map" style={style} />
 }
 
 export default ChapterMap

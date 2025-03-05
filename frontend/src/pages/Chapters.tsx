@@ -49,14 +49,12 @@ const ChaptersPage = () => {
 
     const fetchUserLocation = () => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setUserLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            })
-          },
-        )
+        navigator.geolocation.getCurrentPosition((position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          })
+        })
       }
     }
 
