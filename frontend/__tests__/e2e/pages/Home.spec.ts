@@ -68,4 +68,13 @@ test.describe('Home Page', () => {
     const page1 = await page1Promise
     expect(page1.url()).toBe('https://owasp.glueup.com/organization/6727/memberships/')
   })
+
+  test('should have upcoming events', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Event 1' })).toBeVisible()
+    await expect(page.getByText('Dec 14,')).toBeVisible()
+    await expect(page.getByText('Dec 24,')).toBeVisible()
+    await page.getByRole('link', { name: 'Event 1' }).click()
+    expect(page.url()).toContain('events/event-1')
+  })
 })

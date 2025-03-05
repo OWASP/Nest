@@ -15,6 +15,7 @@ import { toast } from 'hooks/useToast'
 import { useEffect, useState } from 'react'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
+import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
@@ -247,6 +248,41 @@ export default function Home() {
 
         <SecondaryCard>
           <MovingLogos sponsors={data.sponsors} />
+        </SecondaryCard>
+      </div>
+      <div className="mb-20 mt-8">
+        <SecondaryCard title="Upcoming Events">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {data.upcomingEvents.map((event: EventType) => (
+              <div key={event.name} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                <h3 className="mb-2 text-lg font-semibold">
+                  <a
+                    href={event.url}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {event.name}
+                  </a>
+                </h3>
+                <div className="mb-2">
+                  <p>{event.description}</p>
+                </div>
+                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(event.startDate)}</span>
+                  </div>
+                  {event.endDate && (
+                    <div className="mr-4 flex items-center">
+                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <span>{formatDate(event.endDate)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </SecondaryCard>
       </div>
     </div>

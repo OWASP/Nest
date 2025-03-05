@@ -65,6 +65,16 @@ export const mockGraphQLData = {
     countriesStats: 245,
     contributorsStats: 9673,
   },
+  upcomingEvents: [
+    {
+      category: 'Global',
+      description: 'Sample event description',
+      endDate: '2024-12-24',
+      name: 'Event 1',
+      startDate: '2024-12-14',
+      url: 'https://example.com/event1',
+    },
+  ],
 }
 
 export const mockAlgoliaData = {

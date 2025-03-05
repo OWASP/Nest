@@ -61,5 +61,13 @@ export const GET_MAIN_PAGE_DATA = gql`
       contributorsStats
       countriesStats
     }
+    upcomingEvents {
+      category
+      description
+      endDate
+      name
+      startDate
+      url
+    }
   }
 `
