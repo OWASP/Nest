@@ -1,7 +1,7 @@
 """OWASP sponsors GraphQL node."""
 
 from apps.common.graphql.nodes import BaseNode
-from apps.owasp.models.sponsors import Sponsor
+from apps.owasp.models.sponsor import Sponsor
 
 
 class SponsorNode(BaseNode):
@@ -10,6 +10,6 @@ class SponsorNode(BaseNode):
     class Meta:
         model = Sponsor
         fields = (
-            "name",
             "image_url",
+            "name",
         )

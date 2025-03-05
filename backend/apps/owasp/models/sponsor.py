@@ -5,7 +5,6 @@ from django.db import models
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import slugify
 from apps.github.utils import normalize_url
-from apps.owasp.constants import OWASP_ORGANIZATION_DATA_URL
 
 
 class Sponsor(BulkSaveModel, TimestampedModel):
@@ -95,39 +94,37 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     def from_dict(self, data):
         """Update instance based on the dict data."""
         image_path = data.get("image", "").lstrip("/")
-        image_url = f"{OWASP_ORGANIZATION_DATA_URL}/{image_path}"
-
-        sponsor_key = str(data.get("sponsor", "-1"))
-        member_key = str(data.get("membertype", "4"))
+        image_url = f"https://raw.githubusercontent.com/OWASP/owasp.github.io/main/{image_path}"
 
         member_type_mapping = {
-            "2": self.MemberType.PLATINUM,
-            "3": self.MemberType.GOLD,
-            "4": self.MemberType.SILVER,
+            2: self.MemberType.PLATINUM,
+            3: self.MemberType.GOLD,
+            4: self.MemberType.SILVER,
         }
-
         sponsor_type_mapping = {
-            "1": self.SponsorType.DIAMOND,
-            "2": self.SponsorType.PLATINUM,
-            "3": self.SponsorType.GOLD,
-            "4": self.SponsorType.SILVER,
-            "5": self.SponsorType.SUPPORTER,
-            "-1": self.SponsorType.NOT_SPONSOR,
+            -1: self.SponsorType.NOT_SPONSOR,
+            1: self.SponsorType.DIAMOND,
+            2: self.SponsorType.PLATINUM,
+            3: self.SponsorType.GOLD,
+            4: self.SponsorType.SILVER,
+            5: self.SponsorType.SUPPORTER,
         }
 
-        sponsor_type_label = sponsor_type_mapping.get(sponsor_key, self.SponsorType.NOT_SPONSOR)
+        member_key = data.get("membertype", 4)
+        sponsor_key = data.get("sponsor", -1)
         member_type_label = member_type_mapping.get(member_key, self.MemberType.SILVER)
+        sponsor_type_label = sponsor_type_mapping.get(sponsor_key, self.SponsorType.NOT_SPONSOR)
 
         fields = {
-            "name": data.get("name", ""),
-            "sort_name": data.get("sortname", "").capitalize(),
             "description": data.get("description", ""),
-            "url": normalize_url(data.get("url", "")) or "",
-            "job_url": normalize_url(data.get("job_url", "")) or "",
             "image_url": image_url,
-            "is_member": bool(data.get("member", False)),
-            "sponsor_type": sponsor_type_label,
+            "is_member": data.get("member", False),
+            "job_url": normalize_url(data.get("job_url", "")) or "",
             "member_type": member_type_label,
+            "name": data["name"],
+            "sort_name": data.get("sortname", ""),
+            "sponsor_type": sponsor_type_label,
+            "url": normalize_url(data.get("url", "")) or "",
         }
 
         for key, value in fields.items():

@@ -5,7 +5,7 @@ from .committee import CommitteeQuery
 from .event import EventQuery
 from .project import ProjectQuery
 from .snapshot import SnapshotQuery
-from .sponsors import SponsorQuery
+from .sponsor import SponsorQuery
 from .stats import StatsQuery
 
 

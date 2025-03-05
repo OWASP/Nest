@@ -85,7 +85,7 @@ def get_staff_data(timeout=30):
 
 
 def get_events_data():
-    """Get raw events data via Database."""
+    """Get events data."""
     from apps.owasp.models.event import Event
 
     try:
@@ -95,15 +95,12 @@ def get_events_data():
         return None
 
 
-MAX_SPONSORS = 10
-
-
-def get_sponsors_data():
-    """Get raw sponsors data via Database."""
-    from apps.owasp.models.sponsors import Sponsor
+def get_sponsors_data(limit=10):
+    """Get sponsors data."""
+    from apps.owasp.models.sponsor import Sponsor
 
     try:
-        return Sponsor.objects.all()[:MAX_SPONSORS]
+        return Sponsor.objects.all()[:limit]
     except Exception as e:
         logger.exception("Failed to fetch sponsors data via database", extra={"error": str(e)})
         return None

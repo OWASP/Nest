@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.owasp.models.sponsors import Sponsor
+from apps.owasp.models.sponsor import Sponsor
 
 
 class TestSponsorModel:
@@ -50,34 +50,44 @@ class TestSponsorModel:
     def test_bulk_save(self):
         """Test the bulk_save method."""
         mock_sponsors = [Mock(id=None), Mock(id=1)]
-        with patch("apps.owasp.models.sponsors.BulkSaveModel.bulk_save") as mock_bulk_save:
+        with patch("apps.owasp.models.sponsor.BulkSaveModel.bulk_save") as mock_bulk_save:
             Sponsor.bulk_save(mock_sponsors, fields=["name"])
             mock_bulk_save.assert_called_once_with(Sponsor, mock_sponsors, fields=["name"])
 
     @pytest.mark.parametrize(
         ("sponsor_type_value", "expected_sponsor_type"),
         [
-            ("1", "Diamond"),
-            ("2", "Platinum"),
-            ("-1", "Not a Sponsor"),
+            (-1, "Not a Sponsor"),
+            (1, "Diamond"),
+            (2, "Platinum"),
         ],
     )
     def test_from_dict_sponsor_type_mapping(self, sponsor_type_value, expected_sponsor_type):
         """Test the from_dict method for sponsor_type mapping."""
         sponsor = Sponsor()
-        sponsor.from_dict({"sponsor": sponsor_type_value})
+        sponsor.from_dict(
+            {
+                "name": "Sponsor",
+                "sponsor": sponsor_type_value,
+            }
+        )
         assert sponsor.sponsor_type == expected_sponsor_type
 
     @pytest.mark.parametrize(
         ("member_type_value", "expected_member_type"),
         [
-            ("2", "Platinum"),  # "2" maps to "Platinum"
-            ("3", "Gold"),  # "3" maps to "Gold"
-            ("4", "Silver"),  # "4" maps to "Silver"
+            (2, "Platinum"),
+            (3, "Gold"),
+            (4, "Silver"),
         ],
     )
     def test_from_dict_member_type_mapping(self, member_type_value, expected_member_type):
         """Test the from_dict method for member_type mapping."""
         sponsor = Sponsor()
-        sponsor.from_dict({"membertype": member_type_value})
+        sponsor.from_dict(
+            {
+                "membertype": member_type_value,
+                "name": "Sponsor",
+            }
+        )
         assert sponsor.member_type == expected_member_type
