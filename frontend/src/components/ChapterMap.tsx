@@ -58,7 +58,10 @@ const ChapterMap = ({
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
-        maxBounds: [[-90, -180], [90, 180]],
+        maxBounds: [
+          [-90, -180],
+          [90, 180],
+        ],
         maxBoundsViscosity: 1.0,
       }).setView([20, 0], 2)
 
@@ -128,8 +131,8 @@ const ChapterMap = ({
           (chapter) => [chapter.lat, chapter.lng] as [number, number]
         )
         map.fitBounds(nearestBounds, {
-          maxZoom: 10,  // Ensure not too zoomed in
-          padding: [50, 50]  // Add some padding
+          maxZoom: 10, // Ensure not too zoomed in
+          padding: [50, 50], // Add some padding
         })
       } else if (bounds.length > 0) {
         // Fallback to all chapters bounds
