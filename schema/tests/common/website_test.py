@@ -1,4 +1,4 @@
-"""Test cases for the tag schema validation."""
+"""Test cases for the website schema validation."""
 
 import pytest
 

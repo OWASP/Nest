@@ -113,7 +113,7 @@
       "description": "Name",
       "properties": {
         "description": {
-          "description": "Description of mailing list",
+          "description": "A brief description associated with the name entry",
           "type": "string",
           "minLength": 10
         },

@@ -76,7 +76,8 @@ from utils.schema_validators import validate_data
         ("tags_empty.yaml", "[] is too short"),
         (
             "tags_non_unique.yaml",
-            "[{'value': 'example-tag-1'}, {'value': 'example-tag-1'}] is too short",
+            "[{'value': 'example-tag-1'}, {'value': 'example-tag-1'}, "
+            "{'value': 'example-tag-1'}] has non-unique elements",
         ),
         ("tags_null.yaml", "None is not of type 'array'"),
         ("tags_undefined.yaml", "'tags' is a required property"),
