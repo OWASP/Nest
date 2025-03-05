@@ -21,7 +21,7 @@ const TitleWithIcon: React.FC<TitleWithIconProps> = ({ href, icon, title }) => {
 
   return (
     <div id={id} className="relative scroll-mt-20">
-      <div className="group relative flex items-top">
+      <div className="items-top group relative flex">
         <h2 className="mb-4 text-2xl font-semibold">{title}</h2>
         <a
           href={href}

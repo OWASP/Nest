@@ -12,7 +12,6 @@ import TitleWithIcon from 'components/TitleWithIcon'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
 
-
 const DetailsCard = ({
   title,
   is_active = true,
@@ -40,15 +39,7 @@ const DetailsCard = ({
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
-        <SecondaryCard
-          title={
-            <TitleWithIcon
-              href="#summary"
-              icon={faLink}
-              title="Summary"
-            />
-          }
-        >
+        <SecondaryCard title={<TitleWithIcon href="#summary" icon={faLink} title="Summary" />}>
           <p>{summary}</p>
         </SecondaryCard>
 
@@ -75,13 +66,7 @@ const DetailsCard = ({
           </SecondaryCard>
           {(type === 'project' || type === 'repository' || type === 'committee') && (
             <SecondaryCard
-              title={
-                <TitleWithIcon
-                  href="#statistics"
-                  icon={faLink}
-                  title="Statistics"
-                />
-              }
+              title={<TitleWithIcon href="#statistics" icon={faLink} title="Statistics" />}
               className="md:col-span-2"
             >
               {stats.map((stat, index) => (
@@ -112,25 +97,13 @@ const DetailsCard = ({
             {languages.length !== 0 && (
               <ToggleableList
                 items={languages}
-                label={
-                  <TitleWithIcon
-                    href="#languages"
-                    icon={faLink}
-                    title="Languages"
-                  />
-                }
+                label={<TitleWithIcon href="#languages" icon={faLink} title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
               <ToggleableList
                 items={topics}
-                label={
-                  <TitleWithIcon
-                    href="#topics"
-                    icon={faLink}
-                    title="Topics"
-                  />
-                }
+                label={<TitleWithIcon href="#topics" icon={faLink} title="Topics" />}
               />
             )}
           </div>
@@ -141,13 +114,7 @@ const DetailsCard = ({
         {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList
-              title={
-                <TitleWithIcon
-                  href="#recent-issues"
-                  icon={faLink}
-                  title="Recent Issues"
-                />
-              }
+              title={<TitleWithIcon href="#recent-issues" icon={faLink} title="Recent Issues" />}
               data={recentIssues}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -160,11 +127,7 @@ const DetailsCard = ({
             />
             <ItemCardList
               title={
-                <TitleWithIcon
-                  href="#recent-releases"
-                  icon={faLink}
-                  title="Recent Releases"
-                />
+                <TitleWithIcon href="#recent-releases" icon={faLink} title="Recent Releases" />
               }
               data={recentReleases}
               renderDetails={(item) => (
@@ -180,13 +143,7 @@ const DetailsCard = ({
         )}
         {type === 'project' && repositories.length > 0 && (
           <SecondaryCard
-            title={
-              <TitleWithIcon
-                href="#repositories"
-                icon={faLink}
-                title="Repositories"
-              />
-            }
+            title={<TitleWithIcon href="#repositories" icon={faLink} title="Repositories" />}
             className="mt-6"
           >
             <RepositoriesCard repositories={repositories} />

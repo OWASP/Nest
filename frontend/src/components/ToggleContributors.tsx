@@ -31,11 +31,7 @@ const TopContributors = ({
   }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
-      <TitleWithIcon
-        href="#top-contributors"
-        icon={faLink}
-        title={label}
-      />
+      <TitleWithIcon href="#top-contributors" icon={faLink} title={label} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {displayContributors.map((contributor, index) => (
           <div

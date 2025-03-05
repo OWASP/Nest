@@ -130,13 +130,7 @@ export default function Home() {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <SecondaryCard
-          title={
-            <TitleWithIcon
-              href="#new-chapters"
-              icon={faLink}
-              title="New Chapters"
-            />
-          }
+          title={<TitleWithIcon href="#new-chapters" icon={faLink} title="New Chapters" />}
         >
           <div className="space-y-4">
             {data.recentChapters.map((chapter) => (
@@ -161,13 +155,7 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <SecondaryCard
-          title={
-            <TitleWithIcon
-              href="#new-Projects"
-              icon={faLink}
-              title="New Projects"
-            />
-          }
+          title={<TitleWithIcon href="#new-Projects" icon={faLink} title="New Projects" />}
         >
           <div className="space-y-4">
             {data.recentProjects.map((project) => (
@@ -197,11 +185,7 @@ export default function Home() {
       </div>
       <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
       <div className="mb-20">
-        <TitleWithIcon
-          href="#chapters-nearby"
-          icon={faLink}
-          title="OWASP Chapters Nearby"
-        />
+        <TitleWithIcon href="#chapters-nearby" icon={faLink} title="OWASP Chapters Nearby" />
         <ChapterMap
           geoLocData={geoLocData}
           style={{ height: '400px', width: '100%', zIndex: '0' }}
@@ -209,13 +193,7 @@ export default function Home() {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <ItemCardList
-          title={
-            <TitleWithIcon
-              href="#recent-issues"
-              icon={faLink}
-              title="Recent Issues"
-            />
-          }
+          title={<TitleWithIcon href="#recent-issues" icon={faLink} title="Recent Issues" />}
           data={data.recentIssues}
           renderDetails={(item) => (
             <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
@@ -227,13 +205,7 @@ export default function Home() {
           )}
         />
         <ItemCardList
-          title={
-            <TitleWithIcon
-              href="#recent-releases"
-              icon={faLink}
-              title="Recent Releases"
-            />
-          }
+          title={<TitleWithIcon href="#recent-releases" icon={faLink} title="Recent Releases" />}
           data={data.recentReleases}
           renderDetails={(item) => (
             <div className="mt-2 flex flex-shrink-0 text-sm text-gray-600 dark:text-gray-300">
