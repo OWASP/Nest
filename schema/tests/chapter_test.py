@@ -29,7 +29,8 @@ from utils.schema_validators import validate_data
         ("events-empty.yaml", "[] should be non-empty"),
         (
             "events-non-unique.yaml",
-            "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
+            "[{'url': 'https://example.com/event1'}, "
+            "{'url': 'https://example.com/event1'}] has non-unique elements",
         ),
         ("events-null.yaml", "None is not of type 'array'"),
         ("leaders-empty.yaml", "[] is too short"),
@@ -52,8 +53,8 @@ from utils.schema_validators import validate_data
         ("logo-null.yaml", "None is not of type 'array'"),
         ("meetup_group-empty.yaml", "'' should be non-empty"),
         ("meetup_group-null.yaml", "None is not of type 'string'"),
-        ("name-empty.yaml", "'' is too short"),
-        ("name-null.yaml", "None is not of type 'string'"),
+        ("name-empty.yaml", "[] should be non-empty"),
+        ("name-null.yaml", "None is not of type 'array'"),
         ("name-undefined.yaml", "'name' is a required property"),
         ("region-empty.yaml", "'' should be non-empty"),
         ("region-null.yaml", "None is not of type 'string'"),
@@ -73,11 +74,14 @@ from utils.schema_validators import validate_data
         ),
         ("sponsors-null.yaml", "None is not of type 'array'"),
         ("tags-empty.yaml", "[] is too short"),
-        ("tags-non-unique.yaml", "['chapter-tag-1', 'chapter-tag-1'] is too short"),
+        (
+            "tags-non-unique.yaml",
+            "[{'value': 'example-tag-1'}, {'value': 'example-tag-1'}] is too short",
+        ),
         ("tags-null.yaml", "None is not of type 'array'"),
         ("tags-undefined.yaml", "'tags' is a required property"),
-        ("website-empty.yaml", "['example-tag-1'] is too short"),
-        ("website-null.yaml", "None is not of type 'string'"),
+        ("website-empty.yaml", "[] should be non-empty"),
+        ("website-null.yaml", "None is not of type 'array'"),
     ],
 )
 def test_negative(chapter_schema, file_path, error_message):

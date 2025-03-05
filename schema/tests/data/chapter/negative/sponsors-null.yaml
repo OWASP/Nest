@@ -5,9 +5,10 @@ leaders:
   - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
-name: OWASP Chapter
+name:
+  - value: OWASP Chapter
 sponsors:
 tags:
-  - chapter-tag-1
-  - chapter-tag-2
-  - chapter-tag-3
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3

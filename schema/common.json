@@ -13,7 +13,10 @@
         },
         "platform": {
           "description": "The platform used by the community",
-          "enum": ["discord", "slack"],
+          "enum": [
+            "discord",
+            "slack"
+          ],
           "type": "string"
         },
         "url": {
@@ -22,11 +25,39 @@
           "type": "string"
         }
       },
-      "required": ["platform", "url"],
+      "required": [
+        "platform",
+        "url"
+      ],
       "title": "Community",
       "type": "object"
     },
-
+    "event": {
+      "additionalProperties": false,
+      "description": "Event",
+      "properties": {
+        "description": {
+          "description": "A brief description of event",
+          "minLength": 10,
+          "type": "string"
+        },
+        "title": {
+          "description": "Title of the event",
+          "minLength": 10,
+          "type": "string"
+        },
+        "url": {
+          "description": "URL of the event",
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "Event",
+      "type": "object"
+    },
     "logo": {
       "additionalProperties": false,
       "description": "A logo",
@@ -47,11 +78,57 @@
           "format": "uri"
         }
       },
-      "required": ["small", "medium", "large"],
+      "required": [
+        "small",
+        "medium",
+        "large"
+      ],
       "title": "Logo",
       "type": "object"
     },
-
+    "mailing_list": {
+      "additionalProperties": false,
+      "description": "Mail List",
+      "properties": {
+        "description": {
+          "description": "Description of mailing list",
+          "type": "string",
+          "minLength": 10
+        },
+        "email": {
+          "description": "E-mail address",
+          "format": "email",
+          "minLength": 5,
+          "type": "string"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "title": "Mailing List",
+      "type": "object"
+    },
+    "name": {
+      "additionalProperties": false,
+      "description": "Name",
+      "properties": {
+        "description": {
+          "description": "Description of mailing list",
+          "type": "string",
+          "minLength": 10
+        },
+        "value": {
+          "description": "The actual name string.",
+          "minLength": 5,
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Name",
+      "type": "object"
+    },
     "person": {
       "additionalProperties": false,
       "description": "Person",
@@ -78,11 +155,12 @@
           "type": "string"
         }
       },
-      "required": ["github"],
+      "required": [
+        "github"
+      ],
       "title": "Person",
       "type": "object"
     },
-
     "repository": {
       "additionalProperties": false,
       "description": "A repository",
@@ -122,11 +200,12 @@
           "type": "string"
         }
       },
-      "required": ["url"],
+      "required": [
+        "url"
+      ],
       "title": "Repository",
       "type": "object"
     },
-
     "social_media": {
       "additionalProperties": false,
       "description": "A social media platform for the project",
@@ -138,7 +217,12 @@
         },
         "platform": {
           "description": "The type of social media platform.",
-          "enum": ["bluesky", "linkedin", "x", "youtube"],
+          "enum": [
+            "bluesky",
+            "linkedin",
+            "x",
+            "youtube"
+          ],
           "type": "string"
         },
         "url": {
@@ -147,12 +231,13 @@
           "format": "uri"
         }
       },
-      "required": ["platform", "url"],
+      "required": [
+        "platform",
+        "url"
+      ],
       "title": "Social media",
       "type": "object"
-
     },
-
     "sponsor": {
       "additionalProperties": false,
       "description": "A sponsor entity",
@@ -178,8 +263,54 @@
           "type": "string"
         }
       },
-      "required": ["name", "url"],
+      "required": [
+        "name",
+        "url"
+      ],
       "title": "Sponsor",
+      "type": "object"
+    },
+    "tag": {
+      "additionalProperties": false,
+      "description": "Tag",
+      "properties": {
+        "description": {
+          "description": "Description of tag",
+          "type": "string",
+          "minLength": 5
+        },
+        "value": {
+          "description": "Actual value of tag",
+          "type": "string",
+          "minLength": 3
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Tag",
+      "type": "object"
+    },
+    "website": {
+      "additionalProperties": false,
+      "description": "Website",
+      "properties": {
+        "description": {
+          "description": "Description of website",
+          "type": "string",
+          "minLength": 10
+        },
+        "url": {
+          "description": "URL of the website",
+          "type": "string",
+          "format": "uri",
+          "minLength": 4
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "Website",
       "type": "object"
     }
   }

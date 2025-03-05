@@ -58,10 +58,10 @@ from utils.schema_validators import validate_data
         ),
         ("downloads-null.yaml", "None is not of type 'array'"),
         ("events-empty.yaml", "[] should be non-empty"),
-        ("events-invalid.yaml", "'xyz-abc' is not a 'uri'"),
         (
             "events-non-unique.yaml",
-            "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
+            "[{'url': 'https://example.com/event1'}, "
+            "{'url': 'https://example.com/event1'}] has non-unique elements",
         ),
         ("events-null.yaml", "None is not of type 'array'"),
         ("leaders-empty.yaml", "[] is too short"),
@@ -90,11 +90,11 @@ from utils.schema_validators import validate_data
             "'medium': 'https://example.com/mediumLogo.png', "
             "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
         ),
-        ("mailing-list-empty.yaml", "'' is not a 'uri'"),
-        ("mailing-list-invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("mailing-list-null.yaml", "None is not a 'uri'"),
+        ("mailing-list-empty.yaml", "'' is not of type 'array'"),
+        ("mailing-list-invalid.yaml", "'https://xyz' is not of type 'array'"),
+        ("mailing-list-null.yaml", "None is not of type 'array'"),
         ("name-empty.yaml", "'' is too short"),
-        ("name-null.yaml", "None is not of type 'string'"),
+        ("name-null.yaml", "None is not of type 'array'"),
         ("name-undefined.yaml", "'name' is a required property"),
         ("pitch-empty.yaml", "'' is too short"),
         ("pitch-null.yaml", "None is not of type 'string'"),
@@ -121,13 +121,16 @@ from utils.schema_validators import validate_data
         ("sponsors-null.yaml", "None is not of type 'array'"),
         ("tags-empty.yaml", "[] is too short"),
         ("tags-null.yaml", "None is not of type 'array'"),
-        ("tags-non-unique.yaml", "['example-tag-1', 'example-tag-1'] is too short"),
+        (
+            "tags-non-unique.yaml",
+            "[{'value': 'example-tag-1'}, {'value': 'example-tag-1'}] is too short",
+        ),
         ("tags-undefined.yaml", "'tags' is a required property"),
         ("type-empty.yaml", "'' is not one of ['code', 'documentation', 'tool']"),
         ("type-null.yaml", "None is not one of ['code', 'documentation', 'tool']"),
         ("type-undefined.yaml", "'type' is a required property"),
-        ("website-empty.yaml", "'' is too short"),
-        ("website-null.yaml", "None is not of type 'string'"),
+        ("website-empty.yaml", "[] should be non-empty"),
+        ("website-null.yaml", "None is not of type 'array'"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):

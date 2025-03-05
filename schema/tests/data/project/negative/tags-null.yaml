@@ -6,7 +6,8 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 level: 2
-name: OWASP Incubator Code Project
+name:
+  - value: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 tags:
 type: code

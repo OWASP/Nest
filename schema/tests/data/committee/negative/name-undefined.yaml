@@ -8,6 +8,6 @@ members:
     role: Vice Chair
 scope: test scope and purpose of the project
 tags:
-  - development
-  - education
-  - security
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3
