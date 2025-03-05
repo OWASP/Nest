@@ -1,7 +1,6 @@
 """GitHub user Algolia index configuration."""
 
 from apps.common.index import IndexBase, register
-from apps.github.models.organization import Organization
 from apps.github.models.user import User
 
 
@@ -71,5 +70,6 @@ class UserIndex(IndexBase):
     def get_entities(self):
         """Get entities for indexing."""
         return User.objects.exclude(
-            login__in=Organization.get_logins(),
+            is_bot=False,
+            login__in=User.get_non_indexable_logins(),
         )

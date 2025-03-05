@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { MainPageData } from 'types/home'
+import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
@@ -170,7 +171,7 @@ export default function Home() {
                       icon={getProjectIcon(project.type) as IconProp}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>{project.type.charAt(0) + project.type.slice(1).toLowerCase()}</span>
+                    <span>{capitalize(project.type)}</span>
                   </div>
                 </div>
               </div>
