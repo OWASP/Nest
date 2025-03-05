@@ -2,7 +2,7 @@ export const mockGraphQLData = {
   recentProjects: [
     {
       name: 'OWASP GameSec Framework',
-      type: 'DOCUMENTATION',
+      type: 'documentation',
       createdAt: '2024-12-06T20:46:54+00:00',
       key: 'gamesec-framework',
       openIssuesCount: 0,
