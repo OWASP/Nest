@@ -51,6 +51,11 @@ export const GET_MAIN_PAGE_DATA = gql`
       publishedAt
       tagName
     }
+    sponsors {
+      imageUrl
+      name
+      url
+    }
     statsOverview {
       activeChaptersStats
       activeProjectsStats
