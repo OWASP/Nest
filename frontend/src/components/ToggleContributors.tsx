@@ -48,17 +48,16 @@ const TopContributors = ({
               >
                 {contributor.name || contributor.login}
               </p>
-              {contributor?.repositoryName ? (
+              {contributor?.projectName ? (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   <a
-                    href={contributor.repositoryUrl}
+                    href={contributor.projectUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline dark:text-sky-400"
                   >
-                    {contributor.repositoryName}
-                  </a>{' '}
-                  - {contributor.contributionsCount} contributions
+                    {contributor.projectName}
+                  </a>
                 </p>
               ) : (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
