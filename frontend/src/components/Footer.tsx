@@ -33,7 +33,7 @@ export default function Footer() {
               >
                 <Text>{section.title}</Text>
                 {/* Icon to indicate open/close state */}
-                <Box as="footer" className="transition-transform duration-200 lg:hidden">
+                <Box className="transition-transform duration-200 lg:hidden">
                   {openSection === section.title ? (
                     <FontAwesomeIcon icon={faChevronUp} className="h-4 w-4" />
                   ) : (
