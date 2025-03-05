@@ -33,7 +33,7 @@ const HeatMap = ({ className = '' }: { className?: string }) => {
   }, [username, data])
 
   return (
-    <div className={`bg-gray-900 relative h-32 items-center justify-center ${className}`}>
+    <div className={`relative h-32 items-center justify-center bg-gray-900 ${className}`}>
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
       {privateContributor ? (
         <div className="h-32 bg-owasp-blue"></div>
