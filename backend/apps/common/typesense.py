@@ -54,10 +54,14 @@ class IndexBase:
     schema = {}
 
     def get_model(self):
-        model = apps.get_model("owasp", self.index_name)
-        if not model:
+        for app_config in apps.get_app_configs():
+            try:
+                model = app_config.get_model(self.index_name)
+                if model:
+                    return model
+            except LookupError:
+                continue 
             raise ValueError(f"Model '{self.index_name}' not found in Django apps.")
-        return model
 
     def create_collection(self):
         """Create collection if it doesn't exist."""

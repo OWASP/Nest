@@ -9,48 +9,47 @@ class ProjectIndex(IndexBase):
 
     index_name = "project"
     schema = {
-    "name": "project",
-    "enable_nested_fields": True,
-    "fields": [
-        {"name": "companies", "type": "string[]"},
-        {"name": "contributors_count", "type": "int32"},
-        {"name": "custom_tags", "type": "string[]"},
-        {"name": "description", "type": "string"},
-        {"name": "forks_count", "type": "int32"},
-        {"name": "id", "type": "string"},
-        {"name": "issues_count", "type": "int32"},
-        {"name": "is_active", "type": "bool"},
-        {"name": "key", "type": "string"},
-        {"name": "languages", "type": "string[]"},
-        {"name": "leaders", "type": "string[]"},
-        {"name": "level", "type": "string"},
-        {"name": "level_raw", "type": "float"},
-        {"name": "name", "type": "string"},
-        {"name": "organizations", "type": "string[]"},
-        {"name": "repositories", "type": "object[]"},
-        {"name": "repositories_count", "type": "int32"},
-        {"name": "stars_count", "type": "int32"},
-        {"name": "summary", "type": "string"},
-        {"name": "tags", "type": "string[]"},
-        {"name": "topics", "type": "string[]"},
-        {"name": "type", "type": "string"},
-        {
-            "name": "top_contributors",
-            "type": "object[]",
-            "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "avatar_url", "type": "string"},
-                {"name": "contributions_count", "type": "int32"},
-                {"name": "login", "type": "string"},
-            ],
-            "optional": True,
-        },
-        {"name": "updated_at", "type": "int64"},
-        {"name": "url", "type": "string"},
+        "name": "project",
+        "enable_nested_fields": True,
+        "fields": [
+            {"name": "companies", "type": "string[]"},
+            {"name": "contributors_count", "type": "int32"},
+            {"name": "custom_tags", "type": "string[]"},
+            {"name": "description", "type": "string"},
+            {"name": "forks_count", "type": "int32"},
+            {"name": "id", "type": "string"},
+            {"name": "issues_count", "type": "int32"},
+            {"name": "is_active", "type": "bool"},
+            {"name": "key", "type": "string"},
+            {"name": "languages", "type": "string[]"},
+            {"name": "leaders", "type": "string[]"},
+            {"name": "level", "type": "string"},
+            {"name": "level_raw", "type": "float"},
+            {"name": "name", "type": "string"},
+            {"name": "organizations", "type": "string[]"},
+            {"name": "repositories", "type": "object[]"},
+            {"name": "repositories_count", "type": "int32"},
+            {"name": "stars_count", "type": "int32"},
+            {"name": "summary", "type": "string"},
+            {"name": "tags", "type": "string[]"},
+            {"name": "topics", "type": "string[]"},
+            {"name": "type", "type": "string"},
+            {
+                "name": "top_contributors",
+                "type": "object[]",
+                "fields": [
+                    {"name": "name", "type": "string"},
+                    {"name": "avatar_url", "type": "string"},
+                    {"name": "contributions_count", "type": "int32"},
+                    {"name": "login", "type": "string"},
+                ],
+                "optional": True,
+            },
+            {"name": "updated_at", "type": "float"},
+            {"name": "url", "type": "string"},
         ],
         "default_sorting_field": "updated_at",
     }
-
 
     def prepare_document(self, project):
         """Convert model instance to a dictionary for Typesense."""
@@ -93,7 +92,7 @@ class ProjectIndex(IndexBase):
                 {
                     "avatar_url": contributor["avatar_url"],
                     "contributions_count": contributor["contributions_count"],
-                    "login":contributor["login"],
+                    "login": contributor["login"],
                     "name": contributor["name"],
                 }
                 for contributor in project.idx_top_contributors

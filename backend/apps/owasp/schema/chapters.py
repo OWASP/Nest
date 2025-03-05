@@ -25,17 +25,18 @@ class ChapterIndex(IndexBase):
             {"name": "suggested_location", "type": "string"},
             {"name": "summary", "type": "string"},
             {"name": "tags", "type": "string[]"},
-            {"name": "top_contributors",
+            {
+                "name": "top_contributors",
                 "type": "object[]",
                 "fields": [
                     {"name": "name", "type": "string"},
                     {"name": "avatar_url", "type": "string"},
                     {"name": "contributions_count", "type": "int32"},
                     {"name": "login", "type": "string"},
-            ],
-            "optional": True,
+                ],
+                "optional": True,
             },
-            {"name": "updated_at", "type": "int64"},
+            {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
         ],
         "default_sorting_field": "created_at",
@@ -57,7 +58,9 @@ class ChapterIndex(IndexBase):
             else None,
             "postal_code": chapter.idx_postal_code,
             "region": chapter.idx_region,
-            "related_urls": chapter.idx_related_urls if hasattr(chapter, "idx_related_urls") else [],
+            "related_urls": chapter.idx_related_urls
+            if hasattr(chapter, "idx_related_urls")
+            else [],
             "suggested_location": chapter.idx_suggested_location,
             "summary": chapter.idx_summary if hasattr(chapter, "idx_summary") else "",
             "tags": chapter.idx_tags if isinstance(chapter.idx_tags, list) else [],
@@ -65,7 +68,7 @@ class ChapterIndex(IndexBase):
                 {
                     "avatar_url": contributor["avatar_url"],
                     "contributions_count": contributor["contributions_count"],
-                    "login":contributor["login"],
+                    "login": contributor["login"],
                     "name": contributor["name"],
                 }
                 for contributor in chapter.idx_top_contributors

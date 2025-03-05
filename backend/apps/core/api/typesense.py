@@ -9,7 +9,6 @@ from apps.common.typesense import Typesense
 from apps.common.utils import get_geolocation
 
 
-
 @require_POST
 def typesense_search(request):
     """Return Typesense chapter search results."""

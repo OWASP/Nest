@@ -26,10 +26,10 @@ class CommitteeIndex(IndexBase):
                     {"name": "name", "type": "string"},
                     {"name": "avatar_url", "type": "string"},
                     {"name": "url", "type": "string"},
-                    {"name": "contributions_count", "type": "int32"}
-                ]
+                    {"name": "contributions_count", "type": "int32"},
+                ],
             },
-            {"name": "updated_at", "type": "int64"},
+            {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
         ],
         "default_sorting_field": "created_at",
@@ -44,7 +44,9 @@ class CommitteeIndex(IndexBase):
             "key": committee.idx_key,
             "leaders": committee.idx_leaders if hasattr(committee, "idx_leaders") else [],
             "name": committee.idx_name,
-            "related_urls": committee.idx_related_urls if hasattr(committee, "idx_related_urls") else [],
+            "related_urls": committee.idx_related_urls
+            if hasattr(committee, "idx_related_urls")
+            else [],
             "summary": committee.idx_summary if hasattr(committee, "idx_summary") else "",
             "tags": committee.tags if committee.tags else [],
             "top_contributors": [
@@ -55,7 +57,9 @@ class CommitteeIndex(IndexBase):
                     "contributions_count": tc["contributions_count"],
                 }
                 for tc in committee.idx_top_contributors
-            ] if committee.idx_top_contributors else [],
+            ]
+            if committee.idx_top_contributors
+            else [],
             "updated_at": int(committee.idx_updated_at),
             "url": committee.idx_url if hasattr(committee, "idx_url") else "",
         }
