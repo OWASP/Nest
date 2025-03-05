@@ -39,7 +39,7 @@ test.describe('Home Page', () => {
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByText('Repository 1')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Project 21' })).toBeVisible()
     await page.getByText('Contributor 1').click()
     expect(page.url()).toContain('community/users/contributor1')
   })

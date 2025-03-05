@@ -2,9 +2,6 @@
 
 from django.db.models import Sum
 
-from apps.github.models.organization import Organization
-from apps.github.models.repository_contributor import RepositoryContributor
-
 ISSUES_LIMIT = 6
 RELEASES_LIMIT = 6
 TOP_REPOSITORY_CONTRIBUTORS_LIMIT = 6
@@ -16,10 +13,7 @@ class UserIndexMixin:
     @property
     def is_indexable(self):
         """Users to index."""
-        return (
-            self.login != "ghost"  # See https://github.com/ghost for more info.
-            and self.login not in Organization.get_logins()
-        )
+        return not self.is_bot and self.login not in self.get_non_indexable_logins()
 
     @property
     def idx_avatar_url(self):
@@ -89,6 +83,8 @@ class UserIndexMixin:
     @property
     def idx_contributions(self):
         """Return contributions for indexing."""
+        from apps.github.models.repository_contributor import RepositoryContributor
+
         return [
             {
                 "contributions_count": rc.contributions_count,
@@ -112,10 +108,12 @@ class UserIndexMixin:
     @property
     def idx_contributions_count(self):
         """Return contributions count for indexing."""
+        from apps.github.models.repository_contributor import RepositoryContributor
+
         return (
-            RepositoryContributor.objects.filter(user=self).aggregate(
-                total_contributions=Sum("contributions_count")
-            )["total_contributions"]
+            RepositoryContributor.objects.by_humans()
+            .filter(user=self)
+            .aggregate(total_contributions=Sum("contributions_count"))["total_contributions"]
             or 0
         )
 
