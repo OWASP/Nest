@@ -15,7 +15,6 @@ import SearchPageLayout from 'components/SearchPageLayout'
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
 
-
   const {
     items: chapters,
     isLoaded,
@@ -28,7 +27,6 @@ const ChaptersPage = () => {
     indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
   })
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +41,7 @@ const ChaptersPage = () => {
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
-        searchParams.hitsPerPage,
+        searchParams.hitsPerPage
       )
 
       setGeoLocData(data.hits)
