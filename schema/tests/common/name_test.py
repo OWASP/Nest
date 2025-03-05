@@ -10,11 +10,10 @@ SCHEMA_NAME = "name"
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-
         ("description_empty.yaml", "'' is too short"),
         ("description_null.yaml", "None is not of type 'string'"),
         ("name_empty.yaml", "'' is too short"),
-        ("name_null.yaml", "None is not of type 'string'")
+        ("name_null.yaml", "None is not of type 'string'"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):

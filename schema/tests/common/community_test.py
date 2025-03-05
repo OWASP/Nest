@@ -10,16 +10,16 @@ SCHEMA_NAME = "community"
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("description-empty.yaml", "'' is too short"),
-        ("description-null.yaml", "None is not of type 'string'"),
-        ("platform-empty.yaml", "'' is not one of ['discord', 'slack']"),
-        ("platform-invalid.yaml", "'telegram' is not one of ['discord', 'slack']"),
-        ("platform-null.yaml", "None is not one of ['discord', 'slack']"),
-        ("platform-undefined.yaml", "'platform' is a required property"),
-        ("url-empty.yaml", "'' is not a 'uri'"),
-        ("url-invalid.yaml", "'discord.com/invalid' is not a 'uri'"),
-        ("url-null.yaml", "None is not a 'uri'"),
-        ("url-undefined.yaml", "'url' is a required property"),
+        ("description_empty.yaml", "'' is too short"),
+        ("description_null.yaml", "None is not of type 'string'"),
+        ("platform_empty.yaml", "'' is not one of ['discord', 'slack']"),
+        ("platform_invalid.yaml", "'telegram' is not one of ['discord', 'slack']"),
+        ("platform_null.yaml", "None is not one of ['discord', 'slack']"),
+        ("platform_undefined.yaml", "'platform' is a required property"),
+        ("url_empty.yaml", "'' is not a 'uri'"),
+        ("url_invalid.yaml", "'discord.com/invalid' is not a 'uri'"),
+        ("url_null.yaml", "None is not a 'uri'"),
+        ("url_undefined.yaml", "'url' is a required property"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):

@@ -14,7 +14,7 @@ SCHEMA_NAME = "tag"
         ("description_null.yaml", "None is not of type 'string'"),
         ("tag_empty.yaml", "'' is too short"),
         ("tag_null.yaml", "None is not of type 'string'"),
-        ("tag_undefined.yaml", "'value' is a required property")
+        ("tag_undefined.yaml", "'value' is a required property"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):

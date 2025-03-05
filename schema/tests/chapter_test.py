@@ -12,37 +12,37 @@ from utils.schema_validators import validate_data
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("blog-empty.yaml", "'' is not a 'uri'"),
-        ("blog-invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
-        ("blog-null.yaml", "None is not a 'uri'"),
-        ("community-empty.yaml", "[] should be non-empty"),
+        ("blog_empty.yaml", "'' is not a 'uri'"),
+        ("blog_invalid.yaml", "'invalid-blog-uri' is not a 'uri'"),
+        ("blog_null.yaml", "None is not a 'uri'"),
+        ("community_empty.yaml", "[] should be non-empty"),
         (
-            "community-non-unique.yaml",
+            "community_non_unique.yaml",
             "[{'platform': 'discord', 'url': 'https://discord.com/example'}, "
             "{'platform': 'discord', 'url': 'https://discord.com/example'}] "
             "has non-unique elements",
         ),
-        ("community-null.yaml", "None is not of type 'array'"),
-        ("country-empty.yaml", "'' should be non-empty"),
-        ("country-null.yaml", "None is not of type 'string'"),
-        ("country-undefined.yaml", "'country' is a required property"),
-        ("events-empty.yaml", "[] should be non-empty"),
+        ("community_null.yaml", "None is not of type 'array'"),
+        ("country_empty.yaml", "'' should be non-empty"),
+        ("country_null.yaml", "None is not of type 'string'"),
+        ("country_undefined.yaml", "'country' is a required property"),
+        ("events_empty.yaml", "[] should be non-empty"),
         (
-            "events-non-unique.yaml",
+            "events_non_unique.yaml",
             "[{'url': 'https://example.com/event1'}, "
             "{'url': 'https://example.com/event1'}] has non-unique elements",
         ),
-        ("events-null.yaml", "None is not of type 'array'"),
-        ("leaders-empty.yaml", "[] is too short"),
+        ("events_null.yaml", "None is not of type 'array'"),
+        ("leaders_empty.yaml", "[] is too short"),
         (
-            "leaders-non-unique.yaml",
+            "leaders_non_unique.yaml",
             "[{'github': 'leader1'}, {'github': 'leader1'}] has non-unique elements",
         ),
-        ("leaders-null.yaml", "None is not of type 'array'"),
-        ("leaders-undefined.yaml", "'leaders' is a required property"),
-        ("logo-empty.yaml", "[] should be non-empty"),
+        ("leaders_null.yaml", "None is not of type 'array'"),
+        ("leaders_undefined.yaml", "'leaders' is a required property"),
+        ("logo_empty.yaml", "[] should be non-empty"),
         (
-            "logo-non-unique.yaml",
+            "logo_non_unique.yaml",
             "[{'small': 'https://example.com/smallLogo.png', "
             "'medium': 'https://example.com/mediumLogo.png', "
             "'large': 'https://example.com/largeLogo.png'}, "
@@ -50,38 +50,38 @@ from utils.schema_validators import validate_data
             "'medium': 'https://example.com/mediumLogo.png', "
             "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
         ),
-        ("logo-null.yaml", "None is not of type 'array'"),
-        ("meetup_group-empty.yaml", "'' should be non-empty"),
-        ("meetup_group-null.yaml", "None is not of type 'string'"),
-        ("name-empty.yaml", "[] should be non-empty"),
-        ("name-null.yaml", "None is not of type 'array'"),
-        ("name-undefined.yaml", "'name' is a required property"),
-        ("region-empty.yaml", "'' should be non-empty"),
-        ("region-null.yaml", "None is not of type 'string'"),
-        ("social-media-empty.yaml", "[] should be non-empty"),
+        ("logo_null.yaml", "None is not of type 'array'"),
+        ("meetup_group_empty.yaml", "'' should be non-empty"),
+        ("meetup_group_null.yaml", "None is not of type 'string'"),
+        ("name_empty.yaml", "[] should be non-empty"),
+        ("name_null.yaml", "None is not of type 'array'"),
+        ("name_undefined.yaml", "'name' is a required property"),
+        ("region_empty.yaml", "'' should be non-empty"),
+        ("region_null.yaml", "None is not of type 'string'"),
+        ("social_media_empty.yaml", "[] should be non-empty"),
         (
-            "social-media-non-unique.yaml",
+            "social_media_non_unique.yaml",
             "[{'platform': 'youtube', 'url': 'https://youtube.com/channel/123'}, "
             "{'platform': 'youtube', 'url': 'https://youtube.com/channel/123'}] "
             "has non-unique elements",
         ),
-        ("social-media-null.yaml", "None is not of type 'array'"),
-        ("sponsors-empty.yaml", "[] should be non-empty"),
+        ("social_media_null.yaml", "None is not of type 'array'"),
+        ("sponsors_empty.yaml", "[] should be non-empty"),
         (
-            "sponsors-non-unique.yaml",
+            "sponsors_non_unique.yaml",
             "[{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}, "
             "{'name': 'CyberSec Corp', 'url': 'https://cybersec.com'}] has non-unique elements",
         ),
-        ("sponsors-null.yaml", "None is not of type 'array'"),
-        ("tags-empty.yaml", "[] is too short"),
+        ("sponsors_null.yaml", "None is not of type 'array'"),
+        ("tags_empty.yaml", "[] is too short"),
         (
-            "tags-non-unique.yaml",
+            "tags_non_unique.yaml",
             "[{'value': 'example-tag-1'}, {'value': 'example-tag-1'}] is too short",
         ),
-        ("tags-null.yaml", "None is not of type 'array'"),
-        ("tags-undefined.yaml", "'tags' is a required property"),
-        ("website-empty.yaml", "[] should be non-empty"),
-        ("website-null.yaml", "None is not of type 'array'"),
+        ("tags_null.yaml", "None is not of type 'array'"),
+        ("tags_undefined.yaml", "'tags' is a required property"),
+        ("website_empty.yaml", "[] should be non-empty"),
+        ("website_null.yaml", "None is not of type 'array'"),
     ],
 )
 def test_negative(chapter_schema, file_path, error_message):
