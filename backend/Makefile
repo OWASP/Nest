@@ -29,6 +29,7 @@ load-index:
 	@CMD="poetry run python manage.py load_index" $(MAKE) exec-backend-command
 
 populate-index:
+	@echo "Populating Nest data"
 	@CMD="python manage.py populate_data" $(MAKE) exec-backend-command
 
 

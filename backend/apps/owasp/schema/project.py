@@ -9,41 +9,48 @@ class ProjectIndex(IndexBase):
 
     index_name = "project"
     schema = {
-        "name": "project",
-        "enable_nested_fields": True,
-        "fields": [
-            {"name": "id", "type": "string"},
-            {"name": "companies", "type": "string[]"},
-            {"name": "contributors_count", "type": "int32"},
-            {"name": "custom_tags", "type": "string[]"},
-            {"name": "description", "type": "string"},
-            {"name": "forks_count", "type": "int32"},
-            {"name": "issues_count", "type": "int32"},
-            {"name": "is_active", "type": "bool"},
-            {"name": "key", "type": "string"},
-            {"name": "languages", "type": "string[]"},
-            {"name": "leaders", "type": "string[]"},
-            {"name": "level_raw", "type": "float"},
-            {"name": "level", "type": "string"},
-            {"name": "name", "type": "string"},
-            {"name": "organizations", "type": "string[]"},
-            {"name": "repositories", "type": "object[]"},
-            {"name": "repositories_count", "type": "int32"},
-            {"name": "stars_count", "type": "int32"},
-            {"name": "summary", "type": "string"},
-            {"name": "tags", "type": "string[]"},
-            {"name": "topics", "type": "string[]"},
-            {"name": "top_contributors", "type": "object[]"},
-            {"name": "top_contributors.name", "type": "string"},
-            {"name": "top_contributors.avatar_url", "type": "string"},
-            {"name": "top_contributors.url", "type": "string"},
-            {"name": "top_contributors.contributions_count", "type": "int32"},
-            {"name": "type", "type": "string"},
-            {"name": "updated_at", "type": "int64"},
-            {"name": "url", "type": "string"},
+    "name": "project",
+    "enable_nested_fields": True,
+    "fields": [
+        {"name": "companies", "type": "string[]"},
+        {"name": "contributors_count", "type": "int32"},
+        {"name": "custom_tags", "type": "string[]"},
+        {"name": "description", "type": "string"},
+        {"name": "forks_count", "type": "int32"},
+        {"name": "id", "type": "string"},
+        {"name": "issues_count", "type": "int32"},
+        {"name": "is_active", "type": "bool"},
+        {"name": "key", "type": "string"},
+        {"name": "languages", "type": "string[]"},
+        {"name": "leaders", "type": "string[]"},
+        {"name": "level", "type": "string"},
+        {"name": "level_raw", "type": "float"},
+        {"name": "name", "type": "string"},
+        {"name": "organizations", "type": "string[]"},
+        {"name": "repositories", "type": "object[]"},
+        {"name": "repositories_count", "type": "int32"},
+        {"name": "stars_count", "type": "int32"},
+        {"name": "summary", "type": "string"},
+        {"name": "tags", "type": "string[]"},
+        {"name": "topics", "type": "string[]"},
+        {"name": "type", "type": "string"},
+        {
+            "name": "top_contributors",
+            "type": "object[]",
+            "fields": [
+                {"name": "name", "type": "string"},
+                {"name": "avatar_url", "type": "string"},
+                {"name": "contributions_count", "type": "int32"},
+                {"name": "login", "type": "string"},
+            ],
+            "optional": True,
+        },
+        {"name": "updated_at", "type": "int64"},
+        {"name": "url", "type": "string"},
         ],
         "default_sorting_field": "updated_at",
     }
+
 
     def prepare_document(self, project):
         """Convert model instance to a dictionary for Typesense."""
@@ -79,20 +86,20 @@ class ProjectIndex(IndexBase):
             else 0,
             "stars_count": project.stars_count if project.idx_stars_count is not None else 0,
             "summary": project.summary if project.summary else "",
+            "tags": project.tags if project.tags else [],
+            "topics": project.topics if project.topics else [],
+            "type": project.idx_type if project.idx_type else "",
             "top_contributors": [
                 {
-                    "name": contributor["name"],
                     "avatar_url": contributor["avatar_url"],
                     "contributions_count": contributor["contributions_count"],
+                    "login":contributor["login"],
+                    "name": contributor["name"],
                 }
                 for contributor in project.idx_top_contributors
             ]
             if project.idx_top_contributors
             else [],
-            "updated_at": int(project.idx_updated_at) if project.idx_updated_at else 0,
-            "tags": project.tags if project.tags else [],
-            "topics": project.topics if project.topics else [],
-            "type": project.idx_type if project.idx_type else "",
             "updated_at": int(project.idx_updated_at) if project.idx_updated_at else 0,
             "url": project.nest_url if project.nest_url else "",
         }

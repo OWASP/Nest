@@ -9,6 +9,7 @@ from apps.common.typesense import Typesense
 from apps.common.utils import get_geolocation
 
 
+
 @require_POST
 def typesense_search(request):
     """Return Typesense chapter search results."""
@@ -19,14 +20,14 @@ def typesense_search(request):
         hits_per_page = min(int(data.get("hitsPerPage", 25)), 250)
         # ip_address = get_user_ip_address(request)
         # random ip (for now)
-        user_lat, user_lng = get_geolocation("136.63.36.183")
+        user_lat, user_lng = get_geolocation("106.222.213.86")
         search_parameters = {
             "q": query,
             "query_by": "name,country,region",
             "query_by_weights": "5,3,2",  # Prioritize name > country > region
             "page": page,
             "per_page": hits_per_page,
-            "sort_by": f"location({user_lat},{user_lng}):asc,updated_at:desc,created_at:asc",
+            "sort_by": f"_geoloc({user_lat},{user_lng}):asc,updated_at:desc,created_at:asc",
             "num_typos": 2,  # Allow typo tolerance like Algolia
             "prioritize_exact_match": True,  # Rank exact matches higher
         }
