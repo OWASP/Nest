@@ -19,5 +19,4 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3000',
   },
-  workers: process.env.GITHUB_ACTIONS ? 1 : undefined, // Use 1 worker on GitHub
 })
