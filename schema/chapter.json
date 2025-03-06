@@ -33,6 +33,11 @@
       "minItems": 1,
       "uniqueItems": true
     },
+    "mailing_list": {
+      "description": "The optional mailing list associated with the chapter.",
+      "format": "uri",
+      "type": "string"
+    },
     "leaders": {
       "description": "Leaders of the chapter.",
       "type": "array",
