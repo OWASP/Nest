@@ -63,7 +63,6 @@ export const GET_MAIN_PAGE_DATA = gql`
     }
     upcomingEvents {
       category
-      description
       endDate
       name
       startDate

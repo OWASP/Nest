@@ -161,9 +161,9 @@ describe('Home', () => {
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
       mockGraphQLData.upcomingEvents.forEach((event) => {
         expect(screen.getByText(event.name)).toBeInTheDocument()
-        expect(screen.getByText(event.description)).toBeInTheDocument()
-        expect(screen.getByText(formatDate(event.startDate))).toBeInTheDocument()
-        expect(screen.getByText(formatDate(event.endDate))).toBeInTheDocument()
+        expect(
+          screen.getByText(`${formatDate(event.startDate)} - ${formatDate(event.endDate)}`)
+        ).toBeInTheDocument()
       })
     })
   })

@@ -181,7 +181,6 @@ export const mockHomeData = {
     upcomingEvents: [
       {
         category: 'Category 1',
-        description: 'Description 1',
         endDate: '2025-02-28',
         name: 'Event 1',
         startDate: '2025-02-27',
@@ -190,7 +189,6 @@ export const mockHomeData = {
       },
       {
         category: 'Category 2',
-        description: 'Description 2',
         endDate: '2025-03-11',
         name: 'Event 2',
         startDate: '2025-03-10',

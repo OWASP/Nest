@@ -255,7 +255,7 @@ export default function Home() {
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: EventType) => (
               <div key={event.name} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold">
+                <h3 className="mb-2 truncate text-lg font-semibold text-blue-500">
                   <a
                     href={event.url}
                     className="hover:underline"
@@ -265,20 +265,15 @@ export default function Home() {
                     {event.name}
                   </a>
                 </h3>
-                <div className="mb-2">
-                  <p>{event.description}</p>
-                </div>
                 <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
                   <div className="mr-4 flex items-center">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                    <span>{formatDate(event.startDate)}</span>
+                    <span>
+                      {event.endDate && event.startDate != event.endDate
+                        ? `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`
+                        : formatDate(event.startDate)}
+                    </span>
                   </div>
-                  {event.endDate && (
-                    <div className="mr-4 flex items-center">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                      <span>{formatDate(event.endDate)}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}

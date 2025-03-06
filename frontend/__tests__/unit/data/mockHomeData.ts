@@ -67,12 +67,11 @@ export const mockGraphQLData = {
   },
   upcomingEvents: [
     {
-      category: 'Global',
-      description: 'Sample event description',
-      endDate: '2024-12-24',
+      category: 'Category 1',
+      endDate: '2025-02-28',
       name: 'Event 1',
-      startDate: '2024-12-15',
-      url: 'https://example.com/event1',
+      startDate: '2025-02-27',
+      url: 'https://nest.owasp.org/events/event-1',
     },
   ],
 }
