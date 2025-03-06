@@ -17,6 +17,7 @@ csrfguard
 csrfprotector
 cva
 dismissable
+DRF
 dsn
 env
 facebookexternalhit
@@ -33,6 +34,7 @@ hsl
 igoat
 isanori
 jumpstart
+Kateryna
 linkify
 lxml
 markdownit
