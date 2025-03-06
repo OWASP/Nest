@@ -1,16 +1,13 @@
-import {
-  faSearch,
-  faTimes,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { debounce } from 'lodash'
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ChapterTypeAlgolia } from 'types/chapter'
-import { ProjectTypeAlgolia } from 'types/project'
-import { MultiSearchBarProps, Suggestion } from 'types/search'
-import { User } from 'types/user'
+import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { fetchAlgoliaData } from 'api/fetchAlgoliaData';
+import { debounce } from 'lodash';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChapterTypeAlgolia } from 'types/chapter';
+import { ProjectTypeAlgolia } from 'types/project';
+import { MultiSearchBarProps, Suggestion } from 'types/search';
+import { User } from 'types/user';
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -18,14 +15,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   indexes,
   initialValue = '',
 }) => {
-  const [searchQuery, setSearchQuery] = useState(initialValue)
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const [highlightedIndex, setHighlightedIndex] = useState<{ index: number; subIndex: number } | null>(null)
-  const navigate = useNavigate()
-  const pageCount = 1
-  const suggestionCount = 3
-  const searchBarRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [searchQuery, setSearchQuery] = useState(initialValue);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [highlightedIndex, setHighlightedIndex] = useState<{ index: number; subIndex: number } | null>(null);
+  const navigate = useNavigate();
+  const pageCount = 1;
+  const suggestionCount = 3;
+  const searchBarRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const debouncedSearch = useMemo(
     () =>
@@ -33,109 +30,109 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         if (query.length > 0) {
           const results = await Promise.all(
             indexes.map(async (index) => {
-              const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
+              const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount);
               return {
                 indexName: index,
                 hits: data.hits as ChapterTypeAlgolia[] | ProjectTypeAlgolia[] | User[],
                 totalPages: data.totalPages,
-              }
+              };
             })
-          )
-          setSuggestions(results.filter((result) => result.hits.length > 0))
+          );
+          setSuggestions(results.filter((result) => result.hits.length > 0));
         } else {
-          setSuggestions([])
+          setSuggestions([]);
         }
       }, 300),
     [indexes]
-  )
+  );
 
-  useEffect(() => debouncedSearch.cancel(), [debouncedSearch])
+  useEffect(() => debouncedSearch.cancel(), [debouncedSearch]);
 
   const handleSuggestionClick = useCallback(
     (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User, indexName: string) => {
-      setSearchQuery(suggestion.name)
+      setSearchQuery(suggestion.name);
 
       switch (indexName) {
         case 'chapters':
-          navigate(`/chapters/${suggestion.key}`)
-          break
+          navigate(`/chapters/${suggestion.key}`);
+          break;
         case 'projects':
-          navigate(`/projects/${suggestion.key}`)
-          break
+          navigate(`/projects/${suggestion.key}`);
+          break;
         case 'users':
-          navigate(`/community/users/${suggestion.key}`)
-          break
+          navigate(`/community/users/${suggestion.key}`);
+          break;
       }
     },
     [navigate]
-  )
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        inputRef.current?.blur()
+        inputRef.current?.blur();
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
-        const { index, subIndex } = highlightedIndex
-        const suggestion = suggestions[index]?.hits?.[subIndex]
+        const { index, subIndex } = highlightedIndex;
+        const suggestion = suggestions[index]?.hits?.[subIndex];
         if (suggestion) {
-          handleSuggestionClick(suggestion, suggestions[index]?.indexName)
+          handleSuggestionClick(suggestion, suggestions[index]?.indexName);
         }
       } else if (event.key === 'ArrowDown') {
-        event.preventDefault()
+        event.preventDefault();
         if (highlightedIndex === null) {
-          setHighlightedIndex({ index: 0, subIndex: 0 })
+          setHighlightedIndex({ index: 0, subIndex: 0 });
         } else {
-          const { index, subIndex } = highlightedIndex
-          const hitsLength = suggestions[index]?.hits?.length ?? 0
+          const { index, subIndex } = highlightedIndex;
+          const hitsLength = suggestions[index]?.hits?.length ?? 0;
           if (subIndex < hitsLength - 1) {
-            setHighlightedIndex({ index, subIndex: subIndex + 1 })
+            setHighlightedIndex({ index, subIndex: subIndex + 1 });
           } else if (index < suggestions.length - 1) {
-            setHighlightedIndex({ index: index + 1, subIndex: 0 })
+            setHighlightedIndex({ index: index + 1, subIndex: 0 });
           }
         }
       } else if (event.key === 'ArrowUp') {
-        event.preventDefault()
+        event.preventDefault();
         if (highlightedIndex !== null) {
-          const { index, subIndex } = highlightedIndex
+          const { index, subIndex } = highlightedIndex;
           if (subIndex > 0) {
-            setHighlightedIndex({ index, subIndex: subIndex - 1 })
+            setHighlightedIndex({ index, subIndex: subIndex - 1 });
           } else if (index > 0) {
-            const previousHitsLength = suggestions[index - 1]?.hits?.length ?? 1
-            setHighlightedIndex({ index: index - 1, subIndex: previousHitsLength - 1 })
+            const previousHitsLength = suggestions[index - 1]?.hits?.length ?? 1;
+            setHighlightedIndex({ index: index - 1, subIndex: previousHitsLength - 1 });
           }
         }
       }
-    }
+    };
 
-    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', handleKeyDown);
 
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick])
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
-        setSuggestions([])
+        setSuggestions([]);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside);
 
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = e.target.value
-    setSearchQuery(newQuery)
-    debouncedSearch(newQuery)
-    setHighlightedIndex(null)
-  }
+    const newQuery = e.target.value;
+    setSearchQuery(newQuery);
+    debouncedSearch(newQuery);
+    setHighlightedIndex(null);
+  };
 
   const handleClearSearch = () => {
-    setSearchQuery('')
-    setSuggestions([])
-    setHighlightedIndex(null)
-  }
+    setSearchQuery('');
+    setSuggestions([]);
+    setHighlightedIndex(null);
+  };
 
   return (
     <div className="w-full max-w-md p-4" ref={searchBarRef}>
@@ -151,16 +148,19 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
             />
             {searchQuery && (
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600" onClick={handleClearSearch}>
+              <button
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
+                onClick={handleClearSearch}
+              >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             )}
           </>
         ) : (
-          <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          <div className="animate-pulse h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>
         )}
       </div>
     </div>
-  )
-}
-export default MultiSearchBar
+  );
+};
+export default MultiSearchBar;
