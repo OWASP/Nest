@@ -125,8 +125,9 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      ```
 
 1. **Verify API Endpoints**:
-   - Check that the data is available via these API endpoints:
-     - [API Endpoint](http://localhost:8000/api/v1/)
+   - Check the following endpoints availability:
+     - [API](http://localhost:8000/api/v1/)
+     - [GraphQL](http://localhost:8000/graphql/)
 
 ### Optional Steps
 
