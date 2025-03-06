@@ -23,10 +23,9 @@ export const GET_MAIN_PAGE_DATA = gql`
     topContributors(limit: 18) {
       name
       login
-      contributionsCount
       avatarUrl
-      repositoryName
-      repositoryUrl
+      projectName
+      projectUrl
     }
     recentIssues(limit: 5) {
       commentsCount
@@ -50,6 +49,11 @@ export const GET_MAIN_PAGE_DATA = gql`
       name
       publishedAt
       tagName
+    }
+    sponsors {
+      imageUrl
+      name
+      url
     }
     statsOverview {
       activeChaptersStats
