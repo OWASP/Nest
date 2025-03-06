@@ -15,11 +15,6 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
     }
   }, [sponsors])
 
-  const priority = { DIAMOND: 1, PLATINUM: 2, GOLD: 3, SILVER: 4, SUPPORTER: 5, NOT_A_SPONSOR: 6 }
-
-  const sortedSponsors = [...sponsors].sort(
-    (a, b) => priority[a.sponsorType] - priority[b.sponsorType]
-  )
   return (
     <div>
       <div className="relative overflow-hidden py-2">
@@ -28,7 +23,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
           className="flex w-full animate-scroll gap-6"
           style={{ animationDuration: `${sponsors.length * 2}s` }}
         >
-          {sortedSponsors.map((sponsor, index) => (
+          {sponsors.map((sponsor, index) => (
             <div
               key={`${sponsor.name}-${index}`}
               className="flex min-w-[220px] flex-shrink-0 flex-col items-center rounded-lg p-5"
