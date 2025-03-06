@@ -223,7 +223,7 @@ describe('Contribute Component', () => {
     const closeButton = await screen.findByRole('button', { name: /close/i })
     expect(closeButton).toBeInTheDocument()
     fireEvent.click(closeButton)
-    
+
 
     await waitFor(() => {
       const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
