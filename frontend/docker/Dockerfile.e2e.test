@@ -4,12 +4,12 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV FORCE_COLOR=1 \
     PNPM_STORE_PATH=/app/.pnpm-store
-RUN pnpm config set store-dir $PNPM_STORE_PATH
 
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && \
+    pnpm config set store-dir $PNPM_STORE_PATH \
     pnpm install --frozen-lockfile
 
 COPY . .
