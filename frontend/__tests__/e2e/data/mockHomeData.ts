@@ -3,7 +3,7 @@ export const mockHomeData = {
     recentProjects: [
       {
         name: 'Project 1',
-        type: 'CODE',
+        type: 'code',
         createdAt: null,
         key: 'project-1',
         openIssuesCount: 12,
@@ -12,7 +12,7 @@ export const mockHomeData = {
       },
       {
         name: 'Project 2',
-        type: 'DOCUMENTATION',
+        type: 'documentation',
         createdAt: null,
         key: 'project-2',
         openIssuesCount: 5,
@@ -21,7 +21,7 @@ export const mockHomeData = {
       },
       {
         name: 'Project 3',
-        type: 'CODE',
+        type: 'code',
         createdAt: null,
         key: 'project-3',
         openIssuesCount: 8,
@@ -30,7 +30,7 @@ export const mockHomeData = {
       },
       {
         name: 'Project 4',
-        type: 'DOCUMENTATION',
+        type: 'documentation',
         createdAt: null,
         key: 'project-4',
         openIssuesCount: 3,
@@ -39,7 +39,7 @@ export const mockHomeData = {
       },
       {
         name: 'Project 5',
-        type: 'CODE',
+        type: 'code',
         createdAt: null,
         key: 'project-5',
         openIssuesCount: 15,
@@ -105,8 +105,8 @@ export const mockHomeData = {
         login: 'contributor1',
         contributionsCount: 15423,
         avatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4',
-        repositoryName: 'Repository 1',
-        repositoryUrl: 'https://github.com/contributor1/repository1',
+        projectName: 'Project 21',
+        projectUrl: 'https://nest.owasp.org/projects/project-21',
         __typename: 'RepositoryContributorNode',
       },
       {
@@ -114,8 +114,8 @@ export const mockHomeData = {
         login: 'contributor2',
         contributionsCount: 8956,
         avatarUrl: 'https://avatars.githubusercontent.com/u/2?v=4',
-        repositoryName: 'Repository 2',
-        repositoryUrl: 'https://github.com/contributor2/repository2',
+        projectName: 'Project 22',
+        projectUrl: 'https://nest.owasp.org/projects/project-22',
         __typename: 'RepositoryContributorNode',
       },
     ],
@@ -165,6 +165,12 @@ export const mockHomeData = {
         __typename: 'ReleaseNode',
       },
     ],
+    sponsors: [
+      {
+        name: 'Sponsor 1',
+        imageUrl: 'https://avatars.githubusercontent.com/u/1?v=4',
+      },
+    ],
     statsOverview: {
       activeChaptersStats: 100,
       activeProjectsStats: 100,
@@ -172,5 +178,23 @@ export const mockHomeData = {
       countriesStats: 100,
       __typename: 'StatsNode',
     },
+    upcomingEvents: [
+      {
+        category: 'Category 1',
+        endDate: '2025-02-28',
+        name: 'Event 1',
+        startDate: '2025-02-27',
+        url: 'https://nest.owasp.org/events/event-1',
+        __typename: 'EventNode',
+      },
+      {
+        category: 'Category 2',
+        endDate: '2025-03-11',
+        name: 'Event 2',
+        startDate: '2025-03-10',
+        url: 'https://nest.owasp.org/events/event-2',
+        __typename: 'EventNode',
+      },
+    ],
   },
 }

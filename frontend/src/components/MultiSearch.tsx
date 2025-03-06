@@ -146,6 +146,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     setHighlightedIndex(null)
   }
 
+  const handleFocusSearch = () => {
+    if (searchQuery.trim().length > 0 && !showSuggestions) {
+      setShowSuggestions(true)
+    } else {
+      setHighlightedIndex(null)
+    }
+  }
+
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
       case 'chapters':
@@ -168,7 +176,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             <input
               type="text"
               value={searchQuery}
+              ref={inputRef}
               onChange={handleSearchChange}
+              onFocus={handleFocusSearch}
               placeholder={placeholder}
               className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
             />
@@ -179,7 +189,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             )}
           </>
         ) : (
-          <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          <div className="animate-pulse h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>
         )}
       </div>
     </div>
