@@ -38,7 +38,14 @@ function App() {
           path="/projects/:projectKey/repositories/:repositoryKey"
           element={<RepositoryDetailsPage />}
         ></Route>
-        <Route path="/projects/contribute" element={<ContributePage />}></Route>
+       <Route
+          path="/projects/contribute"
+          element={
+            <div className="contribute-container">
+              <ContributePage />
+            </div>
+          }
+        />
         <Route path="/committees" element={<CommitteesPage />}></Route>
         <Route path="/committees/:committeeKey" element={<CommitteeDetailsPage />}></Route>
         <Route path="/chapters" element={<ChaptersPage />}></Route>
@@ -51,5 +58,4 @@ function App() {
     </main>
   )
 }
-
 export default App

@@ -249,6 +249,20 @@ a {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #718096;
 }
+.contribute-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .contribute-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+}
 .popup-content {
   cursor: pointer;
   color: black;
