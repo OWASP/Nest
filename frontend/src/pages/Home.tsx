@@ -112,7 +112,7 @@ export default function Home() {
   return (
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <div className="sm:mb-20 pt-20 pt-5 text-center">
+        <div className="pt-20 pt-5 text-center sm:mb-20">
           <div className="flex flex-col items-center py-10">
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
