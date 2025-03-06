@@ -2,12 +2,14 @@ FROM mcr.microsoft.com/playwright:v1.50.1-noble AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ENV FORCE_COLOR=1
+ENV FORCE_COLOR=1 \
+    PNPM_STORE_PATH=/app/.pnpm-store
+RUN pnpm config set store-dir $PNPM_STORE_PATH
 
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && \
-    pnpm install
+    pnpm install --frozen-lockfile
 
 COPY . .
