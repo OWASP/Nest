@@ -1,9 +1,6 @@
 import {
   faSearch,
   faTimes,
-  faProjectDiagram,
-  faBook,
-  faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -23,7 +20,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState<{ index: number; subIndex: number } | null>(null)
   const navigate = useNavigate()
   const pageCount = 1
@@ -46,10 +42,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             })
           )
           setSuggestions(results.filter((result) => result.hits.length > 0))
-          setShowSuggestions(true)
         } else {
           setSuggestions([])
-          setShowSuggestions(false)
         }
       }, 300),
     [indexes]
@@ -60,7 +54,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const handleSuggestionClick = useCallback(
     (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User, indexName: string) => {
       setSearchQuery(suggestion.name)
-      setShowSuggestions(false)
 
       switch (indexName) {
         case 'chapters':
@@ -80,7 +73,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setShowSuggestions(false)
         inputRef.current?.blur()
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
         const { index, subIndex } = highlightedIndex
@@ -123,7 +115,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false)
+        setSuggestions([])
       }
     }
 
@@ -142,7 +134,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const handleClearSearch = () => {
     setSearchQuery('')
     setSuggestions([])
-    setShowSuggestions(false)
     setHighlightedIndex(null)
   }
 
