@@ -92,21 +92,24 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const formattedBio = user?.bio?.split(' ').map((word, index) => {
-    let mentionMatch = word.match(/^@([\w-.]+)$/)
-    if (mentionMatch) {
-      // Removed dot at the end of the mention
-      if (mentionMatch[0].endsWith('.')) mentionMatch[0] = mentionMatch[0].slice(0, -1)
+    // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
+    let mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
+    if (mentionMatch && mentionMatch.length > 1) {
+      let username = mentionMatch[1]
+      let punctuation = mentionMatch[2] || ''
       return (
-        <Link
-          key={index}
-          href={`https://github.com/${mentionMatch[1]}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:underline"
-        >
-          {mentionMatch[0]}
+        <React.Fragment key={index}>
+          <Link
+            href={`https://github.com/${username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            @{username}
+          </Link>
+          {punctuation}
           <span> </span>
-        </Link>
+        </React.Fragment>
       )
     }
     return <span key={index}>{word} </span>
