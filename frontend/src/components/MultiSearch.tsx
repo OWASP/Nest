@@ -185,5 +185,4 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     </div>
   )
 }
-
 export default MultiSearchBar
