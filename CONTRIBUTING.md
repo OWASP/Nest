@@ -126,8 +126,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Verify API Endpoints**:
    - Check that the data is available via these API endpoints:
-     - [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
-     - [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
+     - [API Endpoint](http://localhost:8000/api/v1/)
 
 ### Optional Steps
 
