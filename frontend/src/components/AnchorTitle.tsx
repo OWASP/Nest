@@ -1,14 +1,13 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 
-interface TitleWithIconProps {
+interface AnchorTitleProps {
   href: string
-  icon: IconProp
   title: string
 }
 
-const TitleWithIcon: React.FC<TitleWithIconProps> = ({ href, icon, title }) => {
+const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
   const id = href.replace('#', '')
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -28,11 +27,11 @@ const TitleWithIcon: React.FC<TitleWithIconProps> = ({ href, icon, title }) => {
           className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
           onClick={handleClick}
         >
-          <FontAwesomeIcon icon={icon} className="h-7 w-5" />
+          <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
         </a>
       </div>
     </div>
   )
 }
 
-export default TitleWithIcon
+export default AnchorTitle

@@ -1,14 +1,14 @@
-import { faCalendar, faFileCode, faLink, faTag } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
+import AnchorTitle from 'components/AnchorTitle'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
-import TitleWithIcon from 'components/TitleWithIcon'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
 
@@ -39,16 +39,15 @@ const DetailsCard = ({
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
-        <SecondaryCard title={<TitleWithIcon href="#summary" icon={faLink} title="Summary" />}>
+        <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
           <p>{summary}</p>
         </SecondaryCard>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             title={
-              <TitleWithIcon
+              <AnchorTitle
                 href={`#${type}-details`}
-                icon={faLink}
                 title={`${type[0].toUpperCase() + type.slice(1)} Details`}
               />
             }
@@ -66,7 +65,7 @@ const DetailsCard = ({
           </SecondaryCard>
           {(type === 'project' || type === 'repository' || type === 'committee') && (
             <SecondaryCard
-              title={<TitleWithIcon href="#statistics" icon={faLink} title="Statistics" />}
+              title={<AnchorTitle href="#statistics" title="Statistics" />}
               className="md:col-span-2"
             >
               {stats.map((stat, index) => (
@@ -97,13 +96,13 @@ const DetailsCard = ({
             {languages.length !== 0 && (
               <ToggleableList
                 items={languages}
-                label={<TitleWithIcon href="#languages" icon={faLink} title="Languages" />}
+                label={<AnchorTitle href="#languages" title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
               <ToggleableList
                 items={topics}
-                label={<TitleWithIcon href="#topics" icon={faLink} title="Topics" />}
+                label={<AnchorTitle href="#topics" title="Topics" />}
               />
             )}
           </div>
@@ -114,7 +113,7 @@ const DetailsCard = ({
         {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList
-              title={<TitleWithIcon href="#recent-issues" icon={faLink} title="Recent Issues" />}
+              title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
               data={recentIssues}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -126,9 +125,7 @@ const DetailsCard = ({
               )}
             />
             <ItemCardList
-              title={
-                <TitleWithIcon href="#recent-releases" icon={faLink} title="Recent Releases" />
-              }
+              title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
               data={recentReleases}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -143,7 +140,7 @@ const DetailsCard = ({
         )}
         {type === 'project' && repositories.length > 0 && (
           <SecondaryCard
-            title={<TitleWithIcon href="#repositories" icon={faLink} title="Repositories" />}
+            title={<AnchorTitle href="#repositories" title="Repositories" />}
             className="mt-6"
           >
             <RepositoriesCard repositories={repositories} />
