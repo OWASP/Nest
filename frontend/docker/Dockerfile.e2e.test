@@ -9,7 +9,7 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && \
-    pnpm config set store-dir $PNPM_STORE_PATH \
+    pnpm config set store-dir $PNPM_STORE_PATH && \
     pnpm install --frozen-lockfile
 
 COPY . .
