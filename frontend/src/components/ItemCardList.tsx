@@ -24,8 +24,8 @@ const ItemCardList = ({
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center">
                 <a
-                  href={`/community/users/${item?.author?.login}`}
                   className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                  href={`/community/users/${item?.author?.login}`}
                 >
                   <img
                     src={item?.author?.avatarUrl}
@@ -34,7 +34,11 @@ const ItemCardList = ({
                   />
                 </a>
                 <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                  <a href={item?.url} className="text-blue-500 hover:underline dark:text-blue-400">
+                  <a
+                    className="text-blue-500 hover:underline dark:text-blue-400"
+                    href={item?.url}
+                    target="_blank"
+                  >
                     {item.title || item.name}
                   </a>
                 </h3>
