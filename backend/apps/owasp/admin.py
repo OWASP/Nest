@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
+from apps.owasp.models.conversation import Conversation
 from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
@@ -172,6 +173,14 @@ class SponsorAdmin(admin.ModelAdmin):
     )
 
 
+class ConversationAdmin(admin.ModelAdmin):
+    """Admin configuration for Conversation model."""
+
+    list_display = ("subject", "created_at", "updated_at")
+    search_fields = ("subject", "participants")
+    list_filter = ("created_at", "updated_at")
+
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
@@ -180,3 +189,4 @@ admin.site.register(ProjectHealthMetrics)
 admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Sponsor, SponsorAdmin)
+admin.site.register(Conversation, ConversationAdmin)
