@@ -65,6 +65,15 @@ export const mockGraphQLData = {
     countriesStats: 245,
     contributorsStats: 9673,
   },
+  upcomingEvents: [
+    {
+      category: 'Category 1',
+      endDate: '2025-02-28',
+      name: 'Event 1',
+      startDate: '2025-02-27',
+      url: 'https://nest.owasp.org/events/event-1',
+    },
+  ],
 }
 
 export const mockAlgoliaData = {

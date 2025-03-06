@@ -62,5 +62,12 @@ export const GET_MAIN_PAGE_DATA = gql`
       contributorsStats
       countriesStats
     }
+    upcomingEvents(limit: 6) {
+      category
+      endDate
+      name
+      startDate
+      url
+    }
   }
 `
