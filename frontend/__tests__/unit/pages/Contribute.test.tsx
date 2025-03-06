@@ -260,11 +260,8 @@ describe('Contribute Component', () => {
     })
 
     // Verify first issue button
-    await waitFor(() => {
-      const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
-      expect(viewIssueButton).toBeInTheDocument()
-      fireEvent.click(viewIssueButton)
-    })
+    const viewIssueButton = await screen.findByRole('button', { name: 'View Issue' })
+    expect(viewIssueButton).toBeInTheDocument()
 
     // Click close button
     await waitFor(() => {
