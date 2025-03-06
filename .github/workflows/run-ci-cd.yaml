@@ -201,7 +201,7 @@ jobs:
       - name: Cache pnpm dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.pnpm-store  # Use consistent cache path for GitHub Actions
+          path: ~/.pnpm-store
           key: pnpm-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-${{ runner.os }}-
@@ -223,7 +223,7 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example \
             --rm \
-            -v pnpm-store:/app/.pnpm-store \
+            -v ~/.pnpm-store:/app/.pnpm-store \
             ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest \
             pnpm run test:e2e
 
