@@ -18,6 +18,7 @@ csrfguard
 csrfprotector
 cva
 dismissable
+DRF
 dsn
 env
 facebookexternalhit
@@ -36,6 +37,7 @@ inlinehilite
 isanori
 jumpstart
 kasya
+Kateryna
 linkify
 lxml
 mamicidal

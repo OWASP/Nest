@@ -16,11 +16,13 @@ import { useEffect, useState } from 'react'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { MainPageData } from 'types/home'
+import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MovingLogos from 'components/LogoCarousel'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
@@ -169,7 +171,7 @@ export default function Home() {
                       icon={getProjectIcon(project.type) as IconProp}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>{project.type.charAt(0) + project.type.slice(1).toLowerCase()}</span>
+                    <span>{capitalize(project.type)}</span>
                   </div>
                 </div>
               </div>
@@ -215,7 +217,8 @@ export default function Home() {
           )}
         />
       </div>
-      <div className="grid gap-6 md:grid-cols-4">
+
+      <div className="mt-10 grid gap-6 md:grid-cols-4">
         {counterData.map((stat, index) => (
           <SecondaryCard key={index} className="text-center">
             <div className="mb-2 text-3xl font-bold text-blue-400">
@@ -240,6 +243,10 @@ export default function Home() {
           >
             Join OWASP Now
           </a>
+        </SecondaryCard>
+
+        <SecondaryCard>
+          <MovingLogos sponsors={data.sponsors} />
         </SecondaryCard>
       </div>
     </div>
