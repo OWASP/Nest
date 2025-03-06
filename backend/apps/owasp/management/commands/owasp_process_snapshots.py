@@ -61,7 +61,9 @@ class Command(BaseCommand):
             new_chapters = self.get_new_items(Chapter, snapshot.start_at, snapshot.end_at)
             new_issues = self.get_new_items(Issue, snapshot.start_at, snapshot.end_at)
             new_projects = self.get_new_items(Project, snapshot.start_at, snapshot.end_at)
-            new_releases = self.get_new_items(Release, snapshot.start_at, snapshot.end_at)
+            new_releases = self.get_new_items(Release, snapshot.start_at, snapshot.end_at).filter(
+                is_draft=False, is_pre_release=False
+            )
             new_users = self.get_new_items(User, snapshot.start_at, snapshot.end_at)
 
             # Add items to snapshot

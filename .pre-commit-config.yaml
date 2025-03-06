@@ -55,3 +55,4 @@ repos:
         exclude: (backend|schema)/tests/data
         files: (backend|schema)/tests
       - id: trailing-whitespace
+        exclude: pnpm-lock.yaml

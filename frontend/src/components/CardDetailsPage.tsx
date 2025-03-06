@@ -42,7 +42,6 @@ const DetailsCard = ({
         <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
           <p>{summary}</p>
         </SecondaryCard>
-
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             title={
@@ -88,7 +87,6 @@ const DetailsCard = ({
             </div>
           )}
         </div>
-
         {(type === 'project' || type === 'repository') && (
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
@@ -107,9 +105,7 @@ const DetailsCard = ({
             )}
           </div>
         )}
-
         <TopContributors contributors={topContributors} maxInitialDisplay={6} />
-
         {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList
