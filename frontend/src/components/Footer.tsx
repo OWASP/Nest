@@ -1,4 +1,4 @@
-import { Box, Button, Link, List, Text } from '@chakra-ui/react'
+import { Box, Button, Heading, Link, List, Text } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useCallback } from 'react'
@@ -31,7 +31,7 @@ export default function Footer() {
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
-                <Text>{section.title}</Text>
+                <Heading as="h3">{section.title}</Heading>
                 {/* Icon to indicate open/close state */}
                 <Box className="transition-transform duration-200 lg:hidden">
                   {openSection === section.title ? (
@@ -51,7 +51,9 @@ export default function Footer() {
                 {section.links.map((link, index) => (
                   <List.Item key={index} className="py-1">
                     {link.isSpan ? (
-                      <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
+                      <Box as="span" className="text-slate-600 dark:text-slate-400">
+                        {link.text}
+                      </Box>
                     ) : (
                       <Link
                         target="_blank"
