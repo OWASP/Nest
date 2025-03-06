@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fireEvent, screen, waitFor, render as rtlRender } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockContributeData } from '@unit/data/mockContributeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
@@ -25,18 +24,7 @@ jest.mock('components/Pagination', () =>
   )
 )
 
-// Custom render function to handle async rendering
-const customRender = (ui, options = {}) => {
-  return rtlRender(ui, {
-    ...options,
-    wrapper: ({ children }) => children,
-  })
-}
-
 describe('Contribute Component', () => {
-  // Setup user event
-  const user = userEvent.setup()
-
   // Suppress console errors and warnings during tests
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
@@ -198,28 +186,20 @@ describe('Contribute Component', () => {
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockIssuesData)
 
-    customRender(<ContributePage />)
+    render(<ContributePage />)
 
-    // Wait for read more buttons with increased timeout
-    await waitFor(
-      () => {
-        const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-        expect(readMoreButtons.length).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
+    await waitFor(() => {
+      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+      expect(readMoreButtons.length).toBeGreaterThan(0)
+    })
 
-    const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-    await user.click(readMoreButtons[0])
+    const readMoreButton = screen.getAllByRole('button', { name: /read more/i })[0]
+    fireEvent.click(readMoreButton)
 
-    // More flexible close button check
-    await waitFor(
-      () => {
-        const closeButtons = screen.queryAllByRole('button', { name: /close/i })
-        expect(closeButtons.length).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
+    await waitFor(() => {
+      const closeButton = screen.getByRole('button', { name: /close/i })
+      expect(closeButton).toBeInTheDocument()
+    })
   })
 
   test('closes modal when onClose is called', async () => {
@@ -230,40 +210,26 @@ describe('Contribute Component', () => {
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockIssuesData)
 
-    customRender(<ContributePage />)
+    render(<ContributePage />)
 
-    // Wait for read more buttons with increased timeout
-    await waitFor(
-      () => {
-        const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-        expect(readMoreButtons.length).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
+    await waitFor(() => {
+      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+      expect(readMoreButtons.length).toBeGreaterThan(0)
+    })
 
-    const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-    await user.click(readMoreButtons[0])
+    const readMoreButton = screen.getAllByRole('button', { name: /read more/i })[0]
+    fireEvent.click(readMoreButton)
 
-    // More flexible close button check
-    await waitFor(
-      () => {
-        const closeButtons = screen.queryAllByRole('button', { name: /close/i })
-        expect(closeButtons.length).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
+    await waitFor(() => {
+      const closeButton = screen.getByRole('button', { name: /close/i })
+      expect(closeButton).toBeInTheDocument()
+      fireEvent.click(closeButton)
+    })
 
-    const closeButtons = screen.getAllByRole('button', { name: /close/i })
-    await user.click(closeButtons[0])
-
-    // Verify modal closed or content is still present
-    await waitFor(
-      () => {
-        const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
-        expect(modalTitle).toBeInTheDocument()
-      },
-      { timeout: 3000 }
-    )
+    await waitFor(() => {
+      const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
+      expect(modalTitle).toBeInTheDocument()
+    })
   })
 
   test('handles modal state for multiple cards', async () => {
@@ -276,65 +242,42 @@ describe('Contribute Component', () => {
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockMultipleIssues)
 
-    customRender(<ContributePage />)
+    render(<ContributePage />)
 
     // Wait for both cards to be rendered
-    await waitFor(
-      () => {
-        const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-        expect(readMoreButtons).toHaveLength(2)
-      },
-      { timeout: 3000 }
-    )
+    await waitFor(() => {
+      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+      expect(readMoreButtons).toHaveLength(2)
+    })
 
     // Click first card's Read More button
     const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+    fireEvent.click(readMoreButtons[0])
 
-    // Use user-event for more reliable interactions
-    await user.click(readMoreButtons[0])
+    // Verify first modal is open
+    await waitFor(() => {
+      expect(screen.getByText('Hint 1')).toBeInTheDocument()
+    })
 
-    // Verify first modal is open with more flexible waiting
-    await waitFor(
-      () => {
-        const hintText = screen.queryByText('Hint 1')
-        expect(hintText).toBeInTheDocument()
-      },
-      { timeout: 3000 }
-    )
+    // Verify first issue button
+    await waitFor(() => {
+      const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
+      expect(viewIssueButton).toBeInTheDocument()
+      fireEvent.click(viewIssueButton)
+    })
 
-    // More flexible button selection
-    await waitFor(
-      () => {
-        const viewIssueButtons = screen.queryAllByRole('button', {
-          name: /view issue/i,
-        })
-        expect(viewIssueButtons.length).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
+    // Click close button
+    await waitFor(() => {
+      const closeButton = screen.getByRole('button', { name: /close/i })
+      fireEvent.click(closeButton)
+    })
 
-    const viewIssueButtons = screen.getAllByRole('button', { name: /view issue/i })
-    await user.click(viewIssueButtons[0])
+    // Click second card's Read More button
+    fireEvent.click(readMoreButtons[1])
 
-    // Click close button with more flexibility
-    await waitFor(
-      () => {
-        const closeButtons = screen.queryAllByRole('button', { name: /close/i })
-        expect(closeButtons.length).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
-
-    const closeButtons = screen.getAllByRole('button', { name: /close/i })
-    await user.click(closeButtons[0])
-
-    // Verify modal closed or content is still present
-    await waitFor(
-      () => {
-        const modalTitle = screen.queryByText(mockMultipleIssues.hits[0].title)
-        expect(modalTitle).toBeInTheDocument()
-      },
-      { timeout: 3000 }
-    )
+    // Verify second modal is open
+    await waitFor(() => {
+      expect(screen.getByText('Hint 2')).toBeInTheDocument()
+    })
   })
 })
