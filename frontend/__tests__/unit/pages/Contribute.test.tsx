@@ -224,7 +224,6 @@ describe('Contribute Component', () => {
     expect(closeButton).toBeInTheDocument()
     fireEvent.click(closeButton)
 
-
     await waitFor(() => {
       const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
       expect(modalTitle).toBeInTheDocument()
