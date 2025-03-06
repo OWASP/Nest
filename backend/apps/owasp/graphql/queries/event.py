@@ -14,4 +14,4 @@ class EventQuery(BaseQuery):
 
     def resolve_upcoming_events(root, info, limit):
         """Resolve all events."""
-        return Event.objects.order_by("start_date")[:limit]
+        return Event.upcoming_events()[:limit]
