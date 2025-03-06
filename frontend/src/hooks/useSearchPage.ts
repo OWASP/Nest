@@ -1,4 +1,4 @@
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { fetchTypesenseData } from 'api/fetchTypesenseData'
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AlgoliaResponseType } from 'types/algolia'
@@ -80,7 +80,7 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
-        const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
+        const data: AlgoliaResponseType<T> = await fetchTypesenseData<T>(
           sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
             ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
             : indexName,

@@ -16,7 +16,23 @@ class UserIndex(IndexBase):
             {"name": "avatar_url", "type": "string"},
             {"name": "bio", "type": "string"},
             {"name": "company", "type": "string"},
-            {"name": "contributions", "type": "string[]"},
+            {
+                "name": "contributions",
+                "type": "object[]",
+                "fields": [
+                    {"name": "contributions_count", "type": "int32"},
+                    {"name": "repository_contributors_count", "type": "int32"},
+                    {"name": "repository_description", "type": "string"},
+                    {"name": "repository_forks_count", "type": "int32"},
+                    {"name": "repository_key", "type": "string"},
+                    {"name": "repository_name", "type": "string"},
+                    {"name": "repository_latest_release", "type": "string"},
+                    {"name": "repository_license", "type": "string"},
+                    {"name": "repository_owner_key", "type": "string"},
+                    {"name": "repository_stars_count", "type": "int32"},
+                ],
+                "optional": True,
+            },
             {"name": "created_at", "type": "float"},
             {"name": "email", "type": "string"},
             {"name": "followers_count", "type": "int32"},
@@ -37,8 +53,8 @@ class UserIndex(IndexBase):
     def prepare_document(self, user):
         """Convert model instance to a dictionary for Typesense."""
         return {
-            "id": str(user.id) if user.id else "",
-            "avatar_url": user.idx_avatar_url or "",
+            "id": str(user.id),
+            "avatar_url": user.idx_avatar_url,
             "bio": user.idx_bio or "",
             "company": user.idx_company or "",
             "contributions": user.idx_contributions if user.idx_contributions else [],
@@ -53,8 +69,8 @@ class UserIndex(IndexBase):
             "issues_count": user.idx_issues_count if user.idx_issues_count is not None else 0,
             "key": user.idx_key or "",
             "location": user.idx_location or "",
-            "login": user.idx_login or "",
-            "name": user.idx_name or "",
+            "login": user.idx_login,
+            "name": user.idx_name,
             "public_repositories_count": user.idx_public_repositories_count
             if user.idx_public_repositories_count is not None
             else 0,

@@ -7,8 +7,6 @@ export interface TypesenseResponseType<T> {
   totalPages: number
 }
 
-
-
 export const fetchTypesenseData = async <T>(
   indexName: string,
   query = '*',

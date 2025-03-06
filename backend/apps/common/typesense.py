@@ -88,9 +88,9 @@ class IndexBase:
         """Populate Typesense collection with data from the database."""
         client = Typesense.get_client()
         model = self.get_model()
-        queryset = model.objects.all()
+        queryset = model.objects.filter().iterator()
 
-        data = [self.prepare_document(obj) for obj in queryset]
+        data = (self.prepare_document(obj) for obj in queryset if obj.is_indexable)
 
         if not data:
             logging.info(f"No data found for {self.index_name}. Skipping population.")
@@ -100,8 +100,11 @@ class IndexBase:
             response = client.collections[self.index_name].documents.import_(
                 data, {"action": "upsert"}
             )
-            logging.info(f"Populated '{self.index_name}' with {len(data)} records.")
-            logging.info(f"Found {len(queryset)} records in Django for {self.index_name}")
+
+            errors = [item["error"] for item in response if "error" in item]
+            if errors:
+                logging.info(f"Errors while populating '{self.index_name}': {errors}")
+            logging.info(f"Populated '{self.index_name}' with this response.")
         except Exception as e:
             logging.exception(f"Error populating '{self.index_name}': {e}")
             logging.info(f"Found {len(queryset)} records in Django for {self.index_name}")

@@ -1,4 +1,4 @@
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { fetchTypesenseData } from 'api/fetchTypesenseData'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -23,19 +23,19 @@ const ChaptersPage = () => {
     handleSearch,
     handlePageChange,
   } = useSearchPage<ChapterTypeAlgolia>({
-    indexName: 'chapters',
+    indexName: 'chapter',
     pageTitle: 'OWASP Chapters',
   })
 
   useEffect(() => {
     const fetchData = async () => {
       const searchParams = {
-        indexName: 'chapters',
+        indexName: 'chapter',
         query: '',
         currentPage: 1,
         hitsPerPage: 1000,
       }
-      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchTypesenseData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
@@ -61,10 +61,9 @@ const ChaptersPage = () => {
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket " />,
       onclick: handleButtonClick,
     }
-
     return (
       <Card
-        key={chapter.objectID}
+        key={chapter.key}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
         summary={chapter.summary}
