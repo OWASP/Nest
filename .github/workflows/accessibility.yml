@@ -13,11 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node
+        if: matrix.language == 'javascript-typescript'
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "pnpm"
+          cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Enable Corepack (for pnpm)
