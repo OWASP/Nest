@@ -76,6 +76,14 @@ jobs:
         working-directory: frontend
         run: pnpm run lint:check
 
+      - name: Run ESLint for accessibility checks
+        working-directory: frontend
+        run: pnpm eslint src --ext .js,.jsx,.ts,.tsx
+
+      - name: Run Lighthouse CI accessibility tests
+        working-directory: frontend
+        run: pnpm run test:accessibility
+
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \

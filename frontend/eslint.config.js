@@ -7,6 +7,7 @@ import typescriptParser from '@typescript-eslint/parser'
 import prettierConfig from 'eslint-config-prettier'
 import importPlugin from 'eslint-plugin-import'
 import jest from 'eslint-plugin-jest'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import prettier from 'eslint-plugin-prettier'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -41,6 +42,7 @@ export default [
       jest,
       prettier,
       react,
+      'jsx-a11y': jsxA11y, // ✅ Added accessibility plugin
     },
     settings: {
       'import/resolver': {
@@ -78,7 +80,6 @@ export default [
             { pattern: 'lib/**', group: 'internal', position: 'after' },
             { pattern: 'components/**', group: 'internal', position: 'after' },
             { pattern: 'pages/**', group: 'internal', position: 'after' },
-
             { pattern: '@tests/**', group: 'internal', position: 'after' },
           ],
           pathGroupsExcludedImportTypes: ['builtin'],
@@ -87,6 +88,14 @@ export default [
       'no-console': 'error',
       'no-unused-vars': 'off',
       'import/no-relative-parent-imports': 'error',
+
+      // ✅ Accessibility Rules
+      ...jsxA11y.configs.recommended.rules, // Use recommended rules
+      'jsx-a11y/anchor-is-valid': 'warn',
+      'jsx-a11y/no-autofocus': 'warn',
+      'jsx-a11y/no-distracting-elements': 'warn',
+      'jsx-a11y/label-has-associated-control': 'error',
+      'jsx-a11y/click-events-have-key-events': 'warn',
     },
     ignores: ['src/utils/logger.ts'],
   },
