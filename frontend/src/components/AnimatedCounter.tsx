@@ -3,19 +3,21 @@ import { useEffect, useRef, useState } from 'react'
 interface AnimatedCounterProps {
   className?: string
   duration: number
-  end: number
+  end: number | string
 }
 
 export default function AnimatedCounter({ end, duration, className }: AnimatedCounterProps) {
-  const [count, setCount] = useState(0)
-  const countRef = useRef(count)
+  const [count, setCount] = useState<string | number>(0)
+  const countRef = useRef(0)
   const startTime = useRef(Date.now())
 
   useEffect(() => {
+    let numericEnd = typeof end === "string" ? parseFloat(end) : end
+
     const animate = () => {
       const now = Date.now()
       const progress = Math.min((now - startTime.current) / (duration * 1000), 1)
-      const currentCount = Math.floor(progress * end)
+      let currentCount = Math.round(progress * numericEnd)
 
       if (currentCount !== countRef.current) {
         setCount(currentCount)
