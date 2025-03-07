@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.2",
-    "@ark-ui/react": "^4.9.2",
+    "@ark-ui/react": "^5.0.0",
     "@chakra-ui/react": "^3.9.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
