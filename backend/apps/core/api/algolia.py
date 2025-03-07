@@ -6,13 +6,12 @@ import requests
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_slug
 from django.http import JsonResponse
 
 from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
 from apps.core.utils.params_mapping import get_params_for_index
+from apps.core.validators import validate_search_params
 
 CACHE_PREFIX = "algolia_proxy"
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
@@ -38,52 +37,6 @@ def get_search_results(index_name, query, page, hits_per_page, ip_address=None):
         "hits": search_result.get("hits", []),
         "nbPages": search_result.get("nbPages", 0),
     }
-
-
-def validate_search_params(data):
-    """Validate search parameters."""
-
-    def validate_string_slug(value):
-        """Validate a string value as a slug."""
-        if not value or not isinstance(value, str):
-            return False
-        try:
-            validate_slug(value)
-            return True
-        except ValidationError:
-            return False
-
-    index_name = data.get("indexName")
-    limit = data.get("hitsPerPage", 25)
-    page = data.get("page", 1)
-    query = data.get("query", "")
-
-    if not validate_string_slug(index_name):
-        return JsonResponse({"error": "Missing or invalid index name."}, status=400)
-
-    try:
-        limit = int(limit)
-
-        if limit <= 0 or limit > 100:
-            return JsonResponse(
-                {"error": "hitsPerPage value must be between 1 and 100."}, status=400
-            )
-
-    except ValueError:
-        return JsonResponse({"error": "Invalid hitsPerPage value provided."}, status=400)
-
-    try:
-        page = int(page)
-        if page <= 0:
-            return JsonResponse({"error": "page value must be greater than 0."}, status=400)
-
-    except ValueError:
-        return JsonResponse({"error": "Invalid page value provided."}, status=400)
-
-    if query and not validate_string_slug(query):
-        return JsonResponse({"error": "Missing or invalid query."}, status=400)
-
-    return None
 
 
 def algolia_search(request):
