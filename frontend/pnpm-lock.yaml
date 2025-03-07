@@ -14,9 +14,6 @@ importers:
       '@ark-ui/react':
         specifier: ^4.9.2
         version: 4.9.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@axe-core/react':
-        specifier: ^4.10.1
-        version: 4.10.1
       '@chakra-ui/react':
         specifier: ^3.9.0
         version: 3.9.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -117,6 +114,9 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.7(@swc/helpers@0.5.15))(@types/node@22.13.9)(typescript@5.8.2)))
     devDependencies:
+      '@axe-core/react':
+        specifier: ^4.10.1
+        version: 4.10.1
       '@eslint/js':
         specifier: ^9.21.0
         version: 9.21.0
