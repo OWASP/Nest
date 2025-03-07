@@ -80,7 +80,7 @@ def validate_search_params(data):
     except ValueError:
         return JsonResponse({"error": "Invalid page value provided."}, status=400)
 
-    if not validate_string_slug(query):
+    if query and not validate_string_slug(query):
         return JsonResponse({"error": "Missing or invalid query."}, status=400)
 
     return None
