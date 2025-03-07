@@ -42,7 +42,7 @@ export default [
       jest,
       prettier,
       react,
-      'jsx-a11y': jsxA11y, // ✅ Added accessibility plugin
+      'jsx-a11y': jsxA11y,
     },
     settings: {
       'import/resolver': {
@@ -89,14 +89,18 @@ export default [
       'no-unused-vars': 'off',
       'import/no-relative-parent-imports': 'error',
 
-      // ✅ Accessibility Rules
-      ...jsxA11y.configs.recommended.rules, // Use recommended rules
+      ...jsxA11y.configs.recommended.rules,
       'jsx-a11y/anchor-is-valid': 'warn',
       'jsx-a11y/no-autofocus': 'warn',
       'jsx-a11y/no-distracting-elements': 'warn',
       'jsx-a11y/label-has-associated-control': 'error',
       'jsx-a11y/click-events-have-key-events': 'warn',
     },
-    ignores: ['src/utils/logger.ts'],
+  },
+  {
+    files: ['src/utils/logger.ts'],
+    rules: {
+      'no-console': 'off',
+    },
   },
 ]
