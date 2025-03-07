@@ -20,15 +20,20 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: frontend/pnpm-lock.yaml
 
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-          run_install: false
+
+      - name: Verify pnpm installation
+        run: pnpm --version
 
       - name: Install dependencies
-        working-directory: frontend
         run: pnpm install --frozen-lockfile
+        working-directory: frontend
 
       - name: Run ESLint for accessibility
         working-directory: frontend
