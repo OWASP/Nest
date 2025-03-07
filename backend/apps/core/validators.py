@@ -1,4 +1,4 @@
-"""Validators for search parameters."""
+"""Validators for the search parameters of the Algolia endpoint."""
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
@@ -8,11 +8,15 @@ from django.http import JsonResponse
 def validate_string_slug(value):
     """Validate a string value as a slug."""
     if not value or not isinstance(value, str):
-        return lambda value: JsonResponse({"error": f"Missing or invalid {value}."}, status=400)
+        return lambda field_name: JsonResponse(
+            {"error": f"Missing or invalid {field_name}."}, status=400
+        )
     try:
         validate_slug(value)
     except ValidationError:
-        return lambda value: JsonResponse({"error": f"Invalid {value} provided."}, status=400)
+        return lambda field_name: JsonResponse(
+            {"error": f"Invalid {field_name} provided."}, status=400
+        )
     return None
 
 
