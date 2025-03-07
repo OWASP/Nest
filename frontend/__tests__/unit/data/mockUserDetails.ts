@@ -4,7 +4,7 @@ export const mockUserDetailsData = {
     name: 'Test User',
     avatarUrl: 'https://example.com/avatar.jpg',
     url: 'https://github.com/testuser',
-    bio: 'This is a test user',
+    bio: 'Test @User',
     company: 'Test Company',
     location: 'Test Location',
     email: 'testuser@example.com',
