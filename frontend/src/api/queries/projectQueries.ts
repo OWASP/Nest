@@ -16,10 +16,12 @@ export const GET_PROJECT_DATA = gql`
         title
         commentsCount
         createdAt
+        url
         author {
           avatarUrl
           login
           name
+          url
         }
       }
       recentReleases {

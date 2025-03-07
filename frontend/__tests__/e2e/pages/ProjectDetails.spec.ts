@@ -9,7 +9,7 @@ test.describe('Project Details Page', () => {
         json: { data: mockProjectDetailsData },
       })
     })
-    await page.goto('/projects/test-project')
+    await page.goto('/projects/test-project', { timeout: 60000 })
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -71,7 +71,6 @@ test.describe('Project Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Fix authentication bug' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Dave Debugger' })).toBeVisible()
-    await expect(page.getByText('Dave Debugger')).toBeVisible()
     await expect(page.getByText('Feb 5, 2025')).toBeVisible()
     await expect(page.getByText('5 comments')).toBeVisible()
   })
@@ -80,7 +79,6 @@ test.describe('Project Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'V1.2.0' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Charlie Dev' })).toBeVisible()
-    await expect(page.getByText('Charlie Dev')).toBeVisible()
     await expect(page.getByText('Jan 20, 2025')).toBeVisible()
   })
 

@@ -61,3 +61,11 @@ The following is an auto-generated visualization of our Django models:
 
 
 To get started, visit the [OWASP Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).
+
+## About
+
+OWASP Nest was **originally created by Arkadii Yakovets** (Ark) to address challenges in navigating OWASP projects. The project was **built from scratch based on Ark's ideas and discussions with Starr Brown** (Starr), ensuring a well-structured system design aligned with OWASP's ecosystem. Ark, an experienced software development professional with over 10 years of expertise in Python, Django, Django REST Framework (DRF), and related backend technologies, led the development of the backend using widely adopted Python **open-source frameworks and libraries**, including DRF, django-filter, OpenAI, Algolia Search, slack-bolt, PyGitHub, pre-commit, pytest, and more. The initial frontend, based on Vue.js, was introduced by **Kateryna Golovanova** (Kate), who later became the project co-leader due to her invaluable frontend and project management skills. The **code is licensed under the MIT License**, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are OWASP members and adhere to the OWASP Code of Conduct.
+
+Over time, OWASP Nest has expanded to address broader OWASP community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, along with NestBot, has become a popular entry point for various OWASP aspects, including projects, chapters, users, and aggregated contribution opportunities -- with even more features planned. OWASP Nest's success is also the result of many valuable [contributions](https://github.com/OWASP/Nest/graphs/contributors) from the broader [OWASP Nest community](https://owasp.slack.com/archives/project-nest), whose efforts have helped shape and improve the project in countless ways.
+
+**No other OWASP projects' code was used in OWASP Nest's development.** While explicit attribution (other than per MIT license) is not required, contributors and other OWASP project leaders are welcome to provide it at their discretion.
