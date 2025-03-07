@@ -14,7 +14,7 @@ DEFAULT_MAX_TOKENS_SET = 2000
 
 
 class TestOpenAi:
-    @pytest.fixture
+    @pytest.fixture()
     def openai_instance(self):
         return OpenAi()
 

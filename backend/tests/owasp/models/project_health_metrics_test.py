@@ -11,7 +11,7 @@ class TestProjectHealthMetricsModel:
     MAX_SCORE = 100.0
     MIN_SCORE = 0.0
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_project(self):
         """Mock a Project instance with simulated persistence."""
         project = Project(key="test_project", name="Test Project")

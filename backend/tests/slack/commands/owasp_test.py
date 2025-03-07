@@ -7,32 +7,32 @@ from apps.slack.commands.owasp import owasp_handler
 
 
 class TestOwaspHandler:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_get_chapters(self):
         with patch("apps.owasp.api.search.chapter.get_chapters") as mock:
             mock.return_value = {"hits": []}
             yield mock
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_get_committees(self):
         with patch("apps.owasp.api.search.committee.get_committees") as mock:
             mock.return_value = {"hits": []}
             yield mock
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_get_projects(self):
         with patch("apps.owasp.api.search.project.get_projects") as mock:
             mock.return_value = {"hits": []}

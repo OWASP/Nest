@@ -6,7 +6,7 @@ import pytest
 from apps.github.models.mixins.release import ReleaseIndexMixin
 
 
-@pytest.fixture
+@pytest.fixture()
 def release_index_mixin_instance():
     instance = ReleaseIndexMixin()
     instance.author = MagicMock()

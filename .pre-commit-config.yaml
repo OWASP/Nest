@@ -1,43 +1,28 @@
 repos:
-  # - repo: https://github.com/adrienverge/yamllint.git
-  #   rev: v1.35.1
-  #   hooks:
-  #     - id: yamllint
-  #       args:
-  #         - --format
-  #         - parsable
-  #         - --strict
-  #       exclude: (\.github|pnpm-lock\.yaml)
-
-  # - repo: https://github.com/astral-sh/ruff-pre-commit
-  #   rev: v0.9.9
-  #   hooks:
-  #     - id: ruff
-  #       args:
-  #         - --fix
-  #     - id: ruff-format
-  #       args:
-  #         - --line-length=99
-
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args:
+          - --format
+          - parsable
+          - --strict
+        exclude: (.github|pnpm-lock.yaml)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.7
+    hooks:
+      - id: ruff
+        args:
+          - --fix
+      - id: ruff-format
   - repo: https://github.com/djlint/djLint
-    rev: v1.36.4
+    rev: v1.35.2
     hooks:
       - id: djlint-reformat-django
-        files: templates/.*\.html
+        files: templates/.*.html
         entry: djlint --reformat
         types:
           - html
-
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.3
-    hooks:
-      - id: yamlfmt
-        args:
-          - --implicit_start
-          - --mapping=2
-          - --offset=2
-          - --sequence=4
-        exclude: (\.github|frontend/pnpm-lock\.yaml)
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -57,7 +42,4 @@ repos:
         exclude: (backend|schema)/tests/data
         files: (backend|schema)/tests
       - id: trailing-whitespace
-        exclude: pnpm-lock\.yaml
-
-default_language_version:
-python: python3.12
+        exclude: pnpm-lock.yaml

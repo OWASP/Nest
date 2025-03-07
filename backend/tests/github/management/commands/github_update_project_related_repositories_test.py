@@ -9,12 +9,12 @@ from apps.github.management.commands.github_update_project_related_repositories 
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def command():
     return Command()
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_project():
     project = mock.Mock(spec=Project)
     project.owasp_url = "https://owasp.org/www-project-test"

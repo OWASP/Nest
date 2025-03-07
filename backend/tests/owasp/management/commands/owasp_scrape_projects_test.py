@@ -13,11 +13,11 @@ from apps.owasp.management.commands.owasp_scrape_projects import (
 
 
 class TestOwaspScrapeProjects:
-    @pytest.fixture
+    @pytest.fixture()
     def command(self):
         return Command()
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_project(self):
         project = mock.Mock(spec=Project)
         project.owasp_url = "https://owasp.org/www-project-test"

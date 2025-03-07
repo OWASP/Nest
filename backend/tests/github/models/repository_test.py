@@ -27,7 +27,7 @@ class TestRepositoryModel:
         assert updated_repository.node_id == mock_repository.node_id
         assert updated_repository.from_github.call_count == 1
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_gh_repository(self):
         """Fixture for a mocked GitHub repository."""
         gh_repository = MagicMock()

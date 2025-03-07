@@ -7,7 +7,7 @@ from apps.slack.common.presentation import EntityPresentation
 
 
 class TestChapterHandler:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_chapter_data(self):
         return {
             "hits": [
@@ -23,7 +23,7 @@ class TestChapterHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_empty_chapter_data(self):
         return {
             "hits": [],

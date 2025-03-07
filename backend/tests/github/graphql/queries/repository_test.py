@@ -11,12 +11,12 @@ from apps.owasp.models.project import Project
 class TestRepositoryQuery:
     """Test cases for RepositoryQuery class."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_info(self):
         """GraphQL info mock fixture."""
         return Mock()
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_project(self):
         """Project mock fixture."""
         return Mock(spec=Project)

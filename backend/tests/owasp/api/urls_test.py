@@ -21,11 +21,11 @@ def test_router_registration(url_name, expected_prefix, viewset_class):
     assert matching_routes, f"Route '{url_name}' not found in router."
 
     for route in matching_routes:
-        assert expected_prefix in route.pattern.describe(), (
-            f"Prefix '{expected_prefix}' not found in route '{route.name}'."
-        )
+        assert (
+            expected_prefix in route.pattern.describe()
+        ), f"Prefix '{expected_prefix}' not found in route '{route.name}'."
 
         viewset = route.callback.cls
-        assert issubclass(viewset, viewset_class), (
-            f"Viewset for '{route.name}' does not match {viewset_class}."
-        )
+        assert issubclass(
+            viewset, viewset_class
+        ), f"Viewset for '{route.name}' does not match {viewset_class}."

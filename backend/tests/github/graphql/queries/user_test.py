@@ -14,12 +14,12 @@ from apps.github.models.user import User
 class TestUserQuery:
     """Test cases for UserQuery class."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_info(self):
         """GraphQL info mock fixture."""
         return Mock()
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_user(self):
         """User mock fixture."""
         return Mock(spec=User)
@@ -43,12 +43,12 @@ class TestUserQuery:
 class TestUserResolution:
     """Test cases for user resolution."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_user(self):
         """User mock fixture."""
         return Mock(spec=User)
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_info(self):
         """GraphQL info mock fixture."""
         return Mock()

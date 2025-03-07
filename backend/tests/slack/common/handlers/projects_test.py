@@ -7,7 +7,7 @@ from apps.slack.common.presentation import EntityPresentation
 
 
 class TestProjectHandler:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_project_data(self):
         return {
             "hits": [
@@ -25,7 +25,7 @@ class TestProjectHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_empty_project_data(self):
         return {
             "hits": [],

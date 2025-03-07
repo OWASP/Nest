@@ -10,11 +10,11 @@ from apps.owasp.management.commands.owasp_enrich_committees import (
 
 
 class TestOwaspEnrichCommittees:
-    @pytest.fixture
+    @pytest.fixture()
     def command(self):
         return Command()
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_committee(self):
         committee = mock.Mock(spec=Committee)
         committee.owasp_url = "https://owasp.org/www-committee-test"

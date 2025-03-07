@@ -7,7 +7,7 @@ from apps.slack.common.presentation import EntityPresentation
 
 
 class TestCommitteeHandler:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_committee_data(self):
         return {
             "hits": [
@@ -21,7 +21,7 @@ class TestCommitteeHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_empty_committee_data(self):
         return {
             "hits": [],

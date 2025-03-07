@@ -11,7 +11,7 @@ OPEN_ISSUES_COUNT = 5
 STARS_COUNT = 5
 
 
-@pytest.fixture
+@pytest.fixture()
 def repository_index_mixin_instance():
     instance = RepositoryIndexMixin()
     instance.contributors_count = CONTRIBUTORS_COUNT

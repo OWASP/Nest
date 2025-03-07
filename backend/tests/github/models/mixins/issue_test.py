@@ -11,7 +11,7 @@ FORKS_COUNT = 3
 STARS_COUNT = 100
 
 
-@pytest.fixture
+@pytest.fixture()
 def issue_index_mixin_instance():
     instance = IssueIndexMixin()
     instance.author = MagicMock()
