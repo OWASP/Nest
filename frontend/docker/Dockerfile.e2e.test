@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.51.0-noble AS builder
+FROM mcr.microsoft.com/playwright:v1.50.1-noble AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
