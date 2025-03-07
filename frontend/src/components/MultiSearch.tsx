@@ -46,7 +46,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     [indexes]
   );
 
-  useEffect(() => debouncedSearch.cancel(), [debouncedSearch]);
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
 
   const handleSuggestionClick = useCallback(
     (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User, indexName: string) => {
@@ -61,6 +63,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           break;
         case 'users':
           navigate(`/community/users/${suggestion.key}`);
+          break;
+        default:
           break;
       }
     },
@@ -107,7 +111,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     document.addEventListener('keydown', handleKeyDown);
 
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick]);
+  }, [highlightedIndex, suggestions, handleSuggestionClick]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -146,6 +150,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               onChange={handleSearchChange}
               placeholder={placeholder}
               className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              ref={inputRef}
             />
             {searchQuery && (
               <button
@@ -164,4 +169,4 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   );
 };
 
-  export default MultiSearchBar;
+export default MultiSearchBar;
