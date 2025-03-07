@@ -91,22 +91,32 @@ export default function Home() {
     }
   }
 
+  const formatNumber = (num) => {
+    if (num >= 1_000_000) return `${(num / 1000000).toFixed(1).replace(/\.0$/, '')}M+`
+    if (num >= 1_000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K+`
+    return `${num}+`
+  }
+
   const counterData = [
     {
       label: 'Active Projects',
-      value: data.statsOverview.activeProjectsStats.toString().concat('+'),
+      rawValue: data.statsOverview.activeProjectsStats, // For animation
+      formattedValue: formatNumber(data.statsOverview.activeProjectsStats), // Display value
     },
     {
       label: 'Contributors',
-      value: data.statsOverview.contributorsStats.toString().concat('+'),
+      rawValue: data.statsOverview.contributorsStats,
+      formattedValue: formatNumber(data.statsOverview.contributorsStats),
     },
     {
       label: 'Local Chapters',
-      value: data.statsOverview.activeChaptersStats.toString().concat('+'),
+      rawValue: data.statsOverview.activeChaptersStats,
+      formattedValue: formatNumber(data.statsOverview.activeChaptersStats),
     },
     {
       label: 'Countries',
-      value: data.statsOverview.countriesStats.toString().concat('+'),
+      rawValue: data.statsOverview.countriesStats,
+      formattedValue: formatNumber(data.statsOverview.countriesStats),
     },
   ]
 
@@ -251,7 +261,8 @@ export default function Home() {
         {counterData.map((stat, index) => (
           <SecondaryCard key={index} className="text-center">
             <div className="mb-2 text-3xl font-bold text-blue-400">
-              <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
+              <AnimatedCounter end={stat.formattedValue} duration={2} />
+              {stat.formattedValue.replace(/[0-9.]/g, '')}
             </div>
             <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
           </SecondaryCard>
