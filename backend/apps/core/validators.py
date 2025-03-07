@@ -1,3 +1,5 @@
+"""Validators for search parameters."""
+
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 from django.http import JsonResponse
