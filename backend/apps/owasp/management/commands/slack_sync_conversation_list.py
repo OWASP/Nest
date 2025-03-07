@@ -1,9 +1,11 @@
 """Command to sync Slack channels and groups from the OWASP Slack workspace."""
 
 import logging
+import time
 from datetime import datetime, timezone
 
 import requests
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -13,17 +15,33 @@ logger = logging.getLogger(__name__)
 class SlackSyncError(Exception):
     """Custom exception for Slack sync errors."""
 
+    MISSING_TOKEN_ERROR = "SLACK BOT TOKEN not found in settings"  # noqa: S105
+    API_ERROR_FORMAT = "Slack API error: {}"
+
 
 class Command(BaseCommand):
     help = "Sync Slack channels and groups from the OWASP Slack workspace."
 
-    def handle(self, *args, **options):
-        from django.conf import settings  # Import settings within the method
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--batch-size",
+            type=int,
+            default=200,
+            help="Number of conversations to retrieve per request",
+        )
+        parser.add_argument(
+            "--delay", type=float, default=0.5, help="Delay between API requests in seconds"
+        )
 
-        from apps.owasp.models.conversation import Conversation  # Import models within the method
+    def handle(self, *args, **options):
+        from apps.owasp.models.conversation import Conversation
 
         try:
-            count = self.sync_slack_conversations(settings, Conversation)
+            batch_size = options["batch_size"]
+            delay = options["delay"]
+
+            count = self.sync_slack_conversations(Conversation, batch_size=batch_size, delay=delay)
+
             self.stdout.write(
                 self.style.SUCCESS(f"Successfully synced {count} Slack conversations")
             )
@@ -33,11 +51,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(error_msg))
             raise
 
-    def sync_slack_conversations(self, settings, conversation_model):
-        slack_token = settings.SLACK_BOT_TOKEN  # Access the token from settings
+    def sync_slack_conversations(self, conversation_model, batch_size=200, delay=0.5):
+        slack_token = getattr(settings, "SLACK_BOT_TOKEN", None)
+        if not slack_token:
+            raise SlackSyncError(SlackSyncError.MISSING_TOKEN_ERROR)
+
         url = "https://slack.com/api/conversations.list"
         params = {
-            "limit": 200,
+            "limit": batch_size,
             "exclude_archived": False,
             "types": "public_channel,private_channel",
         }
@@ -68,10 +89,15 @@ class Command(BaseCommand):
             if not next_cursor:
                 break
 
+            # Add a small delay to avoid rate limiting
+            time.sleep(delay)
+
         return total_processed
 
     @transaction.atomic
     def process_conversations(self, conversations, conversation_model):
+        conversation_objects = []
+
         for conversation in conversations:
             try:
                 # Convert Unix timestamp to datetime
@@ -92,6 +118,7 @@ class Command(BaseCommand):
                 obj, created = conversation_model.objects.update_or_create(
                     entity_id=conversation["id"], defaults=defaults
                 )
+                conversation_objects.append(obj)
 
                 if created:
                     logger.info("Created new conversation: %s", obj.name)
@@ -106,3 +133,5 @@ class Command(BaseCommand):
                     "Error processing conversation %s", conversation.get("id", "unknown")
                 )
                 continue
+
+        return conversation_objects

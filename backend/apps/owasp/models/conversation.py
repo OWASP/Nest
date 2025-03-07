@@ -2,23 +2,25 @@
 
 from django.db import models
 
+from apps.common.models import TimestampedModel
 
-class Conversation(models.Model):
+
+class Conversation(TimestampedModel):
     """Model representing a Slack conversation (channel or group)."""
 
     class Meta:
-        db_table = "slack_conversations"
+        db_table = "owasp_slack_conversations"
         verbose_name_plural = "Conversations"
 
-    entity_id = models.CharField(max_length=255, unique=True)  # Slack ID of the conversation
-    name = models.CharField(max_length=255)  # Channel or group name
-    created_at = models.DateTimeField()  # Timestamp when the conversation was created
-    is_private = models.BooleanField(default=False)  # True if the conversation is private
-    is_archived = models.BooleanField(default=False)  # True if the conversation is archived
-    is_general = models.BooleanField(default=False)  # True if it's the general channel
-    topic = models.TextField(blank=True, default="")  # Topic of the conversation
-    purpose = models.TextField(blank=True, default="")  # Purpose of the conversation
-    creator_id = models.CharField(max_length=255)  # Slack user ID of the creator
+    entity_id = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(blank=True, null=True)
+    is_private = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    is_general = models.BooleanField(default=False)
+    topic = models.TextField(blank=True, default="")
+    purpose = models.TextField(blank=True, default="")
+    creator_id = models.CharField(max_length=255)
 
     def __str__(self):
         """Return a string representation of the conversation."""
