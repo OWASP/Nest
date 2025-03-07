@@ -50,7 +50,7 @@
     "react-dom": "^19.0.0",
     "react-gtm-module": "^2.0.11",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.2.0",
+    "react-router-dom": "^7.3.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7"
   },
