@@ -6,22 +6,21 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 
 
 class Post(BulkSaveModel, TimestampedModel):
+    """Post model."""
 
     class Meta:
         db_table = "owasp_post"
         verbose_name_plural = "Posts"
 
     author = models.CharField(verbose_name="Author name")
-    author_image = models.URLField(verbose_name="Author image URL",blank=True,null=True)
+    author_image = models.URLField(verbose_name="Author image URL", blank=True)
     date = models.DateTimeField(verbose_name="Publication date")
     title = models.CharField(verbose_name="Title")
-    url = models.URLField(verbose_name="URL",unique=True)
-    
-    
+    url = models.URLField(verbose_name="URL", unique=True)
+
     def __str__(self):
         """Return human-readable representation."""
         return f"{self.title}"
-    
 
     @staticmethod
     def bulk_save(posts, fields=None):

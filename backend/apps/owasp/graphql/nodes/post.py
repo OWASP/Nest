@@ -1,14 +1,13 @@
 """OWASP blog posts GraphQL nodes."""
 
-from apps.owasp.models.post import Post
 from apps.common.graphql.nodes import BaseNode
+from apps.owasp.models.post import Post
 
 
 class PostNode(BaseNode):
     """Post node."""
 
     class Meta:
-
         model = Post
         fields = (
             "title",
