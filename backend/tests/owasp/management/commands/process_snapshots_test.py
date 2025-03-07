@@ -27,7 +27,8 @@ class TestProcessSnapshots:
 
         with (
             mock.patch(
-                "apps.owasp.models.snapshot.Snapshot.objects.filter", return_value=mock_queryset
+                "apps.owasp.models.snapshot.Snapshot.objects.filter",
+                return_value=mock_queryset,
             ),
             mock.patch("django.db.transaction.atomic", return_value=mock.MagicMock()),
             mock.patch.object(command, "process_snapshot") as mock_process,
@@ -53,7 +54,8 @@ class TestProcessSnapshots:
 
         with (
             mock.patch(
-                "apps.owasp.models.snapshot.Snapshot.objects.filter", return_value=mock_queryset
+                "apps.owasp.models.snapshot.Snapshot.objects.filter",
+                return_value=mock_queryset,
             ),
             mock.patch("django.db.transaction.atomic", return_value=mock.MagicMock()),
             mock.patch.object(command, "process_snapshot", side_effect=Exception(error_message)),
@@ -80,7 +82,8 @@ class TestProcessSnapshots:
 
         with (
             mock.patch(
-                "apps.owasp.models.snapshot.Snapshot.objects.filter", return_value=mock_queryset
+                "apps.owasp.models.snapshot.Snapshot.objects.filter",
+                return_value=mock_queryset,
             ),
             mock.patch(
                 "apps.owasp.management.commands.owasp_process_snapshots.logger"

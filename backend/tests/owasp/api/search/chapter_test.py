@@ -6,8 +6,14 @@ from apps.owasp.api.search.chapter import get_chapters
 
 MOCKED_HITS = {
     ("hits"): [
-        {"idx_name": "OWASP San Francisco", "idx_url": "https://owasp.org/www-chapter-nagoya/"},
-        {"idx_name": "OWASP New York", "idx_url": "https://owasp.org/www-chapter-seoul/"},
+        {
+            "idx_name": "OWASP San Francisco",
+            "idx_url": "https://owasp.org/www-chapter-nagoya/",
+        },
+        {
+            "idx_name": "OWASP New York",
+            "idx_url": "https://owasp.org/www-chapter-seoul/",
+        },
     ],
     ("nbPages"): 5,
 }

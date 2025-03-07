@@ -18,7 +18,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -37,21 +40,48 @@ class Migration(migrations.Migration):
                     "homepage",
                     models.CharField(default="", max_length=100, verbose_name="Homepage"),
                 ),
-                ("language", models.CharField(default="", max_length=50, verbose_name="Language")),
-                ("license", models.CharField(default="", max_length=100, verbose_name="License")),
-                ("size", models.PositiveIntegerField(default=0, verbose_name="Size in KB")),
+                (
+                    "language",
+                    models.CharField(default="", max_length=50, verbose_name="Language"),
+                ),
+                (
+                    "license",
+                    models.CharField(default="", max_length=100, verbose_name="License"),
+                ),
+                (
+                    "size",
+                    models.PositiveIntegerField(default=0, verbose_name="Size in KB"),
+                ),
                 ("topics", models.JSONField(default=list, verbose_name="Topics")),
-                ("is_archived", models.BooleanField(default=False, verbose_name="Is archived")),
+                (
+                    "is_archived",
+                    models.BooleanField(default=False, verbose_name="Is archived"),
+                ),
                 ("is_fork", models.BooleanField(default=False, verbose_name="Is fork")),
-                ("is_template", models.BooleanField(default=False, verbose_name="Is template")),
+                (
+                    "is_template",
+                    models.BooleanField(default=False, verbose_name="Is template"),
+                ),
                 (
                     "has_downloads",
                     models.BooleanField(default=False, verbose_name="Has downloads"),
                 ),
-                ("has_issues", models.BooleanField(default=False, verbose_name="Has issues")),
-                ("has_pages", models.BooleanField(default=False, verbose_name="Has pages")),
-                ("has_projects", models.BooleanField(default=False, verbose_name="Has projects")),
-                ("has_wiki", models.BooleanField(default=False, verbose_name="Has wiki")),
+                (
+                    "has_issues",
+                    models.BooleanField(default=False, verbose_name="Has issues"),
+                ),
+                (
+                    "has_pages",
+                    models.BooleanField(default=False, verbose_name="Has pages"),
+                ),
+                (
+                    "has_projects",
+                    models.BooleanField(default=False, verbose_name="Has projects"),
+                ),
+                (
+                    "has_wiki",
+                    models.BooleanField(default=False, verbose_name="Has wiki"),
+                ),
                 (
                     "forks_count",
                     models.PositiveIntegerField(default=0, verbose_name="Forks count"),
@@ -69,8 +99,14 @@ class Migration(migrations.Migration):
                     models.PositiveIntegerField(default=0, verbose_name="Subscribers count"),
                 ),
                 ("pushed_at", models.DateTimeField(verbose_name="Pushed at")),
-                ("original_created_at", models.DateTimeField(verbose_name="Original created_at")),
-                ("original_updated_at", models.DateTimeField(verbose_name="Original updated_at")),
+                (
+                    "original_created_at",
+                    models.DateTimeField(verbose_name="Original created_at"),
+                ),
+                (
+                    "original_updated_at",
+                    models.DateTimeField(verbose_name="Original updated_at"),
+                ),
                 (
                     "owner_login",
                     models.CharField(default="", max_length=100, verbose_name="Owner login"),
@@ -103,7 +139,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -117,8 +156,14 @@ class Migration(migrations.Migration):
                     "collaborators_count",
                     models.PositiveIntegerField(default=0, verbose_name="Collaborators count"),
                 ),
-                ("company", models.CharField(default="", max_length=200, verbose_name="Company")),
-                ("email", models.EmailField(default="", max_length=100, verbose_name="Email")),
+                (
+                    "company",
+                    models.CharField(default="", max_length=200, verbose_name="Company"),
+                ),
+                (
+                    "email",
+                    models.EmailField(default="", max_length=100, verbose_name="Email"),
+                ),
                 (
                     "followers_count",
                     models.PositiveIntegerField(default=0, verbose_name="Followers count"),
@@ -135,12 +180,22 @@ class Migration(migrations.Migration):
                     "login",
                     models.CharField(default="", max_length=100, unique=True, verbose_name="Key"),
                 ),
-                ("name", models.CharField(default="", max_length=200, verbose_name="Name")),
+                (
+                    "name",
+                    models.CharField(default="", max_length=200, verbose_name="Name"),
+                ),
                 (
                     "original_created_at",
                     models.DateTimeField(
                         default=datetime.datetime(
-                            2024, 8, 20, 19, 14, 44, 920859, tzinfo=datetime.timezone.utc
+                            2024,
+                            8,
+                            20,
+                            19,
+                            14,
+                            44,
+                            920859,
+                            tzinfo=datetime.timezone.utc,
                         ),
                         verbose_name="Original created_at",
                     ),
@@ -149,7 +204,14 @@ class Migration(migrations.Migration):
                     "original_updated_at",
                     models.DateTimeField(
                         default=datetime.datetime(
-                            2024, 8, 20, 19, 14, 50, 238981, tzinfo=datetime.timezone.utc
+                            2024,
+                            8,
+                            20,
+                            19,
+                            14,
+                            50,
+                            238981,
+                            tzinfo=datetime.timezone.utc,
                         ),
                         verbose_name="Original updated_at",
                     ),
@@ -188,16 +250,28 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=200, verbose_name="Name")),
-                ("login", models.CharField(max_length=100, unique=True, verbose_name="Key")),
-                ("email", models.EmailField(default="", max_length=100, verbose_name="Email")),
+                (
+                    "login",
+                    models.CharField(max_length=100, unique=True, verbose_name="Key"),
+                ),
+                (
+                    "email",
+                    models.EmailField(default="", max_length=100, verbose_name="Email"),
+                ),
                 ("avatar_url", models.URLField(default="", verbose_name="Avatar URL")),
-                ("company", models.CharField(default="", max_length=200, verbose_name="Company")),
+                (
+                    "company",
+                    models.CharField(default="", max_length=200, verbose_name="Company"),
+                ),
                 (
                     "location",
                     models.CharField(default="", max_length=200, verbose_name="Location"),
@@ -224,10 +298,22 @@ class Migration(migrations.Migration):
                         default=0, verbose_name="Public repositories count"
                     ),
                 ),
-                ("original_created_at", models.DateTimeField(verbose_name="Original created_at")),
-                ("original_updated_at", models.DateTimeField(verbose_name="Original updated_at")),
-                ("bio", models.TextField(default="", max_length=1000, verbose_name="Bio")),
-                ("is_hireable", models.BooleanField(default=False, verbose_name="Is hireable")),
+                (
+                    "original_created_at",
+                    models.DateTimeField(verbose_name="Original created_at"),
+                ),
+                (
+                    "original_updated_at",
+                    models.DateTimeField(verbose_name="Original updated_at"),
+                ),
+                (
+                    "bio",
+                    models.TextField(default="", max_length=1000, verbose_name="Bio"),
+                ),
+                (
+                    "is_hireable",
+                    models.BooleanField(default=False, verbose_name="Is hireable"),
+                ),
                 (
                     "twitter_username",
                     models.CharField(default="", max_length=50, verbose_name="Twitter username"),
@@ -496,20 +582,32 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
                 ("node_id", models.CharField(unique=True, verbose_name="Node ID")),
                 ("name", models.CharField(max_length=100, verbose_name="Name")),
-                ("description", models.CharField(max_length=200, verbose_name="Description")),
-                ("color", models.CharField(default="", max_length=6, verbose_name="Color")),
+                (
+                    "description",
+                    models.CharField(max_length=200, verbose_name="Description"),
+                ),
+                (
+                    "color",
+                    models.CharField(default="", max_length=6, verbose_name="Color"),
+                ),
                 (
                     "sequence_id",
                     models.PositiveBigIntegerField(default=0, verbose_name="Label ID"),
                 ),
-                ("is_default", models.BooleanField(default=False, verbose_name="Is default")),
+                (
+                    "is_default",
+                    models.BooleanField(default=False, verbose_name="Is default"),
+                ),
             ],
             options={
                 "verbose_name_plural": "Labels",
@@ -522,7 +620,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
@@ -539,13 +640,22 @@ class Migration(migrations.Migration):
                         verbose_name="State",
                     ),
                 ),
-                ("url", models.URLField(default="", max_length=500, verbose_name="URL")),
-                ("number", models.PositiveBigIntegerField(default=0, verbose_name="Number")),
+                (
+                    "url",
+                    models.URLField(default="", max_length=500, verbose_name="URL"),
+                ),
+                (
+                    "number",
+                    models.PositiveBigIntegerField(default=0, verbose_name="Number"),
+                ),
                 (
                     "sequence_id",
                     models.PositiveBigIntegerField(default=0, verbose_name="Issue ID"),
                 ),
-                ("is_locked", models.BooleanField(default=False, verbose_name="Is locked")),
+                (
+                    "is_locked",
+                    models.BooleanField(default=False, verbose_name="Is locked"),
+                ),
                 (
                     "lock_reason",
                     models.CharField(default="", max_length=200, verbose_name="Lock reason"),
@@ -555,7 +665,10 @@ class Migration(migrations.Migration):
                     models.PositiveIntegerField(default=0, verbose_name="Comments"),
                 ),
                 ("created_at", models.DateTimeField(verbose_name="Created at")),
-                ("updated_at", models.DateTimeField(db_index=True, verbose_name="Updated at")),
+                (
+                    "updated_at",
+                    models.DateTimeField(db_index=True, verbose_name="Updated at"),
+                ),
                 (
                     "author",
                     models.ForeignKey(
@@ -580,7 +693,10 @@ class Migration(migrations.Migration):
                 (
                     "labels",
                     models.ManyToManyField(
-                        blank=True, related_name="issue", to="github.label", verbose_name="Labels"
+                        blank=True,
+                        related_name="issue",
+                        to="github.label",
+                        verbose_name="Labels",
                     ),
                 ),
                 (
@@ -618,15 +734,24 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=200, verbose_name="Name")),
                 ("tag_name", models.CharField(max_length=100, verbose_name="Tag name")),
-                ("description", models.TextField(default="", verbose_name="Description")),
-                ("is_draft", models.BooleanField(default=False, verbose_name="Is draft")),
+                (
+                    "description",
+                    models.TextField(default="", verbose_name="Description"),
+                ),
+                (
+                    "is_draft",
+                    models.BooleanField(default=False, verbose_name="Is draft"),
+                ),
                 (
                     "is_pre_release",
                     models.BooleanField(default=False, verbose_name="Is pre-release"),

@@ -15,7 +15,10 @@ from apps.slack.utils import escape
 
 
 def get_blocks(
-    page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
+    page=1,
+    search_query: str = "",
+    limit: int = 10,
+    presentation: EntityPresentation | None = None,
 ):
     """Get chapters blocks."""
     from apps.owasp.api.search.chapter import get_chapters

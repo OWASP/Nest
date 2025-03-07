@@ -19,7 +19,13 @@ class SnapshotModelMockTest(SimpleTestCase):
         self.snapshot.status = Snapshot.Status.PROCESSING
 
         # Mock ManyToMany relations
-        for field in ["new_chapters", "new_projects", "new_issues", "new_releases", "new_users"]:
+        for field in [
+            "new_chapters",
+            "new_projects",
+            "new_issues",
+            "new_releases",
+            "new_users",
+        ]:
             m2m_mock = MagicMock()
             m2m_mock.all.return_value = []  # Simulate empty queryset
             m2m_mock.set = MagicMock()

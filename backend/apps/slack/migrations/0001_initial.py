@@ -15,7 +15,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
@@ -28,9 +31,18 @@ class Migration(migrations.Migration):
                     "channel_name",
                     models.TextField(default="", max_length=100, verbose_name="Channel name"),
                 ),
-                ("command", models.TextField(default="", max_length=15, verbose_name="Command")),
-                ("text", models.TextField(default="", max_length=1000, verbose_name="Text")),
-                ("trigger", models.TextField(default="", max_length=100, verbose_name="Trigger")),
+                (
+                    "command",
+                    models.TextField(default="", max_length=15, verbose_name="Command"),
+                ),
+                (
+                    "text",
+                    models.TextField(default="", max_length=1000, verbose_name="Text"),
+                ),
+                (
+                    "trigger",
+                    models.TextField(default="", max_length=100, verbose_name="Trigger"),
+                ),
                 ("user_id", models.TextField(max_length=15, verbose_name="User ID")),
                 (
                     "user_name",

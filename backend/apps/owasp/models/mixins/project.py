@@ -80,7 +80,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
                 "description": r.description,
                 "forks_count": r.forks_count,
                 "key": r.key.lower(),
-                "latest_release": str(r.latest_release.summary) if r.latest_release else "",
+                "latest_release": (str(r.latest_release.summary) if r.latest_release else ""),
                 "license": r.license,
                 "name": r.name,
                 "owner_key": r.owner.login.lower(),

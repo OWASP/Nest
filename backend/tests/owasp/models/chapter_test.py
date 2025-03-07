@@ -36,7 +36,8 @@ class TestChapterModel:
             side_effect=lambda x: MagicMock(latitude=1, longitude=0) if x else None
         )
         monkeypatch.setattr(
-            "apps.owasp.models.chapter.get_location_coordinates", mock_get_location_coordinates
+            "apps.owasp.models.chapter.get_location_coordinates",
+            mock_get_location_coordinates,
         )
 
         chapter = Chapter(suggested_location=suggested_location)
@@ -54,7 +55,12 @@ class TestChapterModel:
         ("is_active", "geo_string", "prompt_result", "expected_location"),
         [
             (True, "New York, USA, 10001", "Manhattan, NY", "Manhattan, NY"),
-            (True, "London, UK, SW1A 1AA", "Westminster, London", "Westminster, London"),
+            (
+                True,
+                "London, UK, SW1A 1AA",
+                "Westminster, London",
+                "Westminster, London",
+            ),
             (True, "", "Default Location", "Default Location"),
             (False, "Paris, France", None, None),
             (True, "Tokyo, Japan", None, ""),
@@ -78,8 +84,13 @@ class TestChapterModel:
         mock_prompt_manager = Mock()
         mock_prompt_manager.get.return_value = mock_prompt
 
-        with patch.object(Prompt, "objects", mock_prompt_manager), patch.object(
-            Prompt, "get_owasp_chapter_suggested_location", return_value=mock_prompt.text
+        with (
+            patch.object(Prompt, "objects", mock_prompt_manager),
+            patch.object(
+                Prompt,
+                "get_owasp_chapter_suggested_location",
+                return_value=mock_prompt.text,
+            ),
         ):
             chapter.generate_suggested_location(open_ai=mock_open_ai)
 

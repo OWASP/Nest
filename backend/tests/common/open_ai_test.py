@@ -14,7 +14,7 @@ DEFAULT_MAX_TOKENS_SET = 2000
 
 
 class TestOpenAi:
-    @pytest.fixture()
+    @pytest.fixture
     def openai_instance(self):
         return OpenAi()
 
@@ -31,21 +31,24 @@ class TestOpenAi:
         assert instance.temperature == DEFAULT_TEMPERATURE
 
     @pytest.mark.parametrize(
-        ("input_content", "expected_input"), [("Test input content", "Test input content")]
+        ("input_content", "expected_input"),
+        [("Test input content", "Test input content")],
     )
     def test_set_input(self, openai_instance, input_content, expected_input):
         result = openai_instance.set_input(input_content)
         assert result.input == expected_input
 
     @pytest.mark.parametrize(
-        ("max_tokens", "expected_max_tokens"), [(DEFAULT_MAX_TOKENS_SET, DEFAULT_MAX_TOKENS_SET)]
+        ("max_tokens", "expected_max_tokens"),
+        [(DEFAULT_MAX_TOKENS_SET, DEFAULT_MAX_TOKENS_SET)],
     )
     def test_set_max_tokens(self, openai_instance, max_tokens, expected_max_tokens):
         result = openai_instance.set_max_tokens(max_tokens)
         assert result.max_tokens == expected_max_tokens
 
     @pytest.mark.parametrize(
-        ("prompt_content", "expected_prompt"), [("Test prompt content", "Test prompt content")]
+        ("prompt_content", "expected_prompt"),
+        [("Test prompt content", "Test prompt content")],
     )
     def test_set_prompt(self, openai_instance, prompt_content, expected_prompt):
         result = openai_instance.set_prompt(prompt_content)

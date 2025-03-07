@@ -32,11 +32,20 @@ class TestProjectHealthRequirementsModel:
     @pytest.mark.parametrize(
         ("level", "expected"),
         [
-            (Project.ProjectLevel.FLAGSHIP, "Health Requirements for Flagship Projects"),
-            (Project.ProjectLevel.INCUBATOR, "Health Requirements for Incubator Projects"),
+            (
+                Project.ProjectLevel.FLAGSHIP,
+                "Health Requirements for Flagship Projects",
+            ),
+            (
+                Project.ProjectLevel.INCUBATOR,
+                "Health Requirements for Incubator Projects",
+            ),
             (Project.ProjectLevel.LAB, "Health Requirements for Lab Projects"),
             (Project.ProjectLevel.OTHER, "Health Requirements for Other Projects"),
-            (Project.ProjectLevel.PRODUCTION, "Health Requirements for Production Projects"),
+            (
+                Project.ProjectLevel.PRODUCTION,
+                "Health Requirements for Production Projects",
+            ),
             ("", "Health Requirements for  Projects"),
         ],
     )

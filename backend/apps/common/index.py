@@ -175,7 +175,9 @@ class IndexBase(AlgoliaIndex):
         try:
             client.clear_synonyms(index_name=index_name)
             client.save_synonyms(
-                index_name=index_name, synonym_hit=synonyms, replace_existing_synonyms=True
+                index_name=index_name,
+                synonym_hit=synonyms,
+                replace_existing_synonyms=True,
             )
         except AlgoliaException:
             logger.exception("Error saving synonyms for '%s'", index_name)

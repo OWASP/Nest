@@ -35,7 +35,10 @@ class Migration(migrations.Migration):
             model_name="chapter",
             name="topics",
             field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="GitHub repository topics"
+                blank=True,
+                default=list,
+                null=True,
+                verbose_name="GitHub repository topics",
             ),
         ),
         migrations.AddField(
@@ -57,7 +60,10 @@ class Migration(migrations.Migration):
             model_name="committee",
             name="topics",
             field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="GitHub repository topics"
+                blank=True,
+                default=list,
+                null=True,
+                verbose_name="GitHub repository topics",
             ),
         ),
         migrations.AddField(
@@ -79,7 +85,10 @@ class Migration(migrations.Migration):
             model_name="event",
             name="topics",
             field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="GitHub repository topics"
+                blank=True,
+                default=list,
+                null=True,
+                verbose_name="GitHub repository topics",
             ),
         ),
         migrations.AlterField(
@@ -128,7 +137,10 @@ class Migration(migrations.Migration):
             model_name="project",
             name="topics",
             field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="GitHub repository topics"
+                blank=True,
+                default=list,
+                null=True,
+                verbose_name="GitHub repository topics",
             ),
         ),
     ]

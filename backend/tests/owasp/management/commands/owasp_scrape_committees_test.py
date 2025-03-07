@@ -11,11 +11,11 @@ from apps.owasp.management.commands.owasp_scrape_committees import (
 
 
 class TestOwaspScrapeCommittees:
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_committee(self):
         committee = mock.Mock(spec=Committee)
         committee.owasp_url = "https://owasp.org/www-committee-test"
@@ -43,7 +43,7 @@ class TestOwaspScrapeCommittees:
             "https://example.com/repo2",
             "https://invalid.com/repo3",
         ]
-        mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
+        mock_scraper.verify_url.side_effect = lambda url: (None if "invalid" in url else url)
         mock_scraper.get_leaders.return_value = "Leaders data"
         mock_scraper.page_tree = True
 
@@ -54,8 +54,8 @@ class TestOwaspScrapeCommittees:
         mock_active_committees = mock.MagicMock()
         mock_active_committees.__iter__.return_value = iter(mock_committees_list)
         mock_active_committees.count.return_value = len(mock_committees_list)
-        mock_active_committees.__getitem__.side_effect = (
-            lambda idx: mock_committees_list[idx.start : idx.stop]
+        mock_active_committees.__getitem__.side_effect = lambda idx: (
+            mock_committees_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_committees_list[idx]
         )
@@ -88,7 +88,10 @@ class TestOwaspScrapeCommittees:
 
         for committee in mock_committees_list:
             expected_invalid_urls = ["https://invalid.com/repo3"]
-            expected_related_urls = ["https://example.com/repo1", "https://example.com/repo2"]
+            expected_related_urls = [
+                "https://example.com/repo1",
+                "https://example.com/repo2",
+            ]
             assert committee.invalid_urls == sorted(expected_invalid_urls)
             assert committee.related_urls == sorted(expected_related_urls)
             assert committee.leaders_raw == "Leaders data"

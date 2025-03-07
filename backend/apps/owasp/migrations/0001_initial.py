@@ -21,13 +21,19 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=100, verbose_name="Name")),
-                ("key", models.CharField(max_length=100, unique=True, verbose_name="Key")),
+                (
+                    "key",
+                    models.CharField(max_length=100, unique=True, verbose_name="Key"),
+                ),
                 (
                     "description",
                     models.CharField(default="", max_length=500, verbose_name="Description"),
@@ -97,13 +103,19 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=100, verbose_name="Name")),
-                ("key", models.CharField(max_length=100, unique=True, verbose_name="Key")),
+                (
+                    "key",
+                    models.CharField(max_length=100, unique=True, verbose_name="Key"),
+                ),
                 (
                     "description",
                     models.CharField(default="", max_length=500, verbose_name="Description"),
@@ -130,21 +142,39 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=100, verbose_name="Name")),
-                ("key", models.CharField(max_length=100, unique=True, verbose_name="Key")),
-                ("level", models.CharField(default="", max_length=5, verbose_name="Level")),
-                ("country", models.CharField(default="", max_length=50, verbose_name="Country")),
-                ("region", models.CharField(default="", max_length=50, verbose_name="Region")),
+                (
+                    "key",
+                    models.CharField(max_length=100, unique=True, verbose_name="Key"),
+                ),
+                (
+                    "level",
+                    models.CharField(default="", max_length=5, verbose_name="Level"),
+                ),
+                (
+                    "country",
+                    models.CharField(default="", max_length=50, verbose_name="Country"),
+                ),
+                (
+                    "region",
+                    models.CharField(default="", max_length=50, verbose_name="Region"),
+                ),
                 (
                     "postal_code",
                     models.CharField(default="", max_length=15, verbose_name="Postal code"),
                 ),
-                ("currency", models.CharField(default="", max_length=10, verbose_name="Currency")),
+                (
+                    "currency",
+                    models.CharField(default="", max_length=10, verbose_name="Currency"),
+                ),
                 (
                     "meetup_group",
                     models.CharField(default="", max_length=100, verbose_name="Meetup group"),
@@ -172,17 +202,26 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=100, verbose_name="Name")),
-                ("key", models.CharField(max_length=100, unique=True, verbose_name="Key")),
+                (
+                    "key",
+                    models.CharField(max_length=100, unique=True, verbose_name="Key"),
+                ),
                 (
                     "description",
                     models.CharField(
-                        blank=True, default="", max_length=500, verbose_name="Description"
+                        blank=True,
+                        default="",
+                        max_length=500,
+                        verbose_name="Description",
                     ),
                 ),
                 (
@@ -190,7 +229,10 @@ class Migration(migrations.Migration):
                     models.CharField(blank=True, default="", max_length=5, verbose_name="Level"),
                 ),
                 ("url", models.URLField(blank=True, default="", verbose_name="URL")),
-                ("tags", models.JSONField(blank=True, default=list, verbose_name="Tags")),
+                (
+                    "tags",
+                    models.JSONField(blank=True, default=list, verbose_name="Tags"),
+                ),
                 (
                     "owasp_repository",
                     models.ForeignKey(
@@ -347,7 +389,10 @@ class Migration(migrations.Migration):
             model_name="project",
             name="invalid_urls",
             field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Invalid project related URLs"
+                blank=True,
+                default=list,
+                null=True,
+                verbose_name="Invalid project related URLs",
             ),
         ),
         migrations.AddField(

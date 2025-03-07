@@ -9,10 +9,19 @@ from apps.github.management.commands.github_enrich_issues import Command
     ("argument_name", "expected_properties"),
     [
         ("--offset", {"default": 0, "required": False, "type": int}),
-        ("--force-update-hint", {"default": False, "required": False, "action": "store_true"}),
-        ("--force-update-summary", {"default": False, "required": False, "action": "store_true"}),
+        (
+            "--force-update-hint",
+            {"default": False, "required": False, "action": "store_true"},
+        ),
+        (
+            "--force-update-summary",
+            {"default": False, "required": False, "action": "store_true"},
+        ),
         ("--update-hint", {"default": True, "required": False, "action": "store_true"}),
-        ("--update-summary", {"default": True, "required": False, "action": "store_true"}),
+        (
+            "--update-summary",
+            {"default": True, "required": False, "action": "store_true"},
+        ),
     ],
 )
 def test_add_arguments(argument_name, expected_properties):
@@ -63,7 +72,11 @@ def test_add_arguments(argument_name, expected_properties):
 @patch("apps.github.management.commands.github_enrich_issues.OpenAi")
 @patch("apps.github.management.commands.github_enrich_issues.Issue")
 def test_handle(
-    mock_issue_class, mock_open_ai_class, options, expected_update_fields, is_force_update
+    mock_issue_class,
+    mock_open_ai_class,
+    options,
+    expected_update_fields,
+    is_force_update,
 ):
     mock_open_ai = MagicMock()
     mock_open_ai_class.return_value = mock_open_ai
@@ -78,10 +91,8 @@ def test_handle(
     mock_ordered_queryset = MagicMock()
     mock_ordered_queryset.__iter__.return_value = iter(mock_issues)
     mock_ordered_queryset.count.return_value = len(mock_issues)
-    mock_ordered_queryset.__getitem__ = (
-        lambda _, idx: mock_issues[idx]
-        if isinstance(idx, int)
-        else mock_issues[idx.start : idx.stop]
+    mock_ordered_queryset.__getitem__ = lambda _, idx: (
+        mock_issues[idx] if isinstance(idx, int) else mock_issues[idx.start : idx.stop]
     )
 
     mock_issue_class.open_issues = mock_open_issues

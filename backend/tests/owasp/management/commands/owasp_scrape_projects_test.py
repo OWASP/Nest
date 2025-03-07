@@ -13,11 +13,11 @@ from apps.owasp.management.commands.owasp_scrape_projects import (
 
 
 class TestOwaspScrapeProjects:
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_project(self):
         project = mock.Mock(spec=Project)
         project.owasp_url = "https://owasp.org/www-project-test"
@@ -46,7 +46,7 @@ class TestOwaspScrapeProjects:
             "https://github.com/org/repo2",
             "https://invalid.com/repo3",
         ]
-        mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
+        mock_scraper.verify_url.side_effect = lambda url: (None if "invalid" in url else url)
         mock_scraper.get_leaders.return_value = "Leaders data"
         mock_scraper.page_tree = True
 
@@ -67,8 +67,8 @@ class TestOwaspScrapeProjects:
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
         mock_active_projects.count.return_value = len(mock_projects_list)
-        mock_active_projects.__getitem__.side_effect = (
-            lambda idx: mock_projects_list[idx.start : idx.stop]
+        mock_active_projects.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_projects_list[idx]
         )

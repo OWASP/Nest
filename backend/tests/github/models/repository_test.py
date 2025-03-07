@@ -15,7 +15,8 @@ class TestRepositoryModel:
         mock_repository = mocker.Mock(spec=Repository)
         mock_repository.node_id = "12345"
         mocker.patch(
-            "apps.github.models.repository.Repository.objects.get", return_value=mock_repository
+            "apps.github.models.repository.Repository.objects.get",
+            return_value=mock_repository,
         )
 
         repository = Repository()
@@ -26,7 +27,7 @@ class TestRepositoryModel:
         assert updated_repository.node_id == mock_repository.node_id
         assert updated_repository.from_github.call_count == 1
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_gh_repository(self):
         """Fixture for a mocked GitHub repository."""
         gh_repository = MagicMock()

@@ -13,7 +13,10 @@ class Migration(migrations.Migration):
             model_name="project",
             name="invalid_urls",
             field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Entity invalid related URLs"
+                blank=True,
+                default=list,
+                null=True,
+                verbose_name="Entity invalid related URLs",
             ),
         ),
         migrations.AlterField(

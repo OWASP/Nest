@@ -10,11 +10,11 @@ from apps.owasp.management.commands.owasp_enrich_chapters import (
 
 
 class TestOwaspEnrichChapters:
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_chapter(self):
         chapter = mock.Mock(spec=Chapter)
         chapter.owasp_url = "https://owasp.org/www-chapter-test"
@@ -36,7 +36,14 @@ class TestOwaspEnrichChapters:
     @mock.patch.dict("os.environ", {"GEO_API_KEY": "test-token"})
     @mock.patch.object(Chapter, "bulk_save", autospec=True)
     def test_handle(
-        self, mock_bulk_save, command, mock_chapter, offset, chapters, latitude, longitude
+        self,
+        mock_bulk_save,
+        command,
+        mock_chapter,
+        offset,
+        chapters,
+        latitude,
+        longitude,
     ):
         mock_prompt = mock.Mock()
         mock_prompt.get_owasp_chapter_summary.return_value = "summary prompt"
@@ -56,8 +63,8 @@ class TestOwaspEnrichChapters:
         mock_active_chapters = mock.MagicMock()
         mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
         mock_active_chapters.count.return_value = len(mock_chapters_list)
-        mock_active_chapters.__getitem__.side_effect = (
-            lambda idx: mock_chapters_list[idx.start : idx.stop]
+        mock_active_chapters.__getitem__.side_effect = lambda idx: (
+            mock_chapters_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_chapters_list[idx]
         )
@@ -66,7 +73,9 @@ class TestOwaspEnrichChapters:
         with (
             mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
             mock.patch.object(
-                Prompt, "get_owasp_chapter_summary", mock_prompt.get_owasp_chapter_summary
+                Prompt,
+                "get_owasp_chapter_summary",
+                mock_prompt.get_owasp_chapter_summary,
             ),
             mock.patch("builtins.print") as mock_print,
             mock.patch("time.sleep", return_value=None),

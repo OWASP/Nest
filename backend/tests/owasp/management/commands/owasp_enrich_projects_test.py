@@ -10,11 +10,11 @@ from apps.owasp.management.commands.owasp_enrich_projects import (
 
 
 class TestOwaspEnrichProjects:
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_project(self):
         project = mock.Mock(spec=Project)
         project.owasp_url = "https://owasp.org/www-project-test"
@@ -54,8 +54,8 @@ class TestOwaspEnrichProjects:
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
         mock_active_projects.count.return_value = len(mock_projects_list)
-        mock_active_projects.__getitem__.side_effect = (
-            lambda idx: mock_projects_list[idx.start : idx.stop]
+        mock_active_projects.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_projects_list[idx]
         )
@@ -64,8 +64,8 @@ class TestOwaspEnrichProjects:
         mock_active_projects_without_summary = mock.MagicMock()
         mock_active_projects_without_summary.__iter__.return_value = iter(mock_projects_list)
         mock_active_projects_without_summary.count.return_value = len(mock_projects_list)
-        mock_active_projects_without_summary.__getitem__.side_effect = (
-            lambda idx: mock_projects_list[idx.start : idx.stop]
+        mock_active_projects_without_summary.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_projects_list[idx]
         )
@@ -76,10 +76,14 @@ class TestOwaspEnrichProjects:
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch.object(
-                Project.active_projects, "without_summary", mock_active_projects_without_summary
+                Project.active_projects,
+                "without_summary",
+                mock_active_projects_without_summary,
             ),
             mock.patch.object(
-                Prompt, "get_owasp_project_summary", mock_prompt.get_owasp_project_summary
+                Prompt,
+                "get_owasp_project_summary",
+                mock_prompt.get_owasp_project_summary,
             ),
             mock.patch("builtins.print") as mock_print,
         ):

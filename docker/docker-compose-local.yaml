@@ -24,7 +24,6 @@ services:
     volumes:
       - ../backend:/home/owasp
       - /home/owasp/.venv
-
   db:
     container_name: nest-db
     image: postgres:16.4
@@ -39,7 +38,6 @@ services:
       retries: 5
     volumes:
       - db-data:/var/lib/postgresql/data
-
   frontend:
     container_name: nest-frontend
     command: >
@@ -56,6 +54,5 @@ services:
       - ../frontend:/home/owasp
     environment:
       NODE_ENV: local
-
 volumes:
   db-data:

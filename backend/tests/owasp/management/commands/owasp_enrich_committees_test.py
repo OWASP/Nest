@@ -10,11 +10,11 @@ from apps.owasp.management.commands.owasp_enrich_committees import (
 
 
 class TestOwaspEnrichCommittees:
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_committee(self):
         committee = mock.Mock(spec=Committee)
         committee.owasp_url = "https://owasp.org/www-committee-test"
@@ -54,8 +54,8 @@ class TestOwaspEnrichCommittees:
         mock_active_committees = mock.MagicMock()
         mock_active_committees.__iter__.return_value = iter(mock_committees_list)
         mock_active_committees.count.return_value = len(mock_committees_list)
-        mock_active_committees.__getitem__.side_effect = (
-            lambda idx: mock_committees_list[idx.start : idx.stop]
+        mock_active_committees.__getitem__.side_effect = lambda idx: (
+            mock_committees_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_committees_list[idx]
         )
@@ -64,8 +64,8 @@ class TestOwaspEnrichCommittees:
         mock_active_committees_without_summary = mock.MagicMock()
         mock_active_committees_without_summary.__iter__.return_value = iter(mock_committees_list)
         mock_active_committees_without_summary.count.return_value = len(mock_committees_list)
-        mock_active_committees_without_summary.__getitem__.side_effect = (
-            lambda idx: mock_committees_list[idx.start : idx.stop]
+        mock_active_committees_without_summary.__getitem__.side_effect = lambda idx: (
+            mock_committees_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_committees_list[idx]
         )
@@ -81,7 +81,9 @@ class TestOwaspEnrichCommittees:
                 mock_active_committees_without_summary,
             ),
             mock.patch.object(
-                Prompt, "get_owasp_committee_summary", mock_prompt.get_owasp_committee_summary
+                Prompt,
+                "get_owasp_committee_summary",
+                mock_prompt.get_owasp_committee_summary,
             ),
             mock.patch("builtins.print") as mock_print,
         ):

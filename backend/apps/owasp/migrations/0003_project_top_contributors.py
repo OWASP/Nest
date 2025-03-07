@@ -14,7 +14,9 @@ class Migration(migrations.Migration):
             model_name="project",
             name="top_contributors",
             field=models.ManyToManyField(
-                blank=True, to="github.repositorycontributor", verbose_name="Top contributors"
+                blank=True,
+                to="github.repositorycontributor",
+                verbose_name="Top contributors",
             ),
         ),
     ]

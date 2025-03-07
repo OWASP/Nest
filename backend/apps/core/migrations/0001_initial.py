@@ -15,13 +15,19 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=100, verbose_name="Name")),
-                ("key", models.CharField(max_length=100, unique=True, verbose_name="Key")),
+                (
+                    "key",
+                    models.CharField(max_length=100, unique=True, verbose_name="Key"),
+                ),
                 (
                     "text",
                     models.TextField(blank=True, default="", max_length=1000, verbose_name="Text"),

@@ -17,7 +17,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
@@ -30,7 +33,10 @@ class Migration(migrations.Migration):
                     "created_at",
                     models.DateTimeField(blank=True, null=True, verbose_name="Created at"),
                 ),
-                ("forks_count", models.PositiveIntegerField(default=0, verbose_name="Forks")),
+                (
+                    "forks_count",
+                    models.PositiveIntegerField(default=0, verbose_name="Forks"),
+                ),
                 (
                     "is_funding_requirements_compliant",
                     models.BooleanField(
@@ -40,7 +46,8 @@ class Migration(migrations.Migration):
                 (
                     "is_project_leaders_requirements_compliant",
                     models.BooleanField(
-                        default=False, verbose_name="Is project leaders requirements compliant"
+                        default=False,
+                        verbose_name="Is project leaders requirements compliant",
                     ),
                 ),
                 (
@@ -68,7 +75,9 @@ class Migration(migrations.Migration):
                 (
                     "pull_request_last_created_at",
                     models.DateTimeField(
-                        blank=True, null=True, verbose_name="Pull request last created at"
+                        blank=True,
+                        null=True,
+                        verbose_name="Pull request last created at",
                     ),
                 ),
                 (
@@ -86,7 +95,10 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ("stars_count", models.PositiveIntegerField(default=0, verbose_name="Stars")),
+                (
+                    "stars_count",
+                    models.PositiveIntegerField(default=0, verbose_name="Stars"),
+                ),
                 (
                     "total_issues_count",
                     models.PositiveIntegerField(default=0, verbose_name="Total issues"),

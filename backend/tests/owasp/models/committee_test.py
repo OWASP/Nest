@@ -44,10 +44,13 @@ class TestCommitteeModel:
         committee.generate_summary = Mock()
         committee.summary = summary
 
-        with patch(
-            "apps.core.models.prompt.Prompt.get_owasp_committee_summary",
-            return_value="Test Prompt",
-        ) as mock_prompt, patch("apps.owasp.models.committee.BulkSaveModel.save"):
+        with (
+            patch(
+                "apps.core.models.prompt.Prompt.get_owasp_committee_summary",
+                return_value="Test Prompt",
+            ) as mock_prompt,
+            patch("apps.owasp.models.committee.BulkSaveModel.save"),
+        ):
             committee.save()
 
         if summary:

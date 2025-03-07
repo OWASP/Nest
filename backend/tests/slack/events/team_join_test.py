@@ -6,7 +6,7 @@ from apps.slack.events.team_join import team_join_handler
 
 
 class TestSlackHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_config(self, mocker):
         mock_app = Mock()
         mocker.patch("apps.slack.apps.SlackConfig.app", mock_app)

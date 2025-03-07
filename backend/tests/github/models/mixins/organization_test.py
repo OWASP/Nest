@@ -13,6 +13,9 @@ class TestOrganizationIndexMixin:
     )
     def test_organization_index(self, attr, expected):
         organization = Organization(
-            name="Organization Name", login="login", company="Company", location="Location"
+            name="Organization Name",
+            login="login",
+            company="Company",
+            location="Location",
         )
         assert getattr(organization, attr) == expected

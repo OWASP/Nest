@@ -5,7 +5,9 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from apps.owasp.management.commands.owasp_update_project_health_requirements import Command
+from apps.owasp.management.commands.owasp_update_project_health_requirements import (
+    Command,
+)
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
@@ -35,7 +37,11 @@ class TestUpdateProjectHealthRequirementsCommand:
                 "Created health requirements for Incubator projects",
                 "Incubator",
             ),
-            (None, "Created default health requirements for Flagship projects", "Flagship"),
+            (
+                None,
+                "Created default health requirements for Flagship projects",
+                "Flagship",
+            ),
         ],
     )
     def test_handle_successful_creation(self, level, expected_output, display_name):

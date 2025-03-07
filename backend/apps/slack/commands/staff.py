@@ -20,7 +20,8 @@ def staff_handler(ack, command, client):
     items = get_staff_data()
     if not items:
         client.chat_postMessage(
-            channel=command["user_id"], text="Failed to get OWASP Foundation staff data."
+            channel=command["user_id"],
+            text="Failed to get OWASP Foundation staff data.",
         )
         return
 

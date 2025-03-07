@@ -4,24 +4,20 @@ updates:
     directory: /backend
     schedule:
       interval: daily
-
   - package-ecosystem: docker
     directory: /frontend
     schedule:
       interval: daily
-
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: daily
     target-branch: main
-
   - package-ecosystem: npm
     directory: /frontend
     schedule:
       interval: daily
     target-branch: main
-
   - package-ecosystem: pip
     directory: /backend
     schedule:

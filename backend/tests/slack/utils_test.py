@@ -83,7 +83,10 @@ def test_process_mrkdwn(input_text, expected_output):
 @pytest.mark.parametrize(
     ("input_blocks", "expected_output"),
     [
-        ([{"type": "section", "text": {"type": "mrkdwn", "text": "Hello world"}}], "Hello world"),
+        (
+            [{"type": "section", "text": {"type": "mrkdwn", "text": "Hello world"}}],
+            "Hello world",
+        ),
         (
             [
                 {
@@ -103,7 +106,10 @@ def test_process_mrkdwn(input_text, expected_output):
             [
                 {"type": "section", "text": {"type": "mrkdwn", "text": "*Bold* text"}},
                 {"type": "divider"},
-                {"type": "context", "elements": [{"type": "mrkdwn", "text": "Context text"}]},
+                {
+                    "type": "context",
+                    "elements": [{"type": "mrkdwn", "text": "Context text"}],
+                },
             ],
             "Bold text\n---\nContext text",
         ),
@@ -112,7 +118,10 @@ def test_process_mrkdwn(input_text, expected_output):
                 {
                     "type": "actions",
                     "elements": [
-                        {"type": "button", "text": {"text": "Click me", "type": "plain_text"}}
+                        {
+                            "type": "button",
+                            "text": {"text": "Click me", "type": "plain_text"},
+                        }
                     ],
                 }
             ],
@@ -144,7 +153,10 @@ def test_blocks_to_text(input_blocks, expected_output):
     [
         ("<script>alert('XSS')</script>", "&lt;script&gt;alert('XSS')&lt;/script&gt;"),
         ("Hello, World!", "Hello, World!"),
-        ("<b>Bold</b> & <i>Italic</i>", "&lt;b&gt;Bold&lt;/b&gt; &amp; &lt;i&gt;Italic&lt;/i&gt;"),
+        (
+            "<b>Bold</b> & <i>Italic</i>",
+            "&lt;b&gt;Bold&lt;/b&gt; &amp; &lt;i&gt;Italic&lt;/i&gt;",
+        ),
     ],
 )
 def test_escape(input_content, expected_output):
@@ -221,5 +233,6 @@ def test_get_staff_data(monkeypatch):
     assert result[2]["name"] == "John Doe"
 
     mock_get.assert_called_once_with(
-        "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml", timeout=30
+        "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml",
+        timeout=30,
     )

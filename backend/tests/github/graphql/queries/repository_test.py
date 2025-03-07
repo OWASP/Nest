@@ -11,12 +11,12 @@ from apps.owasp.models.project import Project
 class TestRepositoryQuery:
     """Test cases for RepositoryQuery class."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_info(self):
         """GraphQL info mock fixture."""
         return Mock()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_project(self):
         """Project mock fixture."""
         return Mock(spec=Project)
@@ -43,7 +43,10 @@ class TestRepositoryQuery:
             mock_get.side_effect = Project.DoesNotExist
 
             result = RepositoryQuery.resolve_repository(
-                None, mock_info, project_key="non-existent-project", repository_key="test-repo"
+                None,
+                mock_info,
+                project_key="non-existent-project",
+                repository_key="test-repo",
             )
 
             assert result is None
@@ -57,7 +60,10 @@ class TestRepositoryQuery:
             mock_get.return_value = mock_project
 
             result = RepositoryQuery.resolve_repository(
-                None, mock_info, project_key="test-project", repository_key="non-existent-repo"
+                None,
+                mock_info,
+                project_key="test-project",
+                repository_key="non-existent-repo",
             )
 
             assert result is None

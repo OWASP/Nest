@@ -10,6 +10,12 @@ from .stats import StatsQuery
 
 
 class OwaspQuery(
-    ChapterQuery, CommitteeQuery, EventQuery, ProjectQuery, SnapshotQuery, SponsorQuery, StatsQuery
+    ChapterQuery,
+    CommitteeQuery,
+    EventQuery,
+    ProjectQuery,
+    SnapshotQuery,
+    SponsorQuery,
+    StatsQuery,
 ):
     """OWASP queries."""

@@ -11,11 +11,11 @@ from apps.owasp.management.commands.owasp_scrape_chapters import (
 
 
 class TestOwaspScrapeChapters:
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_chapter(self):
         chapter = mock.Mock(spec=Chapter)
         chapter.owasp_url = "https://owasp.org/www-chapter-test"
@@ -43,7 +43,7 @@ class TestOwaspScrapeChapters:
             "https://example.com/repo2",
             "https://invalid.com/repo3",
         ]
-        mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
+        mock_scraper.verify_url.side_effect = lambda url: (None if "invalid" in url else url)
         mock_scraper.get_leaders.return_value = "Leaders data"
         mock_scraper.page_tree = True
 
@@ -54,8 +54,8 @@ class TestOwaspScrapeChapters:
         mock_active_chapters = mock.MagicMock()
         mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
         mock_active_chapters.count.return_value = len(mock_chapters_list)
-        mock_active_chapters.__getitem__.side_effect = (
-            lambda idx: mock_chapters_list[idx.start : idx.stop]
+        mock_active_chapters.__getitem__.side_effect = lambda idx: (
+            mock_chapters_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_chapters_list[idx]
         )
@@ -88,7 +88,10 @@ class TestOwaspScrapeChapters:
 
         for chapter in mock_chapters_list:
             expected_invalid_urls = ["https://invalid.com/repo3"]
-            expected_related_urls = ["https://example.com/repo1", "https://example.com/repo2"]
+            expected_related_urls = [
+                "https://example.com/repo1",
+                "https://example.com/repo2",
+            ]
             assert chapter.invalid_urls == sorted(expected_invalid_urls)
             assert chapter.related_urls == sorted(expected_related_urls)
             assert chapter.leaders_raw == "Leaders data"

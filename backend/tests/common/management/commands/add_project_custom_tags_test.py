@@ -12,7 +12,11 @@ class TestAddProjectCustomTags:
     @pytest.mark.parametrize(
         ("file_exists", "file_content", "expected_output"),
         [
-            (False, None, "File not found: /mocked/path/data/project-custom-tags/test-file.json"),
+            (
+                False,
+                None,
+                "File not found: /mocked/path/data/project-custom-tags/test-file.json",
+            ),
             (
                 True,
                 json.dumps({"projects": [], "tags": []}),
@@ -43,8 +47,8 @@ class TestAddProjectCustomTags:
         capsys,
     ):
         mock_exists.return_value = file_exists
-        mock_open_func.side_effect = (
-            lambda *_args, **__kwargs: StringIO(file_content) if file_content else None
+        mock_open_func.side_effect = lambda *_args, **__kwargs: (
+            StringIO(file_content) if file_content else None
         )
 
         def mock_get_side_effect(key):

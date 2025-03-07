@@ -4,7 +4,6 @@ on:
     types:
       - edited
       - opened
-
 jobs:
   label:
     runs-on: ubuntu-latest

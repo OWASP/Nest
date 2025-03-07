@@ -68,7 +68,7 @@ class MockAlgoliaRegister:
 
 @patch("apps.common.index.algolia_register", MockAlgoliaRegister)
 class TestConditionalRegister:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_model(self):
         model = MagicMock()
         model._meta.app_label = "test_app"
@@ -129,7 +129,10 @@ class TestIndexBase:
             (
                 False,
                 True,
-                ["test_index_name_index_name_attr_asc", "test_index_name_index_name_attr_desc"],
+                [
+                    "test_index_name_index_name_attr_asc",
+                    "test_index_name_index_name_attr_desc",
+                ],
             ),
             (True, True, ["test_index_name_index_name_attr_asc"]),
             (True, False, []),

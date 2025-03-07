@@ -65,7 +65,11 @@ class Command(BaseCommand):
 
         routes.extend(
             [
-                {"path": f"/projects/{project.nest_key}", "changefreq": "weekly", "priority": 0.7}
+                {
+                    "path": f"/projects/{project.nest_key}",
+                    "changefreq": "weekly",
+                    "priority": 0.7,
+                }
                 for project in indexable_projects
             ]
         )
@@ -81,7 +85,11 @@ class Command(BaseCommand):
 
         routes.extend(
             [
-                {"path": f"/chapters/{chapter.nest_key}", "changefreq": "weekly", "priority": 0.7}
+                {
+                    "path": f"/chapters/{chapter.nest_key}",
+                    "changefreq": "weekly",
+                    "priority": 0.7,
+                }
                 for chapter in indexable_chapters
             ]
         )
@@ -116,7 +124,11 @@ class Command(BaseCommand):
 
         routes.extend(
             [
-                {"path": f"/community/users/{user.login}", "changefreq": "weekly", "priority": 0.7}
+                {
+                    "path": f"/community/users/{user.login}",
+                    "changefreq": "weekly",
+                    "priority": 0.7,
+                }
                 for user in indexable_users
             ]
         )
@@ -146,7 +158,10 @@ class Command(BaseCommand):
         lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         for sitemap_file in sitemap_files:
-            sitemap_entry = {"loc": f"{settings.SITE_URL}/{sitemap_file}", "lastmod": lastmod}
+            sitemap_entry = {
+                "loc": f"{settings.SITE_URL}/{sitemap_file}",
+                "lastmod": lastmod,
+            }
             sitemaps.append(self.create_sitemap_index_entry(sitemap_entry))
 
         return self.create_sitemap_index(sitemaps)
@@ -165,10 +180,7 @@ class Command(BaseCommand):
     def create_sitemap_index_entry(self, sitemap_data):
         """Create a sitemap entry for the index."""
         return (
-            "  <sitemap>\n"
-            "    <loc>{loc}</loc>\n"
-            "    <lastmod>{lastmod}</lastmod>\n"
-            "  </sitemap>"
+            "  <sitemap>\n    <loc>{loc}</loc>\n    <lastmod>{lastmod}</lastmod>\n  </sitemap>"
         ).format(**sitemap_data)
 
     def create_sitemap(self, urls):

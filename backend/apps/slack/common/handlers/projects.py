@@ -15,7 +15,10 @@ from apps.slack.utils import escape
 
 
 def get_blocks(
-    page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
+    page=1,
+    search_query: str = "",
+    limit: int = 10,
+    presentation: EntityPresentation | None = None,
 ):
     """Get projects blocks."""
     from apps.owasp.api.search.project import get_projects

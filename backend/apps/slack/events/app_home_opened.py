@@ -30,7 +30,7 @@ def app_home_opened_handler(event, client, ack):
                     f"*Hi <@{user_id}>!*{NL}"
                     "Welcome to the OWASP Slack Community! Here you can connect with other "
                     "members, collaborate on projects, and learn about the latest OWASP news and "
-                    f"events.{2*NL}"
+                    f"events.{2 * NL}"
                     "I'm OWASP @nestbot, your friendly neighborhood bot. Please use one of the "
                     f"following commands:{NL}"
                     f"{TAB}• /board{NL}"

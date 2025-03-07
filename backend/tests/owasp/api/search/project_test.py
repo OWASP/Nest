@@ -7,7 +7,10 @@ from apps.owasp.api.search.project import get_projects
 MOCKED_HITS = {
     ("hits"): [
         {"idx_name": "OWASP Amass", "idx_url": "https://owasp.org/www-project-amass/"},
-        {"idx_name": "OWASP Juice Shop", "idx_url": "https://owasp.org/www-project-juice-shop/"},
+        {
+            "idx_name": "OWASP Juice Shop",
+            "idx_url": "https://owasp.org/www-project-juice-shop/",
+        },
     ],
     ("nbPages"): 5,
 }

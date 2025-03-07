@@ -7,7 +7,7 @@ from apps.slack.common.presentation import EntityPresentation
 
 
 class TestProjectHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_project_data(self):
         return {
             "hits": [
@@ -25,7 +25,7 @@ class TestProjectHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_empty_project_data(self):
         return {
             "hits": [],
@@ -34,11 +34,15 @@ class TestProjectHandler:
 
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
-        with patch("apps.owasp.api.search.project.get_projects") as mock_get_projects, patch(
-            "apps.owasp.models.project.Project"
-        ) as mock_project_model:
+        with (
+            patch("apps.owasp.api.search.project.get_projects") as mock_get_projects,
+            patch("apps.owasp.models.project.Project") as mock_project_model,
+        ):
             mock_project_model.active_projects_count.return_value = 42
-            yield {"get_projects": mock_get_projects, "project_model": mock_project_model}
+            yield {
+                "get_projects": mock_get_projects,
+                "project_model": mock_project_model,
+            }
 
     def test_get_blocks_with_results(self, setup_mocks, mock_project_data):
         setup_mocks["get_projects"].return_value = mock_project_data

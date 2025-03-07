@@ -57,7 +57,7 @@ def normalize_url(url, check_path=False):
         url = f"{https_prefix}{url}"
 
     normalized_url = (
-        f"{https_prefix}{url[len(http_prefix):]}" if url.startswith(http_prefix) else url
+        f"{https_prefix}{url[len(http_prefix) :]}" if url.startswith(http_prefix) else url
     )
 
     return normalized_url.split("#")[0].strip().rstrip("/")

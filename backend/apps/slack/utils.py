@@ -53,7 +53,7 @@ def get_news_data(limit=10, timeout=30):
             author_tag = h2.xpath("./following-sibling::p[@class='author']")
             items.append(
                 {
-                    "author": author_tag[0].text_content().strip() if author_tag else "",
+                    "author": (author_tag[0].text_content().strip() if author_tag else ""),
                     "title": anchor[0].text_content().strip(),
                     "url": urljoin(OWASP_NEWS_URL, anchor[0].get("href")),
                 }

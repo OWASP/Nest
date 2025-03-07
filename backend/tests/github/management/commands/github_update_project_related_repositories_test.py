@@ -9,12 +9,12 @@ from apps.github.management.commands.github_update_project_related_repositories 
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def command():
     return Command()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_project():
     project = mock.Mock(spec=Project)
     project.owasp_url = "https://owasp.org/www-project-test"
@@ -68,8 +68,8 @@ def test_handle(
     mock_active_projects = mock.MagicMock()
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
     mock_active_projects.count.return_value = len(mock_projects_list)
-    mock_active_projects.__getitem__ = (
-        lambda _, idx: mock_projects_list[idx]
+    mock_active_projects.__getitem__ = lambda _, idx: (
+        mock_projects_list[idx]
         if isinstance(idx, int)
         else mock_projects_list[idx.start : idx.stop]
     )

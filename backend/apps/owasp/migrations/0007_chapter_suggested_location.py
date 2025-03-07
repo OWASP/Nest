@@ -13,7 +13,10 @@ class Migration(migrations.Migration):
             model_name="chapter",
             name="suggested_location",
             field=models.CharField(
-                blank=True, default="", max_length=100, verbose_name="Suggested location"
+                blank=True,
+                default="",
+                max_length=100,
+                verbose_name="Suggested location",
             ),
         ),
     ]

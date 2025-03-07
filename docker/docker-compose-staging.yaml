@@ -12,14 +12,12 @@ services:
       - nest-db-network
     volumes:
       - ./data:/home/owasp/data
-
   staging-nest-frontend:
     container_name: staging-nest-frontend
     image: arkid15r/owasp-nest-frontend:staging
     restart: unless-stopped
     networks:
       - nest-app-network
-
   staging-nest-db:
     container_name: staging-nest-db
     image: postgres:16.4
@@ -34,7 +32,6 @@ services:
       - ./volumes/db:/var/lib/postgresql/data
     networks:
       - nest-db-network
-
 networks:
   nest-app-network:
   nest-db-network:

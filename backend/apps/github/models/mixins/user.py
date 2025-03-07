@@ -93,9 +93,11 @@ class UserIndexMixin:
                 "repository_forks_count": rc.repository.forks_count,
                 "repository_key": rc.repository.key.lower(),
                 "repository_name": rc.repository.name,
-                "repository_latest_release": str(rc.repository.latest_release.summary)
-                if rc.repository.latest_release
-                else "",
+                "repository_latest_release": (
+                    str(rc.repository.latest_release.summary)
+                    if rc.repository.latest_release
+                    else ""
+                ),
                 "repository_license": rc.repository.license,
                 "repository_owner_key": rc.repository.owner.login.lower(),
                 "repository_stars_count": rc.repository.stars_count,
