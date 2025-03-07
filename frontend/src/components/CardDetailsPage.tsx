@@ -4,6 +4,7 @@ import { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ChapterMap from 'components/ChapterMap'
+import HeatMap from 'components/HeatMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
@@ -15,6 +16,8 @@ const DetailsCard = ({
   title,
   is_active = true,
   summary,
+  avatarUrl = '',
+  name = null,
   description,
   stats,
   details,
@@ -38,25 +41,65 @@ const DetailsCard = ({
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
-        <SecondaryCard title="Summary">
-          <p>{summary}</p>
-        </SecondaryCard>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
-          <SecondaryCard
-            title={`${type[0].toUpperCase() + type.slice(1)} Details`}
-            className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
-          >
-            {details &&
-              details.map((detail, index) => (
-                <div key={index}>
-                  <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
-                </div>
-              ))}
-            {socialLinks && (type === 'chapter' || type === 'committee') && (
-              <SocialLinks urls={socialLinks || []} />
-            )}
+        {(type === 'project' || type === 'chapter') && (
+          <SecondaryCard title="Summary">
+            <p>{summary}</p>
           </SecondaryCard>
-          {(type === 'project' || type === 'repository' || type === 'committee') && (
+        )}
+
+        <div className="grid grid-cols-7 gap-6 md:grid-cols-7">
+          <div className="col-span-2">
+            {type === 'user' && (
+              <div className="mb-8 rounded-lg bg-gray-100 p-2 shadow-md dark:bg-gray-800 md:col-span-1">
+                <img
+                  className="h-[300px] w-[300px] rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
+                  src={avatarUrl}
+                  alt={name}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="col-span-5">
+            {type === 'user' && (
+              <SecondaryCard
+                title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+                className={'gap-2 md:col-span-5'}
+              >
+                {details &&
+                  details.map((detail, index) => (
+                    <div key={index}>
+                      <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
+                    </div>
+                  ))}
+              </SecondaryCard>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
+          {type !== 'user' && (
+            <SecondaryCard
+              title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+              className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
+            >
+              {details &&
+                details.map((detail, index) => (
+                  <div key={index}>
+                    <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
+                  </div>
+                ))}
+              {socialLinks && (type === 'chapter' || type === 'committee') && (
+                <SocialLinks urls={socialLinks || []} />
+              )}
+            </SecondaryCard>
+          )}
+          {type === 'user' && <HeatMap className={'gap-2 md:col-span-5'}></HeatMap>}
+
+          {(type === 'project' ||
+            type === 'repository' ||
+            type === 'committee' ||
+            type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
