@@ -1,6 +1,7 @@
-from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
+from django.http import JsonResponse
+
 
 def validate_string_slug(value):
     """Validate a string value as a slug."""
@@ -86,4 +87,3 @@ def validate_search_params(data):
         return query_validation_error
 
     return None
-
