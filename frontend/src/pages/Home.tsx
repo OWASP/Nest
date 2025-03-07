@@ -54,7 +54,7 @@ export default function Home() {
         indexName: 'chapters',
         query: '',
         currentPage: 1,
-        hitsPerPage: 25,
+        hitsPerPage: 1000,
       }
       const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
         searchParams.indexName,
