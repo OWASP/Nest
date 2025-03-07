@@ -43,4 +43,4 @@ jobs:
 
       - name: Run Jest accessibility tests
         working-directory: frontend
-        run: pnpm test -- --testPathPattern=__tests__/accessibility
+        run: pnpm test --testPathPattern="__tests__/accessibility"
