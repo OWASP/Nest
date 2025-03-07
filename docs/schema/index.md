@@ -25,6 +25,15 @@ The **Project Schema** defines how an OWASP project is structured, covering:
 
  [Read the Full Project Schema →](project.md)
 
+###  [Committee Schema](committee.md)
+The **Committee Schema** defines the structure of an OWASP Committee, including:
+<br>
+
+-  Committee details (name, region, sponsors, etc.)
+-  Event listings and related metadata
+
+  [Read the Full Committee Schema →](committee.md)
+
 ---
 
 ##  **How to Use This Documentation**
