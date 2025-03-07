@@ -84,6 +84,26 @@ export const Icons = {
     label: 'Comments count',
     icon: 'fa-regular fa-comment',
   },
+  starsCount: {
+    label: 'GitHub stars',
+    icon: 'fa-regular fa-star',
+  },
+  forksCount: {
+    label: 'GitHub forks',
+    icon: 'fa-solid fa-code-fork',
+  },
+  contributorsCount: {
+    label: 'GitHub contributors',
+    icon: 'fa-regular fa-user',
+  },
+  createdAt: {
+    label: 'Creation date',
+    icon: 'fa-regular fa-clock',
+  },
+  commentsCount: {
+    label: 'Comments count',
+    icon: 'fa-regular fa-comment',
+  },
 } as const
 
 export type IconKeys = keyof typeof Icons

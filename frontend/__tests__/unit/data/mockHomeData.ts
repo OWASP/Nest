@@ -2,11 +2,17 @@ export const mockGraphQLData = {
   recentProjects: [
     {
       name: 'OWASP GameSec Framework',
-      type: 'DOCUMENTATION',
+      type: 'documentation',
       createdAt: '2024-12-06T20:46:54+00:00',
       key: 'gamesec-framework',
       openIssuesCount: 0,
       repositoriesCount: 1,
+    },
+  ],
+  sponsors: [
+    {
+      name: 'OWASP Foundation',
+      imageUrl: 'https://example.com/owasp-foundation.png',
     },
   ],
   recentChapters: [
@@ -59,6 +65,15 @@ export const mockGraphQLData = {
     countriesStats: 245,
     contributorsStats: 9673,
   },
+  upcomingEvents: [
+    {
+      category: 'Category 1',
+      endDate: '2025-02-28',
+      name: 'Event 1',
+      startDate: '2025-02-27',
+      url: 'https://nest.owasp.org/events/event-1',
+    },
+  ],
 }
 
 export const mockAlgoliaData = {
