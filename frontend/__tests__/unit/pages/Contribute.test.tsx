@@ -196,10 +196,8 @@ describe('Contribute Component', () => {
     const readMoreButton = screen.getAllByRole('button', { name: /read more/i })[0]
     fireEvent.click(readMoreButton)
 
-    await waitFor(() => {
-      const closeButton = screen.getByRole('button', { name: /close/i })
-      expect(closeButton).toBeInTheDocument()
-    })
+    const closeButton = await screen.findByRole('button', { name: /close/i })
+    expect(closeButton).toBeInTheDocument()
   })
 
   test('closes modal when onClose is called', async () => {
