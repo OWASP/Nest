@@ -50,12 +50,12 @@ def algolia_search(request):
     try:
         data = json.loads(request.body)
 
+        facet_filters = data.get("facetFilters", [])
         index_name = data.get("indexName")
+        ip_address = get_user_ip_address(request)
         limit = int(data.get("hitsPerPage", 25))
         page = int(data.get("page", 1))
         query = data.get("query", "")
-        facet_filters = data.get("facetFilters", [])
-        ip_address = get_user_ip_address(request)
 
         cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
         if index_name == "chapters":

@@ -18,11 +18,11 @@ export const fetchAlgoliaData = async <T>(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        indexName,
-        query,
-        page: currentPage,
-        hitsPerPage,
         facetFilters,
+        hitsPerPage,
+        indexName,
+        page: currentPage,
+        query,
       }),
     })
 
