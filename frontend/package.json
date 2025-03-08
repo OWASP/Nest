@@ -55,6 +55,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@axe-core/react": "^4.10.1",
     "@eslint/js": "^9.21.0",
     "@playwright/test": "^1.51.0",
     "@swc/core": "^1.11.7",
@@ -76,12 +77,14 @@
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.0.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
+    "jest-axe": "^10.0.0",
     "jest-environment-jsdom": "^29.7.0",
     "open": "^10.1.0",
     "postcss": "^8.5.3",
