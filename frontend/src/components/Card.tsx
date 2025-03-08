@@ -13,8 +13,6 @@ import DisplayIcon from "components/DisplayIcon";
 import Markdown from "components/MarkdownWrapper";
 import { Tooltip } from "components/ui/tooltip";
 
-// Removed unused import: `Icons`
-
 const isMobileInitial = typeof window !== "undefined" && window.innerWidth < desktopViewMinWidth;
 
 const Card = ({
@@ -44,7 +42,7 @@ const Card = ({
         <div className="flex items-center gap-3">
           {level && (
             <Tooltip
-              id={`level-tooltip-${title}`}
+              id={`level-tooltip-${title}`}  // ✅ FIX: Unique tooltip ID
               content={`${level.level} project`}
               openDelay={100}
               closeDelay={100}
