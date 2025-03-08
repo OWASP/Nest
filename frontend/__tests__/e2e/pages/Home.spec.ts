@@ -71,8 +71,7 @@ test.describe('Home Page', () => {
   test('should have upcoming events', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Event 1' })).toBeVisible()
-    await expect(page.getByText('Feb 27,')).toBeVisible()
-    await expect(page.getByText('Feb 28,')).toBeVisible()
+    await expect(page.getByText('Feb 27 - 28, 2025')).toBeVisible()
     await page.getByRole('link', { name: 'Event 1' }).click()
   })
 })
