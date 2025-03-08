@@ -115,6 +115,7 @@ const Card = ({
             <ContributorAvatar
               key={contributor.login || `contributor-${index}`}
               contributor={contributor}
+              uniqueKey={index.toString()}
             />
           ))}
         </div>
