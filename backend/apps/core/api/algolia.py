@@ -17,7 +17,7 @@ CACHE_PREFIX = "algolia_proxy"
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 
 
-def get_search_results(index_name, query, page, hits_per_page, ip_address=None):
+def get_search_results(index_name, query, page, hits_per_page, facet_filters, ip_address=None):
     """Return search results for the given parameters."""
     search_params = get_params_for_index(index_name.split("_")[0])
     search_params.update(
@@ -26,6 +26,7 @@ def get_search_results(index_name, query, page, hits_per_page, ip_address=None):
             "indexName": f"{settings.ENVIRONMENT.lower()}_{index_name}",
             "page": page - 1,
             "query": query,
+            "facetFilters": facet_filters,
         }
     )
 
@@ -50,11 +51,13 @@ def algolia_search(request):
     try:
         data = json.loads(request.body)
 
+        facet_filters = data.get("facetFilters", [])
         index_name = data.get("indexName")
+
         limit = data.get("hitsPerPage", 25)
         page = data.get("page", 1)
+        ip_address = get_user_ip_address(request)       
         query = data.get("query", "")
-        ip_address = get_user_ip_address(request)
 
         validation_error = validate_search_params(data)
 
@@ -74,6 +77,7 @@ def algolia_search(request):
             query,
             page,
             limit,
+            facet_filters,
             ip_address=ip_address,
         )
         cache.set(cache_key, result, CACHE_TTL_IN_SECONDS)
