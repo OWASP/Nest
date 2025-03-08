@@ -10,8 +10,8 @@ from apps.owasp.models.post import Post
 class PostQuery(BaseQuery):
     """GraphQL queries for Post model."""
 
-    recent_posts = graphene.List(PostNode)
+    recent_posts = graphene.List(PostNode, limit=graphene.Int(default_value=5))
 
-    def resolve_recent_posts(root, info):
+    def resolve_recent_posts(root, info, limit):
         """Return the 5 most recent posts."""
-        return Post.recent_posts
+        return Post.recent_posts[:limit]
