@@ -54,7 +54,7 @@ def algolia_search(request):
         limit = int(data.get("hitsPerPage", 25))
         page = int(data.get("page", 1))
         query = data.get("query", "")
-        facet_filters = data.get("facetFilters", "")
+        facet_filters = data.get("facetFilters", [])
         ip_address = get_user_ip_address(request)
 
         cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
