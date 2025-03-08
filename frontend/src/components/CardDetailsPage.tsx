@@ -48,7 +48,7 @@ const DetailsCard = ({
           >
             {details &&
               details.map((detail, index) => (
-                <div key={index} className='pb-1'>
+                <div key={index} className="pb-1">
                   <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
                 </div>
               ))}
