@@ -5,7 +5,7 @@ import { Tooltip } from 'components/ui/tooltip'
 
 type ContributorProps = {
   contributor: TopContributorsTypeAlgolia | TopContributorsTypeGraphql
-  uniqueKey: string 
+  uniqueKey: string
 }
 
 const isAlgoliaContributor = (
