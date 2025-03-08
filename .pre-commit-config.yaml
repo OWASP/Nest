@@ -7,10 +7,7 @@ repos:
           - --format
           - parsable
           - --strict
-        exclude: |
-          pnpm-lock.yaml
-          cspell/pnpm-lock.yaml
-          frontend/pnpm-lock.yaml
+        exclude: (.github|pnpm-lock.yaml|cspell/pnpm-lock.yaml|frontend/pnpm-lock.yaml|.github/workflows/.*.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.7
@@ -41,7 +38,7 @@ repos:
           - svg
       - id: mixed-line-ending
         args:
-          - --fix=lf
+          - --fix=lf  # ✅ Enforce LF line endings
       - id: name-tests-test
         args:
           - --pytest

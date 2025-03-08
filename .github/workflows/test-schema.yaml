@@ -1,6 +1,6 @@
 name: Test OWASP Schema
 
-true:
+on:
   merge_group:
   pull_request:
     branches:

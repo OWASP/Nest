@@ -1,6 +1,6 @@
 name: Run CI/CD
 
-true:
+on:
   merge_group:
   pull_request:
     branches:

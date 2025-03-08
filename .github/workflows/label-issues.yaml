@@ -1,6 +1,6 @@
 name: "Auto Label Issues"
 
-true:
+on:
   issues:
     types:
       - edited

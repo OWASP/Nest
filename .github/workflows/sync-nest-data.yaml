@@ -1,6 +1,6 @@
 name: Sync Nest data
 
-true:
+on:
   schedule:
     - cron: "17 5 * * *"
   workflow_dispatch:
