@@ -7,19 +7,25 @@ export const fetchAlgoliaData = async <T>(
   indexName: string,
   query = '',
   currentPage = 0,
-  hitsPerPage = 25
+  hitsPerPage = 25,
+  facetFilters = []
 ): Promise<AlgoliaResponseType<T>> => {
   try {
+    if (['projects', 'chapters'].includes(indexName)) {
+      facetFilters.push('idx_is_active:true')
+    }
+
     const response = await fetch(IDX_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        indexName,
-        query,
-        page: currentPage,
+        facetFilters,
         hitsPerPage,
+        indexName,
+        page: currentPage,
+        query,
       }),
     })
 
