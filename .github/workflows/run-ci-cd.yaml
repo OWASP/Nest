@@ -76,10 +76,6 @@ jobs:
         working-directory: frontend
         run: pnpm run lint:check
 
-      - name: Run ESLint for accessibility
-        working-directory: frontend
-        run: pnpm eslint src --ext .js,.jsx,.ts,.tsx
-
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \
