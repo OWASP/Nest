@@ -29,17 +29,17 @@ def _clear_cache():
 @pytest.mark.usefixtures("_clear_cache")
 class TestAlgoliaSearch:
     @pytest.mark.parametrize(
-        ("index_name", "query", "page", "hits_per_page", "expected_result"),
+        ("index_name", "query", "page", "hits_per_page", "facet_filters", "expected_result"),
         [
-            ("projects", "security", 1, 10, MOCKED_SEARCH_RESULTS),
-            ("chapters", "owasp", 2, 20, MOCKED_SEARCH_RESULTS),
-            ("users", "john", 1, 10, MOCKED_SEARCH_RESULTS),
-            ("committees", "review", 1, 10, MOCKED_SEARCH_RESULTS),
-            ("issues", "bug", 1, 10, MOCKED_SEARCH_RESULTS),
+            ("projects", "security", 1, 10, ["idx_is_active:true"], MOCKED_SEARCH_RESULTS),
+            ("chapters", "owasp", 2, 20, ["idx_is_active:true"], MOCKED_SEARCH_RESULTS),
+            ("users", "john", 1, 10, [], MOCKED_SEARCH_RESULTS),
+            ("committees", "review", 1, 10, [], MOCKED_SEARCH_RESULTS),
+            ("issues", "bug", 1, 10, [], MOCKED_SEARCH_RESULTS),
         ],
     )
     def test_algolia_search_valid_request(
-        self, index_name, query, page, hits_per_page, expected_result
+        self, index_name, query, page, hits_per_page, facet_filters, expected_result
     ):
         """Test valid requests for the algolia_search."""
         with patch(
@@ -54,6 +54,7 @@ class TestAlgoliaSearch:
                     "query": query,
                     "page": page,
                     "hitsPerPage": hits_per_page,
+                    "facetFilters": facet_filters,
                 }
             )
 
@@ -63,7 +64,7 @@ class TestAlgoliaSearch:
             assert response.status_code == requests.codes.ok
             assert response_data == expected_result
             mock_get_search_results.assert_called_once_with(
-                index_name, query, page, hits_per_page, ip_address=CLIENT_IP_ADDRESS
+                index_name, query, page, hits_per_page, facet_filters, ip_address=CLIENT_IP_ADDRESS
             )
 
     def test_algolia_search_invalid_method(self):
