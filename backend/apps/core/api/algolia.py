@@ -56,7 +56,7 @@ def algolia_search(request):
 
         limit = data.get("hitsPerPage", 25)
         page = data.get("page", 1)
-        ip_address = get_user_ip_address(request)       
+        ip_address = get_user_ip_address(request)
         query = data.get("query", "")
 
         validation_error = validate_search_params(data)
