@@ -36,13 +36,13 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
 
   return icons[item] ? (
     <Tooltip
-      content={`${Icons[item as keyof typeof Icons]?.label}`}
-      recipe={TooltipRecipe}
-      openDelay={150}
-      closeDelay={100}
-      showArrow
-      positioning={{ placement: 'top' }}
-    >
+    content={`${Icons[item as keyof typeof Icons]?.label}`}
+    recipe={TooltipRecipe}
+    openDelay={150}
+    closeDelay={100}
+    showArrow
+    positioning={{ placement: 'top' }}
+  >
       <div className={containerClassName}>
         {/* Display formatted number if the value is a number */}
         <span className="text-gray-600 dark:text-gray-300">
@@ -57,6 +57,6 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
           />
         </span>
       </div>
-    </Tooltip>
+     </Tooltip>
   ) : null
 }
