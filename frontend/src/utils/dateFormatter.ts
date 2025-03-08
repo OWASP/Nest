@@ -23,6 +23,19 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
     throw new Error('Invalid date')
   }
 
+  if (
+    start.getTime() === end.getTime() ||
+    (start.getFullYear() === end.getFullYear() &&
+      start.getMonth() === end.getMonth() &&
+      start.getDate() === end.getDate())
+  ) {
+    return start.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+
   // Check if dates are in the same month and year
   const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
   const sameYear = start.getFullYear() === end.getFullYear()

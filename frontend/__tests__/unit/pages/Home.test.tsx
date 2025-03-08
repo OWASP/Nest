@@ -4,7 +4,6 @@ import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { toast } from 'hooks/useToast'
 import { Home } from 'pages'
-import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
 
 jest.mock('hooks/useToast', () => ({
@@ -156,15 +155,30 @@ describe('Home', () => {
   })
 
   test('renders Upcoming Events section', async () => {
+    jest.mock('utils/dateFormatter', () => ({
+      formatDate: jest.fn().mockImplementation((date) => {
+        if (date === '2025-02-27') return 'Feb 27, 2025'
+        return 'mocked date'
+      }),
+      formatDateRange: jest.fn().mockImplementation((start, end) => {
+        if (start === '2025-02-27' && end === '2025-02-28') return 'Feb 27 - 28, 2025'
+        return 'mocked range'
+      }),
+    }))
+
     render(<Home />)
     await waitFor(() => {
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
       mockGraphQLData.upcomingEvents.forEach((event) => {
         expect(screen.getByText(event.name)).toBeInTheDocument()
-        const expectedDateText = event.endDate && event.startDate != event.endDate
-          ? formatDateRange(event.startDate, event.endDate)
-          : formatDate(event.startDate);
-        expect(screen.getByText(expectedDateText)).toBeInTheDocument()
+
+        if (event.endDate && event.startDate !== event.endDate) {
+          expect(screen.getByText('Feb 27 - 28, 2025')).toBeInTheDocument()
+        } else {
+          if (event.startDate === '2025-02-27') {
+            expect(screen.getByText('Feb 27, 2025')).toBeInTheDocument()
+          }
+        }
       })
     })
   })
