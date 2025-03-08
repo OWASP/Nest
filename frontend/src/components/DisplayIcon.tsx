@@ -52,5 +52,5 @@ const DisplayIcon: React.FC<DisplayIconProps> = memo(({ item, icons }) => {
         <FontAwesomeIconWrapper className={iconClassName} icon={Icons[item as IconKeys]?.icon} />
       </div>
      </Tooltip>
-  ) : null
+  ) :
 }
