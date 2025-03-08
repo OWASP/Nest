@@ -9,7 +9,7 @@ class Conversation(TimestampedModel):
     """Model representing a Slack conversation (channel or group)."""
 
     class Meta:
-        db_table = "owasp_slack_conversations"
+        db_table = "slack_conversations"
         verbose_name_plural = "Conversations"
 
     entity_id = models.CharField(max_length=255, unique=True)
