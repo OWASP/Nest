@@ -102,9 +102,13 @@ export default function Home() {
       label: 'Active Projects',
       rawValue: data.statsOverview.activeProjectsStats, // For animation
       formattedValue: formatNumber(data.statsOverview.activeProjectsStats), // Display value
+      rawValue: data.statsOverview.activeProjectsStats, // For animation
+      formattedValue: formatNumber(data.statsOverview.activeProjectsStats), // Display value
     },
     {
       label: 'Contributors',
+      rawValue: data.statsOverview.contributorsStats,
+      formattedValue: formatNumber(data.statsOverview.contributorsStats),
       rawValue: data.statsOverview.contributorsStats,
       formattedValue: formatNumber(data.statsOverview.contributorsStats),
     },
@@ -112,13 +116,18 @@ export default function Home() {
       label: 'Local Chapters',
       rawValue: data.statsOverview.activeChaptersStats,
       formattedValue: formatNumber(data.statsOverview.activeChaptersStats),
+      rawValue: data.statsOverview.activeChaptersStats,
+      formattedValue: formatNumber(data.statsOverview.activeChaptersStats),
     },
     {
       label: 'Countries',
       rawValue: data.statsOverview.countriesStats,
       formattedValue: formatNumber(data.statsOverview.countriesStats),
+      rawValue: data.statsOverview.countriesStats,
+      formattedValue: formatNumber(data.statsOverview.countriesStats),
     },
-  ]
+  ];
+
 
   return (
     <div className="mx-auto min-h-screen max-w-6xl text-gray-600 dark:text-gray-300">
@@ -261,6 +270,8 @@ export default function Home() {
         {counterData.map((stat, index) => (
           <SecondaryCard key={index} className="text-center">
             <div className="mb-2 text-3xl font-bold text-blue-400">
+              <AnimatedCounter end={stat.formattedValue} duration={2} />
+              {stat.formattedValue.replace(/[0-9.]/g, '')}
               <AnimatedCounter end={stat.formattedValue} duration={2} />
               {stat.formattedValue.replace(/[0-9.]/g, '')}
             </div>
