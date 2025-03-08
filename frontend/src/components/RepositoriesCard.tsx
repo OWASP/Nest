@@ -56,7 +56,7 @@ const RepositoryItem = ({ details }) => {
   return (
     <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <p
-        onClick={handleClick}
+          onClick={handleClick}
         className="font-semibold text-blue-600 hover:cursor-pointer hover:underline dark:text-sky-400"
       >
         {details.name}
@@ -77,13 +77,14 @@ const RepositoryItem = ({ details }) => {
           label="Contributors"
           value={millify(details.contributorsCount, { precision: 1 })}
         />
+
         <InfoItem
           icon={faExclamationCircle}
           label="Issues"
           value={millify(details.openIssuesCount, { precision: 1 })}
         />
       </div>
-    </div>
+     </div>
   )
 }
 
