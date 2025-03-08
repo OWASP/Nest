@@ -55,7 +55,7 @@
     - name: Copy schema makefile
       ansible.builtin.copy:
         src: "{{ github_workspace }}/schema/Makefile"
-        dest: ~/schema/Makefile"
+        dest: ~/schema/Makefile
         mode: "0644"
     - name: Copy directory recursively
       ansible.builtin.copy:
