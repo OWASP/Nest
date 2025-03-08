@@ -92,10 +92,10 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    ```plaintext
    DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
    DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
-   DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
    ```
 
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
+   - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
 1. **Run the Application**:
 
@@ -125,8 +125,9 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      ```
 
 1. **Verify API Endpoints**:
-   - Check that the data is available via these API endpoints:
-     - [API Endpoint](http://localhost:8000/api/v1/)
+   - Check the following endpoints availability:
+     - [API](http://localhost:8000/api/v1/)
+     - [GraphQL](http://localhost:8000/graphql/)
 
 ### Optional Steps
 
