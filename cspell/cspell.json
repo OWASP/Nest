@@ -42,7 +42,10 @@
     "backend/**/migrations/*.py",
     "backend/data/project-custom-tags/*.json",
     "backend/static/**",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "pre-commit-env/**",
+    "node_modules/**",
+    "dist/**"
   ],
   "ignoreRegExpList": [
     "#\\w+" // Slack channel names
