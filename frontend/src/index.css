@@ -162,6 +162,10 @@ a {
   }
 }
 
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
@@ -283,13 +287,4 @@ a {
   top: 45%;
   left: 50%;
   opacity: 0.6;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
