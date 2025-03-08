@@ -6,19 +6,23 @@ import FontAwesomeIconWrapper from "wrappers/FontAwesomeIconWrapper";
 import { Tooltip } from "components/ui/tooltip";
 
 export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
+  // Preserve underscores to prevent spelling issues
+  const normalizedItem = item.toLowerCase();
 
-  const normalizedItem = item.replace(/_/g, "").toLowerCase();
-   const containerClassName = [
+  // Define container class names dynamically
+  const containerClassName = [
     "flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2",
-    ["starscount"].includes(normalizedItem) ? "rotate-container" : "",
-    ["forkscount", "contributorscount", "contributioncount"].includes(normalizedItem) ? "flip-container" : "",
+    ["stars_count"].includes(normalizedItem) ? "rotate-container" : "",
+    ["forks_count", "contributors_count", "contribution_count"].includes(normalizedItem) ? "flip-container" : "",
   ]
     .filter(Boolean)
     .join(" ");
+
+  // Define icon class names dynamically
   const iconClassName = [
     "text-gray-600 dark:text-gray-300",
-    ["starscount"].includes(normalizedItem) ? "icon-rotate" : "",
-    ["forkscount", "contributorscount", "contributioncount"].includes(normalizedItem) ? "icon-flip" : "",
+    ["stars_count"].includes(normalizedItem) ? "icon-rotate" : "",
+    ["forks_count", "contributors_count", "contribution_count"].includes(normalizedItem) ? "icon-flip" : "",
   ]
     .filter(Boolean)
     .join(" ");
