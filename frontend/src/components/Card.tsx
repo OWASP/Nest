@@ -49,7 +49,7 @@ const Card = ({
           {/* Display project level badge (if available) */}
           {level && (
             <Tooltip
-              id="level-tooltip"
+              id={`level-tooltip-${title}`}
               content={`${level.level} project`}
               openDelay={100}
               closeDelay={100}
