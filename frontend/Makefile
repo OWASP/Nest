@@ -3,10 +3,20 @@ check-frontend: \
 	lint-frontend-code
 
 exec-frontend-command:
-	@docker exec -t nest-frontend $(CMD)
+	@if docker ps | grep -q nest-frontend; then \
+		docker exec -t nest-frontend $(CMD); \
+	else \
+		echo "Container nest-frontend not running, trying to run command locally"; \
+		cd frontend && $(CMD); \
+	fi
 
 exec-frontend-command-it:
-	@docker exec -it nest-frontend $(CMD)
+	@if docker ps | grep -q nest-frontend; then \
+		docker exec -it nest-frontend $(CMD); \
+	else \
+		echo "Container nest-frontend not running, trying to run command locally"; \
+		cd frontend && $(CMD); \
+	fi
 
 format-frontend-code:
 	@CMD="pnpm run format" $(MAKE) exec-frontend-command
