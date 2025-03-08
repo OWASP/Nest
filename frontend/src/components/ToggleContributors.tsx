@@ -4,42 +4,43 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopContributorsTypeGraphql } from 'types/contributor'
+
+type TopContributorsProps = {
+  contributors: TopContributorsTypeGraphql[]
+  label?: string
+  maxInitialDisplay?: number
+  className?: string
+}
+
 const TopContributors = ({
   contributors,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
   className = '',
-}: {
-  contributors: TopContributorsTypeGraphql[]
-  label?: string
-  maxInitialDisplay?: number
-  className?: string
-}) => {
+}: TopContributorsProps) => {
   const navigate = useNavigate()
   const [showAllContributors, setShowAllContributors] = useState(false)
 
-  const toggleContributors = () => setShowAllContributors(!showAllContributors)
-
-  const displayContributors = showAllContributors
-    ? contributors
-    : contributors.slice(0, maxInitialDisplay)
-
   if (contributors.length === 0) {
-    return
+    return <p className="text-gray-600 dark:text-gray-400">No contributors available.</p>
   }
+
+  const displayedContributors = showAllContributors ? contributors : contributors.slice(0, maxInitialDisplay)
+
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
       <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {displayContributors.map((contributor, index) => (
+        {displayedContributors.map((contributor, index) => (
           <div
             key={index}
             className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             <img
               src={`${contributor?.avatarUrl}&s=60`}
-              alt={contributor.name || contributor.login}
+              alt={contributor.name || contributor.login || 'Contributor avatar'}
               className="mr-3 h-10 w-10 rounded-full"
+              loading="lazy"
             />
             <div>
               <p
@@ -68,9 +69,10 @@ const TopContributors = ({
           </div>
         ))}
       </div>
+
       {contributors.length > maxInitialDisplay && (
         <Button
-          onClick={toggleContributors}
+          onClick={() => setShowAllContributors((prev) => !prev)}
           className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
         >
           {showAllContributors ? (

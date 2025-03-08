@@ -44,12 +44,13 @@ const Card = ({
 
   return (
     <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
+      {/* Header Section */}
       <div className="mt-2 flex w-full flex-col items-start gap-4 pt-2 sm:flex-col sm:gap-4 md:pt-0">
         <div className="flex items-center gap-3">
           {/* Display project level badge (if available) */}
           {level && (
             <Tooltip
-              closeDelay={100}
+              id={`level-tooltip-${title}`}  // ✅ FIX: Unique tooltip ID
               content={`${level.level} project`}
               id={`level-tooltip-${title}`}
               openDelay={100}
@@ -58,9 +59,7 @@ const Card = ({
               showArrow
             >
               <span
-                className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-full text-xs shadow'
-                )}
+                className={cn("flex h-8 w-8 items-center justify-center rounded-full text-xs shadow")}
                 style={{ backgroundColor: level.color }}
               >
                 <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
@@ -79,37 +78,32 @@ const Card = ({
             </h1>
           </Link>
         </div>
-        {/* Icons associated with the project */}
-        {icons && Object.keys(Icons).some((key) => icons[key]) ? (
+        {icons && Object.keys(icons).some((key) => icons[key]) ? (
           <div className="-ml-1.5 flex flex-grow">
-            {Object.keys(Icons).map((key, index) =>
-              icons[key] ? (
-                <DisplayIcon
-                  key={`${key}-${index}`}
-                  item={key}
-                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))}
-                />
-              ) : null
-            )}
+            {Object.entries(icons)
+              .filter(([_, value]) => value)
+              .map(([key, index]) => (
+                <DisplayIcon key={`${key}-${index}`} item={key} icons={icons} />
+              ))}
           </div>
-        ) : null}
+        )}
       </div>
-      {/* Link to project name if provided */}
+
       {projectName && (
         <Link href={projectLink} rel="noopener noreferrer" className="mt-2 font-medium">
           {projectName}
         </Link>
       )}
-      {/* Render project summary using Markdown */}
+
       <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
+
       <div
         className={
           social && social.length > 0
-            ? 'flex w-full flex-col gap-2 pr-4'
-            : 'flex w-full items-center justify-between'
+            ? "flex w-full flex-col gap-2 pr-4"
+            : "flex w-full items-center justify-between"
         }
       >
-        {/* Render top contributors as avatars */}
         <div className="mt-3 flex w-full flex-wrap items-center gap-2">
           {topContributors?.map((contributor, index) => (
             <ContributorAvatar
@@ -118,29 +112,17 @@ const Card = ({
             />
           ))}
         </div>
+
         {!social || social.length === 0 ? (
-          <div
-            className={cn(
-              'mt-3 flex items-center pr-4',
-              isMobile && 'mt-4 w-full justify-end pr-4'
-            )}
-          >
+          <div className={cn("mt-3 flex items-center pr-4", isMobile && "mt-4 w-full justify-end pr-4")}>
             <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
               {button.icon}
               {button.label}
             </ActionButton>
           </div>
         ) : (
-          <div
-            className={cn(
-              'flex w-full flex-wrap items-center justify-between gap-6',
-              isMobile && 'items-start'
-            )}
-          >
-            <div
-              className={cn('flex w-full items-center justify-between', isMobile && 'flex-wrap')}
-            >
-              {/* Render social links if available */}
+          <div className={cn("flex w-full flex-wrap items-center justify-between gap-6", isMobile && "items-start")}>
+            <div className={cn("flex w-full items-center justify-between", isMobile && "flex-wrap")}>
               {social && social.length > 0 && (
                 <HStack id="social" mt={2}>
                   {social.map((item) => (
@@ -158,7 +140,6 @@ const Card = ({
                   ))}
                 </HStack>
               )}
-              {/* Action Button */}
               <div className="flex items-center">
                 <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
                   {button.icon}

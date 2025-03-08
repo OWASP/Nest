@@ -38,22 +38,24 @@ const ContributorAvatar = memo(({ contributor }: ContributorProps) => {
       : ''
 
   return (
-    <Tooltip
-      id={`avatar-tooltip-${login}`}
-      content={`${contributionsCount} contributions${repositoryInfo} by ${displayName}`}
-      openDelay={100}
-      closeDelay={100}
-      showArrow
-      positioning={{ placement: 'top' }}
-    >
+    <div className="relative inline-block">
+      <Tooltip
+        id={`avatar-tooltip-${login}`}
+        content={`${contributionsCount} contributions${repositoryInfo} by ${displayName}`}
+        openDelay={100}
+        closeDelay={100}
+        showArrow
+        positioning={{ placement: 'top' }}
+      />
       <Link href={`/community/users/${login}`} target="_blank" rel="noopener noreferrer">
         <img
           className="h-[30px] w-[30px] rounded-full grayscale hover:grayscale-0"
           src={`${avatarUrl}${isAlgolia ? '&s=60' : ''}`}
           alt={`${displayName}'s avatar`}
+          data-tooltip-id={`avatar-tooltip-${login}`}
         />
       </Link>
-    </Tooltip>
+    </div>
   )
 })
 

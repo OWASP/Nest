@@ -9,27 +9,31 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import millify from 'millify'
-import type React from 'react'
-import { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RepositoriesCardProps } from 'types/project'
+import { RepositoriesCardProps, RepositoryDetails } from 'types/project'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
+
+  if (!repositories.length) {
+    return <p className="text-gray-600 dark:text-gray-400">No repositories available.</p>
+  }
 
   const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4)
 
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {displayedRepositories.map((repository, index) => {
-          return <RepositoryItem key={index} details={repository} />
-        })}
+        {displayedRepositories.map((repository, index) => (
+          <RepositoryItem key={index} details={repository} />
+        ))}
       </div>
+
       {repositories.length > 4 && (
         <div className="mt-6 flex items-center justify-center text-center">
           <button
-            onClick={() => setShowAllRepositories(!showAllRepositories)}
+            onClick={() => setShowAllRepositories((prev) => !prev)}
             className="mt-4 flex items-center justify-center text-[#1d7bd7] hover:underline dark:text-sky-600"
           >
             {showAllRepositories ? (
@@ -48,13 +52,15 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   )
 }
 
-const RepositoryItem = ({ details }) => {
+const RepositoryItem: React.FC<{ details: RepositoryDetails }> = memo(({ details }) => {
   const navigate = useNavigate()
+
   const handleClick = () => {
-    navigate(window.location.pathname + '/repositories/' + details?.key)
+    navigate(`${window.location.pathname}/repositories/${details.key}`)
   }
+
   return (
-    <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <p
         onClick={handleClick}
         className="font-semibold text-blue-600 hover:cursor-pointer hover:underline dark:text-sky-400"
@@ -77,6 +83,7 @@ const RepositoryItem = ({ details }) => {
           label="Contributors"
           value={millify(details.contributorsCount, { precision: 1 })}
         />
+
         <InfoItem
           icon={faExclamationCircle}
           label="Issues"
@@ -85,13 +92,9 @@ const RepositoryItem = ({ details }) => {
       </div>
     </div>
   )
-}
+})
 
-const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: string }> = ({
-  icon,
-  label,
-  value,
-}) => (
+const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: string }> = ({ icon, label, value }) => (
   <div className="flex items-center justify-between">
     <span className="flex items-center">
       <FontAwesomeIcon icon={icon} className="mr-2 h-4 w-4" />
