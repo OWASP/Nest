@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import { CardProps } from "types/card";
 import { desktopViewMinWidth } from "utils/constants";
-import { Icons } from "utils/data";
 import { TooltipRecipe } from "utils/theme";
 import { getSocialIcon } from "utils/urlIconMappings";
 import { cn } from "utils/utility";
@@ -13,6 +12,8 @@ import ContributorAvatar from "components/ContributorAvatar";
 import DisplayIcon from "components/DisplayIcon";
 import Markdown from "components/MarkdownWrapper";
 import { Tooltip } from "components/ui/tooltip";
+
+// Removed unused import: `Icons`
 
 const isMobileInitial = typeof window !== "undefined" && window.innerWidth < desktopViewMinWidth;
 
@@ -31,7 +32,6 @@ const Card = ({
 }: CardProps) => {
   const [isMobile, setIsMobile] = useState(isMobileInitial);
 
-
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < desktopViewMinWidth);
     window.addEventListener("resize", checkMobile);
@@ -42,7 +42,6 @@ const Card = ({
     <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
       <div className="mt-2 flex w-full flex-col items-start gap-4 pt-2 sm:flex-col sm:gap-4 md:pt-0">
         <div className="flex items-center gap-3">
-          {/* Fixed tooltip issue by ensuring unique tooltip ID */}
           {level && (
             <Tooltip
               id={`level-tooltip-${title}`}
@@ -60,7 +59,6 @@ const Card = ({
               </span>
             </Tooltip>
           )}
-          {/* Project title */}
           <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
               className="max-w-full break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl"
@@ -70,26 +68,23 @@ const Card = ({
             </h1>
           </Link>
         </div>
-        {/* Fixed DisplayIcon tooltips not showing for multiple items */}
         {icons && Object.keys(icons).some((key) => icons[key]) ? (
           <div className="-ml-1.5 flex flex-grow">
             {Object.entries(icons)
               .filter(([_, value]) => value)
-              .map(([key, value], index) => (
+              .map(([key, index]) => (
                 <DisplayIcon key={`${key}-${index}`} item={key} icons={icons} />
               ))}
           </div>
         ) : null}
       </div>
 
-      {/* Project name with link */}
       {projectName && (
         <Link href={projectLink} rel="noopener noreferrer" className="mt-2 font-medium">
           {projectName}
         </Link>
       )}
 
-      {/* Render project summary with Markdown */}
       <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
 
       <div
@@ -99,7 +94,6 @@ const Card = ({
             : "flex w-full items-center justify-between"
         }
       >
-        {/* Render top contributors */}
         <div className="mt-3 flex w-full flex-wrap items-center gap-2">
           {topContributors?.map((contributor, index) => (
             <ContributorAvatar key={contributor.login || `contributor-${index}`} contributor={contributor} />
@@ -116,7 +110,6 @@ const Card = ({
         ) : (
           <div className={cn("flex w-full flex-wrap items-center justify-between gap-6", isMobile && "items-start")}>
             <div className={cn("flex w-full items-center justify-between", isMobile && "flex-wrap")}>
-              {/* Render social links */}
               {social && social.length > 0 && (
                 <HStack id="social" mt={2}>
                   {social.map((item) => (
@@ -134,7 +127,6 @@ const Card = ({
                   ))}
                 </HStack>
               )}
-              {/* Action Button */}
               <div className="flex items-center">
                 <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
                   {button.icon}
