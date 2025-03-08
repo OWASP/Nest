@@ -1,35 +1,35 @@
 """OWASP app issue search API."""
 
-from algoliasearch_django import raw_search
-
-from apps.github.models.issue import Issue
+from apps.common.typesense import Typesense
+from apps.core.utils.params_mapping_typesense import get_typesense_params_for_index
 
 ISSUE_CACHE_PREFIX = "issue:"
 
 
 def get_issues(query, attributes=None, distinct=False, limit=25, page=1):
     """Return issues relevant to a search query."""
-    params = {
-        "attributesToHighlight": [],
-        "attributesToRetrieve": attributes
-        or [
-            "idx_comments_count",
-            "idx_created_at",
-            "idx_hint",
-            "idx_labels",
-            "idx_project_name",
-            "idx_project_url",
-            "idx_repository_languages",
-            "idx_summary",
-            "idx_title",
-            "idx_updated_at",
-            "idx_url",
-        ],
-        "hitsPerPage": limit,
-        "page": page - 1,
-    }
+    search_parameters = get_typesense_params_for_index("issue")
+    search_parameters.update(
+        {
+            "q": query,
+            "page": page,
+            "per_page": limit,
+        }
+    )
+
+    if attributes:
+        search_parameters["include_fields"] = attributes
 
     if distinct:
-        params["distinct"] = 1
+        search_parameters["group_by"] = "project_name"
+        search_parameters["group_limit"] = 1
 
-    return raw_search(Issue, query, params)
+    client = Typesense.get_client()
+    search_result = client.collections["issue"].documents.search(search_parameters)
+    documents = [doc["document"] for doc in search_result.get("hits", [])]
+
+    return {
+        "hits": documents,
+        "nbPages": (search_result.get("found", 0) + limit - 1) // limit,
+        "totalHits": search_result.get("found", 0),
+    }

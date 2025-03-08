@@ -22,13 +22,7 @@ def get_blocks(
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
 
-    attributes = [
-        "idx_project_name",
-        "idx_project_url",
-        "idx_summary",
-        "idx_title",
-        "idx_url",
-    ]
+    attributes = "project_name,project_url,summary,title,url"
 
     offset = (page - 1) * limit
     contribute_data = get_issues(search_query, attributes=attributes, limit=limit, page=page)
@@ -46,18 +40,18 @@ def get_blocks(
 
     blocks = []
     for idx, issue in enumerate(issues):
-        title = Truncator(escape(issue["idx_title"])).chars(
+        title = Truncator(escape(issue["title"])).chars(
             presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
-        project_name = escape(issue["idx_project_name"])
-        project_url = escape(issue["idx_project_url"])
-        summary = Truncator(escape(issue["idx_summary"])).chars(
+        project_name = escape(issue["project_name"])
+        project_url = escape(issue["project_url"])
+        summary = Truncator(escape(issue["summary"])).chars(
             presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
         blocks.append(
             markdown(
-                f"{offset + idx + 1}. <{issue['idx_url']}|*{title}*>{NL}"
+                f"{offset + idx + 1}. <{issue['url']}|*{title}*>{NL}"
                 f"<{project_url}|{project_name}>{NL}"
                 f"{summary}{NL}"
             )

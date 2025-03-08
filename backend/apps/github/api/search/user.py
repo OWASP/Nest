@@ -1,41 +1,32 @@
 """OWASP app user search API."""
 
-from algoliasearch_django import raw_search
-
-from apps.github.models.user import User
+from apps.common.typesense import Typesense
+from apps.core.utils.params_mapping_typesense import get_typesense_params_for_index
 
 
 def get_users(query, attributes=None, limit=25, page=1, searchable_attributes=None):
     """Return users relevant to a search query."""
-    params = {
-        "attributesToHighlight": [],
-        "attributesToRetrieve": attributes
-        or [
-            "idx_avatar_url",
-            "idx_bio",
-            "idx_company",
-            "idx_contributions",
-            "idx_created_at",
-            "idx_email",
-            "idx_followers_count",
-            "idx_following_count",
-            "idx_issues_count",
-            "idx_key",
-            "idx_location",
-            "idx_login",
-            "idx_name",
-            "idx_public_repositories_count",
-            "idx_title",
-            "idx_updated_at",
-            "idx_url",
-        ],
-        "hitsPerPage": limit,
-        "minProximity": 4,
-        "page": page - 1,
-        "typoTolerance": "min",
-    }
+    search_parameters = get_typesense_params_for_index("user")
+    search_parameters.update(
+        {
+            "q": query,
+            "page": page,
+            "per_page": limit,
+        }
+    )
+
+    if attributes:
+        search_parameters["include_fields"] = attributes
 
     if searchable_attributes:
-        params["restrictSearchableAttributes"] = searchable_attributes
+        search_parameters["query_by"] = searchable_attributes
 
-    return raw_search(User, query, params)
+    client = Typesense.get_client()
+    search_result = client.collections["user"].documents.search(search_parameters)
+    documents = [doc["document"] for doc in search_result.get("hits", [])]
+
+    return {
+        "hits": documents,
+        "nbPages": (search_result.get("found", 0) + limit - 1) // limit,
+        "totalHits": search_result.get("found", 0),
+    }

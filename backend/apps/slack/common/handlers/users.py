@@ -26,21 +26,7 @@ def get_blocks(
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
 
-    attributes = [
-        "idx_bio",
-        "idx_company",
-        "idx_contributions",
-        "idx_email",
-        "idx_followers_count",
-        "idx_following_count",
-        "idx_issues_count",
-        "idx_location",
-        "idx_login",
-        "idx_name",
-        "idx_public_repositories_count",
-        "idx_updated_at",
-        "idx_url",
-    ]
+    attributes = "bio,company,contributions,email,followers_count,following_count,issues_count,location,login,name,public_repositories_count,updated_at,url"
 
     users_data = get_users(search_query, attributes=attributes, limit=limit, page=page)
     users = users_data["hits"]
@@ -65,20 +51,20 @@ def get_blocks(
 
     blocks = []
     for idx, user in enumerate(users):
-        user_name_raw = user.get("idx_name") or user.get("idx_login", "")
+        user_name_raw = user.get("name") or user.get("login", "")
         user_name = Truncator(escape(user_name_raw)).chars(
             presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
 
-        bio = Truncator(escape(user.get("idx_bio", "") or "")).chars(
+        bio = Truncator(escape(user.get("bio", "") or "")).chars(
             presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
-        location = escape(user.get("idx_location", ""))
-        company = escape(user.get("idx_company", ""))
-        followers_count = user.get("idx_followers_count", 0)
-        following_count = user.get("idx_following_count", 0)
-        public_repositories = user.get("idx_public_repositories_count", 0)
+        location = escape(user.get("location", ""))
+        company = escape(user.get("company", ""))
+        followers_count = user.get("followers_count", 0)
+        following_count = user.get("following_count", 0)
+        public_repositories = user.get("public_repositories_count", 0)
 
         metadata = []
         if presentation.include_metadata:
@@ -95,7 +81,7 @@ def get_blocks(
 
         blocks.append(
             markdown(
-                f"{offset + idx + 1}. <{user['idx_url']}|*{user_name}*>{NL}"
+                f"{offset + idx + 1}. <{user['url']}|*{user_name}*>{NL}"
                 f"_{' | '.join(metadata)}_{NL}"
                 f"{bio}{NL}"
             )

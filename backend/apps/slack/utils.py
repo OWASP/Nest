@@ -27,14 +27,10 @@ def get_gsoc_projects(year):
     from apps.owasp.api.search.project import get_projects
 
     return get_projects(
-        attributes=["idx_name", "idx_url"],
+        attributes="name,url",
         query=f"gsoc{year}",
-        searchable_attributes=[
-            "idx_custom_tags",
-            "idx_languages",
-            "idx_tags",
-            "idx_topics",
-        ],
+        searchable_attributes="custom_tags,languages,tags,topics",
+        searchable_attributes_weights="4,3,2,1",
     )["hits"]
 
 

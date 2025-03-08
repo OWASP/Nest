@@ -24,16 +24,7 @@ def get_blocks(
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
 
-    attributes = [
-        "idx_country",
-        "idx_leaders",
-        "idx_name",
-        "idx_region",
-        "idx_suggested_location",
-        "idx_summary",
-        "idx_updated_at",
-        "idx_url",
-    ]
+    attributes = "country,leaders,name,region,suggested_location,summary,updated_at,url"
 
     offset = (page - 1) * limit
     chapters_data = get_chapters(search_query, attributes=attributes, limit=limit, page=page)
@@ -58,24 +49,24 @@ def get_blocks(
     ]
 
     for idx, chapter in enumerate(chapters):
-        location = chapter["idx_suggested_location"] or chapter["idx_country"]
-        leaders = chapter.get("idx_leaders", [])
+        location = chapter["suggested_location"] or chapter["country"]
+        leaders = chapter.get("leaders", [])
         leaders_text = (
             f"_Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}_{NL}"
             if leaders and presentation.include_metadata
             else ""
         )
 
-        name = Truncator(escape(chapter["idx_name"])).chars(
+        name = Truncator(escape(chapter["name"])).chars(
             presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
-        summary = Truncator(chapter["idx_summary"]).chars(
+        summary = Truncator(chapter["summary"]).chars(
             presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
         blocks.append(
             markdown(
-                f"{offset + idx + 1}. <{chapter['idx_url']}|*{name}*>{NL}"
+                f"{offset + idx + 1}. <{chapter['url']}|*{name}*>{NL}"
                 f"_{location}_{NL}"
                 f"{leaders_text}"
                 f"{escape(summary)}{NL}"
