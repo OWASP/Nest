@@ -6,26 +6,25 @@ import {
   faChevronDown,
   faChevronUp,
   IconDefinition,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import millify from 'millify'
-import type React from 'react'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { RepositoriesCardProps } from 'types/project'
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import millify from "millify";
+import React, { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { RepositoriesCardProps } from "types/project";
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
-  const [showAllRepositories, setShowAllRepositories] = useState(false)
-
-  const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4)
+  const [showAllRepositories, setShowAllRepositories] = useState(false);
+  const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4);
 
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {displayedRepositories.map((repository, index) => {
-          return <RepositoryItem key={index} details={repository} />
-        })}
+        {displayedRepositories.map((repository, index) => (
+          <RepositoryItem key={repository.key || index} details={repository} />
+        ))}
       </div>
+
       {repositories.length > 4 && (
         <div className="mt-6 flex items-center justify-center text-center">
           <button
@@ -45,14 +44,27 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
         </div>
       )}
     </div>
-  )
+  );
+};
+
+interface RepositoryItemProps {
+  details: {
+    key?: string;
+    id?: string;
+    name: string;
+    starsCount: number;
+    forksCount: number;
+    contributorsCount: number;
+    openIssuesCount: number;
+  };
 }
 
-const RepositoryItem = ({ details }) => {
-  const navigate = useNavigate()
-  const handleClick = () => {
-    navigate(window.location.pathname + '/repositories/' + details?.key)
-  }
+const RepositoryItem: React.FC<RepositoryItemProps> = ({ details }) => {
+  const navigate = useNavigate();
+  const handleClick = useCallback(() => {
+    navigate(`${window.location.pathname}/repositories/${details?.key ?? details?.id}`);
+  }, [navigate, details]);
+
   return (
     <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <p
@@ -62,43 +74,29 @@ const RepositoryItem = ({ details }) => {
         {details.name}
       </p>
       <div className="space-y-2 text-sm">
-        <InfoItem
-          icon={faStar}
-          label="Stars"
-          value={millify(details.starsCount, { precision: 1 })}
-        />
-        <InfoItem
-          icon={faCodeFork}
-          label="Forks"
-          value={millify(details.forksCount, { precision: 1 })}
-        />
-        <InfoItem
-          icon={faUsers}
-          label="Contributors"
-          value={millify(details.contributorsCount, { precision: 1 })}
-        />
-        <InfoItem
-          icon={faExclamationCircle}
-          label="Issues"
-          value={millify(details.openIssuesCount, { precision: 1 })}
-        />
+        <InfoItem icon={faStar} label="Stars" value={details.starsCount} />
+        <InfoItem icon={faCodeFork} label="Forks" value={details.forksCount} />
+        <InfoItem icon={faUsers} label="Contributors" value={details.contributorsCount} />
+        <InfoItem icon={faExclamationCircle} label="Issues" value={details.openIssuesCount} />
       </div>
     </div>
-  )
+  );
+};
+
+interface InfoItemProps {
+  icon: IconDefinition;
+  label: string;
+  value: number;
 }
 
-const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: string }> = ({
-  icon,
-  label,
-  value,
-}) => (
+const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value }) => (
   <div className="flex items-center justify-between">
     <span className="flex items-center">
       <FontAwesomeIcon icon={icon} className="mr-2 h-4 w-4" />
       {label}
     </span>
-    <span className="font-medium">{value.toLocaleString()}</span>
+    <span className="font-medium">{millify(value, { precision: 1 })}</span>
   </div>
-)
+);
 
-export default RepositoriesCard
+export default RepositoriesCard;
