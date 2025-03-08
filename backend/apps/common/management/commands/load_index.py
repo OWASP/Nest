@@ -2,8 +2,6 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-import apps.github.schema
-import apps.owasp.schema  # noqa
 from apps.common.typesense import REGISTERED_INDEXES
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -17,7 +15,7 @@ class Command(BaseCommand):
         if not REGISTERED_INDEXES:
             logging.info("No registered indexes found.")
         else:
-            logging.info(f"Registered indexes: {list(REGISTERED_INDEXES.values())}")
+            logging.info(f"Registered indexes: {list(REGISTERED_INDEXES.keys())}")
         for index in REGISTERED_INDEXES.values():
             index.create_collection()
 

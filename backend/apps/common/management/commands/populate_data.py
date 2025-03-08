@@ -1,7 +1,5 @@
 from django.core.management.base import BaseCommand
 
-import apps.github.schema
-import apps.owasp.schema  # noqa
 from apps.common.typesense import REGISTERED_INDEXES
 
 
