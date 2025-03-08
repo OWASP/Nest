@@ -15,16 +15,9 @@ export const formatDate = (input: number | string) => {
   })
 }
 
-export const formatDateRange = (
-  startDate: number | string,
-  endDate: number | string
-) => {
-  const start = typeof startDate === 'number'
-    ? new Date(startDate * 1000)
-    : new Date(startDate)
-  const end = typeof endDate === 'number'
-    ? new Date(endDate * 1000)
-    : new Date(endDate)
+export const formatDateRange = (startDate: number | string, endDate: number | string) => {
+  const start = typeof startDate === 'number' ? new Date(startDate * 1000) : new Date(startDate)
+  const end = typeof endDate === 'number' ? new Date(endDate * 1000) : new Date(endDate)
 
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     throw new Error('Invalid date')
@@ -39,9 +32,7 @@ export const formatDateRange = (
     return formatDate(startDate)
   }
 
-  const sameMonth =
-    start.getMonth() === end.getMonth() &&
-    start.getFullYear() === end.getFullYear()
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
   const sameYear = start.getFullYear() === end.getFullYear()
 
   if (sameMonth) {
