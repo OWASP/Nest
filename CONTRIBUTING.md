@@ -88,15 +88,14 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
    - After creating an account, create an Algolia app.
    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
-   - If you encounter any issues, you can refer directly to [Algolia's official documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
    ```plaintext
    DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
    DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
-   DJANGO_ALGOLIA_APPLICATION_REGION=<your-algolia-application-region> // eu or us
    ```
 
    - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
+   - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
 1. **Run the Application**:
 
