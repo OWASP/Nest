@@ -15,6 +15,7 @@ class ReleaseIndex(IndexBase):
             {"name": "id", "type": "string"},
             {
                 "name": "author",
+                "facet": True,
                 "type": "object[]",
                 "fields": [
                     {"name": "avatar_url", "type": "string"},
@@ -26,9 +27,9 @@ class ReleaseIndex(IndexBase):
             {"name": "created_at", "type": "int64"},
             {"name": "description", "type": "string"},
             {"name": "name", "type": "string"},
-            {"name": "project", "type": "string"},
+            {"name": "project", "type": "string", "facet": True},
             {"name": "published_at", "type": "int64"},
-            {"name": "repository", "type": "string"},
+            {"name": "repository", "type": "string", "facet": True},
             {"name": "tag_name", "type": "string"},
             {"name": "is_pre_release", "type": "bool"},
         ],

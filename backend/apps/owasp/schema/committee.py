@@ -13,12 +13,12 @@ class CommitteeIndex(IndexBase):
         "fields": [
             {"name": "id", "type": "string"},
             {"name": "created_at", "type": "int64"},
-            {"name": "key", "type": "string"},
+            {"name": "key", "type": "string", "facet": True},
             {"name": "leaders", "type": "string[]"},
-            {"name": "name", "type": "string"},
+            {"name": "name", "type": "string", "facet": True},
             {"name": "related_urls", "type": "string[]"},
             {"name": "summary", "type": "string"},
-            {"name": "tags", "type": "string"},
+            {"name": "tags", "type": "string", "facet": True},
             {
                 "name": "top_contributors",
                 "type": "object[]",

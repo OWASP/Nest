@@ -15,7 +15,6 @@ CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 def get_typesense_search_results(index_name, query, page, hits_per_page, ip_address=None):
     """Return search results for the given parameters and index."""
     search_parameters = get_typesense_params_for_index(index_name)
-    print(search_parameters)
 
     search_parameters.update(
         {
@@ -32,8 +31,6 @@ def get_typesense_search_results(index_name, query, page, hits_per_page, ip_addr
 
     client = Typesense.get_client()
     search_result = client.collections[index_name].documents.search(search_parameters)
-    # print(search_result)
-    print(search_result.get("found", 0))
     documents = [doc["document"] for doc in search_result.get("hits", [])]
 
     return {
@@ -45,7 +42,7 @@ def get_typesense_search_results(index_name, query, page, hits_per_page, ip_addr
 
 @require_POST
 def typesense_search(request):
-    """Generic Typesense search API endpoint."""
+    """Perform a generic Typesense search API endpoint."""
     try:
         data = json.loads(request.body)
 

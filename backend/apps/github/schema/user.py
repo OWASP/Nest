@@ -16,6 +16,7 @@ class UserIndex(IndexBase):
             {"name": "avatar_url", "type": "string"},
             {"name": "bio", "type": "string"},
             {"name": "company", "type": "string"},
+            {"name": "max_contributions_count", "type": "int32"},
             {
                 "name": "contributions",
                 "type": "object[]",
@@ -38,12 +39,12 @@ class UserIndex(IndexBase):
             {"name": "followers_count", "type": "int32"},
             {"name": "following_count", "type": "int32"},
             {"name": "issues_count", "type": "int32"},
-            {"name": "key", "type": "string"},
+            {"name": "key", "type": "string", "facet": True},
             {"name": "location", "type": "string"},
             {"name": "login", "type": "string"},
-            {"name": "name", "type": "string"},
+            {"name": "name", "type": "string", "facet": True},
             {"name": "public_repositories_count", "type": "int32"},
-            {"name": "title", "type": "string"},
+            {"name": "title", "type": "string", "facet": True},
             {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
         ],
@@ -70,6 +71,10 @@ class UserIndex(IndexBase):
             "key": user.idx_key or "",
             "location": user.idx_location or "",
             "login": user.idx_login,
+            "max_contributions_count": max(
+                (contrib.get("contributions_count", 0) for contrib in user.idx_contributions),
+                default=0,
+            ),
             "name": user.idx_name,
             "public_repositories_count": user.idx_public_repositories_count
             if user.idx_public_repositories_count is not None

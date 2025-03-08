@@ -13,7 +13,7 @@ REGISTERED_INDEXES = {}
 
 
 def register(model_name):
-    """Decorator to register a model schema."""
+    """Register a model schema."""
 
     def wrapper(cls):
         instance = cls()
@@ -81,8 +81,8 @@ class IndexBase:
 
             client.collections.create(self.schema)
             logging.info(f"Created collection: {self.index_name}")
-        except:
-            logging.info(f"Some error occured while creating collection: {self.index_name}")
+        except Exception as e:
+            logging.info(f"Some error occured while creating collection: {e}")
 
     def populate_collection(self):
         """Populate Typesense collection with data from the database."""
