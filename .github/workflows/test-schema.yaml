@@ -1,6 +1,6 @@
 name: Test OWASP Schema
 
-on:
+true:
   merge_group:
   pull_request:
     branches:
@@ -41,7 +41,7 @@ jobs:
         with:
           cache: poetry
           cache-dependency-path: schema/poetry.lock
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1

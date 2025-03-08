@@ -1,8 +1,8 @@
 name: Update Nest Test Images
 
-on:
+true:
   schedule:
-    - cron: 30 0 * * *
+    - cron: "30 0 * * *"
   workflow_dispatch:
 
 env:
@@ -12,7 +12,7 @@ env:
 jobs:
   update-nest-test-images:
     name: Update Nest test images
-    if: ${{ github.repository == 'OWASP/Nest' }}
+    if: github.repository == 'OWASP/Nest'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

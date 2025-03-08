@@ -1,0 +1,57 @@
+#!C:\Users\srinj\documents\GitHub\Nest\pre-commit-env\Scripts\python.exe
+
+import argparse
+import os
+import sys
+import tempfile
+
+from ruamel.yaml import YAML
+
+parser = argparse.ArgumentParser()
+parser.add_argument('file', help='file to parse', nargs='*')
+parser.add_argument('-w', '--write', help='overwrite file with formatted output', action='store_true')
+args = parser.parse_args()
+
+
+def round_trip(sout, sin):
+    yaml = YAML()
+    yaml.default_flow_style = False
+    y = yaml.load(sin)
+    yaml.dump(y, sout)
+
+
+def make_temp_file(name):
+    basename = os.path.basename(name)
+    dirname = os.path.dirname(name)
+    fd, outname = tempfile.mkstemp(prefix=basename + '.', dir=dirname)
+    stat = os.stat(name)
+    os.fchmod(fd, stat.st_mode)
+    os.fchown(fd, stat.st_uid, stat.st_gid)
+    os.close(fd)
+    return outname
+
+
+def main():
+    if args.write and not args.file:
+        parser.error('write requires at least one file')
+
+    if not args.file:
+        round_trip(sys.stdout, sys.stdin)
+        sys.exit(0)
+
+    if not args.write:
+        file_out = os.ttyname(sys.stdout.fileno())
+
+    for file in args.file:
+        if args.write:
+            file_out = make_temp_file(file)
+
+        with open(file, 'r') as sin, open(file_out, 'w') as sout:
+            round_trip(sout, sin)
+
+        if args.write:
+            os.rename(file_out, file)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

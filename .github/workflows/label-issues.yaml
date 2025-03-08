@@ -1,5 +1,6 @@
 name: "Auto Label Issues"
-on:
+
+true:
   issues:
     types:
       - edited
@@ -10,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Apply Labels to Issues
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@v7
         with:
           script: |
             const issue = context.payload.issue;
@@ -22,16 +23,17 @@ jobs:
 
             let labels = [];
             for (const [label, words] of Object.entries(keywords)) {
-              if (words.some(word => issue.title.toLowerCase().includes(word) || issue.body.toLowerCase().includes(word))) {
+              if (words.some(word => issue.title.toLowerCase().includes(word.toLowerCase()) ||
+                                     (issue.body && issue.body.toLowerCase().includes(word.toLowerCase())))) {
                 labels.push(label);
               }
             }
 
             if (labels.length > 0) {
               github.rest.issues.addLabels({
-                issue_number: context.issue.number,
-                labels: labels,
                 owner: context.repo.owner,
-                repo: context.repo.repo
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
               });
             }
