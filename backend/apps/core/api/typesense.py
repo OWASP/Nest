@@ -12,7 +12,9 @@ CACHE_PREFIX = "typesense_proxy"
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 
 
-def get_typesense_search_results(index_name, query, page, hits_per_page, ip_address=None):
+def get_typesense_search_results(
+    index_name, query, page, hits_per_page, sort_by=None, ip_address=None
+):
     """Return search results for the given parameters and index."""
     search_parameters = get_typesense_params_for_index(index_name)
 
@@ -24,8 +26,12 @@ def get_typesense_search_results(index_name, query, page, hits_per_page, ip_addr
         }
     )
 
+    print(sort_by)
+    if sort_by:
+        search_parameters["sort_by"] = sort_by
+
     if index_name == "chapter" and ip_address:
-        user_lat, user_lng = get_geolocation("106.222.213.89")
+        user_lat, user_lng = get_geolocation(ip_address)
         if user_lat and user_lng:
             search_parameters["sort_by"] = f"_geoloc({user_lat},{user_lng}):asc,updated_at:desc"
 
@@ -50,21 +56,24 @@ def typesense_search(request):
         hits_per_page = min(int(data.get("hitsPerPage", 25)), 250)
         page = int(data.get("page", 1))
         query = data.get("query", "")
+        sort_by = data.get("sortBy", "")
+
         ip_address = get_user_ip_address(request=request)
 
-        cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{hits_per_page}"
+        cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{hits_per_page}:{sort_by}"
         if "chapters" in index_name:
             cache_key = f"{cache_key}:{ip_address}"
 
         result = cache.get(cache_key)
-        # if result is not None:
-        # return JsonResponse(result)
+        if result is not None:
+            return JsonResponse(result)
 
         result = get_typesense_search_results(
             index_name,
             query,
             page,
             hits_per_page,
+            sort_by=sort_by,
             ip_address=ip_address,
         )
 

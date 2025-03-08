@@ -81,12 +81,13 @@ export function useSearchPage<T>({
     const fetchData = async () => {
       try {
         const data: AlgoliaResponseType<T> = await fetchTypesenseData<T>(
-          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
-            ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
-            : indexName,
+          indexName,
           searchQuery,
           currentPage,
-          hitsPerPage
+          hitsPerPage,
+          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
+            ? `${sortBy}${order && order !== '' ? `:${order}` : ''}`
+            : '',
         )
         setItems(data.hits)
         setTotalPages(data.totalPages)

@@ -26,7 +26,7 @@ class ProjectIndex(IndexBase):
             {"name": "leaders", "type": "string[]"},
             {"name": "level", "type": "string"},
             {"name": "level_raw", "type": "float"},
-            {"name": "name", "type": "string", "facet": True},
+            {"name": "name", "type": "string", "facet": True, "sort": True},
             {"name": "organizations", "type": "string[]"},
             {
                 "name": "repositories",

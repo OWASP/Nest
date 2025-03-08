@@ -11,7 +11,8 @@ export const fetchTypesenseData = async <T>(
   indexName: string,
   query = '*',
   currentPage = 1,
-  hitsPerPage = 25
+  hitsPerPage = 25,
+  sortBy = '',
 ): Promise<TypesenseResponseType<T>> => {
   try {
     const response = await fetch(TYPESENSE_URL, {
@@ -24,6 +25,7 @@ export const fetchTypesenseData = async <T>(
         indexName,
         page: currentPage,
         query,
+        sortBy,
       }),
     })
 
