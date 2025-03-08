@@ -1,6 +1,7 @@
 """Typesense index for Chapter model."""
 
 from apps.common.typesense import IndexBase, register
+from apps.owasp.schema.common import TOP_CONTRIBUTOR_FIELD
 
 
 @register("chapter")
@@ -10,14 +11,14 @@ class ChapterIndex(IndexBase):
     index_name = "chapter"
     schema = {
         "name": "chapter",
+        "default_sorting_field": "created_at",
+        "enable_nested_fields": True,
         "fields": [
-            {"name": "id", "type": "string"},
             {"name": "country", "type": "string", "facet": True},
             {"name": "created_at", "type": "int64"},
             {"name": "is_active", "type": "bool", "facet": True},
             {"name": "key", "type": "string", "facet": True},
             {"name": "leaders", "type": "string[]"},
-            {"name": "_geoloc", "type": "geopoint", "optional": True},
             {"name": "name", "type": "string", "facet": True},
             {"name": "postal_code", "type": "string"},
             {"name": "region", "type": "string"},
@@ -25,37 +26,22 @@ class ChapterIndex(IndexBase):
             {"name": "suggested_location", "type": "string"},
             {"name": "summary", "type": "string"},
             {"name": "tags", "type": "string[]", "facet": True},
-            {
-                "name": "top_contributors",
-                "type": "object[]",
-                "fields": [
-                    {"name": "name", "type": "string"},
-                    {"name": "avatar_url", "type": "string"},
-                    {"name": "contributions_count", "type": "int32"},
-                    {"name": "login", "type": "string"},
-                ],
-                "optional": True,
-            },
             {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
+            {"name": "_geoloc", "type": "geopoint", "optional": True},
+            TOP_CONTRIBUTOR_FIELD,
         ],
-        "default_sorting_field": "created_at",
-        "enable_nested_fields": True,
     }
 
     def prepare_document(self, chapter):
         """Convert model instance to a dictionary for Typesense."""
         return {
-            "id": str(chapter.id),
-            "name": chapter.idx_name,
             "country": chapter.idx_country,
             "created_at": int(chapter.idx_created_at),
             "is_active": chapter.idx_is_active,
             "key": chapter.idx_key,
             "leaders": chapter.idx_leaders if hasattr(chapter, "idx_leaders") else [],
-            "_geoloc": [chapter.latitude, chapter.longitude]
-            if chapter.latitude is not None and chapter.longitude is not None
-            else None,
+            "name": chapter.idx_name,
             "postal_code": chapter.idx_postal_code,
             "region": chapter.idx_region,
             "related_urls": chapter.idx_related_urls
@@ -77,4 +63,7 @@ class ChapterIndex(IndexBase):
             else [],
             "updated_at": int(chapter.idx_updated_at),
             "url": chapter.idx_url if hasattr(chapter, "idx_url") else "",
+            "_geoloc": [chapter.latitude, chapter.longitude]
+            if chapter.latitude is not None and chapter.longitude is not None
+            else None,
         }

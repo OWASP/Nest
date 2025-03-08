@@ -25,7 +25,7 @@ def get_typesense_search_results(index_name, query, page, hits_per_page, ip_addr
     )
 
     if index_name == "chapter" and ip_address:
-        user_lat, user_lng = get_geolocation("106.222.213.86")
+        user_lat, user_lng = get_geolocation("106.222.213.89")
         if user_lat and user_lng:
             search_parameters["sort_by"] = f"_geoloc({user_lat},{user_lng}):asc,updated_at:desc"
 

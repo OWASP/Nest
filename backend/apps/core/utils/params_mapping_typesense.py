@@ -28,7 +28,7 @@ def get_typesense_params_for_index(index_name):
 
         case "chapter":
             params["query_by"] = (
-                "name,leaders,top_contributors.login,top_contributors.name,top_suggested_location,country,region,postal_code,tags"
+                "name,leaders,top_contributors.login,top_contributors.name,suggested_location,country,region,postal_code,tags"
             )
             params["query_by_weights"] = "10,5,4,4,2,2,2,2,1"
             params["include_fields"] = (

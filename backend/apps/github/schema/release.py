@@ -11,8 +11,8 @@ class ReleaseIndex(IndexBase):
     schema = {
         "name": "release",
         "enable_nested_fields": True,
+        "default_sorting_field": "published_at",
         "fields": [
-            {"name": "id", "type": "string"},
             {
                 "name": "author",
                 "facet": True,
@@ -26,25 +26,23 @@ class ReleaseIndex(IndexBase):
             },
             {"name": "created_at", "type": "int64"},
             {"name": "description", "type": "string"},
+            {"name": "is_pre_release", "type": "bool"},
             {"name": "name", "type": "string"},
             {"name": "project", "type": "string", "facet": True},
             {"name": "published_at", "type": "int64"},
             {"name": "repository", "type": "string", "facet": True},
             {"name": "tag_name", "type": "string"},
-            {"name": "is_pre_release", "type": "bool"},
         ],
-        "default_sorting_field": "published_at",
     }
 
     def prepare_document(self, release):
         """Convert model instance to a dictionary for Typesense."""
         return {
-            "id": str(release.id) if release.id else "",
             "author": [
                 {
-                    "name": contributor["name"],
                     "avatar_url": contributor["avatar_url"],
                     "login": contributor["login"],
+                    "name": contributor["name"],
                 }
                 for contributor in release.idx_author
             ]
@@ -52,6 +50,9 @@ class ReleaseIndex(IndexBase):
             else [],
             "created_at": int(release.idx_created_at) if release.idx_created_at is not None else 0,
             "description": release.idx_description or "",
+            "is_pre_release": bool(release.idx_is_pre_release)
+            if release.idx_is_pre_release is not None
+            else False,
             "name": release.idx_name or "",
             "project": release.idx_project or "",
             "published_at": int(release.idx_published_at)
@@ -59,7 +60,4 @@ class ReleaseIndex(IndexBase):
             else 0,
             "repository": release.idx_repository or "",
             "tag_name": release.idx_tag_name or "",
-            "is_pre_release": bool(release.idx_is_pre_release)
-            if release.idx_is_pre_release is not None
-            else False,
         }

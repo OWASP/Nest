@@ -10,9 +10,9 @@ class RepositoryIndex(IndexBase):
     index_name = "repository"
     schema = {
         "name": "repository",
+        "default_sorting_field": "pushed_at",
         "enable_nested_fields": True,
         "fields": [
-            {"name": "id", "type": "string"},
             {"name": "commits_count", "type": "int32"},
             {"name": "contributors_count", "type": "int32"},
             {"name": "created_at", "type": "float"},
@@ -29,26 +29,24 @@ class RepositoryIndex(IndexBase):
             {"name": "size", "type": "int32"},
             {"name": "stars_count", "type": "int32", "facet": True},
             {"name": "subscribers_count", "type": "int32"},
+            {"name": "topics", "type": "string[]"},
             {
                 "name": "top_contributors",
                 "type": "object[]",
                 "fields": [
-                    {"name": "name", "type": "string"},
                     {"name": "avatar_url", "type": "string"},
                     {"name": "contributions_count", "type": "int32"},
                     {"name": "login", "type": "string"},
+                    {"name": "name", "type": "string"},
                 ],
                 "optional": True,
             },
-            {"name": "topics", "type": "string[]"},
         ],
-        "default_sorting_field": "pushed_at",
     }
 
     def prepare_document(self, repository):
         """Convert model instance to a dictionary for Typesense."""
         return {
-            "id": str(repository.id) if repository.id else "",
             "commits_count": int(repository.idx_commits_count)
             if repository.idx_commits_count is not None
             else 0,
@@ -92,6 +90,7 @@ class RepositoryIndex(IndexBase):
             "subscribers_count": int(repository.idx_subscribers_count)
             if repository.idx_subscribers_count is not None
             else 0,
+            "topics": repository.idx_topics if isinstance(repository.idx_topics, list) else [],
             "top_contributors": [
                 {
                     "avatar_url": contributor["avatar_url"],
@@ -103,5 +102,4 @@ class RepositoryIndex(IndexBase):
             ]
             if repository.idx_top_contributors
             else [],
-            "topics": repository.idx_topics if isinstance(repository.idx_topics, list) else [],
         }

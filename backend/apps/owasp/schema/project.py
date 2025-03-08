@@ -1,6 +1,7 @@
 """Typesense index for Project model."""
 
 from apps.common.typesense import IndexBase, register
+from apps.owasp.schema.common import TOP_CONTRIBUTOR_FIELD
 
 
 @register("project")
@@ -10,6 +11,7 @@ class ProjectIndex(IndexBase):
     index_name = "project"
     schema = {
         "name": "project",
+        "default_sorting_field": "updated_at",
         "enable_nested_fields": True,
         "fields": [
             {"name": "companies", "type": "string[]"},
@@ -17,7 +19,6 @@ class ProjectIndex(IndexBase):
             {"name": "custom_tags", "type": "string[]"},
             {"name": "description", "type": "string"},
             {"name": "forks_count", "type": "int32"},
-            {"name": "id", "type": "string"},
             {"name": "issues_count", "type": "int32"},
             {"name": "is_active", "type": "bool", "facet": True},
             {"name": "key", "type": "string", "facet": True},
@@ -48,27 +49,15 @@ class ProjectIndex(IndexBase):
             {"name": "tags", "type": "string[]", "facet": True},
             {"name": "topics", "type": "string[]"},
             {"name": "type", "type": "string"},
-            {
-                "name": "top_contributors",
-                "type": "object[]",
-                "fields": [
-                    {"name": "name", "type": "string"},
-                    {"name": "avatar_url", "type": "string"},
-                    {"name": "contributions_count", "type": "int32"},
-                    {"name": "login", "type": "string"},
-                ],
-                "optional": True,
-            },
             {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
+            TOP_CONTRIBUTOR_FIELD,
         ],
-        "default_sorting_field": "updated_at",
     }
 
     def prepare_document(self, project):
         """Convert model instance to a dictionary for Typesense."""
         return {
-            "id": str(project.id) if project.id else "",
             "companies": project.idx_companies if project.idx_companies else [],
             "contributors_count": project.idx_contributors_count
             if project.idx_contributors_count is not None
@@ -101,7 +90,6 @@ class ProjectIndex(IndexBase):
             "summary": project.summary if project.summary else "",
             "tags": project.tags if project.tags else [],
             "topics": project.topics if project.topics else [],
-            "type": project.idx_type if project.idx_type else "",
             "top_contributors": [
                 {
                     "avatar_url": contributor["avatar_url"],
@@ -113,6 +101,7 @@ class ProjectIndex(IndexBase):
             ]
             if project.idx_top_contributors
             else [],
+            "type": project.idx_type if project.idx_type else "",
             "updated_at": int(project.idx_updated_at) if project.idx_updated_at else 0,
             "url": project.nest_url if project.nest_url else "",
         }

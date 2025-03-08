@@ -1,6 +1,7 @@
 """Typesense index for Committee model."""
 
 from apps.common.typesense import IndexBase, register
+from apps.owasp.schema.common import TOP_CONTRIBUTOR_FIELD
 
 
 @register("committee")
@@ -10,8 +11,9 @@ class CommitteeIndex(IndexBase):
     index_name = "committee"
     schema = {
         "name": "committee",
+        "default_sorting_field": "created_at",
+        "enable_nested_fields": True,
         "fields": [
-            {"name": "id", "type": "string"},
             {"name": "created_at", "type": "int64"},
             {"name": "key", "type": "string", "facet": True},
             {"name": "leaders", "type": "string[]"},
@@ -19,27 +21,15 @@ class CommitteeIndex(IndexBase):
             {"name": "related_urls", "type": "string[]"},
             {"name": "summary", "type": "string"},
             {"name": "tags", "type": "string", "facet": True},
-            {
-                "name": "top_contributors",
-                "type": "object[]",
-                "fields": [
-                    {"name": "name", "type": "string"},
-                    {"name": "avatar_url", "type": "string"},
-                    {"name": "url", "type": "string"},
-                    {"name": "contributions_count", "type": "int32"},
-                ],
-            },
             {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
+            TOP_CONTRIBUTOR_FIELD,
         ],
-        "default_sorting_field": "created_at",
-        "enable_nested_fields": True,
     }
 
     def prepare_document(self, committee):
         """Convert model instance to a dictionary for Typesense."""
         return {
-            "id": str(committee.id),
             "created_at": int(committee.idx_created_at),
             "key": committee.idx_key,
             "leaders": committee.idx_leaders if hasattr(committee, "idx_leaders") else [],

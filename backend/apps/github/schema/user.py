@@ -10,13 +10,12 @@ class UserIndex(IndexBase):
     index_name = "user"
     schema = {
         "name": "user",
+        "default_sorting_field": "updated_at",
         "enable_nested_fields": True,
         "fields": [
-            {"name": "id", "type": "string"},
             {"name": "avatar_url", "type": "string"},
             {"name": "bio", "type": "string"},
             {"name": "company", "type": "string"},
-            {"name": "max_contributions_count", "type": "int32"},
             {
                 "name": "contributions",
                 "type": "object[]",
@@ -42,19 +41,18 @@ class UserIndex(IndexBase):
             {"name": "key", "type": "string", "facet": True},
             {"name": "location", "type": "string"},
             {"name": "login", "type": "string"},
+            {"name": "max_contributions_count", "type": "int32"},
             {"name": "name", "type": "string", "facet": True},
             {"name": "public_repositories_count", "type": "int32"},
             {"name": "title", "type": "string", "facet": True},
             {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
         ],
-        "default_sorting_field": "updated_at",
     }
 
     def prepare_document(self, user):
         """Convert model instance to a dictionary for Typesense."""
         return {
-            "id": str(user.id),
             "avatar_url": user.idx_avatar_url,
             "bio": user.idx_bio or "",
             "company": user.idx_company or "",

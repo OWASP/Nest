@@ -10,6 +10,7 @@ class IssueIndex(IndexBase):
     index_name = "issue"
     schema = {
         "name": "issue",
+        "default_sorting_field": "created_at",
         "enable_nested_fields": True,
         "fields": [
             {"name": "author_login", "type": "string"},
@@ -35,7 +36,6 @@ class IssueIndex(IndexBase):
             {"name": "updated_at", "type": "float"},
             {"name": "url", "type": "string"},
         ],
-        "default_sorting_field": "created_at",
     }
 
     def prepare_document(self, issue):
