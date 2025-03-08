@@ -63,11 +63,11 @@ const ProjectDetailsPage = () => {
     )
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
+    { label: 'Leaders', value: project.leaders.join(', ') },
     {
       label: 'Level',
       value: capitalize(project.level),
     },
-    { label: 'Project Leaders', value: project.leaders.join(', ') },
     { label: 'Type', value: capitalize(project.type) },
     {
       label: 'URL',
