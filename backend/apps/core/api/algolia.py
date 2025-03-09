@@ -52,7 +52,7 @@ def algolia_search(request):
         data = json.loads(request.body)
 
         if validation_error := validate_search_params(data):
-            return validation_error
+            return JsonResponse({"error": validation_error}, status=400)
 
         facet_filters = data.get("facetFilters", [])
         index_name = data.get("indexName")
