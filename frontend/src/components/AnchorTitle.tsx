@@ -27,7 +27,7 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
           className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
           onClick={handleClick}
         >
-          <FontAwesomeIcon icon={faLink} className="h-7 w-5" />
+          <FontAwesomeIcon icon={faLink} className="h-7 w-5 custom-icon" />
         </a>
       </div>
     </div>

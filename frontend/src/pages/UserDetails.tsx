@@ -91,6 +91,30 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
+  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+    // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
+    let mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
+    if (mentionMatch && mentionMatch.length > 1) {
+      let username = mentionMatch[1]
+      let punctuation = mentionMatch[2] || ''
+      return (
+        <React.Fragment key={index}>
+          <Link
+            href={`https://github.com/${username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            @{username}
+          </Link>
+          {punctuation}
+          <span> </span>
+        </React.Fragment>
+      )
+    }
+    return <span key={index}>{word} </span>
+  })
+
   return (
     <MetadataManager pageTitle={user?.name || user?.login} description={user?.bio} url={user.url}>
       <div className="mt-24 min-h-screen w-full p-4">
@@ -102,13 +126,18 @@ const UserDetailsPage: React.FC = () => {
                 <div className="h-32 bg-owasp-blue"></div>
               ) : imageLink ? (
                 <div className="bg-#10151c h-32">
-                  <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
+                  <img
+                    src={imageLink}
+                    className="h-full w-full object-cover object-[54%_60%]"
+                    alt="Heatmap Background"
+                  />
                 </div>
               ) : (
                 <div className="bg-#10151c relative h-32 items-center justify-center">
                   <img
                     src="/img/heatmapBackground.png"
                     className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                    alt="Heatmap Background"
                   />
                   <div className="heatmap-loader"></div>
                 </div>
@@ -150,7 +179,9 @@ const UserDetailsPage: React.FC = () => {
               </div>
             </div>
             <div className="px-6 py-6">
-              {user.bio && <p className="text-lg text-gray-700 dark:text-gray-300">{user.bio}</p>}
+              {user.bio && (
+                <p className="text-lg text-gray-700 dark:text-gray-300">{formattedBio}</p>
+              )}
               <div className="mt-4 space-y-3">
                 {user.company && (
                   <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
@@ -229,7 +260,6 @@ const UserDetailsPage: React.FC = () => {
                   </div>
                 </div>
               )}
-
               {user.releases && user.releases.length > 0 && (
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">

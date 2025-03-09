@@ -31,8 +31,8 @@ jobs:
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache,mode=max
-          context: frontend
-          file: frontend/docker/Dockerfile.test
+          context: backend
+          file: backend/docker/Dockerfile.test
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest

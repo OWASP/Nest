@@ -153,4 +153,15 @@ describe('Home', () => {
       expect(screen.getByText('Documentation')).toBeInTheDocument()
     })
   })
+
+  test('renders Upcoming Events section', async () => {
+    render(<Home />)
+    await waitFor(() => {
+      expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
+      mockGraphQLData.upcomingEvents.forEach((event) => {
+        expect(screen.getByText(event.name)).toBeInTheDocument()
+        expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
+      })
+    })
+  })
 })

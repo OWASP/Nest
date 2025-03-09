@@ -44,23 +44,24 @@ const TopContributors = ({
               className="mr-3 h-10 w-10 rounded-full"
             />
             <div>
-              <p
+              <button
                 onClick={() => navigate(`/community/users/${contributor.login}`)}
-                className="font-semibold text-blue-600 hover:underline dark:text-sky-400"
+                className="m-0 border-none bg-transparent p-0 font-semibold text-blue-600 hover:underline dark:text-sky-400"
+                style={{ all: 'unset', cursor: 'pointer' }}
               >
                 {contributor.name || contributor.login}
-              </p>
-              {contributor?.repositoryName ? (
+              </button>
+
+              {contributor?.projectName ? (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   <a
-                    href={contributor.repositoryUrl}
+                    href={contributor.projectUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline dark:text-sky-400"
                   >
-                    {contributor.repositoryName}
-                  </a>{' '}
-                  - {contributor.contributionsCount} contributions
+                    {contributor.projectName}
+                  </a>
                 </p>
               ) : (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
