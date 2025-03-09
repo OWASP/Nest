@@ -1,12 +1,15 @@
+import { useQuery } from '@apollo/client'
 import {
   faSearch,
   faTimes,
   faProjectDiagram,
   faBook,
   faUser,
+  faCalendarAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
 import { debounce } from 'lodash'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
@@ -15,9 +18,6 @@ import { ChapterTypeAlgolia } from 'types/chapter'
 import { ProjectTypeAlgolia } from 'types/project'
 import { MultiSearchBarProps, Suggestion } from 'types/search'
 import { User } from 'types/user'
-
-import { useQuery } from '@apollo/client'
-import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -58,7 +58,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           const filteredEvents = events.filter((event) =>
             event.name.toLowerCase().includes(query.toLowerCase())
           )
-  
           if (filteredEvents.length > 0) {
             results.push({
               indexName: 'events',
@@ -73,7 +72,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           setShowSuggestions(false)
         }
       }, 300),
-    [indexes]
+    [indexes, data?.upcomingEvents]
   )
 
   useEffect(() => {
@@ -192,6 +191,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         return faProjectDiagram
       case 'users':
         return faUser
+      case 'events':
+        return faCalendarAlt
       default:
         return faSearch
     }
