@@ -51,6 +51,9 @@ def algolia_search(request):
     try:
         data = json.loads(request.body)
 
+        if validation_error := validate_search_params(data):
+            return validation_error
+
         facet_filters = data.get("facetFilters", [])
         index_name = data.get("indexName")
 
@@ -59,17 +62,11 @@ def algolia_search(request):
         ip_address = get_user_ip_address(request)
         query = data.get("query", "")
 
-        validation_error = validate_search_params(data)
-
-        if validation_error:
-            return validation_error
-
         cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
         if index_name == "chapters":
             cache_key = f"{cache_key}:{ip_address}"
 
-        result = cache.get(cache_key)
-        if result is not None:
+        if result := cache.get(cache_key):
             return JsonResponse(result)
 
         result = get_search_results(
