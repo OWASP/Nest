@@ -36,10 +36,11 @@ OWASP Nest promotes collaboration, making it easier for both new and experienced
 OWASP Nest is led by a dedicated team committed to fostering collaboration and supporting contributors. The leadership team ensures the platform aligns with OWASP's mission, continually improving its features to serve the community better.
 Current Leaders:
 
-- [Arkadii Yakovets](https://github.com/arkid15r/)
-- [Kate Golovanova](https://github.com/kasya/)
-- [Starr Brown](https://github.com/mamicidal/)
+- [Arkadii Yakovets](https://github.com/arkid15r/)  -- CCSP, CISSP, CSSLP
+- [Kate Golovanova](https://github.com/kasya/) -- CC
+- [Starr Brown](https://github.com/mamicidal/) -- CISSP
 
+All OWASP Nest leaders are certified ISC2 professionals and adhere to the OWASP Code of Conduct.
 For questions or discussions with the leadership team and other contributors, please use the [#project-nest](https://owasp.slack.com/archives/project-nest) channel on OWASP Slack.
 
 ## Contributing
