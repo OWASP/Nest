@@ -4,30 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0022_sponsor'),
+        ("owasp", "0022_sponsor"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='latitude',
-            field=models.FloatField(blank=True, null=True, verbose_name='Latitude'),
+            model_name="event",
+            name="latitude",
+            field=models.FloatField(blank=True, null=True, verbose_name="Latitude"),
         ),
         migrations.AddField(
-            model_name='event',
-            name='longitude',
-            field=models.FloatField(blank=True, null=True, verbose_name='Longitude'),
+            model_name="event",
+            name="longitude",
+            field=models.FloatField(blank=True, null=True, verbose_name="Longitude"),
         ),
         migrations.AddField(
-            model_name='event',
-            name='suggested_location',
-            field=models.CharField(blank=True, default='', max_length=255, verbose_name='Suggested Location'),
+            model_name="event",
+            name="suggested_location",
+            field=models.CharField(
+                blank=True, default="", max_length=255, verbose_name="Suggested Location"
+            ),
         ),
         migrations.AddField(
-            model_name='event',
-            name='summary',
-            field=models.TextField(blank=True, default='', verbose_name='Summary'),
+            model_name="event",
+            name="summary",
+            field=models.TextField(blank=True, default="", verbose_name="Summary"),
         ),
     ]

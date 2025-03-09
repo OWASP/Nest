@@ -4,25 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0023_event_latitude_event_longitude_and_more'),
+        ("owasp", "0023_event_latitude_event_longitude_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='country',
-            field=models.CharField(default='', max_length=50, verbose_name='Country'),
+            model_name="event",
+            name="country",
+            field=models.CharField(default="", max_length=50, verbose_name="Country"),
         ),
         migrations.AddField(
-            model_name='event',
-            name='postal_code',
-            field=models.CharField(blank=True, default='', max_length=15, verbose_name='Postal code'),
+            model_name="event",
+            name="postal_code",
+            field=models.CharField(
+                blank=True, default="", max_length=15, verbose_name="Postal code"
+            ),
         ),
         migrations.AddField(
-            model_name='event',
-            name='region',
-            field=models.CharField(default='', max_length=50, verbose_name='Region'),
+            model_name="event",
+            name="region",
+            field=models.CharField(default="", max_length=50, verbose_name="Region"),
         ),
     ]

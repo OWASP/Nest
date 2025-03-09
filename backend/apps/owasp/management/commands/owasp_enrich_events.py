@@ -31,7 +31,9 @@ class Command(BaseCommand):
                 event.generate_summary(prompt=prompt)
 
             # Suggested location.
-            if not event.suggested_location and (prompt := Prompt.get_owasp_event_suggested_location()):
+            if not event.suggested_location and (
+                prompt := Prompt.get_owasp_event_suggested_location()
+            ):
                 event.generate_suggested_location()
 
             # Geo location.
