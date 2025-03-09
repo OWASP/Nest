@@ -70,6 +70,10 @@ owasp-enrich-committees:
 	@echo "Enriching OWASP committees"
 	@CMD="python manage.py owasp_enrich_committees" $(MAKE) exec-backend-command
 
+owasp-enrich-events:
+	@echo "Enriching OWASP events"
+	@CMD="python manage.py owasp_enrich_events" $(MAKE) exec-backend-command
+
 owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command

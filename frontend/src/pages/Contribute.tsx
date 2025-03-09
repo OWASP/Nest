@@ -64,6 +64,7 @@ const ContributePage = () => {
           summary={issue.summary}
           hint={issue.hint}
           button={viewIssueButton}
+          entityType="issue"
         ></Modal>
       </React.Fragment>
     )

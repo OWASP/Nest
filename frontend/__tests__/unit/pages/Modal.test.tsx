@@ -38,6 +38,7 @@ describe('Dialog Component', () => {
       url: 'https://example.com/issue/123',
     },
     children: undefined as React.ReactNode | undefined,
+    entityType: 'issue',
   }
 
   const renderModal = (props = defaultProps) => {

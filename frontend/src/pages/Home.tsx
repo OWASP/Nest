@@ -24,6 +24,7 @@ import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
+import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
@@ -33,6 +34,7 @@ export default function Home() {
   const [data, setData] = useState<MainPageData>(null)
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA)
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
+  const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (graphQLData) {
@@ -131,28 +133,35 @@ export default function Home() {
       </div>
       <SecondaryCard title="Upcoming Events">
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {data.upcomingEvents.map((event: EventType) => (
-            <div key={event.name} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-              <h3 className="mb-2 truncate text-lg font-semibold text-blue-500">
-                <a
-                  href={event.url}
-                  className="hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
+          {data.upcomingEvents.map((event: EventType, index: number) => (
+            <div key={index}>
+              <div key={event.name} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                <button
+                  className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
+                  onClick={() => setModalOpenIndex(index)}
                 >
-                  {event.name}
-                </a>
-              </h3>
-              <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                <div className="mr-4 flex items-center">
-                  <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                  <span>
-                    {event.endDate && event.startDate != event.endDate
-                      ? `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`
-                      : formatDate(event.startDate)}
-                  </span>
+                  <h3 className="truncate">{event.name}</h3>
+                </button>
+                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>
+                      {event.endDate && event.startDate != event.endDate
+                        ? `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`
+                        : formatDate(event.startDate)}
+                    </span>
+                  </div>
                 </div>
               </div>
+              <Modal
+                key={`modal-${index}`}
+                isOpen={modalOpenIndex === index}
+                onClose={() => setModalOpenIndex(null)}
+                title={event.name}
+                summary={event.summary}
+                button={{ label: 'View Event', url: event.url }}
+                entityType="event"
+              ></Modal>
             </div>
           ))}
         </div>
