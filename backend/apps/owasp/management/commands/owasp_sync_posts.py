@@ -4,6 +4,7 @@ import json
 import re
 
 import yaml
+import yaml.scanner
 from django.core.management.base import BaseCommand
 
 from apps.github.utils import get_repository_file_content
@@ -24,8 +25,13 @@ class Command(BaseCommand):
                 post_content = get_repository_file_content(download_url)
 
                 if post_content.startswith("---"):
-                    yaml_content = re.search(r"^---\s*(.*?)\s*---", post_content, re.DOTALL)
-                    metadata = yaml.safe_load(yaml_content.group(1)) or {}
+                    try:
+                        yaml_content = re.search(r"^---\s*(.*?)\s*---", post_content, re.DOTALL)
+                        metadata = (
+                            yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+                        )
+                    except yaml.scanner.ScannerError:
+                        metadata = {}
 
                     title = metadata.get("title")
                     published_at = metadata.get("date")

@@ -10,9 +10,9 @@ class PostNode(BaseNode):
     class Meta:
         model = Post
         fields = (
+            "author_name",
+            "author_image_url",
+            "publised_at",
             "title",
-            "date",
-            "author",
-            "author_image",
             "url",
         )

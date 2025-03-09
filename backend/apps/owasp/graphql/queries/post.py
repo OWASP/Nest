@@ -14,4 +14,4 @@ class PostQuery(BaseQuery):
 
     def resolve_recent_posts(root, info, limit):
         """Return the 5 most recent posts."""
-        return Post.recent_posts[:limit]
+        return Post.recent_posts()[:limit]
