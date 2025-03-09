@@ -4,6 +4,7 @@ import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { toast } from 'hooks/useToast'
 import { Home } from 'pages'
+import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
 
 jest.mock('hooks/useToast', () => ({
@@ -151,6 +152,19 @@ describe('Home', () => {
       expect(screen.getByText('Welcome to OWASP Nest')).toBeInTheDocument()
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
       expect(screen.getByText('Documentation')).toBeInTheDocument()
+    })
+  })
+
+  test('renders Upcoming Events section', async () => {
+    render(<Home />)
+    await waitFor(() => {
+      expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
+      mockGraphQLData.upcomingEvents.forEach((event) => {
+        expect(screen.getByText(event.name)).toBeInTheDocument()
+        expect(
+          screen.getByText(`${formatDate(event.startDate)} - ${formatDate(event.endDate)}`)
+        ).toBeInTheDocument()
+      })
     })
   })
 })

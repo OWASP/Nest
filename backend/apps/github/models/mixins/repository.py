@@ -1,10 +1,10 @@
 """GitHub repository mixins."""
 
-from apps.github.constants import OWASP_FOUNDATION_LOGIN
 from apps.github.models.repository_contributor import (
     TOP_CONTRIBUTORS_LIMIT,
     RepositoryContributor,
 )
+from apps.github.models.user import User
 
 
 class RepositoryIndexMixin:
@@ -110,8 +110,8 @@ class RepositoryIndexMixin:
                 "login": tc["user__login"],
                 "name": tc["user__name"],
             }
-            for tc in RepositoryContributor.objects.filter(repository__in=[self])
-            .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
+            for tc in RepositoryContributor.objects.filter(repository=self)
+            .exclude(user__login__in=User.get_non_indexable_logins())
             .values(
                 "contributions_count",
                 "user__avatar_url",

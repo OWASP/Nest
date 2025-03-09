@@ -1,6 +1,7 @@
 """OWASP app snapshot models."""
 
 from django.db import models
+from django.utils.timezone import now
 
 
 class Snapshot(models.Model):
@@ -15,6 +16,9 @@ class Snapshot(models.Model):
         PROCESSING = "processing", "Processing"
         COMPLETED = "completed", "Completed"
         ERROR = "error", "Error"
+
+    title = models.CharField(max_length=255, default="")
+    key = models.CharField(max_length=10, unique=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -33,4 +37,11 @@ class Snapshot(models.Model):
 
     def __str__(self):
         """Return a string representation of the snapshot."""
-        return f"Snapshot {self.start_at} to {self.end_at} ({self.status})"
+        return self.title
+
+    def save(self, *args, **kwargs):
+        """Save snapshot."""
+        if not self.key:  # automatically set the key
+            self.key = now().strftime("%Y-%m")
+
+        super().save(*args, **kwargs)

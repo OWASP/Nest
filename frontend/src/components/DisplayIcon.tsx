@@ -9,8 +9,13 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
   // className for the container
   const containerClassName = [
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
-    item === 'stars_count' ? 'rotate-container' : '',
-    item === 'forks_count' || item === 'contributors_count' ? 'flip-container' : '',
+    item === 'stars_count' || item === 'starsCount' ? 'rotate-container' : '',
+    item === 'forks_count' ||
+    item === 'contributors_count' ||
+    item === 'forksCount' ||
+    item === 'contributionCount'
+      ? 'flip-container'
+      : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -18,8 +23,13 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
   // className for the FontAwesome icon
   const iconClassName = [
     'text-gray-600 dark:text-gray-300',
-    item === 'stars_count' ? 'icon-rotate' : '',
-    item === 'forks_count' || item === 'contributors_count' ? 'icon-flip' : '',
+    item === 'stars_count' || item === 'starsCount' ? 'icon-rotate' : '',
+    item === 'forks_count' ||
+    item === 'contributors_count' ||
+    item === 'forksCount' ||
+    item === 'contributionCount'
+      ? 'icon-flip'
+      : '',
   ]
     .filter(Boolean)
     .join(' ')

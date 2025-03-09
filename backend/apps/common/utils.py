@@ -1,5 +1,6 @@
 """Common app utils."""
 
+import re
 from datetime import datetime, timezone
 from functools import lru_cache
 
@@ -7,6 +8,7 @@ import requests
 from django.conf import settings
 from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
+from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
 
@@ -51,6 +53,7 @@ def natural_date(value):
         value = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     elif isinstance(value, int):
         value = datetime.fromtimestamp(value, tz=timezone.utc)
+
     return naturaltime(value)
 
 
@@ -58,6 +61,11 @@ def natural_number(value, unit=None):
     """Return humanized version of a number."""
     number = intword(value)
     return f"{number} {unit}{pluralize(value)}" if unit else number
+
+
+def slugify(text):
+    """Return slug for text."""
+    return re.sub(r"-{2,}", "-", django_slugify(text))
 
 
 def truncate(text, limit, truncate="..."):

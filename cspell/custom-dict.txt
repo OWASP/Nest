@@ -7,6 +7,7 @@ ansa
 arkid15r
 askowasp
 Aupdated
+bsky
 certbot
 Chakra
 collectstatic
@@ -16,6 +17,7 @@ csrfguard
 csrfprotector
 cva
 dismissable
+DRF
 dsn
 env
 facebookexternalhit
@@ -32,6 +34,7 @@ hsl
 igoat
 isanori
 jumpstart
+Kateryna
 linkify
 lxml
 markdownit
@@ -68,6 +71,9 @@ SEO
 Sivagangai
 slackbot
 SLF
+slideshare
+speakerdeck
+tiktok
 Truncator
 tsc
 Twitterbot

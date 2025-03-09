@@ -87,6 +87,14 @@ owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
 
+owasp-update-project-health-metrics:
+	@echo "Updating OWASP project health requirements"
+	@CMD="python manage.py owasp_update_project_health_metrics" $(MAKE) exec-backend-command
+
+owasp-update-project-health-requirements:
+	@echo "Updating OWASP project health metrics"
+	@CMD="python manage.py owasp_update_project_health_requirements" $(MAKE) exec-backend-command
+
 owasp-scrape-chapters:
 	@echo "Scraping OWASP site chapters data"
 	@CMD="python manage.py owasp_scrape_chapters" $(MAKE) exec-backend-command
@@ -98,6 +106,14 @@ owasp-scrape-committees:
 owasp-scrape-projects:
 	@echo "Scraping OWASP site projects data"
 	@CMD="python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
+
+owasp-update-events:
+	@echo "Getting OWASP events data"
+	@CMD="python manage.py owasp_update_events" $(MAKE) exec-backend-command
+
+owasp-update-sponsors:
+	@echo "Getting OWASP sponsors data"
+	@CMD="python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
 
 purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
@@ -132,4 +148,6 @@ update-data: \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
 	github-update-project-related-repositories \
-	owasp-aggregate-projects
+	owasp-aggregate-projects \
+	owasp-update-events \
+	owasp-update-sponsors

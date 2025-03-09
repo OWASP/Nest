@@ -41,7 +41,6 @@ const DetailsCard = ({
         <SecondaryCard title="Summary">
           <p>{summary}</p>
         </SecondaryCard>
-
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             title={`${type[0].toUpperCase() + type.slice(1)} Details`}
@@ -79,7 +78,6 @@ const DetailsCard = ({
             </div>
           )}
         </div>
-
         {(type === 'project' || type === 'repository') && (
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
@@ -88,9 +86,7 @@ const DetailsCard = ({
             {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
           </div>
         )}
-
         <TopContributors contributors={topContributors} maxInitialDisplay={6} />
-
         {(type === 'project' || type === 'repository') && (
           <>
             <ItemCardList
@@ -100,8 +96,12 @@ const DetailsCard = ({
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                   <span>{formatDate(item.createdAt)}</span>
-                  <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                  <span>{item.commentsCount} comments</span>
+                  {item?.commentsCount ? (
+                    <>
+                      <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+                      <span>{item.commentsCount} comments</span>
+                    </>
+                  ) : null}
                 </div>
               )}
             />

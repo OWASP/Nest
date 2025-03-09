@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 
 import requests
 import yaml
+from django.utils import timezone
 from lxml import html
 from requests.exceptions import RequestException
 
@@ -77,6 +78,28 @@ def get_staff_data(timeout=30):
         )
     except (RequestException, yaml.scanner.ScannerError):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
+
+
+def get_events_data():
+    """Get events data."""
+    from apps.owasp.models.event import Event
+
+    try:
+        return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
+    except Exception as e:
+        logger.exception("Failed to fetch events data via database", extra={"error": str(e)})
+        return None
+
+
+def get_sponsors_data(limit=10):
+    """Get sponsors data."""
+    from apps.owasp.models.sponsor import Sponsor
+
+    try:
+        return Sponsor.objects.all()[:limit]
+    except Exception as e:
+        logger.exception("Failed to fetch sponsors data via database", extra={"error": str(e)})
+        return None
 
 
 def get_text(blocks):
