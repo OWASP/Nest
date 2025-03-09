@@ -4,7 +4,6 @@ import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { toast } from 'hooks/useToast'
 import { Home } from 'pages'
-import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
 
 jest.mock('hooks/useToast', () => ({
@@ -161,9 +160,7 @@ describe('Home', () => {
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
       mockGraphQLData.upcomingEvents.forEach((event) => {
         expect(screen.getByText(event.name)).toBeInTheDocument()
-        expect(
-          screen.getByText(`${formatDate(event.startDate)} - ${formatDate(event.endDate)}`)
-        ).toBeInTheDocument()
+        expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
       })
     })
   })
