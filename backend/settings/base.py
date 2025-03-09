@@ -116,6 +116,9 @@ class Base(Configuration):
         environ_name="ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES"
     )
     ALGOLIA_WRITE_API_KEY = values.SecretValue(environ_name="ALGOLIA_WRITE_API_KEY")
+    TYPESENSE_API_KEY = values.SecretValue(environ_name="TYPESENSE_API_KEY")
+    TYPESENSE_HOST = values.Value(environ_name="TYPESENSE_HOST")
+    TYPESENSE_PORT = values.Value(environ_name="TYPESENSE_PORT")
 
     ALGOLIA = {
         "API_KEY": ALGOLIA_WRITE_API_KEY,
