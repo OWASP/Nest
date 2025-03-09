@@ -146,11 +146,7 @@ export default function Home() {
               <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
                 <div className="mr-4 flex items-center">
                   <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                  <span>
-                    {event.endDate && event.startDate != event.endDate
-                      ? formatDateRange(event.startDate, event.endDate)
-                      : formatDate(event.startDate)}
-                  </span>
+                  <span>{formatDateRange(event.startDate, event.endDate)}</span>
                 </div>
               </div>
             </div>

@@ -39,22 +39,22 @@ describe('formatDateRange function', () => {
   })
 
   test('formats date range in same month correctly', () => {
-    expect(formatDateRange('2023-09-01', '2023-09-04')).toBe('Sep 1 - 4, 2023')
+    expect(formatDateRange('2023-09-01', '2023-09-04')).toBe('Sep 1 — 4, 2023')
   })
 
   test('formats date range in different months but same year correctly', () => {
-    expect(formatDateRange('2023-09-29', '2023-10-02')).toBe('Sep 29 - Oct 2, 2023')
+    expect(formatDateRange('2023-09-29', '2023-10-02')).toBe('Sep 29 — Oct 2, 2023')
   })
 
   test('formats date range in different years correctly', () => {
-    expect(formatDateRange('2023-12-30', '2024-01-03')).toBe('Dec 30, 2023 - Jan 3, 2024')
+    expect(formatDateRange('2023-12-30', '2024-01-03')).toBe('Dec 30, 2023 — Jan 3, 2024')
   })
 
   test('formats Unix timestamp date ranges correctly', () => {
     // Sept 1-4, 2021
     const startTimestamp = 1630454400 // Sep 1, 2021
     const endTimestamp = 1630713600 // Sep 4, 2021
-    expect(formatDateRange(startTimestamp, endTimestamp)).toBe('Sep 1 - 4, 2021')
+    expect(formatDateRange(startTimestamp, endTimestamp)).toBe('Sep 1 — 4, 2021')
   })
 
   test('throws error when start date is invalid', () => {
@@ -66,11 +66,11 @@ describe('formatDateRange function', () => {
   })
 
   test('handles month boundaries correctly', () => {
-    expect(formatDateRange('2023-09-30', '2023-10-02')).toBe('Sep 30 - Oct 2, 2023')
+    expect(formatDateRange('2023-09-30', '2023-10-02')).toBe('Sep 30 — Oct 2, 2023')
   })
 
   test('handles year boundaries correctly', () => {
-    expect(formatDateRange('2023-12-29', '2024-01-02')).toBe('Dec 29, 2023 - Jan 2, 2024')
+    expect(formatDateRange('2023-12-29', '2024-01-02')).toBe('Dec 29, 2023 — Jan 2, 2024')
   })
 
   test('handles single-day ranges correctly', () => {
@@ -79,6 +79,6 @@ describe('formatDateRange function', () => {
 
   test('handles mixed input types correctly', () => {
     // Sep 1, 2021 as Unix timestamp and ISO string
-    expect(formatDateRange(1630454400, '2021-09-04')).toBe('Sep 1 - 4, 2021')
+    expect(formatDateRange(1630454400, '2021-09-04')).toBe('Sep 1 — 4, 2021')
   })
 })

@@ -39,7 +39,7 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
     // Format as "Month Day - Day, Year" (e.g., "Sep 1 - 4, 2025")
     return (
       `${start.toLocaleDateString('en-US', { month: 'short' })} ` +
-      `${start.getDate()} - ${end.getDate()}, ${start.getFullYear()}`
+      `${start.getDate()} — ${end.getDate()}, ${start.getFullYear()}`
     )
   } else if (sameYear) {
     // Different months but same year (e.g., "Sep 29 - Oct 2, 2025")
@@ -49,9 +49,9 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
     const endDay = end.getDate()
     const year = start.getFullYear()
 
-    return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`
+    return `${startMonth} ${startDay} — ${endMonth} ${endDay}, ${year}`
   } else {
     // Different years (e.g., "Dec 30, 2025 - Jan 3, 2026")
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`
+    return `${formatDate(startDate)} — ${formatDate(endDate)}`
   }
 }
