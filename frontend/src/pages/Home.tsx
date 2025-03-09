@@ -18,7 +18,7 @@ import { ChapterTypeAlgolia } from 'types/chapter'
 import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
-import { formatDate } from 'utils/dateFormatter'
+import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
@@ -165,11 +165,7 @@ export default function Home() {
               <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
                 <div className="mr-4 flex items-center">
                   <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                  <span>
-                    {event.endDate && event.startDate != event.endDate
-                      ? `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`
-                      : formatDate(event.startDate)}
-                  </span>
+                  <span>{formatDateRange(event.startDate, event.endDate)}</span>
                 </div>
               </div>
             </div>
