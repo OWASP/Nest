@@ -4,12 +4,9 @@ interface AnimatedCounterProps {
   className?: string
   duration: number
   end: number | string
-  end: number | string
 }
 
 export default function AnimatedCounter({ end, duration, className }: AnimatedCounterProps) {
-  const [count, setCount] = useState<string | number>(0)
-  const countRef = useRef(0)
   const [count, setCount] = useState<string | number>(0)
   const countRef = useRef(0)
   const startTime = useRef(Date.now())
