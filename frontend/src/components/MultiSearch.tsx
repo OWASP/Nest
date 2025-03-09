@@ -16,6 +16,9 @@ import { ProjectTypeAlgolia } from 'types/project'
 import { MultiSearchBarProps, Suggestion } from 'types/search'
 import { User } from 'types/user'
 
+import { useQuery } from '@apollo/client'
+import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
+
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
   placeholder,
@@ -35,6 +38,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const { data } = useQuery(GET_MAIN_PAGE_DATA)
+
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
@@ -49,6 +54,18 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               }
             })
           )
+          const events = data?.upcomingEvents || []
+          const filteredEvents = events.filter((event) =>
+            event.name.toLowerCase().includes(query.toLowerCase())
+          )
+  
+          if (filteredEvents.length > 0) {
+            results.push({
+              indexName: 'events',
+              hits: filteredEvents,
+              totalPages: 1, 
+            })
+          }
           setSuggestions(results.filter((result) => result.hits.length > 0))
           setShowSuggestions(true)
         } else {
@@ -76,6 +93,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           break
         case 'projects':
           navigate(`/projects/${suggestion.key}`)
+          break
+        case 'events':
+          window.open(suggestion.url, '_blank')
           break
         case 'users':
           navigate(`/community/users/${suggestion.key}`)
