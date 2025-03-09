@@ -26,7 +26,11 @@ def get_blocks(
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
 
-    attributes = "bio,company,contributions,email,followers_count,following_count,issues_count,location,login,name,public_repositories_count,updated_at,url"
+    attributes = (
+        "bio,company,contributions,email,followers_count,following_count,"
+        "issues_count,location,login,name,public_repositories_count,"
+        "updated_at,url"
+    )
 
     users_data = get_users(search_query, attributes=attributes, limit=limit, page=page)
     users = users_data["hits"]

@@ -7,4 +7,5 @@ class OwaspConfig(AppConfig):
     name = "apps.owasp"
 
     def ready(self):
+        """Import the schema module when the app is ready."""
         import_module("apps.owasp.schema")

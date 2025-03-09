@@ -7,4 +7,5 @@ class GithubConfig(AppConfig):
     name = "apps.github"
 
     def ready(self):
+        """Import the schema module when the app is ready."""
         import_module("apps.github.schema")

@@ -1,3 +1,5 @@
+"""Typesense search API endpoint."""
+
 import json
 
 from django.core.cache import cache
@@ -26,7 +28,6 @@ def get_typesense_search_results(
         }
     )
 
-    print(sort_by)
     if sort_by:
         search_parameters["sort_by"] = sort_by
 
@@ -81,8 +82,8 @@ def typesense_search(request):
 
         return JsonResponse(result)
 
-    except Exception as e:
+    except json.JSONDecodeError:
         return JsonResponse(
-            {"error": "An internal error occurred. Please try again later. " + str(e)},
+            {"error": "An internal error occurred. Please try again later."},
             status=500,
         )

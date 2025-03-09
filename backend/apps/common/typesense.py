@@ -18,9 +18,10 @@ def register(model_name):
     def wrapper(cls):
         instance = cls()
         if not hasattr(instance, "index_name") or not hasattr(instance, "schema"):
-            raise AttributeError(f"{cls.__name__} must have 'index_name' and 'schema' attributes.")
+            message = f"{cls.__name__} must have 'index_name' and 'schema' attributes."
+            raise AttributeError(message)
         REGISTERED_INDEXES[model_name] = instance
-        logging.info(f"Registered index: {model_name}")
+        logging.info("Registered index: %s", model_name)
         return cls
 
     return wrapper
@@ -67,7 +68,7 @@ class IndexBase:
 
             except LookupError:
                 continue
-        raise ValueError(f"Model '{self.index_name}' not found in Django apps.")
+        raise ValueError(self.index_name)
 
     def create_collection(self):
         """Create collection if it doesn't exist."""
@@ -75,14 +76,12 @@ class IndexBase:
         try:
             try:
                 client.collections[self.index_name].delete()
-                logging.info(f"Collection Dropped : {self.index_name}")
-            except:
-                pass
-
+            except typesense.exceptions.TypesenseClientError:
+                logging.info("Collection %s does not exist. Creating a new one.", self.index_name)
             client.collections.create(self.schema)
-            logging.info(f"Created collection: {self.index_name}")
-        except Exception as e:
-            logging.info(f"Some error occured while creating collection: {e}")
+            logging.info("Created collection: %s", self.index_name)
+        except Exception:
+            logging.exception("Some error occured while creating collection")
 
     def populate_collection(self):
         """Populate Typesense collection with data from the database."""
@@ -93,7 +92,7 @@ class IndexBase:
         data = (self.prepare_document(obj) for obj in queryset if obj.is_indexable)
 
         if not data:
-            logging.info(f"No data found for {self.index_name}. Skipping population.")
+            logging.info("No data found for {self.index_name}. Skipping... .")
             return
 
         try:
@@ -103,12 +102,12 @@ class IndexBase:
 
             errors = [item["error"] for item in response if "error" in item]
             if errors:
-                logging.info(f"Errors while populating '{self.index_name}': {errors}")
-            logging.info(f"Populated '{self.index_name}' with this response.")
-        except Exception as e:
-            logging.exception(f"Error populating '{self.index_name}': {e}")
-            logging.info(f"Found {len(queryset)} records in Django for {self.index_name}")
+                logging.info("Errors while populating '%s': %s", self.index_name, errors)
+            logging.info("Populated '%s' with %d records", self.index_name, len(response))
+        except Exception:
+            logging.exception("Error populating")
 
     def prepare_document(self, obj):
         """Convert model instance to a dictionary for Typesense."""
-        raise NotImplementedError("Subclasses must implement prepare_document()")
+        message = "Subclasses must implement prepare_document()"
+        raise NotImplementedError(message)

@@ -86,7 +86,7 @@ class ProjectIndex(IndexBase):
             "repositories_count": project.idx_repositories_count
             if project.idx_repositories_count is not None
             else 0,
-            "stars_count": project.stars_count if project.idx_stars_count is not None else 0,
+            "stars_count": project.idx_stars_count if project.idx_stars_count is not None else 0,
             "summary": project.summary if project.summary else "",
             "tags": project.tags if project.tags else [],
             "topics": project.topics if project.topics else [],
