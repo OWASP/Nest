@@ -205,11 +205,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             )}
           </>
         ) : (
-          <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          <div className="animate-pulse h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>
         )}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-            {suggestions.map((suggestion, index) => (
+            {suggestions.map((suggestion) => (
               <div
                 key={suggestion.indexName}
                 className="border-b text-gray-600 last:border-b-0 dark:border-gray-700 dark:text-gray-300"
@@ -221,18 +221,19 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
                       key={subIndex}
-                      className={`flex cursor-pointer items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex?.index === index && highlightedIndex.subIndex === subIndex
-                          ? 'bg-gray-100 dark:bg-gray-700'
-                          : ''
-                      }`}
-                      onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
+                      className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      <FontAwesomeIcon
-                        icon={getIconForIndex(suggestion.indexName)}
-                        className="mr-2 text-gray-400"
-                      />
-                      <span className="whitespace-nowrap">{hit.name || hit.login}</span>
+                      <button
+                        onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
+                        className="flex w-full cursor-pointer items-center border-none bg-transparent p-0 text-left"
+                        style={{ all: 'unset', cursor: 'pointer' }}
+                      >
+                        <FontAwesomeIcon
+                          icon={getIconForIndex(suggestion.indexName)}
+                          className="mr-2 text-gray-400"
+                        />
+                        <span className="whitespace-nowrap">{hit.name || hit.login}</span>
+                      </button>
                     </li>
                   ))}
                 </ul>

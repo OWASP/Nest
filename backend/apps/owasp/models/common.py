@@ -13,7 +13,6 @@ from apps.common.open_ai import OpenAi
 from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
-    OWASP_FOUNDATION_LOGIN,
 )
 from apps.github.models.repository_contributor import (
     TOP_CONTRIBUTORS_LIMIT,
@@ -139,7 +138,6 @@ class RepositoryBasedEntityModel(models.Model):
             }
             for tc in RepositoryContributor.objects.by_humans()
             .filter(repository__in=repositories)
-            .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
             .values(
                 "user__avatar_url",
                 "user__login",

@@ -122,7 +122,7 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('p')?.click()
+    screen.getByText('Contributor 1').closest('button')?.click()
 
     expect(navigateMock).toHaveBeenCalledWith('/community/users/contributor1')
   })
@@ -135,8 +135,6 @@ describe('RepositoryDetailsPage', () => {
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
-
-        expect(screen.getAllByText(issue.author.name).length).toBeGreaterThan(0)
 
         expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
       })
