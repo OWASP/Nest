@@ -87,7 +87,7 @@ export function useSearchPage<T>({
           hitsPerPage,
           sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
             ? `${sortBy}${order && order !== '' ? `:${order}` : ''}`
-            : '',
+            : ''
         )
         setItems(data.hits)
         setTotalPages(data.totalPages)

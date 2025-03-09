@@ -12,7 +12,7 @@ export const fetchTypesenseData = async <T>(
   query = '*',
   currentPage = 1,
   hitsPerPage = 25,
-  sortBy = '',
+  sortBy = ''
 ): Promise<TypesenseResponseType<T>> => {
   try {
     const response = await fetch(TYPESENSE_URL, {
