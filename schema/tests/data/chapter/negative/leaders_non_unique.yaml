@@ -2,8 +2,9 @@ country: India
 leaders:
   - github: leader1
   - github: leader1
-name: OWASP Chapter
+name:
+  - value: OWASP Chapter
 tags:
-  - chapter-tag-1
-  - chapter-tag-2
-  - chapter-tag-3
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3

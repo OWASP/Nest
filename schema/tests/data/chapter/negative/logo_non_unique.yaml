@@ -12,8 +12,9 @@ logo:
   - small: https://example.com/smallLogo.png
     medium: https://example.com/mediumLogo.png
     large: https://example.com/largeLogo.png
-name: OWASP Chapter
+name:
+  - value: OWASP Chapter
 tags:
-  - chapter-tag-1
-  - chapter-tag-2
-  - chapter-tag-3
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3

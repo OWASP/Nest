@@ -1,8 +1,9 @@
 description: This committee has null members.
 members:
-name: OWASP Committee
+name:
+  - value: OWASP Committee
 scope: test scope and purpose of the project
 tags:
-  - security
-  - education
-  - development
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3

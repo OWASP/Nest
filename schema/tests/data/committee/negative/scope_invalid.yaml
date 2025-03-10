@@ -6,8 +6,9 @@ members:
   - github: leader2-github
     name: Leader Two
     role: Vice Chair
-name: OWASP Committee
+name:
+  - value: OWASP Committee
 tags:
-  - development
-  - education
-  - security
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3

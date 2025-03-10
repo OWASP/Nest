@@ -6,7 +6,11 @@
   "properties": {
     "audience": {
       "description": "The intended audience for the project.",
-      "enum": ["breaker", "builder", "defender"],
+      "enum": [
+        "breaker",
+        "builder",
+        "defender"
+      ],
       "enumDescriptions": [
         "Security testers and ethical hackers.",
         "Developers and engineers.",
@@ -21,69 +25,78 @@
     },
     "community": {
       "description": "A list of community platforms associated with the project.",
-      "type": "array",
       "items": {
         "$ref": "common.json#/definitions/community"
       },
       "minItems": 1,
+      "type": "array",
       "uniqueItems": true
     },
     "demo": {
       "description": "Optional URLs to the project demo.",
-      "minItems": 1,
       "items": {
         "format": "uri",
         "type": "string"
       },
+      "minItems": 1,
       "type": "array",
       "uniqueItems": true
     },
     "documentation": {
       "description": "Optional URLs to project documentation.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri"
-      },
-      "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
-    },
-    "downloads": {
-      "description": "Optional list of download URLs.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri"
-      },
-      "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
-    },
-    "events": {
-      "description": "Event URLs related to the project.",
-      "type": "array",
       "items": {
         "format": "uri",
         "type": "string"
       },
       "minItems": 1,
+      "optional": true,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "downloads": {
+      "description": "Optional list of download URLs.",
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "minItems": 1,
+      "optional": true,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "events": {
+      "description": "Events related to the project.",
+      "items": {
+        "$ref": "common.json#/definitions/event"
+      },
+      "minItems": 1,
+      "type": "array",
       "uniqueItems": true
     },
     "leaders": {
       "description": "Leaders of the project.",
-      "type": "array",
       "items": {
         "$ref": "common.json#/definitions/person"
       },
       "minItems": 2,
+      "type": "array",
       "uniqueItems": true
     },
     "level": {
       "default": 2,
       "description": "The numeric level of the project.",
-      "enum": [2, 3, 3.5, 4],
-      "enumDescriptions": ["Incubator", "Lab", "Production", "Flagship"],
+      "enum": [
+        2,
+        3,
+        3.5,
+        4
+      ],
+      "enumDescriptions": [
+        "Incubator",
+        "Lab",
+        "Production",
+        "Flagship"
+      ],
       "title": "Project level.",
       "type": "number"
     },
@@ -119,13 +132,22 @@
     },
     "mailing_list": {
       "description": "The optional mailing list associated with the project.",
-      "format": "uri",
-      "type": "string"
+      "items": {
+        "$ref": "common.json#/definitions/mailing_list"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     },
     "name": {
-      "description": "The unique name of the project.",
-      "minLength": 10,
-      "type": "string"
+      "description": "Name of the project",
+      "items": {
+        "$ref": "common.json#/definitions/name"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     },
     "pitch": {
       "description": "The project pitch.",
@@ -143,11 +165,11 @@
     },
     "social_media": {
       "description": "Social media information for the project",
-      "type": "array",
       "items": {
         "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
+      "type": "array",
       "uniqueItems": true
     },
     "sponsors": {
@@ -162,7 +184,7 @@
     "tags": {
       "description": "Tags for the project",
       "items": {
-        "type": "string"
+        "$ref": "common.json#/definitions/tag"
       },
       "minItems": 3,
       "type": "array",
@@ -170,7 +192,11 @@
     },
     "type": {
       "description": "The type of the project: code, documentation or tool.",
-      "enum": ["code", "documentation", "tool"],
+      "enum": [
+        "code",
+        "documentation",
+        "tool"
+      ],
       "enumDescriptions": [
         "Code projects",
         "Documentation, standards, etc.",
@@ -180,12 +206,23 @@
     },
     "website": {
       "description": "The official website of the project.",
-      "format": "url",
-      "minLength": 4,
-      "type": "string"
+      "items": {
+        "$ref": "common.json#/definitions/website"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     }
   },
-  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
+  "required": [
+    "audience",
+    "leaders",
+    "level",
+    "name",
+    "pitch",
+    "tags",
+    "type"
+  ],
   "title": "OWASP Project",
   "type": "object"
 }

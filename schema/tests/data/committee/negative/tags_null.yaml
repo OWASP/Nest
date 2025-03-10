@@ -6,6 +6,7 @@ members:
   - github: leader2-github
     name: Leader Two
     role: Vice Chair
-name: OWASP Committee
+name:
+  - value: OWASP Committee
 scope: test scope and purpose of the project
 tags:

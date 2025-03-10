@@ -7,8 +7,8 @@ community:
     url: https://discord.com/example
 description: This committee supports development initiatives.
 events:
-  - https://example.com/event1
-  - https://example.com/event2
+  - url: https://example.com/event1
+  - url: https://example.com/event2
 members:
   - github: leader1-github
     name: Leader One
@@ -23,7 +23,8 @@ logo:
 meeting_minutes:
   - date: '2023-01-15'
     url: https://example.com/minutes/2023-01-15
-name: OWASP Development Committee
+name:
+  - value: OWASP Development Committee
 resources:
   - type: guide
     title: Security Best Practices
@@ -40,8 +41,9 @@ sponsors:
   - name: Sponsor Two
     url: https://sponsor2.com
 tags:
-  - development
-  - collaboration
-  - security
-  - OWASP
-website: https://example.com/owasp-dev
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3
+website:
+  - description: website description
+    url: https://example.com/owasp-dev

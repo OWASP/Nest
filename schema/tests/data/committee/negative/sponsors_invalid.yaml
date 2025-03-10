@@ -6,12 +6,13 @@ members:
   - github: leader2-github
     name: Leader Two
     role: Vice Chair
-name: OWASP Committee
+name:
+  - value: OWASP Committee
 scope: test scope and purpose of the project
 sponsors:
   - name: Invalid Sponsor
     url: https://xyz
 tags:
-  - security
-  - education
-  - development
+  - value: example-tag-1
+  - value: example-tag-2
+  - value: example-tag-3

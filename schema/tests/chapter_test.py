@@ -29,7 +29,8 @@ from utils.schema_validators import validate_data
         ("events_empty.yaml", "[] should be non-empty"),
         (
             "events_non_unique.yaml",
-            "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
+            "[{'url': 'https://example.com/event1'}, "
+            "{'url': 'https://example.com/event1'}] has non-unique elements",
         ),
         ("events_null.yaml", "None is not of type 'array'"),
         ("leaders_empty.yaml", "[] is too short"),
@@ -55,8 +56,8 @@ from utils.schema_validators import validate_data
         ("mailing_list_null.yaml", "None is not a 'uri'"),
         ("meetup_group_empty.yaml", "'' should be non-empty"),
         ("meetup_group_null.yaml", "None is not of type 'string'"),
-        ("name_empty.yaml", "'' is too short"),
-        ("name_null.yaml", "None is not of type 'string'"),
+        ("name_empty.yaml", "[] should be non-empty"),
+        ("name_null.yaml", "None is not of type 'array'"),
         ("name_undefined.yaml", "'name' is a required property"),
         ("region_empty.yaml", "'' should be non-empty"),
         ("region_null.yaml", "None is not of type 'string'"),
@@ -76,11 +77,15 @@ from utils.schema_validators import validate_data
         ),
         ("sponsors_null.yaml", "None is not of type 'array'"),
         ("tags_empty.yaml", "[] is too short"),
-        ("tags_non_unique.yaml", "['chapter-tag-1', 'chapter-tag-1'] is too short"),
+        (
+            "tags_non_unique.yaml",
+            "[{'value': 'example-tag-1'}, {'value': 'example-tag-1'}, "
+            "{'value': 'example-tag-1'}] has non-unique elements",
+        ),
         ("tags_null.yaml", "None is not of type 'array'"),
         ("tags_undefined.yaml", "'tags' is a required property"),
-        ("website_empty.yaml", "['example-tag-1'] is too short"),
-        ("website_null.yaml", "None is not of type 'string'"),
+        ("website_empty.yaml", "[] should be non-empty"),
+        ("website_null.yaml", "None is not of type 'array'"),
     ],
 )
 def test_negative(chapter_schema, file_path, error_message):
