@@ -24,7 +24,7 @@ const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
         </div>
 
         <div className="text-center">
-          <h3 className="whitespace-normal break-words text-lg font-semibold text-gray-900 group-hover:text-blue-500 dark:text-white sm:text-xl">
+          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 group-hover:text-blue-500 dark:text-white sm:text-xl">
             {name}
           </h3>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm text-gray-600 dark:text-gray-400 sm:text-base">
