@@ -1,4 +1,4 @@
-"""A command to update OWASP posts from owasp.org data."""
+"""A command to sync posts from owasp.org data."""
 
 import json
 import re
@@ -7,6 +7,7 @@ import yaml
 import yaml.scanner
 from django.core.management.base import BaseCommand
 
+from apps.common.utils import get_blog_url
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.post import Post
 
@@ -19,6 +20,8 @@ class Command(BaseCommand):
         repository_files = json.loads(post_repository_content)
         posts = []
 
+        yaml_pattern = re.compile(r"^---\s*\n((?:(?!^---\s*$).*\n)+)^---\s*$", re.MULTILINE)
+
         for repository_file in repository_files:
             if repository_file.get("name", "").endswith(".md"):
                 download_url = repository_file.get("download_url")
@@ -26,10 +29,12 @@ class Command(BaseCommand):
 
                 if post_content.startswith("---"):
                     try:
-                        yaml_content = re.search(r"^---\s*(.*?)\s*---", post_content, re.DOTALL)
-                        metadata = (
-                            yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
-                        )
+                        match = yaml_pattern.search(post_content)
+                        if match:
+                            metadata_yaml = match.group(1)
+                            metadata = yaml.safe_load(metadata_yaml) or {}
+                        else:
+                            metadata = {}
                     except yaml.scanner.ScannerError:
                         metadata = {}
 
@@ -38,10 +43,7 @@ class Command(BaseCommand):
                         "published_at": metadata.get("date"),
                         "author_name": metadata.get("author"),
                         "author_image_url": metadata.get("author_image", ""),
-                        "url": download_url.replace(
-                            "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/",
-                            "https://owasp.org/blog/",
-                        ),
+                        "url": get_blog_url(download_url),
                     }
 
                     post = Post.update_data(data, save=False)

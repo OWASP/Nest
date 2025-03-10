@@ -78,7 +78,7 @@ This is the content of the test post."""
                 "published_at": date(2023, 1, 1),
                 "author_name": "John Doe",
                 "author_image_url": "https://example.com/john.jpg",
-                "url": "https://owasp.org/blog/2023-01-01-test-post.md",
+                "url": "https://owasp.org/blog/2023/01/01/test-post.html",
             },
             save=False,
         )
@@ -89,7 +89,7 @@ This is the content of the test post."""
                 "published_at": date(2023, 1, 1),
                 "author_name": "John Doe",
                 "author_image_url": "https://example.com/john.jpg",
-                "url": "https://owasp.org/blog/2023-01-02-another-post.md",
+                "url": "https://owasp.org/blog/2023/01/02/another-post.html",
             },
             save=False,
         )
