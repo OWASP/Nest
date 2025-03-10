@@ -49,7 +49,7 @@ const ItemCardList = ({
         ))}
       </div>
     ) : (
-      <p> Nothing to Display . </p>
+      <p> Nothing to display.</p>
     )}
   </SecondaryCard>
 )

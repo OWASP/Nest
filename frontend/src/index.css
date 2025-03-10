@@ -298,6 +298,7 @@ html {
 }
 
 .custom-icon {
-  position: relative;
-  top: 4px;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
