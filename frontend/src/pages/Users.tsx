@@ -41,6 +41,7 @@ const UsersPage = () => {
         name={user.name || `@${user.login}`}
         company={user.company}
         email={user.email}
+        location={user.location}
         button={SubmitButton}
       />
     )
