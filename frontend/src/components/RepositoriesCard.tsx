@@ -19,6 +19,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
 
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+      <section id="repositories"></section>
       <h2 className="mb-4 text-2xl font-semibold">Repositories</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {visibleItems.map((repository, index) => (
@@ -38,6 +39,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
           </div>
         ))}
       </div>
+      <section />
 
       {repositories.length > 4 && (
         <div className="mt-6 flex items-center justify-center text-center">
