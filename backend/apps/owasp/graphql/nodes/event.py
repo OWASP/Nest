@@ -11,14 +11,12 @@ class EventNode(BaseNode):
         model = Event
         fields = (
             "category",
-            "country",
             "end_date",
             "description",
             "key",
             "name",
-            "postal_code",
-            "region",
             "start_date",
+            "suggested_location",
             "summary",
             "url",
         )

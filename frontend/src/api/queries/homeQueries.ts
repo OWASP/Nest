@@ -64,15 +64,12 @@ export const GET_MAIN_PAGE_DATA = gql`
     }
     upcomingEvents(limit: 6) {
       category
-      country
-      description
       endDate
       key
       name
-      postalCode
-      region
       startDate
       summary
+      suggestedLocation
       url
     }
   }

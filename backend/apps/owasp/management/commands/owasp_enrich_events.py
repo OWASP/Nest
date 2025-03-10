@@ -19,12 +19,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         events = Event.objects.order_by("id")
-        events_count = events.count()
         all_events = []
         offset = options["offset"]
 
         for idx, event in enumerate(events[offset:]):
-            prefix = f"{idx + offset + 1} of {events_count}"
+            prefix = f"{idx + offset + 1} of {events.count()}"
             print(f"{prefix:<10} {event.url}")
             # Summary.
             if not event.summary and (prompt := Prompt.get_owasp_event_summary()):
