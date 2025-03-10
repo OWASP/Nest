@@ -1,80 +1,150 @@
-from unittest.mock import Mock, patch
+import json
+from datetime import date
+from unittest import mock
 
 import pytest
-from datetime import datetime
 
-from apps.owasp.models.post import Post
+from apps.owasp.management.commands.owasp_sync_posts import Command
 
 
-class TestPostModel:
-    @pytest.mark.parametrize(
-        ("title", "expected_str"),
-        [
-            ("Sample Post", "Sample Post"),
-            ("", ""),
-        ],
-    )
-    def test_post_str(self, title, expected_str):
-        """Test the __str__ method of the Post model."""
-        post = Post(
-            title=title,
-            url="https://example.com",
-            published_at=datetime(2025, 1, 1)
+class TestUpdateOwaspPostsCommand:
+    TOTAL_API_CALLS = 3
+    TOTAL_UPDATE_CALLS = 2
+
+    @pytest.fixture()
+    def command(self):
+        return Command()
+
+    @pytest.fixture()
+    def mock_repository_files(self):
+        return [
+            {
+                "name": "2023-01-01-test-post.md",
+                "download_url": "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/2023-01-01-test-post.md",
+            },
+            {
+                "name": "2023-01-02-another-post.md",
+                "download_url": "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/2023-01-02-another-post.md",
+            },
+        ]
+
+    @pytest.fixture()
+    def mock_post_content(self):
+        return """---
+title: Test Post
+date: 2023-01-01
+author: John Doe
+author_image: https://example.com/john.jpg
+---
+
+This is the content of the test post."""
+
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_successful_processing(
+        self,
+        mock_bulk_save,
+        mock_update_data,
+        mock_get_content,
+        command,
+        mock_repository_files,
+        mock_post_content,
+    ):
+        mock_get_content.side_effect = [
+            json.dumps(mock_repository_files),
+            mock_post_content,
+            mock_post_content,
+        ]
+
+        mock_post1 = mock.Mock()
+        mock_post2 = mock.Mock()
+        mock_update_data.side_effect = [mock_post1, mock_post2]
+
+        command.handle()
+
+        assert mock_get_content.call_count == self.TOTAL_API_CALLS
+        mock_get_content.assert_any_call(
+            "https://api.github.com/repos/OWASP/owasp.github.io/contents/_posts"
         )
-        assert str(post) == expected_str
+        mock_get_content.assert_any_call(mock_repository_files[0]["download_url"])
+        mock_get_content.assert_any_call(mock_repository_files[1]["download_url"])
 
-    def test_bulk_save(self):
-        """Test the bulk_save method."""
-        mock_posts = [Mock(id=None), Mock(id=1)]
-        with patch("apps.owasp.models.post.BulkSaveModel.bulk_save") as mock_bulk_save:
-            Post.bulk_save(mock_posts, fields=["title"])
-            mock_bulk_save.assert_called_once_with(Post, mock_posts, fields=["title"])
+        assert mock_update_data.call_count == self.TOTAL_UPDATE_CALLS
 
-    @pytest.mark.parametrize(
-        ("data", "expected_fields"),
-        [
-            (
-                {"title": "New Post", "url": "https://example.com", "author_name": "John Doe", "published_at": datetime(2025, 1, 1), "author_image_url": "https://image.com"},
-                {"title": "New Post", "url": "https://example.com", "author_name": "John Doe", "published_at": datetime(2025, 1, 1), "author_image_url": "https://image.com"},
-            ),
-            (
-                {"author_image_url": "https://image.com", "url": "https://example.com"},
-                {"author_image_url": "https://image.com", "url": "https://example.com"},
-            ),
-        ],
-    )
-    def test_from_dict_updates_fields(self, data, expected_fields):
-        """Test the from_dict method updates fields correctly."""
-        post = Post()
-        post.from_dict(data)
-        for field, value in expected_fields.items():
-            assert getattr(post, field) == value
+        mock_update_data.assert_any_call(
+            {
+                "title": "Test Post",
+                "published_at": date(2023, 1, 1),
+                "author_name": "John Doe",
+                "author_image_url": "https://example.com/john.jpg",
+                "url": "https://owasp.org/blog/2023-01-01-test-post.md",
+            },
+            save=False,
+        )
 
-    @patch("apps.owasp.models.post.Post.objects.get")
-    def test_update_data_existing_post(self, mock_get):
-        """Test update_data updates existing post."""
-        mock_post = Mock()
-        mock_get.return_value = mock_post
-        data = {"url": "https://existing.com", "title": "Updated Title", "author_name": "Updated Author", "author_image_url": "https://updatedimage.com"}
-        
-        result = Post.update_data(data)
-        
-        mock_get.assert_called_once_with(url=data["url"])
-        mock_post.from_dict.assert_called_once_with(data)
-        mock_post.save.assert_called_once()
-        assert result == mock_post
+        mock_update_data.assert_any_call(
+            {
+                "title": "Test Post",
+                "published_at": date(2023, 1, 1),
+                "author_name": "John Doe",
+                "author_image_url": "https://example.com/john.jpg",
+                "url": "https://owasp.org/blog/2023-01-02-another-post.md",
+            },
+            save=False,
+        )
 
-    def test_update_data_missing_url(self):
-        """Test update_data returns None when url is missing."""
-        assert Post.update_data({"title": "No URL"}) is None
+        mock_bulk_save.assert_called_once_with(
+            [mock_post1, mock_post2],
+            fields=["title", "published_at", "author_name", "author_image_url", "url"],
+        )
 
-    @patch("apps.owasp.models.post.Post.objects.all")
-    def test_recent_posts_ordering(self, mock_all):
-        """Test recent_posts uses correct ordering."""
-        mock_queryset = Mock()
-        mock_all.return_value = mock_queryset
-        
-        result = Post.recent_posts()
-        
-        mock_queryset.order_by.assert_called_once_with("-published_at")
-        assert result == mock_queryset.order_by.return_value
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_with_no_front_matter(
+        self, mock_bulk_save, mock_update_data, mock_get_content, command, mock_repository_files
+    ):
+        no_front_matter = "This is a post without front matter"
+
+        mock_get_content.side_effect = [
+            json.dumps(mock_repository_files),
+            no_front_matter,
+            no_front_matter,
+        ]
+
+        command.handle()
+
+        assert mock_get_content.call_count == self.TOTAL_API_CALLS
+        assert mock_update_data.call_count == 0
+        mock_bulk_save.assert_called_once_with(
+            [], fields=["title", "published_at", "author_name", "author_image_url", "url"]
+        )
+
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_when_update_data_returns_none(
+        self,
+        mock_bulk_save,
+        mock_update_data,
+        mock_get_content,
+        command,
+        mock_repository_files,
+        mock_post_content,
+    ):
+        mock_get_content.side_effect = [
+            json.dumps(mock_repository_files),
+            mock_post_content,
+            mock_post_content,
+        ]
+
+        mock_update_data.return_value = None
+
+        command.handle()
+
+        assert mock_get_content.call_count == self.TOTAL_API_CALLS
+        assert mock_update_data.call_count == self.TOTAL_UPDATE_CALLS
+        mock_bulk_save.assert_called_once_with(
+            [], fields=["title", "published_at", "author_name", "author_image_url", "url"]
+        )

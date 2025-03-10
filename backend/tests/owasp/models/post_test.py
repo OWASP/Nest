@@ -1,7 +1,7 @@
+from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
-from datetime import datetime
 
 from apps.owasp.models.post import Post
 
@@ -19,7 +19,7 @@ class TestPostModel:
         post = Post(
             title=title,
             url="https://example.com",
-            published_at=datetime(2025, 1, 1)
+            published_at=date(2025, 1, 1),
         )
         assert str(post) == expected_str
 
@@ -34,8 +34,20 @@ class TestPostModel:
         ("data", "expected_fields"),
         [
             (
-                {"title": "New Post", "url": "https://example.com", "author_name": "John Doe", "published_at": datetime(2025, 1, 1), "author_image_url": "https://image.com"},
-                {"title": "New Post", "url": "https://example.com", "author_name": "John Doe", "published_at": datetime(2025, 1, 1), "author_image_url": "https://image.com"},
+                {
+                    "title": "New Post",
+                    "url": "https://example.com",
+                    "author_name": "John Doe",
+                    "published_at": date(2025, 1, 1),
+                    "author_image_url": "https://image.com",
+                },
+                {
+                    "title": "New Post",
+                    "url": "https://example.com",
+                    "author_name": "John Doe",
+                    "published_at": date(2025, 1, 1),
+                    "author_image_url": "https://image.com",
+                },
             ),
             (
                 {"author_image_url": "https://image.com", "url": "https://example.com"},
@@ -55,10 +67,15 @@ class TestPostModel:
         """Test update_data updates existing post."""
         mock_post = Mock()
         mock_get.return_value = mock_post
-        data = {"url": "https://existing.com", "title": "Updated Title", "author_name": "Updated Author", "author_image_url": "https://updatedimage.com"}
-        
+        data = {
+            "url": "https://existing.com",
+            "title": "Updated Title",
+            "author_name": "Updated Author",
+            "author_image_url": "https://updatedimage.com",
+        }
+
         result = Post.update_data(data)
-        
+
         mock_get.assert_called_once_with(url=data["url"])
         mock_post.from_dict.assert_called_once_with(data)
         mock_post.save.assert_called_once()
@@ -73,8 +90,8 @@ class TestPostModel:
         """Test recent_posts uses correct ordering."""
         mock_queryset = Mock()
         mock_all.return_value = mock_queryset
-        
+
         result = Post.recent_posts()
-        
+
         mock_queryset.order_by.assert_called_once_with("-published_at")
         assert result == mock_queryset.order_by.return_value
