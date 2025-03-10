@@ -14,6 +14,7 @@ const ChapterMap = ({
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
+  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
   const normalizedData = useMemo(() => {
     return geoLocData.map((chapter) => ({
@@ -24,48 +25,60 @@ const ChapterMap = ({
     }))
   }, [geoLocData])
 
-  //for reference: https://leafletjs.com/reference.html#map-example
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
-        worldCopyJump: false, // Prevents the map from wrapping around the world
+        worldCopyJump: false,
         maxBounds: [
-          [-90, -180], // Southwest corner of the map bounds (latitude, longitude)
-          [90, 180], // Northeast corner of the map bounds (latitude, longitude)
+          [-90, -180],
+          [90, 180],
         ],
         maxBoundsViscosity: 1.0,
       }).setView([20, 0], 2)
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        className: 'map-tiles',
       }).addTo(mapRef.current)
     }
 
     const map = mapRef.current
 
-    // Remove previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
         map.removeLayer(layer)
       }
     })
 
+    // Create a new marker cluster group
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
-    normalizedData.forEach((chapter) => {
+    markerClusterRef.current = markerClusterGroup
+
+    // Validate and filter out invalid coordinates
+    const validChapters = normalizedData.filter(
+      (chapter) =>
+        chapter.lat !== null &&
+        chapter.lng !== null &&
+        !isNaN(chapter.lat) &&
+        !isNaN(chapter.lng) &&
+        chapter.lat >= -90 &&
+        chapter.lat <= 90 &&
+        chapter.lng >= -180 &&
+        chapter.lng <= 180
+    )
+
+    // Create markers for all chapters
+    validChapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
-        iconAnchor: [12, 41], // Anchor point
+        iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
-        iconSize: [25, 41], // Default size for Leaflet markers
+        iconSize: [25, 41],
         iconUrl: '/img/marker-icon.png',
-        popupAnchor: [1, -34], // Popup position relative to marker
-        shadowSize: [41, 41], // Shadow size
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
         shadowUrl: '/img/marker-shadow.png',
       })
-      const marker = L.marker([chapter.lat, chapter.lng], {
-        icon: markerIcon,
-      })
+      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
       const popup = L.popup()
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
@@ -81,12 +94,34 @@ const ChapterMap = ({
 
     map.addLayer(markerClusterGroup)
 
-    if (bounds.length > 0) {
-      map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
+    // Determine map view based on 6th index (index 5)
+    try {
+      if (validChapters.length >= 6) {
+        // Specifically target the 6th chapter (index 5)
+        const sixthChapter = validChapters[5]
+
+        // Take the first 6 chapters for bounds
+        const localChapters = validChapters.slice(0, 6)
+        const temp = localChapters.map((ch) => [ch.lat, ch.lng])
+        const localBounds = L.latLngBounds(temp)
+
+        map.setView([sixthChapter.lat, sixthChapter.lng], 6)
+        map.fitBounds(localBounds, { maxZoom: 10 })
+      } else if (validChapters.length > 0) {
+        // Fallback if fewer than 6 chapters
+        const firstChapter = validChapters[0]
+        map.setView([firstChapter.lat, firstChapter.lng], 6)
+      } else if (bounds.length > 0) {
+        map.fitBounds(bounds)
+      } else {
+        map.setView([20, 0], 2)
+      }
+    } catch {
+      map.setView([20, 0], 2)
     }
   }, [normalizedData])
 
-  return <div id="chapter-map" className="rounded-lg dark:bg-[#212529]" style={style} />
+  return <div id="chapter-map" style={style} />
 }
 
 export default ChapterMap
