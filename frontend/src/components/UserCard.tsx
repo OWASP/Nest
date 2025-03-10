@@ -28,7 +28,7 @@ const UserCard = ({ avatar, name, company, email, location, button }: UserCardPr
             {name}
           </h3>
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-            {company || email || location}
+            {company || location || email}
           </p>
         </div>
       </div>
