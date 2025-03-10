@@ -25,9 +25,9 @@ import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import MultiSearchBar from 'components/MultiSearch'
+import RecentCardList from 'components/RecentCardList'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
-import RecentCardList from 'components/RecentCardList'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)

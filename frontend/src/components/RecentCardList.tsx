@@ -39,7 +39,8 @@ const RecentCardList = ({
                     href={`https://github.com/${item?.author?.releases?.[0]?.repository?.ownerKey}/${item?.author?.releases?.[0]?.repository?.key}/releases/tag/${item.tagName}`}
                     target="_blank"
                   >
-                    {item.title || item.name}<br />
+                    {item.title || item.name}
+                    <br />
                   </a>
                 </h3>
               </div>

@@ -1,7 +1,6 @@
 import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import SecondaryCard from './SecondaryCard'
-import { release } from 'os'
 
 const ItemCardList = ({
   title,
@@ -40,7 +39,8 @@ const ItemCardList = ({
                     href={item?.url}
                     target="_blank"
                   >
-                    {item.title || item.name}<br />
+                    {item.title || item.name}
+                    <br />
                   </a>
                 </h3>
               </div>
