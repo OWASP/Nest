@@ -40,6 +40,8 @@ const UsersPage = () => {
         avatar={user.avatar_url}
         name={user.name || `@${user.login}`}
         company={user.company}
+        email={user.email}
+        location={user.location}
         button={SubmitButton}
       />
     )
