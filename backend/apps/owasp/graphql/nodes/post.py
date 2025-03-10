@@ -12,7 +12,7 @@ class PostNode(BaseNode):
         fields = (
             "author_name",
             "author_image_url",
-            "publised_at",
+            "published_at",
             "title",
             "url",
         )

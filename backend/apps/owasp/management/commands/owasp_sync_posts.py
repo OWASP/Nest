@@ -33,24 +33,20 @@ class Command(BaseCommand):
                     except yaml.scanner.ScannerError:
                         metadata = {}
 
-                    title = metadata.get("title")
-                    published_at = metadata.get("date")
-                    author_name = metadata.get("author")
-                    author_image_url = metadata.get("author_image") or ""
-                    url = download_url.replace(
-                        "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/",
-                        "https://owasp.org/blog/",
-                    )
+                    data = {
+                        "title": metadata.get("title"),
+                        "published_at": metadata.get("date"),
+                        "author_name": metadata.get("author"),
+                        "author_image_url": metadata.get("author_image", ""),
+                        "url": download_url.replace(
+                            "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/",
+                            "https://owasp.org/blog/",
+                        ),
+                    }
 
-                    post = Post(
-                        title=title,
-                        published_at=published_at,
-                        author_name=author_name,
-                        author_image_url=author_image_url,
-                        url=url,
-                    )
-
-                    posts.append(post)
+                    post = Post.update_data(data, save=False)
+                    if post:
+                        posts.append(post)
 
         Post.bulk_save(
             posts, fields=["title", "published_at", "author_name", "author_image_url", "url"]

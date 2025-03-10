@@ -31,3 +31,29 @@ class Post(BulkSaveModel, TimestampedModel):
     def recent_posts():
         """Get recent posts."""
         return Post.objects.all().order_by("-published_at")
+
+    @staticmethod
+    def update_data(data, save=True):
+        """Update post data."""
+        url = data.get("url")
+        if not url:
+            return None
+
+        try:
+            post = Post.objects.get(url=url)
+        except Post.DoesNotExist:
+            post = Post(url=url)
+        post.from_dict(data)
+        if save:
+            post.save()
+        return post
+
+    def from_dict(self, data):
+        """Update instance based on dict data."""
+        self.author_image_url = data.get("author_image_url", self.author_image_url)
+        self.author_name = data.get("author_name", self.author_name)
+        self.published_at = data.get("published_at", self.published_at)
+        if "author_image_url" in data:
+            self.author_image_url = data.get("author_image_url") or ""
+        self.title = data.get("title", self.title)
+        self.url = data.get("url", self.url)
