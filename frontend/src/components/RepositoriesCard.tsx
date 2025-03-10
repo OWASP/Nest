@@ -8,31 +8,45 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useExpandableList } from 'hooks/useExpandableList'
 import millify from 'millify'
 import type React from 'react'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RepositoriesCardProps } from 'types/project'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
-  const [showAllRepositories, setShowAllRepositories] = useState(false)
-
-  const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4)
+  const { visibleItems, showAll, animatingOut, toggleShowAll } = useExpandableList(repositories, 4)
 
   return (
-    <div>
+    <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+      <h2 className="mb-4 text-2xl font-semibold">Repositories</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {displayedRepositories.map((repository, index) => {
-          return <RepositoryItem key={index} details={repository} />
-        })}
+        {visibleItems.map((repository, index) => (
+          <div
+            key={index}
+            className={`transition-all duration-700 ease-in-out ${
+              index >= 4
+                ? showAll
+                  ? 'animate-fadeIn'
+                  : animatingOut
+                    ? 'animate-fadeOut'
+                    : 'hidden'
+                : ''
+            }`}
+          >
+            <RepositoryItem details={repository} />
+          </div>
+        ))}
       </div>
+
       {repositories.length > 4 && (
         <div className="mt-6 flex items-center justify-center text-center">
           <button
-            onClick={() => setShowAllRepositories(!showAllRepositories)}
-            className="mt-4 flex items-center justify-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+            onClick={toggleShowAll}
+            disabled={animatingOut}
+            className="mt-4 flex items-center justify-center text-[#1d7bd7] transition-all duration-300 hover:underline dark:text-sky-600"
           >
-            {showAllRepositories ? (
+            {showAll || animatingOut ? (
               <>
                 Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
               </>
@@ -61,7 +75,6 @@ const RepositoryItem = ({ details }) => {
       >
         {details?.name}
       </button>
-
       <div className="space-y-2 text-sm">
         <InfoItem
           icon={faStar}

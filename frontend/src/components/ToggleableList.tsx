@@ -1,7 +1,7 @@
 import { Button } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState } from 'react'
+import { useExpandableList } from 'hooks/useExpandableList'
 
 const ToggleableList = ({
   items,
@@ -12,18 +12,24 @@ const ToggleableList = ({
   label: string
   limit?: number
 }) => {
-  const [showAll, setShowAll] = useState(false)
-
-  const toggleShowAll = () => setShowAll(!showAll)
+  const { visibleItems, showAll, animatingOut, toggleShowAll } = useExpandableList(items, limit)
 
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
       <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
       <div className="flex flex-wrap gap-2">
-        {(showAll ? items : items.slice(0, limit)).map((item, index) => (
+        {visibleItems.map((item, index) => (
           <span
             key={index}
-            className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
+            className={`rounded-lg border border-gray-400 px-2 py-1 text-sm transition-all duration-700 ease-in-out dark:border-gray-300 ${
+              index >= limit
+                ? showAll
+                  ? 'animate-fadeIn'
+                  : animatingOut
+                    ? 'animate-fadeOut'
+                    : 'hidden'
+                : ''
+            }`}
           >
             {item}
           </span>
@@ -32,9 +38,10 @@ const ToggleableList = ({
       {items.length > limit && (
         <Button
           onClick={toggleShowAll}
-          className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+          disabled={animatingOut}
+          className="mt-4 flex items-center text-[#1d7bd7] transition-all duration-300 hover:underline dark:text-sky-600"
         >
-          {showAll ? (
+          {showAll || animatingOut ? (
             <>
               Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
             </>
