@@ -4,6 +4,7 @@ Aichi
 Aissue
 algoliasearch
 ansa
+arithmatex
 arkid15r
 askowasp
 Aupdated
@@ -34,15 +35,19 @@ GTM
 gunicorn
 hsl
 igoat
+inlinehilite
 isanori
 jumpstart
+kasya
 Kateryna
 linkify
 lxml
+mamicidal
 markdownit
 markercluster
 mastg
 mcr
+mdfile
 mern
 millify
 mpim
@@ -60,6 +65,7 @@ PLR
 psycopg
 pygithub
 pygoat
+pymdownx
 PYTHONUNBUFFERED
 pyyaml
 repositorycontributor
@@ -77,6 +83,7 @@ slideshare
 speakerdeck
 tiktok
 Truncator
+superfences
 tsc
 Twitterbot
 usefixtures
