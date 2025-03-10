@@ -1,12 +1,15 @@
+import { useQuery } from '@apollo/client'
 import {
   faSearch,
   faTimes,
   faProjectDiagram,
   faBook,
   faUser,
+  faCalendarAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
 import { debounce } from 'lodash'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
@@ -35,6 +38,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const { data } = useQuery(GET_MAIN_PAGE_DATA)
+
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
@@ -49,6 +54,17 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               }
             })
           )
+          const events = data?.upcomingEvents || []
+          const filteredEvents = events.filter((event) =>
+            event.name.toLowerCase().includes(query.toLowerCase())
+          )
+          if (filteredEvents.length > 0) {
+            results.push({
+              indexName: 'events',
+              hits: filteredEvents.slice(0, suggestionCount),
+              totalPages: 1,
+            })
+          }
           setSuggestions(results.filter((result) => result.hits.length > 0))
           setShowSuggestions(true)
         } else {
@@ -56,7 +72,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           setShowSuggestions(false)
         }
       }, 300),
-    [indexes]
+    [indexes, data?.upcomingEvents]
   )
 
   useEffect(() => {
@@ -76,6 +92,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           break
         case 'projects':
           navigate(`/projects/${suggestion.key}`)
+          break
+        case 'events':
+          window.open(suggestion.url, '_blank')
           break
         case 'users':
           navigate(`/community/users/${suggestion.key}`)
@@ -172,6 +191,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         return faProjectDiagram
       case 'users':
         return faUser
+      case 'events':
+        return faCalendarAlt
       default:
         return faSearch
     }
