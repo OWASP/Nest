@@ -38,8 +38,8 @@ def gsoc_handler(ack, command, client):
         if year in SUPPORTED_YEARS:
             gsoc_projects = get_gsoc_projects(year)
             gsoc_projects_markdown = f"{NL}".join(
-                f"  • <{gp['idx_url']}|{gp['idx_name']}>"
-                for gp in sorted(gsoc_projects, key=lambda p: p["idx_name"])
+                f"  • <{gp['url']}|{gp['name']}>"
+                for gp in sorted(gsoc_projects, key=lambda p: p["name"])
             )
             additional_info = []
             blocks = [

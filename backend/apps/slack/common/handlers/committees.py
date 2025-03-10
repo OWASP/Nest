@@ -24,12 +24,7 @@ def get_blocks(
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
 
-    attributes = [
-        "idx_leaders",
-        "idx_name",
-        "idx_summary",
-        "idx_url",
-    ]
+    attributes = "leaders,name,summary,url"
 
     offset = (page - 1) * limit
     committees_data = get_committees(search_query, attributes=attributes, limit=limit, page=page)
@@ -54,14 +49,14 @@ def get_blocks(
     ]
 
     for idx, committee in enumerate(committees):
-        name = Truncator(escape(committee["idx_name"])).chars(
+        name = Truncator(escape(committee["name"])).chars(
             presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
-        summary = Truncator(committee["idx_summary"]).chars(
+        summary = Truncator(committee["summary"]).chars(
             presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
-        leaders = committee.get("idx_leaders", [])
+        leaders = committee.get("leaders", [])
         leaders_text = (
             f"_Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}_{NL}"
             if leaders and presentation.include_metadata
@@ -70,7 +65,7 @@ def get_blocks(
 
         blocks.append(
             markdown(
-                f"{offset + idx + 1}. <{committee['idx_url']}|*{name}*>{NL}"
+                f"{offset + idx + 1}. <{committee['url']}|*{name}*>{NL}"
                 f"{leaders_text}"
                 f"{escape(summary)}{NL}"
             )

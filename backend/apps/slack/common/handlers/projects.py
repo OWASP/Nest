@@ -24,17 +24,9 @@ def get_blocks(
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
 
-    attributes = [
-        "idx_contributors_count",
-        "idx_forks_count",
-        "idx_leaders",
-        "idx_level",
-        "idx_name",
-        "idx_stars_count",
-        "idx_summary",
-        "idx_updated_at",
-        "idx_url",
-    ]
+    attributes = (
+        "contributors_count,forks_count,leaders,level,name,stars_count,summary,updated_at,url"
+    )
 
     offset = (page - 1) * limit
     projects_data = get_projects(search_query, attributes=attributes, limit=limit, page=page)
@@ -59,25 +51,25 @@ def get_blocks(
     ]
 
     for idx, project in enumerate(projects):
-        name = Truncator(escape(project["idx_name"])).chars(
+        name = Truncator(escape(project["name"])).chars(
             presentation.name_truncation, truncate=TRUNCATION_INDICATOR
         )
-        summary = Truncator(project["idx_summary"]).chars(
+        summary = Truncator(project["summary"]).chars(
             presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
         )
 
         metadata = []
         if presentation.include_metadata:
-            if project["idx_contributors_count"]:
-                metadata.append(f"Contributors: {project['idx_contributors_count']}")
-            if project["idx_forks_count"]:
-                metadata.append(f"Forks: {project['idx_forks_count']}")
-            if project["idx_stars_count"]:
-                metadata.append(f"Stars: {project['idx_stars_count']}")
+            if project["contributors_count"]:
+                metadata.append(f"Contributors: {project['contributors_count']}")
+            if project["forks_count"]:
+                metadata.append(f"Forks: {project['forks_count']}")
+            if project["stars_count"]:
+                metadata.append(f"Stars: {project['stars_count']}")
 
         metadata_text = f"_{' | '.join(metadata)}_{NL}" if metadata else ""
 
-        leaders = project["idx_leaders"]
+        leaders = project["leaders"]
         leader_text = (
             f"_Leaders: {', '.join(leaders)}_{NL}"
             if leaders and presentation.include_metadata
@@ -85,14 +77,14 @@ def get_blocks(
         )
 
         updated_text = (
-            f"_Updated {natural_date(int(project['idx_updated_at']))}_{NL}"
+            f"_Updated {natural_date(int(project['updated_at']))}_{NL}"
             if presentation.include_timestamps
             else ""
         )
 
         blocks.append(
             markdown(
-                f"{offset + idx + 1}. <{project['idx_url']}|*{name}*>{NL}"
+                f"{offset + idx + 1}. <{project['url']}|*{name}*>{NL}"
                 f"{updated_text}"
                 f"{metadata_text}"
                 f"{leader_text}"

@@ -24,19 +24,18 @@ def leaders_handler(ack, command, client):
     search_query = command["text"].strip()
     search_query_escaped = escape(search_query)
 
-    attributes = [
-        "idx_key",
-        "idx_leaders",
-        "idx_name",
-    ]
-    searchable_attributes = ["idx_leaders", "idx_name"]
+    attributes = "key,leaders,name"
+    searchable_attributes = "leaders,name"
+    searchable_attributes_weights = "2,1"
     limit = 5
+
     chapters = get_chapters(
         query=search_query_escaped,
         attributes=attributes,
         limit=limit,
         page=1,
         searchable_attributes=searchable_attributes,
+        searchable_attributes_weights=searchable_attributes_weights,
     )["hits"]
 
     projects = get_projects(
@@ -45,6 +44,7 @@ def leaders_handler(ack, command, client):
         limit=limit,
         page=1,
         searchable_attributes=searchable_attributes,
+        searchable_attributes_weights=searchable_attributes_weights,
     )["hits"]
 
     blocks = []
@@ -53,21 +53,21 @@ def leaders_handler(ack, command, client):
         if chapters:
             blocks.append(markdown("*Chapters*"))
             for chapter in chapters:
-                if chapter_leaders := chapter["idx_leaders"]:
-                    chapter_url = get_absolute_url(f"chapters/{chapter['idx_key']}")
+                if chapter_leaders := chapter["leaders"]:
+                    chapter_url = get_absolute_url(f"chapters/{chapter['key']}")
                     leaders = "".join(
                         f"{indent} `{leader}`{NL}"
                         if search_query and search_query.lower() in leader.lower()
                         else f"{indent} {leader}{NL}"
                         for leader in chapter_leaders
                     )
-                    blocks.append(markdown(f"<{chapter_url}|{chapter['idx_name']}>:{NL}{leaders}"))
+                    blocks.append(markdown(f"<{chapter_url}|{chapter['name']}>:{NL}{leaders}"))
 
         if projects:
             blocks.append(markdown("*Projects*"))
             for project in projects:
-                if project_leaders := project["idx_leaders"]:
-                    project_url = get_absolute_url(f"projects/{project['idx_key']}")
+                if project_leaders := project["leaders"]:
+                    project_url = get_absolute_url(f"projects/{project['key']}")
                     leaders = "".join(
                         f"{indent} `{leader}`{NL}"
                         if search_query and search_query.lower() in leader.lower()
@@ -75,7 +75,7 @@ def leaders_handler(ack, command, client):
                         for leader in project_leaders
                     )
 
-                    blocks.append(markdown(f"<{project_url}|{project['idx_name']}>:{NL}{leaders}"))
+                    blocks.append(markdown(f"<{project_url}|{project['name']}>:{NL}{leaders}"))
     else:
         blocks.append(markdown(f"*No results found for `{COMMAND} {search_query_escaped}`*{NL}"))
 
