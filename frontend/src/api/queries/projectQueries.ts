@@ -34,6 +34,7 @@ export const GET_PROJECT_DATA = gql`
           login
           name
         }
+        tagname
       }
       repositories {
         contributorsCount

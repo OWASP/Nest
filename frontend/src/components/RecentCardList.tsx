@@ -1,9 +1,8 @@
 import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import SecondaryCard from './SecondaryCard'
-import { release } from 'os'
 
-const ItemCardList = ({
+const RecentCardList = ({
   title,
   data,
   renderDetails,
@@ -37,7 +36,7 @@ const ItemCardList = ({
                 <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                   <a
                     className="text-blue-500 hover:underline dark:text-blue-400"
-                    href={item?.url}
+                    href={`https://github.com/${item?.author?.releases?.[0]?.repository?.ownerKey}/${item?.author?.releases?.[0]?.repository?.key}/releases/tag/${item.tagName}`}
                     target="_blank"
                   >
                     {item.title || item.name}<br />
@@ -55,4 +54,4 @@ const ItemCardList = ({
   </SecondaryCard>
 )
 
-export default ItemCardList
+export default RecentCardList

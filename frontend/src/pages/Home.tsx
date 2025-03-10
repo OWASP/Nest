@@ -27,6 +27,7 @@ import MovingLogos from 'components/LogoCarousel'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
+import RecentCardList from 'components/RecentCardList'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -229,7 +230,7 @@ export default function Home() {
             </div>
           )}
         />
-        <ItemCardList
+        <RecentCardList
           title="Recent Releases"
           data={data.recentReleases}
           renderDetails={(item) => (
