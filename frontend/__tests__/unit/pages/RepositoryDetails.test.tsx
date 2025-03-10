@@ -1,5 +1,6 @@
 import { useQuery } from '@apollo/client'
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
+import { userEvent } from '@testing-library/user-event'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { toast } from 'hooks/useToast'
 import { RepositoryDetailsPage } from 'pages'
@@ -92,24 +93,30 @@ describe('RepositoryDetailsPage', () => {
 
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<RepositoryDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
-    })
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Contributor 6')).toBeInTheDocument()
+        expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      },
+      { timeout: 1000 }
+    )
 
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
+    const heading = screen.getByRole('heading', { name: /Top Contributors/i })
+    expect(heading).toBeInTheDocument()
+
+    const contributorsSection = heading.closest('div')
+    expect(contributorsSection).not.toBeNull()
+    if (!contributorsSection) return
     const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
-    fireEvent.click(showMoreButton)
+    await userEvent.click(showMoreButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 7')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 8')).toBeInTheDocument()
     })
 
     const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
-    fireEvent.click(showLessButton)
+    await userEvent.click(showLessButton)
 
     await waitFor(() => {
       expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()

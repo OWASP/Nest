@@ -1,5 +1,6 @@
 import { useQuery } from '@apollo/client'
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
+import { userEvent } from '@testing-library/user-event'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { toast } from 'hooks/useToast'
 import { ProjectDetailsPage } from 'pages'
@@ -91,24 +92,29 @@ describe('ProjectDetailsPage', () => {
 
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
+
     await waitFor(() => {
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
       expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
     })
 
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
-    fireEvent.click(showMoreButton)
+    const heading = screen.getByRole('heading', { name: /Top Contributors/i })
+    expect(heading).toBeInTheDocument()
+
+    const contributorsSection = heading.closest('div')
+    expect(contributorsSection).not.toBeNull()
+    if (!contributorsSection) return
+
+    const showMoreButton = within(contributorsSection).getByRole('button', { name: /Show more/i })
+    await userEvent.click(showMoreButton)
 
     await waitFor(() => {
       expect(screen.getByText('Contributor 7')).toBeInTheDocument()
       expect(screen.getByText('Contributor 8')).toBeInTheDocument()
     })
 
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
-    fireEvent.click(showLessButton)
+    const showLessButton = within(contributorsSection).getByRole('button', { name: /Show less/i })
+    await userEvent.click(showLessButton)
 
     await waitFor(() => {
       expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
