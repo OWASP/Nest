@@ -78,6 +78,10 @@ owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
 
+slack-sync-conversation-list:
+	@echo "Syncing Slack conversation list"
+	@CMD="python manage.py slack_sync_conversation_list" $(MAKE) exec-backend-command
+
 owasp-update-project-health-metrics:
 	@echo "Updating OWASP project health requirements"
 	@CMD="python manage.py owasp_update_project_health_metrics" $(MAKE) exec-backend-command
