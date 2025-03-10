@@ -3,7 +3,7 @@ import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UserCardProps } from 'types/card'
 
-const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
+const UserCard = ({ avatar, name, company,email, button }: UserCardProps) => {
   return (
     <Button
       onClick={button.onclick}
@@ -28,8 +28,9 @@ const UserCard = ({ avatar, name, company, button }: UserCardProps) => {
             {name}
           </h3>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-            {company || ''}
+            {company || email }
           </p>
+
         </div>
       </div>
 
