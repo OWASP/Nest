@@ -288,3 +288,17 @@ a {
   left: 50%;
   opacity: 0.6;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+.inherit-color {
+  color: inherit;
+}
+
+.custom-icon {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}

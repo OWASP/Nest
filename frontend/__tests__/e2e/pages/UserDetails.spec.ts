@@ -25,13 +25,13 @@ test.describe('User Details Page', () => {
   })
 
   test('should have recent issues', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Issues' }).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Test Issue' })).toBeVisible()
     await expect(page.getByText('8/7/2024').first()).toBeVisible()
   })
 
   test('should have recent releases', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Releases' }).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'v1.0.0' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'testuser/test-repo' }).nth(1)).toBeVisible()
     await expect(page.getByText('8/7/2024').first()).toBeVisible()
