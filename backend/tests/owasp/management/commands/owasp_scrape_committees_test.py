@@ -44,7 +44,6 @@ class TestOwaspScrapeCommittees:
             "https://invalid.com/repo3",
         ]
         mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
-        mock_scraper.get_leaders.return_value = "Leaders data"
         mock_scraper.page_tree = True
 
         mock_committee.get_related_url.side_effect = lambda url, **_: url
@@ -91,4 +90,3 @@ class TestOwaspScrapeCommittees:
             expected_related_urls = ["https://example.com/repo1", "https://example.com/repo2"]
             assert committee.invalid_urls == sorted(expected_invalid_urls)
             assert committee.related_urls == sorted(expected_related_urls)
-            assert committee.leaders_raw == "Leaders data"

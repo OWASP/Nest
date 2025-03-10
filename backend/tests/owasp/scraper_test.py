@@ -108,16 +108,6 @@ class TestOwaspScraper:
 
         assert scraper.page_tree is None
 
-    def test_get_leaders_no_leaders(self, mock_session):
-        invalid_html = b"<div class='sidebar'><div id='leaders'></div></div>"
-        mock_response = Mock()
-        mock_response.content = invalid_html
-        mock_session.get.return_value = mock_response
-
-        scraper = OwaspScraper("https://test.org")
-
-        assert scraper.get_leaders() == []
-
     def test_verify_url_invalid_url(self, mock_session):
         response = Mock()
         response.status_code = codes.ok
