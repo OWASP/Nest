@@ -102,16 +102,9 @@ const Card = ({
             content={summary}
             className="prose prose-xs sm:prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
           />
-        ) : null}
+        </div>
       </div>
-      {/* Link to project name if provided */}
-      {projectName && (
-        <Link href={projectLink} rel="noopener noreferrer" className="mt-2 font-medium">
-          {projectName}
-        </Link>
-      )}
-      {/* Render project summary using Markdown */}
-      <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
+
       <div
         className={
           social && social.length > 0
@@ -119,17 +112,6 @@ const Card = ({
             : 'flex w-full items-center justify-between'
         }
       >
-        {/* Render top contributors as avatars */}
-        <div className="mt-3 flex w-full flex-wrap items-center gap-2">
-          {topContributors?.map((contributor, index) => (
-            <ContributorAvatar
-              key={contributor.login || `contributor-${index}`}
-              contributor={contributor}
-              uniqueKey={index.toString()}
-            />
-          ))}
-        </div>
-
         {/* Footer section */}
         {hasSocial ? (
           <div className="mt-2 w-full">
