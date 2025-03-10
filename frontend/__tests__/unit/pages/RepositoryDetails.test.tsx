@@ -122,7 +122,7 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('p')?.click()
+    screen.getByText('Contributor 1').closest('button')?.click()
 
     expect(navigateMock).toHaveBeenCalledWith('/community/users/contributor1')
   })
