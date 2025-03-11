@@ -77,6 +77,11 @@ jobs:
           echo "\n**Size Difference:**" >> bundle-comparison.txt
           diff main-bundle-size.txt pr-bundle-size.txt >> bundle-comparison.txt || true
 
+      - name: Debug dist folder contents
+        working-directory: frontend
+        run: ls -R dist || echo "dist folder not found"
+
+
       - name: Upload bundle analysis report
         uses: actions/upload-artifact@v4
         with:
