@@ -48,9 +48,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 indexName: index,
                 hits: data.hits as
                   | ChapterTypeAlgolia[]
+                  | EventType[]
                   | ProjectTypeAlgolia[]
-                  | User[]
-                  | EventType[],
+                  | User[],
                 totalPages: data.totalPages,
               }
             })
@@ -72,7 +72,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           setShowSuggestions(false)
         }
       }, 300),
-    [indexes, eventData]
+    [eventData, indexes]
   )
 
   useEffect(() => {
@@ -90,11 +90,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         case 'chapters':
           navigate(`/chapters/${suggestion.key}`)
           break
-        case 'projects':
-          navigate(`/projects/${suggestion.key}`)
-          break
         case 'events':
           window.open((suggestion as EventType).url, '_blank')
+          break
+        case 'projects':
+          navigate(`/projects/${suggestion.key}`)
           break
         case 'users':
           navigate(`/community/users/${suggestion.key}`)
@@ -191,12 +191,12 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     switch (indexName) {
       case 'chapters':
         return faBook
+      case 'events':
+        return faCalendarAlt
       case 'projects':
         return faProjectDiagram
       case 'users':
         return faUser
-      case 'events':
-        return faCalendarAlt
       default:
         return faSearch
     }

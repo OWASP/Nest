@@ -13,6 +13,6 @@ export interface MultiSearchBarProps {
 
 export interface Suggestion {
   indexName: string
-  hits: ChapterTypeAlgolia[] | ProjectTypeAlgolia[] | User[] | EventType[]
+  hits: ChapterTypeAlgolia[] | EventType[] | ProjectTypeAlgolia[] | User[]
   totalPages: number
 }
