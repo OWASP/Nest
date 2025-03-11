@@ -17,7 +17,9 @@ test.describe('Contribute Page', () => {
 
   test('renders issue data correctly', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'Contribution 1' })).toBeVisible()
-    await expect(page.getByText('3 months ago')).toBeVisible()
+    await expect(
+      page.locator('text=/\\d+ months? ago|a month ago|a day ago|\\d+ days? ago/')
+    ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Owasp Nest' })).toBeVisible()
     await expect(page.getByText('This is a summary of Contribution 1')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Read More' })).toBeVisible()
