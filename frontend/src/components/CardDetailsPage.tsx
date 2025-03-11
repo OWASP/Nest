@@ -120,7 +120,7 @@ const DetailsCard = ({
           </>
         )}
         {type === 'project' && (
-          <SecondaryCard title="Repositories" className="mt-6" id="repositories">
+          <SecondaryCard title="Repositories" className="mt-6" id="repositories-section">
             {repositories.length > 0 ? (
               <RepositoriesCard repositories={repositories} />
             ) : (

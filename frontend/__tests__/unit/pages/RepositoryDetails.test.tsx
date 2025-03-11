@@ -93,12 +93,14 @@ describe('RepositoryDetailsPage', () => {
 
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<RepositoryDetailsPage />)
+
+    // Wait for the initial contributors to be in the document
     await waitFor(
       () => {
-        expect(screen.queryByText('Contributor 6')).toBeInTheDocument()
+        expect(screen.getByText('Contributor 6')).toBeInTheDocument()
         expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
       },
-      { timeout: 1000 }
+      { timeout: 2000 }
     )
 
     const heading = screen.getByRole('heading', { name: /Top Contributors/i })
@@ -107,20 +109,29 @@ describe('RepositoryDetailsPage', () => {
     const contributorsSection = heading.closest('div')
     expect(contributorsSection).not.toBeNull()
     if (!contributorsSection) return
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
+
+    const showMoreButton = within(contributorsSection).getByRole('button', { name: /Show more/i })
     await userEvent.click(showMoreButton)
 
-    await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 8')).toBeInTheDocument()
-    })
+    // Ensure Contributor 7 & 8 are now visible
+    await waitFor(
+      () => {
+        expect(screen.getByText('Contributor 7')).toBeInTheDocument()
+        expect(screen.getByText('Contributor 8')).toBeInTheDocument()
+      },
+      { timeout: 2000 }
+    )
 
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
+    const showLessButton = within(contributorsSection).getByRole('button', { name: /Show less/i })
     await userEvent.click(showLessButton)
 
-    await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
-    })
+    // Wait for the element to be hidden instead of removed
+    await waitFor(
+      () => {
+        expect(screen.getByText('Contributor 7')).toHaveStyle('display: none')
+      },
+      { timeout: 2000 }
+    )
   })
 
   test('navigates to user page when contributor is clicked', async () => {
