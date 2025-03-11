@@ -59,17 +59,17 @@ def algolia_search(request):
 
         facet_filters = data.get("facetFilters", [])
         index_name = data.get("indexName")
-
+        ip_address = get_user_ip_address(request)
         limit = data.get("hitsPerPage", 25)
         page = data.get("page", 1)
-        ip_address = get_user_ip_address(request)
         query = data.get("query", "")
 
         cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
         if index_name == "chapters":
             cache_key = f"{cache_key}:{ip_address}"
 
-        if result := cache.get(cache_key):
+        result = cache.get(cache_key)
+        if result is not None:
             return JsonResponse(result)
 
         result = get_search_results(
