@@ -48,7 +48,7 @@ const DetailsCard = ({
           >
             {details &&
               details.map((detail, index) => (
-                <div key={index}>
+                <div key={index} className="pb-1">
                   <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
                 </div>
               ))}
@@ -96,8 +96,12 @@ const DetailsCard = ({
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                   <span>{formatDate(item.createdAt)}</span>
-                  <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                  <span>{item.commentsCount} comments</span>
+                  {item?.commentsCount ? (
+                    <>
+                      <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+                      <span>{item.commentsCount} comments</span>
+                    </>
+                  ) : null}
                 </div>
               )}
             />

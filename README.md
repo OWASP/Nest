@@ -36,10 +36,11 @@ OWASP Nest promotes collaboration, making it easier for both new and experienced
 OWASP Nest is led by a dedicated team committed to fostering collaboration and supporting contributors. The leadership team ensures the platform aligns with OWASP's mission, continually improving its features to serve the community better.
 Current Leaders:
 
-- [Arkadii Yakovets](https://github.com/arkid15r/)
-- [Kate Golovanova](https://github.com/kasya/)
-- [Starr Brown](https://github.com/mamicidal/)
+- [Arkadii Yakovets](https://github.com/arkid15r/)  -- CCSP, CISSP, CSSLP
+- [Kate Golovanova](https://github.com/kasya/) -- CC
+- [Starr Brown](https://github.com/mamicidal/) -- CISSP
 
+All OWASP Nest leaders are certified ISC2 professionals and adhere to the OWASP Code of Conduct.
 For questions or discussions with the leadership team and other contributors, please use the [#project-nest](https://owasp.slack.com/archives/project-nest) channel on OWASP Slack.
 
 ## Contributing
@@ -53,3 +54,11 @@ OWASP Nest thrives on community contributions. Whether you are a developer, desi
 - Engagement: Share feedback, participate in discussions, or promote the project in your network.
 
 To get started, visit the [OWASP Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).
+
+## About
+
+OWASP Nest was **originally created by Arkadii Yakovets** (Ark) to address challenges in navigating OWASP projects. The project was **built from scratch based on Ark's ideas and discussions with Starr Brown** (Starr), ensuring a well-structured system design aligned with OWASP's ecosystem. Ark, an experienced software development professional with over 10 years of expertise in Python, Django, Django REST Framework (DRF), and related backend technologies, led the development of the backend using widely adopted Python **open-source frameworks and libraries**, including DRF, django-filter, OpenAI, Algolia Search, slack-bolt, PyGitHub, pre-commit, pytest, and more. The initial frontend, based on Vue.js, was introduced by **Kateryna Golovanova** (Kate), who later became the project co-leader due to her invaluable frontend and project management skills. The **code is licensed under the MIT License**, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are OWASP members and adhere to the OWASP Code of Conduct.
+
+Over time, OWASP Nest has expanded to address broader OWASP community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, along with NestBot, has become a popular entry point for various OWASP aspects, including projects, chapters, users, and aggregated contribution opportunities -- with even more features planned. OWASP Nest's success is also the result of many valuable [contributions](https://github.com/OWASP/Nest/graphs/contributors) from the broader [OWASP Nest community](https://owasp.slack.com/archives/project-nest), whose efforts have helped shape and improve the project in countless ways.
+
+**No other OWASP projects' code was used in OWASP Nest's development.** While explicit attribution (other than per MIT license) is not required, contributors and other OWASP project leaders are welcome to provide it at their discretion.

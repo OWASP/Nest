@@ -5,6 +5,7 @@ import { Tooltip } from 'components/ui/tooltip'
 
 type ContributorProps = {
   contributor: TopContributorsTypeAlgolia | TopContributorsTypeGraphql
+  uniqueKey: string
 }
 
 const isAlgoliaContributor = (
@@ -18,7 +19,7 @@ const isAlgoliaContributor = (
   )
 }
 
-const ContributorAvatar = memo(({ contributor }: ContributorProps) => {
+const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) => {
   const isAlgolia = isAlgoliaContributor(contributor)
 
   const avatarUrl = isAlgolia
@@ -33,13 +34,13 @@ const ContributorAvatar = memo(({ contributor }: ContributorProps) => {
   const displayName = name || login
 
   const repositoryInfo =
-    !isAlgolia && (contributor as TopContributorsTypeGraphql).repositoryName
-      ? ` in ${(contributor as TopContributorsTypeGraphql).repositoryName}`
+    !isAlgolia && (contributor as TopContributorsTypeGraphql).projectName
+      ? ` in ${(contributor as TopContributorsTypeGraphql).projectName}`
       : ''
 
   return (
     <Tooltip
-      id={`avatar-tooltip-${login}`}
+      id={`avatar-tooltip-${login}-${uniqueKey}`}
       content={`${contributionsCount} contributions${repositoryInfo} by ${displayName}`}
       openDelay={100}
       closeDelay={100}

@@ -50,6 +50,11 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         """Return release summary."""
         return f"{self.tag_name} on {self.published_at.strftime('%b %d, %Y')}"
 
+    @property
+    def url(self):
+        """Return release URL."""
+        return f"{self.repository.url}/releases/tag/{self.tag_name}"
+
     def from_github(self, gh_release, author=None, repository=None):
         """Update instance based on GitHub release data."""
         field_mapping = {

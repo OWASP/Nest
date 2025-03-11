@@ -51,6 +51,11 @@
       "type": "array",
       "uniqueItems": true
     },
+    "mailing_list": {
+      "description": "The optional mailing list associated with the chapter.",
+      "format": "uri",
+      "type": "string"
+    },
     "meetup_group": {
       "description": "Meetup group.",
       "minLength": 1,
