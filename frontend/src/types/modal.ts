@@ -9,5 +9,5 @@ export interface ModalProps {
   onClose: () => void
   button: ButtonType
   children?: React.ReactNode
-  entityType: string
+  description: string
 }

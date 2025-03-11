@@ -6,4 +6,5 @@ export type EventType = {
   startDate: string
   url: string
   summary?: string
+  suggestedLocation?: string
 }

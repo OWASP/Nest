@@ -22,6 +22,7 @@ enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
 	owasp-enrich-committees \
+	owasp-enrich-events \
 	owasp-enrich-projects
 
 generate-sitemap:

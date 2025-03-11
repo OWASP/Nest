@@ -145,6 +145,8 @@ class Event(BulkSaveModel, TimestampedModel):
         if not prompt:
             return ""
         open_ai = OpenAi()
+        if not self.description:
+            return ""
         open_ai.set_input(
             join_values(
                 (
@@ -156,8 +158,11 @@ class Event(BulkSaveModel, TimestampedModel):
             )
         )
         open_ai.set_max_tokens(100).set_prompt(prompt)
-        summary = open_ai.complete()
-        self.summary = summary if summary and summary != "None" else ""
+        try:
+            summary = open_ai.complete()
+            self.summary = summary if summary and summary != "None" else ""
+        except (ValueError, TypeError):
+            self.summary = ""
         return self.summary
 
     def get_geo_string(self, include_name=True):
@@ -189,7 +194,10 @@ class Event(BulkSaveModel, TimestampedModel):
         open_ai = open_ai or OpenAi()
         open_ai.set_input(self.get_geo_string())
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
-        suggested_location = open_ai.complete()
-        self.suggested_location = (
-            suggested_location if suggested_location and suggested_location != "None" else ""
-        )
+        try:
+            suggested_location = open_ai.complete()
+            self.suggested_location = (
+                suggested_location if suggested_location and suggested_location != "None" else ""
+            )
+        except (ValueError, TypeError):
+            self.suggested_location = ""
