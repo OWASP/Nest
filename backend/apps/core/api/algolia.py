@@ -6,6 +6,7 @@ import requests
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 
 from apps.common.index import IndexBase
@@ -51,8 +52,10 @@ def algolia_search(request):
     try:
         data = json.loads(request.body)
 
-        if validation_error := validate_search_params(data):
-            return JsonResponse({"error": validation_error}, status=400)
+        try:
+            validate_search_params(data)
+        except ValidationError as error:
+            return JsonResponse({"error": error.message}, status=400)
 
         facet_filters = data.get("facetFilters", [])
         index_name = data.get("indexName")
