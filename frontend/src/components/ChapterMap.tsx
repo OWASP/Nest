@@ -133,7 +133,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
           className="rounded-lg dark:bg-[#212529]"
           style={{
             minHeight: '400px', // set a minimum height
-            width: '100%',      // or a specific width if desired
+            width: '100%', // or a specific width if desired
             ...style,
           }}
         />
