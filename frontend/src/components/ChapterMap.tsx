@@ -11,7 +11,7 @@ import { Tooltip } from 'components/ui/tooltip'
 interface ChapterMapProps {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
   showLocal: boolean
-  style: React.CSSProperties
+  style?: React.CSSProperties
 }
 
 const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style }) => {
@@ -45,17 +45,15 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
     }
 
     const map = mapRef.current
-    // Remove previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
         map.removeLayer(layer)
       }
     })
 
-    // Create a new marker cluster group
     const markerClusterGroup = L.markerClusterGroup()
-    const bounds: [number, number][] = []
     markerClusterRef.current = markerClusterGroup
+    const bounds: [number, number][] = []
 
     chapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
@@ -76,7 +74,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
       popupContent.addEventListener('click', () => {
         window.location.href = `/chapters/${chapter.key}`
       })
-
       popup.setContent(popupContent)
       marker.bindPopup(popup)
       markerClusterGroup.addLayer(marker)
@@ -96,7 +93,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
       map.fitBounds(localBounds, { maxZoom })
     }
 
-    // Enable Ctrl-to-zoom only on desktop
     const isDesktop = window.innerWidth >= desktopViewMinWidth
     if (isDesktop) {
       map.scrollWheelZoom.disable()
@@ -131,7 +127,16 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
       disabled={window.innerWidth < desktopViewMinWidth}
     >
       <div style={{ position: 'relative' }}>
-        <div id="chapter-map" className="rounded-lg dark:bg-[#212529]" style={style} />
+        {/* Ensure the map container has a minimum height to avoid being hidden */}
+        <div
+          id="chapter-map"
+          className="rounded-lg dark:bg-[#212529]"
+          style={{
+            minHeight: '400px', // set a minimum height
+            width: '100%',      // or a specific width if desired
+            ...style,
+          }}
+        />
       </div>
     </Tooltip>
   )
