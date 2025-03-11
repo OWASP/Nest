@@ -49,6 +49,10 @@ jobs:
         working-directory: frontend
         run: pnpm build
 
+      - name: Verify `dist/` contents after PR build
+        working-directory: frontend
+        run: ls -R dist || echo "dist folder not found"
+
       - name: Save PR branch bundle size
         working-directory: frontend
         run: du -sh dist > pr-bundle-size.txt
@@ -61,6 +65,10 @@ jobs:
       - name: Build main branch
         working-directory: frontend
         run: pnpm build
+
+      - name: Verify `dist/` contents after `main` build
+        working-directory: frontend
+        run: ls -R dist || echo "dist folder not found"
 
       - name: Save main branch bundle size
         working-directory: frontend

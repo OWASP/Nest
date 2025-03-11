@@ -15,7 +15,7 @@ export default defineConfig({
   plugins: [
     react(),
     visualizer({
-      filename: 'dist/stats.html',
+      filename: path.resolve(__dirname, "dist/stats.html"),
       open: false,
       gzipSize: true,
       brotliSize: true,
