@@ -18,8 +18,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   const { visibleItems, showAll, animatingOut, toggleShowAll } = useExpandableList(repositories, 4)
 
   return (
-    <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-      <section id="repositories"></section>
+    <div id="repositories" className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
       <h2 className="mb-4 text-2xl font-semibold">Repositories</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {visibleItems.map((repository, index) => (

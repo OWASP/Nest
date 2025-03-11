@@ -83,8 +83,10 @@ test.describe('Project Details Page', () => {
   })
 
   test('should have project repositories', async ({ page }) => {
-    const repositoriesSection = page.locator('section#repositories')
+    const repositoriesSection = page.locator('#repositories')
+    await repositoriesSection.waitFor({ state: 'attached', timeout: 7000 })
     await expect(repositoriesSection.getByRole('heading', { name: 'Repositories' })).toBeVisible()
+
     await expect(page.getByText('Repo One')).toBeVisible()
     await expect(page.getByText('Stars95')).toBeVisible()
     await expect(page.getByText('Forks12')).toBeVisible()
