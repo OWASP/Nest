@@ -146,6 +146,7 @@ const SnapshotDetailsPage: React.FC = () => {
             <div className="mb-4">
               <ChapterMap
                 geoLocData={snapshot.newChapters}
+                showLocal={false}
                 style={{ height: '400px', width: '100%', zIndex: '0' }}
               />
             </div>
