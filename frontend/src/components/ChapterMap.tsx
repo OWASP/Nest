@@ -82,14 +82,13 @@ const ChapterMap = ({
 
     map.addLayer(markerClusterGroup)
 
-    if (showLocal) {
+    if (showLocal && chapters.length > 0) {
       const maxNearestChapters = 5
       const localChapters = chapters.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
-      const firstChapter = chapters[0]
-
       const maxZoom = 7
-      map.setView([firstChapter.lat, firstChapter.lng], maxZoom)
+      const nearestChapter = chapters[0]
+      map.setView([nearestChapter.lat, nearestChapter.lng], maxZoom)
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
   }, [chapters, showLocal])
