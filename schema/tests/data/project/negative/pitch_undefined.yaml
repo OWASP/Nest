@@ -6,10 +6,9 @@ leaders:
     name: Leader 2 Name
     slack: leader-2-slack
 level: 2
-name:
-  - value: OWASP Incubator Code Project
+name: OWASP Incubator Code Project
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
 type: code

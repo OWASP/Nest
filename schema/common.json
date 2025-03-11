@@ -108,27 +108,6 @@
       "title": "Mailing List",
       "type": "object"
     },
-    "name": {
-      "additionalProperties": false,
-      "description": "Name",
-      "properties": {
-        "description": {
-          "description": "A brief description associated with the name entry",
-          "type": "string",
-          "minLength": 10
-        },
-        "value": {
-          "description": "The actual name string.",
-          "minLength": 5,
-          "type": "string"
-        }
-      },
-      "required": [
-        "value"
-      ],
-      "title": "Name",
-      "type": "object"
-    },
     "person": {
       "additionalProperties": false,
       "description": "Person",
@@ -268,49 +247,6 @@
         "url"
       ],
       "title": "Sponsor",
-      "type": "object"
-    },
-    "tag": {
-      "additionalProperties": false,
-      "description": "Tag",
-      "properties": {
-        "description": {
-          "description": "Description of tag",
-          "type": "string",
-          "minLength": 5
-        },
-        "value": {
-          "description": "Actual value of tag",
-          "type": "string",
-          "minLength": 3
-        }
-      },
-      "required": [
-        "value"
-      ],
-      "title": "Tag",
-      "type": "object"
-    },
-    "website": {
-      "additionalProperties": false,
-      "description": "Website",
-      "properties": {
-        "description": {
-          "description": "Description of website",
-          "type": "string",
-          "minLength": 10
-        },
-        "url": {
-          "description": "URL of the website",
-          "type": "string",
-          "format": "uri",
-          "minLength": 4
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "title": "Website",
       "type": "object"
     }
   }

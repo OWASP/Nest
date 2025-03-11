@@ -4,11 +4,10 @@ leaders:
   - github: leader-2-github
 level: 2
 license: INVALID-LICENSE-VALUE
-name:
-  - value: OWASP Project Invalid License
+name: OWASP Project Invalid License
 pitch: A project with invalid license value
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
 type: code

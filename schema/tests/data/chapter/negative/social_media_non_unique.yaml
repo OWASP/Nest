@@ -5,14 +5,13 @@ leaders:
   - github: leader-2-github
     name: Leader 2 Name
     slack: leader-2-slack
-name:
-  - value: OWASP Chapter
+name: OWASP Chapter
 social_media:
   - platform: youtube
     url: https://youtube.com/channel/123
   - platform: youtube
     url: https://youtube.com/channel/123
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

@@ -30,8 +30,7 @@ logo:
   - large: https://example.com/largeLogo
     medium: https://example.com/mediumLogo
     small: https://example.com/smallLogo
-name:
-  - value: OWASP Incubator Code Project
+name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 repositories:
   - changelog: https://example.com/changelog1
@@ -56,9 +55,8 @@ sponsors:
     name: Sponsor 1
     url: https://sponsor1.com
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
 type: code
-website:
-  - url: https://official-website.com
+website: https://official-website.com

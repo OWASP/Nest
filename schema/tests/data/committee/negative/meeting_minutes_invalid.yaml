@@ -9,10 +9,9 @@ members:
 meeting_minutes:
   - date: '2024-02-26'
     url: https://xyz
-name:
-  - value: OWASP Committee
+name: OWASP Committee
 scope: test scope and purpose of project
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

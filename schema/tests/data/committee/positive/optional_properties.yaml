@@ -23,8 +23,7 @@ logo:
 meeting_minutes:
   - date: '2023-01-15'
     url: https://example.com/minutes/2023-01-15
-name:
-  - value: OWASP Development Committee
+name: OWASP Development Committee
 resources:
   - type: guide
     title: Security Best Practices
@@ -41,9 +40,7 @@ sponsors:
   - name: Sponsor Two
     url: https://sponsor2.com
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
-website:
-  - description: website description
-    url: https://example.com/owasp-dev
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
+website: https://example.com/owasp-dev

@@ -1,3 +1,4 @@
+description: This committee has an empty name.
 members:
   - github: leader1-github
     name: Leader One
@@ -6,10 +7,8 @@ members:
     name: Leader Two
     role: Vice Chair
 name:
-  - value: OWASP Committee
-  - value: OWASP Committee
 scope: test scope and purpose of the project
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

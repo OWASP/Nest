@@ -1,7 +1,6 @@
 audience: builder
 documentation: []
-name:
-  - value: OWASP Incubator Code Project
+name: OWASP Incubator Code Project
 leaders:
   - github: leader-1-github
     name: Leader 1 Name
@@ -11,7 +10,7 @@ leaders:
 level: 3
 pitch: A very brief, one-line description of your project
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
 type: code

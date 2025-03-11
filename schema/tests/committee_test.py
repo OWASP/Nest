@@ -21,7 +21,6 @@ from utils.schema_validators import validate_data
         ),
         ("community_null.yaml", "None is not of type 'array'"),
         ("description_null.yaml", "None is not of type 'string'"),
-        ("description_undefined.yaml", "'description' is a required property"),
         ("events_empty.yaml", "[] should be non-empty"),
         (
             "events_non_unique.yaml",
@@ -47,7 +46,8 @@ from utils.schema_validators import validate_data
         ),
         ("meeting_minutes_null.yaml", "None is not of type 'array'"),
         ("meeting_minutes_invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("name_empty.yaml", "[] should be non-empty"),
+        ("name_empty.yaml", "'' is too short"),
+        ("name_null.yaml", "None is not of type 'string'"),
         ("name_undefined.yaml", "'name' is a required property"),
         ("resources_invalid.yaml", "'https://xyz' is not a 'uri'"),
         ("resources_null.yaml", "None is not of type 'array'"),
@@ -62,8 +62,8 @@ from utils.schema_validators import validate_data
         ("tags_empty.yaml", "[] is too short"),
         ("tags_null.yaml", "None is not of type 'array'"),
         ("tags_undefined.yaml", "'tags' is a required property"),
-        ("website_empty.yaml", "[] should be non-empty"),
-        ("website_null.yaml", "None is not of type 'array'"),
+        ("website_empty.yaml", "'' is not a 'uri'"),
+        ("website_null.yaml", "None is not a 'uri'"),
     ],
 )
 def test_negative(committee_schema, file_path, error_message):

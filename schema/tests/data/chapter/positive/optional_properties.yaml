@@ -21,8 +21,7 @@ logo:
     medium: https://example.com/mediumLogo
     large: https://example.com/largeLogo
 meetup_group: OWASP Meetup
-name:
-  - value: OWASP Chapter
+name: OWASP Chapter
 region: Asia
 social_media:
   - description: A brief description of the social media platform
@@ -34,9 +33,7 @@ sponsors:
     name: Sponsor 1
     url: https://sponsor1.com
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
-website:
-  - description: website description
-    url: https://chapter-website.com
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
+website: https://chapter-website.com

@@ -94,7 +94,7 @@ from utils.schema_validators import validate_data
         ("mailing_list_invalid.yaml", "'https://xyz' is not of type 'array'"),
         ("mailing_list_null.yaml", "None is not of type 'array'"),
         ("name_empty.yaml", "'' is too short"),
-        ("name_null.yaml", "None is not of type 'array'"),
+        ("name_null.yaml", "None is not of type 'string'"),
         ("name_undefined.yaml", "'name' is a required property"),
         ("pitch_empty.yaml", "'' is too short"),
         ("pitch_null.yaml", "None is not of type 'string'"),
@@ -123,14 +123,14 @@ from utils.schema_validators import validate_data
         ("tags_null.yaml", "None is not of type 'array'"),
         (
             "tags_non_unique.yaml",
-            "[{'value': 'example-tag-1'}, {'value': 'example-tag-1'}] is too short",
+            "['example-tag-1', 'example-tag-1', 'example-tag-1'] has non-unique elements",
         ),
         ("tags_undefined.yaml", "'tags' is a required property"),
         ("type_empty.yaml", "'' is not one of ['code', 'documentation', 'tool']"),
         ("type_null.yaml", "None is not one of ['code', 'documentation', 'tool']"),
         ("type_undefined.yaml", "'type' is a required property"),
-        ("website_empty.yaml", "[] should be non-empty"),
-        ("website_null.yaml", "None is not of type 'array'"),
+        ("website_empty.yaml", "'' is not a 'uri'"),
+        ("website_null.yaml", "None is not a 'uri'"),
     ],
 )
 def test_negative(project_schema, file_path, error_message):

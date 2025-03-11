@@ -1,8 +1,7 @@
 country: India
 leaders:
-name:
-  - value: OWASP Chapter
+name: OWASP Chapter
 tags:
-  - value: example-tag-1
-  - value: example-tag-2
-  - value: example-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
