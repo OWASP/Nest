@@ -25,6 +25,7 @@ class TestReleaseNode:
             "project_name",
             "published_at",
             "tag_name",
+            "url",
         }
         assert set(ReleaseNode._meta.fields) == expected_fields
 
