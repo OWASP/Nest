@@ -53,8 +53,12 @@
     },
     "mailing_list": {
       "description": "The optional mailing list associated with the chapter.",
-      "format": "uri",
-      "type": "string"
+      "items": {
+        "$ref": "common.json#/definitions/mailing_list"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     },
     "meetup_group": {
       "description": "Meetup group.",
