@@ -48,5 +48,7 @@ export interface UserCardProps {
   avatar: string
   button: ButtonType
   company: string
+  email: string
+  location: string
   name: string
 }
