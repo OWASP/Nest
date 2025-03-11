@@ -36,14 +36,10 @@ const ItemCardList = ({
                 <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                   <a
                     className="text-blue-500 hover:underline dark:text-blue-400"
-                    href={
-                      item?.url ||
-                      `https://github.com/${item?.author?.releases?.[0]?.repository?.ownerKey}/${item?.author?.releases?.[0]?.repository?.key}/releases/tag/${item.tagName}`
-                    }
+                    href={item?.url}
                     target="_blank"
                   >
                     {item.title || item.name}
-                    <br />
                   </a>
                 </h3>
               </div>

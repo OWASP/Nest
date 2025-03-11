@@ -13,6 +13,7 @@ class ReleaseNode(BaseNode):
 
     author = graphene.Field(UserNode)
     project_name = graphene.String()
+    url = graphene.String()
 
     class Meta:
         model = Release
@@ -27,3 +28,7 @@ class ReleaseNode(BaseNode):
     def resolve_project_name(self, info):
         """Return project name."""
         return self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
+
+    def resolve_url(self, info):
+        """Return release URL."""
+        return self.url

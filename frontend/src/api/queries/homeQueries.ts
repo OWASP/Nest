@@ -37,25 +37,19 @@ export const GET_MAIN_PAGE_DATA = gql`
         avatarUrl
         login
         name
-        url
       }
     }
     recentReleases(limit: 5) {
       author {
         avatarUrl
-        name
         login
-        releases {
-          repository {
-            key
-            ownerKey
-          }
-        }
+        name
       }
       isPreRelease
       name
-      tagName
       publishedAt
+      tagName
+      url
     }
     sponsors {
       imageUrl
