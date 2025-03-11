@@ -76,8 +76,19 @@ class TestProjectModel:
         mock_save.assert_called_once_with(update_fields=("is_active",))
 
     @patch("apps.owasp.models.project.Project.objects.get")
-    def test_update_data_project_does_not_exist(self, mock_get):
+    @patch("apps.github.utils.requests.get")
+    def test_update_data_project_does_not_exist(self, mock_requests_get, mock_get):
+        """Test updating project data when the project doesn't exist."""
         mock_get.side_effect = Project.DoesNotExist
+
+        mock_response = Mock()
+        mock_response.text = """
+        # Project Title
+        Some project description
+        """
+        mock_requests_get.return_value = mock_response
+
+        # Setup test data
         gh_repository_mock = Mock()
         gh_repository_mock.name = "new_repo"
         repository_mock = Repository()

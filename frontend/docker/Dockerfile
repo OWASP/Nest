@@ -2,12 +2,13 @@ FROM node:22 AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm  && \
+    pnpm install
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 FROM nginx:stable-alpine
 

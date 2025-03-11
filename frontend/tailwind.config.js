@@ -53,6 +53,15 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
     },
+    keyframes: {
+      scroll: {
+        '0%': { transform: 'translateX(0)' },
+        '100%': { transform: 'translateX(-500%)' },
+      },
+    },
+    animation: {
+      scroll: 'scroll 0.5s linear infinite',
+    },
   },
   darkMode: ['class'],
   plugins: [require('tailwindcss-animate')],

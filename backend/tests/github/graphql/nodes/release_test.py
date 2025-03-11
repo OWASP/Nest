@@ -22,8 +22,10 @@ class TestReleaseNode:
             "author",
             "is_pre_release",
             "name",
+            "project_name",
             "published_at",
             "tag_name",
+            "url",
         }
         assert set(ReleaseNode._meta.fields) == expected_fields
 
