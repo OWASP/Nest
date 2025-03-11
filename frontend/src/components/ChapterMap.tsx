@@ -45,16 +45,17 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
     }
 
     const map = mapRef.current
+    // Remove previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
         map.removeLayer(layer)
       }
     })
 
+    // Create a new marker cluster group
     const markerClusterGroup = L.markerClusterGroup()
-    markerClusterRef.current = markerClusterGroup
     const bounds: [number, number][] = []
-
+    markerClusterRef.current = markerClusterGroup
     chapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
@@ -65,7 +66,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
         shadowSize: [41, 41],
         shadowUrl: '/img/marker-shadow.png',
       })
-
       const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
       const popup = L.popup()
       const popupContent = document.createElement('div')
@@ -86,11 +86,10 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
       const maxNearestChapters = 5
       const localChapters = chapters.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
-      const firstChapter = chapters[0]
       const maxZoom = 7
-
-      map.setView([firstChapter.lat, firstChapter.lng], maxZoom)
-      map.fitBounds(localBounds, { maxZoom })
+      const nearestChapter = chapters[0]
+      map.setView([nearestChapter.lat, nearestChapter.lng], maxZoom)
+      map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
 
     const isDesktop = window.innerWidth >= desktopViewMinWidth
@@ -127,15 +126,10 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
       disabled={window.innerWidth < desktopViewMinWidth}
     >
       <div style={{ position: 'relative' }}>
-        {/* Ensure the map container has a minimum height to avoid being hidden */}
         <div
           id="chapter-map"
           className="rounded-lg dark:bg-[#212529]"
-          style={{
-            minHeight: '400px', // set a minimum height
-            width: '100%', // or a specific width if desired
-            ...style,
-          }}
+          style={style}
         />
       </div>
     </Tooltip>
