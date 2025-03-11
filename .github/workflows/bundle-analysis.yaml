@@ -77,10 +77,6 @@ jobs:
           echo "\n**Size Difference:**" >> bundle-comparison.txt
           diff main-bundle-size.txt pr-bundle-size.txt >> bundle-comparison.txt || true
 
-      - name: Generate Visualizer Report
-        working-directory: frontend
-        run: pnpm build
-
       - name: Upload bundle analysis report
         uses: actions/upload-artifact@v4
         with:
