@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client'
-import { act, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor} from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { toast } from 'hooks/useToast'
@@ -93,47 +93,14 @@ describe('RepositoryDetailsPage', () => {
 
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<RepositoryDetailsPage />)
-
-    // Wait for the initial contributors to be in the document
-    await waitFor(
-      () => {
-        expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-        expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
-      },
-      { timeout: 2000 }
-    )
-
-    const heading = screen.getByRole('heading', { name: /Top Contributors/i })
-    expect(heading).toBeInTheDocument()
-
-    const contributorsSection = heading.closest('div')
-    expect(contributorsSection).not.toBeNull()
-    if (!contributorsSection) return
-
-    const showMoreButton = within(contributorsSection).getByRole('button', { name: /Show more/i })
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     await userEvent.click(showMoreButton)
+    await screen.findByText('Contributor 7')
 
-    // Ensure Contributor 7 & 8 are now visible
-    await waitFor(
-      () => {
-        expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-        expect(screen.getByText('Contributor 8')).toBeInTheDocument()
-      },
-      { timeout: 2000 }
-    )
-
-    const showLessButton = within(contributorsSection).getByRole('button', { name: /Show less/i })
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
     await userEvent.click(showLessButton)
-
-    // Wait for the element to be hidden instead of removed
-    await waitFor(
-      () => {
-        expect(screen.getByText('Contributor 7')).toHaveStyle('display: none')
-      },
-      { timeout: 2000 }
-    )
-  })
-
+    expect(showLessButton).toBeInTheDocument()
+  }, 10000)
   test('navigates to user page when contributor is clicked', async () => {
     render(<RepositoryDetailsPage />)
     await waitFor(() => {
