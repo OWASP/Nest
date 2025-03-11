@@ -132,8 +132,11 @@ export default function Home() {
         <SecondaryCard title="Upcoming Events">
           <div className="grid gap-4 md:grid-cols-3">
             {data.upcomingEvents.map((event: EventType) => (
-              <div key={event.name} className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold truncate text-lg font-semibold text-blue-500">
+              <div
+                key={event.name}
+                className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+              >
+                <h3 className="mb-2 truncate text-lg font-semibold text-blue-500">
                   <a
                     href={event.url}
                     className="hover:underline"

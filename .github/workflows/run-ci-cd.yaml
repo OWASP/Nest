@@ -224,6 +224,7 @@ jobs:
     needs:
       - code-ql
       - run-backend-tests
+      - run-frontend-e2e-tests
       - run-frontend-unit-tests
     runs-on: ubuntu-latest
     steps:
@@ -365,6 +366,7 @@ jobs:
     needs:
       - code-ql
       - run-backend-tests
+      - run-frontend-e2e-tests
       - run-frontend-unit-tests
     runs-on: ubuntu-latest
     steps:
