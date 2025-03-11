@@ -1,0 +1,88 @@
+name: Bundle Analysis & Comparison
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Set up environment variables
+        working-directory: frontend
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env.production
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> .env.production
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> .env.production
+          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> .env.production
+          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> .env.production
+
+      # Build PR branch
+      - name: Build PR branch
+        working-directory: frontend
+        run: pnpm build
+
+      - name: Save PR branch bundle size
+        working-directory: frontend
+        run: du -sh dist > pr-bundle-size.txt
+
+      - name: Fetch and checkout main branch
+        run: |
+          git fetch origin main
+          git checkout main
+
+      - name: Build main branch
+        working-directory: frontend
+        run: pnpm build
+
+      - name: Save main branch bundle size
+        working-directory: frontend
+        run: du -sh dist > main-bundle-size.txt || echo "0 KB" > main-bundle-size.txt
+
+      # Compare both bundle sizes
+      - name: Compare bundle sizes
+        working-directory: frontend
+        run: |
+          echo "Main Branch Size:" > bundle-comparison.txt
+          cat main-bundle-size.txt >> bundle-comparison.txt
+          echo "\nPR Branch Size:" >> bundle-comparison.txt
+          cat pr-bundle-size.txt >> bundle-comparison.txt
+          echo "\n**Size Difference:**" >> bundle-comparison.txt
+          diff main-bundle-size.txt pr-bundle-size.txt >> bundle-comparison.txt || true
+
+      - name: Generate Visualizer Report
+        working-directory: frontend
+        run: pnpm build
+
+      - name: Upload bundle analysis report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: frontend/dist/stats.html
