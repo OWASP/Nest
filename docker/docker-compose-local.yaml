@@ -2,10 +2,10 @@ services:
   backend:
     container_name: nest-backend
     command: >
-      bash -c "
+      sh -c '
         python manage.py migrate &&
         python manage.py runserver 0.0.0.0:8000
-      "
+      '
     build:
       context: ../backend
       dockerfile: docker/Dockerfile.local
@@ -23,7 +23,7 @@ services:
       - 127.0.0.1:8000:8000
     volumes:
       - ../backend:/home/owasp
-      - /home/owasp/.venv
+      - backend-data:/home/owasp/.venv
 
   db:
     container_name: nest-db
@@ -33,20 +33,19 @@ services:
       POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
       POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_dev}
     healthcheck:
-      test: [CMD, pg_isready, -U, '${DJANGO_DB_USER:-nest_user_dev}', -d, '${DJANGO_DB_NAME:-nest_db_dev}']
       interval: 5s
-      timeout: 5s
       retries: 5
+      test: [CMD, pg_isready, -U, '${DJANGO_DB_USER:-nest_user_dev}', -d, '${DJANGO_DB_NAME:-nest_db_dev}']
+      timeout: 5s
     volumes:
       - db-data:/var/lib/postgresql/data
 
   frontend:
     container_name: nest-frontend
     command: >
-      bash -c "
-        pnpm install &&
+      sh -c '
         pnpm run dev
-      "
+      '
     build:
       context: ../frontend
       dockerfile: docker/Dockerfile.local
@@ -54,8 +53,11 @@ services:
       - 127.0.0.1:3000:3000
     volumes:
       - ../frontend:/home/owasp
+      - frontend-data:/home/owasp/node_modules
     environment:
       NODE_ENV: local
 
 volumes:
+  backend-data:
   db-data:
+  frontend-data:
