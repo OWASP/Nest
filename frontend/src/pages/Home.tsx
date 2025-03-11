@@ -205,14 +205,15 @@ export default function Home() {
           </div>
         </SecondaryCard>
       </div>
-      <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
       <div className="mb-20">
-        <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Nearby</h2>
+        <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Worldwide</h2>
         <ChapterMap
           geoLocData={geoLocData}
+          showLocal={false}
           style={{ height: '400px', width: '100%', zIndex: '0' }}
         />
       </div>
+      <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
       <div className="grid gap-4 md:grid-cols-2">
         <ItemCardList
           title="Recent Issues"

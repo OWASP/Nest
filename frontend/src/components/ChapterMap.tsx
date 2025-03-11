@@ -8,15 +8,17 @@ import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
 const ChapterMap = ({
   geoLocData,
+  showLocal,
   style,
 }: {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
+  showLocal: boolean
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
-  const normalizedData = useMemo(() => {
+  const chapters = useMemo(() => {
     return geoLocData.map((chapter) => ({
       lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
       lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
@@ -38,11 +40,12 @@ const ChapterMap = ({
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
+        className: 'map-tiles',
       }).addTo(mapRef.current)
     }
 
     const map = mapRef.current
-
+    // Remove previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
         map.removeLayer(layer)
@@ -53,22 +56,7 @@ const ChapterMap = ({
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
     markerClusterRef.current = markerClusterGroup
-
-    // Validate and filter out invalid coordinates
-    const validChapters = normalizedData.filter(
-      (chapter) =>
-        chapter.lat !== null &&
-        chapter.lng !== null &&
-        !isNaN(chapter.lat) &&
-        !isNaN(chapter.lng) &&
-        chapter.lat >= -90 &&
-        chapter.lat <= 90 &&
-        chapter.lng >= -180 &&
-        chapter.lng <= 180
-    )
-
-    // Create markers for all chapters
-    validChapters.forEach((chapter) => {
+    chapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
@@ -94,32 +82,17 @@ const ChapterMap = ({
 
     map.addLayer(markerClusterGroup)
 
-    // Determine map view based on 6th index (index 5)
-    try {
-      if (validChapters.length >= 6) {
-        // Specifically target the 6th chapter (index 5)
-        const sixthChapter = validChapters[5]
+    if (showLocal) {
+      const maxNearestChapters = 5
+      const localChapters = chapters.slice(0, maxNearestChapters - 1)
+      const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
+      const firstChapter = chapters[0]
 
-        // Take the first 6 chapters for bounds
-        const localChapters = validChapters.slice(0, 6)
-        const temp = localChapters.map((ch) => [ch.lat, ch.lng])
-        const localBounds = L.latLngBounds(temp)
-
-        map.setView([sixthChapter.lat, sixthChapter.lng], 6)
-        map.fitBounds(localBounds, { maxZoom: 10 })
-      } else if (validChapters.length > 0) {
-        // Fallback if fewer than 6 chapters
-        const firstChapter = validChapters[0]
-        map.setView([firstChapter.lat, firstChapter.lng], 6)
-      } else if (bounds.length > 0) {
-        map.fitBounds(bounds)
-      } else {
-        map.setView([20, 0], 2)
-      }
-    } catch {
-      map.setView([20, 0], 2)
+      const maxZoom = 7
+      map.setView([firstChapter.lat, firstChapter.lng], maxZoom)
+      map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
-  }, [normalizedData])
+  }, [chapters, showLocal])
 
   return <div id="chapter-map" style={style} />
 }
