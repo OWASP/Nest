@@ -10,13 +10,15 @@ import { Tooltip } from 'components/ui/tooltip'
 
 interface ChapterMapProps {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
+  showLocal: boolean
   style: React.CSSProperties
 }
 
-const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
+const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style }) => {
   const mapRef = useRef<L.Map | null>(null)
+  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
-  const normalizedData = useMemo(() => {
+  const chapters = useMemo(() => {
     return geoLocData.map((chapter) => ({
       lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
       lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
@@ -25,14 +27,13 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
     }))
   }, [geoLocData])
 
-  //for reference: https://leafletjs.com/reference.html#map-example
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
-        worldCopyJump: false, // Prevents the map from wrapping around the world
+        worldCopyJump: false,
         maxBounds: [
-          [-90, -180], // Southwest corner of the map bounds (latitude, longitude)
-          [90, 180], // Northeast corner of the map bounds (latitude, longitude)
+          [-90, -180],
+          [90, 180],
         ],
         maxBoundsViscosity: 1.0,
       }).setView([20, 0], 2)
@@ -44,7 +45,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
     }
 
     const map = mapRef.current
-
     // Remove previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
@@ -52,21 +52,23 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
       }
     })
 
+    // Create a new marker cluster group
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
-    normalizedData.forEach((chapter) => {
+    markerClusterRef.current = markerClusterGroup
+
+    chapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
-        iconAnchor: [12, 41], // Anchor point
+        iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
-        iconSize: [25, 41], // Default size for Leaflet markers
+        iconSize: [25, 41],
         iconUrl: '/img/marker-icon.png',
-        popupAnchor: [1, -34], // Popup position relative to marker
-        shadowSize: [41, 41], // Shadow size
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
         shadowUrl: '/img/marker-shadow.png',
       })
-      const marker = L.marker([chapter.lat, chapter.lng], {
-        icon: markerIcon,
-      })
+
+      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
       const popup = L.popup()
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
@@ -74,6 +76,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
       popupContent.addEventListener('click', () => {
         window.location.href = `/chapters/${chapter.key}`
       })
+
       popup.setContent(popupContent)
       marker.bindPopup(popup)
       markerClusterGroup.addLayer(marker)
@@ -82,8 +85,15 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
 
     map.addLayer(markerClusterGroup)
 
-    if (bounds.length > 0) {
-      map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
+    if (showLocal && chapters.length) {
+      const maxNearestChapters = 5
+      const localChapters = chapters.slice(0, maxNearestChapters - 1)
+      const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
+      const firstChapter = chapters[0]
+      const maxZoom = 7
+
+      map.setView([firstChapter.lat, firstChapter.lng], maxZoom)
+      map.fitBounds(localBounds, { maxZoom })
     }
 
     // Enable Ctrl-to-zoom only on desktop
@@ -97,10 +107,8 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
         }
       }
 
-      const handleKeyUp = (e: KeyboardEvent) => {
-        if (!e.ctrlKey) {
-          map.scrollWheelZoom.disable()
-        }
+      const handleKeyUp = () => {
+        map.scrollWheelZoom.disable()
       }
 
       window.addEventListener('keydown', handleKeyDown)
@@ -111,7 +119,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, style }) => {
         window.removeEventListener('keyup', handleKeyUp)
       }
     }
-  }, [normalizedData])
+  }, [chapters, showLocal])
 
   return (
     <Tooltip
