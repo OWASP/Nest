@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client'
-import { act, screen, waitFor} from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { toast } from 'hooks/useToast'
