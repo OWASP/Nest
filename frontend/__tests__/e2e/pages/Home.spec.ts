@@ -1,5 +1,9 @@
 import { mockHomeData } from '@e2e/data/mockHomeData'
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
+
+function getFirstHeading(page: Page, name: string) {
+  return page.getByRole('heading', { name }).first()
+}
 
 test.describe('Home Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -22,14 +26,15 @@ test.describe('Home Page', () => {
   })
 
   test('should have new chapters', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'New Chapters' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'New Chapters')).toBeVisible()
     await expect(page.getByRole('link', { name: 'chapter 1' })).toBeVisible()
     await expect(page.getByText('Feb 20,').first()).toBeVisible()
     await page.getByRole('link', { name: 'chapter 1' }).click()
     expect(page.url()).toContain('chapters/chapter-1')
   })
+
   test('should have new projects', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'New Projects' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'New Projects')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 1' })).toBeVisible()
     await expect(page.getByText('Jan 1,').first()).toBeVisible()
     await page.getByRole('link', { name: 'Project 1' }).click()
@@ -37,7 +42,7 @@ test.describe('Home Page', () => {
   })
 
   test('should have top contributors', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'Top Contributors')).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 21' })).toBeVisible()
     await page.getByText('Contributor 1').click()
@@ -45,14 +50,14 @@ test.describe('Home Page', () => {
   })
 
   test('should have recent issues', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'Recent Issues')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Issue 1' })).toBeVisible()
     await expect(page.getByText('Feb 24,').first()).toBeVisible()
     await expect(page.getByText('5 comments')).toBeVisible()
   })
 
   test('should have recent Releases', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Releases' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'Recent Releases')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Release 1' })).toBeVisible()
     await expect(page.getByText('Feb 22,')).toBeVisible()
     await expect(page.getByText('v1', { exact: true })).toBeVisible()
@@ -61,17 +66,17 @@ test.describe('Home Page', () => {
   test('should be able to join OWASP', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Ready to Make a Difference?' })).toBeVisible()
     await expect(page.getByText('Join OWASP and be part of the')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Join OWASP Now' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Join OWASP' })).toBeVisible()
     const page1Promise = page.waitForEvent('popup')
-    await page.getByRole('link', { name: 'Join OWASP Now' }).click()
+    await page.getByRole('link', { name: 'Join OWASP' }).click()
     const page1 = await page1Promise
     expect(page1.url()).toBe('https://owasp.glueup.com/organization/6727/memberships/')
   })
 
   test('should have upcoming events', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Upcoming Events' }).first()).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Event 1' })).toBeVisible()
+    await expect(getFirstHeading(page, 'Upcoming Events')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
     await expect(page.getByText('Feb 27 — 28, 2025')).toBeVisible()
-    await page.getByRole('link', { name: 'Event 1' }).click()
+    await page.getByRole('button', { name: 'Event 1' }).click()
   })
 })

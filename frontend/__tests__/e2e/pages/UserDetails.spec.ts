@@ -1,5 +1,9 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
+
+function getFirstHeading(page: Page, name: string) {
+  return page.getByRole('heading', { name }).first()
+}
 
 test.describe('User Details Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -25,13 +29,13 @@ test.describe('User Details Page', () => {
   })
 
   test('should have recent issues', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'Recent Issues')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Test Issue' })).toBeVisible()
     await expect(page.getByText('8/7/2024').first()).toBeVisible()
   })
 
   test('should have recent releases', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Releases' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'Recent Releases')).toBeVisible()
     await expect(page.getByRole('link', { name: 'v1.0.0' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'testuser/test-repo' }).nth(1)).toBeVisible()
     await expect(page.getByText('8/7/2024').first()).toBeVisible()

@@ -18,7 +18,7 @@ const ItemCardList = ({
 }) => (
   <SecondaryCard title={title}>
     {data && data.length > 0 ? (
-      <div className="h-64 overflow-y-auto pr-2">
+      <div className="overflow-y-auto pr-2">
         {data.map((item, index) => (
           <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
             <div className="flex w-full flex-col justify-between">

@@ -14,12 +14,15 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
     const element = document.getElementById(id)
     if (element) {
       event.preventDefault()
-      element.scrollIntoView({ behavior: 'smooth' })
+      const headingHeight = element.querySelector('h2')?.offsetHeight || 0
+      const yOffset = -headingHeight - 50
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: 'smooth' })
     }
   }
 
   return (
-    <div id={id} className="relative scroll-mt-20">
+    <div id={id} className="relative">
       <div className="items-top group relative flex">
         <h2 className="mb-4 text-2xl font-semibold">{title}</h2>
         <a

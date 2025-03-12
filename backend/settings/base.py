@@ -111,7 +111,6 @@ class Base(Configuration):
     WSGI_APPLICATION = "wsgi.application"
 
     ALGOLIA_APPLICATION_ID = values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID")
-    ALGOLIA_APPLICATION_REGION = values.SecretValue(environ_name="ALGOLIA_APPLICATION_REGION")
     ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES = values.Value(
         environ_name="ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES"
     )

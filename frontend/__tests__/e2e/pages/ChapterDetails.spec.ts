@@ -1,5 +1,9 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
 import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
+
+function getFirstHeading(page: Page, name: string) {
+  return page.getByRole('heading', { name }).first()
+}
 
 test.describe('Chapter Details Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -32,7 +36,7 @@ test.describe('Chapter Details Page', () => {
   })
 
   test('should have top contributors', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' }).first()).toBeVisible()
+    await expect(getFirstHeading(page, 'Top Contributors')).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
     await expect(page.getByText('Contributor 1')).toBeVisible()
     await expect(page.getByText('10 Contributions')).toBeVisible()

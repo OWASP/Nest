@@ -17,7 +17,6 @@ import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
-import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -25,6 +24,7 @@ import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
+import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
@@ -34,6 +34,7 @@ export default function Home() {
   const [data, setData] = useState<MainPageData>(null)
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA)
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
+  const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (graphQLData) {
@@ -56,7 +57,7 @@ export default function Home() {
         indexName: 'chapters',
         query: '',
         currentPage: 1,
-        hitsPerPage: 25,
+        hitsPerPage: 1000,
       }
       const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
         searchParams.indexName,
@@ -112,168 +113,184 @@ export default function Home() {
   ]
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl text-gray-600 dark:text-gray-300">
-      <div className="mb-20 pt-20 text-center">
-        <div className="flex flex-col items-center py-10">
-          <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
-            Welcome to OWASP Nest
-          </h1>
-          <p className="max-w-[700px] pt-6 text-muted-foreground md:text-xl">
-            Your gateway to OWASP. Discover, engage, and help shape the future!
-          </p>
+    <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+      <div className="mx-auto max-w-6xl">
+        <div className="pt-20 pt-5 text-center sm:mb-20">
+          <div className="flex flex-col items-center py-10">
+            <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
+              Welcome to OWASP Nest
+            </h1>
+            <p className="max-w-[700px] pt-6 text-muted-foreground md:text-xl">
+              Your gateway to OWASP. Discover, engage, and help shape the future!
+            </p>
+          </div>
+          <div className="mx-auto mb-8 flex max-w-2xl justify-center">
+            <MultiSearchBar
+              isLoaded={true}
+              placeholder="Search the OWASP community"
+              indexes={['chapters', 'projects', 'users']}
+            />
+          </div>
         </div>
-        <div className="mx-auto mb-8 flex max-w-2xl justify-center">
-          <MultiSearchBar
-            isLoaded={true}
-            placeholder="Search the OWASP community"
-            indexes={['chapters', 'projects', 'users']}
+        <SecondaryCard title={<AnchorTitle href="#upcoming-events" title="Upcoming Events" />}>
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {data.upcomingEvents.map((event: EventType, index: number) => (
+              <div key={`card-${event.name}`}>
+                <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                  <button
+                    className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
+                    onClick={() => setModalOpenIndex(index)}
+                  >
+                    <h3 className="truncate">{event.name}</h3>
+                  </button>
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div className="mr-2 flex items-center">
+                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                    </div>
+                    {event.suggestedLocation && (
+                      <div className="flex items-center">
+                        <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 h-4 w-4" />
+                        <span>{event.suggestedLocation}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Modal
+                  key={`modal-${event.name}`}
+                  isOpen={modalOpenIndex === index}
+                  onClose={() => setModalOpenIndex(null)}
+                  title={event.name}
+                  summary={event.summary}
+                  button={{ label: 'View Event', url: event.url }}
+                  description="The event summary has been generated by AI"
+                ></Modal>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
+        <div className="grid gap-4 md:grid-cols-2">
+          <SecondaryCard title={<AnchorTitle href="#new-chapters" title="New Chapters" />}>
+            <div className="space-y-4">
+              {data.recentChapters.map((chapter) => (
+                <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                  <h3 className="mb-2 text-lg font-semibold">
+                    <a href={`/chapters/${chapter.key}`} className="hover:underline">
+                      {chapter.name}
+                    </a>
+                  </h3>
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div className="mr-4 flex items-center">
+                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <span>{formatDate(chapter.createdAt)}</span>
+                    </div>
+                    <div className="mr-4 flex items-center">
+                      <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
+                      <span>{chapter.suggestedLocation}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SecondaryCard>
+          <SecondaryCard title={<AnchorTitle href="#new-Projects" title="New Projects" />}>
+            <div className="space-y-4">
+              {data.recentProjects.map((project) => (
+                <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                  <h3 className="mb-2 text-lg font-semibold">
+                    <a href={`/projects/${project.key}`} className="hover:underline">
+                      {project.name}
+                    </a>
+                  </h3>
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div className="mr-4 flex items-center">
+                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <span>{formatDate(project.createdAt)}</span>
+                    </div>
+                    <div className="mr-4 flex items-center">
+                      <FontAwesomeIcon
+                        icon={getProjectIcon(project.type) as IconProp}
+                        className="mr-2 h-4 w-4"
+                      />
+                      <span>
+                        {project.type.charAt(0).toUpperCase() + project.type.slice(1).toLowerCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SecondaryCard>
+        </div>
+        <div className="mb-20">
+          <AnchorTitle href="#chapters-worldwide" title="OWASP Chapters Worldwide" />
+          <ChapterMap
+            geoLocData={geoLocData}
+            showLocal={false}
+            style={{ height: '400px', width: '100%', zIndex: '0' }}
           />
         </div>
-      </div>
-      <SecondaryCard title={<AnchorTitle href="#upcoming-events" title="Upcoming Events" />}>
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {data.upcomingEvents.map((event: EventType) => (
-            <div key={event.name} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-              <h3 className="mb-2 truncate text-lg font-semibold text-blue-500">
-                <a
-                  href={event.url}
-                  className="hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {event.name}
-                </a>
-              </h3>
-              <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                <div className="mr-4 flex items-center">
-                  <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                  <span>{formatDateRange(event.startDate, event.endDate)}</span>
-                </div>
+        <TopContributors contributors={data.topContributors} maxInitialDisplay={6} />
+        <div className="grid-cols-2 gap-4 lg:grid">
+          <ItemCardList
+            title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
+            data={data.recentIssues}
+            renderDetails={(item) => (
+              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                <span>{formatDate(item.createdAt)}</span>
+                {item?.commentsCount ? (
+                  <>
+                    <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+                    <span>{item.commentsCount} comments</span>
+                  </>
+                ) : null}
               </div>
-            </div>
+            )}
+          />
+          <ItemCardList
+            title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
+            data={data.recentReleases}
+            renderDetails={(item) => (
+              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                <span>{formatDate(item.publishedAt)}</span>
+                <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
+                <span>{item.tagName}</span>
+              </div>
+            )}
+          />
+        </div>
+        <div className="grid gap-6 md:grid-cols-4">
+          {counterData.map((stat, index) => (
+            <SecondaryCard key={index} className="text-center">
+              <div className="mb-2 text-3xl font-bold text-blue-400">
+                <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
+              </div>
+              <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
+            </SecondaryCard>
           ))}
         </div>
-      </SecondaryCard>
-      <div className="grid gap-4 md:grid-cols-2">
-        <SecondaryCard title={<AnchorTitle href="#new-chapters" title="New Chapters" />}>
-          <div className="space-y-4">
-            {data.recentChapters.map((chapter) => (
-              <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold">
-                  <a href={`/chapters/${chapter.key}`} className="hover:underline">
-                    {chapter.name}
-                  </a>
-                </h3>
-                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                    <span>{formatDate(chapter.createdAt)}</span>
-                  </div>
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
-                    <span>{chapter.suggestedLocation}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SecondaryCard>
-        <SecondaryCard title={<AnchorTitle href="#new-Projects" title="New Projects" />}>
-          <div className="space-y-4">
-            {data.recentProjects.map((project) => (
-              <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold">
-                  <a href={`/projects/${project.key}`} className="hover:underline">
-                    {project.name}
-                  </a>
-                </h3>
-                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                    <span>{formatDate(project.createdAt)}</span>
-                  </div>
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon
-                      icon={getProjectIcon(project.type) as IconProp}
-                      className="mr-2 h-4 w-4"
-                    />
-                    <span>{capitalize(project.type)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SecondaryCard>
-      </div>
-      <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
-      <div className="mb-20">
-        <AnchorTitle href="#chapters-nearby" title="OWASP Chapters Nearby" />
-        <ChapterMap
-          geoLocData={geoLocData}
-          style={{ height: '400px', width: '100%', zIndex: '0' }}
-        />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ItemCardList
-          title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
-          data={data.recentIssues}
-          renderDetails={(item) => (
-            <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
-              <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-              <span>{formatDate(item.createdAt)}</span>
-              <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-              <span>{item.commentsCount} comments</span>
-            </div>
-          )}
-        />
-        <ItemCardList
-          title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
-          data={data.recentReleases}
-          renderDetails={(item) => (
-            <div className="mt-2 flex flex-shrink-0 text-sm text-gray-600 dark:text-gray-300">
-              <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-              <span>{formatDate(item.publishedAt)}</span>
-              <div className="flex flex-row overflow-hidden text-ellipsis whitespace-nowrap">
-                <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-1/5" />
-                <span className="w-[100px] flex-grow-0 flex-col justify-between overflow-hidden text-ellipsis whitespace-nowrap lg:flex-row">
-                  {item.tagName}
-                </span>
-              </div>
-            </div>
-          )}
-        />
-      </div>
 
-      <div className="mt-10 grid gap-6 md:grid-cols-4">
-        {counterData.map((stat, index) => (
-          <SecondaryCard key={index} className="text-center">
-            <div className="mb-2 text-3xl font-bold text-blue-400">
-              <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
-            </div>
-            <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
+        <div className="mb-20 mt-8">
+          <SecondaryCard className="text-center">
+            <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
+            <p className="mb-6 text-gray-600 dark:text-gray-300">
+              Join OWASP and be part of the global cybersecurity community.
+            </p>
+            <a
+              href="https://owasp.glueup.com/organization/6727/memberships/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600"
+            >
+              Join OWASP
+            </a>
           </SecondaryCard>
-        ))}
-      </div>
-
-      <div className="mb-20 mt-8">
-        <SecondaryCard className="text-center">
-          <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
-          <p className="mb-6 text-gray-600 dark:text-gray-300">
-            Join OWASP and be part of the global cybersecurity community.
-          </p>
-          <a
-            href="https://owasp.glueup.com/organization/6727/memberships/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block rounded bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600"
-          >
-            Join OWASP Now
-          </a>
-        </SecondaryCard>
-
-        <SecondaryCard>
-          <MovingLogos sponsors={data.sponsors} />
-        </SecondaryCard>
+          <SecondaryCard>
+            <MovingLogos sponsors={data.sponsors} />
+          </SecondaryCard>
+        </div>
       </div>
     </div>
   )

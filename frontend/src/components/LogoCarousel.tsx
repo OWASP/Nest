@@ -53,8 +53,8 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
       </div>
       <div className="mt-4 flex w-full flex-col items-center justify-center text-center text-sm text-muted-foreground">
         <p>
-          These logos represent the corporate supporters of the OWASP Foundation, whose
-          contributions fuel OWASP's security initiatives. Visit{' '}
+          These logos represent the corporate supporters, whose contributions fuel OWASP Foundation
+          security initiatives. Visit{' '}
           <a
             href="https://owasp.org/supporters/"
             className="font-medium text-primary hover:underline"
@@ -63,8 +63,10 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
           >
             this page
           </a>{' '}
-          to become an OWASP Foundation corporate supporter. If you're interested in sponsoring the
-          OWASP Nest project ❤️{' '}
+          to become a corporate supporter.
+        </p>
+        <p>
+          If you're interested in sponsoring the OWASP Nest project ❤️{' '}
           <a
             href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
             className="font-medium text-primary hover:underline"
