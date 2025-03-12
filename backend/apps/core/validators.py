@@ -31,7 +31,7 @@ def validate_limit(limit):
     min_limit = 1
     max_limit = 1000
     if limit < min_limit or limit > max_limit:
-        message = "hitsPerPage value must be between 1 and 100."
+        message = "hitsPerPage value must be between 1 and 1000."
         raise ValidationError(message)
 
 
