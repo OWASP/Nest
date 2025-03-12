@@ -1,8 +1,13 @@
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime.js'
+dayjs.extend(relativeTime)
+const threeMonthsAgo = dayjs().subtract(3, 'months')
+
 export const mockContributeData = {
   issues: [
     {
       comments_count: 1,
-      created_at: 1734726983,
+      created_at: threeMonthsAgo.unix(),
       hint: 'Hint',
       labels: [],
       project_name: 'Owasp Nest',
