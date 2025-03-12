@@ -7,57 +7,73 @@ import yaml
 import yaml.scanner
 from django.core.management.base import BaseCommand
 
-from apps.common.utils import get_author_image_url, get_blog_url
+from apps.common.constants import OWASP_BLOG_URL, OWASP_WEBSITE_URL
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.post import Post
 
 
 class Command(BaseCommand):
+    def get_author_image_url(self, author_image_url):
+        """Return URL for author image."""
+        return f"{OWASP_WEBSITE_URL}/{author_image_url}" if author_image_url else ""
+
+    def get_blog_url(self, path):
+        """Return OWASP blog URL for a given path."""
+        pattern = re.compile(
+            r"(https://raw\.githubusercontent\.com/OWASP/owasp\.github\.io/main/_posts/)"
+            r"(\d{4})-(\d{2})-(\d{2})-"
+            r"(.+)"
+            r"\.md$"
+        )
+        match = pattern.match(path)
+
+        return (
+            f"{OWASP_BLOG_URL}/{match.group(2)}/{match.group(3)}/{match.group(4)}/"
+            f"{match.group(5)}.html"
+            if match
+            else path
+        )
+
     def handle(self, *args, **options):
         post_repository_content = get_repository_file_content(
             "https://api.github.com/repos/OWASP/owasp.github.io/contents/_posts"
         )
-        repository_files = json.loads(post_repository_content)
-        posts = []
-
         yaml_pattern = re.compile(r"^---\s*\n((?:(?!^---\s*$).*\n)+)^---\s*$", re.MULTILINE)
 
-        for repository_file in repository_files:
-            if repository_file.get("name", "").endswith(".md"):
-                download_url = repository_file.get("download_url")
-                post_content = get_repository_file_content(download_url)
+        posts = []
+        for repository_file in json.loads(post_repository_content):
+            if not repository_file.get("name", "").endswith(".md"):
+                continue
 
-                if post_content.startswith("---"):
-                    try:
-                        match = yaml_pattern.search(post_content)
-                        if match:
-                            metadata_yaml = match.group(1)
-                            metadata = yaml.safe_load(metadata_yaml) or {}
-                        else:
-                            metadata = {}
-                    except yaml.scanner.ScannerError:
-                        metadata = {}
+            download_url = repository_file.get("download_url")
+            post_content = get_repository_file_content(download_url)
+            if not post_content.startswith("---"):
+                continue
 
-                    data = {
-                        "title": metadata.get("title"),
-                        "published_at": metadata.get("date"),
-                        "author_name": metadata.get("author"),
-                        "author_image_url": get_author_image_url(metadata.get("author_image", "")),
-                        "url": get_blog_url(download_url),
-                    }
+            metadata = {}
+            try:
+                if match := yaml_pattern.search(post_content):
+                    metadata_yaml = match.group(1)
+                    metadata = yaml.safe_load(metadata_yaml) or {}
+            except yaml.scanner.ScannerError:
+                pass
 
-                    if not all([data["title"], data["published_at"], data["author_name"]]):
-                        self.stderr.write(
-                            self.style.WARNING(
-                                f"Skipping {repository_file.get('name')}: Missing required fields"
-                            )
-                        )
-                        continue
+            data = {
+                "author_image_url": self.get_author_image_url(metadata.get("author_image", "")),
+                "author_name": metadata.get("author"),
+                "published_at": metadata.get("date"),
+                "title": metadata.get("title"),
+                "url": self.get_blog_url(download_url),
+            }
 
-                    post = Post.update_data(data, save=False)
-                    if post:
-                        posts.append(post)
+            if not all([data["title"], data["published_at"], data["author_name"], data["url"]]):
+                self.stderr.write(
+                    self.style.WARNING(
+                        f"Skipping {repository_file.get('name')}: Missing required fields"
+                    )
+                )
+                continue
 
-        Post.bulk_save(
-            posts, fields=["title", "published_at", "author_name", "author_image_url", "url"]
-        )
+            posts.append(Post.update_data(data, save=False))
+
+        Post.bulk_save(posts)

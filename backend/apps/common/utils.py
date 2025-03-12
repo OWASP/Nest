@@ -9,37 +9,10 @@ from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
-from apps.common.constants import OWASP_BLOG_URL, OWASP_WEBSITE_URL
-
-
-def get_author_image_url(author_image_url):
-    """Return URL for author image."""
-    if author_image_url == "":
-        return ""
-    return f"{OWASP_WEBSITE_URL}{author_image_url}"
-
 
 def get_absolute_url(path):
     """Return absolute URL for a view."""
     return f"{settings.SITE_URL}/{path}"
-
-
-def get_blog_url(path):
-    """Return OWASP blog URL for a given path."""
-    pattern = re.compile(
-        r"(https://raw\.githubusercontent\.com/OWASP/owasp\.github\.io/main/_posts/)"
-        r"(\d{4})-(\d{2})-(\d{2})-"
-        r"(.+)"
-        r"\.md$"
-    )
-    match = pattern.match(path)
-    if match:
-        year = match.group(2)
-        month = match.group(3)
-        day = match.group(4)
-        slug = match.group(5)
-        return f"{OWASP_BLOG_URL}{year}/{month}/{day}/{slug}.html"
-    return path
 
 
 def get_nest_user_agent():
