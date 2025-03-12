@@ -17,6 +17,13 @@ export type MainPageData = {
       name: string
     }[]
   }[]
+  recentPosts: {
+    authorName: string
+    authorImageUrl: string
+    publishedAt: string
+    title: string
+    url: string
+  }[]
   recentProjects: {
     createdAt: string
     key: string

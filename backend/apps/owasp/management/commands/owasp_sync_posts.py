@@ -7,7 +7,7 @@ import yaml
 import yaml.scanner
 from django.core.management.base import BaseCommand
 
-from apps.common.utils import get_blog_url
+from apps.common.utils import get_author_image_url, get_blog_url
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.post import Post
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
                         "title": metadata.get("title"),
                         "published_at": metadata.get("date"),
                         "author_name": metadata.get("author"),
-                        "author_image_url": metadata.get("author_image", ""),
+                        "author_image_url": get_author_image_url(metadata.get("author_image", "")),
                         "url": get_blog_url(download_url),
                     }
 

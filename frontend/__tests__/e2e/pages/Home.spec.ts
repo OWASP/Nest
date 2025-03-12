@@ -36,6 +36,16 @@ test.describe('Home Page', () => {
     expect(page.url()).toContain('projects/project-1')
   })
 
+  test('should have recent posts', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Blog Posts' })).toBeVisible()
+    const postContainer = page.getByTestId('post-container').first()
+    await expect(postContainer.getByRole('link', { name: 'Post 1' })).toBeVisible()
+    await expect(postContainer.getByText('Author 1')).toBeVisible()
+    await expect(postContainer.getByText('Feb 23').first()).toBeVisible()
+    await expect(postContainer.getByRole('img', { name: 'Author 1' })).toBeVisible()
+    await postContainer.getByRole('link', { name: 'Post 1' }).click()
+  })
+
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()

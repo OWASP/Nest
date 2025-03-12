@@ -34,7 +34,7 @@ class TestUpdateOwaspPostsCommand:
 title: Test Post
 date: 2023-01-01
 author: John Doe
-author_image: https://example.com/john.jpg
+author_image: /assets/images/people/john.jpg
 ---
 
 This is the content of the test post."""
@@ -77,7 +77,7 @@ This is the content of the test post."""
                 "title": "Test Post",
                 "published_at": date(2023, 1, 1),
                 "author_name": "John Doe",
-                "author_image_url": "https://example.com/john.jpg",
+                "author_image_url": "https://owasp.org/assets/images/people/john.jpg",
                 "url": "https://owasp.org/blog/2023/01/01/test-post.html",
             },
             save=False,
@@ -88,7 +88,7 @@ This is the content of the test post."""
                 "title": "Test Post",
                 "published_at": date(2023, 1, 1),
                 "author_name": "John Doe",
-                "author_image_url": "https://example.com/john.jpg",
+                "author_image_url": "https://owasp.org/assets/images/people/john.jpg",
                 "url": "https://owasp.org/blog/2023/01/02/another-post.html",
             },
             save=False,

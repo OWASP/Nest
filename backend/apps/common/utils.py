@@ -9,7 +9,14 @@ from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
-from apps.common.constants import OWASP_BLOG_URL
+from apps.common.constants import OWASP_BLOG_URL, OWASP_WEBSITE_URL
+
+
+def get_author_image_url(author_image_url):
+    """Return URL for author image."""
+    if author_image_url == "":
+        return ""
+    return f"{OWASP_WEBSITE_URL}{author_image_url}"
 
 
 def get_absolute_url(path):

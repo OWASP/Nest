@@ -129,30 +129,68 @@ export default function Home() {
           />
         </div>
       </div>
-      <SecondaryCard title="Upcoming Events">
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {data.upcomingEvents.map((event: EventType) => (
-            <div key={event.name} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-              <h3 className="mb-2 truncate text-lg font-semibold text-blue-500">
-                <a
-                  href={event.url}
-                  className="hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {event.name}
-                </a>
-              </h3>
-              <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                <div className="mr-4 flex items-center">
-                  <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                  <span>{formatDateRange(event.startDate, event.endDate)}</span>
+      <div className="grid gap-4 md:grid-cols-2">
+        <SecondaryCard title="Upcoming Events">
+          <div className="space-y-4">
+            {data.upcomingEvents.map((event: EventType) => (
+              <div key={event.name} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                <h3 className="mb-2 truncate text-lg font-semibold text-blue-500">
+                  <a
+                    href={event.url}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {event.name}
+                  </a>
+                </h3>
+                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </SecondaryCard>
+            ))}
+          </div>
+        </SecondaryCard>
+        <SecondaryCard title="Blog Posts">
+          <div className="space-y-4">
+            {data.recentPosts.map((post) => (
+              <div
+                key={post.title}
+                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                data-testid="post-container"
+              >
+                <h3 className="mb-1 truncate text-lg font-semibold text-blue-500">
+                  <a
+                    href={post.url}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {post.title}
+                  </a>
+                </h3>
+                <h4 className="flex flex-row items-center gap-1 text-sm">
+                  <img
+                    src={post.authorImageUrl}
+                    alt={post.authorName}
+                    className="h-6 w-6 rounded-full"
+                  />
+                  {post.authorName}
+                </h4>
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(post.publishedAt)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         <SecondaryCard title="New Chapters">
           <div className="space-y-4">
