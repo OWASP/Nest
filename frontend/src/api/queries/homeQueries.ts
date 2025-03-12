@@ -45,7 +45,6 @@ export const GET_MAIN_PAGE_DATA = gql`
         login
         name
       }
-      isPreRelease
       name
       publishedAt
       tagName
@@ -66,8 +65,11 @@ export const GET_MAIN_PAGE_DATA = gql`
     upcomingEvents(limit: 6) {
       category
       endDate
+      key
       name
       startDate
+      summary
+      suggestedLocation
       url
     }
   }
