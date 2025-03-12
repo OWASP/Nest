@@ -114,7 +114,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByText('OWASP Chapters Nearby')).toBeInTheDocument()
+      expect(screen.getByText('OWASP Chapters Worldwide')).toBeInTheDocument()
     })
   })
 
