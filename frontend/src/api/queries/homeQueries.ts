@@ -45,7 +45,6 @@ export const GET_MAIN_PAGE_DATA = gql`
         login
         name
       }
-      isPreRelease
       name
       publishedAt
       tagName
