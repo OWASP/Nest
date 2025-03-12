@@ -27,13 +27,13 @@ class Command(BaseCommand):
             print(f"{prefix:<10} {event.url}")
             # Summary.
             if not event.summary and (prompt := Prompt.get_owasp_event_summary()):
-                event.generate_summary(prompt=prompt)
+                event.generate_summary(prompt)
 
             # Suggested location.
             if not event.suggested_location and (
                 prompt := Prompt.get_owasp_event_suggested_location()
             ):
-                event.generate_suggested_location()
+                event.generate_suggested_location(prompt)
 
             # Geo location.
             if not event.latitude or not event.longitude:

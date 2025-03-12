@@ -9,7 +9,6 @@ from apps.common.geocoding import get_location_coordinates
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values, slugify
-from apps.core.models.prompt import Prompt
 from apps.github.utils import normalize_url
 
 
@@ -140,60 +139,22 @@ class Event(BulkSaveModel, TimestampedModel):
         for key, value in fields.items():
             setattr(self, key, value)
 
-    def generate_summary(self, prompt):
-        """Generate a summary for the event using OpenAI."""
-        if not prompt:
-            return ""
-        open_ai = OpenAi()
-        if not self.description:
-            return ""
-        open_ai.set_input(
-            join_values(
-                (
-                    f"Name: {self.name}",
-                    f"Description: {self.description}",
-                    f"Dates: {self.start_date} - {self.end_date}",
-                ),
-                delimiter=NL,
-            )
-        )
-        open_ai.set_max_tokens(100).set_prompt(prompt)
-        try:
-            summary = open_ai.complete()
-            self.summary = summary if summary and summary != "None" else ""
-        except (ValueError, TypeError):
-            self.summary = ""
-        return self.summary
-
-    def get_geo_string(self, include_name=True):
-        """Return geo string."""
-        return join_values(
-            (
-                f"Name: {self.name}",
-                f"Description: {self.description}",
-                f"Summary: {self.summary}",
-            ),
-            delimiter=NL,
-        )
-
     def generate_geo_location(self):
         """Add latitude and longitude data."""
         location = None
         if self.suggested_location and self.suggested_location != "None":
             location = get_location_coordinates(self.suggested_location)
         if location is None:
-            location = get_location_coordinates(self.get_geo_string())
+            location = get_location_coordinates(self.get_context())
         if location:
             self.latitude = location.latitude
             self.longitude = location.longitude
 
-    def generate_suggested_location(self, open_ai=None, max_tokens=100):
-        """Generate project summary."""
-        if not (prompt := Prompt.get_owasp_event_suggested_location()):
-            return
-        open_ai = open_ai or OpenAi()
-        open_ai.set_input(self.get_geo_string())
-        open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
+    def generate_suggested_location(self, prompt):
+        """Generate a suggested location for the event."""
+        open_ai = OpenAi()
+        open_ai.set_input(self.get_context())
+        open_ai.set_max_tokens(100).set_prompt(prompt)
         try:
             suggested_location = open_ai.complete()
             self.suggested_location = (
@@ -201,3 +162,29 @@ class Event(BulkSaveModel, TimestampedModel):
             )
         except (ValueError, TypeError):
             self.suggested_location = ""
+
+    def generate_summary(self, prompt):
+        """Generate a summary for the event."""
+        open_ai = OpenAi()
+        open_ai.set_input(self.get_context(include_dates=True))
+        open_ai.set_max_tokens(100).set_prompt(prompt)
+        try:
+            summary = open_ai.complete()
+            self.summary = summary if summary and summary != "None" else ""
+        except (ValueError, TypeError):
+            self.summary = ""
+
+    def get_context(self, include_dates=False):
+        """Return geo string."""
+        context = [
+            f"Name: {self.name}",
+            f"Description: {self.description}",
+            f"Summary: {self.summary}",
+        ]
+        if include_dates:
+            context.append(f"Dates: {self.start_date} - {self.end_date}")
+
+        return join_values(
+            context,
+            delimiter=NL,
+        )
