@@ -46,6 +46,14 @@ class Command(BaseCommand):
                         "url": get_blog_url(download_url),
                     }
 
+                    if not all([data["title"], data["published_at"], data["author_name"]]):
+                        self.stderr.write(
+                            self.style.WARNING(
+                                f"Skipping {repository_file.get('name')}: Missing required fields"
+                            )
+                        )
+                        continue
+
                     post = Post.update_data(data, save=False)
                     if post:
                         posts.append(post)
