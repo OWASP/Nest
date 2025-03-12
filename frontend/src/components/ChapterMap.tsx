@@ -123,7 +123,7 @@ const ChapterMap = ({
       positioning={{ placement: 'top' }}
       disabled={window.innerWidth < desktopViewMinWidth}
     >
-      <div className="relative">
+      <div className="relative h-full w-full">
         <div id="chapter-map" style={style} />
       </div>
     </Tooltip>
