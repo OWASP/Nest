@@ -37,18 +37,18 @@ export const GET_MAIN_PAGE_DATA = gql`
         avatarUrl
         login
         name
-        url
       }
     }
     recentReleases(limit: 5) {
       author {
         avatarUrl
+        login
         name
       }
-      isPreRelease
       name
       publishedAt
       tagName
+      url
     }
     sponsors {
       imageUrl
@@ -65,8 +65,11 @@ export const GET_MAIN_PAGE_DATA = gql`
     upcomingEvents(limit: 6) {
       category
       endDate
+      key
       name
       startDate
+      summary
+      suggestedLocation
       url
     }
   }

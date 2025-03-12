@@ -48,7 +48,7 @@ const DetailsCard = ({
           >
             {details &&
               details.map((detail, index) => (
-                <div key={index}>
+                <div key={index} className="pb-1">
                   <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
                 </div>
               ))}
@@ -67,6 +67,7 @@ const DetailsCard = ({
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
+                showLocal={true}
                 style={{
                   height: '100%',
                   width: '100%',
