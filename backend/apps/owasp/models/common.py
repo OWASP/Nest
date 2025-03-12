@@ -96,6 +96,7 @@ class RepositoryBasedEntityModel(models.Model):
         try:
             yaml_content = re.search(r"^---\s*(.*?)\s*---", index_md_content, re.DOTALL)
             project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+            project_metadata["leaders"] = self.get_leaders(repository=repository)
 
             # Direct fields.
             for model_field, gh_field in field_mapping.items():
@@ -127,6 +128,16 @@ class RepositoryBasedEntityModel(models.Model):
             else None
         )
 
+    def get_leaders_md_raw_url(self, repository=None):
+        """Return project's raw leaders.md GitHub URL."""
+        owasp_repository = repository or self.owasp_repository
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{owasp_repository.key}/{owasp_repository.default_branch}/leaders.md"
+            if owasp_repository
+            else None
+        )
+
     def get_top_contributors(self, repositories=()):
         """Get top contributors."""
         return [
@@ -151,7 +162,7 @@ class RepositoryBasedEntityModel(models.Model):
         """Get leaders from leaders.md file on GitHub."""
         try:
             content = get_repository_file_content(
-                f"https://raw.githubusercontent.com/OWASP/{repository.key}/{repository.default_branch}/leaders.md"
+                self.get_leaders_md_raw_url(repository=repository)
             )
         except (requests.exceptions.RequestException, ValueError) as e:
             logger.exception(

@@ -75,8 +75,6 @@ class Command(BaseCommand):
                 else:
                     logger.info("Skipped related URL %s", verified_url)
 
-            repository = project.owasp_repository
-            project.leaders_raw = project.get_leaders(repository)
             project.invalid_urls = sorted(invalid_urls)
             project.related_urls = sorted(related_urls)
             projects.append(project)
