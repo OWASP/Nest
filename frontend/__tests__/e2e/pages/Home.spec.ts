@@ -71,17 +71,17 @@ test.describe('Home Page', () => {
   test('should be able to join OWASP', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Ready to Make a Difference?' })).toBeVisible()
     await expect(page.getByText('Join OWASP and be part of the')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Join OWASP Now' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Join OWASP' })).toBeVisible()
     const page1Promise = page.waitForEvent('popup')
-    await page.getByRole('link', { name: 'Join OWASP Now' }).click()
+    await page.getByRole('link', { name: 'Join OWASP' }).click()
     const page1 = await page1Promise
     expect(page1.url()).toBe('https://owasp.glueup.com/organization/6727/memberships/')
   })
 
   test('should have upcoming events', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Event 1' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
     await expect(page.getByText('Feb 27 — 28, 2025')).toBeVisible()
-    await page.getByRole('link', { name: 'Event 1' }).click()
+    await page.getByRole('button', { name: 'Event 1' }).click()
   })
 })

@@ -67,7 +67,10 @@ class CommitteeAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = (
+        "name",
+        "suggested_location",
+    )
     search_fields = ("name",)
 
 
