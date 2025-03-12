@@ -4,8 +4,11 @@ from dateutil import parser
 from django.db import models
 from django.utils import timezone
 
+from apps.common.constants import NL
+from apps.common.geocoding import get_location_coordinates
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.common.utils import slugify
+from apps.common.open_ai import OpenAi
+from apps.common.utils import join_values, slugify
 from apps.github.utils import normalize_url
 
 
@@ -30,13 +33,18 @@ class Event(BulkSaveModel, TimestampedModel):
         choices=Category.choices,
         default=Category.OTHER,
     )
-
-    end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     name = models.CharField(verbose_name="Name", max_length=100)
-    description = models.TextField(verbose_name="Description", default="", blank=True)
     start_date = models.DateField(verbose_name="Start Date")
+    end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
+    description = models.TextField(verbose_name="Description", default="", blank=True)
+    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    summary = models.TextField(verbose_name="Summary", blank=True, default="")
+    suggested_location = models.CharField(
+        verbose_name="Suggested Location", max_length=255, blank=True, default=""
+    )
     url = models.URLField(verbose_name="URL", default="", blank=True)
+    latitude = models.FloatField(verbose_name="Latitude", null=True, blank=True)
+    longitude = models.FloatField(verbose_name="Longitude", null=True, blank=True)
 
     def __str__(self):
         """Event human readable representation."""
@@ -130,3 +138,53 @@ class Event(BulkSaveModel, TimestampedModel):
 
         for key, value in fields.items():
             setattr(self, key, value)
+
+    def generate_geo_location(self):
+        """Add latitude and longitude data."""
+        location = None
+        if self.suggested_location and self.suggested_location != "None":
+            location = get_location_coordinates(self.suggested_location)
+        if location is None:
+            location = get_location_coordinates(self.get_context())
+        if location:
+            self.latitude = location.latitude
+            self.longitude = location.longitude
+
+    def generate_suggested_location(self, prompt):
+        """Generate a suggested location for the event."""
+        open_ai = OpenAi()
+        open_ai.set_input(self.get_context())
+        open_ai.set_max_tokens(100).set_prompt(prompt)
+        try:
+            suggested_location = open_ai.complete()
+            self.suggested_location = (
+                suggested_location if suggested_location and suggested_location != "None" else ""
+            )
+        except (ValueError, TypeError):
+            self.suggested_location = ""
+
+    def generate_summary(self, prompt):
+        """Generate a summary for the event."""
+        open_ai = OpenAi()
+        open_ai.set_input(self.get_context(include_dates=True))
+        open_ai.set_max_tokens(100).set_prompt(prompt)
+        try:
+            summary = open_ai.complete()
+            self.summary = summary if summary and summary != "None" else ""
+        except (ValueError, TypeError):
+            self.summary = ""
+
+    def get_context(self, include_dates=False):
+        """Return geo string."""
+        context = [
+            f"Name: {self.name}",
+            f"Description: {self.description}",
+            f"Summary: {self.summary}",
+        ]
+        if include_dates:
+            context.append(f"Dates: {self.start_date} - {self.end_date}")
+
+        return join_values(
+            context,
+            delimiter=NL,
+        )
