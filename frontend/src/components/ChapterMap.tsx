@@ -8,13 +8,15 @@ import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 import { desktopViewMinWidth } from 'utils/constants'
 import { Tooltip } from 'components/ui/tooltip'
 
-interface ChapterMapProps {
+const ChapterMap = ({
+  geoLocData,
+  showLocal,
+  style,
+}: {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
   showLocal: boolean
-  style?: React.CSSProperties
-}
-
-const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style }) => {
+  style: React.CSSProperties
+}) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
@@ -82,7 +84,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
 
     map.addLayer(markerClusterGroup)
 
-    if (showLocal && chapters.length) {
+    if (showLocal && chapters.length > 0) {
       const maxNearestChapters = 5
       const localChapters = chapters.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
@@ -91,7 +93,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
       map.setView([nearestChapter.lat, nearestChapter.lng], maxZoom)
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
-
     const isDesktop = window.innerWidth >= desktopViewMinWidth
     if (isDesktop) {
       map.scrollWheelZoom.disable()
@@ -101,14 +102,11 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
           map.scrollWheelZoom.enable()
         }
       }
-
       const handleKeyUp = () => {
         map.scrollWheelZoom.disable()
       }
-
       window.addEventListener('keydown', handleKeyDown)
       window.addEventListener('keyup', handleKeyUp)
-
       return () => {
         window.removeEventListener('keydown', handleKeyDown)
         window.removeEventListener('keyup', handleKeyUp)
@@ -118,19 +116,15 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style })
 
   return (
     <Tooltip
-      content="Press Ctrl while scrolling to zoom"
+      content="Use ctrl + scroll to zoom"
       closeDelay={100}
       openDelay={100}
       showArrow
       positioning={{ placement: 'top' }}
       disabled={window.innerWidth < desktopViewMinWidth}
     >
-      <div style={{ position: 'relative' }}>
-        <div
-          id="chapter-map"
-          className="rounded-lg dark:bg-[#212529]"
-          style={style}
-        />
+      <div className="relative">
+        <div id="chapter-map" style={style} />
       </div>
     </Tooltip>
   )
