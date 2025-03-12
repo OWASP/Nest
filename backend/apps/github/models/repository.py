@@ -129,7 +129,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @property
     def published_releases(self):
         """Return published releases."""
-        return self.releases.filter(is_draft=False, published_at__isnull=False)
+        return self.releases.filter(
+            is_draft=False,
+            is_pre_release=False,
+            published_at__isnull=False,
+        )
 
     @property
     def top_languages(self):
