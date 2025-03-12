@@ -105,7 +105,7 @@ def get_sponsors_data(limit=10):
         logger.exception("Failed to fetch sponsors data via database", extra={"error": str(e)})
         return None
 
-
+@lru_cache
 def get_posts_data(limit=5):
     """Get Posts data."""
     from apps.owasp.models.post import Post
