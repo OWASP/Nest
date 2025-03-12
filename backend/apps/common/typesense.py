@@ -5,6 +5,7 @@ import logging
 import typesense
 from django.apps import apps
 from django.conf import settings
+from typesense.exceptions import TypesenseClientError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -76,12 +77,12 @@ class IndexBase:
         try:
             try:
                 client.collections[self.index_name].delete()
-            except typesense.exceptions.TypesenseClientError:
-                logging.info("Collection %s does not exist. Creating a new one.", self.index_name)
+            except TypesenseClientError as e:
+                logging.info("%s", e)
             client.collections.create(self.schema)
             logging.info("Created collection: %s", self.index_name)
-        except Exception:
-            logging.exception("Some error occured while creating collection")
+        except TypesenseClientError:
+            logging.exception("Error while creating collection %s", self.index_name)
 
     def populate_collection(self):
         """Populate Typesense collection with data from the database."""
@@ -103,9 +104,9 @@ class IndexBase:
             errors = [item["error"] for item in response if "error" in item]
             if errors:
                 logging.info("Errors while populating '%s': %s", self.index_name, errors)
-            logging.info("Populated '%s' with %d records", self.index_name, len(response))
-        except Exception:
-            logging.exception("Error populating")
+            logging.info("Populated '%s'", self.index_name)
+        except TypesenseClientError:
+            logging.exception("Error while populating '%s'", self.index_name)
 
     def prepare_document(self, obj):
         """Convert model instance to a dictionary for Typesense."""

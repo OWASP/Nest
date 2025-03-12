@@ -5,6 +5,7 @@ import json
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from typesense.exceptions import TypesenseClientError
 
 from apps.common.typesense import Typesense
 from apps.common.utils import get_geolocation, get_user_ip_address
@@ -82,7 +83,7 @@ def typesense_search(request):
 
         return JsonResponse(result)
 
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypesenseClientError):
         return JsonResponse(
             {"error": "An internal error occurred. Please try again later."},
             status=500,

@@ -1,6 +1,7 @@
 """A command to populate all Typesense indexes with database data."""
 
 from django.core.management.base import BaseCommand
+from typesense.exceptions import TypsesenseClientError
 
 from apps.common.typesense import REGISTERED_INDEXES
 
@@ -15,5 +16,5 @@ class Command(BaseCommand):
             try:
                 index_instance.populate_collection()
                 self.stdout.write(self.style.SUCCESS(f"Successfully populated '{index_name}'"))
-            except (ConnectionError, TimeoutError, ValueError) as e:
+            except TypsesenseClientError as e:
                 self.stdout.write(self.style.ERROR(f"Failed to populate '{index_name}': {e}"))
