@@ -1,5 +1,5 @@
+import millify from 'millify'
 import { useEffect, useRef, useState } from 'react'
-import millify from "millify"
 
 interface AnimatedCounterProps {
   className?: string
