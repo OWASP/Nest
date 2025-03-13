@@ -187,7 +187,7 @@ class Base(Configuration):
     SECRET_KEY = values.SecretValue()
 
     # https://docs.djangoproject.com/en/5.1/ref/settings/#data-upload-max-number-fields
-    DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = 15000
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
 

@@ -28,7 +28,8 @@ test.describe('Home Page', () => {
   test('should have new chapters', async ({ page }) => {
     await expect(getFirstHeading(page, 'New Chapters')).toBeVisible()
     await expect(page.getByRole('link', { name: 'chapter 1' })).toBeVisible()
-    await expect(page.getByText('Feb 20,').first()).toBeVisible()
+    await expect(page.getByText('Chapter Leader1,').first()).toBeVisible()
+    await expect(page.getByText('Feb 20, 2025').first()).toBeVisible()
     await page.getByRole('link', { name: 'chapter 1' }).click()
     expect(page.url()).toContain('chapters/chapter-1')
   })
@@ -36,7 +37,8 @@ test.describe('Home Page', () => {
   test('should have new projects', async ({ page }) => {
     await expect(getFirstHeading(page, 'New Projects')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 1' })).toBeVisible()
-    await expect(page.getByText('Jan 1,').first()).toBeVisible()
+    await expect(page.getByText('Project Leader1,').first()).toBeVisible()
+    await expect(page.getByText('Dec 6, 2024').first()).toBeVisible()
     await page.getByRole('link', { name: 'Project 1' }).click()
     expect(page.url()).toContain('projects/project-1')
   })

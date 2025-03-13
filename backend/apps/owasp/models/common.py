@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import yaml
 from django.db import models
 from django.db.models import Sum
+from requests.exceptions import RequestException
 
 from apps.common.open_ai import OpenAi
 from apps.github.constants import (
@@ -40,6 +41,9 @@ class RepositoryBasedEntityModel(models.Model):
     )
     is_active = models.BooleanField(verbose_name="Is active", default=True)
 
+    leaders_raw = models.JSONField(
+        verbose_name="Entity leaders list", default=list, blank=True, null=True
+    )
     tags = models.JSONField(verbose_name="OWASP metadata tags", default=list)
     topics = models.JSONField(
         verbose_name="GitHub repository topics", default=list, blank=True, null=True
@@ -63,6 +67,16 @@ class RepositoryBasedEntityModel(models.Model):
         return f"https://github.com/owasp/{self.key}"
 
     @property
+    def leaders_md_raw_url(self):
+        """Return entity's raw leaders.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/leaders.md"
+            if self.owasp_repository
+            else None
+        )
+
+    @property
     def owasp_name(self):
         """Get OWASP name."""
         return self.name if self.name.startswith("OWASP ") else f"OWASP {self.name}"
@@ -79,6 +93,9 @@ class RepositoryBasedEntityModel(models.Model):
 
     def from_github(self, field_mapping, repository):
         """Update instance based on GitHub repository data."""
+        # Get leaders.
+        self.leaders_raw = self.get_leaders()
+
         # Normalize tags.
         self.tags = (
             [tag.strip(", ") for tag in self.tags.split("," if "," in self.tags else " ")]
@@ -126,6 +143,34 @@ class RepositoryBasedEntityModel(models.Model):
             else None
         )
 
+    def get_leaders(self):
+        """Get leaders from leaders.md file on GitHub."""
+        leaders = []
+
+        try:
+            content = get_repository_file_content(self.leaders_md_raw_url)
+        except (RequestException, ValueError) as e:
+            logger.exception(
+                "Failed to fetch leaders.md file",
+                extra={"URL": self.leaders_md_raw_url, "error": str(e)},
+            )
+            return leaders
+
+        if not content:
+            return leaders
+
+        try:
+            for line in content.split("\n"):
+                logger.debug("Processing line: %s", line)
+                # Match both standard Markdown list items with links and variations.
+                leaders.extend(re.findall(r"\*\s*\[([^\]]+)\](?:\([^)]*\))?", line))
+        except AttributeError:
+            logger.exception(
+                "Unable to parse leaders.md content", extra={"URL": self.leaders_md_raw_url}
+            )
+
+        return sorted(leaders)
+
     def get_top_contributors(self, repositories=()):
         """Get top contributors."""
         return [
@@ -153,9 +198,6 @@ class GenericEntityModel(models.Model):
     class Meta:
         abstract = True
 
-    leaders_raw = models.JSONField(
-        verbose_name="Entity leaders list", default=list, blank=True, null=True
-    )
     related_urls = models.JSONField(
         verbose_name="Entity related URLs", default=list, blank=True, null=True
     )
