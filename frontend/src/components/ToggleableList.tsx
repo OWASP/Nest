@@ -14,13 +14,12 @@ const ToggleableList = ({
   limit?: number
 }) => {
   const [showAll, setShowAll] = useState(false)
+  const navigate = useNavigate()
 
   const toggleShowAll = () => setShowAll(!showAll)
   const handleButtonClick = ({ item }) => {
     navigate(`/projects?q=${encodeURIComponent(item)}`)
   }
-  const navigate = useNavigate()
-
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
       <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
