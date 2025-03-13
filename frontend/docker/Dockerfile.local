@@ -25,7 +25,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends && \
     npm install -g pnpm
 
 COPY --from=builder --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
-RUN chmod -R a-w /home/owasp/node_modules
 
 EXPOSE 3000
 

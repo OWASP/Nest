@@ -63,8 +63,6 @@ class Command(BaseCommand):
                 else:
                     logger.info("Skipped related URL %s", verified_url)
 
-                chapter.leaders_raw = scraper.get_leaders()
-
             chapter.invalid_urls = sorted(invalid_urls)
             chapter.related_urls = sorted(related_urls)
 

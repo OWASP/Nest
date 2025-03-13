@@ -7,6 +7,7 @@ import {
   faFileCode,
   faMapMarkerAlt,
   faTag,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -17,6 +18,7 @@ import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
+import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
@@ -188,6 +190,12 @@ export default function Home() {
                       <span>{chapter.suggestedLocation}</span>
                     </div>
                   </div>
+                  {chapter.leaders.length > 0 && (
+                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
+                      <span>{chapter.leaders.join(', ')}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -211,11 +219,15 @@ export default function Home() {
                         icon={getProjectIcon(project.type) as IconProp}
                         className="mr-2 h-4 w-4"
                       />
-                      <span>
-                        {project.type.charAt(0).toUpperCase() + project.type.slice(1).toLowerCase()}
-                      </span>
+                      <span>{capitalize(project.type)}</span>
                     </div>
                   </div>
+                  {project.leaders.length > 0 && (
+                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
+                      <span>{project.leaders.join(', ')}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

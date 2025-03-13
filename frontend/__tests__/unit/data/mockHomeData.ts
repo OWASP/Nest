@@ -1,12 +1,11 @@
 export const mockGraphQLData = {
   recentProjects: [
     {
-      name: 'OWASP GameSec Framework',
-      type: 'documentation',
       createdAt: '2024-12-06T20:46:54+00:00',
       key: 'gamesec-framework',
-      openIssuesCount: 0,
-      repositoriesCount: 1,
+      leaders: ['Project Leader1', 'Project Leader2'],
+      name: 'OWASP GameSec Framework',
+      type: 'documentation',
     },
   ],
   sponsors: [
@@ -17,16 +16,11 @@ export const mockGraphQLData = {
   ],
   recentChapters: [
     {
+      createdAt: '2024-12-14T06:44:54+00:00',
+      key: 'sivagangai',
+      leaders: ['Chapter Leader1', 'Chapter Leader2'],
       name: 'OWASP Sivagangai',
       suggestedLocation: 'Sivagangai, Tamil Nadu, India',
-      region: 'Asia',
-      key: 'sivagangai',
-      createdAt: '2024-12-14T06:44:54+00:00',
-      topContributors: [
-        {
-          name: 'P.ARUN',
-        },
-      ],
     },
   ],
   topContributors: [
@@ -71,6 +65,8 @@ export const mockGraphQLData = {
       endDate: '2025-02-28',
       name: 'Event 1',
       startDate: '2025-02-27',
+      summary: 'Event Summary',
+      suggestedLocation: 'Location 1',
       url: 'https://nest.owasp.org/events/event-1',
     },
   ],
