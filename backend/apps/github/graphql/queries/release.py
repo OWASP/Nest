@@ -14,4 +14,8 @@ class ReleaseQuery(BaseQuery):
 
     def resolve_recent_releases(root, info, limit):
         """Resolve recent release."""
-        return Release.objects.order_by("-created_at")[:limit]
+        return Release.objects.filter(
+            is_draft=False,
+            is_pre_release=False,
+            published_at__isnull=False,
+        ).order_by("-published_at")[:limit]

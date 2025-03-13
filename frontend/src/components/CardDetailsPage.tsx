@@ -1,6 +1,7 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
+import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ChapterMap from 'components/ChapterMap'
@@ -31,9 +32,7 @@ const DetailsCard = ({
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 mt-4 text-4xl font-bold">
-          {title && title[0].toUpperCase() + title.slice(1)}
-        </h1>
+        <h1 className="mb-6 mt-4 text-4xl font-bold">{title && capitalize(title)}</h1>
         <p className="mb-6 text-xl">{description}</p>
         {!is_active && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
@@ -43,7 +42,7 @@ const DetailsCard = ({
         </SecondaryCard>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            title={`${type[0].toUpperCase() + type.slice(1)} Details`}
+            title={`${capitalize(type)} Details`}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
@@ -69,11 +68,11 @@ const DetailsCard = ({
                 geoLocData={geolocationData ? [geolocationData] : []}
                 showLocal={true}
                 style={{
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                   height: '100%',
                   width: '100%',
                   zIndex: '0',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                 }}
               />
             </div>
