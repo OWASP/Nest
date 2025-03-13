@@ -7,7 +7,7 @@ from django.db import models
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.core.models.prompt import Prompt
-from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
+from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.committee import ActiveCommitteeManager
 from apps.owasp.models.mixins.committee import CommitteeIndexMixin
 
@@ -15,7 +15,6 @@ from apps.owasp.models.mixins.committee import CommitteeIndexMixin
 class Committee(
     BulkSaveModel,
     CommitteeIndexMixin,
-    GenericEntityModel,
     RepositoryBasedEntityModel,
     TimestampedModel,
 ):
