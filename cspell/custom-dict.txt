@@ -79,6 +79,7 @@ tiktok
 Truncator
 tsc
 Twitterbot
+Typsesense
 usefixtures
 Whistleblower
 winsrdf
