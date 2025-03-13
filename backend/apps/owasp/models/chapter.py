@@ -10,7 +10,7 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values
 from apps.core.models.prompt import Prompt
-from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
+from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.chapter import ActiveChapterManager
 from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 
@@ -18,7 +18,6 @@ from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 class Chapter(
     BulkSaveModel,
     ChapterIndexMixin,
-    GenericEntityModel,
     RepositoryBasedEntityModel,
     TimestampedModel,
 ):
