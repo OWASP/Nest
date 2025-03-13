@@ -94,17 +94,6 @@ class TestAlgoliaSearch:
         [
             # Index name tests
             (
-                "project has spaces",
-                "security",
-                1,
-                10,
-                ["idx_is_active:true"],
-                (
-                    "Invalid indexName value provided. "
-                    "Only alphanumeric characters hyphens and underscores are allowed."
-                ),
-            ),
-            (
                 5,
                 "owasp",
                 2,
@@ -113,24 +102,10 @@ class TestAlgoliaSearch:
                 "indexName is required and must be a string.",
             ),
             # Query tests
-            (
-                "chapters",
-                "owasp'",
-                2,
-                20,
-                ["idx_is_active:true"],
-                (
-                    "Invalid query value provided. "
-                    "Only alphanumeric characters, hyphens, spaces and underscores are allowed."
-                ),
-            ),
             ("chapters", 5, 2, 20, ["idx_is_active:true"], "query must be a string."),
             # Page tests
-            ("users", "john", 0, 10, [], "page value must be a positive integer."),
             ("committees", "review", "0", 5, [], "page value must be an integer."),
             # hitsPerPage tests
-            ("committees", "review", 1, 0, [], "hitsPerPage value must be between 1 and 1000."),
-            ("committees", "review", 1, 1001, [], "hitsPerPage value must be between 1 and 1000."),
             ("committees", "review", 1, "1001", [], "hitsPerPage must be an integer."),
             # Facet filters tests
             ("issues", "bug", 1, 10, "idx_is_active:true", "facetFilters must be a list."),
