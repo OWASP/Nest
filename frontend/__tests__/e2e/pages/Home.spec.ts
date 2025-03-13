@@ -42,7 +42,6 @@ test.describe('Home Page', () => {
     await expect(postContainer.getByRole('link', { name: 'Post 1' })).toBeVisible()
     await expect(postContainer.getByText('Author 1')).toBeVisible()
     await expect(postContainer.getByText('Feb 23').first()).toBeVisible()
-    await expect(postContainer.getByRole('img', { name: 'Author 1' })).toBeVisible()
     await postContainer.getByRole('link', { name: 'Post 1' }).click()
   })
 

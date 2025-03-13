@@ -12,6 +12,6 @@ class PostQuery(BaseQuery):
 
     recent_posts = graphene.List(PostNode, limit=graphene.Int(default_value=5))
 
-    def resolve_recent_posts(root, info, limit=5):
+    def resolve_recent_posts(root, info, limit=6):
         """Return the 5 most recent posts."""
         return Post.recent_posts()[:limit]

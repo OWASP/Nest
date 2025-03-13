@@ -19,7 +19,7 @@ class Post(BulkSaveModel, TimestampedModel):
     author_name = models.CharField(verbose_name="Author name", max_length=100)
     published_at = models.DateTimeField(verbose_name="Publication date")
     title = models.CharField(verbose_name="Title", max_length=200)
-    url = models.URLField(verbose_name="URL")
+    url = models.URLField(verbose_name="URL", unique=True)
 
     def __str__(self):
         """Return human-readable representation."""

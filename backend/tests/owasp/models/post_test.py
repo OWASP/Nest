@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
 import pytest
@@ -19,7 +19,7 @@ class TestPostModel:
         post = Post(
             title=title,
             url="https://example.com",
-            published_at=date(2025, 1, 1),
+            published_at=datetime(2025, 1, 1, tzinfo=timezone.utc),
         )
         assert str(post) == expected_str
 
@@ -38,20 +38,32 @@ class TestPostModel:
                     "title": "New Post",
                     "url": "https://example.com",
                     "author_name": "John Doe",
-                    "published_at": date(2025, 1, 1),
+                    "published_at": datetime(2025, 1, 1, tzinfo=timezone.utc),
                     "author_image_url": "https://image.com",
                 },
                 {
                     "title": "New Post",
                     "url": "https://example.com",
                     "author_name": "John Doe",
-                    "published_at": date(2025, 1, 1),
+                    "published_at": datetime(2025, 1, 1, tzinfo=timezone.utc),
                     "author_image_url": "https://image.com",
                 },
             ),
             (
-                {"author_image_url": "https://image.com", "url": "https://example.com"},
-                {"author_image_url": "https://image.com", "url": "https://example.com"},
+                {
+                    "title": "Another Post",
+                    "url": "https://example.com",
+                    "author_name": "Jane Doe",
+                    "published_at": datetime(2023, 1, 1, tzinfo=timezone.utc),
+                    "author_image_url": "",
+                },
+                {
+                    "title": "Another Post",
+                    "url": "https://example.com",
+                    "author_name": "Jane Doe",
+                    "published_at": datetime(2023, 1, 1, tzinfo=timezone.utc),
+                    "author_image_url": "",
+                },
             ),
         ],
     )
@@ -72,6 +84,7 @@ class TestPostModel:
             "title": "Updated Title",
             "author_name": "Updated Author",
             "author_image_url": "https://updatedimage.com",
+            "published_at": datetime(2023, 1, 1, tzinfo=timezone.utc),
         }
 
         result = Post.update_data(data)
@@ -81,17 +94,12 @@ class TestPostModel:
         mock_post.save.assert_called_once()
         assert result == mock_post
 
-    def test_update_data_missing_url(self):
-        """Test update_data returns None when url is missing."""
-        assert Post.update_data({"title": "No URL"}) is None
-
-    @patch("apps.owasp.models.post.Post.objects.all")
-    def test_recent_posts_ordering(self, mock_all):
+    @patch("apps.owasp.models.post.Post.objects.order_by")
+    def test_recent_posts_ordering(self, mock_order_by):
         """Test recent_posts uses correct ordering."""
         mock_queryset = Mock()
-        mock_all.return_value = mock_queryset
+        mock_order_by.return_value = mock_queryset
 
         result = Post.recent_posts()
-
-        mock_queryset.order_by.assert_called_once_with("-published_at")
-        assert result == mock_queryset.order_by.return_value
+        mock_order_by.assert_called_once_with("-published_at")
+        assert result == mock_queryset

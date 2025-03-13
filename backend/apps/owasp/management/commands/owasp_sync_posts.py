@@ -15,7 +15,7 @@ from apps.owasp.models.post import Post
 class Command(BaseCommand):
     def get_author_image_url(self, author_image_url):
         """Return URL for author image."""
-        return f"{OWASP_WEBSITE_URL}/{author_image_url}" if author_image_url else ""
+        return f"{OWASP_WEBSITE_URL}{author_image_url}" if author_image_url else ""
 
     def get_blog_url(self, path):
         """Return OWASP blog URL for a given path."""

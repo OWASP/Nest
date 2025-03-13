@@ -10,7 +10,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       openIssuesCount
       repositoriesCount
     }
-    recentPosts(limit: 5) {
+    recentPosts(limit: 6) {
       authorName
       authorImageUrl
       publishedAt

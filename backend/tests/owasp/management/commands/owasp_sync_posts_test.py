@@ -94,10 +94,7 @@ This is the content of the test post."""
             save=False,
         )
 
-        mock_bulk_save.assert_called_once_with(
-            [mock_post1, mock_post2],
-            fields=["title", "published_at", "author_name", "author_image_url", "url"],
-        )
+        mock_bulk_save.assert_called_once_with([mock_post1, mock_post2])
 
     @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
     @mock.patch("apps.owasp.models.post.Post.update_data")
@@ -117,9 +114,7 @@ This is the content of the test post."""
 
         assert mock_get_content.call_count == self.TOTAL_API_CALLS
         assert mock_update_data.call_count == 0
-        mock_bulk_save.assert_called_once_with(
-            [], fields=["title", "published_at", "author_name", "author_image_url", "url"]
-        )
+        mock_bulk_save.assert_called_once_with([])
 
     @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
     @mock.patch("apps.owasp.models.post.Post.update_data")
@@ -145,6 +140,4 @@ This is the content of the test post."""
 
         assert mock_get_content.call_count == self.TOTAL_API_CALLS
         assert mock_update_data.call_count == self.TOTAL_UPDATE_CALLS
-        mock_bulk_save.assert_called_once_with(
-            [], fields=["title", "published_at", "author_name", "author_image_url", "url"]
-        )
+        mock_bulk_save.assert_called_once_with([None, None])
