@@ -23,9 +23,9 @@ const ToggleableList = ({
         {(showAll ? items : items.slice(0, limit)).map((item, index) => (
           <span
             key={index}
-            className="rounded-lg border border-gray-400 px-2 py-1 text-sm dark:border-gray-300"
+            className="rounded-lg border border-gray-400 px-3 py-1 text-sm dark:border-gray-300 hover:scale-105 transition-transform hover:bg-gray-200 dark:hover:bg-gray-700"
           >
-            {item}
+            <a className="hover:underline" href={`/projects?q=${encodeURIComponent(item)}`} target="_blank">{item}</a>
           </span>
         ))}
       </div>
