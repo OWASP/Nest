@@ -8,6 +8,7 @@ import {
   faMapMarkerAlt,
   faTag,
   faUsers,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -273,6 +274,36 @@ export default function Home() {
             )}
           />
         </div>
+        <SecondaryCard title="Recent News & Opinions">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+            {data.recentPosts.map((post) => (
+              <div
+                key={post.title}
+                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                data-testid="post-container"
+              >
+                <h3 className="mb-1 truncate text-lg font-semibold text-blue-500">
+                  <a
+                    href={post.url}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {post.title}
+                  </a>
+                </h3>
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(post.publishedAt)}</span>
+                  </div>
+                  <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
+                  <span>{post.authorName}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
         <div className="grid gap-6 md:grid-cols-4">
           {counterData.map((stat, index) => (
             <SecondaryCard key={index} className="text-center">
