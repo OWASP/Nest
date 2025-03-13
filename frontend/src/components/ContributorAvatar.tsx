@@ -40,7 +40,7 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
 
   return (
     <Tooltip
-      id={`avatar-tooltip-${login}-${uniqueKey}`}
+      id={`avatar-tooltip-${login}-${uniqueKey}-${repositoryInfo}`}
       content={`${contributionsCount} contributions${repositoryInfo} by ${displayName}`}
       openDelay={100}
       closeDelay={100}
