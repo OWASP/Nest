@@ -41,9 +41,6 @@ class RepositoryBasedEntityModel(models.Model):
     )
     is_active = models.BooleanField(verbose_name="Is active", default=True)
 
-    leaders_raw = models.JSONField(
-        verbose_name="Entity leaders list", default=list, blank=True, null=True
-    )
     tags = models.JSONField(verbose_name="OWASP metadata tags", default=list)
     topics = models.JSONField(
         verbose_name="GitHub repository topics", default=list, blank=True, null=True
@@ -51,6 +48,16 @@ class RepositoryBasedEntityModel(models.Model):
 
     created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
     updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
+
+    leaders_raw = models.JSONField(
+        verbose_name="Entity leaders list", default=list, blank=True, null=True
+    )
+    related_urls = models.JSONField(
+        verbose_name="Entity related URLs", default=list, blank=True, null=True
+    )
+    invalid_urls = models.JSONField(
+        verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
+    )
 
     # FKs.
     owasp_repository = models.ForeignKey(
@@ -171,40 +178,6 @@ class RepositoryBasedEntityModel(models.Model):
 
         return sorted(leaders)
 
-    def get_top_contributors(self, repositories=()):
-        """Get top contributors."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["total_contributions"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.by_humans()
-            .filter(repository__in=repositories)
-            .values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-            )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
-
-
-class GenericEntityModel(models.Model):
-    """Generic entity model."""
-
-    class Meta:
-        abstract = True
-
-    related_urls = models.JSONField(
-        verbose_name="Entity related URLs", default=list, blank=True, null=True
-    )
-    invalid_urls = models.JSONField(
-        verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
-    )
-
     def get_related_url(self, url, exclude_domains=(), include_domains=()):
         """Get OWASP entity related URL."""
         if (
@@ -226,3 +199,23 @@ class GenericEntityModel(models.Model):
             return f"https://github.com/{match.group(1)}".lower()
 
         return url
+
+    def get_top_contributors(self, repositories=()):
+        """Get top contributors."""
+        return [
+            {
+                "avatar_url": tc["user__avatar_url"],
+                "contributions_count": tc["total_contributions"],
+                "login": tc["user__login"],
+                "name": tc["user__name"],
+            }
+            for tc in RepositoryContributor.objects.by_humans()
+            .filter(repository__in=repositories)
+            .values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+            )
+            .annotate(total_contributions=Sum("contributions_count"))
+            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
+        ]
