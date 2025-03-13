@@ -1,9 +1,9 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
-import { toaster } from 'components/ui/toaster'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
+import { toaster } from 'components/ui/toaster'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
 

@@ -12,7 +12,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
-import { toaster } from 'components/ui/toaster'
 import { useEffect, useState } from 'react'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
@@ -29,6 +28,7 @@ import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
+import { toaster } from 'components/ui/toaster'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)

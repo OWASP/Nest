@@ -1,10 +1,10 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-import { toaster } from 'components/ui/toaster'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
+import { toaster } from 'components/ui/toaster'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

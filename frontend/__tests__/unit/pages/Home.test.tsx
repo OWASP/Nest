@@ -2,9 +2,9 @@ import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { toaster } from 'components/ui/toaster'
 import { Home } from 'pages'
 import { render } from 'wrappers/testUtil'
+import { toaster } from 'components/ui/toaster'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

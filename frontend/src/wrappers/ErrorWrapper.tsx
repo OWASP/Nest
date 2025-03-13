@@ -1,8 +1,8 @@
 import { Button } from '@chakra-ui/react'
 import * as Sentry from '@sentry/react'
-import { toaster } from 'components/ui/toaster'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toaster } from 'components/ui/toaster'
 
 interface ErrorDisplayProps {
   statusCode: number

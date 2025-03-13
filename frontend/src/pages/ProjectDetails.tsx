@@ -8,7 +8,6 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
-import { toaster } from 'components/ui/toaster'
 import millify from 'millify'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
@@ -20,6 +19,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()

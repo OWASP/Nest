@@ -7,7 +7,6 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_REPOSITORY_DATA } from 'api/queries/repositoryQueries'
-import { toaster } from 'components/ui/toaster'
 import millify from 'millify'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -17,6 +16,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
