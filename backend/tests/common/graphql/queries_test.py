@@ -1,8 +1,10 @@
 """Test cases for BaseQuery and GraphQl Query."""
 
 import pytest
+from graphene import ObjectType
 from graphene.test import Client
 
+from apps.common.graphql.queries import BaseQuery
 from settings.graphql import schema
 
 Expected_Recent_Issues_Releases_Distinct_TRUE_Counter = 2
@@ -40,3 +42,11 @@ def test_recent_issues_releases_without_distinct(client):
         len(result["data"]["recentIssuesReleases"])
         == Expected_Recent_Issues_Releases_Distinct_FALSE_Counter
     )
+
+
+class TestBaseQuery:
+    """Test cases for BaseQuery class."""
+
+    def test_base_query_inheritance(self):
+        """Test if BaseQuery inherits from ObjectType."""
+        assert issubclass(BaseQuery, ObjectType)
