@@ -11,6 +11,7 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
+import { pluralize } from 'utils/pluralize'
 
 const DetailsCard = ({
   title,
@@ -99,7 +100,7 @@ const DetailsCard = ({
                   {item?.commentsCount ? (
                     <>
                       <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                      <span>{item.commentsCount} comments</span>
+                      <span>{item.commentsCount} {pluralize(item.commentsCount, 'comment', 'comments')}</span>
                     </>
                   ) : null}
                 </div>
