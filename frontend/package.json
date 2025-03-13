@@ -60,7 +60,7 @@
     "@playwright/test": "^1.51.0",
     "@swc/core": "^1.11.9",
     "@swc/jest": "^0.2.37",
-    "@tailwindcss/postcss": "^4.0.13",
+    "@tailwindcss/postcss": "^4.0.14",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
