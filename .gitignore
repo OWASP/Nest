@@ -10,6 +10,7 @@ __pycache__
 .mypy_cache
 .npm/
 .pnpm-store/
+.psql_history
 .pytest_cache
 .python_history
 .python-version
