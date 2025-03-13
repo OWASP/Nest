@@ -128,6 +128,7 @@ export default function Home() {
           </div>
           <div className="mx-auto mb-8 flex max-w-2xl justify-center">
             <MultiSearchBar
+              eventData={data.upcomingEvents}
               isLoaded={true}
               placeholder="Search the OWASP community"
               indexes={['chapters', 'projects', 'users']}
