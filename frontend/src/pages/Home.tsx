@@ -12,7 +12,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
-import { toast } from 'hooks/useToast'
+import { toaster } from 'components/ui/toaster'
 import { useEffect, useState } from 'react'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
@@ -43,10 +43,10 @@ export default function Home() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }

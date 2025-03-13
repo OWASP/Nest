@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client'
 import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { GET_SNAPSHOT_DETAILS } from 'api/queries/snapshotQueries'
-import { toast } from 'hooks/useToast'
+import { toaster } from 'components/ui/toaster'
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChapterTypeGraphQL } from 'types/chapter'
@@ -34,10 +34,10 @@ const SnapshotDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }

@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
 import { GET_CHAPTER_DATA } from 'api/queries/chapterQueries'
-import { toast } from 'hooks/useToast'
+import { toaster } from 'components/ui/toaster'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ChapterTypeGraphQL } from 'types/chapter'
@@ -26,10 +26,10 @@ export default function ChapterDetailsPage() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }

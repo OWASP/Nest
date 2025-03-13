@@ -7,7 +7,7 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_REPOSITORY_DATA } from 'api/queries/repositoryQueries'
-import { toast } from 'hooks/useToast'
+import { toaster } from 'components/ui/toaster'
 import millify from 'millify'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -31,10 +31,10 @@ const RepositoryDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }

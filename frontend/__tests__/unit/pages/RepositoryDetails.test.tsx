@@ -1,18 +1,22 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
-import { toast } from 'hooks/useToast'
+import { toaster } from 'components/ui/toaster'
 import { RepositoryDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
+
+jest.mock('components/ui/toaster', () => ({
+  toaster: {
+    create: jest.fn(),
+  },
+}))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ repositoryKey: 'test-repository' }),
@@ -83,10 +87,10 @@ describe('RepositoryDetailsPage', () => {
 
     await waitFor(() => screen.getByText('Repository not found'))
     expect(screen.getByText('Repository not found')).toBeInTheDocument()
-    expect(toast).toHaveBeenCalledWith({
+    expect(toaster.create).toHaveBeenCalledWith({
       description: 'Unable to complete the requested operation.',
       title: 'GraphQL Request Failed',
-      variant: 'destructive',
+      type: 'error',
     })
   })
 
