@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
+import { pluralize } from 'utils/pluralize'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
@@ -11,7 +12,6 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
-import { pluralize } from 'utils/pluralize'
 
 const DetailsCard = ({
   title,
@@ -100,7 +100,9 @@ const DetailsCard = ({
                   {item?.commentsCount ? (
                     <>
                       <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                      <span>{item.commentsCount} {pluralize(item.commentsCount, 'comment', 'comments')}</span>
+                      <span>
+                        {item.commentsCount} {pluralize(item.commentsCount, 'comment')}
+                      </span>
                     </>
                   ) : null}
                 </div>
