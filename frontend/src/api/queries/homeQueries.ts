@@ -3,12 +3,13 @@ import { gql } from '@apollo/client'
 export const GET_MAIN_PAGE_DATA = gql`
   query GetMainPageData {
     recentProjects(limit: 5) {
-      name
-      type
       createdAt
       key
+      leaders
+      name
       openIssuesCount
       repositoriesCount
+      type
     }
     recentPosts(limit: 6) {
       authorName
@@ -18,14 +19,11 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     recentChapters(limit: 5) {
-      name
       createdAt
-      suggestedLocation
-      region
       key
-      topContributors {
-        name
-      }
+      leaders
+      name
+      suggestedLocation
     }
     topContributors(limit: 18) {
       name

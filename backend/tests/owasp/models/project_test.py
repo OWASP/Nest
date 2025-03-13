@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from apps.github.models.repository import Repository
+from apps.github.models.user import User
 from apps.owasp.models.project import Project
 
 
@@ -105,6 +106,8 @@ class TestProjectModel:
         repository_mock.title = "Nest"
         repository_mock.pitch = "Nest Pitch"
         repository_mock.tags = "react, python"
+        repository_mock.leaders = ["Leader1", "Leader2"]
+        repository_mock.owner = User(name="OWASP")
 
         project = Project()
 
