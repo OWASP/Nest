@@ -1,3 +1,19 @@
+FROM node:22-slim AS builder
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apt-get update && apt-get install -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /home/owasp && \
+    chown -R node:node /home/owasp && \
+    npm install -g pnpm
+
+WORKDIR /home/owasp
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm config set store-dir /home/owasp/.local/share/pnpm/store/v10 --global && \
+    pnpm install
+
 FROM node:22-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -7,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends && \
     mkdir -p /home/owasp && \
     chown -R node:node /home/owasp && \
     npm install -g pnpm
+
+COPY --from=builder --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
 
 EXPOSE 3000
 

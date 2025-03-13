@@ -22,6 +22,7 @@ enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
 	owasp-enrich-committees \
+	owasp-enrich-events \
 	owasp-enrich-projects
 
 load-index:
@@ -78,6 +79,10 @@ owasp-enrich-chapters:
 owasp-enrich-committees:
 	@echo "Enriching OWASP committees"
 	@CMD="python manage.py owasp_enrich_committees" $(MAKE) exec-backend-command
+
+owasp-enrich-events:
+	@echo "Enriching OWASP events"
+	@CMD="python manage.py owasp_enrich_events" $(MAKE) exec-backend-command
 
 owasp-enrich-projects:
 	@echo "Enriching OWASP projects"

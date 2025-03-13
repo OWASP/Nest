@@ -91,6 +91,7 @@ const ChaptersPage = () => {
         {chapters.length > 0 && (
           <ChapterMap
             geoLocData={searchQuery ? chapters : geoLocData}
+            showLocal={true}
             style={{ height: '400px', width: '100%', zIndex: '0' }}
           />
         )}

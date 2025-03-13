@@ -10,14 +10,13 @@ from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
 from apps.github.models.release import Release
-from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
+from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 
 
 class Project(
     BulkSaveModel,
-    GenericEntityModel,
     ProjectIndexMixin,
     RepositoryBasedEntityModel,
     TimestampedModel,
