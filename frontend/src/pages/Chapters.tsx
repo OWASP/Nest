@@ -32,8 +32,8 @@ const ChaptersPage = () => {
       const searchParams = {
         indexName: 'chapters',
         query: '',
-        currentPage: 1,
-        hitsPerPage: 1000,
+        currentPage,
+        hitsPerPage: currentPage === 1 ? 1000 : 25,
       }
       const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
         searchParams.indexName,
@@ -44,7 +44,7 @@ const ChaptersPage = () => {
       setGeoLocData(data.hits)
     }
     fetchData()
-  }, [])
+  }, [currentPage])
 
   const navigate = useNavigate()
   const renderChapterCard = (chapter: ChapterTypeAlgolia) => {
