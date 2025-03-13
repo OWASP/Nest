@@ -65,6 +65,7 @@ class Command(BaseCommand):
 
             chapter.invalid_urls = sorted(invalid_urls)
             chapter.related_urls = sorted(related_urls)
+
             chapters.append(chapter)
 
             time.sleep(0.5)

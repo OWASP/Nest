@@ -78,7 +78,6 @@ class Chapter(
         field_mapping = {
             "country": "country",
             "currency": "currency",
-            "leaders_raw": "leaders",
             "level": "level",
             "meetup_group": "meetup-group",
             "name": "title",

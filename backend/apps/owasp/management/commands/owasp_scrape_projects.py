@@ -77,6 +77,7 @@ class Command(BaseCommand):
 
             project.invalid_urls = sorted(invalid_urls)
             project.related_urls = sorted(related_urls)
+
             projects.append(project)
 
             time.sleep(0.5)

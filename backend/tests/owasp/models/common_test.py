@@ -27,9 +27,10 @@ class TestRepositoryBasedEntityModel:
         model = EntityModel()
         repository = MagicMock()
         repository.name = "test-repo"
+        model.repository = repository
 
         with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
-            leaders = model.get_leaders(repository)
+            leaders = model.get_leaders()
 
         assert leaders == expected_leaders
 

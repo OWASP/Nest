@@ -187,7 +187,6 @@ class Project(
         """Update instance based on GitHub repository data."""
         field_mapping = {
             "description": "pitch",
-            "leaders_raw": "leaders",
             "name": "title",
             "tags": "tags",
         }

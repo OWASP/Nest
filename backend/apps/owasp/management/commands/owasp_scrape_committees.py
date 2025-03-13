@@ -22,7 +22,7 @@ class Command(BaseCommand):
         active_committees = Committee.active_committees.order_by("-created_at")
         active_committees_count = active_committees.count()
         offset = options["offset"]
-        chapters = []
+        committees = []
         for idx, committee in enumerate(active_committees[offset:]):
             prefix = f"{idx + offset + 1} of {active_committees_count}"
             print(f"{prefix:<10} {committee.owasp_url}")
@@ -66,9 +66,9 @@ class Command(BaseCommand):
             committee.invalid_urls = sorted(invalid_urls)
             committee.related_urls = sorted(related_urls)
 
-            chapters.append(committee)
+            committees.append(committee)
 
             time.sleep(0.5)
 
         # Bulk save data.
-        Committee.bulk_save(chapters)
+        Committee.bulk_save(committees)
