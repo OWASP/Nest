@@ -8,18 +8,16 @@ export type MainPageData = {
   recentReleases: ProjectReleaseType[]
   upcomingEvents: EventType[]
   recentChapters: {
-    name: string
     createdAt: string
     key: string
-    region: string
+    leaders: string[]
+    name: string
     suggestedLocation: string
-    topContributors: {
-      name: string
-    }[]
   }[]
   recentProjects: {
     createdAt: string
     key: string
+    leaders: string[]
     name: string
     openIssuesCount: number
     repositoriesCount: number

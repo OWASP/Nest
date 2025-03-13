@@ -55,16 +55,6 @@ class OwaspScraper:
             else self.page_tree.xpath("//div[@class='sidebar']//a/@href")
         )
 
-    def get_leaders(self):
-        """Get leaders."""
-        leaders_header = self.page_tree.xpath("//div[@class='sidebar']//*[@id='leaders']")
-        if leaders_header:
-            leaders_ul = leaders_header[0].getnext()
-            if leaders_ul is not None and leaders_ul.tag == "ul":
-                return sorted(name.strip() for name in leaders_ul.xpath(".//li/a/text()"))
-
-        return []
-
     def verify_url(self, url):
         """Verify URL."""
         location = urlparse(url).netloc.lower()
