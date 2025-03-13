@@ -1,4 +1,4 @@
-"""OWASP app conversation models."""
+"""Slack app conversation model."""
 
 import logging
 from datetime import datetime, timezone
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Conversation(BulkSaveModel, TimestampedModel):
-    """Model representing a Slack conversation (channel or group)."""
+    """conversation model."""
 
     class Meta:
         db_table = "slack_conversations"
@@ -44,6 +44,8 @@ class Conversation(BulkSaveModel, TimestampedModel):
             List of conversation objects to save
 
         """
+        logger.info("Preparing %d conversations from Slack data", len(conversations))
+
         to_save = []
         entity_id_map = {
             conv.entity_id: conv
@@ -61,11 +63,19 @@ class Conversation(BulkSaveModel, TimestampedModel):
             )
         }
 
+        logger.info("Found %d existing conversations in database", len(entity_id_map))
+
+        to_update = 0
+        to_create = 0
+        skipped = 0
+        errors = 0
+
         for conversation in conversations:
             try:
                 channel_id = conversation.get("id")
                 if not channel_id:
                     logger.warning("Found conversation without ID, skipping")
+                    skipped += 1
                     continue
 
                 # Convert Unix timestamp to datetime
@@ -89,37 +99,64 @@ class Conversation(BulkSaveModel, TimestampedModel):
                     for field, value in channel_data.items():
                         setattr(instance, field, value)
                     to_save.append(instance)
+                    to_update += 1
+                    logger.debug(
+                        "Updating existing conversation: %s - %s",
+                        channel_id,
+                        channel_data["name"],
+                    )
                 else:
                     # Create new instance
                     new_conversation = cls(entity_id=channel_id, **channel_data)
                     to_save.append(new_conversation)
+                    to_create += 1
+                    logger.debug(
+                        "Creating new conversation: %s - %s",
+                        channel_id,
+                        channel_data["name"],
+                    )
 
             except KeyError:
                 logger.exception("Missing required field in conversation data")
+                logger.exception("Conversation data: %s", conversation)
+                skipped += 1
+                errors += 1
                 continue
             except Exception:
                 logger.exception(
                     "Error processing conversation %s",
                     conversation.get("id", "unknown"),
                 )
+                skipped += 1
+                errors += 1
                 continue
+
+        logger.info(
+            "Prepared %d conversations to update and %d to create, skipped %d, "
+            "encountered %d errors",
+            to_update,
+            to_create,
+            skipped,
+            errors,
+        )
 
         return to_save
 
+    @staticmethod
+    def bulk_save(conversations, fields=None):
+        """Bulk save conversations."""
+        BulkSaveModel.bulk_save(Conversation, conversations, fields=fields)
+
     @classmethod
     def bulk_save_from_slack(cls, conversations):
-        """Bulk save conversations from Slack API data.
-
-        Args:
-        ----
-            conversations: List of conversation data from Slack API
-
-        Returns:
-        -------
-            int: Number of conversations saved
-
-        """
+        """Bulk save conversations from Slack API data."""
+        logger.info("Starting bulk save from Slack for %d conversations", len(conversations))
         to_save = cls.prepare_from_slack_data(conversations)
+        logger.info("Prepared %d conversations for saving", len(to_save))
+
+        if not to_save:
+            logger.warning("No conversations to save after preparation")
+            return 0
 
         update_fields = [
             "name",
@@ -132,5 +169,11 @@ class Conversation(BulkSaveModel, TimestampedModel):
             "creator_id",
         ]
 
-        cls.bulk_save(cls, to_save, fields=update_fields)
-        return len(to_save)
+        # Save the count before the list is cleared
+        saved_count = len(to_save)
+
+        # Use the static method instead of calling BulkSaveModel directly
+        cls.bulk_save(to_save, fields=update_fields)
+
+        logger.info("Saved %d conversations", saved_count)
+        return saved_count

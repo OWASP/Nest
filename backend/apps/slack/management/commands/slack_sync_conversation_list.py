@@ -1,29 +1,15 @@
-"""Command to sync Slack channels and groups from the OWASP Slack workspace using slack-bolt."""
+"""Command to sync Slack channels and groups from the OWASP Slack workspace."""
 
 import logging
 import time
 
 from django.core.management.base import BaseCommand
-from django.db import transaction
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
+from apps.slack.models.conversation import Conversation
 
 logger = logging.getLogger(__name__)
-
-
-class SlackSyncError(Exception):
-    """Custom exception for Slack sync errors."""
-
-    APP_NOT_CONFIGURED = "Slack app is not configured properly"
-    API_ERROR_FORMAT = "Slack API error: {}"
-
-
-def handle_api_error(error, error_message=None):
-    """Handle API errors consistently."""
-    message = error_message or f"Slack API error: {error}"
-    logger.exception(message)
-    raise SlackSyncError(SlackSyncError.API_ERROR_FORMAT.format(error)) from error
 
 
 class Command(BaseCommand):
@@ -53,107 +39,104 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Execute the command."""
-        from apps.slack.models.conversation import Conversation
+        # Parse command arguments
+        batch_size = options["batch_size"]
+        delay = options["delay"]
+        dry_run = options.get("dry_run", False)
+
+        if dry_run:
+            self.stdout.write(
+                self.style.WARNING("Running in dry-run mode - no database changes will be made")
+            )
 
         try:
-            batch_size = options["batch_size"]
-            delay = options["delay"]
-            dry_run = options.get("dry_run", False)
+            # Get Slack app instance
+            app = SlackConfig.app
+            if not app:
+                logger.error("Slack app is not configured properly")
+                self.stdout.write(self.style.ERROR("Slack app is not configured properly"))
+                return
 
-            if dry_run:
+            # Collect conversations from API
+            all_conversations = self._fetch_all_conversations(app, batch_size, delay)
+
+            # Save conversations to database
+            if not dry_run and all_conversations:
+                self.stdout.write(f"Saving {len(all_conversations)} conversations to database...")
+                saved_count = Conversation.bulk_save_from_slack(all_conversations)
                 self.stdout.write(
-                    self.style.WARNING(
-                        "Running in dry-run mode - no database changes will be made"
+                    self.style.SUCCESS(f"Successfully synced {saved_count} Slack conversations")
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Processed {len(all_conversations)} conversations (dry run)"
                     )
                 )
 
-            count = self.sync_slack_conversations(
-                Conversation,
-                batch_size=batch_size,
-                delay=delay,
-                dry_run=dry_run,
-            )
-
-            self.stdout.write(
-                self.style.SUCCESS(f"Successfully synced {count} Slack conversations")
-            )
+        except SlackApiError as e:
+            error_msg = f"Error calling Slack API: {e}"
+            logger.exception(error_msg)
+            self.stdout.write(self.style.ERROR(error_msg))
         except Exception as e:
             error_msg = f"Failed to sync Slack conversations: {e}"
             logger.exception(error_msg)
             self.stdout.write(self.style.ERROR(error_msg))
-            raise
 
-    def sync_slack_conversations(
-        self, conversation_model, batch_size=200, delay=0.1, dry_run=False
-    ):
-        """Synchronize Slack conversations with the database.
+    def _fetch_all_conversations(self, app, batch_size, delay):
+        """Fetch all conversations from Slack API.
 
         Args:
         ----
-            conversation_model: The Django model to store conversations
-            batch_size: Number of conversations to retrieve per API call
-            delay: Time in seconds to wait between API calls
-            dry_run: If True, only fetch data without modifying the database
+            app: Slack app instance
+            batch_size: Number of conversations to retrieve per request
+            delay: Delay between API requests in seconds
 
         Returns:
         -------
-            int: Total number of conversations processed
+            List of conversation data
 
         """
-        # Use the app from SlackConfig instead of creating a new one
-        app = SlackConfig.app
-
-        if not app:
-            error_msg = SlackSyncError.APP_NOT_CONFIGURED
-            logger.error(error_msg)
-            raise SlackSyncError(error_msg)
-
-        # Pagination variables
+        all_conversations = []
         next_cursor = None
         total_processed = 0
-        total_saved = 0
+
+        self.stdout.write("Fetching conversations from Slack API...")
 
         while True:
-            try:
-                # Fetch batch of conversations
-                result = app.client.conversations_list(
-                    limit=batch_size,
-                    exclude_archived=False,
-                    types="public_channel,private_channel",
-                    cursor=next_cursor or None,
-                )
+            # Fetch batch of conversations
+            result = app.client.conversations_list(
+                limit=batch_size,
+                exclude_archived=False,
+                types="public_channel,private_channel",
+                cursor=next_cursor or None,
+                timeout=30,
+            )
 
-                if not result.get("ok"):
-                    error = result.get("error", "Unknown error")
-                    handle_api_error(error)
+            if not result.get("ok"):
+                error = result.get("error", "Unknown error")
+                logger.exception("Slack API error: %s", error)
+                self.stdout.write(self.style.ERROR(f"Slack API error: {error}"))
+                break
 
-                conversations = result.get("channels", [])
+            batch_conversations = result.get("channels", [])
+            total_processed += len(batch_conversations)
 
-                total_processed += len(conversations)
-                self.stdout.write(f"Processed {len(conversations)} conversations...")
+            # Display progress
+            self.stdout.write(f"Processed {total_processed} conversations...")
 
-                # Save conversations if not in dry-run mode
-                if not dry_run and conversations:
-                    with transaction.atomic():
-                        saved = conversation_model.bulk_save_from_slack(conversations)
-                        total_saved += saved
-                        logger.info("Saved %d conversations", saved)
+            # Collect conversations
+            if batch_conversations:
+                all_conversations.extend(batch_conversations)
 
-                # Handle pagination
-                next_cursor = result.get("response_metadata", {}).get("next_cursor")
-                if not next_cursor:
-                    break
+            # Handle pagination
+            next_cursor = result.get("response_metadata", {}).get("next_cursor")
+            if not next_cursor:
+                break
 
-                # Rate limiting protection
-                if delay > 0:
-                    time.sleep(delay)
+            # Rate limiting protection
+            if delay > 0:
+                time.sleep(delay)
 
-            except SlackApiError as e:
-                handle_api_error(e, f"Error calling Slack API: {e}")
-            except (ValueError, TypeError, ConnectionError) as e:
-                handle_api_error(e, f"Unexpected error: {e}")
-
-        if not dry_run:
-            self.stdout.write(f"Saved {total_saved} conversations")
-
-        return total_processed
+        self.stdout.write(f"Total conversations retrieved: {len(all_conversations)}")
+        return all_conversations
