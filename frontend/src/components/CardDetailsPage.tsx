@@ -43,12 +43,7 @@ const DetailsCard = ({
         </SecondaryCard>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            title={
-              <AnchorTitle
-                href={`#${type}-details`}
-                title={`${capitalize(type)} Details`}
-              />
-            }
+            title={<AnchorTitle href={`#${type}-details`} title={`${capitalize(type)} Details`} />}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
