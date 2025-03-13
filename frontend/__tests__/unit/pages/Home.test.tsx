@@ -98,7 +98,6 @@ describe('Home', () => {
     await waitFor(() => {
       expect(screen.getByText('New Chapters')).toBeInTheDocument()
       expect(screen.getByText('New Projects')).toBeInTheDocument()
-      expect(screen.getByText('Blog Posts')).toBeInTheDocument()
     })
   })
 

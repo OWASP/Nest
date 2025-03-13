@@ -39,7 +39,7 @@ test.describe('Home Page', () => {
   })
 
   test('should have recent posts', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Blog Posts' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
     const postContainer = page.getByTestId('post-container').first()
     await expect(postContainer.getByRole('link', { name: 'Post 1' })).toBeVisible()
     await expect(postContainer.getByText('Author 1')).toBeVisible()
