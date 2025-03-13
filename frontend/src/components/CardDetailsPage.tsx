@@ -89,7 +89,7 @@ const DetailsCard = ({
         )}
         <TopContributors contributors={topContributors} maxInitialDisplay={6} />
         {(type === 'project' || type === 'repository') && (
-          <>
+          <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList
               title="Recent Issues"
               data={recentIssues}
@@ -118,7 +118,7 @@ const DetailsCard = ({
                 </div>
               )}
             />
-          </>
+          </div>
         )}
         {type === 'project' && repositories.length > 0 && (
           <SecondaryCard title="Repositories" className="mt-6">
