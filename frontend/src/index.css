@@ -212,10 +212,6 @@ a {
   display: none !important;
 }
 
-.leaflet-marker-icon {
-  color: #4b5563;
-}
-
 .icon-rotate {
   transition: transform 2.5s ease;
 }
@@ -272,6 +268,10 @@ a {
 
 .dark .leaflet-popup-tip {
   background-color: #2c3e50;
+}
+
+.leaflet-marker-icon {
+  color: #4b5563;
 }
 
 .heatmap-background-loader {
