@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from apps.github.models.repository import Repository
 from apps.owasp.models.common import RepositoryBasedEntityModel
 
 
@@ -23,16 +24,16 @@ class TestRepositoryBasedEntityModel:
             ("", []),
         ],
     )
-    def test_get_leaders(self, content, expected_leaders):
+    def test_update_leaders(self, content, expected_leaders):
         model = EntityModel()
-        repository = MagicMock()
-        repository.name = "test-repo"
-        model.repository = repository
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
 
         with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
-            leaders = model.get_leaders()
+            model.update_leaders()
 
-        assert leaders == expected_leaders
+        assert model.leaders_raw == expected_leaders
 
     @pytest.mark.parametrize(
         ("key", "expected_url"),
@@ -87,6 +88,6 @@ class TestRepositoryBasedEntityModel:
             "apps.owasp.models.common.get_repository_file_content",
             return_value="---\nfield1: value1\nfield2: value2\n---",
         ):
-            model.from_github({}, None)
+            model.update_tags()
 
         assert model.tags == expected_normalized_tags

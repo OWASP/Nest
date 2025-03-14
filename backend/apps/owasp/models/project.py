@@ -184,18 +184,15 @@ class Project(
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
-        field_mapping = {
-            "description": "pitch",
-            "name": "title",
-            "tags": "tags",
-        }
-        project_metadata = RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
+        self.owasp_repository = repository
 
-        # Normalize tags.
-        self.tags = (
-            [tag.strip(", ") for tag in self.tags.split("," if "," in self.tags else " ")]
-            if isinstance(self.tags, str)
-            else self.tags
+        project_metadata = RepositoryBasedEntityModel.from_github(
+            self,
+            {
+                "description": "pitch",
+                "name": "title",
+                "tags": "tags",
+            },
         )
 
         # Level.
@@ -218,8 +215,8 @@ class Project(
             )
             self.type_raw = project_type
 
-        # FKs.
-        self.owasp_repository = repository
+        self.created_at = repository.created_at
+        self.updated_at = repository.updated_at
 
     def save(self, *args, **kwargs):
         """Save project."""
