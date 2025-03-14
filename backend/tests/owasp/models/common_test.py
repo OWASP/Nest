@@ -13,6 +13,28 @@ class EntityModel(RepositoryBasedEntityModel):
 
 class TestRepositoryBasedEntityModel:
     @pytest.mark.parametrize(
+        ("content", "expected_leaders"),
+        [
+            ("* [Leader1](https://example.com)", ["Leader1"]),
+            (
+                "* [Leader1](https://example.com)\n* [Leader2](https://example.com)",
+                ["Leader1", "Leader2"],
+            ),
+            ("", []),
+        ],
+    )
+    def test_get_leaders(self, content, expected_leaders):
+        model = EntityModel()
+        repository = MagicMock()
+        repository.name = "test-repo"
+        model.repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            leaders = model.get_leaders()
+
+        assert leaders == expected_leaders
+
+    @pytest.mark.parametrize(
         ("key", "expected_url"),
         [
             ("example-key", "https://github.com/owasp/example-key"),

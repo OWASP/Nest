@@ -24,16 +24,27 @@ test.describe('Home Page', () => {
   test('should have new chapters', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'chapter 1' })).toBeVisible()
-    await expect(page.getByText('Feb 20,').first()).toBeVisible()
+    await expect(page.getByText('Chapter Leader1,').first()).toBeVisible()
+    await expect(page.getByText('Feb 20, 2025').first()).toBeVisible()
     await page.getByRole('link', { name: 'chapter 1' }).click()
     expect(page.url()).toContain('chapters/chapter-1')
   })
   test('should have new projects', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Projects' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 1' })).toBeVisible()
-    await expect(page.getByText('Jan 1,').first()).toBeVisible()
+    await expect(page.getByText('Project Leader1,').first()).toBeVisible()
+    await expect(page.getByText('Dec 6, 2024').first()).toBeVisible()
     await page.getByRole('link', { name: 'Project 1' }).click()
     expect(page.url()).toContain('projects/project-1')
+  })
+
+  test('should have recent posts', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
+    const postContainer = page.getByTestId('post-container').first()
+    await expect(postContainer.getByRole('link', { name: 'Post 1' })).toBeVisible()
+    await expect(postContainer.getByText('Author 1')).toBeVisible()
+    await expect(postContainer.getByText('Feb 23').first()).toBeVisible()
+    await postContainer.getByRole('link', { name: 'Post 1' }).click()
   })
 
   test('should have top contributors', async ({ page }) => {
