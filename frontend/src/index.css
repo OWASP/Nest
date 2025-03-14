@@ -212,6 +212,10 @@ a {
   display: none !important;
 }
 
+.leaflet-marker-icon {
+  color: #4b5563;
+}
+
 .icon-rotate {
   transition: transform 2.5s ease;
 }
@@ -288,3 +292,4 @@ a {
   left: 50%;
   opacity: 0.6;
 }
+
