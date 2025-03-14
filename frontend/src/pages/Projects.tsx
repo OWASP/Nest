@@ -24,7 +24,7 @@ const ProjectsPage = () => {
     handleSortChange,
     handleOrderChange,
   } = useSearchPage<ProjectTypeAlgolia>({
-    indexName: 'projects',
+    indexName: 'project',
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
     defaultOrder: 'desc',

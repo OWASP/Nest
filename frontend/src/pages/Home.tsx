@@ -11,7 +11,7 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { fetchTypesenseData } from 'api/fetchTypesenseData'
 import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
 import { toast } from 'hooks/useToast'
 import { useEffect, useState } from 'react'
@@ -56,12 +56,12 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       const searchParams = {
-        indexName: 'chapters',
+        indexName: 'chapter',
         query: '',
         currentPage: 1,
         hitsPerPage: 1000,
       }
-      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchTypesenseData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,

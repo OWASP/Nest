@@ -7,7 +7,7 @@ import {
   faFolder,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { fetchTypesenseData } from 'api/fetchTypesenseData'
 import { debounce } from 'lodash'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
@@ -44,7 +44,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         if (query.length > 0) {
           const results = await Promise.all(
             indexes.map(async (index) => {
-              const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
+              const data = await fetchTypesenseData(index, query, pageCount, suggestionCount)
               return {
                 indexName: index,
                 hits: data.hits as
@@ -88,16 +88,16 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       setShowSuggestions(false)
 
       switch (indexName) {
-        case 'chapters':
+        case 'chapter':
           navigate(`/chapters/${suggestion.key}`)
           break
         case 'events':
           window.open((suggestion as EventType).url, '_blank')
           break
-        case 'projects':
+        case 'project':
           navigate(`/projects/${suggestion.key}`)
           break
-        case 'users':
+        case 'user':
           navigate(`/community/users/${suggestion.key}`)
           break
       }
@@ -190,13 +190,13 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
-      case 'chapters':
+      case 'chapter':
         return faLocationPin
       case 'events':
         return faCalendarAlt
-      case 'projects':
+      case 'project':
         return faFolder
-      case 'users':
+      case 'user':
         return faUser
       default:
         return faSearch

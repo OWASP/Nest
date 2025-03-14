@@ -25,6 +25,15 @@ enrich-data: \
 	owasp-enrich-events \
 	owasp-enrich-projects
 
+load-index:
+	@echo "Indexing Nest data"
+	@CMD="poetry run python manage.py load_index" $(MAKE) exec-backend-command
+
+populate-index:
+	@echo "Populating Nest data"
+	@CMD="python manage.py populate_data" $(MAKE) exec-backend-command
+
+
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 

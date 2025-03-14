@@ -7,7 +7,7 @@ export interface ChapterDataType {
 }
 
 export interface ChapterTypeAlgolia {
-  _geoloc: { lat: number; lng: number }
+  _geoloc: [number, number]
   created_at: number
   is_active: boolean
   key: string
@@ -43,7 +43,7 @@ export interface GeoLocation {
 }
 
 export interface GeoLocDataAlgolia {
-  _geoloc: { lat: number; lng: number }
+  _geoloc: [number, number]
   key: string
   name: string
 }
