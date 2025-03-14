@@ -83,7 +83,7 @@ class TestAlgoliaValidators:
                 "query!name",
                 (
                     "Invalid query value provided. "
-                    "Only alphanumeric characters, hyphens, spaces and underscores are allowed."
+                    "Only alphanumeric characters, hyphens, spaces, and underscores are allowed."
                 ),
             ),
         ],
@@ -93,7 +93,10 @@ class TestAlgoliaValidators:
             validate_query(query)
         assert str(exc_info.value.messages[0]) == error_message
 
-    @pytest.mark.parametrize(("query"), [("query_name"), ("query-name"), ("query name")])
+    @pytest.mark.parametrize(
+        ("query"),
+        ["query_name", "query-name", "query name"],
+    )
     def test_valid_query(self, query):
         validate_query(query)
 

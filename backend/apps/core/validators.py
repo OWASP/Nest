@@ -58,7 +58,7 @@ def validate_query(query):
     if not re.match(r"^[a-zA-Z0-9-_ ]*$", query):
         message = (
             "Invalid query value provided. "
-            "Only alphanumeric characters, hyphens, spaces and underscores are allowed."
+            "Only alphanumeric characters, hyphens, spaces, and underscores are allowed."
         )
         raise ValidationError(message)
 
