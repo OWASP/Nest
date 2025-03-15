@@ -11,10 +11,10 @@ export const TruncatedText = ({
   className?: string
   disabledTooltip?: boolean
 }) => {
-  const isTruncated = text.length > maxLength && !disabledTooltip
+  const isTruncated = text.length > maxLength
   const displayText = isTruncated ? `${text.slice(0, maxLength)}...` : text
 
-  return disabledTooltip ? (
+  return !isTruncated || disabledTooltip ? (
     <span className={className}>{text}</span>
   ) : (
     <Tooltip content={text}>

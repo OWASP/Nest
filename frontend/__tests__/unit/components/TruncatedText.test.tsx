@@ -11,10 +11,7 @@ describe('Truncate Component', () => {
 
   test('truncates long text and adds ellipsis', () => {
     render(<TruncatedText text={longText} maxLength={40} />)
-
-    expect(
-      screen.getByText((content) => content.startsWith('This is very long text that should be tr'))
-    ).toBeInTheDocument()
+    expect(screen.getByText(/This is very long text that should be tr\.\.\./)).toBeInTheDocument()
   })
 
   test('does not truncate if disabledTooltip is true', () => {
