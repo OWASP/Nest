@@ -90,7 +90,7 @@ class Project(
     pushed_at = models.DateTimeField(verbose_name="Pushed at", blank=True, null=True)
     updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
 
-    custom_tags = models.JSONField(verbose_name="Custom tags", default=list)
+    custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
 
     # FKs.

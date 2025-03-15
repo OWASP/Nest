@@ -137,15 +137,19 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         leaders = []
-        for line in content.split("\n"):
-            try:
-                logger.debug("Processing line: %s", line)
-                # Match both standard Markdown list items with links and variations.
-                leaders.extend(re.findall(r"\*\s*\[([^\]]+)\](?:\([^)]*\))?", line))
-            except AttributeError:
-                logger.exception(
-                    "Unable to parse leaders.md content", extra={"URL": self.leaders_md_url}
-                )
+        try:
+            for line in content.split("\n"):
+                leaders.extend(re.findall(r"[-*]\s*\[([^\]]+)\](?:\([^)]*\))?", line))
+        except AttributeError:
+            logger.exception(
+                "Unable to parse leaders.md content", extra={"URL": self.leaders_md_url}
+            )
+
+        if not leaders:
+            logger.error(
+                "No leaders found in leaders.md file",
+                extra={"URL": self.leaders_md_url},
+            )
 
         return sorted(leaders)
 
