@@ -10,8 +10,8 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import ChapterMap from 'components/ChapterMap'
 import MetadataManager from 'components/MetadataManager'
-import SearchPageLayout from 'components/SearchPageLayout'
 import ScrollToTop from 'components/ScrollToTop'
+import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])

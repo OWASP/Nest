@@ -8,8 +8,8 @@ import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import MetadataManager from 'components/MetadataManager'
-import SearchPageLayout from 'components/SearchPageLayout'
 import ScrollToTop from 'components/ScrollToTop'
+import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
 const ProjectsPage = () => {
   const {

@@ -4,9 +4,9 @@ import { User } from 'types/user'
 import { METADATA_CONFIG } from 'utils/metadata'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import MetadataManager from 'components/MetadataManager'
+import ScrollToTop from 'components/ScrollToTop'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
-import ScrollToTop from 'components/ScrollToTop'
 
 const UsersPage = () => {
   const {

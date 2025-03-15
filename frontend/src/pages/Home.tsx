@@ -27,10 +27,10 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
+import ScrollToTop from 'components/ScrollToTop'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import { toaster } from 'components/ui/toaster'
-import ScrollToTop from 'components/ScrollToTop'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
