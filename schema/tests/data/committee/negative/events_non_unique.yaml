@@ -1,7 +1,7 @@
 description: This committee has an invalid event URL.
 events:
-  - https://example.com/event1
-  - https://example.com/event1
+  - url: https://example.com/event1
+  - url: https://example.com/event1
 members:
   - github: leader1-github
     name: Leader One
@@ -12,6 +12,6 @@ members:
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:
-  - security
-  - education
-  - development
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

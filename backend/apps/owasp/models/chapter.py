@@ -74,24 +74,24 @@ class Chapter(
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
-        field_mapping = {
-            "country": "country",
-            "currency": "currency",
-            "level": "level",
-            "meetup_group": "meetup-group",
-            "name": "title",
-            "postal_code": "postal-code",
-            "region": "region",
-            "tags": "tags",
-        }
-        RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
-
-        if repository:
-            self.created_at = repository.created_at
-            self.updated_at = repository.updated_at
-
-        # FKs.
         self.owasp_repository = repository
+
+        RepositoryBasedEntityModel.from_github(
+            self,
+            {
+                "country": "country",
+                "currency": "currency",
+                "level": "level",
+                "meetup_group": "meetup-group",
+                "name": "title",
+                "postal_code": "postal-code",
+                "region": "region",
+                "tags": "tags",
+            },
+        )
+
+        self.created_at = repository.created_at
+        self.updated_at = repository.updated_at
 
     def generate_geo_location(self):
         """Add latitude and longitude data."""
