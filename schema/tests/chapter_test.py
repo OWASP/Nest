@@ -29,7 +29,8 @@ from utils.schema_validators import validate_data
         ("events_empty.yaml", "[] should be non-empty"),
         (
             "events_non_unique.yaml",
-            "['https://example.com/event1', 'https://example.com/event1'] has non-unique elements",
+            "[{'url': 'https://example.com/event1'}, "
+            "{'url': 'https://example.com/event1'}] has non-unique elements",
         ),
         ("events_null.yaml", "None is not of type 'array'"),
         ("leaders_empty.yaml", "[] is too short"),
@@ -50,9 +51,9 @@ from utils.schema_validators import validate_data
             "'large': 'https://example.com/largeLogo.png'}] has non-unique elements",
         ),
         ("logo_null.yaml", "None is not of type 'array'"),
-        ("mailing_list_empty.yaml", "'' is not a 'uri'"),
-        ("mailing_list_invalid.yaml", "'https://xyz' is not a 'uri'"),
-        ("mailing_list_null.yaml", "None is not a 'uri'"),
+        ("mailing_list_empty.yaml", "'' is not of type 'array'"),
+        ("mailing_list_invalid.yaml", "'https://xyz' is not of type 'array'"),
+        ("mailing_list_null.yaml", "None is not of type 'array'"),
         ("meetup_group_empty.yaml", "'' should be non-empty"),
         ("meetup_group_null.yaml", "None is not of type 'string'"),
         ("name_empty.yaml", "'' is too short"),
@@ -76,11 +77,14 @@ from utils.schema_validators import validate_data
         ),
         ("sponsors_null.yaml", "None is not of type 'array'"),
         ("tags_empty.yaml", "[] is too short"),
-        ("tags_non_unique.yaml", "['chapter-tag-1', 'chapter-tag-1'] is too short"),
+        (
+            "tags_non_unique.yaml",
+            "['example-tag-1', 'example-tag-1', 'example-tag-1'] has non-unique elements",
+        ),
         ("tags_null.yaml", "None is not of type 'array'"),
         ("tags_undefined.yaml", "'tags' is a required property"),
-        ("website_empty.yaml", "['example-tag-1'] is too short"),
-        ("website_null.yaml", "None is not of type 'string'"),
+        ("website_empty.yaml", "'' is not a 'uri'"),
+        ("website_null.yaml", "None is not a 'uri'"),
     ],
 )
 def test_negative(chapter_schema, file_path, error_message):
