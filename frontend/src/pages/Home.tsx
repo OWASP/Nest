@@ -145,9 +145,9 @@ export default function Home() {
                     className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
-                    <h3 className="truncate">{event.name}</h3>
+                    <h3 className="truncate text-wrap md:text-nowrap">{event.name}</h3>
                   </button>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
                     <div className="mr-2 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDateRange(event.startDate, event.endDate)}</span>
@@ -283,7 +283,7 @@ export default function Home() {
                 className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
                 data-testid="post-container"
               >
-                <h3 className="mb-1 truncate text-lg font-semibold text-blue-500">
+                <h3 className="mb-1 truncate text-wrap text-lg font-semibold text-blue-500 md:text-nowrap">
                   <a
                     href={post.url}
                     className="hover:underline"
@@ -293,13 +293,15 @@ export default function Home() {
                     {post.title}
                   </a>
                 </h3>
-                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
                   <div className="mr-4 flex items-center">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
-                  <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                  <span>{post.authorName}</span>
+                  <div className="flex items-center">
+                    <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
+                    <span>{post.authorName}</span>
+                  </div>
                 </div>
               </div>
             ))}
