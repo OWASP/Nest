@@ -64,30 +64,25 @@ class TestCommitteeModel:
             mock_bulk_save.assert_called_once_with(Committee, mock_committees, fields=["name"])
 
     def test_from_github(self):
-        repository_mock = Repository()
-        repository_mock.name = "Test Repo"
-        repository_mock.created_at = "2024-01-01"
-        repository_mock.updated_at = "2024-12-24"
-        repository_mock.title = "Nest"
-        repository_mock.pitch = "Nest Pitch"
-        repository_mock.tags = ["react", "python"]
-        repository_mock.leaders = ["Leader1, Leader2"]
-        repository_mock.owner = User(name="OWASP")
+        owasp_repository = Repository()
+        owasp_repository.name = "Test Repo"
+        owasp_repository.created_at = "2024-01-01"
+        owasp_repository.updated_at = "2024-12-24"
+        owasp_repository.title = "Project Committee"
+        owasp_repository.pitch = "Nest Pitch"
+        owasp_repository.tags = ["react", "python"]
+        owasp_repository.owner = User(name="OWASP")
 
         committee = Committee()
+        committee.owasp_repository = owasp_repository
 
         with patch(
             "apps.owasp.models.committee.RepositoryBasedEntityModel.from_github"
         ) as mock_from_github:
-            mock_from_github.side_effect = lambda instance, _, repo: setattr(
-                instance, "name", repo.title
+            mock_from_github.side_effect = lambda instance, _: setattr(
+                instance, "name", owasp_repository.title
             )
-
-            committee.from_github(repository_mock)
-
-        assert committee.created_at == repository_mock.created_at
-        assert committee.updated_at == repository_mock.updated_at
-        assert committee.owasp_repository == repository_mock
+            committee.from_github(owasp_repository)
 
         mock_from_github.assert_called_once_with(
             committee,
@@ -96,7 +91,8 @@ class TestCommitteeModel:
                 "name": "title",
                 "tags": "tags",
             },
-            repository_mock,
         )
 
-        assert committee.name == repository_mock.title
+        assert committee.created_at == owasp_repository.created_at
+        assert committee.name == owasp_repository.title
+        assert committee.updated_at == owasp_repository.updated_at
