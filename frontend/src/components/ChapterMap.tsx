@@ -5,6 +5,8 @@ import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
+import { desktopViewMinWidth } from 'utils/constants'
+import { Tooltip } from 'components/ui/tooltip'
 
 const ChapterMap = ({
   geoLocData,
@@ -91,9 +93,41 @@ const ChapterMap = ({
       map.setView([nearestChapter.lat, nearestChapter.lng], maxZoom)
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
+    const isDesktop = window.innerWidth >= desktopViewMinWidth
+    if (isDesktop) {
+      map.scrollWheelZoom.disable()
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.ctrlKey) {
+          map.scrollWheelZoom.enable()
+        }
+      }
+      const handleKeyUp = () => {
+        map.scrollWheelZoom.disable()
+      }
+      window.addEventListener('keydown', handleKeyDown)
+      window.addEventListener('keyup', handleKeyUp)
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown)
+        window.removeEventListener('keyup', handleKeyUp)
+      }
+    }
   }, [chapters, showLocal])
 
-  return <div id="chapter-map" style={style} />
+  return (
+    <Tooltip
+      content="Use ctrl + scroll to zoom"
+      closeDelay={100}
+      openDelay={100}
+      showArrow
+      positioning={{ placement: 'top' }}
+      disabled={window.innerWidth < desktopViewMinWidth}
+    >
+      <div className="relative h-full w-full">
+        <div id="chapter-map" style={style} />
+      </div>
+    </Tooltip>
+  )
 }
 
 export default ChapterMap
