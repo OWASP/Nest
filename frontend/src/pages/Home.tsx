@@ -20,6 +20,7 @@ import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
+import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
@@ -135,7 +136,7 @@ export default function Home() {
             />
           </div>
         </div>
-        <SecondaryCard title="Upcoming Events">
+        <SecondaryCard title={<AnchorTitle href="#upcoming-events" title="Upcoming Events" />}>
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: EventType, index: number) => (
               <div key={`card-${event.name}`}>
@@ -173,7 +174,7 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
-          <SecondaryCard title="New Chapters">
+          <SecondaryCard title={<AnchorTitle href="#new-chapters" title="New Chapters" />}>
             <div className="space-y-4">
               {data.recentChapters.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -202,7 +203,7 @@ export default function Home() {
               ))}
             </div>
           </SecondaryCard>
-          <SecondaryCard title="New Projects">
+          <SecondaryCard title={<AnchorTitle href="#new-Projects" title="New Projects" />}>
             <div className="space-y-4">
               {data.recentProjects.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -236,7 +237,7 @@ export default function Home() {
           </SecondaryCard>
         </div>
         <div className="mb-20">
-          <h2 className="mb-4 text-2xl font-semibold">OWASP Chapters Worldwide</h2>
+          <AnchorTitle href="#chapters-worldwide" title="OWASP Chapters Worldwide" />
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
@@ -246,7 +247,7 @@ export default function Home() {
         <TopContributors contributors={data.topContributors} maxInitialDisplay={6} />
         <div className="grid-cols-2 gap-4 lg:grid">
           <ItemCardList
-            title="Recent Issues"
+            title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
             data={data.recentIssues}
             renderDetails={(item) => (
               <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -262,7 +263,7 @@ export default function Home() {
             )}
           />
           <ItemCardList
-            title="Recent Releases"
+            title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
             data={data.recentReleases}
             renderDetails={(item) => (
               <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">

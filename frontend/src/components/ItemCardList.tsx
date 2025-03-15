@@ -1,4 +1,4 @@
-import { JSX } from 'react'
+import React, { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import SecondaryCard from './SecondaryCard'
 
@@ -7,7 +7,7 @@ const ItemCardList = ({
   data,
   renderDetails,
 }: {
-  title: string
+  title: React.ReactNode
   data: ProjectReleaseType[] | ProjectIssuesType[]
   renderDetails: (item: {
     createdAt: string
@@ -49,7 +49,7 @@ const ItemCardList = ({
         ))}
       </div>
     ) : (
-      <p>No {title.toLowerCase()}.</p>
+      <p> Nothing to display.</p>
     )}
   </SecondaryCard>
 )
