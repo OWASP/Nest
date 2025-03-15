@@ -1,9 +1,10 @@
 import {
   faSearch,
   faTimes,
-  faProjectDiagram,
-  faBook,
   faUser,
+  faCalendarAlt,
+  faLocationPin,
+  faFolder,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -12,6 +13,7 @@ import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChapterTypeAlgolia } from 'types/chapter'
+import { EventType } from 'types/event'
 import { ProjectTypeAlgolia } from 'types/project'
 import { MultiSearchBarProps, Suggestion } from 'types/search'
 import { User } from 'types/user'
@@ -21,6 +23,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   placeholder,
   indexes,
   initialValue = '',
+  eventData,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
@@ -31,7 +34,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   } | null>(null)
   const navigate = useNavigate()
   const pageCount = 1
-  const suggestionCount = 3
+  const suggestionCount = 5
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -44,11 +47,25 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
               return {
                 indexName: index,
-                hits: data.hits as ChapterTypeAlgolia[] | ProjectTypeAlgolia[] | User[],
+                hits: data.hits as
+                  | ChapterTypeAlgolia[]
+                  | EventType[]
+                  | ProjectTypeAlgolia[]
+                  | User[],
                 totalPages: data.totalPages,
               }
             })
           )
+          const filteredEvents =
+            eventData?.filter((event) => event.name.toLowerCase().includes(query.toLowerCase())) ||
+            []
+          if (filteredEvents.length > 0) {
+            results.push({
+              indexName: 'events',
+              hits: filteredEvents.slice(0, suggestionCount),
+              totalPages: 1,
+            })
+          }
           setSuggestions(results.filter((result) => result.hits.length > 0))
           setShowSuggestions(true)
         } else {
@@ -56,7 +73,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           setShowSuggestions(false)
         }
       }, 300),
-    [indexes]
+    [eventData, indexes]
   )
 
   useEffect(() => {
@@ -66,7 +83,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [debouncedSearch])
 
   const handleSuggestionClick = useCallback(
-    (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User, indexName: string) => {
+    (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User | EventType, indexName: string) => {
       setSearchQuery(suggestion.name)
       setShowSuggestions(false)
 
@@ -74,11 +91,15 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         case 'chapters':
           navigate(`/chapters/${suggestion.key}`)
           break
+        case 'events':
+          window.open((suggestion as EventType).url, '_blank')
+          break
         case 'projects':
           navigate(`/projects/${suggestion.key}`)
           break
         case 'users':
           navigate(`/community/users/${suggestion.key}`)
+          break
       }
     },
     [navigate]
@@ -92,7 +113,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
-        handleSuggestionClick(suggestion, suggestions[index].indexName)
+        handleSuggestionClick(
+          suggestion as ChapterTypeAlgolia | ProjectTypeAlgolia | User | EventType,
+          suggestions[index].indexName
+        )
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
         if (highlightedIndex === null) {
@@ -167,9 +191,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
       case 'chapters':
-        return faBook
+        return faLocationPin
+      case 'events':
+        return faCalendarAlt
       case 'projects':
-        return faProjectDiagram
+        return faFolder
       case 'users':
         return faUser
       default:
@@ -214,38 +240,33 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 key={suggestion.indexName}
                 className="border-b text-gray-600 last:border-b-0 dark:border-gray-700 dark:text-gray-300"
               >
-                <h3 className="border-b p-2 text-start font-semibold">
-                  {suggestion.indexName.charAt(0).toUpperCase() + suggestion.indexName.slice(1)}
-                </h3>
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
                       key={subIndex}
-                      className={`flex cursor-pointer items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex?.index === index && highlightedIndex.subIndex === subIndex
+                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                        highlightedIndex &&
+                        highlightedIndex.index === index &&
+                        highlightedIndex.subIndex === subIndex
                           ? 'bg-gray-100 dark:bg-gray-700'
                           : ''
                       }`}
-                      onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
                     >
-                      <FontAwesomeIcon
-                        icon={getIconForIndex(suggestion.indexName)}
-                        className="mr-2 text-gray-400"
-                      />
-                      <span className="whitespace-nowrap">{hit.name || hit.login}</span>
+                      <button
+                        onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
+                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left"
+                      >
+                        <FontAwesomeIcon
+                          icon={getIconForIndex(suggestion.indexName)}
+                          className="mr-2 flex-shrink-0 text-gray-400"
+                        />
+                        <span className="block max-w-full truncate">{hit.name || hit.login}</span>
+                      </button>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
-            <button
-              className="w-full border-t p-2 text-center text-sm text-muted-foreground hover:bg-accent"
-              onClick={() => setShowSuggestions(false)}
-            >
-              Press{' '}
-              <kbd className="rounded border bg-muted px-1 py-0.5 text-xs font-semibold">Esc</kbd>{' '}
-              to close
-            </button>
           </div>
         )}
       </div>

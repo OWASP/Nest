@@ -23,7 +23,7 @@ test.describe('Project Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Project Details' })).toBeVisible()
     await expect(page.getByText('Last Updated: Feb 7, 2025')).toBeVisible()
     await expect(page.getByText('Level: Lab')).toBeVisible()
-    await expect(page.getByText('Project Leaders: alice, bob')).toBeVisible()
+    await expect(page.getByText('Leaders: alice, bob')).toBeVisible()
     await expect(page.getByText('URL: https://github.com/')).toBeVisible()
   })
 

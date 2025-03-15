@@ -49,10 +49,11 @@ const Card = ({
           {/* Display project level badge (if available) */}
           {level && (
             <Tooltip
-              id="level-tooltip"
-              content={`${level.level} project`}
-              openDelay={100}
               closeDelay={100}
+              content={`${level.level} project`}
+              id={`level-tooltip-${title}`}
+              openDelay={100}
+              positioning={{ placement: 'top' }}
               recipe={TooltipRecipe}
               showArrow
             >
@@ -114,6 +115,7 @@ const Card = ({
             <ContributorAvatar
               key={contributor.login || `contributor-${index}`}
               contributor={contributor}
+              uniqueKey={index.toString()}
             />
           ))}
         </div>

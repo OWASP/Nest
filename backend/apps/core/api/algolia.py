@@ -6,17 +6,19 @@ import requests
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 
 from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
 from apps.core.utils.params_mapping import get_params_for_index
+from apps.core.validators import validate_search_params
 
 CACHE_PREFIX = "algolia_proxy"
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 
 
-def get_search_results(index_name, query, page, hits_per_page, ip_address=None):
+def get_search_results(index_name, query, page, hits_per_page, facet_filters, ip_address=None):
     """Return search results for the given parameters."""
     search_params = get_params_for_index(index_name.split("_")[0])
     search_params.update(
@@ -25,6 +27,7 @@ def get_search_results(index_name, query, page, hits_per_page, ip_address=None):
             "indexName": f"{settings.ENVIRONMENT.lower()}_{index_name}",
             "page": page - 1,
             "query": query,
+            "facetFilters": facet_filters,
         }
     )
 
@@ -49,11 +52,17 @@ def algolia_search(request):
     try:
         data = json.loads(request.body)
 
+        try:
+            validate_search_params(data)
+        except ValidationError as error:
+            return JsonResponse({"error": error.message}, status=400)
+
+        facet_filters = data.get("facetFilters", [])
         index_name = data.get("indexName")
-        limit = int(data.get("hitsPerPage", 25))
-        page = int(data.get("page", 1))
-        query = data.get("query", "")
         ip_address = get_user_ip_address(request)
+        limit = data.get("hitsPerPage", 25)
+        page = data.get("page", 1)
+        query = data.get("query", "")
 
         cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
         if index_name == "chapters":
@@ -68,6 +77,7 @@ def algolia_search(request):
             query,
             page,
             limit,
+            facet_filters,
             ip_address=ip_address,
         )
         cache.set(cache_key, result, CACHE_TTL_IN_SECONDS)

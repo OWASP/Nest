@@ -2,18 +2,19 @@ import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { toast } from 'hooks/useToast'
 import { Home } from 'pages'
-import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
-
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
+import { toaster } from 'components/ui/toaster'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
+}))
+
+jest.mock('components/ui/toaster', () => ({
+  toaster: {
+    create: jest.fn(),
+  },
 }))
 
 jest.mock('api/fetchAlgoliaData', () => ({
@@ -68,10 +69,10 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith({
+      expect(toaster.create).toHaveBeenCalledWith({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
     })
   })
@@ -115,7 +116,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByText('OWASP Chapters Nearby')).toBeInTheDocument()
+      expect(screen.getByText('OWASP Chapters Worldwide')).toBeInTheDocument()
     })
   })
 
@@ -161,9 +162,7 @@ describe('Home', () => {
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
       mockGraphQLData.upcomingEvents.forEach((event) => {
         expect(screen.getByText(event.name)).toBeInTheDocument()
-        expect(
-          screen.getByText(`${formatDate(event.startDate)} - ${formatDate(event.endDate)}`)
-        ).toBeInTheDocument()
+        expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
       })
     })
   })

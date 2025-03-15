@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from apps.github.models.repository import Repository
+from apps.github.models.user import User
 from apps.owasp.models.project import Project
 
 
@@ -100,22 +101,22 @@ class TestProjectModel:
             assert project.owasp_repository == repository_mock
 
     def test_from_github(self):
-        repository_mock = Repository()
-        repository_mock.name = "Test Repo"
-        repository_mock.title = "Nest"
-        repository_mock.pitch = "Nest Pitch"
-        repository_mock.tags = "react, python"
+        owasp_repository = Repository()
+        owasp_repository.name = "Test Repo"
+        owasp_repository.owner = User(name="OWASP")
+        owasp_repository.pitch = "Nest Pitch"
+        owasp_repository.tags = "react, python"
+        owasp_repository.title = "Nest"
 
         project = Project()
+        project.owasp_repository = owasp_repository
 
         with patch(
             "apps.owasp.models.project.RepositoryBasedEntityModel.from_github"
         ) as mock_from_github:
             mock_from_github.return_value = {"level": 3, "type": "tool"}
+            project.from_github(owasp_repository)
 
-            project.from_github(repository_mock)
-
-        assert project.owasp_repository == repository_mock
         mock_from_github.assert_called_once_with(
             project,
             {
@@ -123,8 +124,9 @@ class TestProjectModel:
                 "name": "title",
                 "tags": "tags",
             },
-            repository_mock,
         )
 
+        assert project.created_at == owasp_repository.created_at
         assert project.level == Project.ProjectLevel.LAB
         assert project.type == Project.ProjectType.TOOL
+        assert project.updated_at == owasp_repository.updated_at

@@ -25,15 +25,15 @@ export const GET_PROJECT_DATA = gql`
         }
       }
       recentReleases {
-        name
-        tagName
-        isPreRelease
-        publishedAt
         author {
           avatarUrl
           login
           name
         }
+        name
+        publishedAt
+        tagName
+        url
       }
       repositories {
         contributorsCount

@@ -9,8 +9,10 @@ arkid15r
 askowasp
 Aupdated
 bsky
+CCSP
 certbot
 Chakra
+CISSP
 collectstatic
 coraza
 corsheaders
