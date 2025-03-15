@@ -1,17 +1,11 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockContributeData } from '@unit/data/mockContributeData'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
 import ContributePage from 'pages/Contribute'
 
-// Mock dependencies
 jest.mock('api/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: jest.fn(() => null),
 }))
 
 jest.mock('components/Pagination', () =>
@@ -25,19 +19,12 @@ jest.mock('components/Pagination', () =>
 )
 
 describe('Contribute Component', () => {
-  // Suppress console errors and warnings during tests
   beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {})
-    jest.spyOn(console, 'warn').mockImplementation(() => {})
-
-    // Reset mocks before each test
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockContributeData)
-    ;(FontAwesomeIcon as jest.Mock).mockReturnValue(<div>Icon</div>)
   })
 
   afterEach(() => {
     jest.clearAllMocks()
-    jest.restoreAllMocks()
   })
 
   test('renders skeleton initially', async () => {
@@ -49,22 +36,19 @@ describe('Contribute Component', () => {
   })
 
   test('renders contribute data correctly', async () => {
-    const mockIssuesData = {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
-    }
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockIssuesData)
-
+    })
     render(<ContributePage />)
 
     await waitFor(() => {
       expect(screen.getByText('Contribution 1')).toBeInTheDocument()
     })
     expect(screen.getByText('This is a summary of Contribution 1')).toBeInTheDocument()
-
-    const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-    expect(readMoreButtons.length).toBeGreaterThan(0)
+    const viewButton = screen.getByText('Read More')
+    expect(viewButton).toBeInTheDocument()
   })
 
   test('displays "No issues found" when there are no issues', async () => {
@@ -159,68 +143,60 @@ describe('Contribute Component', () => {
     render(<ContributePage />)
 
     await waitFor(() => {
-      expect(screen.queryByRole('button', { name: /read more/i })).not.toBeInTheDocument()
+      expect(screen.queryByText('Read More')).not.toBeInTheDocument()
     })
   })
 
   test('renders SubmitButton correctly', async () => {
-    const mockIssuesData = {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
-    }
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockIssuesData)
+    })
     render(<ContributePage />)
 
     await waitFor(() => {
-      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-      expect(readMoreButtons.length).toBeGreaterThan(0)
+      const readMoreButton = screen.getByText('Read More')
+      expect(readMoreButton).toBeInTheDocument()
     })
   })
 
   test('opens modal when SubmitButton is clicked', async () => {
-    const mockIssuesData = {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
-    }
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockIssuesData)
-
+    })
     render(<ContributePage />)
 
     await waitFor(() => {
-      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-      expect(readMoreButtons.length).toBeGreaterThan(0)
+      const readMoreButton = screen.getByText('Read More')
+      fireEvent.click(readMoreButton)
     })
 
-    const readMoreButton = screen.getAllByRole('button', { name: /read more/i })[0]
-    fireEvent.click(readMoreButton)
-
-    const closeButton = await screen.findByRole('button', { name: /close/i })
-    expect(closeButton).toBeInTheDocument()
+    await waitFor(() => {
+      const modalTitle = screen.getByText('Close')
+      expect(modalTitle).toBeInTheDocument()
+    })
   })
 
   test('closes modal when onClose is called', async () => {
-    const mockIssuesData = {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
-    }
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockIssuesData)
-
+    })
     render(<ContributePage />)
 
     await waitFor(() => {
-      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
-      expect(readMoreButtons.length).toBeGreaterThan(0)
+      const readMoreButton = screen.getByText('Read More')
+      fireEvent.click(readMoreButton)
     })
 
-    const readMoreButton = screen.getAllByRole('button', { name: /read more/i })[0]
-    fireEvent.click(readMoreButton)
-
-    const closeButton = await screen.findByRole('button', { name: /close/i })
-    expect(closeButton).toBeInTheDocument()
-    fireEvent.click(closeButton)
+    await waitFor(() => {
+      const closeButton = screen.getByText('Close')
+      fireEvent.click(closeButton)
+    })
 
     await waitFor(() => {
       const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
@@ -242,12 +218,12 @@ describe('Contribute Component', () => {
 
     // Wait for both cards to be rendered
     await waitFor(() => {
-      const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+      const readMoreButtons = screen.getAllByText('Read More')
       expect(readMoreButtons).toHaveLength(2)
     })
 
     // Click first card's Read More button
-    const readMoreButtons = screen.getAllByRole('button', { name: /read more/i })
+    const readMoreButtons = screen.getAllByText('Read More')
     fireEvent.click(readMoreButtons[0])
 
     // Verify first modal is open
@@ -256,12 +232,15 @@ describe('Contribute Component', () => {
     })
 
     // Verify first issue button
-    const viewIssueButton = await screen.findByRole('button', { name: 'View Issue' })
-    expect(viewIssueButton).toBeInTheDocument()
+    await waitFor(() => {
+      const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
+      expect(viewIssueButton).toBeInTheDocument()
+      fireEvent.click(viewIssueButton)
+    })
 
     // Click close button
     await waitFor(() => {
-      const closeButton = screen.getByRole('button', { name: /close/i })
+      const closeButton = screen.getByText('Close')
       fireEvent.click(closeButton)
     })
 
