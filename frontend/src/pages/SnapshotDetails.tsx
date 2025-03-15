@@ -2,7 +2,6 @@ import { useQuery } from '@apollo/client'
 import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { GET_SNAPSHOT_DETAILS } from 'api/queries/snapshotQueries'
-import { toast } from 'hooks/useToast'
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChapterTypeGraphQL } from 'types/chapter'
@@ -17,6 +16,7 @@ import Card from 'components/Card'
 import ChapterMap from 'components/ChapterMap'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams()
@@ -34,10 +34,10 @@ const SnapshotDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
@@ -146,6 +146,7 @@ const SnapshotDetailsPage: React.FC = () => {
             <div className="mb-4">
               <ChapterMap
                 geoLocData={snapshot.newChapters}
+                showLocal={false}
                 style={{ height: '400px', width: '100%', zIndex: '0' }}
               />
             </div>

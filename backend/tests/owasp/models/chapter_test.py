@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 from apps.github.models.repository import Repository
+from apps.github.models.user import User
 from apps.owasp.models.chapter import Chapter, Prompt
 
 
@@ -154,28 +155,25 @@ class TestChapterModel:
             mock_bulk_save.assert_called_once_with(Chapter, mock_chapters, fields=["name"])
 
     def test_from_github(self):
-        repository_mock = Repository()
-        repository_mock.name = "Test Repo"
-        repository_mock.created_at = "2024-01-01"
-        repository_mock.updated_at = "2024-12-24"
-        repository_mock.title = "Nest"
-        repository_mock.pitch = "Nest Pitch"
-        repository_mock.tags = ["react", "python"]
+        owasp_repository = Repository()
+        owasp_repository.created_at = "2024-01-01"
+        owasp_repository.name = "Chapter Repo"
+        owasp_repository.owner = User(name="OWASP")
+        owasp_repository.pitch = "Nest Pitch"
+        owasp_repository.tags = ["react", "python"]
+        owasp_repository.title = "Nest"
+        owasp_repository.updated_at = "2024-12-24"
 
         chapter = Chapter()
+        chapter.owasp_repository = owasp_repository
 
         with patch(
             "apps.owasp.models.chapter.RepositoryBasedEntityModel.from_github"
         ) as mock_from_github:
-            mock_from_github.side_effect = lambda instance, _, repo: setattr(
-                instance, "name", repo.title
+            mock_from_github.side_effect = lambda instance, _: setattr(
+                instance, "name", owasp_repository.title
             )
-
-            chapter.from_github(repository_mock)
-
-        assert chapter.created_at == repository_mock.created_at
-        assert chapter.updated_at == repository_mock.updated_at
-        assert chapter.owasp_repository == repository_mock
+            chapter.from_github(owasp_repository)
 
         mock_from_github.assert_called_once_with(
             chapter,
@@ -189,7 +187,8 @@ class TestChapterModel:
                 "region": "region",
                 "tags": "tags",
             },
-            repository_mock,
         )
 
-        assert chapter.name == repository_mock.title
+        assert chapter.created_at == owasp_repository.created_at
+        assert chapter.name == owasp_repository.title
+        assert chapter.updated_at == owasp_repository.updated_at

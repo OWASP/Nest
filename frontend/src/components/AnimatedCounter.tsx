@@ -1,3 +1,4 @@
+import millify from 'millify'
 import { useEffect, useRef, useState } from 'react'
 
 interface AnimatedCounterProps {
@@ -30,5 +31,5 @@ export default function AnimatedCounter({ end, duration, className }: AnimatedCo
     requestAnimationFrame(animate)
   }, [end, duration])
 
-  return <span className={className}>{count}</span>
+  return <span className={className}>{millify(count)}</span>
 }
