@@ -4,7 +4,6 @@ import { User } from 'types/user'
 import { METADATA_CONFIG } from 'utils/metadata'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import MetadataManager from 'components/MetadataManager'
-import ScrollToTop from 'components/ScrollToTop'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -65,7 +64,6 @@ const UsersPage = () => {
           {users && users.map((user) => <div key={user.key}>{renderUserCard(user)}</div>)}
         </div>
       </SearchPageLayout>
-      <ScrollToTop />
     </MetadataManager>
   )
 }

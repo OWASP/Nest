@@ -10,7 +10,6 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import ChapterMap from 'components/ChapterMap'
 import MetadataManager from 'components/MetadataManager'
-import ScrollToTop from 'components/ScrollToTop'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
@@ -99,7 +98,6 @@ const ChaptersPage = () => {
         )}
         {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
       </SearchPageLayout>
-      <ScrollToTop />
     </MetadataManager>
   )
 }

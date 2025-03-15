@@ -27,7 +27,6 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
-import ScrollToTop from 'components/ScrollToTop'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import { toaster } from 'components/ui/toaster'
@@ -336,7 +335,6 @@ export default function Home() {
           </SecondaryCard>
         </div>
       </div>
-      <ScrollToTop />
     </div>
   )
 }

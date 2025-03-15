@@ -10,7 +10,6 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import MetadataManager from 'components/MetadataManager'
 import Modal from 'components/Modal'
-import ScrollToTop from 'components/ScrollToTop'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ContributePage = () => {
@@ -86,7 +85,6 @@ const ContributePage = () => {
       >
         {issues && issues.map(renderContributeCard)}
       </SearchPageLayout>
-      <ScrollToTop />
     </MetadataManager>
   )
 }
