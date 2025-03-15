@@ -16,10 +16,10 @@ class TestRepositoryBasedEntityModel:
     @pytest.mark.parametrize(
         ("content", "expected_leaders"),
         [
-            ("* [Leader1](https://example.com)", ["Leader1"]),
+            ("- [Leader1](https://example.com)", ["Leader1"]),
             (
-                "* [Leader1](https://example.com)\n* [Leader2](https://example.com)",
-                ["Leader1", "Leader2"],
+                "* [Leader one (Chapter Lead)](https://example.com)\n* [Leader two  (Faculty Advisor)](https://example.com)",
+                ["Leader one", "Leader two"],
             ),
             ("", []),
         ],

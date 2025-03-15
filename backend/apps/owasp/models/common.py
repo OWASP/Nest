@@ -139,7 +139,7 @@ class RepositoryBasedEntityModel(models.Model):
         leaders = []
         try:
             for line in content.split("\n"):
-                leaders.extend(re.findall(r"[-*]\s*\[([^\]]+)\](?:\([^)]*\))?", line))
+                leaders.extend(re.findall(r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]", line))
         except AttributeError:
             logger.exception(
                 "Unable to parse leaders.md content", extra={"URL": self.leaders_md_url}
