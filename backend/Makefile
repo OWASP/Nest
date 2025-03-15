@@ -22,6 +22,7 @@ enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
 	owasp-enrich-committees \
+	owasp-enrich-events \
 	owasp-enrich-projects
 
 generate-sitemap:
@@ -70,6 +71,10 @@ owasp-enrich-committees:
 	@echo "Enriching OWASP committees"
 	@CMD="python manage.py owasp_enrich_committees" $(MAKE) exec-backend-command
 
+owasp-enrich-events:
+	@echo "Enriching OWASP events"
+	@CMD="python manage.py owasp_enrich_events" $(MAKE) exec-backend-command
+
 owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
@@ -97,6 +102,9 @@ owasp-scrape-committees:
 owasp-scrape-projects:
 	@echo "Scraping OWASP site projects data"
 	@CMD="python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
+
+owasp-sync-posts:
+	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command-it
 
 owasp-update-events:
 	@echo "Getting OWASP events data"
