@@ -30,6 +30,7 @@ import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
 import { toaster } from 'components/ui/toaster'
+import ScrollToTop from 'components/ScrollToTop'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -335,6 +336,7 @@ export default function Home() {
           </SecondaryCard>
         </div>
       </div>
+      <ScrollToTop />
     </div>
   )
 }

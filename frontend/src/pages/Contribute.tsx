@@ -11,6 +11,7 @@ import Card from 'components/Card'
 import MetadataManager from 'components/MetadataManager'
 import Modal from 'components/Modal'
 import SearchPageLayout from 'components/SearchPageLayout'
+import ScrollToTop from 'components/ScrollToTop'
 
 const ContributePage = () => {
   const {
@@ -85,6 +86,7 @@ const ContributePage = () => {
       >
         {issues && issues.map(renderContributeCard)}
       </SearchPageLayout>
+      <ScrollToTop />
     </MetadataManager>
   )
 }

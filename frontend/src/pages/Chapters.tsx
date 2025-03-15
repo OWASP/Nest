@@ -11,6 +11,7 @@ import Card from 'components/Card'
 import ChapterMap from 'components/ChapterMap'
 import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'
+import ScrollToTop from 'components/ScrollToTop'
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
@@ -98,6 +99,7 @@ const ChaptersPage = () => {
         )}
         {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
       </SearchPageLayout>
+      <ScrollToTop />
     </MetadataManager>
   )
 }

@@ -9,6 +9,7 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import MetadataManager from 'components/MetadataManager'
 import SearchPageLayout from 'components/SearchPageLayout'
+import ScrollToTop from 'components/ScrollToTop'
 import SortBy from 'components/SortBy'
 const ProjectsPage = () => {
   const {
@@ -82,6 +83,7 @@ const ProjectsPage = () => {
       >
         {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
       </SearchPageLayout>
+      <ScrollToTop />
     </MetadataManager>
   )
 }
