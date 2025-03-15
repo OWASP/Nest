@@ -8,8 +8,10 @@ community:
     url: https://discord.com/example
     description: Discord community
 events:
-  - url: https://example.com/event1
-  - url: https://example.com/event2
+  - title: OWASP Event
+    url: https://example.com/event1
+  - title: OWASP Event
+    url: https://example.com/event2
 leaders:
   - github: leader-1-github
     name: Leader 1 Name

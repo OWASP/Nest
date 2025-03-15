@@ -100,10 +100,20 @@
           "format": "email",
           "minLength": 5,
           "type": "string"
+        },
+        "title": {
+          "description": "Title of mailing list",
+          "minLength": 10,
+          "type": "string"
+        },
+        "url": {
+          "description": "URL to mailing list",
+          "format": "uri",
+          "type": "string"
         }
       },
       "required": [
-        "email"
+        "url"
       ],
       "title": "Mailing List",
       "type": "object"

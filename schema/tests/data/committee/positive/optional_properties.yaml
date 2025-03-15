@@ -7,8 +7,10 @@ community:
     url: https://discord.com/example
 description: This committee supports development initiatives.
 events:
-  - url: https://example.com/event1
-  - url: https://example.com/event2
+  - title: OWASP Event
+    url: https://example.com/event1
+  - title: OWASP Event
+    url: https://example.com/event2
 members:
   - github: leader1-github
     name: Leader One

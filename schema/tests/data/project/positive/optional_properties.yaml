@@ -17,7 +17,10 @@ downloads:
   - https://abc.com/download1
   - https://abc.com/download2
 events:
-  - url: https://eventtest1.com
+  - title: OWASP Event
+    url: https://example.com/event1
+  - title: OWASP Event
+    url: https://example.com/event2
 leaders:
   - github: leader-1-github
     name: Leader 1 Name

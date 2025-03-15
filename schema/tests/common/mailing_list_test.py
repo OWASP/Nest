@@ -14,6 +14,11 @@ SCHEMA_NAME = "mailing_list"
         ("description_null.yaml", "None is not of type 'string'"),
         ("email_empty.yaml", "'' is not a 'email'"),
         ("email_null.yaml", "None is not a 'email'"),
+        ("title_empty.yaml", "'' is too short"),
+        ("title_null.yaml", "None is not of type 'string'"),
+        ("url_empty.yaml", "'' is not a 'uri'"),
+        ("url_invalid.yaml", "'https://xyz' is not a 'uri'"),
+        ("url_null.yaml", "None is not a 'uri'"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):
