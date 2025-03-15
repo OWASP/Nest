@@ -126,6 +126,7 @@ const Card = ({
                     {topContributors.map((contributor, index) => (
                       <ContributorAvatar
                         key={contributor.login || `contributor-${index}`}
+                        uniqueKey={contributor.login || `contributor-${index}`}
                         contributor={contributor}
                       />
                     ))}
@@ -173,6 +174,7 @@ const Card = ({
                   {topContributors.map((contributor, index) => (
                     <ContributorAvatar
                       key={contributor.login || `contributor-${index}`}
+                      uniqueKey={contributor.login || `contributor-${index}`}
                       contributor={contributor}
                     />
                   ))}
