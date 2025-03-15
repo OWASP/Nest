@@ -116,7 +116,7 @@ class RepositoryBasedEntityModel(models.Model):
                 setattr(self, model_field, value)
 
         self.leaders_raw = self.get_leaders()
-        self.tags = self.parse_tags(entity_metadata.get("tags"))
+        self.tags = self.parse_tags(entity_metadata.get("tags", []))
 
         return entity_metadata
 
