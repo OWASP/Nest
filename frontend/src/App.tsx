@@ -18,7 +18,7 @@ import { ErrorDisplay, ERROR_CONFIGS } from 'wrappers/ErrorWrapper'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
-import { Toaster } from 'components/ui/Toaster'
+import { Toaster } from 'components/ui/toaster'
 
 function App() {
   const location = useLocation()
