@@ -8,8 +8,8 @@ from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.common import GenericEntityNode
 from apps.owasp.models.project import Project
 
-RECENT_ISSUES_LIMIT = 10
-RECENT_RELEASES_LIMIT = 10
+RECENT_ISSUES_LIMIT = 5
+RECENT_RELEASES_LIMIT = 5
 
 
 class ProjectNode(GenericEntityNode):

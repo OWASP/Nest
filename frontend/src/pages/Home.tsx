@@ -7,31 +7,36 @@ import {
   faFileCode,
   faMapMarkerAlt,
   faTag,
+  faUsers,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
-import { toast } from 'hooks/useToast'
 import { useEffect, useState } from 'react'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
+import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
+import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
+import { toaster } from 'components/ui/toaster'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [data, setData] = useState<MainPageData>(null)
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA)
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
+  const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (graphQLData) {
@@ -39,10 +44,10 @@ export default function Home() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
@@ -123,6 +128,7 @@ export default function Home() {
           </div>
           <div className="mx-auto mb-8 flex max-w-2xl justify-center">
             <MultiSearchBar
+              eventData={data.upcomingEvents}
               isLoaded={true}
               placeholder="Search the OWASP community"
               indexes={['chapters', 'projects', 'users']}
@@ -130,28 +136,38 @@ export default function Home() {
           </div>
         </div>
         <SecondaryCard title="Upcoming Events">
-          <div className="grid gap-4 md:grid-cols-3">
-            {data.upcomingEvents.map((event: EventType) => (
-              <div
-                key={event.name}
-                className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-              >
-                <h3 className="mb-2 truncate text-lg font-semibold text-blue-500">
-                  <a
-                    href={event.url}
-                    className="hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {data.upcomingEvents.map((event: EventType, index: number) => (
+              <div key={`card-${event.name}`}>
+                <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                  <button
+                    className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
+                    onClick={() => setModalOpenIndex(index)}
                   >
-                    {event.name}
-                  </a>
-                </h3>
-                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                  <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                    <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                    <h3 className="truncate">{event.name}</h3>
+                  </button>
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div className="mr-2 flex items-center">
+                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                    </div>
+                    {event.suggestedLocation && (
+                      <div className="flex items-center">
+                        <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 h-4 w-4" />
+                        <span>{event.suggestedLocation}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
+                <Modal
+                  key={`modal-${event.name}`}
+                  isOpen={modalOpenIndex === index}
+                  onClose={() => setModalOpenIndex(null)}
+                  title={event.name}
+                  summary={event.summary}
+                  button={{ label: 'View Event', url: event.url }}
+                  description="The event summary has been generated by AI"
+                ></Modal>
               </div>
             ))}
           </div>
@@ -176,6 +192,12 @@ export default function Home() {
                       <span>{chapter.suggestedLocation}</span>
                     </div>
                   </div>
+                  {chapter.leaders.length > 0 && (
+                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
+                      <span>{chapter.leaders.join(', ')}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -199,18 +221,22 @@ export default function Home() {
                         icon={getProjectIcon(project.type) as IconProp}
                         className="mr-2 h-4 w-4"
                       />
-                      <span>
-                        {project.type.charAt(0).toUpperCase() + project.type.slice(1).toLowerCase()}
-                      </span>
+                      <span>{capitalize(project.type)}</span>
                     </div>
                   </div>
+                  {project.leaders.length > 0 && (
+                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
+                      <span>{project.leaders.join(', ')}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </SecondaryCard>
         </div>
         <div className="mb-20">
-          <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Worldwide</h2>
+          <h2 className="mb-4 text-2xl font-semibold">OWASP Chapters Worldwide</h2>
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
@@ -248,6 +274,36 @@ export default function Home() {
             )}
           />
         </div>
+        <SecondaryCard title="Recent News & Opinions">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+            {data.recentPosts.map((post) => (
+              <div
+                key={post.title}
+                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                data-testid="post-container"
+              >
+                <h3 className="mb-1 truncate text-lg font-semibold text-blue-500">
+                  <a
+                    href={post.url}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {post.title}
+                  </a>
+                </h3>
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(post.publishedAt)}</span>
+                  </div>
+                  <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
+                  <span>{post.authorName}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
         <div className="grid gap-6 md:grid-cols-4">
           {counterData.map((stat, index) => (
             <SecondaryCard key={index} className="text-center">
@@ -271,7 +327,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="inline-block rounded bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600"
             >
-              Join OWASP Now
+              Join OWASP
             </a>
           </SecondaryCard>
           <SecondaryCard>
