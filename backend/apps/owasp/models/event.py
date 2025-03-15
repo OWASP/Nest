@@ -53,7 +53,11 @@ class Event(BulkSaveModel, TimestampedModel):
     @staticmethod
     def upcoming_events():
         """Get upcoming events."""
-        return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
+        return Event.objects.filter(
+            start_date__gt=timezone.now(),
+        ).order_by(
+            "start_date",
+        )
 
     @staticmethod
     def bulk_save(events, fields=None):
