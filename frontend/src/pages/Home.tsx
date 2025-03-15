@@ -29,6 +29,7 @@ import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
+import { TruncatedText } from 'components/TruncatedText'
 import { toaster } from 'components/ui/toaster'
 
 export default function Home() {
@@ -144,7 +145,9 @@ export default function Home() {
                     className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
-                    <h3 className="truncate text-wrap md:text-nowrap">{event.name}</h3>
+                    <h3 className="truncate text-wrap md:text-nowrap">
+                      <TruncatedText text={event.name} maxLength={40} />
+                    </h3>
                   </button>
                   <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
                     <div className="mr-2 flex items-center">
@@ -179,7 +182,7 @@ export default function Home() {
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <a href={`/chapters/${chapter.key}`} className="hover:underline">
-                      {chapter.name}
+                      <TruncatedText text={chapter.name} maxLength={40} />
                     </a>
                   </h3>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
@@ -208,7 +211,9 @@ export default function Home() {
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <a href={`/projects/${project.key}`} className="hover:underline">
-                      {project.name}
+                      <h3 className="truncate text-wrap md:text-nowrap">
+                        <TruncatedText text={project.name} maxLength={40} />
+                      </h3>
                     </a>
                   </h3>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
@@ -289,7 +294,7 @@ export default function Home() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {post.title}
+                    <TruncatedText text={post.title} maxLength={40} />
                   </a>
                 </h3>
                 <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
