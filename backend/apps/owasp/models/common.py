@@ -78,6 +78,8 @@ class RepositoryBasedEntityModel(models.Model):
         return (
             "https://raw.githubusercontent.com/OWASP/"
             f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
+            if self.owasp_repository
+            else None
         )
 
     @property
@@ -86,6 +88,8 @@ class RepositoryBasedEntityModel(models.Model):
         return (
             "https://raw.githubusercontent.com/OWASP/"
             f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/leaders.md"
+            if self.owasp_repository
+            else None
         )
 
     @property
@@ -111,8 +115,8 @@ class RepositoryBasedEntityModel(models.Model):
             if value:
                 setattr(self, model_field, value)
 
-        self.update_leaders()
-        self.update_tags()
+        self.leaders_raw = self.get_leaders()
+        self.tags = self.parse_tags(entity_metadata.get("tags"))
 
         return entity_metadata
 
@@ -126,11 +130,30 @@ class RepositoryBasedEntityModel(models.Model):
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
+    def get_leaders(self):
+        """Get leaders from leaders.md file on GitHub."""
+        content = get_repository_file_content(self.leaders_md_url)
+        if not content:
+            return []
+
+        leaders = []
+        for line in content.split("\n"):
+            try:
+                logger.debug("Processing line: %s", line)
+                # Match both standard Markdown list items with links and variations.
+                leaders.extend(re.findall(r"\*\s*\[([^\]]+)\](?:\([^)]*\))?", line))
+            except AttributeError:
+                logger.exception(
+                    "Unable to parse leaders.md content", extra={"URL": self.leaders_md_url}
+                )
+
+        return sorted(leaders)
+
     def get_metadata(self):
         """Get entity metadata."""
         try:
             yaml_content = re.search(
-                r"^---\s*(.*?)\s*---",
+                r"^---\s*([\s\S]*?)\s*---",
                 get_repository_file_content(self.index_md_url),
                 re.DOTALL,
             )
@@ -182,29 +205,10 @@ class RepositoryBasedEntityModel(models.Model):
             .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
         ]
 
-    def update_leaders(self):
-        """Get leaders from leaders.md file on GitHub."""
-        content = get_repository_file_content(self.leaders_md_url)
-        if not content:
-            return
-
-        leaders = []
-        for line in content.split("\n"):
-            try:
-                logger.debug("Processing line: %s", line)
-                # Match both standard Markdown list items with links and variations.
-                leaders.extend(re.findall(r"\*\s*\[([^\]]+)\](?:\([^)]*\))?", line))
-            except AttributeError:
-                logger.exception(
-                    "Unable to parse leaders.md content", extra={"URL": self.leaders_md_url}
-                )
-
-        self.leaders_raw = sorted(leaders)
-
-    def update_tags(self):
-        """Update entity tags."""
-        self.tags = (
-            [tag.strip(", ") for tag in self.tags.split("," if "," in self.tags else " ")]
-            if isinstance(self.tags, str)
-            else self.tags
+    def parse_tags(self, tags):
+        """Get entity tags."""
+        return (
+            [tag.strip(", ") for tag in tags.split("," if "," in tags else " ")]
+            if isinstance(tags, str)
+            else tags
         )
