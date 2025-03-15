@@ -17,9 +17,11 @@ downloads:
   - https://abc.com/download1
   - https://abc.com/download2
 events:
-  - title: OWASP Event
+  - description: OWASP event description
+    title: OWASP Event
     url: https://example.com/event1
-  - title: OWASP Event
+  - description: OWASP event description
+    title: OWASP Event
     url: https://example.com/event2
 leaders:
   - github: leader-1-github
@@ -33,6 +35,11 @@ logo:
   - large: https://example.com/largeLogo
     medium: https://example.com/mediumLogo
     small: https://example.com/smallLogo
+mailing_list:
+  - description: Mailing list description
+    email: testorg@example.com
+    title: Test mailing list
+    url: https://testmailinglist.com
 name: OWASP Incubator Code Project
 pitch: A very brief, one-line description of your project
 repositories:
