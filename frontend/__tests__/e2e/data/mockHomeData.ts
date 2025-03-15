@@ -37,6 +37,24 @@ export const mockHomeData = {
         leaders: ['Project Leader9', 'Project Leader10'],
       },
     ],
+    recentPosts: [
+      {
+        authorName: 'Author 1',
+        authorImageUrl: 'https://owasp.org/assets/images/people/author1.png',
+        publishedAt: '2025-02-23T18:45:30+00:00',
+        title: 'Post 1',
+        url: 'https://nest.owasp.org/posts/post-1',
+        __typename: 'PostNode',
+      },
+      {
+        authorName: 'Author 2',
+        authorImageUrl: 'https://owasp.org/assets/images/people/author2.png',
+        publishedAt: '2025-02-25T18:45:30+00:00',
+        title: 'Post 2',
+        url: 'https://nest.owasp.org/posts/post-2',
+        __typename: 'PostNode',
+      },
+    ],
     recentChapters: [
       {
         createdAt: '2025-02-20T14:30:00+00:00',

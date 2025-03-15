@@ -10,7 +10,7 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import join_values
 from apps.core.models.prompt import Prompt
-from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
+from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.chapter import ActiveChapterManager
 from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 
@@ -18,7 +18,6 @@ from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 class Chapter(
     BulkSaveModel,
     ChapterIndexMixin,
-    GenericEntityModel,
     RepositoryBasedEntityModel,
     TimestampedModel,
 ):
@@ -75,24 +74,24 @@ class Chapter(
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
-        field_mapping = {
-            "country": "country",
-            "currency": "currency",
-            "level": "level",
-            "meetup_group": "meetup-group",
-            "name": "title",
-            "postal_code": "postal-code",
-            "region": "region",
-            "tags": "tags",
-        }
-        RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
-
-        if repository:
-            self.created_at = repository.created_at
-            self.updated_at = repository.updated_at
-
-        # FKs.
         self.owasp_repository = repository
+
+        RepositoryBasedEntityModel.from_github(
+            self,
+            {
+                "country": "country",
+                "currency": "currency",
+                "level": "level",
+                "meetup_group": "meetup-group",
+                "name": "title",
+                "postal_code": "postal-code",
+                "region": "region",
+                "tags": "tags",
+            },
+        )
+
+        self.created_at = repository.created_at
+        self.updated_at = repository.updated_at
 
     def generate_geo_location(self):
         """Add latitude and longitude data."""
