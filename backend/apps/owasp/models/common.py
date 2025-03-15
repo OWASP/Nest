@@ -160,7 +160,8 @@ class RepositoryBasedEntityModel(models.Model):
             return yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
         except (AttributeError, yaml.scanner.ScannerError):
             logger.exception(
-                "Unable to parse entity metadata", extra={"repository": self.owasp_repository.name}
+                "Unable to parse entity metadata",
+                extra={"repository": getattr(self.owasp_repository, "name", None)},
             )
 
     def get_related_url(self, url, exclude_domains=(), include_domains=()):
