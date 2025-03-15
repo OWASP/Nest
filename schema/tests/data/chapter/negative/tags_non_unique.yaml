@@ -7,5 +7,6 @@ leaders:
     slack: leader-2-slack
 name: OWASP Chapter
 tags:
-  - chapter-tag-1
-  - chapter-tag-1
+  - example-tag-1
+  - example-tag-1
+  - example-tag-1
