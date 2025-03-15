@@ -12,6 +12,6 @@ meeting_minutes:
 name: OWASP Committee
 scope: test scope and purpose of project
 tags:
-  - security
-  - education
-  - development
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

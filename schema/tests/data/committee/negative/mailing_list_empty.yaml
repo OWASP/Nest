@@ -1,6 +1,5 @@
-description: This committee has an invalid event URL.
-events:
-  - xyz-abc
+description: This committee has null events.
+mailing_list: []
 members:
   - github: leader1-github
     name: Leader One
@@ -11,6 +10,6 @@ members:
 name: OWASP Committee
 scope: test scope and purpose of the project
 tags:
-  - security
-  - education
-  - development
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

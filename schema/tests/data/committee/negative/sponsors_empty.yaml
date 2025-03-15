@@ -10,6 +10,6 @@ name: OWASP Committee
 scope: test scope and purpose of the project
 sponsors: []
 tags:
-  - security
-  - education
-  - development
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
