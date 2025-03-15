@@ -122,9 +122,13 @@ const DetailsCard = ({
             />
           </div>
         )}
-        {type === 'project' && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
-            <RepositoriesCard repositories={repositories} />
+        {type === 'project' && (
+          <SecondaryCard title="Repositories" className="mt-6" id="repositories-section">
+            {repositories.length > 0 ? (
+              <RepositoriesCard repositories={repositories} />
+            ) : (
+              <p className="text-gray-500">No repositories available</p>
+            )}
           </SecondaryCard>
         )}
       </div>
