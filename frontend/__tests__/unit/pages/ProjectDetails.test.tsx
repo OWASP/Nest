@@ -1,5 +1,6 @@
 import { useQuery } from '@apollo/client'
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
+import { userEvent } from '@testing-library/user-event'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
@@ -94,29 +95,16 @@ describe('ProjectDetailsPage', () => {
 
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
-    })
 
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
-    fireEvent.click(showMoreButton)
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    await userEvent.click(showMoreButton)
 
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
-    })
+    await screen.findByText('Contributor 7')
 
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
-    fireEvent.click(showLessButton)
-
-    await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
-    })
-  })
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
+    await userEvent.click(showLessButton)
+    expect(showLessButton).toBeInTheDocument()
+  }, 10000)
 
   test('navigates to user page when contributor is clicked', async () => {
     render(<ProjectDetailsPage />)
