@@ -71,10 +71,9 @@ describe('Contribute Component', () => {
       totalPages: 4,
     })
     render(<ContributePage />)
-    await waitFor(() => {
-      const nextPageButton = screen.getByText('Next Page')
-      fireEvent.click(nextPageButton)
-    })
+    const nextPageButton = await screen.findByText('Next Page')
+    expect(nextPageButton).toBeInTheDocument()
+    fireEvent.click(nextPageButton)
     expect(window.scrollTo).toHaveBeenCalledWith({
       top: 0,
       behavior: 'auto',
@@ -155,10 +154,8 @@ describe('Contribute Component', () => {
     })
     render(<ContributePage />)
 
-    await waitFor(() => {
-      const readMoreButton = screen.getByText('Read More')
-      expect(readMoreButton).toBeInTheDocument()
-    })
+    const submitButton = await screen.findByRole('button', { name: /submit/i })
+    expect(submitButton).toBeInTheDocument()
   })
 
   test('opens modal when SubmitButton is clicked', async () => {
@@ -169,10 +166,8 @@ describe('Contribute Component', () => {
     })
     render(<ContributePage />)
 
-    await waitFor(() => {
-      const readMoreButton = screen.getByText('Read More')
-      fireEvent.click(readMoreButton)
-    })
+    const readMoreButton = await screen.findByText('Read More')
+    fireEvent.click(readMoreButton)
 
     await waitFor(() => {
       const modalTitle = screen.getByText('Close')
@@ -188,10 +183,8 @@ describe('Contribute Component', () => {
     })
     render(<ContributePage />)
 
-    await waitFor(() => {
-      const readMoreButton = screen.getByText('Read More')
-      fireEvent.click(readMoreButton)
-    })
+    const readMoreButton = await screen.findByText('Read More')
+    fireEvent.click(readMoreButton)
 
     await waitFor(() => {
       const closeButton = screen.getByText('Close')
