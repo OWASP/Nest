@@ -1,9 +1,8 @@
-import django
 import pytest
-from django.conf import settings
+from configurations import importer
 
 
 @pytest.fixture(scope="session", autouse=True)
-def _setup_django():
-    settings.configure()
-    django.setup()
+def django_configurations_setup():  # noqa: PT004
+    importer.install()
+    
