@@ -240,12 +240,12 @@ export default function Home() {
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
-            style={{ 
-              height: '400px', 
-              width: '100%', 
-              zIndex: '0', 
+            style={{
+              height: '400px',
+              width: '100%',
+              zIndex: '0',
               borderRadius: '0.5rem',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             }}
           />
         </div>
