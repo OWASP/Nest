@@ -17,9 +17,11 @@ from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
 
-INVALID_ISSUE_LINK_FORMAT = "Invalid GitHub issue link format."
 FETCH_ISSUE_ERROR = "Failed to fetch issue from GitHub: {error}"
 MIN_PARTS_LENGTH = 4
+VALID_PROJECT_ERROR = (
+    "Issue does not have a valid project and cannot be considered for sponsorship."
+)
 
 
 logger = logging.getLogger(__name__)
@@ -34,8 +36,6 @@ def sync_issue(issue_link):
 
     parsed_url = urlparse(issue_link)
     path_parts = parsed_url.path.strip("/").split("/")
-    if len(path_parts) < MIN_PARTS_LENGTH or path_parts[2] != "issues":
-        raise ValidationError(INVALID_ISSUE_LINK_FORMAT)
 
     github_token = os.getenv("GITHUB_TOKEN")
     github_client = Github(github_token)
@@ -75,6 +75,10 @@ def sync_issue(issue_link):
             organization=organization,
             user=repo_owner,
         )
+
+        if not repository.project:
+            logger.exception(VALID_PROJECT_ERROR)
+            return None
 
     return Issue.update_data(gh_issue, author=author, repository=repository)
 

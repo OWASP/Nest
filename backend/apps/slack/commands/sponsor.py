@@ -1,10 +1,13 @@
 """Slack bot sponsors command."""
 
 import logging
+from urllib.parse import urlparse
 
+from dateutil.parser import parse as date_parse
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
@@ -15,8 +18,10 @@ logger = logging.getLogger(__name__)
 COMMAND = "/sponsor"
 
 COMMAND_FORMAT_ERROR = (
-    "Invalid command format. Usage: `/sponsor task add <issue_link> <price_usd> [deadline]`"
+    "Invalid command format. Usage: `/sponsor task add <issue_link> <amount>[EUR|USD] [deadline]`"
 )
+DEADLINE_FORMAT_ERROR = "Invalid deadline format. Use YYYY-MM-DD or YYYY-MM-DD HH:MM."
+INVALID_ISSUE_LINK_FORMAT = "Invalid GitHub issue link format."
 DATE_INDEX = 4
 MIN_PARTS_LENGTH = 4
 TIME_INDEX = 5
@@ -32,44 +37,60 @@ def sponsor_handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    def validate_command_format(parts):
-        if len(parts) < MIN_PARTS_LENGTH:
-            raise ValidationError(COMMAND_FORMAT_ERROR)
-
     text = command.get("text", "")
     if text.startswith("task add"):
         try:
             parts = text.split()
-            validate_command_format(parts)
+            if len(parts) < MIN_PARTS_LENGTH:
+                logger.error(COMMAND_FORMAT_ERROR)
+                return
 
             issue_link = parts[2]
-            price = parts[3]
+            price_input = parts[3]
 
-            deadline_str = None
+            currency = Sponsorship.CurrencyType.USD
+            price = price_input
+
+            if price_input.endswith("EUR"):
+                currency = "EUR"
+                price = price_input[:-3]
+            elif price_input.endswith("USD"):
+                currency = "USD"
+                price = price_input[:-3]
+
+            parsed_url = urlparse(issue_link)
+            path_parts = parsed_url.path.strip("/").split("/")
+            if len(path_parts) < MIN_PARTS_LENGTH or path_parts[2] != "issues":
+                logger.error("Invalid GitHub issue link format")
+                return
+
+            deadline = None
             if len(parts) > DATE_INDEX:
-                deadline_str = parts[DATE_INDEX]
-                if len(parts) > TIME_INDEX:
-                    deadline_str += " " + parts[TIME_INDEX]
-
-            Sponsorship.validate_github_issue_link(issue_link)
-            validated_price = Sponsorship.validate_price(price)
-            deadline = Sponsorship.validate_deadline(deadline_str) if deadline_str else None
+                deadline_str = " ".join(parts[DATE_INDEX:])
+                try:
+                    deadline = date_parse(deadline_str).replace(
+                        tzinfo=timezone.get_current_timezone()
+                    )
+                except ValueError as e:
+                    raise ValidationError(DEADLINE_FORMAT_ERROR) from e
 
             with transaction.atomic():
                 issue = sync_issue(issue_link)
                 sponsorship, created = Sponsorship.objects.get_or_create(
                     issue=issue,
                     defaults={
-                        "price_usd": validated_price,
-                        "slack_user_id": command["user_id"],
+                        "amount": price,
+                        "currency": currency,
                         "deadline_at": deadline,
+                        "slack_user_id": command["user_id"],
                     },
                 )
 
                 if not created:
-                    sponsorship.price_usd = validated_price
-                    sponsorship.slack_user_id = command["user_id"]
+                    sponsorship.amount = price
+                    sponsorship.currency = currency
                     sponsorship.deadline_at = deadline
+                    sponsorship.slack_user_id = command["user_id"]
                     sponsorship.save()
 
             blocks = get_sponsorship_blocks(sponsorship)
@@ -99,9 +120,11 @@ def sponsor_handler(ack, command, client):
             ]
     else:
         usage_text = (
-            f"*Usage:* `/sponsor task add <issue_link> <price_usd> [deadline]`{NL}"
-            f"Example: `/sponsor task add https://github.com/ORG/Repo/issues/XYZ"
-            f"100 2025-12-31`{NL}"
+            f"*Usage:* `/sponsor task add <issue_link> <amount>[EUR|USD] [deadline]`{NL}"
+            f"Example: `/sponsor task add https://github.com/ORG/Repo/issues/XYZ "
+            f"100USD 2025-12-31`{NL}"
+            f"Example with EUR: `/sponsor task add https://github.com/ORG/Repo/issues/XYZ "
+            f"100EUR 2025-12-31`{NL}"
             f"Example with time: `/sponsor task add https://github.com/ORG/Repo/"
             f"issues/XYZ 100 2025-12-31 23:59`"
         )
@@ -129,6 +152,7 @@ if SlackConfig.app:
 
 def get_sponsorship_blocks(sponsorship):
     """Generate Slack blocks for the sponsorship confirmation message."""
+    currency_symbol = "€" if sponsorship.currency == "EUR" else "$"
     blocks = [
         {
             "type": "section",
@@ -136,7 +160,7 @@ def get_sponsorship_blocks(sponsorship):
                 "type": "mrkdwn",
                 "text": f"🎉 *Sponsorship created successfully!* 🎉{NL}"
                 f"*Issue:* {sponsorship.issue.title}{NL}"
-                f"*Price:* ${sponsorship.price_usd}{NL}"
+                f"*Price:* {currency_symbol}{sponsorship.amount} ({sponsorship.currency}){NL}"
                 f"*Created by:* <@{sponsorship.slack_user_id}>{NL}",
             },
         }
