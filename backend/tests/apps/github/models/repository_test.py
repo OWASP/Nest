@@ -2,9 +2,9 @@ from base64 import b64encode
 from unittest.mock import MagicMock
 
 import pytest
-from github.GithubException import GithubException
 
 from apps.github.models.repository import Repository
+from github.GithubException import GithubException
 
 
 class TestRepositoryModel:
