@@ -50,8 +50,8 @@ function App() {
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
-      <ScrollToTop />
       <Footer />
+      <ScrollToTop />
     </main>
   )
 }
