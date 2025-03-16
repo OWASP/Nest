@@ -10,17 +10,17 @@ SCHEMA_NAME = "person"
 @pytest.mark.parametrize(
     ("file_path", "error_message"),
     [
-        ("email-empty.yaml", "'' is not a 'email'"),
-        ("email-invalid.yaml", "'name@invalid' is not a 'email'"),
-        ("email-null.yaml", "None is not a 'email'"),
-        ("github-empty.yaml", "'' does not match '^[a-zA-Z0-9-]{1,39}$'"),
-        ("github-invalid.yaml", "'user@name' does not match '^[a-zA-Z0-9-]{1,39}$'"),
-        ("github-null.yaml", "None is not of type 'string'"),
-        ("github-undefined.yaml", "'github' is a required property"),
-        ("name-empty.yaml", "'' is too short"),
-        ("name-null.yaml", "None is not of type 'string'"),
-        ("slack-empty.yaml", "'' does not match '^[a-zA-Z0-9._-]{1,21}$'"),
-        ("slack-null.yaml", "None is not of type 'string'"),
+        ("email_empty.yaml", "'' is not a 'email'"),
+        ("email_invalid.yaml", "'name@invalid' is not a 'email'"),
+        ("email_null.yaml", "None is not a 'email'"),
+        ("github_empty.yaml", "'' does not match '^[a-zA-Z0-9-]{1,39}$'"),
+        ("github_invalid.yaml", "'user@name' does not match '^[a-zA-Z0-9-]{1,39}$'"),
+        ("github_null.yaml", "None is not of type 'string'"),
+        ("github_undefined.yaml", "'github' is a required property"),
+        ("name_empty.yaml", "'' is too short"),
+        ("name_null.yaml", "None is not of type 'string'"),
+        ("slack_empty.yaml", "'' does not match '^[a-zA-Z0-9._-]{1,21}$'"),
+        ("slack_null.yaml", "None is not of type 'string'"),
     ],
 )
 def test_negative(common_schema, file_path, error_message):

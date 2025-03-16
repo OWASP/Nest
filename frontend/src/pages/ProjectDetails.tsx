@@ -8,7 +8,6 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
-import { toast } from 'hooks/useToast'
 import millify from 'millify'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
@@ -20,6 +19,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -36,10 +36,10 @@ const ProjectDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
@@ -63,11 +63,11 @@ const ProjectDetailsPage = () => {
     )
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
+    { label: 'Leaders', value: project.leaders.join(', ') },
     {
       label: 'Level',
       value: capitalize(project.level),
     },
-    { label: 'Project Leaders', value: project.leaders.join(', ') },
     { label: 'Type', value: capitalize(project.type) },
     {
       label: 'URL',

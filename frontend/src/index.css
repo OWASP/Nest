@@ -162,6 +162,10 @@ a {
   }
 }
 
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
@@ -266,6 +270,10 @@ a {
   background-color: #2c3e50;
 }
 
+.leaflet-marker-icon {
+  color: #4b5563;
+}
+
 .heatmap-background-loader {
   filter: blur(1px);
   transition: filter 2s ease;
@@ -283,13 +291,4 @@ a {
   top: 45%;
   left: 50%;
   opacity: 0.6;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }

@@ -16,22 +16,24 @@ export const GET_PROJECT_DATA = gql`
         title
         commentsCount
         createdAt
+        url
         author {
           avatarUrl
           login
           name
+          url
         }
       }
       recentReleases {
-        name
-        tagName
-        isPreRelease
-        publishedAt
         author {
           avatarUrl
           login
           name
         }
+        name
+        publishedAt
+        tagName
+        url
       }
       repositories {
         contributorsCount

@@ -6,10 +6,12 @@ from django.utils.safestring import mark_safe
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
+from apps.owasp.models.post import Post
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 from apps.owasp.models.snapshot import Snapshot
+from apps.owasp.models.sponsor import Sponsor
 
 
 class GenericEntityAdminMixin:
@@ -65,8 +67,28 @@ class CommitteeAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = (
+        "name",
+        "suggested_location",
+    )
     search_fields = ("name",)
+
+
+class PostAdmin(admin.ModelAdmin):
+    """Admin configuration for Post model."""
+
+    list_display = (
+        "author_name",
+        "published_at",
+        "title",
+    )
+    search_fields = (
+        "author_image_url",
+        "author_name",
+        "published_at",
+        "title",
+        "url",
+    )
 
 
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
@@ -141,10 +163,42 @@ class SnapshotAdmin(admin.ModelAdmin):
     )
 
 
+class SponsorAdmin(admin.ModelAdmin):
+    """Admin configuration for Sponsor model."""
+
+    list_display = (
+        "name",
+        "sort_name",
+        "sponsor_type",
+        "is_member",
+        "member_type",
+    )
+
+    search_fields = (
+        "name",
+        "sort_name",
+        "description",
+    )
+
+    list_filter = (
+        "sponsor_type",
+        "is_member",
+        "member_type",
+    )
+
+    fieldsets = (
+        ("Basic Information", {"fields": ("name", "sort_name", "description")}),
+        ("URLs and Images", {"fields": ("url", "job_url", "image_url")}),
+        ("Status", {"fields": ("is_member", "member_type", "sponsor_type")}),
+    )
+
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
+admin.site.register(Post, PostAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectHealthMetrics)
 admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)
+admin.site.register(Sponsor, SponsorAdmin)

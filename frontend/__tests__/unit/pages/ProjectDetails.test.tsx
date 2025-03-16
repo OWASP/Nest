@@ -1,19 +1,22 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-import { toast } from 'hooks/useToast'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
+import { toaster } from 'components/ui/toaster'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
+
+jest.mock('components/ui/toaster', () => ({
+  toaster: {
+    create: jest.fn(),
+  },
+}))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ projectKey: 'test-project' }),
@@ -82,10 +85,10 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => screen.getByText('Project not found'))
     expect(screen.getByText('Project not found')).toBeInTheDocument()
-    expect(toast).toHaveBeenCalledWith({
+    expect(toaster.create).toHaveBeenCalledWith({
       description: 'Unable to complete the requested operation.',
       title: 'GraphQL Request Failed',
-      variant: 'destructive',
+      type: 'error',
     })
   })
 
@@ -121,7 +124,7 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('p')?.click()
+    screen.getByText('Contributor 1').closest('button')?.click()
 
     expect(navigateMock).toHaveBeenCalledWith('/community/users/contributor1')
   })
@@ -134,8 +137,6 @@ describe('ProjectDetailsPage', () => {
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
-
-        expect(screen.getAllByText(issue.author.name).length).toBeGreaterThan(0)
 
         expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
       })

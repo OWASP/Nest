@@ -92,7 +92,14 @@ const ChaptersPage = () => {
         {chapters.length > 0 && (
           <ChapterMap
             geoLocData={searchQuery ? chapters : geoLocData}
-            style={{ height: '400px', width: '100%', zIndex: '0' }}
+            showLocal={true}
+            style={{
+              height: '400px',
+              width: '100%',
+              zIndex: '0',
+              borderRadius: '0.5rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
           />
         )}
         {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}

@@ -300,8 +300,8 @@ jobs:
       - name: Prepare secrets
         run: |
           # Backend
-          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" > .env.backend
-          echo "DJANGO_ALGOLIA_APPLICATION_REGION=${{ secrets.DJANGO_ALGOLIA_APPLICATION_REGION }}" >> .env.backend
+          touch .env.backend
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" >> .env.backend
           echo "DJANGO_ALGOLIA_WRITE_API_KEY=${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}" >> .env.backend
           echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env.backend
           echo "DJANGO_AWS_ACCESS_KEY_ID=${{ secrets.DJANGO_AWS_ACCESS_KEY_ID }}" >> .env.backend
@@ -322,7 +322,8 @@ jobs:
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
 
           # Database
-          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" > .env.db
+          touch .env.db
+          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
 
@@ -398,6 +399,7 @@ jobs:
 
       - name: Prepare frontend environment
         run: |
+          touch frontend/.env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
@@ -442,8 +444,8 @@ jobs:
       - name: Prepare secrets
         run: |
           # Backend
-          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" > .env.backend
-          echo "DJANGO_ALGOLIA_APPLICATION_REGION=${{ secrets.DJANGO_ALGOLIA_APPLICATION_REGION }}" >> .env.backend
+          touch .env.backend
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" >> .env.backend
           echo "DJANGO_ALGOLIA_WRITE_API_KEY=${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}" >> .env.backend
           echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env.backend
           echo "DJANGO_AWS_ACCESS_KEY_ID=${{ secrets.DJANGO_AWS_ACCESS_KEY_ID }}" >> .env.backend
@@ -464,7 +466,8 @@ jobs:
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
 
           # Database
-          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" > .env.db
+          touch .env.db
+          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
 

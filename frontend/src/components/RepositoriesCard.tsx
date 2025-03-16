@@ -55,12 +55,13 @@ const RepositoryItem = ({ details }) => {
   }
   return (
     <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <p
+      <button
         onClick={handleClick}
         className="font-semibold text-blue-600 hover:cursor-pointer hover:underline dark:text-sky-400"
       >
-        {details.name}
-      </p>
+        {details?.name}
+      </button>
+
       <div className="space-y-2 text-sm">
         <InfoItem
           icon={faStar}

@@ -1,19 +1,21 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
-import { toast } from 'hooks/useToast'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
+import { toaster } from 'components/ui/toaster'
 import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
-
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
+}))
+
+jest.mock('components/ui/toaster', () => ({
+  toaster: {
+    create: jest.fn(),
+  },
 }))
 
 jest.mock('react-router-dom', () => ({
@@ -72,7 +74,8 @@ describe('UserDetailsPage', () => {
 
     expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText(`@testuser`)).toBeInTheDocument()
-    expect(screen.getByText('This is a test user')).toBeInTheDocument()
+    expect(screen.getByText('Test')).toBeInTheDocument()
+    expect(screen.getByText('@User')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
   })
@@ -121,10 +124,10 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => screen.getByText('User not found'))
-    expect(toast).toHaveBeenCalledWith({
+    expect(toaster.create).toHaveBeenCalledWith({
       description: 'Unable to complete the requested operation.',
       title: 'GraphQL Request Failed',
-      variant: 'destructive',
+      type: 'error',
     })
   })
 })

@@ -1,0 +1,14 @@
+description: This committee focuses on security initiatives.
+members:
+  - github: leader1-github
+    name: Leader One
+    role: Chair
+  - github: leader2-github
+    name: Leader Two
+    role: Vice Chair
+name: OWASP Security Committee
+scope: test scope and purpose of the project
+tags:
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

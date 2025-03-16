@@ -3,8 +3,10 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.github.constants import GITHUB_GHOST_USER_LOGIN, OWASP_FOUNDATION_LOGIN
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
+from apps.github.models.organization import Organization
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
@@ -51,6 +53,15 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
                 setattr(self, model_field, value)
 
         self.is_bot = gh_user.type == "Bot"
+
+    @staticmethod
+    def get_non_indexable_logins():
+        """Return non-indexable logins."""
+        return {
+            GITHUB_GHOST_USER_LOGIN,
+            OWASP_FOUNDATION_LOGIN,
+            *Organization.get_logins(),
+        }
 
     @staticmethod
     def update_data(gh_user, save=True):
