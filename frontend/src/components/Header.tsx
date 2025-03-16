@@ -1,4 +1,4 @@
-import { Button } from '@chakra-ui/react'
+import { Button, Drawer, Portal } from '@chakra-ui/react'
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -17,6 +17,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= desktopViewMinWidth) {
@@ -24,26 +25,10 @@ export default function Header() {
       }
     }
 
-    const handleOutsideClick = (event) => {
-      const navbar = document.getElementById('navbar-sticky')
-      const sidebar = document.querySelector('.fixed.inset-y-0')
-      if (
-        mobileMenuOpen &&
-        navbar &&
-        !navbar.contains(event.target) &&
-        sidebar &&
-        !sidebar.contains(event.target)
-      ) {
-        setMobileMenuOpen(false)
-      }
-    }
-
     window.addEventListener('resize', handleResize)
-    window.addEventListener('click', handleOutsideClick)
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      window.removeEventListener('click', handleOutsideClick)
     }
   }, [mobileMenuOpen])
 
@@ -122,67 +107,76 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800',
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
+      <Drawer.Root
+        size={'xs'}
+        placement={'start'}
+        open={mobileMenuOpen}
+        onInteractOutside={() => setMobileMenuOpen(false)}
       >
-        <div className="flex h-full flex-col justify-between space-y-1 px-2 pb-3 pt-2">
-          {/* Logo */}
-          <div className="flex flex-col justify-center gap-1">
-            <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
-              <div className="flex h-full items-center">
-                <img
-                  src={'/img/owasp_icon_white_sm.png'}
-                  className="hidden h-16 dark:block"
-                  alt="OWASP Logo"
-                ></img>
-                <img
-                  src={'/img/owasp_icon_black_sm.png'}
-                  className="block h-16 dark:hidden"
-                  alt="OWASP Logo"
-                ></img>
-                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-                  Nest
-                </div>
-              </div>
-            </NavLink>
-            {headerLinks.map((link, i) => (
-              <NavLink
-                key={i}
-                to={link.href}
-                className={cn(
-                  'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                  location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                )}
-                onClick={toggleMobileMenu}
-              >
-                {link.text}
-              </NavLink>
-            ))}
-          </div>
+        <Drawer.Backdrop />
+        <Portal>
+          <Drawer.Positioner>
+            <Drawer.Content>
+              <Drawer.Body className="bg-owasp-blue dark:bg-slate-800">
+                <div className="flex h-full flex-col justify-between space-y-1 px-2 pb-3 pt-2">
+                  <div className="flex flex-col justify-center gap-1">
+                    <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
+                      <div className="flex h-full items-center">
+                        <img
+                          src={'/img/owasp_icon_white_sm.png'}
+                          className="hidden h-16 dark:block"
+                          alt="OWASP Logo"
+                        ></img>
+                        <img
+                          src={'/img/owasp_icon_black_sm.png'}
+                          className="block h-16 dark:hidden"
+                          alt="OWASP Logo"
+                        ></img>
+                        <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                          Nest
+                        </div>
+                      </div>
+                    </NavLink>
+                    {headerLinks.map((link, i) => (
+                      <NavLink
+                        key={i}
+                        to={link.href}
+                        className={cn(
+                          'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                          location.pathname === link.href &&
+                            'font-bold text-blue-800 dark:text-white'
+                        )}
+                        onClick={toggleMobileMenu}
+                      >
+                        {link.text}
+                      </NavLink>
+                    ))}
+                  </div>
 
-          <div className="flex flex-col gap-y-2">
-            <NavButton
-              href="https://github.com/OWASP/Nest"
-              defaultIcon={faRegularStar}
-              hoverIcon={faSolidStar}
-              defaultIconColor="#FDCE2D"
-              hoverIconColor="text-yellow-400"
-              text="Star On Github"
-            />
-            <NavButton
-              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-              defaultIcon={faRegularHeart}
-              hoverIcon={faSolidHeart}
-              defaultIconColor="#b55f95"
-              hoverIconColor="#d9156c"
-              text="Sponsor Us"
-            />
-          </div>
-        </div>
-      </div>
+                  <div className="flex flex-col gap-y-2">
+                    <NavButton
+                      href="https://github.com/OWASP/Nest"
+                      defaultIcon={faRegularStar}
+                      hoverIcon={faSolidStar}
+                      defaultIconColor="#FDCE2D"
+                      hoverIconColor="text-yellow-400"
+                      text="Star On Github"
+                    />
+                    <NavButton
+                      href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+                      defaultIcon={faRegularHeart}
+                      hoverIcon={faSolidHeart}
+                      defaultIconColor="#b55f95"
+                      hoverIconColor="#d9156c"
+                      text="Sponsor Us"
+                    />
+                  </div>
+                </div>
+              </Drawer.Body>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     </header>
   )
 }

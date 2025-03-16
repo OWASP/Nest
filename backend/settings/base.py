@@ -111,7 +111,6 @@ class Base(Configuration):
     WSGI_APPLICATION = "wsgi.application"
 
     ALGOLIA_APPLICATION_ID = values.SecretValue(environ_name="ALGOLIA_APPLICATION_ID")
-    ALGOLIA_APPLICATION_REGION = values.SecretValue(environ_name="ALGOLIA_APPLICATION_REGION")
     ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES = values.Value(
         environ_name="ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES"
     )
@@ -188,7 +187,7 @@ class Base(Configuration):
     SECRET_KEY = values.SecretValue()
 
     # https://docs.djangoproject.com/en/5.1/ref/settings/#data-upload-max-number-fields
-    DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = 15000
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
 

@@ -1,7 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { Link } from '@chakra-ui/react'
 import { GET_CHAPTER_DATA } from 'api/queries/chapterQueries'
-import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ChapterTypeGraphQL } from 'types/chapter'
@@ -10,6 +9,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -26,10 +26,10 @@ export default function ChapterDetailsPage() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }

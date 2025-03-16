@@ -1,8 +1,8 @@
 import { Button } from '@chakra-ui/react'
 import * as Sentry from '@sentry/react'
-import { toast } from 'hooks/useToast'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toaster } from 'components/ui/toaster'
 
 interface ErrorDisplayProps {
   statusCode: number
@@ -73,8 +73,8 @@ export const handleAppError = (error: unknown) => {
   }
   const errorConfig = ERROR_CONFIGS[appError.statusCode === 404 ? '404' : '500']
 
-  toast({
-    variant: 'destructive',
+  toaster.create({
+    type: 'error',
     title: errorConfig.title,
     description: errorConfig.message || appError.message,
     duration: 5000,
