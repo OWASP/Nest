@@ -11,25 +11,25 @@ PRICE_USD = 100.0
 
 class TestSponsorshipModel:
     @pytest.mark.parametrize(
-        ("price_usd", "deadline_at", "slack_user_id"),
+        ("amount", "deadline_at", "slack_user_id"),
         [
             (100.0, timezone.now(), "U12345"),
             (200.0, None, "U67890"),
         ],
     )
     @patch.object(Sponsorship, "save")
-    def test_update_data(self, mock_save, price_usd, deadline_at, slack_user_id):
+    def test_update_data(self, mock_save, amount, deadline_at, slack_user_id):
         """Test the update_data method of the Sponsorship model."""
         sponsorship = Sponsorship()
 
         updated_sponsorship = Sponsorship.update_data(
             sponsorship,
-            price_usd=price_usd,
+            amount=amount,
             deadline_at=deadline_at,
             slack_user_id=slack_user_id,
         )
 
-        assert updated_sponsorship.price_usd == price_usd
+        assert updated_sponsorship.amount == amount
         assert updated_sponsorship.deadline_at == deadline_at
         assert updated_sponsorship.slack_user_id == slack_user_id
         mock_save.assert_called_once()
@@ -41,7 +41,7 @@ class TestSponsorshipModel:
 
         Sponsorship.update_data(
             sponsorship,
-            price_usd=PRICE_USD,
+            amount=PRICE_USD,
             deadline_at=timezone.now(),
             slack_user_id="U12345",
         )
@@ -60,10 +60,10 @@ class TestSponsorshipModel:
         self, mock_save, initial_price, updated_price, initial_deadline, updated_deadline
     ):
         """Test partial updates using the update_data method."""
-        sponsorship = Sponsorship(price_usd=initial_price, deadline_at=initial_deadline)
+        sponsorship = Sponsorship(amount=initial_price, deadline_at=initial_deadline)
 
-        Sponsorship.update_data(sponsorship, price_usd=updated_price)
-        assert sponsorship.price_usd == updated_price
+        Sponsorship.update_data(sponsorship, amount=updated_price)
+        assert sponsorship.amount == updated_price
         assert sponsorship.deadline_at == initial_deadline
         mock_save.assert_called_once()
 
@@ -71,7 +71,7 @@ class TestSponsorshipModel:
 
         # Update only the deadline
         Sponsorship.update_data(sponsorship, deadline_at=updated_deadline)
-        assert sponsorship.price_usd == updated_price
+        assert sponsorship.amount == updated_price
         assert sponsorship.deadline_at == updated_deadline
         mock_save.assert_called_once()
 
@@ -83,23 +83,23 @@ class TestSponsorshipModel:
 
         mock_create.return_value = Sponsorship(
             issue=issue,
-            price_usd=PRICE_USD,
+            amount=PRICE_USD,
             slack_user_id="U12345",
         )
 
         sponsorship = Sponsorship.objects.create(
             issue=issue,
-            price_usd=100.0,
+            amount=100.0,
             slack_user_id="U12345",
         )
 
         assert sponsorship.issue == issue
-        assert sponsorship.price_usd == PRICE_USD
+        assert sponsorship.amount == PRICE_USD
         assert sponsorship.slack_user_id == "U12345"
         assert sponsorship.deadline_at is None
         mock_create.assert_called_once_with(
             issue=issue,
-            price_usd=100.0,
+            amount=100.0,
             slack_user_id="U12345",
         )
 
@@ -115,14 +115,14 @@ class TestSponsorshipModel:
         # Mock the return value of Sponsorship.objects.create
         mock_create.return_value = Sponsorship(
             issue=issue,
-            price_usd=100.0,
+            amount=100.0,
             slack_user_id="U12345",
             deadline_at=deadline,
         )
 
         sponsorship = Sponsorship.objects.create(
             issue=issue,
-            price_usd=100.0,
+            amount=100.0,
             slack_user_id="U12345",
             deadline_at=deadline,
         )
@@ -130,7 +130,7 @@ class TestSponsorshipModel:
         assert sponsorship.deadline_at == deadline
         mock_create.assert_called_once_with(
             issue=issue,
-            price_usd=100.0,
+            amount=100.0,
             slack_user_id="U12345",
             deadline_at=deadline,
         )
