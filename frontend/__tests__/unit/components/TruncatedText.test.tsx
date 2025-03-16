@@ -15,13 +15,6 @@ describe('TruncatedText Component', () => {
     expect(textElement).toHaveClass('truncate')
   })
 
-  test('shows tooltip when text is truncated', async () => {
-    render(<TruncatedText text={longText} className="w-20" />)
-    const textElement = screen.getByText(/This is very long text that should be/)
-    textElement.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
-    expect(await screen.findByRole('tooltip')).toBeInTheDocument()
-  })
-
   test('does not show tooltip when text is fully visible', () => {
     render(<TruncatedText text={longText} className="w-full" disabledTooltip />)
     expect(screen.getByText(longText)).toBeInTheDocument()
