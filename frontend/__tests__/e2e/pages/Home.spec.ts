@@ -88,16 +88,15 @@ test.describe('Home Page', () => {
 
   test('should truncate long titles in new chapters', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
-    const chapterTitle = page.getByTestId('chapter-title')
+    const chapterTitle = page.locator('h3 span').first()
     await expect(chapterTitle).toHaveClass(/truncate/)
     await chapterTitle.hover()
-    const tooltip = page.getByRole('tooltip', { name: /.*/ })
-    await expect(tooltip).toBeVisible()
+    await expect(page.getByRole('tooltip')).toBeVisible()
   })
 
   test('should truncate long titles in upcoming events', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
-    const eventTitle = page.locator('button h3 span')
+    const eventTitle = page.locator('button h3 span').first()
     await expect(eventTitle).toHaveClass(/truncate/)
     await eventTitle.hover()
     await expect(page.getByRole('tooltip')).toBeVisible()
