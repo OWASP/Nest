@@ -1,24 +1,33 @@
+import { useRef, useState, useEffect } from 'react'
 import { Tooltip } from 'components/ui/tooltip'
 
 export const TruncatedText = ({
   text,
-  maxLength = 40,
   className = '',
   disabledTooltip = false,
 }: {
   text: string
-  maxLength?: number
   className?: string
   disabledTooltip?: boolean
 }) => {
-  const isTruncated = text.length > maxLength
-  const displayText = isTruncated ? `${text.slice(0, maxLength)}...` : text
+  const textRef = useRef<HTMLSpanElement>(null)
+  const [isTruncated, setIsTruncated] = useState(false)
 
-  return !isTruncated || disabledTooltip ? (
-    <span className={className}>{text}</span>
-  ) : (
-    <Tooltip content={text}>
-      <span className={`truncate ${className}`}>{displayText}</span>
+  useEffect(() => {
+    const element = textRef.current
+    if (element) {
+      setIsTruncated(element.scrollWidth > element.clientWidth)
+    }
+  }, [text])
+
+  return (
+    <Tooltip content={text} disabled={!isTruncated || disabledTooltip}>
+      <span
+        ref={textRef}
+        className={`block overflow-hidden truncate text-ellipsis whitespace-nowrap ${className}`}
+      >
+        {text}
+      </span>
     </Tooltip>
   )
 }

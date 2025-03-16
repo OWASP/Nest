@@ -40,7 +40,7 @@ const ItemCardList = ({
                     href={item?.url}
                     target="_blank"
                   >
-                    <TruncatedText text={item.title || item.name} maxLength={40} />
+                    <TruncatedText text={item.title || item.name} />
                   </a>
                 </h3>
               </div>
