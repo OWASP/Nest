@@ -9,7 +9,7 @@ from apps.slack.commands.contribute import contribute_handler
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
@@ -69,9 +69,9 @@ class TestContributeHandler:
                 {
                     "idx_title": "Test Contribution",
                     "idx_project_name": "Test Project",
-                    "idx_project_url": "http://example.com/project",
+                    "idx_project_url": "https://example.com/project",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com/contribution",
+                    "idx_url": "https://example.com/contribution",
                 }
             ],
             "nbPages": 1,

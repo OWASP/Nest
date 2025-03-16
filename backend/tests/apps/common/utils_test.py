@@ -16,11 +16,11 @@ class TestUtils:
     @pytest.mark.parametrize(
         ("path", "expected"),
         [
-            ("some/view", "http://example.com/some/view"),
-            ("another/view", "http://example.com/another/view"),
+            ("some/view", "https://example.com/some/view"),
+            ("another/view", "https://example.com/another/view"),
         ],
     )
-    @patch.object(settings, "SITE_URL", "http://example.com")
+    @patch.object(settings, "SITE_URL", "https://example.com")
     def test_get_absolute_url(self, path, expected):
         assert get_absolute_url(path) == expected
 
