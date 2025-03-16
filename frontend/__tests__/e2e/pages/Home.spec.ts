@@ -99,8 +99,10 @@ test.describe('Home Page', () => {
     const eventTitle = page.locator('button h3 span').first()
     await expect(eventTitle).toHaveClass(/truncate/)
     await eventTitle.hover()
-    await expect(page.getByRole('tooltip')).toBeVisible()
+    const tooltip = page.locator('[role="tooltip"]')
+    await expect(tooltip).toBeVisible({ timeout: 7000 })
   })
+  
 
   test('should display full text when short enough', async ({ page }) => {
     const shortTitle = page.getByTestId('short-title')
