@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
-import { SnapshotDetailsProps } from 'types/snapshot'
+import { SnapshotDetailsProps, Snapshots } from 'types/snapshot'
 import { METADATA_CONFIG } from 'utils/metadata'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import MetadataManager from 'components/MetadataManager'
@@ -12,15 +12,14 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import { toast } from 'hooks/useToast'
 
 const SnapshotsPage = () => {
+  const [snapshots, setSnapshots] = useState<Snapshots[] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [data, setData] = useState(null)
-  const { data: recentSnapshots, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
 
-  console.log(recentSnapshots)
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
 
   useEffect(() => {
-    if (recentSnapshots) {
-      setData(recentSnapshots)
+    if (graphQLData) {
+      setSnapshots(graphQLData.snapshots)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -31,17 +30,15 @@ const SnapshotsPage = () => {
       })
       setIsLoading(false)
     }
-  }, [recentSnapshots, graphQLRequestError])
+  }, [graphQLData, graphQLRequestError])
 
   const navigate = useNavigate()
 
-  const handleButtonClick = (snapshot: SnapshotDetailsProps) => {
+  const handleButtonClick = (snapshot: Snapshots) => {
     navigate(`/community/snapshots/${snapshot.key}`)
   }
 
-
-
-  const renderSnapshotCard = (snapshot: SnapshotDetailsProps) => {
+  const renderSnapshotCard = (snapshot: Snapshots) => {
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
@@ -53,7 +50,7 @@ const SnapshotsPage = () => {
         title={snapshot.title}
         button={SubmitButton}
         startAt={snapshot.startAt}
-        endAt={snapshot.endAt}
+        // endAt={snapshot.endAt}
       />
     )
   }
@@ -68,12 +65,24 @@ const SnapshotsPage = () => {
 
   return (
     <MetadataManager {...METADATA_CONFIG.snapshot}>
+      <SearchPageLayout
+        currentPage={1}
+        empty="No Snapshots found"
+        indexName="snapshots"
+        isLoaded={!isLoading}
+        onPageChange={() => {}}
+        onSearch={() => {}}
+        searchPlaceholder="Search for OWASP Snapshots..."
+        searchQuery=""
+        totalPages={1}
+      >
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {data &&
-          data.map((snapshot: SnapshotDetailsProps) => (
+        {snapshots &&
+          snapshots.map((snapshot: Snapshots) => (
             <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
           ))}
       </div>
+      </SearchPageLayout>
     </MetadataManager>
   )
 }
