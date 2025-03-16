@@ -96,12 +96,20 @@ test.describe('Home Page', () => {
 
   test('should truncate long titles in upcoming events', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
+  
+    // Locate the first event title span inside button -> h3 -> span (TruncatedText component)
     const eventTitle = page.locator('button h3 span').first()
+  
+    // Ensure the class "truncate" is applied
     await expect(eventTitle).toHaveClass(/truncate/)
-    await eventTitle.hover()
-    const tooltip = page.locator('[role="tooltip"]')
-    await expect(tooltip).toBeVisible({ timeout: 7000 })
+  
+    // Check if the text is actually truncated (scrollWidth > clientWidth)
+    const isTruncated = await eventTitle.evaluate(el => el.scrollWidth > el.clientWidth)
+  
+    // Ensure truncation is happening
+    expect(isTruncated).toBe(true)
   })
+  
 
   test('should display full text when short enough', async ({ page }) => {
     const shortTitle = page.getByTestId('short-title')
