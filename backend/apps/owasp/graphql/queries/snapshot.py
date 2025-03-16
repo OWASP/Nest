@@ -10,6 +10,8 @@ from apps.owasp.models.snapshot import Snapshot
 class SnapshotQuery(BaseQuery):
     """Snapshot queries."""
 
+    all_snapshots = graphene.List(SnapshotNode)
+
     snapshot = graphene.Field(
         SnapshotNode,
         key=graphene.String(required=True),

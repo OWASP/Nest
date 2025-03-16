@@ -18,7 +18,8 @@ import { ErrorDisplay, ERROR_CONFIGS } from 'wrappers/ErrorWrapper'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
-import { Toaster } from 'components/ui/Toaster'
+import { Toaster } from 'components/ui/toaster'
+import Snapshots from 'pages/Snapshots'
 
 function App() {
   const location = useLocation()
@@ -46,6 +47,7 @@ function App() {
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
         <Route path="/community/snapshots/:id" element={<SnapshotDetailsPage />}></Route>
         <Route path="/community/users" element={<UsersPage />}></Route>
+        <Route path="/community/snapshots" element={<Snapshots />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
