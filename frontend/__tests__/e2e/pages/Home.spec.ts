@@ -98,7 +98,7 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
     const eventTitle = page.locator('button h3 span').first()
     await expect(eventTitle).toHaveClass(/truncate/)
-    const isTruncated = await eventTitle.evaluate(el => el.scrollWidth > el.clientWidth)
+    const isTruncated = await eventTitle.evaluate((el) => el.scrollWidth > el.clientWidth)
     expect(isTruncated).toBe(true)
   })
 
