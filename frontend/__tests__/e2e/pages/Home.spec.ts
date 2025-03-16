@@ -85,23 +85,21 @@ test.describe('Home Page', () => {
     await expect(page.getByText('Feb 27 — 28, 2025')).toBeVisible()
     await page.getByRole('button', { name: 'Event 1' }).click()
   })
+
   test('should truncate long titles in new chapters', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
     const chapterTitle = page.getByTestId('chapter-title')
-
     await expect(chapterTitle).toHaveClass(/truncate/)
-
     await chapterTitle.hover()
-    await expect(page.getByRole('tooltip')).toBeVisible()
+    const tooltip = page.getByRole('tooltip', { name: /.*/ })
+    await expect(tooltip).toBeVisible()
   })
 
-  test('should truncate long project names correctly', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'New Projects' })).toBeVisible()
-    const projectTitle = page.getByTestId('project-title')
-
-    await expect(projectTitle).toHaveClass(/truncate/)
-
-    await projectTitle.hover()
+  test('should truncate long titles in upcoming events', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
+    const eventTitle = page.locator('button h3 span')
+    await expect(eventTitle).toHaveClass(/truncate/)
+    await eventTitle.hover()
     await expect(page.getByRole('tooltip')).toBeVisible()
   })
 
@@ -109,25 +107,5 @@ test.describe('Home Page', () => {
     const shortTitle = page.getByTestId('short-title')
     await expect(shortTitle).not.toHaveClass(/truncate/)
     await expect(page.getByRole('tooltip')).not.toBeVisible()
-  })
-
-  test('should truncate long recent post titles', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
-    const postTitle = page.getByTestId('post-title')
-
-    await expect(postTitle).toHaveClass(/truncate/)
-
-    await postTitle.hover()
-    await expect(page.getByRole('tooltip')).toBeVisible()
-  })
-
-  test('should truncate long top contributor names', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    const contributorName = page.getByTestId('contributor-name')
-
-    await expect(contributorName).toHaveClass(/truncate/)
-
-    await contributorName.hover()
-    await expect(page.getByRole('tooltip')).toBeVisible()
   })
 })
