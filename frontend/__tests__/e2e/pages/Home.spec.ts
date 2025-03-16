@@ -102,7 +102,6 @@ test.describe('Home Page', () => {
     const tooltip = page.locator('[role="tooltip"]')
     await expect(tooltip).toBeVisible({ timeout: 7000 })
   })
-  
 
   test('should display full text when short enough', async ({ page }) => {
     const shortTitle = page.getByTestId('short-title')
