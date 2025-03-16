@@ -8,6 +8,15 @@ export const mockGraphQLData = {
       type: 'documentation',
     },
   ],
+  recentPosts: [
+    {
+      authorName: 'Author 1',
+      authorImageUrl: 'https://owasp.org/assets/images/people/author1.png',
+      publishedAt: '2024-12-14T06:44:54+00:00',
+      title: 'Post 1',
+      url: 'https://owasp.org/blog/post-1.html',
+    },
+  ],
   sponsors: [
     {
       name: 'OWASP Foundation',
