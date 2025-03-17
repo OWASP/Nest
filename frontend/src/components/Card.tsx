@@ -79,7 +79,7 @@ const Card = ({
                 }}
               >
                 {title}
-                {labels.map((label, index) => (
+                {labels?.map((label, index) => (
                   <span
                     key={`label-${index}`}
                     className="mb-3 ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
