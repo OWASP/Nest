@@ -1,5 +1,6 @@
 """OWASP app common models."""
 
+import itertools
 import logging
 import re
 from urllib.parse import urlparse
@@ -137,12 +138,17 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         leaders = []
-        try:
-            for line in content.split("\n"):
-                leaders.extend(re.findall(r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]", line))
-        except AttributeError:
-            logger.exception(
-                "Unable to parse leaders.md content", extra={"URL": self.leaders_md_url}
+        for line in content.split("\n"):
+            leaders.extend(
+                [
+                    name
+                    for name in itertools.chain(
+                        *re.findall(
+                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line
+                        )
+                    )
+                    if name
+                ]
             )
 
         if not leaders:
