@@ -17,15 +17,15 @@ class Conversation(BulkSaveModel, TimestampedModel):
         db_table = "slack_conversations"
         verbose_name_plural = "Conversations"
 
-    entity_id = models.CharField(verbose_name="Entity ID", max_length=255, unique=True)
-    name = models.CharField(verbose_name="Name", max_length=255)
     created_at = models.DateTimeField(verbose_name="Created At", blank=True, null=True)
-    is_private = models.BooleanField(verbose_name="Is Private", default=False)
+    creator_id = models.CharField(verbose_name="Creator ID", max_length=255)
+    entity_id = models.CharField(verbose_name="Entity ID", max_length=255, unique=True)
     is_archived = models.BooleanField(verbose_name="Is Archived", default=False)
     is_general = models.BooleanField(verbose_name="Is General", default=False)
-    topic = models.TextField(verbose_name="Topic", blank=True, default="")
+    is_private = models.BooleanField(verbose_name="Is Private", default=False)
+    name = models.CharField(verbose_name="Name", max_length=255)
     purpose = models.TextField(verbose_name="Purpose", blank=True, default="")
-    creator_id = models.CharField(verbose_name="Creator ID", max_length=255)
+    topic = models.TextField(verbose_name="Topic", blank=True, default="")
 
     def __str__(self):
         """Return a string representation of the conversation."""
