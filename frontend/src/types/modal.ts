@@ -10,4 +10,6 @@ export interface ModalProps {
   button: ButtonType
   children?: React.ReactNode
   description: string
+  labels?: string[]
+  repository_languages?: string[]
 }
