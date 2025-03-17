@@ -58,7 +58,7 @@ class Project(
     level = models.CharField(
         verbose_name="Level",
         max_length=20,
-        choices=ProjectLevel,
+        choices=ProjectLevel.choices,
         default=ProjectLevel.OTHER,
     )
     level_raw = models.CharField(verbose_name="Level raw", max_length=50, default="")
@@ -66,7 +66,7 @@ class Project(
     type = models.CharField(
         verbose_name="Type",
         max_length=20,
-        choices=ProjectType,
+        choices=ProjectType.choices,
         default=ProjectType.OTHER,
     )
     type_raw = models.CharField(verbose_name="Type raw", max_length=100, default="")
@@ -220,7 +220,7 @@ class Project(
 
     def save(self, *args, **kwargs):
         """Save project."""
-        if not self.summary and (prompt := Prompt.get_owasp_project_summary()):
+        if self.is_active and not self.summary and (prompt := Prompt.get_owasp_project_summary()):
             self.generate_summary(prompt=prompt)
 
         super().save(*args, **kwargs)
