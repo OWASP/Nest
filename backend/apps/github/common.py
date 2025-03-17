@@ -51,10 +51,11 @@ def sync_repository(gh_repository, organization=None, user=None):
     if not repository.is_archived:
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
+        until = timezone.now() - td(days=30)
         if repository.track_issues and project_track_issues:
             kwargs = {
-                "direction": "asc",
-                "sort": "created",
+                "direction": "desc",
+                "sort": "updated",
                 "state": "all",
             }
             if latest_updated_issue := repository.latest_updated_issue:
@@ -62,6 +63,9 @@ def sync_repository(gh_repository, organization=None, user=None):
                 kwargs.update({"since": latest_updated_issue.updated_at})
 
             for gh_issue in gh_repository.get_issues(**kwargs):
+                if gh_issue.updated_at < until:
+                    break
+
                 if gh_issue.pull_request:  # Skip pull requests.
                     continue
 
@@ -89,10 +93,10 @@ def sync_repository(gh_repository, organization=None, user=None):
             "sort": "updated",
             "state": "all",
         }
-
-        pull_request_cut_off_at = timezone.now() - td(days=30)
-        latest_updated_pull_request = repository.latest_updated_pull_request
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
+            if gh_pull_request.updated_at < until:
+                break
+
             author = User.update_data(gh_pull_request.user)
             pull_request = PullRequest.update_data(
                 gh_pull_request, author=author, repository=repository
@@ -110,14 +114,6 @@ def sync_repository(gh_repository, organization=None, user=None):
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
                     logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
-
-            pull_request_cut_off = pull_request.updated_at <= pull_request_cut_off_at
-            pull_request_seen = (
-                latest_updated_pull_request
-                and pull_request.updated_at <= latest_updated_pull_request.updated_at
-            )
-            if pull_request_seen or pull_request_cut_off:
-                break
 
     # GitHub repository releases.
     releases = []

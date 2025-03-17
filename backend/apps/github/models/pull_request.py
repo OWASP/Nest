@@ -11,12 +11,13 @@ from .generic_issue_model import GenericIssueModel
 class PullRequest(GenericIssueModel):
     """Pull request Model."""
 
+    objects = models.Manager()
+    open_pull_requests = OpenPullRequestManager()
+
     class Meta:
         db_table = "github_pull_requests"
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Pull Requests"
-
-    open_pull_requests = OpenPullRequestManager()
 
     merged_at = models.DateTimeField(verbose_name="Merged at", blank=True, null=True)
 

@@ -16,6 +16,7 @@ from .generic_issue_model import GenericIssueModel
 class Issue(GenericIssueModel):
     """Issue model."""
 
+    objects = models.Manager()
     open_issues = OpenIssueManager()
 
     class Meta:

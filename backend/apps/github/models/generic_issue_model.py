@@ -22,7 +22,12 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     title = models.CharField(verbose_name="Title", max_length=1000)
     body = models.TextField(verbose_name="Body", default="")
 
-    state = models.CharField(verbose_name="State", max_length=6, choices=State, default=State.OPEN)
+    state = models.CharField(
+        verbose_name="State",
+        max_length=6,
+        choices=State.choices,
+        default=State.OPEN,
+    )
     url = models.URLField(verbose_name="URL", max_length=500, default="")
 
     number = models.PositiveBigIntegerField(verbose_name="Number", default=0)
