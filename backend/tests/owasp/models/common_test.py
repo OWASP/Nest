@@ -18,10 +18,13 @@ class TestRepositoryBasedEntityModel:
         [
             ("- [Leader1](https://example.com)", ["Leader1"]),
             (
-                "* [Leader one (Chapter Lead)](https://example.com)\n* [Leader two  (Faculty Advisor)](https://example.com)",
-                ["Leader one", "Leader two"],
+                "* [Leader One (Chapter Lead)](https://example.com)\n* [Leader Two (Faculty Advisor)](https://example.com)",
+                ["Leader One", "Leader Two"],
             ),
+            ("* Leader One\n* Leader Two", ["Leader One", "Leader Two"]),
+            ("### Leaders", []),
             ("", []),
+            (None, []),
         ],
     )
     def test_get_leaders(self, content, expected_leaders):
