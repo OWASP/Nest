@@ -106,6 +106,18 @@ def get_sponsors_data(limit=10):
         return None
 
 
+@lru_cache
+def get_posts_data(limit=5):
+    """Get Posts data."""
+    from apps.owasp.models.post import Post
+
+    try:
+        return Post.recent_posts()[:limit]
+    except Exception as e:
+        logger.exception("Failed to fetch posts data via database", extra={"error": str(e)})
+        return None
+
+
 def get_text(blocks):
     """Convert blocks to plain text."""
     text = []

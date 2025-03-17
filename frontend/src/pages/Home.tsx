@@ -8,11 +8,11 @@ import {
   faMapMarkerAlt,
   faTag,
   faUsers,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { GET_MAIN_PAGE_DATA } from 'api/queries/homeQueries'
-import { toast } from 'hooks/useToast'
 import { useEffect, useState } from 'react'
 import { AlgoliaResponseType } from 'types/algolia'
 import { ChapterTypeAlgolia } from 'types/chapter'
@@ -29,6 +29,7 @@ import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
+import { toaster } from 'components/ui/toaster'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -43,10 +44,10 @@ export default function Home() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
@@ -127,6 +128,7 @@ export default function Home() {
           </div>
           <div className="mx-auto mb-8 flex max-w-2xl justify-center">
             <MultiSearchBar
+              eventData={data.upcomingEvents}
               isLoaded={true}
               placeholder="Search the OWASP community"
               indexes={['chapters', 'projects', 'users']}
@@ -142,9 +144,9 @@ export default function Home() {
                     className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
-                    <h3 className="truncate">{event.name}</h3>
+                    <h3 className="truncate text-wrap md:text-nowrap">{event.name}</h3>
                   </button>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
                     <div className="mr-2 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDateRange(event.startDate, event.endDate)}</span>
@@ -238,7 +240,13 @@ export default function Home() {
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
-            style={{ height: '400px', width: '100%', zIndex: '0' }}
+            style={{
+              height: '400px',
+              width: '100%',
+              zIndex: '0',
+              borderRadius: '0.5rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
           />
         </div>
         <TopContributors contributors={data.topContributors} maxInitialDisplay={6} />
@@ -272,6 +280,38 @@ export default function Home() {
             )}
           />
         </div>
+        <SecondaryCard title="Recent News & Opinions">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+            {data.recentPosts.map((post) => (
+              <div
+                key={post.title}
+                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                data-testid="post-container"
+              >
+                <h3 className="mb-1 truncate text-wrap text-lg font-semibold text-blue-500 md:text-nowrap">
+                  <a
+                    href={post.url}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {post.title}
+                  </a>
+                </h3>
+                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
+                  <div className="mr-4 flex items-center">
+                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <span>{formatDate(post.publishedAt)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
+                    <span>{post.authorName}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
         <div className="grid gap-6 md:grid-cols-4">
           {counterData.map((stat, index) => (
             <SecondaryCard key={index} className="text-center">
