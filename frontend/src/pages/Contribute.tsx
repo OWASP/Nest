@@ -44,7 +44,6 @@ const ContributePage = () => {
       url: issue.url,
     }
 
-
     return (
       <React.Fragment key={issue.objectID}>
         <Card
