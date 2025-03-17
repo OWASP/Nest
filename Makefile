@@ -48,3 +48,6 @@ update-dependencies: \
 update-nest-app-dependencies: \
 	update-backend-dependencies \
 	update-frontend-dependencies
+
+generate-schema-docs:
+	docker compose -f docker/docker-compose-local.yaml up --build schema-docs

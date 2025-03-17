@@ -57,6 +57,16 @@ services:
     environment:
       NODE_ENV: local
 
+  schema-docs:
+    container_name: nest-schema-docs
+    build:
+      context: ..
+      dockerfile: docs/Dockerfile.schema-docs
+    volumes:
+      - ../schema:/app/schema
+      - ../docs/schema:/app/docs/schema
+    command: python generate_schema_docs.py
+
 volumes:
   backend-data:
   db-data:

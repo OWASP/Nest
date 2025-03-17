@@ -14,7 +14,10 @@
 - [6. Property `OWASP Project > downloads`](#downloads)
   - [6.1. OWASP Project > downloads > downloads items](#downloads_items)
 - [7. Property `OWASP Project > events`](#events)
-  - [7.1. OWASP Project > events > events items](#events_items)
+  - [7.1. OWASP Project > events > Event](#events_items)
+    - [7.1.1. Property `OWASP Project > events > Event > description`](#events_items_description)
+    - [7.1.2. Property `OWASP Project > events > Event > title`](#events_items_title)
+    - [7.1.3. Property `OWASP Project > events > Event > url`](#events_items_url)
 - [8. Property `OWASP Project > leaders`](#leaders)
   - [8.1. OWASP Project > leaders > Person](#leaders_items)
     - [8.1.1. Property `OWASP Project > leaders > Person > email`](#leaders_items_email)
@@ -29,6 +32,11 @@
     - [11.1.2. Property `OWASP Project > logo > Logo > medium`](#logo_items_medium)
     - [11.1.3. Property `OWASP Project > logo > Logo > large`](#logo_items_large)
 - [12. Property `OWASP Project > mailing_list`](#mailing_list)
+  - [12.1. OWASP Project > mailing_list > Mailing List](#mailing_list_items)
+    - [12.1.1. Property `OWASP Project > mailing_list > Mailing List > description`](#mailing_list_items_description)
+    - [12.1.2. Property `OWASP Project > mailing_list > Mailing List > email`](#mailing_list_items_email)
+    - [12.1.3. Property `OWASP Project > mailing_list > Mailing List > title`](#mailing_list_items_title)
+    - [12.1.4. Property `OWASP Project > mailing_list > Mailing List > url`](#mailing_list_items_url)
 - [13. Property `OWASP Project > name`](#name)
 - [14. Property `OWASP Project > pitch`](#pitch)
 - [15. Property `OWASP Project > repositories`](#repositories)
@@ -73,12 +81,12 @@
 | - [demo](#demo )                   | No      | array of string             | No         | -          | Optional URLs to the project demo.                         |
 | - [documentation](#documentation ) | No      | array of string             | No         | -          | Optional URLs to project documentation.                    |
 | - [downloads](#downloads )         | No      | array of string             | No         | -          | Optional list of download URLs.                            |
-| - [events](#events )               | No      | array of string             | No         | -          | Event URLs related to the project.                         |
+| - [events](#events )               | No      | array                       | No         | -          | Events related to the project.                             |
 | + [leaders](#leaders )             | No      | array                       | No         | -          | Leaders of the project.                                    |
 | + [level](#level )                 | No      | enum (of integer or number) | No         | -          | Project level.                                             |
 | - [license](#license )             | No      | enum (of string)            | No         | -          | The license of the project.                                |
 | - [logo](#logo )                   | No      | array                       | No         | -          | Logo information for the project.                          |
-| - [mailing_list](#mailing_list )   | No      | string                      | No         | -          | The optional mailing list associated with the project.     |
+| - [mailing_list](#mailing_list )   | No      | array                       | No         | -          | The optional mailing list associated with the project.     |
 | + [name](#name )                   | No      | string                      | No         | -          | The unique name of the project.                            |
 | + [pitch](#pitch )                 | No      | string                      | No         | -          | The project pitch.                                         |
 | - [repositories](#repositories )   | No      | array                       | No         | -          | Repositories associated with the project.                  |
@@ -277,12 +285,12 @@ Must be one of:
 
 ## <a name="events"></a>7. Property `OWASP Project > events`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
 
-**Description:** Event URLs related to the project.
+**Description:** Events related to the project.
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -294,15 +302,62 @@ Must be one of:
 
 | Each item of this array must be | Description |
 | ------------------------------- | ----------- |
-| [events items](#events_items)   | -           |
+| [Event](#events_items)          | Event       |
 
-### <a name="events_items"></a>7.1. OWASP Project > events > events items
+### <a name="events_items"></a>7.1. OWASP Project > events > Event
+
+**Title:** Event
+
+|                           |                                |
+| ------------------------- | ------------------------------ |
+| **Type**                  | `object`                       |
+| **Required**              | No                             |
+| **Additional properties** | Not allowed                    |
+| **Defined in**            | common.json#/definitions/event |
+
+**Description:** Event
+
+| Property                                    | Pattern | Type   | Deprecated | Definition | Title/Description            |
+| ------------------------------------------- | ------- | ------ | ---------- | ---------- | ---------------------------- |
+| - [description](#events_items_description ) | No      | string | No         | -          | A brief description of event |
+| - [title](#events_items_title )             | No      | string | No         | -          | Title of the event           |
+| + [url](#events_items_url )                 | No      | string | No         | -          | URL of the event             |
+
+#### <a name="events_items_description"></a>7.1.1. Property `OWASP Project > events > Event > description`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+**Description:** A brief description of event
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="events_items_title"></a>7.1.2. Property `OWASP Project > events > Event > title`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Title of the event
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="events_items_url"></a>7.1.3. Property `OWASP Project > events > Event > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
 | **Format**   | `uri`    |
+
+**Description:** URL of the event
 
 ## <a name="leaders"></a>8. Property `OWASP Project > leaders`
 
@@ -514,13 +569,94 @@ Must be one of:
 
 ## <a name="mailing_list"></a>12. Property `OWASP Project > mailing_list`
 
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** The optional mailing list associated with the project.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | True               |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be     | Description |
+| ----------------------------------- | ----------- |
+| [Mailing List](#mailing_list_items) | Mail List   |
+
+### <a name="mailing_list_items"></a>12.1. OWASP Project > mailing_list > Mailing List
+
+**Title:** Mailing List
+
+|                           |                                       |
+| ------------------------- | ------------------------------------- |
+| **Type**                  | `object`                              |
+| **Required**              | No                                    |
+| **Additional properties** | Not allowed                           |
+| **Defined in**            | common.json#/definitions/mailing_list |
+
+**Description:** Mail List
+
+| Property                                          | Pattern | Type   | Deprecated | Definition | Title/Description           |
+| ------------------------------------------------- | ------- | ------ | ---------- | ---------- | --------------------------- |
+| - [description](#mailing_list_items_description ) | No      | string | No         | -          | Description of mailing list |
+| - [email](#mailing_list_items_email )             | No      | string | No         | -          | E-mail address              |
+| - [title](#mailing_list_items_title )             | No      | string | No         | -          | Title of mailing list       |
+| + [url](#mailing_list_items_url )                 | No      | string | No         | -          | URL to mailing list         |
+
+#### <a name="mailing_list_items_description"></a>12.1.1. Property `OWASP Project > mailing_list > Mailing List > description`
+
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+**Description:** Description of mailing list
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="mailing_list_items_email"></a>12.1.2. Property `OWASP Project > mailing_list > Mailing List > email`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+| **Format**   | `email`  |
+
+**Description:** E-mail address
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
+
+#### <a name="mailing_list_items_title"></a>12.1.3. Property `OWASP Project > mailing_list > Mailing List > title`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Title of mailing list
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="mailing_list_items_url"></a>12.1.4. Property `OWASP Project > mailing_list > Mailing List > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
 | **Format**   | `uri`    |
 
-**Description:** The optional mailing list associated with the project.
+**Description:** URL to mailing list
 
 ## <a name="name"></a>13. Property `OWASP Project > name`
 
@@ -886,7 +1022,7 @@ Must be one of:
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
-| **Format**   | `url`    |
+| **Format**   | `uri`    |
 
 **Description:** The official website of the project.
 

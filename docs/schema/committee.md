@@ -7,13 +7,21 @@
     - [1.1.3. Property `OWASP Committee Schema > community > Community > url`](#community_items_url)
 - [2. Property `OWASP Committee Schema > description`](#description)
 - [3. Property `OWASP Committee Schema > events`](#events)
-  - [3.1. OWASP Committee Schema > events > events items](#events_items)
-- [4. Property `OWASP Committee Schema > group_mail`](#group_mail)
-- [5. Property `OWASP Committee Schema > logo`](#logo)
-  - [5.1. OWASP Committee Schema > logo > Logo](#logo_items)
-    - [5.1.1. Property `OWASP Committee Schema > logo > Logo > small`](#logo_items_small)
-    - [5.1.2. Property `OWASP Committee Schema > logo > Logo > medium`](#logo_items_medium)
-    - [5.1.3. Property `OWASP Committee Schema > logo > Logo > large`](#logo_items_large)
+  - [3.1. OWASP Committee Schema > events > Event](#events_items)
+    - [3.1.1. Property `OWASP Committee Schema > events > Event > description`](#events_items_description)
+    - [3.1.2. Property `OWASP Committee Schema > events > Event > title`](#events_items_title)
+    - [3.1.3. Property `OWASP Committee Schema > events > Event > url`](#events_items_url)
+- [4. Property `OWASP Committee Schema > logo`](#logo)
+  - [4.1. OWASP Committee Schema > logo > Logo](#logo_items)
+    - [4.1.1. Property `OWASP Committee Schema > logo > Logo > small`](#logo_items_small)
+    - [4.1.2. Property `OWASP Committee Schema > logo > Logo > medium`](#logo_items_medium)
+    - [4.1.3. Property `OWASP Committee Schema > logo > Logo > large`](#logo_items_large)
+- [5. Property `OWASP Committee Schema > mailing_list`](#mailing_list)
+  - [5.1. OWASP Committee Schema > mailing_list > Mailing List](#mailing_list_items)
+    - [5.1.1. Property `OWASP Committee Schema > mailing_list > Mailing List > description`](#mailing_list_items_description)
+    - [5.1.2. Property `OWASP Committee Schema > mailing_list > Mailing List > email`](#mailing_list_items_email)
+    - [5.1.3. Property `OWASP Committee Schema > mailing_list > Mailing List > title`](#mailing_list_items_title)
+    - [5.1.4. Property `OWASP Committee Schema > mailing_list > Mailing List > url`](#mailing_list_items_url)
 - [6. Property `OWASP Committee Schema > meeting_minutes`](#meeting_minutes)
   - [6.1. OWASP Committee Schema > meeting_minutes > Meeting Minutes](#meeting_minutes_items)
     - [6.1.1. Property `OWASP Committee Schema > meeting_minutes > Meeting Minutes > date`](#meeting_minutes_items_date)
@@ -61,18 +69,18 @@
 | -------------------------------------- | ------- | --------------- | ---------- | ---------- | ------------------------------------------------------ |
 | - [community](#community )             | No      | array           | No         | -          | Community platforms associated with the committee.     |
 | + [description](#description )         | No      | string          | No         | -          | Description of the committee's purpose and activities. |
-| - [events](#events )                   | No      | array of string | No         | -          | Events organized or sponsored by the committee.        |
-| - [group_mail](#group_mail )           | No      | string          | No         | -          | Group mail of the committee.                           |
+| - [events](#events )                   | No      | array           | No         | -          | Events organized or sponsored by the committee.        |
 | - [logo](#logo )                       | No      | array           | No         | -          | Logo information for the project.                      |
+| - [mailing_list](#mailing_list )       | No      | array           | No         | -          | Mailing list associated with the committee.            |
 | - [meeting_minutes](#meeting_minutes ) | No      | array           | No         | -          | Meeting minutes of the committee.                      |
 | + [members](#members )                 | No      | array           | No         | -          | Members of the committee.                              |
-| + [name](#name )                       | No      | string          | No         | -          | Name of the committee.                                 |
+| + [name](#name )                       | No      | string          | No         | -          | The unique name of the committee                       |
 | - [resources](#resources )             | No      | array of object | No         | -          | Resources provided by the committee.                   |
 | + [scope](#scope )                     | No      | string          | No         | -          | Scope and purpose of committee.                        |
 | - [social_media](#social_media )       | No      | array           | No         | -          | Social media information of the committee.             |
 | - [sponsors](#sponsors )               | No      | array           | No         | -          | Sponsors of the committee.                             |
-| + [tags](#tags )                       | No      | array of string | No         | -          | Tags associated with the committee.                    |
-| - [website](#website )                 | No      | string          | No         | -          | Official website of the committee.                     |
+| + [tags](#tags )                       | No      | array of string | No         | -          | Tags associated with the committee                     |
+| - [website](#website )                 | No      | string          | No         | -          | The official website of the committee.                 |
 
 ## <a name="community"></a>1. Property `OWASP Committee Schema > community`
 
@@ -161,10 +169,10 @@ Must be one of:
 
 ## <a name="events"></a>3. Property `OWASP Committee Schema > events`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
 
 **Description:** Events organized or sponsored by the committee.
 
@@ -178,27 +186,64 @@ Must be one of:
 
 | Each item of this array must be | Description |
 | ------------------------------- | ----------- |
-| [events items](#events_items)   | -           |
+| [Event](#events_items)          | Event       |
 
-### <a name="events_items"></a>3.1. OWASP Committee Schema > events > events items
+### <a name="events_items"></a>3.1. OWASP Committee Schema > events > Event
+
+**Title:** Event
+
+|                           |                                |
+| ------------------------- | ------------------------------ |
+| **Type**                  | `object`                       |
+| **Required**              | No                             |
+| **Additional properties** | Not allowed                    |
+| **Defined in**            | common.json#/definitions/event |
+
+**Description:** Event
+
+| Property                                    | Pattern | Type   | Deprecated | Definition | Title/Description            |
+| ------------------------------------------- | ------- | ------ | ---------- | ---------- | ---------------------------- |
+| - [description](#events_items_description ) | No      | string | No         | -          | A brief description of event |
+| - [title](#events_items_title )             | No      | string | No         | -          | Title of the event           |
+| + [url](#events_items_url )                 | No      | string | No         | -          | URL of the event             |
+
+#### <a name="events_items_description"></a>3.1.1. Property `OWASP Committee Schema > events > Event > description`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+**Description:** A brief description of event
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="events_items_title"></a>3.1.2. Property `OWASP Committee Schema > events > Event > title`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Title of the event
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="events_items_url"></a>3.1.3. Property `OWASP Committee Schema > events > Event > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
 | **Format**   | `uri`    |
 
-## <a name="group_mail"></a>4. Property `OWASP Committee Schema > group_mail`
+**Description:** URL of the event
 
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-| **Format**   | `email`  |
-
-**Description:** Group mail of the committee.
-
-## <a name="logo"></a>5. Property `OWASP Committee Schema > logo`
+## <a name="logo"></a>4. Property `OWASP Committee Schema > logo`
 
 |              |         |
 | ------------ | ------- |
@@ -219,7 +264,7 @@ Must be one of:
 | ------------------------------- | ----------- |
 | [Logo](#logo_items)             | A logo      |
 
-### <a name="logo_items"></a>5.1. OWASP Committee Schema > logo > Logo
+### <a name="logo_items"></a>4.1. OWASP Committee Schema > logo > Logo
 
 **Title:** Logo
 
@@ -238,7 +283,7 @@ Must be one of:
 | + [medium](#logo_items_medium ) | No      | string | No         | -          | Logo size should be 256x256 pixels. |
 | + [large](#logo_items_large )   | No      | string | No         | -          | Logo size should be 512x512 pixels. |
 
-#### <a name="logo_items_small"></a>5.1.1. Property `OWASP Committee Schema > logo > Logo > small`
+#### <a name="logo_items_small"></a>4.1.1. Property `OWASP Committee Schema > logo > Logo > small`
 
 |              |          |
 | ------------ | -------- |
@@ -248,7 +293,7 @@ Must be one of:
 
 **Description:** Logo size should be 192x192 pixels.
 
-#### <a name="logo_items_medium"></a>5.1.2. Property `OWASP Committee Schema > logo > Logo > medium`
+#### <a name="logo_items_medium"></a>4.1.2. Property `OWASP Committee Schema > logo > Logo > medium`
 
 |              |          |
 | ------------ | -------- |
@@ -258,7 +303,7 @@ Must be one of:
 
 **Description:** Logo size should be 256x256 pixels.
 
-#### <a name="logo_items_large"></a>5.1.3. Property `OWASP Committee Schema > logo > Logo > large`
+#### <a name="logo_items_large"></a>4.1.3. Property `OWASP Committee Schema > logo > Logo > large`
 
 |              |          |
 | ------------ | -------- |
@@ -267,6 +312,97 @@ Must be one of:
 | **Format**   | `uri`    |
 
 **Description:** Logo size should be 512x512 pixels.
+
+## <a name="mailing_list"></a>5. Property `OWASP Committee Schema > mailing_list`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Mailing list associated with the committee.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | True               |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be     | Description |
+| ----------------------------------- | ----------- |
+| [Mailing List](#mailing_list_items) | Mail List   |
+
+### <a name="mailing_list_items"></a>5.1. OWASP Committee Schema > mailing_list > Mailing List
+
+**Title:** Mailing List
+
+|                           |                                       |
+| ------------------------- | ------------------------------------- |
+| **Type**                  | `object`                              |
+| **Required**              | No                                    |
+| **Additional properties** | Not allowed                           |
+| **Defined in**            | common.json#/definitions/mailing_list |
+
+**Description:** Mail List
+
+| Property                                          | Pattern | Type   | Deprecated | Definition | Title/Description           |
+| ------------------------------------------------- | ------- | ------ | ---------- | ---------- | --------------------------- |
+| - [description](#mailing_list_items_description ) | No      | string | No         | -          | Description of mailing list |
+| - [email](#mailing_list_items_email )             | No      | string | No         | -          | E-mail address              |
+| - [title](#mailing_list_items_title )             | No      | string | No         | -          | Title of mailing list       |
+| + [url](#mailing_list_items_url )                 | No      | string | No         | -          | URL to mailing list         |
+
+#### <a name="mailing_list_items_description"></a>5.1.1. Property `OWASP Committee Schema > mailing_list > Mailing List > description`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Description of mailing list
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="mailing_list_items_email"></a>5.1.2. Property `OWASP Committee Schema > mailing_list > Mailing List > email`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+| **Format**   | `email`  |
+
+**Description:** E-mail address
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
+
+#### <a name="mailing_list_items_title"></a>5.1.3. Property `OWASP Committee Schema > mailing_list > Mailing List > title`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Title of mailing list
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="mailing_list_items_url"></a>5.1.4. Property `OWASP Committee Schema > mailing_list > Mailing List > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+| **Format**   | `uri`    |
+
+**Description:** URL to mailing list
 
 ## <a name="meeting_minutes"></a>6. Property `OWASP Committee Schema > meeting_minutes`
 
@@ -443,7 +579,7 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** Name of the committee.
+**Description:** The unique name of the committee
 
 | Restrictions   |   |
 | -------------- | - |
@@ -693,7 +829,7 @@ Must be one of:
 | **Type**     | `array of string` |
 | **Required** | Yes               |
 
-**Description:** Tags associated with the committee.
+**Description:** Tags associated with the committee
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -722,7 +858,7 @@ Must be one of:
 | **Required** | No       |
 | **Format**   | `uri`    |
 
-**Description:** Official website of the committee.
+**Description:** The official website of the committee.
 
 | Restrictions   |   |
 | -------------- | - |

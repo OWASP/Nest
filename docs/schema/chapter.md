@@ -8,7 +8,10 @@
     - [2.1.3. Property `OWASP Chapter > community > Community > url`](#community_items_url)
 - [3. Property `OWASP Chapter > country`](#country)
 - [4. Property `OWASP Chapter > events`](#events)
-  - [4.1. OWASP Chapter > events > events items](#events_items)
+  - [4.1. OWASP Chapter > events > Event](#events_items)
+    - [4.1.1. Property `OWASP Chapter > events > Event > description`](#events_items_description)
+    - [4.1.2. Property `OWASP Chapter > events > Event > title`](#events_items_title)
+    - [4.1.3. Property `OWASP Chapter > events > Event > url`](#events_items_url)
 - [5. Property `OWASP Chapter > leaders`](#leaders)
   - [5.1. OWASP Chapter > leaders > Person](#leaders_items)
     - [5.1.1. Property `OWASP Chapter > leaders > Person > email`](#leaders_items_email)
@@ -21,6 +24,11 @@
     - [6.1.2. Property `OWASP Chapter > logo > Logo > medium`](#logo_items_medium)
     - [6.1.3. Property `OWASP Chapter > logo > Logo > large`](#logo_items_large)
 - [7. Property `OWASP Chapter > mailing_list`](#mailing_list)
+  - [7.1. OWASP Chapter > mailing_list > Mailing List](#mailing_list_items)
+    - [7.1.1. Property `OWASP Chapter > mailing_list > Mailing List > description`](#mailing_list_items_description)
+    - [7.1.2. Property `OWASP Chapter > mailing_list > Mailing List > email`](#mailing_list_items_email)
+    - [7.1.3. Property `OWASP Chapter > mailing_list > Mailing List > title`](#mailing_list_items_title)
+    - [7.1.4. Property `OWASP Chapter > mailing_list > Mailing List > url`](#mailing_list_items_url)
 - [8. Property `OWASP Chapter > meetup_group`](#meetup_group)
 - [9. Property `OWASP Chapter > name`](#name)
 - [10. Property `OWASP Chapter > region`](#region)
@@ -54,12 +62,12 @@
 | - [blog](#blog )                 | No      | string          | No         | -          | Chapter's blog.                                            |
 | - [community](#community )       | No      | array           | No         | -          | A list of community platforms associated with the chapter. |
 | + [country](#country )           | No      | string          | No         | -          | Country.                                                   |
-| - [events](#events )             | No      | array of string | No         | -          | Event URLs related to the chapter.                         |
+| - [events](#events )             | No      | array           | No         | -          | Events related to the project.                             |
 | + [leaders](#leaders )           | No      | array           | No         | -          | Leaders of the chapter.                                    |
 | - [logo](#logo )                 | No      | array           | No         | -          | Logo for the chapter.                                      |
-| - [mailing_list](#mailing_list ) | No      | string          | No         | -          | The optional mailing list associated with the chapter.     |
+| - [mailing_list](#mailing_list ) | No      | array           | No         | -          | The optional mailing list associated with the chapter.     |
 | - [meetup_group](#meetup_group ) | No      | string          | No         | -          | Meetup group.                                              |
-| + [name](#name )                 | No      | string          | No         | -          | The unique name of the chapter.                            |
+| + [name](#name )                 | No      | string          | No         | -          | The unique name of chapter.                                |
 | - [region](#region )             | No      | string          | No         | -          | Region.                                                    |
 | - [social_media](#social_media ) | No      | array           | No         | -          | Social media information for the chapter.                  |
 | - [sponsors](#sponsors )         | No      | array           | No         | -          | Sponsors of the chapter.                                   |
@@ -167,12 +175,12 @@ Must be one of:
 
 ## <a name="events"></a>4. Property `OWASP Chapter > events`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
 
-**Description:** Event URLs related to the chapter.
+**Description:** Events related to the project.
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -184,15 +192,62 @@ Must be one of:
 
 | Each item of this array must be | Description |
 | ------------------------------- | ----------- |
-| [events items](#events_items)   | -           |
+| [Event](#events_items)          | Event       |
 
-### <a name="events_items"></a>4.1. OWASP Chapter > events > events items
+### <a name="events_items"></a>4.1. OWASP Chapter > events > Event
+
+**Title:** Event
+
+|                           |                                |
+| ------------------------- | ------------------------------ |
+| **Type**                  | `object`                       |
+| **Required**              | No                             |
+| **Additional properties** | Not allowed                    |
+| **Defined in**            | common.json#/definitions/event |
+
+**Description:** Event
+
+| Property                                    | Pattern | Type   | Deprecated | Definition | Title/Description            |
+| ------------------------------------------- | ------- | ------ | ---------- | ---------- | ---------------------------- |
+| - [description](#events_items_description ) | No      | string | No         | -          | A brief description of event |
+| - [title](#events_items_title )             | No      | string | No         | -          | Title of the event           |
+| + [url](#events_items_url )                 | No      | string | No         | -          | URL of the event             |
+
+#### <a name="events_items_description"></a>4.1.1. Property `OWASP Chapter > events > Event > description`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+**Description:** A brief description of event
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="events_items_title"></a>4.1.2. Property `OWASP Chapter > events > Event > title`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Title of the event
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="events_items_url"></a>4.1.3. Property `OWASP Chapter > events > Event > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
 | **Format**   | `uri`    |
+
+**Description:** URL of the event
 
 ## <a name="leaders"></a>5. Property `OWASP Chapter > leaders`
 
@@ -360,13 +415,94 @@ Must be one of:
 
 ## <a name="mailing_list"></a>7. Property `OWASP Chapter > mailing_list`
 
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** The optional mailing list associated with the chapter.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | True               |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be     | Description |
+| ----------------------------------- | ----------- |
+| [Mailing List](#mailing_list_items) | Mail List   |
+
+### <a name="mailing_list_items"></a>7.1. OWASP Chapter > mailing_list > Mailing List
+
+**Title:** Mailing List
+
+|                           |                                       |
+| ------------------------- | ------------------------------------- |
+| **Type**                  | `object`                              |
+| **Required**              | No                                    |
+| **Additional properties** | Not allowed                           |
+| **Defined in**            | common.json#/definitions/mailing_list |
+
+**Description:** Mail List
+
+| Property                                          | Pattern | Type   | Deprecated | Definition | Title/Description           |
+| ------------------------------------------------- | ------- | ------ | ---------- | ---------- | --------------------------- |
+| - [description](#mailing_list_items_description ) | No      | string | No         | -          | Description of mailing list |
+| - [email](#mailing_list_items_email )             | No      | string | No         | -          | E-mail address              |
+| - [title](#mailing_list_items_title )             | No      | string | No         | -          | Title of mailing list       |
+| + [url](#mailing_list_items_url )                 | No      | string | No         | -          | URL to mailing list         |
+
+#### <a name="mailing_list_items_description"></a>7.1.1. Property `OWASP Chapter > mailing_list > Mailing List > description`
+
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+**Description:** Description of mailing list
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="mailing_list_items_email"></a>7.1.2. Property `OWASP Chapter > mailing_list > Mailing List > email`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+| **Format**   | `email`  |
+
+**Description:** E-mail address
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 5 |
+
+#### <a name="mailing_list_items_title"></a>7.1.3. Property `OWASP Chapter > mailing_list > Mailing List > title`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Title of mailing list
+
+| Restrictions   |    |
+| -------------- | -- |
+| **Min length** | 10 |
+
+#### <a name="mailing_list_items_url"></a>7.1.4. Property `OWASP Chapter > mailing_list > Mailing List > url`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
 | **Format**   | `uri`    |
 
-**Description:** The optional mailing list associated with the chapter.
+**Description:** URL to mailing list
 
 ## <a name="meetup_group"></a>8. Property `OWASP Chapter > meetup_group`
 
@@ -388,7 +524,7 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** The unique name of the chapter.
+**Description:** The unique name of chapter.
 
 | Restrictions   |    |
 | -------------- | -- |
@@ -606,8 +742,12 @@ Must be one of:
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
-| **Format**   | `url`    |
+| **Format**   | `uri`    |
 
 **Description:** The official website of the chapter.
+
+| Restrictions   |   |
+| -------------- | - |
+| **Min length** | 4 |
 
 ----------------------------------------------------------------------------------------------------------------------------
