@@ -12,6 +12,7 @@ class IssueIndexMixin:
             and not self.is_locked
             and self.repository.is_indexable
             and self.repository.track_issues
+            and self.project
             and self.project.track_issues
         )
 
