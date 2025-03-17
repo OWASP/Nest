@@ -139,7 +139,10 @@ sync-data: \
 	index-data
 
 test-backend:
-	@docker build -f backend/docker/Dockerfile.test backend -t nest-test-backend
+	@DOCKER_BUILDKIT=1 docker build \
+		--cache-from nest-test-backend \
+		-f backend/docker/Dockerfile.test backend \
+		-t nest-test-backend
 	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend pytest
 
 update-backend-dependencies:
