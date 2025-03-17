@@ -5,15 +5,15 @@ from functools import lru_cache
 from django.db import models
 
 from apps.common.index import IndexBase
-from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.models import BulkSaveModel
 from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
-from apps.github.models.common import NodeModel
 from apps.github.models.managers.issue import OpenIssueManager
-from apps.github.models.mixins import IssueIndexMixin
+
+from .generic_issue_model import GenericIssueModel
 
 
-class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
+class Issue(GenericIssueModel):
     """Issue model."""
 
     objects = models.Manager()
@@ -24,26 +24,14 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Issues"
 
-    class State(models.TextChoices):
-        OPEN = "open", "Open"
-        CLOSED = "closed", "Closed"
-
-    title = models.CharField(verbose_name="Title", max_length=1000)
-    body = models.TextField(verbose_name="Body", default="")
-
     summary = models.TextField(
         verbose_name="Summary", default="", blank=True
     )  # AI generated summary
     hint = models.TextField(verbose_name="Hint", default="", blank=True)  # AI generated hint
-    state = models.CharField(
-        verbose_name="State", max_length=20, choices=State, default=State.OPEN
-    )
+
     state_reason = models.CharField(
         verbose_name="State reason", max_length=200, default="", blank=True
     )
-    url = models.URLField(verbose_name="URL", max_length=500, default="")
-    number = models.PositiveBigIntegerField(verbose_name="Number", default=0)
-    sequence_id = models.PositiveBigIntegerField(verbose_name="Issue ID", default=0)
 
     is_locked = models.BooleanField(verbose_name="Is locked", default=False)
     lock_reason = models.CharField(
@@ -51,10 +39,6 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
     )
 
     comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
-
-    closed_at = models.DateTimeField(verbose_name="Closed at", blank=True, null=True)
-    created_at = models.DateTimeField(verbose_name="Created at")
-    updated_at = models.DateTimeField(verbose_name="Updated at", db_index=True)
 
     # FKs.
     author = models.ForeignKey(
@@ -86,20 +70,6 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
         related_name="issue",
         blank=True,
     )
-
-    def __str__(self):
-        """Issue human readable representation."""
-        return f"{self.title} by {self.author}"
-
-    @property
-    def project(self):
-        """Return project."""
-        return self.repository.project
-
-    @property
-    def repository_id(self):
-        """Return repository ID."""
-        return self.repository.id
 
     def from_github(self, gh_issue, author=None, repository=None):
         """Update instance based on GitHub issue data."""
@@ -164,11 +134,12 @@ class Issue(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedModel):
 
     def save(self, *args, **kwargs):
         """Save issue."""
-        if not self.hint:
-            self.generate_hint()
+        if self.is_open:
+            if not self.hint:
+                self.generate_hint()
 
-        if not self.summary:
-            self.generate_summary()
+            if not self.summary:
+                self.generate_summary()
 
         super().save(*args, **kwargs)
 
