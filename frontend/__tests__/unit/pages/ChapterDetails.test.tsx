@@ -3,9 +3,6 @@ import { screen, waitFor } from '@testing-library/react'
 import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

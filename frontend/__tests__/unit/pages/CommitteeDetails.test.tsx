@@ -4,10 +4,6 @@ import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { CommitteeDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
 
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
-
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),

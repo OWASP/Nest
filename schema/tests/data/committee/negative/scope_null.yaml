@@ -9,6 +9,6 @@ members:
 name: OWASP Committee
 scope:
 tags:
-  - development
-  - education
-  - security
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3
