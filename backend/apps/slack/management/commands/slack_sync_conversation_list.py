@@ -50,22 +50,35 @@ class Command(BaseCommand):
             )
 
         try:
-            # Get Slack app instance
             app = SlackConfig.app
             if not app:
                 logger.error("Slack app is not configured properly")
                 self.stdout.write(self.style.ERROR("Slack app is not configured properly"))
                 return
 
-            # Collect conversations from API
             all_conversations = self._fetch_all_conversations(app, batch_size, delay)
 
-            # Save conversations to database
             if not dry_run and all_conversations:
                 self.stdout.write(f"Saving {len(all_conversations)} conversations to database...")
-                saved_count = Conversation.bulk_save_from_slack(all_conversations)
+                conversations = []
+                cnt = 0
+                for conversation_data in all_conversations:
+                    conversation = Conversation.update_data(conversation_data, save=False)
+                    if conversation:
+                        conversations.append(conversation)
+                        cnt += 1
+                    else:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"Failed to process conversation: {conversation_data.get('id')}"
+                            )
+                        )
+
+                if conversations:
+                    Conversation.bulk_save(conversations)
+
                 self.stdout.write(
-                    self.style.SUCCESS(f"Successfully synced {saved_count} Slack conversations")
+                    self.style.SUCCESS(f"Successfully synced {cnt} Slack conversations")
                 )
             else:
                 self.stdout.write(
