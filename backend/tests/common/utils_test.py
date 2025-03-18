@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
 
 from apps.common.utils import (
     get_absolute_url,
+    get_user_ip_address,
     join_values,
     natural_date,
     natural_number,
@@ -57,3 +58,24 @@ class TestUtils:
     )
     def test_natural_number(self, value, unit, expected):
         assert natural_number(value, unit=unit) == expected
+
+    @pytest.mark.parametrize(
+        ("mock_request", "expected"),
+        [
+            ({"HTTP_X_FORWARDED_FOR": "8.8.8.8"}, "8.8.8.8"),
+            ({"REMOTE_ADDR": "192.168.1.2"}, "192.168.1.2"),
+        ],
+    )
+    def test_get_user_ip_address(self, mock_request, expected):
+        request = MagicMock()
+        request.META = mock_request
+        assert get_user_ip_address(request) == expected
+
+    def test_get_user_ip_address_local(self, mocker):
+        request = MagicMock()
+        request.META = {}
+
+        mocker.patch.object(settings, "ENVIRONMENT", "Local")
+        mocker.patch.dict(settings._wrapped.__dict__, {"PUBLIC_IP_ADDRESS": "1.1.1.1"})
+
+        assert get_user_ip_address(request) == "1.1.1.1"
