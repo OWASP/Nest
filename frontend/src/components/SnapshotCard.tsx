@@ -1,9 +1,8 @@
 import { Button } from '@chakra-ui/react'
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { SnapshotCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
-import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 
 const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
   return (

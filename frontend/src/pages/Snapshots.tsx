@@ -64,10 +64,9 @@ const SnapshotsPage = () => {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {snapshots &&
-            snapshots.map((snapshot: Snapshots) => (
-              <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
-            ))}
+          {snapshots?.map((snapshot: Snapshots) => (
+            <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
+          ))}
         </div>
       </div>
     </div>
