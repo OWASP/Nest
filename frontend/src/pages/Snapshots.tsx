@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
+import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Snapshots } from 'types/snapshot'
-import { toaster } from 'components/ui/toaster'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import SnapshotCard from 'components/SnapshotCard'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
+import { toaster } from 'components/ui/toaster'
 
 const SnapshotsPage = () => {
   const [snapshots, setSnapshots] = useState<Snapshots[] | null>(null)
