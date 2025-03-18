@@ -205,7 +205,17 @@ export default function Home() {
           </div>
         </SecondaryCard>
       </div>
-      <TopContributors contributors={data.topContributors} maxInitialDisplay={9} />
+      <TopContributors
+        contributors={data.topContributors}
+        renderDetails={(item) => (
+          <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+              {item.projectName}
+            </span>
+          </div>
+        )}
+        maxInitialDisplay={9}
+      />
       <div className="mb-20">
         <h2 className="mb-6 text-3xl font-semibold">OWASP Chapters Nearby</h2>
         <ChapterMap

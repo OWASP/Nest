@@ -2,18 +2,22 @@ import { Button } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
+import { JSX } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopContributorsTypeGraphql } from 'types/contributor'
+import { capitalize } from 'utils/capitalize'
 const TopContributors = ({
   contributors,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
   className = '',
+  renderDetails,
 }: {
   contributors: TopContributorsTypeGraphql[]
   label?: string
   maxInitialDisplay?: number
   className?: string
+  renderDetails: (item: { contributionsCount: number; projectName?: string }) => JSX.Element
 }) => {
   const navigate = useNavigate()
   const [showAllContributors, setShowAllContributors] = useState(false)
@@ -23,51 +27,29 @@ const TopContributors = ({
   const displayContributors = showAllContributors
     ? contributors
     : contributors.slice(0, maxInitialDisplay)
-
   if (contributors.length === 0) {
     return
   }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
       <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {displayContributors.map((contributor, index) => (
-          <div
+      <div className="grid gap-x-5 sm:grid-cols-2 md:grid-cols-3">
+        {displayContributors.map((item, index) => (
+          <button
             key={index}
-            className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-gray-200 dark:hover:bg-gray-700"
+            onClick={() => navigate(`/community/users/${item.login}`)}
+            className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
           >
-            <img
-              src={`${contributor?.avatarUrl}&s=60`}
-              alt={contributor.name || contributor.login}
-              className="mr-3 h-10 w-10 rounded-full"
-            />
-            <div>
-              <button
-                onClick={() => navigate(`/community/users/${contributor.login}`)}
-                className="m-0 border-none bg-transparent p-0 font-semibold text-blue-600 hover:underline dark:text-sky-400"
-                style={{ all: 'unset', cursor: 'pointer' }}
-              >
-                {contributor.name || contributor.login}
-              </button>
-
-              {contributor?.projectName ? (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <a
-                    href={contributor.projectUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline dark:text-sky-400"
-                  >
-                    {contributor.projectName}
-                  </a>
-                </p>
-              ) : (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {contributor?.contributionsCount} contributions
-                </p>
-              )}
+            <div className="flex w-full flex-col justify-between">
+              <div className="flex w-full items-center gap-2">
+                <img src={item?.avatarUrl} alt={item?.name} className="h-6 w-6 rounded-full" />
+                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-500">
+                  {capitalize(item.name) || capitalize(item.login)}
+                </h3>
+              </div>
+              <div className="ml-0.5 w-full">{renderDetails(item)}</div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       {contributors.length > maxInitialDisplay && (
