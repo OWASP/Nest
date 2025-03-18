@@ -59,7 +59,7 @@ describe('Snapshots Component', () => {
 
   test('navigates to snapshot details on button click', async () => {
     const navigateMock = jest.fn();
-    (useNavigate as jest.Mock)(navigateMock);
+    (useNavigate as jest.Mock).mockReturnValue(navigateMock);
     // Mocking the return value with snapshot data
     (useQuery as jest.Mock).mockReturnValue({ data: { snapshots: mockSnapshotDetailsData }, loading: false, error: null });
     render(<Snapshots />);
