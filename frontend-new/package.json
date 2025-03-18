@@ -19,7 +19,7 @@
   "dependencies": {
     "@apollo/client": "^3.13.4",
     "@ark-ui/react": "^5.0.1",
-    "@chakra-ui/react": "^3.12.0",
+    "@chakra-ui/react": "^3.13.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -46,6 +46,7 @@
     "markdown-it": "^14.1.0",
     "millify": "^6.1.0",
     "next": "15.2.2",
+    "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-gtm-module": "^2.0.11",
