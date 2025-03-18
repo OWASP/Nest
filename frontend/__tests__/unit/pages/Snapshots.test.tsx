@@ -53,31 +53,39 @@ describe('Snapshots Component', () => {
 
   test('displays error message on GraphQL error', async () => {
     // Mocking the return value with an error
-    (useQuery as jest.Mock).mockReturnValue({ data: null, loading: false, error: new Error('GraphQL Error') });
-    render(<Snapshots />);
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      loading: false,
+      error: new Error('GraphQL Error'),
+    })
+    render(<Snapshots />)
 
     await waitFor(() => {
       expect(toaster).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'GraphQL Request Failed' })
-      );
-    });
-  });
+      )
+    })
+  })
 
   test('navigates to snapshot details on button click', async () => {
-    const navigateMock = jest.fn();
-    (useNavigate as jest.Mock)(navigateMock);
+    const navigateMock = jest.fn()
+    ;(useNavigate as jest.Mock)(navigateMock)
     // Mocking the return value with snapshot data
-    (useQuery as jest.Mock).mockReturnValue({ data: { snapshots: mockSnapshotDetailsData }, loading: false, error: null });
-    render(<Snapshots />);
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: { snapshots: mockSnapshotDetailsData },
+      loading: false,
+      error: null,
+    })
+    render(<Snapshots />)
 
     await waitFor(() => {
-      const viewButtons = screen.getAllByText('View Details');
-      expect(viewButtons).toHaveLength(2);
-      fireEvent.click(viewButtons[0]);
-    });
+      const viewButtons = screen.getAllByText('View Details')
+      expect(viewButtons).toHaveLength(2)
+      fireEvent.click(viewButtons[0])
+    })
 
-    expect(navigateMock).toHaveBeenCalledWith('/community/snapshots/1');
-  });
+    expect(navigateMock).toHaveBeenCalledWith('/community/snapshots/1')
+  })
 
   test('displays "No Snapshots found" when there are no snapshots', async () => {
     // Mocking the return value with no snapshot data
