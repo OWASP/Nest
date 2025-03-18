@@ -58,26 +58,31 @@ export default function Header() {
           <div className="flex justify-start pl-6">
             {headerLinks.map((link, i) => {
               return link.submenu ? (
-                <div key={i} className={cn(
-                  'dropdown group navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                  link.submenu.map((sub) => sub.href).includes(location.pathname) && 'font-bold text-blue-800 dark:text-white'
-                )}> 
+                <div
+                  key={i}
+                  className={cn(
+                    'dropdown navlink group px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    link.submenu.map((sub) => sub.href).includes(location.pathname) &&
+                      'font-bold text-blue-800 dark:text-white'
+                  )}
+                >
                   {link.text}
-                <div className='dropdown-menu group-hover:opacity-100 group-hover:visible'>
-                  {link.submenu.map((sub, j) => (
-                    <NavLink
-                      key={j}
-                      to={sub.href}
-                      className={cn(
-                        'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                        location.pathname === sub.href && 'font-bold text-blue-800 dark:text-white'
-                      )}
-                      aria-current="page"
-                    >
-                      {sub.text}
-                    </NavLink>
-                  ))}
-                </div>
+                  <div className="dropdown-menu group-hover:visible group-hover:opacity-100">
+                    {link.submenu.map((sub, j) => (
+                      <NavLink
+                        key={j}
+                        to={sub.href}
+                        className={cn(
+                          'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                          location.pathname === sub.href &&
+                            'font-bold text-blue-800 dark:text-white'
+                        )}
+                        aria-current="page"
+                      >
+                        {sub.text}
+                      </NavLink>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <NavLink

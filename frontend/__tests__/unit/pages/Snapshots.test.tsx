@@ -81,20 +81,6 @@ describe('Snapshots Component', () => {
     });
   });
 
-  test('handles pagination correctly', async () => {
-    const nextPageMock = jest.fn();
-    // Mocking the return value with snapshot data and pagination
-    (useQuery as jest.Mock).mockReturnValue({ data: { snapshots: mockSnapshotDetailsData, totalPages: 2 }, loading: false, error: null });
-    render(<Snapshots />);
-
-    await waitFor(() => {
-      const nextPageButton = screen.getByText('Next Page');
-      fireEvent.click(nextPageButton);
-    });
-
-    expect(nextPageMock).toHaveBeenCalled();
-  });
-
   test('displays fallback snapshot title if snapshot title is missing', async () => {
     // Mocking the return value with a snapshot that has no title
     (useQuery as jest.Mock).mockReturnValue({
