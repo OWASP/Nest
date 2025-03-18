@@ -1,5 +1,7 @@
 import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect } from '@playwright/test'
+import { expectContributorVisible } from '../utils/contributor-utils';
+
 
 test.describe('Home Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -37,10 +39,8 @@ test.describe('Home Page', () => {
   })
 
   test('should have top contributors', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('Project 21')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible();
+    await expectContributorVisible(page, 'Contributor 1', 'Project 21');
   })
 
   test('should have recent issues', async ({ page }) => {
