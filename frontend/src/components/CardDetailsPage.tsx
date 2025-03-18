@@ -87,7 +87,17 @@ const DetailsCard = ({
             {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
           </div>
         )}
-        <TopContributors contributors={topContributors} maxInitialDisplay={6} />
+        <TopContributors
+          contributors={topContributors}
+          renderDetails={(item) => (
+            <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                {item.contributionsCount} contributions
+              </span>
+            </div>
+          )}
+          maxInitialDisplay={6}
+        />
         {(type === 'project' || type === 'repository') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList
