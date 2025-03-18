@@ -11,7 +11,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { GET_USER_DATA } from 'api/queries/userQueries'
-import { toast } from 'hooks/useToast'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { UserDetailsProps } from 'types/user'
@@ -22,6 +21,7 @@ import { IssueCard } from 'components/IssueCard'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
 import { ReleaseCard } from 'components/ReleaseCard'
+import { toaster } from 'components/ui/toaster'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
@@ -44,10 +44,10 @@ const UserDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }

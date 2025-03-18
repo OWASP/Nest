@@ -11,6 +11,7 @@ import {
   SnapshotDetailsPage,
   UserDetailsPage,
   UsersPage,
+  Snapshots,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
@@ -18,8 +19,8 @@ import { ErrorDisplay, ERROR_CONFIGS } from 'wrappers/ErrorWrapper'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
+import ScrollToTop from 'components/ScrollToTop'
 import { Toaster } from 'components/ui/toaster'
-import Snapshots from 'pages/Snapshots'
 
 function App() {
   const location = useLocation()
@@ -52,6 +53,7 @@ function App() {
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />
+      <ScrollToTop />
     </main>
   )
 }
