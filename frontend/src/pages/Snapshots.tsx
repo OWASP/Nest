@@ -1,20 +1,16 @@
+import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
-import { SnapshotDetailsProps, Snapshots } from 'types/snapshot'
-import { METADATA_CONFIG } from 'utils/metadata'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import MetadataManager from 'components/MetadataManager'
-import SearchPageLayout from 'components/SearchPageLayout'
-import SnapshotCard from 'components/SnapshotCard' // A custom card component for Snapshot
-import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/homeQueries'
-import { useEffect, useState } from 'react'
-import LoadingSpinner from 'components/LoadingSpinner'
+import { Snapshots } from 'types/snapshot'
 import { toast } from 'hooks/useToast'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import SnapshotCard from 'components/SnapshotCard'
+import LoadingSpinner from 'components/LoadingSpinner'
+import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
 
 const SnapshotsPage = () => {
   const [snapshots, setSnapshots] = useState<Snapshots[] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
 
   useEffect(() => {
@@ -47,10 +43,11 @@ const SnapshotsPage = () => {
 
     return (
       <SnapshotCard
+        key={snapshot.key}
         title={snapshot.title}
         button={SubmitButton}
         startAt={snapshot.startAt}
-        // endAt={snapshot.endAt}
+        endAt={snapshot.endAt}
       />
     )
   }
@@ -64,26 +61,16 @@ const SnapshotsPage = () => {
   }
 
   return (
-    <MetadataManager {...METADATA_CONFIG.snapshot}>
-      <SearchPageLayout
-        currentPage={1}
-        empty="No Snapshots found"
-        indexName="snapshots"
-        isLoaded={!isLoading}
-        onPageChange={() => {}}
-        onSearch={() => {}}
-        searchPlaceholder="Search for OWASP Snapshots..."
-        searchQuery=""
-        totalPages={1}
-      >
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {snapshots &&
-          snapshots.map((snapshot: Snapshots) => (
-            <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
-          ))}
+    <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+      <div className="mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {snapshots &&
+            snapshots.map((snapshot: Snapshots) => (
+              <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
+            ))}
+        </div>
       </div>
-      </SearchPageLayout>
-    </MetadataManager>
+    </div>
   )
 }
 

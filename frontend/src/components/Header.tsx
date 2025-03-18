@@ -71,19 +71,43 @@ export default function Header() {
         {/* Desktop Header Links */}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
           <div className="flex justify-start pl-6">
-            {headerLinks.map((link, i) => (
-              <NavLink
-                key={i}
-                to={link.href}
-                className={cn(
-                  'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                  location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                )}
-                aria-current="page"
-              >
-                {link.text}
-              </NavLink>
-            ))}
+            {headerLinks.map((link, i) => {
+              return link.submenu ? (
+                <div key={i} className={cn(
+                  'dropdown group navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                  link.submenu.map((sub) => sub.href).includes(location.pathname) && 'font-bold text-blue-800 dark:text-white'
+                )}> 
+                  {link.text}
+                <div className='dropdown-menu group-hover:opacity-100 group-hover:visible'>
+                  {link.submenu.map((sub, j) => (
+                    <NavLink
+                      key={j}
+                      to={sub.href}
+                      className={cn(
+                        'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                        location.pathname === sub.href && 'font-bold text-blue-800 dark:text-white'
+                      )}
+                      aria-current="page"
+                    >
+                      {sub.text}
+                    </NavLink>
+                  ))}
+                </div>
+                </div>
+              ) : (
+                <NavLink
+                  key={i}
+                  to={link.href}
+                  className={cn(
+                    'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  aria-current="page"
+                >
+                  {link.text}
+                </NavLink>
+              )
+            })}
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">
