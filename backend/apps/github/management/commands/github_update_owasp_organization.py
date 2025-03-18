@@ -7,6 +7,7 @@ import github
 from django.core.management.base import BaseCommand
 from github.GithubException import BadCredentialsException
 
+from apps.core.utils.index import register_indexes, unregister_indexes
 from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.models.repository import Repository
@@ -31,6 +32,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *_args, **options):
+        unregister_indexes()  # Disable automatic indexing
+
         try:
             gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
             gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
@@ -109,3 +112,5 @@ class Command(BaseCommand):
         for project in Project.objects.all():
             if project.owasp_repository:
                 project.repositories.add(project.owasp_repository)
+
+        register_indexes()  # Enable automatic indexing
