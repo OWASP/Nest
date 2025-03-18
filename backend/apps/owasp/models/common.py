@@ -58,6 +58,9 @@ class RepositoryBasedEntityModel(models.Model):
     invalid_urls = models.JSONField(
         verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
     )
+    is_leaders_policy_compliant = models.BooleanField(
+        verbose_name="Is leaders policy compliant", default=True
+    )
 
     # FKs.
     owasp_repository = models.ForeignKey(
@@ -117,6 +120,8 @@ class RepositoryBasedEntityModel(models.Model):
                 setattr(self, model_field, value)
 
         self.leaders_raw = self.get_leaders()
+        self.is_leaders_policy_compliant = len(self.leaders_raw) > 1
+
         self.tags = self.parse_tags(entity_metadata.get("tags", []))
 
         return entity_metadata
@@ -149,12 +154,6 @@ class RepositoryBasedEntityModel(models.Model):
                     )
                     if name
                 ]
-            )
-
-        if not leaders:
-            logger.error(
-                "No leaders found in leaders.md file",
-                extra={"URL": self.leaders_md_url},
             )
 
         return sorted(leaders)
