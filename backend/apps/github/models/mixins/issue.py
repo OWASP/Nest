@@ -8,7 +8,8 @@ class IssueIndexMixin:
     def is_indexable(self):
         """Issues to index."""
         return (
-            self.state == self.State.OPEN
+            self.id
+            and self.state == self.State.OPEN
             and not self.is_locked
             and self.repository.is_indexable
             and self.repository.track_issues
