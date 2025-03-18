@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Snapshots } from 'types/snapshot'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import SnapshotCard from 'components/SnapshotCard'
 import LoadingSpinner from 'components/LoadingSpinner'
+import SnapshotCard from 'components/SnapshotCard'
 import { toaster } from 'components/ui/toaster'
 
 const SnapshotsPage = () => {
