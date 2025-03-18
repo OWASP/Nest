@@ -56,10 +56,10 @@ export default function Header() {
         {/* Desktop Header Links */}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
           <div className="flex justify-start pl-6">
-            {headerLinks.map((link, i) => {
+            {headerLinks.map((link) => {
               return link.submenu ? (
                 <div
-                  key={i}
+                  key={link.text}
                   className={cn(
                     'dropdown navlink group px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
                     link.submenu.map((sub) => sub.href).includes(location.pathname) &&
@@ -68,9 +68,9 @@ export default function Header() {
                 >
                   {link.text}
                   <div className="dropdown-menu group-hover:visible group-hover:opacity-100">
-                    {link.submenu.map((sub, j) => (
+                    {link.submenu.map((sub) => (
                       <NavLink
-                        key={j}
+                        key={link.text}
                         to={sub.href}
                         className={cn(
                           'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
@@ -86,7 +86,7 @@ export default function Header() {
                 </div>
               ) : (
                 <NavLink
-                  key={i}
+                  key={link.text}
                   to={link.href}
                   className={cn(
                     'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
@@ -166,16 +166,16 @@ export default function Header() {
                         </div>
                       </div>
                     </NavLink>
-                    {headerLinks.map((link, i) =>
+                    {headerLinks.map((link) =>
                       link.submenu ? (
-                        <div key={i} className="flex flex-col">
+                        <div key={link.text} className="flex flex-col">
                           <div className="block px-3 py-2 font-medium text-slate-700 dark:text-slate-300">
                             {link.text}
                           </div>
                           <div className="ml-4">
-                            {link.submenu.map((sub, j) => (
+                            {link.submenu.map((sub) => (
                               <NavLink
-                                key={j}
+                                key={link.text}
                                 to={sub.href}
                                 className={cn(
                                   'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
@@ -191,7 +191,7 @@ export default function Header() {
                         </div>
                       ) : (
                         <NavLink
-                          key={i}
+                          key={link.text}
                           to={link.href}
                           className={cn(
                             'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
