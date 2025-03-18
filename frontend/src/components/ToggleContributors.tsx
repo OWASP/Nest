@@ -34,9 +34,10 @@ const TopContributors = ({
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
       <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
       <div className="grid gap-x-5 sm:grid-cols-2 md:grid-cols-3">
-        {displayContributors.map((item, index) => (
+        {displayContributors.map((item, index) => (  
           <button
             key={index}
+            data-testid="top-contributor"
             onClick={() => navigate(`/community/users/${item.login}`)}
             className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
           >

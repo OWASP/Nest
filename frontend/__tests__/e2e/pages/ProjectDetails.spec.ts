@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-import { expectContributorVisible } from '../utils/contributor-utils';
-
 
 test.describe('Project Details Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -53,8 +51,12 @@ test.describe('Project Details Page', () => {
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expectContributorVisible(page, 'Contributor 1', '30 Contributions');
-    await expectContributorVisible(page, 'Contributor 2', '29 Contributions');
+    await expect(page.getByRole('img', {name: 'Contributor 1'})).toBeVisible();
+    await expect(page.getByText('Contributor 1')).toBeVisible();
+    await expect(page.getByText('30 Contributions')).toBeVisible();
+    await expect(page.getByRole('img', {name: 'Contributor 1'})).toBeVisible();
+    await expect(page.getByText('Contributor 2')).toBeVisible();
+    await expect(page.getByText('29 Contributions')).toBeVisible();
   })
 
   test('toggle top contributors', async ({ page }) => {
