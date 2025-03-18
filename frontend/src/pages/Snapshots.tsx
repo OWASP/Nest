@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 import { Snapshots } from 'types/snapshot'
-import { toast } from 'hooks/useToast'
+import { toaster } from 'components/ui/toaster'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import SnapshotCard from 'components/SnapshotCard'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -19,10 +19,10 @@ const SnapshotsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }

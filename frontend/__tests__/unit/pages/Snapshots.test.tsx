@@ -1,7 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'hooks/useToast';
+import { toaster } from 'components/ui/toaster'
 import Snapshots from 'pages/Snapshots';
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData';
 
@@ -15,9 +15,11 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}));
+jest.mock('components/ui/toaster', () => ({
+  toaster: {
+    create: jest.fn(),
+  },
+}))
 
 describe('Snapshots Component', () => {
   afterEach(() => {
@@ -49,7 +51,7 @@ describe('Snapshots Component', () => {
     render(<Snapshots />);
 
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith(
+      expect(toaster).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'GraphQL Request Failed' })
       );
     });

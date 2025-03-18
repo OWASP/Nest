@@ -14,6 +14,7 @@ import RepositoryDetailsPage from './RepositoryDetails'
 import SnapshotDetailsPage from './SnapshotDetails'
 import UserDetailsPage from './UserDetails'
 import UsersPage from './Users'
+import Snapshots from './Snapshots'
 export {
   ChapterDetailsPage,
   ChaptersPage,
@@ -27,4 +28,5 @@ export {
   SnapshotDetailsPage,
   UserDetailsPage,
   UsersPage,
+  Snapshots
 }
