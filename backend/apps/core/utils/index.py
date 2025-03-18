@@ -1,4 +1,10 @@
-"""Retrieve search parameters for different Algolia indices based on the index name."""
+"""Index utils."""
+
+import contextlib
+
+from algoliasearch_django import register, unregister
+from algoliasearch_django.registration import RegistrationError
+from django.apps import apps
 
 
 def get_params_for_index(index_name):
@@ -105,3 +111,19 @@ def get_params_for_index(index_name):
             params["attributesToRetrieve"] = []
 
     return params
+
+
+def register_indexes(app_names=("github", "owasp")):
+    """Register indexes."""
+    for app_name in app_names:
+        for model in apps.get_app_config(app_name).get_models():
+            with contextlib.suppress(RegistrationError):
+                register(model)
+
+
+def unregister_indexes(app_names=("github", "owasp")):
+    """Unregister indexes."""
+    for app_name in app_names:
+        for model in apps.get_app_config(app_name).get_models():
+            with contextlib.suppress(RegistrationError):
+                unregister(model)
