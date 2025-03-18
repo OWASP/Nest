@@ -1,142 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
-  "$defs": {
-    "community": {
-      "type": "object",
-      "title": "Community",
-      "description": "A project community.",
-      "required": ["platform", "url"],
-      "properties": {
-        "description": {
-          "description": "A brief description of the community.",
-          "type": "string"
-        },
-        "platform": {
-          "type": "string",
-          "enum": ["discord", "slack"],
-          "description": "The platform used by the community."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the community.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
-    },
-    "repository": {
-      "type": "object",
-      "title": "Repository",
-      "description": "A project repository.",
-      "required": [
-        "url"
-      ],
-      "properties": {
-        "changelog": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Link to the changelog.",
-          "format": "uri"
-        },
-        "code_of_conduct": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Link to the code of conduct.",
-          "format": "uri"
-        },
-        "contribution_guide": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Link to the contribution guide.",
-          "format": "uri"
-        },
-        "description": {
-          "type": [
-            "string"
-          ],
-          "description": "Repository description."
-        },
-        "name": {
-          "type": [
-            "string"
-          ],
-          "description": "Repository name."
-        },
-        "url": {
-          "type": "string",
-          "description": "The repository URL.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
-    },
-    "sponsor": {
-      "type": "object",
-      "title": "Sponsor",
-      "description": "A project sponsor.",
-      "required": [
-        "name",
-        "url"
-      ],
-      "properties": {
-        "description": {
-          "type": "string",
-          "description": "A brief description of the sponsor."
-        },
-        "logo": {
-          "type": "string",
-          "description": "The URL of the sponsor's logo.",
-          "format": "uri"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the sponsor or organization."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the sponsor.",
-          "format": "uri"
-        }
-      },
-      "additionalProperties": false
-    },
-    "logo": {
-      "description": "A logo for the project",
-      "type": "object",
-      "properties": {
-        "small": {
-          "description": "Logo size should be 192x192 pixels.",
-          "type": "string",
-          "format": "uri"
-        },
-        "medium": {
-          "description": "Logo size should be 256x256 pixels.",
-          "type": "string",
-          "format": "uri"
-        },
-        "large": {
-          "description": "Logo size should be 512x512 pixels.",
-          "type": "string",
-          "format": "uri"
-        }
-      },
-      "required": [
-        "small",
-        "medium",
-        "large"
-      ],
-      "additionalProperties": false
-    }
-  },
   "additionalProperties": false,
-  "description": "OWASP schema.",
+  "description": "OWASP project schema",
   "properties": {
     "audience": {
       "description": "The intended audience for the project.",
@@ -159,64 +25,61 @@
     },
     "community": {
       "description": "A list of community platforms associated with the project.",
-      "type": "array",
       "items": {
-        "$ref": "#/$defs/community"
+        "$ref": "common.json#/definitions/community"
       },
       "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
+      "type": "array",
+      "uniqueItems": true
     },
     "demo": {
       "description": "Optional URLs to the project demo.",
-      "minItems": 1,
       "items": {
         "format": "uri",
         "type": "string"
       },
+      "minItems": 1,
       "type": "array",
       "uniqueItems": true
     },
     "documentation": {
       "description": "Optional URLs to project documentation.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri"
-      },
-      "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
-    },
-    "downloads": {
-      "description": "Optional list of download URLs.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri"
-      },
-      "minItems": 1,
-      "uniqueItems": true,
-      "optional": true
-    },
-    "events": {
-      "description": "Event URLs related to the project.",
-      "type": "array",
       "items": {
         "format": "uri",
         "type": "string"
       },
       "minItems": 1,
+      "optional": true,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "downloads": {
+      "description": "Optional list of download URLs.",
+      "items": {
+        "format": "uri",
+        "type": "string"
+      },
+      "minItems": 1,
+      "optional": true,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "events": {
+      "description": "Events related to the project.",
+      "items": {
+        "$ref": "common.json#/definitions/event"
+      },
+      "minItems": 1,
+      "type": "array",
       "uniqueItems": true
     },
     "leaders": {
       "description": "Leaders of the project.",
-      "type": "array",
       "items": {
         "$ref": "common.json#/definitions/person"
-
       },
       "minItems": 2,
+      "type": "array",
       "uniqueItems": true
     },
     "level": {
@@ -260,18 +123,21 @@
     },
     "logo": {
       "description": "Logo information for the project.",
-      "type": "array",
       "items": {
-        "$ref": "#/$defs/logo"
+        "$ref": "common.json#/definitions/logo"
       },
       "minItems": 1,
-      "additionalProperties": false,
-      "optional": true
+      "type": "array",
+      "uniqueItems": true
     },
     "mailing_list": {
       "description": "The optional mailing list associated with the project.",
-      "format": "uri",
-      "type": "string"
+      "items": {
+        "$ref": "common.json#/definitions/mailing_list"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     },
     "name": {
       "description": "The unique name of the project.",
@@ -280,41 +146,43 @@
     },
     "pitch": {
       "description": "The project pitch.",
+      "minLength": 10,
       "type": "string"
     },
     "repositories": {
       "description": "Repositories associated with the project.",
-      "type": "array",
-      "minItems": 1,
       "items": {
-        "$ref": "#/$defs/repository"
+        "$ref": "common.json#/definitions/repository"
       },
+      "minItems": 1,
+      "type": "array",
       "uniqueItems": true
     },
     "social_media": {
       "description": "Social media information for the project",
-      "type": "array",
       "items": {
         "$ref": "common.json#/definitions/social_media"
       },
       "minItems": 1,
-      "additionalProperties": false
+      "type": "array",
+      "uniqueItems": true
     },
     "sponsors": {
       "description": "Sponsors of the project.",
-      "type": "array",
       "items": {
-        "$ref": "#/$defs/sponsor"
+        "$ref": "common.json#/definitions/sponsor"
       },
-      "minItems": 1
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     },
     "tags": {
       "description": "Tags for the project",
-      "type": "array",
       "items": {
         "type": "string"
       },
       "minItems": 3,
+      "type": "array",
       "uniqueItems": true
     },
     "type": {
@@ -333,7 +201,7 @@
     },
     "website": {
       "description": "The official website of the project.",
-      "format": "url",
+      "format": "uri",
       "minLength": 4,
       "type": "string"
     }

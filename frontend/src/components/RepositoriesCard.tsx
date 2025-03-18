@@ -8,6 +8,7 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import millify from 'millify'
 import type React from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -54,23 +55,40 @@ const RepositoryItem = ({ details }) => {
   }
   return (
     <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <p
+      <button
         onClick={handleClick}
         className="font-semibold text-blue-600 hover:cursor-pointer hover:underline dark:text-sky-400"
       >
-        {details.name}
-      </p>
+        {details?.name}
+      </button>
+
       <div className="space-y-2 text-sm">
-        <InfoItem icon={faStar} label="Stars" value={details.starsCount} />
-        <InfoItem icon={faCodeFork} label="Forks" value={details.forksCount} />
-        <InfoItem icon={faUsers} label="Contributors" value={details.contributorsCount} />
-        <InfoItem icon={faExclamationCircle} label="Issues" value={details.openIssuesCount} />
+        <InfoItem
+          icon={faStar}
+          label="Stars"
+          value={millify(details.starsCount, { precision: 1 })}
+        />
+        <InfoItem
+          icon={faCodeFork}
+          label="Forks"
+          value={millify(details.forksCount, { precision: 1 })}
+        />
+        <InfoItem
+          icon={faUsers}
+          label="Contributors"
+          value={millify(details.contributorsCount, { precision: 1 })}
+        />
+        <InfoItem
+          icon={faExclamationCircle}
+          label="Issues"
+          value={millify(details.openIssuesCount, { precision: 1 })}
+        />
       </div>
     </div>
   )
 }
 
-const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: number }> = ({
+const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: string }> = ({
   icon,
   label,
   value,

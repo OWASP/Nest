@@ -8,8 +8,8 @@ from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.common import GenericEntityNode
 from apps.owasp.models.project import Project
 
-RECENT_ISSUES_LIMIT = 10
-RECENT_RELEASES_LIMIT = 10
+RECENT_ISSUES_LIMIT = 5
+RECENT_RELEASES_LIMIT = 5
 
 
 class ProjectNode(GenericEntityNode):
@@ -18,11 +18,13 @@ class ProjectNode(GenericEntityNode):
     issues_count = graphene.Int()
     key = graphene.String()
     languages = graphene.List(graphene.String)
+    level = graphene.String()
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
     repositories = graphene.List(RepositoryNode)
     repositories_count = graphene.Int()
     topics = graphene.List(graphene.String)
+    type = graphene.String()
 
     class Meta:
         model = Project

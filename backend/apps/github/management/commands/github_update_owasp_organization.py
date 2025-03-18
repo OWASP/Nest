@@ -7,13 +7,13 @@ import github
 from django.core.management.base import BaseCommand
 from github.GithubException import BadCredentialsException
 
+from apps.core.utils.index import register_indexes, unregister_indexes
 from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
-from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *_args, **options):
+        unregister_indexes()  # Disable automatic indexing
+
         try:
             gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
             gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
@@ -48,7 +50,6 @@ class Command(BaseCommand):
 
         chapters = []
         committees = []
-        events = []
         projects = []
 
         offset = options["offset"]
@@ -84,17 +85,12 @@ class Command(BaseCommand):
             elif entity_key.startswith("www-project-"):
                 projects.append(Project.update_data(gh_repository, repository, save=False))
 
-            # OWASP events.
-            elif entity_key.startswith("www-event-"):
-                events.append(Event.update_data(gh_repository, repository, save=False))
-
             # OWASP committees.
             elif entity_key.startswith("www-committee-"):
                 committees.append(Committee.update_data(gh_repository, repository, save=False))
 
         Chapter.bulk_save(chapters)
         Committee.bulk_save(committees)
-        Event.bulk_save(events)
         Project.bulk_save(projects)
 
         # Check repository counts.
@@ -116,3 +112,5 @@ class Command(BaseCommand):
         for project in Project.objects.all():
             if project.owasp_repository:
                 project.repositories.add(project.owasp_repository)
+
+        register_indexes()  # Enable automatic indexing

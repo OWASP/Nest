@@ -7,7 +7,7 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_REPOSITORY_DATA } from 'api/queries/repositoryQueries'
-import { toast } from 'hooks/useToast'
+import millify from 'millify'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
@@ -16,6 +16,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const RepositoryDetailsPage = () => {
   const { projectKey, repositoryKey } = useParams()
@@ -30,10 +31,10 @@ const RepositoryDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
@@ -82,24 +83,37 @@ const RepositoryDetailsPage = () => {
 
   const RepositoryStats = [
     {
-      icon: faHistory,
-      value: `${repository?.commitsCount || 'No'} ${pluralize(repository.commitsCount, 'Commit')}`,
-    },
-    {
-      icon: faUsers,
-      value: `${repository?.contributorsCount || 'No'} ${pluralize(repository.contributorsCount, 'Contributor')}`,
+      icon: faStar,
+      value: `${
+        repository.starsCount ? millify(repository.starsCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.starsCount, 'Star')}`,
     },
     {
       icon: faCodeFork,
-      value: `${repository?.forksCount || 'No'} ${pluralize(repository.forksCount, 'Fork')}`,
+      value: `${
+        repository.forksCount ? millify(repository.forksCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.forksCount, 'Fork')}`,
     },
+    {
+      icon: faUsers,
+      value: `${
+        repository.contributorsCount
+          ? millify(repository.contributorsCount, { precision: 1 })
+          : 'No'
+      } ${pluralize(repository.contributorsCount, 'Contributor')}`,
+    },
+
     {
       icon: faExclamationCircle,
-      value: `${repository?.openIssuesCount || 'No'} ${pluralize(repository.openIssuesCount, 'Issue')}`,
+      value: `${
+        repository.openIssuesCount ? millify(repository.openIssuesCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.openIssuesCount, 'Issue')}`,
     },
     {
-      icon: faStar,
-      value: `${repository?.starsCount || 'No'} ${pluralize(repository.starsCount, 'Star')}`,
+      icon: faHistory,
+      value: `${
+        repository.commitsCount ? millify(repository.commitsCount, { precision: 1 }) : 'No'
+      } ${pluralize(repository.commitsCount, 'Commit')}`,
     },
   ]
   return (

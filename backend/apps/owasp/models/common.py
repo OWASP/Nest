@@ -1,5 +1,6 @@
 """OWASP app common models."""
 
+import itertools
 import logging
 import re
 from urllib.parse import urlparse
@@ -12,7 +13,6 @@ from apps.common.open_ai import OpenAi
 from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
-    OWASP_FOUNDATION_LOGIN,
 )
 from apps.github.models.repository_contributor import (
     TOP_CONTRIBUTORS_LIMIT,
@@ -49,6 +49,19 @@ class RepositoryBasedEntityModel(models.Model):
     created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
     updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
 
+    leaders_raw = models.JSONField(
+        verbose_name="Entity leaders list", default=list, blank=True, null=True
+    )
+    related_urls = models.JSONField(
+        verbose_name="Entity related URLs", default=list, blank=True, null=True
+    )
+    invalid_urls = models.JSONField(
+        verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
+    )
+    is_leaders_policy_compliant = models.BooleanField(
+        verbose_name="Is leaders policy compliant", default=True
+    )
+
     # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository",
@@ -62,6 +75,26 @@ class RepositoryBasedEntityModel(models.Model):
     def github_url(self):
         """Get GitHub URL."""
         return f"https://github.com/owasp/{self.key}"
+
+    @property
+    def index_md_url(self):
+        """Return project's raw index.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
+            if self.owasp_repository
+            else None
+        )
+
+    @property
+    def leaders_md_url(self):
+        """Return entity's raw leaders.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/leaders.md"
+            if self.owasp_repository
+            else None
+        )
 
     @property
     def owasp_name(self):
@@ -78,34 +111,20 @@ class RepositoryBasedEntityModel(models.Model):
         self.is_active = False
         self.save(update_fields=("is_active",))
 
-    def from_github(self, field_mapping, repository):
+    def from_github(self, field_mapping):
         """Update instance based on GitHub repository data."""
-        # Normalize tags.
-        self.tags = (
-            [tag.strip(", ") for tag in self.tags.split("," if "," in self.tags else " ")]
-            if isinstance(self.tags, str)
-            else self.tags
-        )
+        entity_metadata = self.get_metadata()
+        for model_field, gh_field in field_mapping.items():
+            value = entity_metadata.get(gh_field)
+            if value:
+                setattr(self, model_field, value)
 
-        project_metadata = {}
+        self.leaders_raw = self.get_leaders()
+        self.is_leaders_policy_compliant = len(self.leaders_raw) > 1
 
-        index_md_content = get_repository_file_content(
-            self.get_index_md_raw_url(repository=repository)
-        )
-        # Fetch project metadata from index.md file.
-        try:
-            yaml_content = re.search(r"^---\s*(.*?)\s*---", index_md_content, re.DOTALL)
-            project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+        self.tags = self.parse_tags(entity_metadata.get("tags", []))
 
-            # Direct fields.
-            for model_field, gh_field in field_mapping.items():
-                value = project_metadata.get(gh_field)
-                if value:
-                    setattr(self, model_field, value)
-        except (AttributeError, yaml.scanner.ScannerError):
-            logger.exception("Unable to parse metadata", extra={"repository": repository.name})
-
-        return project_metadata
+        return entity_metadata
 
     def generate_summary(self, prompt, open_ai=None, max_tokens=500):
         """Generate entity summary."""
@@ -113,57 +132,46 @@ class RepositoryBasedEntityModel(models.Model):
             return
 
         open_ai = open_ai or OpenAi()
-        open_ai.set_input(get_repository_file_content(self.get_index_md_raw_url()))
+        open_ai.set_input(get_repository_file_content(self.index_md_url))
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
-    def get_index_md_raw_url(self, repository=None):
-        """Return project's raw index.md GitHub URL."""
-        owasp_repository = repository or self.owasp_repository
-        return (
-            "https://raw.githubusercontent.com/OWASP/"
-            f"{owasp_repository.key}/{owasp_repository.default_branch}/index.md"
-            if owasp_repository
-            else None
-        )
+    def get_leaders(self):
+        """Get leaders from leaders.md file on GitHub."""
+        content = get_repository_file_content(self.leaders_md_url)
+        if not content:
+            return []
 
-    def get_top_contributors(self, repositories=()):
-        """Get top contributors."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["total_contributions"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.by_humans()
-            .filter(repository__in=repositories)
-            .exclude(user__login__in=[OWASP_FOUNDATION_LOGIN])
-            .values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
+        leaders = []
+        for line in content.split("\n"):
+            leaders.extend(
+                [
+                    name
+                    for name in itertools.chain(
+                        *re.findall(
+                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line
+                        )
+                    )
+                    if name
+                ]
             )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
 
+        return sorted(leaders)
 
-class GenericEntityModel(models.Model):
-    """Generic entity model."""
-
-    class Meta:
-        abstract = True
-
-    leaders_raw = models.JSONField(
-        verbose_name="Entity leaders list", default=list, blank=True, null=True
-    )
-    related_urls = models.JSONField(
-        verbose_name="Entity related URLs", default=list, blank=True, null=True
-    )
-    invalid_urls = models.JSONField(
-        verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
-    )
+    def get_metadata(self):
+        """Get entity metadata."""
+        try:
+            yaml_content = re.search(
+                r"^---\s*([\s\S]*?)\s*---",
+                get_repository_file_content(self.index_md_url),
+                re.DOTALL,
+            )
+            return yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+        except (AttributeError, yaml.scanner.ScannerError):
+            logger.exception(
+                "Unable to parse entity metadata",
+                extra={"repository": getattr(self.owasp_repository, "name", None)},
+            )
 
     # M2M
     suggested_leaders = models.ManyToManyField(
@@ -197,3 +205,31 @@ class GenericEntityModel(models.Model):
             return f"https://github.com/{match.group(1)}".lower()
 
         return url
+
+    def get_top_contributors(self, repositories=()):
+        """Get top contributors."""
+        return [
+            {
+                "avatar_url": tc["user__avatar_url"],
+                "contributions_count": tc["total_contributions"],
+                "login": tc["user__login"],
+                "name": tc["user__name"],
+            }
+            for tc in RepositoryContributor.objects.by_humans()
+            .filter(repository__in=repositories)
+            .values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+            )
+            .annotate(total_contributions=Sum("contributions_count"))
+            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
+        ]
+
+    def parse_tags(self, tags):
+        """Get entity tags."""
+        return (
+            [tag.strip(", ") for tag in tags.split("," if "," in tags else " ")]
+            if isinstance(tags, str)
+            else tags
+        )

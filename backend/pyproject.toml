@@ -39,6 +39,7 @@ openai = "^1.60.1"
 psycopg = "^3.2.4"
 pygithub = "^2.5.0"
 python = "^3.13"
+python-dateutil = "^2.9.0.post0"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
@@ -49,7 +50,7 @@ thefuzz = "^0.22.1"
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
-ruff = "^0.9.5"
+ruff = "^0.11.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
