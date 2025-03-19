@@ -151,6 +151,7 @@ class TestAlgoliaSearch:
         """Test the algolia_search function with fuzz testing."""
         mock_request = Mock()
         mock_request.method = "POST"
+        mock_request.META = {"HTTP_X_FORWARDED_FOR": CLIENT_IP_ADDRESS}
         mock_request.body = json.dumps(
             {
                 "facetFilters": facet_filters,
@@ -163,4 +164,4 @@ class TestAlgoliaSearch:
 
         response = algolia_search(mock_request)
 
-        assert response.status_code != requests.codes.server_error
+        assert response.status_code in [requests.codes.ok, requests.codes.bad_request]
