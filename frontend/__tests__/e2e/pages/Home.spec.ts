@@ -49,10 +49,9 @@ test.describe('Home Page', () => {
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    const contributors = page.getByTestId('top-contributor');
-    await expect(contributors.getByRole('img', {name: 'Contributor 1'})).toBeVisible();
-    await expect(contributors.getByText('Contributor 1')).toBeVisible();
-    await expect(page.getByText('Project 21')).toBeVisible();
+    await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
+    await expect(page.getByText('Contributor 1')).toBeVisible()
+    await expect(page.getByText('Project 21')).toBeVisible()
   })
 
   test('should have recent issues', async ({ page }) => {
