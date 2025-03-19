@@ -1,9 +1,9 @@
 import json
 from unittest.mock import Mock, patch
 
+import hypothesis
 import pytest
 import requests
-import hypothesis
 from django.core.cache import cache
 
 from apps.core.api.algolia import algolia_search
