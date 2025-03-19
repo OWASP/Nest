@@ -43,8 +43,6 @@ class Command(BaseCommand):
             )
             return
 
-        remote_owasp_repositories_count = gh_owasp_organization.public_repos
-
         owasp_organization = None
         owasp_user = None
 
@@ -93,18 +91,21 @@ class Command(BaseCommand):
         Committee.bulk_save(committees)
         Project.bulk_save(projects)
 
-        # Check repository counts.
-        local_owasp_repositories_count = Repository.objects.filter(
-            is_owasp_repository=True
-        ).count()
-        result = (
-            "==" if remote_owasp_repositories_count == local_owasp_repositories_count else "!="
-        )
-        print(
-            "\n"
-            f"OWASP GitHub repositories count {result} synced repositories count: "
-            f"{remote_owasp_repositories_count} {result} {local_owasp_repositories_count}"
-        )
+        if repository is None:
+            # Check repository counts.
+            local_owasp_repositories_count = Repository.objects.filter(
+                is_owasp_repository=True,
+            ).count()
+            remote_owasp_repositories_count = gh_owasp_organization.public_repos
+            has_same_repositories_count = (
+                gh_owasp_organization.public_repos == local_owasp_repositories_count
+            )
+            result = "==" if has_same_repositories_count else "!="
+            print(
+                "\n"
+                f"OWASP GitHub repositories count {result} synced repositories count: "
+                f"{remote_owasp_repositories_count} {result} {local_owasp_repositories_count}"
+            )
 
         gh.close()
 
