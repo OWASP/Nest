@@ -98,7 +98,7 @@ class Command(BaseCommand):
             ).count()
             remote_owasp_repositories_count = gh_owasp_organization.public_repos
             has_same_repositories_count = (
-                gh_owasp_organization.public_repos == local_owasp_repositories_count
+                local_owasp_repositories_count == remote_owasp_repositories_count
             )
             result = "==" if has_same_repositories_count else "!="
             print(
