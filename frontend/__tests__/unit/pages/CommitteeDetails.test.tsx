@@ -80,7 +80,7 @@ describe('CommitteeDetailsPage Component', () => {
           {
             avatarUrl: 'https://example.com/avatar1.jpg',
             contributionsCount: 30,
-            login: 'user1',
+            login: 'Contributor 1',
             name: '',
             __typename: 'UserNode',
           },
@@ -94,7 +94,7 @@ describe('CommitteeDetailsPage Component', () => {
     render(<CommitteeDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('user1')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
   })
 
