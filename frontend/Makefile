@@ -1,3 +1,4 @@
+
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code
@@ -22,12 +23,18 @@ test-frontend: \
 	test-frontend-unit
 
 test-frontend-e2e:
-	@docker build -f frontend/docker/Dockerfile.e2e.test frontend -t nest-test-frontend-e2e
-	@docker run --env-file frontend/.env.example nest-test-frontend-e2e npm run test:e2e
+	@DOCKER_BUILDKIT=1 docker build \
+		--cache-from nest-test-frontend-e2e \
+		-f frontend/docker/Dockerfile.e2e.test frontend \
+		-t nest-test-frontend-e2e
+	@docker run --env-file frontend/.env.example nest-test-frontend-e2e pnpm run test:e2e
 
 test-frontend-unit:
-	@docker build -f frontend/docker/Dockerfile.unit.test frontend -t nest-test-frontend-unit
-	@docker run --env-file frontend/.env.example nest-test-frontend-unit npm run test:unit
+	@DOCKER_BUILDKIT=1 docker build \
+		--cache-from nest-test-frontend-unit \
+		-f frontend/docker/Dockerfile.unit.test frontend \
+		-t nest-test-frontend-unit
+	@docker run --env-file frontend/.env.example nest-test-frontend-unit pnpm run test:unit
 
 update-frontend-dependencies:
 	@CMD="pnpm update" $(MAKE) exec-frontend-command-it
