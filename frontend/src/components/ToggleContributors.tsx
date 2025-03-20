@@ -1,7 +1,7 @@
 import { Button } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useState, JSX } from 'react'
+import { useState } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 import { TopContributorsTypeGraphql } from 'types/contributor'
@@ -11,13 +11,13 @@ const TopContributors = ({
   label = 'Top Contributors',
   maxInitialDisplay = 6,
   className = '',
-  renderDetails,
+  type,
 }: {
   contributors: TopContributorsTypeGraphql[]
   label?: string
   maxInitialDisplay?: number
   className?: string
-  renderDetails: (item: { contributionsCount: number; projectName?: string }) => JSX.Element
+  type: string
 }) => {
   const navigate = useNavigate()
   const [showAllContributors, setShowAllContributors] = useState(false)
@@ -48,7 +48,15 @@ const TopContributors = ({
                   {capitalize(item.name) || capitalize(item.login)}
                 </h3>
               </div>
-              <div className="ml-0.5 w-full">{renderDetails(item)}</div>
+              <div className="ml-0.5 w-full">
+                <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
+                  <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                    {type === 'contributor'
+                      ? `${item.contributionsCount ?? 0} contributions`
+                      : item.projectName}
+                  </span>
+                </div>
+              </div>
             </div>
           </button>
         ))}
