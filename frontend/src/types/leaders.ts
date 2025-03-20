@@ -1,3 +1,3 @@
 export interface LeadersListProps {
-    leaders: string
-};
+  leaders: string
+}
