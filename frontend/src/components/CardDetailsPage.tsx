@@ -10,6 +10,7 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
+import LeadersList from './LeadersList'
 
 const DetailsCard = ({
   title,
@@ -47,11 +48,19 @@ const DetailsCard = ({
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
-              details.map((detail, index) => (
-                <div key={index} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
-                </div>
-              ))}
+              details.map((detail, index) =>
+                detail?.label === 'Leaders' ? (
+                  <div key={index} className="pb-1">
+                    <strong>
+                      {detail.label}: <LeadersList leaders={String(detail?.value)} />
+                    </strong>
+                  </div>
+                ) : (
+                  <div key={index} className="pb-1">
+                    <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
+                  </div>
+                )
+              )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
             )}
