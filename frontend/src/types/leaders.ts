@@ -1,3 +1,3 @@
-export type LeadersListProps = {
+export interface LeadersListProps {
     leaders: string
 };
