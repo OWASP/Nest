@@ -28,5 +28,5 @@ export {
   SnapshotDetailsPage,
   UserDetailsPage,
   UsersPage,
-  Snapshots
+  Snapshots,
 }

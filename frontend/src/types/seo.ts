@@ -24,7 +24,7 @@ export interface MetadataConfig {
   projectContribute: PageMetadata
   projects: PageMetadata
   users: PageMetadata
-  snapshot : PageMetadata
+  snapshot: PageMetadata
 }
 
 export interface MetadataManagerProps {
