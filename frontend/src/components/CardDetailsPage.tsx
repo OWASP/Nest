@@ -48,15 +48,15 @@ const DetailsCard = ({
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
-              details.map((detail, index) =>
+              details.map((detail) =>
                 detail?.label === 'Leaders' ? (
-                  <div key={index} className="pb-1">
+                  <div key={detail.label} className="pb-1">
                     <strong>
                       {detail.label}: <LeadersList leaders={String(detail?.value)} />
                     </strong>
                   </div>
                 ) : (
-                  <div key={index} className="pb-1">
+                  <div key={detail.label} className="pb-1">
                     <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
                   </div>
                 )
