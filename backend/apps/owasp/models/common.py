@@ -122,7 +122,7 @@ class RepositoryBasedEntityModel(models.Model):
         self.leaders_raw = self.get_leaders()
         self.is_leaders_policy_compliant = len(self.leaders_raw) > 1
 
-        self.tags = self.parse_tags(entity_metadata.get("tags", []))
+        self.tags = self.parse_tags(entity_metadata.get("tags", None) or [])
 
         return entity_metadata
 
@@ -216,7 +216,10 @@ class RepositoryBasedEntityModel(models.Model):
         ]
 
     def parse_tags(self, tags):
-        """Get entity tags."""
+        """Parse entity tags."""
+        if not tags:
+            return []
+
         return (
             [tag.strip(", ") for tag in tags.split("," if "," in tags else " ")]
             if isinstance(tags, str)
