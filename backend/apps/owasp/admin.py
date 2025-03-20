@@ -84,6 +84,7 @@ class CommitteeAdmin(LeaderEntityAdmin):
     autocomplete_fields = ("owasp_repository", "leaders")
     search_fields = ("name",)
 
+
 class EventAdmin(admin.ModelAdmin):
     list_display = (
         "name",
