@@ -18,10 +18,20 @@ class TestRepositoryBasedEntityModel:
         [
             ("- [Leader1](https://example.com)", ["Leader1"]),
             (
-                "* [Leader One (Chapter Lead)](https://example.com)\n* [Leader Two (Faculty Advisor)](https://example.com)",
+                "* [Leader One (Chapter Lead)](https://example.com)\n"
+                "* [Leader Two (Faculty Advisor)](https://example.com)",
                 ["Leader One", "Leader Two"],
             ),
-            ("* Leader One\n* Leader Two", ["Leader One", "Leader Two"]),
+            (
+                '**<img width = "200" height = "200" src="assets/leader1.jpeg"/>**\n'
+                "* [Prof. Leader 1](mailto:leader1@owasp.org) -  Faculty Advisor\n"
+                '**<img width = "200" height = "200" src="assets/leader2.jpeg"/>**            \n'
+                "* [Leader 2](mailto:leader2@owasp.org)  \n"
+                '**<img width = "200" height = "200" src="assets/leader3.jpeg"/>**\n'
+                "* [Leader 3](mailto:leader3@owasp.org)\n",
+                ["Prof. Leader 1", "Leader 2", "Leader 3"],
+            ),
+            ("* Leader Two\n* Leader One", ["Leader Two", "Leader One"]),
             ("### Leaders", []),
             ("", []),
             (None, []),
