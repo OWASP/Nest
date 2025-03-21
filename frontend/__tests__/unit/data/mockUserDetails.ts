@@ -18,6 +18,7 @@ export const mockUserDetailsData = {
         title: 'Test Issue',
         createdAt: 1723002473,
         commentsCount: 5,
+        url: 'https://example.com/test-issue',
         repository: {
           key: 'test-repo',
           ownerKey: 'testuser',
@@ -34,7 +35,27 @@ export const mockUserDetailsData = {
           key: 'test-repo',
           ownerKey: 'testuser',
         },
+        url: 'https://example.com/test-release',
       },
     ],
   },
+  pullRequests: [
+    {
+      title: 'Test Pull Request',
+      createdAt: 1723002473,
+      url: 'https://example.com/test-pull-request',
+    },
+  ],
+  topRepositories: [
+    {
+      key: 'test-repo',
+      name: 'Test Repo',
+      url: 'https://example.com/test-repo',
+      starsCount: 10,
+      forksCount: 5,
+      openIssuesCount: 3,
+      subscribersCount: 2,
+      contributorsCount: 1,
+    },
+  ],
 }

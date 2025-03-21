@@ -19,6 +19,7 @@ export const GET_USER_DATA = gql`
           ownerKey
         }
         title
+        url
       }
       issuesCount
       location
@@ -34,8 +35,24 @@ export const GET_USER_DATA = gql`
           ownerKey
         }
         tagName
+        url
       }
       releasesCount
+      url
+    }
+    pullRequests(login: $key) {
+      createdAt
+      title
+      url
+    }
+    topRepositories(login: $key) {
+      contributorsCount
+      forksCount
+      key
+      name
+      openIssuesCount
+      starsCount
+      subscribersCount
       url
     }
   }

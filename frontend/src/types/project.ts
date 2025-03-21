@@ -8,7 +8,7 @@ export interface ProjectDataType {
 
 export interface ProjectIssuesType {
   commentsCount: number
-  createdAt: string
+  createdAt: number
   number: number
   title: string
   author: { avatarUrl: string; key: string; name: string }
@@ -86,6 +86,7 @@ export type ProjectReleaseType = {
   author: {
     avatarUrl: string
     key: string
+    login: string
     name: string
   }
   isPreRelease: boolean
@@ -96,4 +97,5 @@ export type ProjectReleaseType = {
     owner_key: string
   }
   tagName: string
+  url: string
 }
