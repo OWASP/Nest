@@ -55,6 +55,7 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
     list_filter = (
         "is_active",
+        "is_leaders_policy_compliant",
         "country",
         "region",
     )
@@ -111,6 +112,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
     list_filter = (
         "is_active",
+        "is_leaders_policy_compliant",
         "has_active_repositories",
         "level",
         "type",

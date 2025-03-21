@@ -1,7 +1,10 @@
 check-spelling: cspell-check
 
 cspell-install:
-	@docker build cspell -t cspell
+	@DOCKER_BUILDKIT=1 docker build \
+		--cache-from cspell \
+		cspell \
+		-t cspell
 
 cspell-check: CMD="--no-progress -r /nest"
 cspell-check: cspell-install cspell-run

@@ -249,7 +249,7 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributors contributors={data.topContributors} maxInitialDisplay={6} />
+        <TopContributors contributors={data.topContributors} type="company" maxInitialDisplay={9} />
         <div className="grid-cols-2 gap-4 lg:grid">
           <ItemCardList
             title="Recent Issues"

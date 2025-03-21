@@ -11,7 +11,7 @@ from django.http import JsonResponse
 
 from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
-from apps.core.utils.params_mapping import get_params_for_index
+from apps.core.utils.index import get_params_for_index
 from apps.core.validators import validate_search_params
 
 CACHE_PREFIX = "algolia_proxy"

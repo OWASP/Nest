@@ -103,10 +103,7 @@ class Issue(GenericIssueModel):
 
     def generate_hint(self, open_ai=None, max_tokens=1000):
         """Generate issue hint."""
-        if self.id and not self.is_indexable:
-            return
-
-        if not (prompt := Prompt.get_github_issue_hint()):
+        if not self.is_indexable or not (prompt := Prompt.get_github_issue_hint()):
             return
 
         open_ai = open_ai or OpenAi()
@@ -116,15 +113,13 @@ class Issue(GenericIssueModel):
 
     def generate_summary(self, open_ai=None, max_tokens=500):
         """Generate issue summary."""
-        if self.id and not self.is_indexable:
-            return
-
-        prompt = (
-            Prompt.get_github_issue_documentation_project_summary()
-            if self.project.is_documentation_type
-            else Prompt.get_github_issue_project_summary()
-        )
-        if not prompt:
+        if not self.is_indexable or not (
+            prompt := (
+                Prompt.get_github_issue_documentation_project_summary()
+                if self.project.is_documentation_type
+                else Prompt.get_github_issue_project_summary()
+            )
+        ):
             return
 
         open_ai = open_ai or OpenAi()
