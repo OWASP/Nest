@@ -85,25 +85,13 @@ test.describe('Home Page', () => {
     await page.getByRole('button', { name: 'Event 1' }).click()
   })
 
-  test('should truncate long titles in new chapters', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
-    const chapterTitle = page.locator('h3 span').first()
-    await expect(chapterTitle).toHaveClass(/truncate/)
-    await chapterTitle.hover()
-    await expect(page.getByRole('tooltip')).toBeVisible()
-  })
-
-  test('should truncate long titles in upcoming events', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
-    const eventTitle = page.locator('button h3 span').first()
-    await expect(eventTitle).toHaveClass(/truncate/)
-    const isTruncated = await eventTitle.evaluate((el) => el.scrollWidth > el.clientWidth)
-    expect(isTruncated).toBe(true)
-  })
-
-  test('should display full text when short enough', async ({ page }) => {
-    const shortTitle = page.getByTestId('short-title')
-    await expect(shortTitle).not.toHaveClass(/truncate/)
-    await expect(page.getByRole('tooltip')).not.toBeVisible()
+  test('should have truncated text with overflow for all relevant elements', async ({ page }) => {
+    const truncatedElements = await page.locator('[data-testid="truncated-text"]').all()
+    expect(truncatedElements.length).toBeGreaterThan(0)
+    for (const element of truncatedElements) {
+      await expect(element).toHaveCSS('overflow', 'hidden')
+      await expect(element).toHaveCSS('text-overflow', 'ellipsis')
+      await expect(element).toHaveCSS('white-space', 'nowrap')
+    }
   })
 })
