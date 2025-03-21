@@ -25,10 +25,7 @@ function ModeToggle({ className }: { className?: string }) {
   }
 
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
-      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-        <FontAwesomeIcon icon={dark ? faMoon : faSun} className="h-4 w-4" fixedWidth />
-      </span>
+    <div className={cn('flex items-center', className)}>
       <Tooltip
         showArrow
         content={dark ? 'Enable light mode' : 'Enable dark mode'}
@@ -36,17 +33,21 @@ function ModeToggle({ className }: { className?: string }) {
         openDelay={100}
         closeDelay={100}
       >
-        <label className="relative inline-flex cursor-pointer items-center">
-          <input
-            type="checkbox"
-            className="peer sr-only"
-            checked={!dark}
-            onChange={darkModeHandler}
-            aria-label={dark ? 'Enable light mode' : 'Enable dark mode'}
-          />
-
-          <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600 dark:bg-gray-700"></div>
-        </label>
+        <button
+          onClick={darkModeHandler}
+          className="relative h-10 w-10 transform overflow-hidden rounded-full border border-gray-300 shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-1 focus:ring-gray-600 active:scale-95 dark:border-gray-600"
+          aria-label={dark ? 'Enable light mode' : 'Enable dark mode'}
+        >
+          <div className="absolute inset-0 bg-gray-100 transition-colors duration-300 dark:bg-gray-800"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <FontAwesomeIcon
+              icon={!dark ? faMoon : faSun}
+              className="h-5 w-5 transform text-gray-900 transition-all duration-300 hover:rotate-12 dark:text-gray-100"
+              fixedWidth
+            />
+          </div>
+          <div className="absolute inset-0 bg-gray-200 opacity-0 transition-opacity duration-200 hover:opacity-20 dark:bg-gray-700"></div>
+        </button>
       </Tooltip>
     </div>
   )
