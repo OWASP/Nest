@@ -1,9 +1,13 @@
 """GitHub app common module."""
 
 import logging
+import os
 from datetime import timedelta as td
+from urllib.parse import urlparse
 
+from django.core.exceptions import ValidationError
 from django.utils import timezone
+from github import Github
 from github.GithubException import UnknownObjectException
 
 from apps.github.models.issue import Issue
@@ -16,7 +20,70 @@ from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
 
+FETCH_ISSUE_ERROR = "Failed to fetch issue from GitHub: {error}"
+MIN_PARTS_LENGTH = 4
+VALID_PROJECT_ERROR = (
+    "Issue does not have a valid project and cannot be considered for sponsorship."
+)
+
+
 logger = logging.getLogger(__name__)
+
+
+def sync_issue(issue_link):
+    """Sync GitHub issue data."""
+    try:
+        return Issue.objects.get(url=issue_link)
+    except Issue.DoesNotExist:
+        pass
+
+    parsed_url = urlparse(issue_link)
+    path_parts = parsed_url.path.strip("/").split("/")
+
+    github_token = os.getenv("GITHUB_TOKEN")
+    github_client = Github(github_token)
+
+    issue_number = int(path_parts[3])
+    owner = path_parts[0]
+    repo_name = path_parts[1]
+
+    try:
+        gh_repo = github_client.get_repo(f"{owner}/{repo_name}")
+        gh_issue = gh_repo.get_issue(issue_number)
+    except Exception as error:
+        raise ValidationError(FETCH_ISSUE_ERROR.format(error=error)) from error
+
+    try:
+        author = User.objects.get(login=gh_issue.user.login)
+    except User.DoesNotExist:
+        author = User.update_data(gh_issue.user)
+
+    try:
+        repository = Repository.objects.get(node_id=gh_repo.id)
+    except Repository.DoesNotExist:
+        try:
+            repo_owner = User.objects.get(login=gh_repo.owner.login)
+        except User.DoesNotExist:
+            repo_owner = User.update_data(gh_repo.owner)
+        try:
+            organization = Organization.objects.get(node_id=gh_repo.organization.id)
+        except Organization.DoesNotExist:
+            organization = Organization.update_data(gh_repo.organization)
+
+        repository = Repository.update_data(
+            gh_repository=gh_repo,
+            commits=gh_repo.get_commits(),
+            contributors=gh_repo.get_contributors(),
+            languages=gh_repo.get_languages(),
+            organization=organization,
+            user=repo_owner,
+        )
+
+        if not repository.project:
+            logger.exception(VALID_PROJECT_ERROR)
+            return None
+
+    return Issue.update_data(gh_issue, author=author, repository=repository)
 
 
 def sync_repository(gh_repository, organization=None, user=None):
