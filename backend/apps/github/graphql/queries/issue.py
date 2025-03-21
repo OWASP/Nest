@@ -10,8 +10,11 @@ from apps.github.models.issue import Issue
 class IssueQuery(BaseQuery):
     """Issue queries."""
 
-    recent_issues = graphene.List(IssueNode, limit=graphene.Int(default_value=15))
+    recent_issues = graphene.List(IssueNode, limit=graphene.Int(default_value=15), distinct=graphene.Boolean(default_value=False))
 
-    def resolve_recent_issues(root, info, limit):
+    def resolve_recent_issues(root, info, limit, distinct):
         """Resolve recent issue."""
-        return Issue.objects.order_by("-created_at")[:limit]
+        query = Issue.objects.order_by("-created_at")
+        if distinct:
+            query = query.distinct("author_id", "project_id")
+        return query[:limit]

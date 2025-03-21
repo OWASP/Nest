@@ -34,7 +34,10 @@ import { toaster } from 'components/ui/toaster'
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA)
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA, {
+    variables: { distinct: true },
+  })
+
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
