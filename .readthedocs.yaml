@@ -6,7 +6,9 @@ build:
       - pip install poetry poetry-plugin-export
       - poetry config virtualenvs.create false
       - cd docs && poetry export --format=requirements.txt --output=requirements.txt --without-hashes
+    post_install:
       - python docs/scripts/generate_schema_docs.py
+
   os: ubuntu-24.04
   tools:
     python: '3.13'
@@ -16,5 +18,4 @@ mkdocs:
 
 python:
   install:
-    - method: pip
-      path: docs
+    - requirements: docs/requirements.txt
