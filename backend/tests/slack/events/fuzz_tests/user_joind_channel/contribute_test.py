@@ -1,13 +1,14 @@
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
+from hypothesis import given
+from hypothesis import strategies as st
 
 from apps.slack.constants import (
     OWASP_CONTRIBUTE_CHANNEL_ID,
 )
 from apps.slack.events.member_joined_channel.contribute import contribute_handler
 
-from hypothesis import given, strategies as st
 
 class TestContributeEventHandler:
     @given(
@@ -31,8 +32,7 @@ class TestContributeEventHandler:
         mock_slack_event = {"user": "U123456", "channel": OWASP_CONTRIBUTE_CHANNEL_ID}
         mock_slack_client = MagicMock()
         mock_slack_client.conversations_open.return_value = {"channel": {"id": "C123456"}}
-        
 
         contribute_handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
-        
+
         assert True
