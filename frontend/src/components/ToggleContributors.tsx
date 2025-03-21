@@ -6,6 +6,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
+import AnchorTitle from 'components/AnchorTitle'
+
 const TopContributors = ({
   contributors,
   label = 'Top Contributors',
@@ -33,7 +35,7 @@ const TopContributors = ({
   }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
-      <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
+      <AnchorTitle href="#top-contributors" title={label} />
       <div className="grid gap-x-5 sm:grid-cols-2 md:grid-cols-3">
         {displayContributors.map((item, index) => (
           <button

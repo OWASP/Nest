@@ -103,7 +103,7 @@ describe('RepositoryDetailsPage', () => {
 
     const contributorsSection = screen
       .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
+      .closest('div.mb-8') as HTMLElement
     const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
