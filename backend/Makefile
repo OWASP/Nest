@@ -13,6 +13,9 @@ collect-static:
 django-shell:
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
+match-user:
+	@CMD="python manage.py matching_users $(model)" $(MAKE) exec-backend-command-it
+
 dump-data:
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json

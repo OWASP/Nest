@@ -110,7 +110,7 @@ class PostAdmin(admin.ModelAdmin):
     )
 
 
-class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
+class ProjectAdmin(LeaderEntityAdmin):
     autocomplete_fields = (
         "organizations",
         "owasp_repository",

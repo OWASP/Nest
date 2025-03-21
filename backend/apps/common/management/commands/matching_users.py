@@ -1,7 +1,6 @@
 """A command to perform fuzzy and exact matching of leaders with GitHub users models."""
 
 from django.core.management.base import BaseCommand
-from django.db import models
 from django.db.utils import DatabaseError
 from thefuzz import fuzz
 
@@ -20,15 +19,19 @@ class Command(BaseCommand):
         parser.add_argument(
             "model_name",
             type=str,
-            help="Model name to process leaders for (e.g., Chapter, Committee, Project)",
+            choices=["chapter", "committee", "project"],
+            help="Model name to process leaders for (chapter, committee, project)",
         )
         parser.add_argument(
-            "--threshold", type=int, default=95, help="Threshold for fuzzy matching"
+            "--threshold",
+            type=int,
+            default=85,
+            help="Threshold for fuzzy matching (0-100)",
         )
 
     def handle(self, *args, **kwargs):
-        model_name = kwargs["model_name"]
-        threshold = kwargs["threshold"]
+        model_name = kwargs["model_name"].lower()
+        threshold = max(0, min(kwargs["threshold"], 100))
 
         model_map = {
             "chapter": Chapter,
@@ -36,65 +39,86 @@ class Command(BaseCommand):
             "project": Project,
         }
 
-        model_class = model_map.get(model_name.lower())
-
+        model_class = model_map.get(model_name)
         if not model_class:
             self.stdout.write(
                 self.style.ERROR("Invalid model name! Choose from: chapter, committee, project")
             )
             return
 
-        all_users = User.objects.all()
-        filtered_users = [
-            u
-            for u in all_users
-            if len(u.login) >= MIN_NO_OF_WORDS and (u.name and len(u.name) >= MIN_NO_OF_WORDS)
-        ]
+        # Pre-fetch users
+        all_users = User.objects.values("id", "login", "name")
+        filtered_users = {
+            u["id"]: u for u in all_users if self._is_valid_user(u["login"], u["name"])
+        }
 
-        instances = model_class.objects.all()
+        instances = model_class.objects.prefetch_related("suggested_leaders")
         for instance in instances:
             self.stdout.write(f"Processing leaders for {model_name.capitalize()} {instance.id}...")
-            exact_matches, fuzzy_matches, unmatched_leaders = self.process_leaders(
+            exact_matches, fuzzy_matches, unmatched = self.process_leaders(
                 instance.leaders_raw, threshold, filtered_users
             )
-            instance.suggested_leaders.set(list(set(exact_matches + fuzzy_matches)))
-            instance.save()
 
-            if unmatched_leaders:
-                self.stdout.write(f"Unmatched leaders for {instance.name}: {unmatched_leaders}")
+            suggested_leader_ids = {user["id"] for user in exact_matches + fuzzy_matches}
+            instance.suggested_leaders.set(suggested_leader_ids)
+
+            if unmatched:
+                self.stdout.write(f"Unmatched leaders for {instance.name}: {unmatched}")
+
+    def _is_valid_user(self, login, name):
+        """Check if user meets minimum requirements."""
+        return len(login) >= MIN_NO_OF_WORDS and name and len(name) >= MIN_NO_OF_WORDS
 
     def process_leaders(self, leaders_raw, threshold, filtered_users):
-        """Process leaders and return the suggested leaders with exact and fuzzy matching."""
+        """Process leaders with optimized matching."""
         if not leaders_raw:
             return [], [], []
 
         exact_matches = []
         fuzzy_matches = []
         unmatched_leaders = []
+        processed_leaders = set()
+
+        user_list = list(filtered_users.values())
 
         for leader in leaders_raw:
+            if not leader or leader in processed_leaders:
+                continue
+
+            processed_leaders.add(leader)
+            leader_lower = leader.lower()
+
             try:
-                leaders_data = User.objects.filter(
-                    models.Q(login__iexact=leader) | models.Q(name__iexact=leader)
-                ).first()
-                if leaders_data:
-                    exact_matches.append(leaders_data)
-                    self.stdout.write(f"Exact match found for {leader}: {leaders_data}")
+                exact_match = next(
+                    (
+                        u
+                        for u in user_list
+                        if u["login"].lower() == leader_lower
+                        or (u["name"] and u["name"].lower() == leader_lower)
+                    ),
+                    None,
+                )
+
+                if exact_match:
+                    exact_matches.append(exact_match)
+                    self.stdout.write(f"Exact match found for {leader}: {exact_match['login']}")
                     continue
 
                 matches = [
                     u
-                    for u in filtered_users
-                    if (fuzz.partial_ratio(leader, u.login) >= threshold)
-                    or (fuzz.partial_ratio(leader, u.name if u.name else "") >= threshold)
+                    for u in user_list
+                    if (fuzz.partial_ratio(leader_lower, u["login"].lower()) >= threshold)
+                    or (
+                        u["name"]
+                        and fuzz.partial_ratio(leader_lower, u["name"].lower()) >= threshold
+                    )
                 ]
 
                 new_fuzzy_matches = [m for m in matches if m not in exact_matches]
-                fuzzy_matches.extend(new_fuzzy_matches)
-
-                if matches:
+                if new_fuzzy_matches:
+                    fuzzy_matches.extend(new_fuzzy_matches)
                     for match in new_fuzzy_matches:
-                        self.stdout.write(f"Fuzzy match found for {leader}: {match}")
+                        self.stdout.write(f"Fuzzy match found for {leader}: {match['login']}")
                 else:
                     unmatched_leaders.append(leader)
 
