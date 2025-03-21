@@ -16,15 +16,16 @@ class ReleaseQuery(BaseQuery):
         distinct=graphene.Boolean(default_value=False),
     )
 
-    def resolve_recent_releases(root, info, limit, distinct):
-        """Resolve recent release."""
+    def resolve_recent_releases(root, info, limit=15, distinct=False):  
+        """Resolve recent releases with optional distinct filtering."""
         query = Release.objects.filter(
             is_draft=False,
             is_pre_release=False,
             published_at__isnull=False,
-        ).order_by("-published_at")
+        ).order_by("author_id", "repository_id", "-published_at")  
 
         if distinct:
-            query = query.distinct("author_id", "project_id")
+            query = query.distinct("author_id", "repository_id") 
 
         return query[:limit]
+
