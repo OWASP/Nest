@@ -59,12 +59,22 @@ class ProjectNode(GenericEntityNode):
         """Resolve languages."""
         return self.idx_languages
 
-    def resolve_recent_issues(root, info, limit=RECENT_ISSUES_LIMIT, distinct=False):  
-        """Resolve recent issues with optional distinct filtering."""
-        query = Issue.objects.order_by("author_id", "repository_id", "-created_at")  
+    def resolve_recent_issues(self, info, limit=RECENT_ISSUES_LIMIT, distinct=False):
+        """Resolve recent issues with optional distinct filtering.
+        
+        Parameters:
+        - info: The GraphQL context and information.
+        - limit (int): The maximum number of issues to return.
+        - distinct (bool): Whether to return distinct issues based on author and repository.
+        
+        Returns:
+        - A list of recent issues, potentially filtered for distinct authors and repositories.
+        """
+        from apps.github.models import Issue
+        query = Issue.objects.order_by("author_id", "repository_id", "-created_at")
 
         if distinct:
-            query = query.distinct("author_id", "repository_id")  
+            query = query.distinct("author_id", "repository_id")
 
         return query[:limit]
 
