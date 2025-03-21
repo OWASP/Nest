@@ -11,6 +11,8 @@ export interface CardProps {
   button: ButtonType
   icons?: IconType
   isActive?: boolean
+  labels?: string[]
+  repository_languages?: string[]
   level?: Level
   projectLink?: string
   projectName?: string
