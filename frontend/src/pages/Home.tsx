@@ -245,10 +245,16 @@ export default function Home() {
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
-            style={{ height: '400px', width: '100%', zIndex: '0' }}
+            style={{
+              height: '400px',
+              width: '100%',
+              zIndex: '0',
+              borderRadius: '0.5rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
           />
         </div>
-        <TopContributors contributors={data.topContributors} maxInitialDisplay={6} />
+        <TopContributors contributors={data.topContributors} type="company" maxInitialDisplay={9} />
         <div className="grid-cols-2 gap-4 lg:grid">
           <ItemCardList
             title="Recent Issues"

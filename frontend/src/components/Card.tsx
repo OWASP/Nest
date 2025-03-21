@@ -43,7 +43,7 @@ const Card = ({
   }, [])
 
   return (
-    <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
+    <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white px-4 pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
       <div className="mt-2 flex w-full flex-col items-start gap-4 pt-2 sm:flex-col sm:gap-4 md:pt-0">
         <div className="flex items-center gap-3">
           {/* Display project level badge (if available) */}

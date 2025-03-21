@@ -1,5 +1,6 @@
 """OWASP app common models."""
 
+import itertools
 import logging
 import re
 from urllib.parse import urlparse
@@ -56,6 +57,9 @@ class RepositoryBasedEntityModel(models.Model):
     )
     invalid_urls = models.JSONField(
         verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
+    )
+    is_leaders_policy_compliant = models.BooleanField(
+        verbose_name="Is leaders policy compliant", default=True
     )
 
     # FKs.
@@ -116,7 +120,9 @@ class RepositoryBasedEntityModel(models.Model):
                 setattr(self, model_field, value)
 
         self.leaders_raw = self.get_leaders()
-        self.tags = self.parse_tags(entity_metadata.get("tags", []))
+        self.is_leaders_policy_compliant = len(self.leaders_raw) > 1
+
+        self.tags = self.parse_tags(entity_metadata.get("tags", None) or [])
 
         return entity_metadata
 
@@ -137,21 +143,20 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         leaders = []
-        try:
-            for line in content.split("\n"):
-                leaders.extend(re.findall(r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]", line))
-        except AttributeError:
-            logger.exception(
-                "Unable to parse leaders.md content", extra={"URL": self.leaders_md_url}
+        for line in content.split("\n"):
+            leaders.extend(
+                [
+                    name
+                    for name in itertools.chain(
+                        *re.findall(
+                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
+                        )
+                    )
+                    if name.strip()
+                ]
             )
 
-        if not leaders:
-            logger.error(
-                "No leaders found in leaders.md file",
-                extra={"URL": self.leaders_md_url},
-            )
-
-        return sorted(leaders)
+        return leaders
 
     def get_metadata(self):
         """Get entity metadata."""
@@ -211,7 +216,10 @@ class RepositoryBasedEntityModel(models.Model):
         ]
 
     def parse_tags(self, tags):
-        """Get entity tags."""
+        """Parse entity tags."""
+        if not tags:
+            return []
+
         return (
             [tag.strip(", ") for tag in tags.split("," if "," in tags else " ")]
             if isinstance(tags, str)
