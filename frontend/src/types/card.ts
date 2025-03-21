@@ -52,3 +52,11 @@ export interface UserCardProps {
   location: string
   name: string
 }
+
+export interface SnapshotCardProps {
+  key: string
+  startAt: string
+  endAt: string
+  title: string
+  button: ButtonType
+}
