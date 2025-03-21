@@ -5,7 +5,7 @@ build:
     post_create_environment:
       - pip install poetry
       - poetry config virtualenvs.create false
-      - cd docs && poetry export --format=requirements.txt --output=docs-requirements.txt
+      - cd docs && poetry export --format=requirements.txt --output=requirements.txt
   os: ubuntu-24.04
   tools:
     python: '3.13'
