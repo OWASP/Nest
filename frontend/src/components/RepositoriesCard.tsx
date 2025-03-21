@@ -51,7 +51,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
 const RepositoryItem = ({ details }) => {
   const navigate = useNavigate()
   const handleClick = () => {
-    navigate(window.location.pathname + '/repositories/' + details?.key)
+    navigate('/repositories/' + details?.key)
   }
   return (
     <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
