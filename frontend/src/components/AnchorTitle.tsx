@@ -1,6 +1,6 @@
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React from 'react'
+import React, { useEffect, useCallback } from 'react'
 
 interface AnchorTitleProps {
   href: string
@@ -10,16 +10,39 @@ interface AnchorTitleProps {
 const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
   const id = href.replace('#', '')
 
-  const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const scrollToElement = useCallback(() => {
     const element = document.getElementById(id)
     if (element) {
-      event.preventDefault()
       const headingHeight = element.querySelector('h2')?.offsetHeight || 0
       const yOffset = -headingHeight - 50
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset
       window.scrollTo({ top: y, behavior: 'smooth' })
     }
+  }, [id])
+
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault()
+    scrollToElement()
+    window.history.pushState(null, '', href)
   }
+
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '')
+    if (hash === id) {
+      requestAnimationFrame(() => scrollToElement())
+    }
+  }, [id, scrollToElement])
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.replace('#', '')
+      if (hash === id) {
+        requestAnimationFrame(() => scrollToElement())
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [id, scrollToElement])
 
   return (
     <div id={id} className="relative">

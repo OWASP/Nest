@@ -40,6 +40,23 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
+  docs:
+    container_name: nest-docs
+    command: >
+      sh -c '
+        python docs/scripts/generate_schema_docs.py &&
+        mkdocs serve -a 0.0.0.0:8001
+      '
+    build:
+      context: ..
+      dockerfile: docs/docker/Dockerfile.local
+    ports:
+      - 127.0.0.1:8001:8001
+    volumes:
+      - ../docs:/home/owasp/docs
+      - ../schema:/home/owasp/schema
+      - docs-data:/home/owasp/.venv
+
   frontend:
     container_name: nest-frontend
     command: >
@@ -60,4 +77,5 @@ services:
 volumes:
   backend-data:
   db-data:
+  docs-data:
   frontend-data:

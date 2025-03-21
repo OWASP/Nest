@@ -11,6 +11,13 @@ export const GET_MAIN_PAGE_DATA = gql`
       repositoriesCount
       type
     }
+    recentPosts(limit: 6) {
+      authorName
+      authorImageUrl
+      publishedAt
+      title
+      url
+    }
     recentChapters(limit: 5) {
       createdAt
       key

@@ -1,5 +1,6 @@
 """OWASP app common models."""
 
+import itertools
 import logging
 import re
 from urllib.parse import urlparse
@@ -7,7 +8,6 @@ from urllib.parse import urlparse
 import yaml
 from django.db import models
 from django.db.models import Sum
-from requests.exceptions import RequestException
 
 from apps.common.open_ai import OpenAi
 from apps.github.constants import (
@@ -41,9 +41,6 @@ class RepositoryBasedEntityModel(models.Model):
     )
     is_active = models.BooleanField(verbose_name="Is active", default=True)
 
-    leaders_raw = models.JSONField(
-        verbose_name="Entity leaders list", default=list, blank=True, null=True
-    )
     tags = models.JSONField(verbose_name="OWASP metadata tags", default=list)
     topics = models.JSONField(
         verbose_name="GitHub repository topics", default=list, blank=True, null=True
@@ -51,6 +48,19 @@ class RepositoryBasedEntityModel(models.Model):
 
     created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
     updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
+
+    leaders_raw = models.JSONField(
+        verbose_name="Entity leaders list", default=list, blank=True, null=True
+    )
+    related_urls = models.JSONField(
+        verbose_name="Entity related URLs", default=list, blank=True, null=True
+    )
+    invalid_urls = models.JSONField(
+        verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
+    )
+    is_leaders_policy_compliant = models.BooleanField(
+        verbose_name="Is leaders policy compliant", default=True
+    )
 
     # FKs.
     owasp_repository = models.ForeignKey(
@@ -67,7 +77,17 @@ class RepositoryBasedEntityModel(models.Model):
         return f"https://github.com/owasp/{self.key}"
 
     @property
-    def leaders_md_raw_url(self):
+    def index_md_url(self):
+        """Return project's raw index.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
+            if self.owasp_repository
+            else None
+        )
+
+    @property
+    def leaders_md_url(self):
         """Return entity's raw leaders.md GitHub URL."""
         return (
             "https://raw.githubusercontent.com/OWASP/"
@@ -91,37 +111,20 @@ class RepositoryBasedEntityModel(models.Model):
         self.is_active = False
         self.save(update_fields=("is_active",))
 
-    def from_github(self, field_mapping, repository):
+    def from_github(self, field_mapping):
         """Update instance based on GitHub repository data."""
-        # Get leaders.
+        entity_metadata = self.get_metadata()
+        for model_field, gh_field in field_mapping.items():
+            value = entity_metadata.get(gh_field)
+            if value:
+                setattr(self, model_field, value)
+
         self.leaders_raw = self.get_leaders()
+        self.is_leaders_policy_compliant = len(self.leaders_raw) > 1
 
-        # Normalize tags.
-        self.tags = (
-            [tag.strip(", ") for tag in self.tags.split("," if "," in self.tags else " ")]
-            if isinstance(self.tags, str)
-            else self.tags
-        )
+        self.tags = self.parse_tags(entity_metadata.get("tags", None) or [])
 
-        project_metadata = {}
-
-        index_md_content = get_repository_file_content(
-            self.get_index_md_raw_url(repository=repository)
-        )
-        # Fetch project metadata from index.md file.
-        try:
-            yaml_content = re.search(r"^---\s*(.*?)\s*---", index_md_content, re.DOTALL)
-            project_metadata = yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
-
-            # Direct fields.
-            for model_field, gh_field in field_mapping.items():
-                value = project_metadata.get(gh_field)
-                if value:
-                    setattr(self, model_field, value)
-        except (AttributeError, yaml.scanner.ScannerError):
-            logger.exception("Unable to parse metadata", extra={"repository": repository.name})
-
-        return project_metadata
+        return entity_metadata
 
     def generate_summary(self, prompt, open_ai=None, max_tokens=500):
         """Generate entity summary."""
@@ -129,81 +132,46 @@ class RepositoryBasedEntityModel(models.Model):
             return
 
         open_ai = open_ai or OpenAi()
-        open_ai.set_input(get_repository_file_content(self.get_index_md_raw_url()))
+        open_ai.set_input(get_repository_file_content(self.index_md_url))
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
-    def get_index_md_raw_url(self, repository=None):
-        """Return project's raw index.md GitHub URL."""
-        owasp_repository = repository or self.owasp_repository
-        return (
-            "https://raw.githubusercontent.com/OWASP/"
-            f"{owasp_repository.key}/{owasp_repository.default_branch}/index.md"
-            if owasp_repository
-            else None
-        )
-
     def get_leaders(self):
         """Get leaders from leaders.md file on GitHub."""
-        leaders = []
-
-        try:
-            content = get_repository_file_content(self.leaders_md_raw_url)
-        except (RequestException, ValueError) as e:
-            logger.exception(
-                "Failed to fetch leaders.md file",
-                extra={"URL": self.leaders_md_raw_url, "error": str(e)},
-            )
-            return leaders
-
+        content = get_repository_file_content(self.leaders_md_url)
         if not content:
-            return leaders
+            return []
 
+        leaders = []
+        for line in content.split("\n"):
+            leaders.extend(
+                [
+                    name
+                    for name in itertools.chain(
+                        *re.findall(
+                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
+                        )
+                    )
+                    if name.strip()
+                ]
+            )
+
+        return leaders
+
+    def get_metadata(self):
+        """Get entity metadata."""
         try:
-            for line in content.split("\n"):
-                logger.debug("Processing line: %s", line)
-                # Match both standard Markdown list items with links and variations.
-                leaders.extend(re.findall(r"\*\s*\[([^\]]+)\](?:\([^)]*\))?", line))
-        except AttributeError:
+            yaml_content = re.search(
+                r"^---\s*([\s\S]*?)\s*---",
+                get_repository_file_content(self.index_md_url),
+                re.DOTALL,
+            )
+            return yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+        except (AttributeError, yaml.scanner.ScannerError):
             logger.exception(
-                "Unable to parse leaders.md content", extra={"URL": self.leaders_md_raw_url}
+                "Unable to parse entity metadata",
+                extra={"repository": getattr(self.owasp_repository, "name", None)},
             )
-
-        return sorted(leaders)
-
-    def get_top_contributors(self, repositories=()):
-        """Get top contributors."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["total_contributions"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.by_humans()
-            .filter(repository__in=repositories)
-            .values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-            )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
-
-
-class GenericEntityModel(models.Model):
-    """Generic entity model."""
-
-    class Meta:
-        abstract = True
-
-    related_urls = models.JSONField(
-        verbose_name="Entity related URLs", default=list, blank=True, null=True
-    )
-    invalid_urls = models.JSONField(
-        verbose_name="Entity invalid related URLs", default=list, blank=True, null=True
-    )
 
     def get_related_url(self, url, exclude_domains=(), include_domains=()):
         """Get OWASP entity related URL."""
@@ -226,3 +194,34 @@ class GenericEntityModel(models.Model):
             return f"https://github.com/{match.group(1)}".lower()
 
         return url
+
+    def get_top_contributors(self, repositories=()):
+        """Get top contributors."""
+        return [
+            {
+                "avatar_url": tc["user__avatar_url"],
+                "contributions_count": tc["total_contributions"],
+                "login": tc["user__login"],
+                "name": tc["user__name"],
+            }
+            for tc in RepositoryContributor.objects.by_humans()
+            .filter(repository__in=repositories)
+            .values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+            )
+            .annotate(total_contributions=Sum("contributions_count"))
+            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
+        ]
+
+    def parse_tags(self, tags):
+        """Parse entity tags."""
+        if not tags:
+            return []
+
+        return (
+            [tag.strip(", ") for tag in tags.split("," if "," in tags else " ")]
+            if isinstance(tags, str)
+            else tags
+        )

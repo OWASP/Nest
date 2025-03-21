@@ -43,12 +43,20 @@ test.describe('Home Page', () => {
     expect(page.url()).toContain('projects/project-1')
   })
 
+  test('should have recent posts', async ({ page }) => {
+    await expect(getFirstHeading(page, 'Recent News & Opinions')).toBeVisible()
+    const postContainer = page.getByTestId('post-container').first()
+    await expect(postContainer.getByRole('link', { name: 'Post 1' })).toBeVisible()
+    await expect(postContainer.getByText('Author 1')).toBeVisible()
+    await expect(postContainer.getByText('Feb 23').first()).toBeVisible()
+    await postContainer.getByRole('link', { name: 'Post 1' }).click()
+  })
+
   test('should have top contributors', async ({ page }) => {
     await expect(getFirstHeading(page, 'Top Contributors')).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Project 21' })).toBeVisible()
-    await page.getByText('Contributor 1').click()
-    expect(page.url()).toContain('community/users/contributor1')
+    await expect(page.getByText('Contributor 1')).toBeVisible()
+    await expect(page.getByText('Project 21')).toBeVisible()
   })
 
   test('should have recent issues', async ({ page }) => {

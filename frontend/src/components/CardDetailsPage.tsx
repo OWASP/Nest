@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
+import { pluralize } from 'utils/pluralize'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMap from 'components/ChapterMap'
@@ -100,9 +101,9 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        <TopContributors contributors={topContributors} maxInitialDisplay={6} />
+        <TopContributors contributors={topContributors} type="contributor" maxInitialDisplay={6} />
         {(type === 'project' || type === 'repository') && (
-          <>
+          <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList
               title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
               data={recentIssues}
@@ -113,7 +114,9 @@ const DetailsCard = ({
                   {item?.commentsCount ? (
                     <>
                       <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                      <span>{item.commentsCount} comments</span>
+                      <span>
+                        {item.commentsCount} {pluralize(item.commentsCount, 'comment')}
+                      </span>
                     </>
                   ) : null}
                 </div>
@@ -131,7 +134,7 @@ const DetailsCard = ({
                 </div>
               )}
             />
-          </>
+          </div>
         )}
         {type === 'project' && repositories.length > 0 && (
           <SecondaryCard
