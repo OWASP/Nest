@@ -11,7 +11,7 @@ class PullRequestQuery(BaseQuery):
     """Pull request queries."""
 
     pull_requests = graphene.List(
-        PullRequestNode, limit=graphene.Int(default_value=15), login=graphene.String()
+        PullRequestNode, limit=graphene.Int(default_value=6), login=graphene.String()
     )
 
     def resolve_pull_requests(root, info, limit, login):
