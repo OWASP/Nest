@@ -13,14 +13,12 @@ export const TruncatedText = ({
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState(false)
 
-   const checkTruncation = useCallback(() => {
+  const checkTruncation = useCallback(() => {
     const element = textRef.current
     if (element) {
       setIsTruncated(element.scrollWidth > element.clientWidth)
     }
   }, [])
-
-
 
   useEffect(() => {
     checkTruncation()
