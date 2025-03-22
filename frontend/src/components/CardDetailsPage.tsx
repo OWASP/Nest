@@ -99,7 +99,7 @@ const DetailsCard = ({
             {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
           </div>
         )}
-        <TopContributors contributors={topContributors} maxInitialDisplay={6} />
+        <TopContributors contributors={topContributors} type="contributor" maxInitialDisplay={6} />
         {(type === 'project' || type === 'repository') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList

@@ -15,7 +15,7 @@ ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
 USER owasp
 WORKDIR /home/owasp
 
-COPY --chown=owasp:owasp poetry.lock pyproject.toml apps settings static templates manage.py wsgi.py ./
+COPY --chown=owasp:owasp poetry.lock pyproject.toml ./
 RUN poetry install --no-root --without dev --without test
 
 FROM python:3.13-slim

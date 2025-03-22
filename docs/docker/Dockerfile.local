@@ -1,0 +1,41 @@
+FROM python:3.13-slim AS builder
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd --system owasp && \
+    useradd --system --create-home --home-dir /home/owasp -g owasp owasp && \
+    python -m pip install --no-cache-dir poetry
+
+ENV FORCE_COLOR=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /home/owasp
+USER owasp
+
+COPY --chown=owasp:owasp docs/poetry.lock docs/pyproject.toml mkdocs.yaml ./
+RUN poetry install --no-root && \
+    rm -rf docs/poetry.lock docs/pyproject.toml
+
+FROM python:3.13-slim
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd --system owasp && \
+    useradd --system --create-home --home-dir /home/owasp -g owasp owasp
+
+ENV PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
+
+EXPOSE 8001
+
+USER owasp
+WORKDIR /home/owasp
+
+COPY --from=builder /home/owasp /home/owasp
