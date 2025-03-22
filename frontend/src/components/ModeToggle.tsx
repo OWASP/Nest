@@ -35,7 +35,7 @@ function ModeToggle({ className }: { className?: string }) {
       >
         <button
           onClick={darkModeHandler}
-          className="relative h-10 w-10 transform rounded-full bg-[#87a1bc] transition-all duration-200 active:scale-95  hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]  "
+          className="relative h-10 w-10 transform rounded-full bg-[#87a1bc] transition-all duration-200 hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
           aria-label={dark ? 'Enable light mode' : 'Enable dark mode'}
         >
           <div className="absolute inset-0 flex items-center justify-center">
