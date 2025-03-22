@@ -1,5 +1,5 @@
 import L from 'leaflet'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useCallback } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
@@ -18,6 +18,7 @@ const ChapterMap = ({
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
+  // Memoize processed chapter data
   const chapters = useMemo(() => {
     return geoLocData.map((chapter) => ({
       lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
@@ -27,9 +28,10 @@ const ChapterMap = ({
     }))
   }, [geoLocData])
 
+  // Function to initialize map (runs once)
   useEffect(() => {
     if (!mapRef.current) {
-      mapRef.current = L.map('chapter-map', {
+      const map = L.map('chapter-map', {
         worldCopyJump: false,
         maxBounds: [
           [-90, -180],
@@ -41,21 +43,27 @@ const ChapterMap = ({
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         className: 'map-tiles',
-      }).addTo(mapRef.current)
+      }).addTo(map)
+
+      mapRef.current = map
+    }
+  }, [])
+
+  // Function to update markers efficiently
+  const updateMarkers = useCallback(() => {
+    if (!mapRef.current) return
+    const map = mapRef.current
+
+    // Clear existing markers if needed
+    if (markerClusterRef.current) {
+      markerClusterRef.current.clearLayers()
+    } else {
+      markerClusterRef.current = L.markerClusterGroup()
     }
 
-    const map = mapRef.current
-    // Remove previous markers
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
-        map.removeLayer(layer)
-      }
-    })
-
-    // Create a new marker cluster group
-    const markerClusterGroup = L.markerClusterGroup()
+    const markerClusterGroup = markerClusterRef.current
     const bounds: [number, number][] = []
-    markerClusterRef.current = markerClusterGroup
+
     chapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
@@ -66,32 +74,36 @@ const ChapterMap = ({
         shadowSize: [41, 41],
         shadowUrl: '/img/marker-shadow.png',
       })
-      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
-      const popup = L.popup()
-      const popupContent = document.createElement('div')
-      popupContent.className = 'popup-content'
-      popupContent.textContent = chapter.name
-      popupContent.addEventListener('click', () => {
+
+      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon }).bindPopup(
+        `<div class="popup-content">${chapter.name}</div>`
+      )
+
+      marker.on('click', () => {
         window.location.href = `/chapters/${chapter.key}`
       })
-      popup.setContent(popupContent)
-      marker.bindPopup(popup)
+
       markerClusterGroup.addLayer(marker)
       bounds.push([chapter.lat, chapter.lng])
     })
 
     map.addLayer(markerClusterGroup)
 
+    // Zoom to local area if enabled
     if (showLocal && chapters.length > 0) {
       const maxNearestChapters = 5
-      const localChapters = chapters.slice(0, maxNearestChapters - 1)
+      const localChapters = chapters.slice(0, maxNearestChapters)
       const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
       const maxZoom = 7
-      const nearestChapter = chapters[0]
-      map.setView([nearestChapter.lat, nearestChapter.lng], maxZoom)
-      map.fitBounds(localBounds, { maxZoom: maxZoom })
+
+      map.fitBounds(localBounds, { maxZoom })
     }
   }, [chapters, showLocal])
+
+  // Update markers when geoLocData changes
+  useEffect(() => {
+    updateMarkers()
+  }, [updateMarkers])
 
   return <div id="chapter-map" style={style} />
 }
