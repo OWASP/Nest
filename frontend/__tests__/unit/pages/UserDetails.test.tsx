@@ -73,14 +73,101 @@ describe('UserDetailsPage', () => {
     })
 
     expect(screen.getByText('Test User')).toBeInTheDocument()
-    expect(screen.getByText(`@testuser`)).toBeInTheDocument()
-    expect(screen.getByText('Test')).toBeInTheDocument()
-    expect(screen.getByText('@User')).toBeInTheDocument()
+    expect(screen.getByText(`Test @User`)).toBeInTheDocument()
+    expect(screen.getByText('Statistics')).toBeInTheDocument()
+    expect(screen.getByText('Contribution Heatmap')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
   })
 
-  test('displays GitHub profile link correctly', async () => {
+  test('renders recent issues correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const recentIssuesTitle = screen.getByText('Recent Issues')
+      expect(recentIssuesTitle).toBeInTheDocument()
+
+      const issueTitle = screen.getByText('Test Issue')
+      expect(issueTitle).toBeInTheDocument()
+
+      const issueComments = screen.getByText('5 comments')
+      expect(issueComments).toBeInTheDocument()
+    })
+  })
+
+  test('renders recent pull requests correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const pullRequestsTitle = screen.getByText('Recent Pull Requests')
+      expect(pullRequestsTitle).toBeInTheDocument()
+
+      const pullRequestTitle = screen.getByText('Test Pull Request')
+      expect(pullRequestTitle).toBeInTheDocument()
+    })
+  })
+
+  test('renders repositories section correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const repositoriesTitle = screen.getByText('Repositories')
+      expect(repositoriesTitle).toBeInTheDocument()
+
+      const repositoryName = screen.getByText('Test Repo')
+      expect(repositoryName).toBeInTheDocument()
+
+      const starsCount = screen.getByText('10')
+      expect(starsCount).toBeInTheDocument()
+
+      const forksCount = screen.getByText('5')
+      expect(forksCount).toBeInTheDocument()
+    })
+  })
+
+  test('renders statistics section correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const statisticsTitle = screen.getByText('Statistics')
+      expect(statisticsTitle).toBeInTheDocument()
+
+      const followersCount = screen.getByText('10 Followers')
+      expect(followersCount).toBeInTheDocument()
+
+      const followingCount = screen.getByText('5 Following')
+      expect(followingCount).toBeInTheDocument()
+
+      const repositoriesCount = screen.getByText('3 Repositories')
+      expect(repositoriesCount).toBeInTheDocument()
+    })
+  })
+
+  test('renders contribution heatmap correctly', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
@@ -89,9 +176,25 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      const githubProfileLink = screen.getByText('Visit GitHub Profile')
-      expect(githubProfileLink).toBeInTheDocument()
-      expect(githubProfileLink.closest('a')).toHaveAttribute('href', 'https://github.com/testuser')
+      const heatmapTitle = screen.getByText('Contribution Heatmap')
+      expect(heatmapTitle).toBeInTheDocument()
+    })
+  })
+
+  test('renders user summary section correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const userName = screen.getByText('Test User')
+      expect(userName).toBeInTheDocument()
+
+      const userBio = screen.getByText('Test @User')
+      expect(userBio).toBeInTheDocument()
     })
   })
 

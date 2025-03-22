@@ -4,7 +4,7 @@ import graphene
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.repository import RepositoryNode
-from apps.owasp.models.project import Project
+from apps.github.models.repository import Repository
 
 
 class RepositoryQuery(BaseQuery):
@@ -12,17 +12,12 @@ class RepositoryQuery(BaseQuery):
 
     repository = graphene.Field(
         RepositoryNode,
-        project_key=graphene.String(required=True),
         repository_key=graphene.String(required=True),
     )
 
-    def resolve_repository(root, info, project_key, repository_key):
+    def resolve_repository(root, info, repository_key):
         """Resolve project."""
         try:
-            return (
-                Project.objects.get(key=f"www-project-{project_key}")
-                .repositories.filter(key=repository_key)
-                .first()
-            )
-        except Project.DoesNotExist:
+            return Repository.objects.get(key=repository_key)
+        except Repository.DoesNotExist:
             return None

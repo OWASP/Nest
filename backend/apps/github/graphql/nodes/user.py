@@ -21,6 +21,7 @@ class IssueType(graphene.ObjectType):
     number = graphene.Int()
     repository = graphene.Field(RepositoryType)
     title = graphene.String()
+    url = graphene.String()
 
 
 class ReleaseType(graphene.ObjectType):
@@ -31,6 +32,7 @@ class ReleaseType(graphene.ObjectType):
     published_at = graphene.Float()
     repository = graphene.Field(RepositoryType)
     tag_name = graphene.String()
+    url = graphene.String()
 
 
 class UserNode(BaseNode):

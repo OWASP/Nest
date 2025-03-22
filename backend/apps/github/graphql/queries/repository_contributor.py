@@ -5,7 +5,9 @@ from django.db.models import F, OuterRef, Subquery, Window
 from django.db.models.functions import Rank
 
 from apps.common.graphql.queries import BaseQuery
+from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
+from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.project import Project
 
@@ -16,6 +18,8 @@ class RepositoryContributorQuery(BaseQuery):
     top_contributors = graphene.List(
         RepositoryContributorNode, limit=graphene.Int(default_value=15)
     )
+
+    top_repositories = graphene.List(RepositoryNode, login=graphene.String(required=True))
 
     def resolve_top_contributors(root, info, limit):
         """Resolve top contributors only for repositories with projects."""
@@ -65,4 +69,50 @@ class RepositoryContributorQuery(BaseQuery):
                 project_url=trc["project_url"],
             )
             for trc in top_contributors
+        ]
+
+    def resolve_top_repositories(root, info, login):
+        """Resolve top repositories for a specific user based on contribution count."""
+        top_repo_ids = (
+            RepositoryContributor.objects.filter(user__login=login)
+            .values_list("repository_id", flat=True)
+            .order_by("-contributions_count")
+        )
+
+        if not top_repo_ids:
+            return []
+
+        repositories = Repository.objects.filter(id__in=top_repo_ids)
+
+        contribution_map = {
+            rc.repository_id: rc.contributions_count
+            for rc in RepositoryContributor.objects.filter(
+                user__login=login, repository_id__in=top_repo_ids
+            )
+        }
+
+        # Sort repositories by contribution count
+        sorted_repositories = sorted(
+            repositories, key=lambda repo: contribution_map.get(repo.id, 0), reverse=True
+        )
+        return [
+            RepositoryNode(
+                commits_count=repo.commits_count,
+                contributors_count=repo.contributors_count,
+                created_at=repo.created_at,
+                description=repo.description,
+                forks_count=repo.forks_count,
+                key=repo.key,
+                languages=repo.languages,
+                license=repo.license,
+                name=repo.name,
+                open_issues_count=repo.open_issues_count,
+                size=repo.size,
+                stars_count=repo.stars_count,
+                subscribers_count=repo.subscribers_count,
+                topics=repo.topics,
+                updated_at=repo.updated_at,
+                url=repo.url,
+            )
+            for repo in sorted_repositories
         ]

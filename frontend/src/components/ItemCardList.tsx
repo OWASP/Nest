@@ -1,5 +1,6 @@
 import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
+import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
 
 const ItemCardList = ({
@@ -8,7 +9,7 @@ const ItemCardList = ({
   renderDetails,
 }: {
   title: string
-  data: ProjectReleaseType[] | ProjectIssuesType[]
+  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[]
   renderDetails: (item: {
     createdAt: string
     commentsCount: number
