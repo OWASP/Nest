@@ -205,7 +205,7 @@ const DetailsCard = ({
                 ))}
               </div>
             ) : (
-              <p>No {title.toLowerCase()}.</p>
+              <p>No recent releases.</p>
             )}
           </SecondaryCard>
         )}
