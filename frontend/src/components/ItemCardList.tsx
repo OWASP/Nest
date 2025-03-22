@@ -6,7 +6,7 @@ import SecondaryCard from './SecondaryCard'
 const ItemCardList = ({
   title,
   data,
-  showAvatar,
+  showAvatar = true,
   renderDetails,
 }: {
   title: string
