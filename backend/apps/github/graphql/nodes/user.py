@@ -18,7 +18,6 @@ class IssueType(graphene.ObjectType):
 
     created_at = graphene.Float()
     comments_count = graphene.Int()
-    number = graphene.Int()
     repository = graphene.Field(RepositoryType)
     title = graphene.String()
     url = graphene.String()

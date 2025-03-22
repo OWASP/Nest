@@ -12,6 +12,9 @@ class IssueQuery(BaseQuery):
 
     recent_issues = graphene.List(IssueNode, limit=graphene.Int(default_value=15))
 
-    def resolve_recent_issues(root, info, limit):
-        """Resolve recent issue."""
-        return Issue.objects.order_by("-created_at")[:limit]
+    def resolve_recent_issues(root, info, limit, login=None):
+        """Resolve recent issues."""
+        queryset = Issue.objects.order_by("-created_at")
+        if login:
+            queryset = queryset.filter(author__login=login)
+        return queryset[:limit]

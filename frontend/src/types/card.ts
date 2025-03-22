@@ -41,6 +41,7 @@ export interface DetailsCardProps {
   socialLinks?: string[]
   stats?: stats[]
   summary?: string
+  showAvatar?: boolean
   title?: string
   topContributors?: TopContributorsTypeGraphql[]
   topics?: string[]

@@ -14,11 +14,10 @@ export const mockUserDetailsData = {
     createdAt: 1723002473,
     issues: [
       {
-        number: 1,
         title: 'Test Issue',
         createdAt: 1723002473,
         commentsCount: 5,
-        url: 'https://example.com/test-issue',
+        url: 'https://github.com/OWASP/Nest/issues/798',
         repository: {
           key: 'test-repo',
           ownerKey: 'testuser',
@@ -35,22 +34,22 @@ export const mockUserDetailsData = {
           key: 'test-repo',
           ownerKey: 'testuser',
         },
-        url: 'https://example.com/test-release',
+        url: 'https://github.com/testuser/test-repo/releases/tag/1.0.0',
       },
     ],
   },
-  pullRequests: [
+  recentPullRequests: [
     {
       title: 'Test Pull Request',
       createdAt: 1723002473,
-      url: 'https://example.com/test-pull-request',
+      url: 'https://github.com/testuser/test-repo/pull/1',
     },
   ],
-  topRepositories: [
+  topContributedRepositories: [
     {
       key: 'test-repo',
       name: 'Test Repo',
-      url: 'https://example.com/test-repo',
+      url: 'https://github.com/testuser/test-repo',
       starsCount: 10,
       forksCount: 5,
       openIssuesCount: 3,

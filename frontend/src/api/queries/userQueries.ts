@@ -13,10 +13,8 @@ export const GET_USER_DATA = gql`
       issues {
         commentsCount
         createdAt
-        number
         repository {
           key
-          ownerKey
         }
         title
         url
@@ -32,7 +30,6 @@ export const GET_USER_DATA = gql`
         publishedAt
         repository {
           key
-          ownerKey
         }
         tagName
         url
@@ -40,12 +37,12 @@ export const GET_USER_DATA = gql`
       releasesCount
       url
     }
-    pullRequests(login: $key) {
+    recentPullRequests(login: $key) {
       createdAt
       title
       url
     }
-    topRepositories(login: $key) {
+    topContributedRepositories(login: $key) {
       contributorsCount
       forksCount
       key

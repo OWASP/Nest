@@ -159,7 +159,7 @@ describe('UserDetailsPage', () => {
       const followersCount = screen.getByText('10 Followers')
       expect(followersCount).toBeInTheDocument()
 
-      const followingCount = screen.getByText('5 Following')
+      const followingCount = screen.getByText('5 Followings')
       expect(followingCount).toBeInTheDocument()
 
       const repositoriesCount = screen.getByText('3 Repositories')

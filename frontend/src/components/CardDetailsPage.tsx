@@ -29,6 +29,7 @@ const DetailsCard = ({
   topics,
   recentIssues,
   recentReleases,
+  showAvatar = true,
   userSummary,
   geolocationData = null,
   repositories = [],
@@ -111,6 +112,7 @@ const DetailsCard = ({
             <ItemCardList
               title="Recent Issues"
               data={recentIssues}
+              showAvatar={showAvatar}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -130,6 +132,7 @@ const DetailsCard = ({
               <ItemCardList
                 title="Recent Pull Requests"
                 data={pullRequests}
+                showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -149,6 +152,7 @@ const DetailsCard = ({
               <ItemCardList
                 title="Recent Releases"
                 data={recentReleases}
+                showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -172,16 +176,18 @@ const DetailsCard = ({
                   >
                     <div className="flex w-full flex-col justify-between">
                       <div className="flex w-full items-center">
-                        <a
-                          className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
-                          href={`/community/users/${item?.author?.login}`}
-                        >
-                          <img
-                            src={item?.author?.avatarUrl}
-                            alt={item?.author?.name}
-                            className="mr-2 h-6 w-6 rounded-full"
-                          />
-                        </a>
+                        {showAvatar && (
+                          <a
+                            className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                            href={`/community/users/${item?.author?.login}`}
+                          >
+                            <img
+                              src={item?.author?.avatarUrl}
+                              alt={item?.author?.name}
+                              className="mr-2 h-6 w-6 rounded-full"
+                            />
+                          </a>
+                        )}
                         <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                           <a
                             className="text-blue-500 hover:underline dark:text-blue-400"

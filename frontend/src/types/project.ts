@@ -9,10 +9,9 @@ export interface ProjectDataType {
 export interface ProjectIssuesType {
   commentsCount: number
   createdAt: number
-  number: number
   title: string
   author: { avatarUrl: string; key: string; name: string }
-  repository: { key: string; owner_key: string }
+  repository: { key: string }
 }
 
 export interface ProjectStatsType {
@@ -94,7 +93,6 @@ export type ProjectReleaseType = {
   publishedAt: number
   repository: {
     key: string
-    owner_key: string
   }
   tagName: string
   url: string
