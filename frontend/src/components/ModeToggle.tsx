@@ -35,18 +35,16 @@ function ModeToggle({ className }: { className?: string }) {
       >
         <button
           onClick={darkModeHandler}
-          className="relative h-10 w-10 transform overflow-hidden rounded-full border border-gray-300 shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-1 focus:ring-gray-600 active:scale-95 dark:border-gray-600"
+          className="relative h-10 w-10 transform rounded-full bg-[#87a1bc] transition-all duration-200 active:scale-95  hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]  "
           aria-label={dark ? 'Enable light mode' : 'Enable dark mode'}
         >
-          <div className="absolute inset-0 bg-gray-100 transition-colors duration-300 dark:bg-gray-800"></div>
           <div className="absolute inset-0 flex items-center justify-center">
             <FontAwesomeIcon
-              icon={!dark ? faMoon : faSun}
+              icon={dark ? faSun : faMoon}
               className="h-5 w-5 transform text-gray-900 transition-all duration-300 hover:rotate-12 dark:text-gray-100"
               fixedWidth
             />
           </div>
-          <div className="absolute inset-0 bg-gray-200 opacity-0 transition-opacity duration-200 hover:opacity-20 dark:bg-gray-700"></div>
         </button>
       </Tooltip>
     </div>
