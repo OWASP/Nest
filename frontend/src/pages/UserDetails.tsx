@@ -77,6 +77,30 @@ const UserDetailsPage: React.FC = () => {
     }
   }, [username, data])
 
+  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+    // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
+    let mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
+    if (mentionMatch && mentionMatch.length > 1) {
+      let username = mentionMatch[1]
+      let punctuation = mentionMatch[2] || ''
+      return (
+        <React.Fragment key={index}>
+          <Link
+            href={`https://github.com/${username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            @{username}
+          </Link>
+          {punctuation}
+          <span> </span>
+        </React.Fragment>
+      )
+    }
+    return <span key={index}>{word} </span>
+  })
+
   const formattedIssues: ProjectIssuesType[] = useMemo(() => {
     return (
       user?.issues?.map((issue) => ({
@@ -233,7 +257,7 @@ const UserDetailsPage: React.FC = () => {
         <Link href={user.url} className="text-xl font-bold hover:underline dark:text-sky-600">
           @{user.login}
         </Link>
-        <p className="text-gray-600 dark:text-gray-400">{user.bio}</p>
+        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
       </div>
     </div>
   )
