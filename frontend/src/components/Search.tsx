@@ -77,7 +77,7 @@ const SearchBar: React.FC<SearchProps> = ({
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black  focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
