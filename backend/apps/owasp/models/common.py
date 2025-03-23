@@ -176,12 +176,15 @@ class RepositoryBasedEntityModel(models.Model):
     # M2M
     suggested_leaders = models.ManyToManyField(
         "github.User",
-        verbose_name="Exact Match Users",
-        related_name="exact_matched_%(class)s",
+        verbose_name="Matched Users",
+        related_name="matched_%(class)s",
         blank=True,
     )
     leaders = models.ManyToManyField(
-        "github.User", verbose_name="Leaders", related_name="normal_%(class)s", blank=True
+        "github.User",
+        verbose_name="Assigned leaders",
+        related_name="assigned_%(class)s",
+        blank=True,
     )
 
     def get_related_url(self, url, exclude_domains=(), include_domains=()):

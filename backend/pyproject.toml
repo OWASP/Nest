@@ -45,6 +45,7 @@ requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 thefuzz = "^0.22.1"
+slack-sdk = "^3.35.0"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"

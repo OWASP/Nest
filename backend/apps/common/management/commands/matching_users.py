@@ -1,4 +1,4 @@
-"""A command to perform fuzzy and exact matching of leaders with GitHub users models."""
+"""A command to perform fuzzy and exact matching of leaders/slack members with User model."""
 
 from django.core.management.base import BaseCommand
 from django.db.utils import DatabaseError
@@ -8,19 +8,20 @@ from apps.github.models.user import User
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
+from apps.slack.models import Member
 
 MIN_NO_OF_WORDS = 2
 
 
 class Command(BaseCommand):
-    help = "Process raw leaders for multiple models and suggest leaders."
+    help = "Process raw leaders or Slack members and match with GitHub users."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "model_name",
             type=str,
-            choices=["chapter", "committee", "project"],
-            help="Model name to process leaders for (chapter, committee, project)",
+            choices=["chapter", "committee", "project", "member"],
+            help="Model name to process: chapter, committee, project, or member",
         )
         parser.add_argument(
             "--threshold",
@@ -34,39 +35,48 @@ class Command(BaseCommand):
         threshold = max(0, min(kwargs["threshold"], 100))
 
         model_map = {
-            "chapter": Chapter,
-            "committee": Committee,
-            "project": Project,
+            "chapter": (Chapter, "suggested_leaders"),
+            "committee": (Committee, "suggested_leaders"),
+            "project": (Project, "suggested_leaders"),
+            "member": (Member, "suggested_users"),
         }
 
-        model_class = model_map.get(model_name)
-        if not model_class:
+        if model_name not in model_map:
             self.stdout.write(
-                self.style.ERROR("Invalid model name! Choose from: chapter, committee, project")
+                self.style.ERROR(
+                    "Invalid model name! Choose from: chapter, committee, project, member"
+                )
             )
             return
 
-        # Pre-fetch users
+        model_class, relation_field = model_map[model_name]
+
+        # Pre-fetch GitHub users
         all_users = User.objects.values("id", "login", "name")
         filtered_users = {
             u["id"]: u for u in all_users if self._is_valid_user(u["login"], u["name"])
         }
 
-        instances = model_class.objects.prefetch_related("suggested_leaders")
+        instances = model_class.objects.prefetch_related(relation_field)
         for instance in instances:
-            self.stdout.write(f"Processing leaders for {model_name.capitalize()} {instance.id}...")
+            self.stdout.write(f"Processing {model_name} {instance.id}...")
+            if model_name == "member":
+                leaders_raw = [field for field in [instance.username, instance.real_name] if field]
+            else:
+                leaders_raw = instance.leaders_raw
+
             exact_matches, fuzzy_matches, unmatched = self.process_leaders(
-                instance.leaders_raw, threshold, filtered_users
+                leaders_raw, threshold, filtered_users
             )
 
-            suggested_leader_ids = {user["id"] for user in exact_matches + fuzzy_matches}
-            instance.suggested_leaders.set(suggested_leader_ids)
+            matched_user_ids = {user["id"] for user in exact_matches + fuzzy_matches}
+            getattr(instance, relation_field).set(matched_user_ids)
 
             if unmatched:
-                self.stdout.write(f"Unmatched leaders for {instance.name}: {unmatched}")
+                self.stdout.write(f"Unmatched for {instance}: {unmatched}")
 
     def _is_valid_user(self, login, name):
-        """Check if user meets minimum requirements."""
+        """Check if GitHub user meets minimum requirements."""
         return len(login) >= MIN_NO_OF_WORDS and name and len(name) >= MIN_NO_OF_WORDS
 
     def process_leaders(self, leaders_raw, threshold, filtered_users):
@@ -94,7 +104,7 @@ class Command(BaseCommand):
                         u
                         for u in user_list
                         if u["login"].lower() == leader_lower
-                        or (u["name"] and u["name"].lower() == leader_lower)
+                        or (u["name"].lower() == leader_lower)
                     ),
                     None,
                 )
