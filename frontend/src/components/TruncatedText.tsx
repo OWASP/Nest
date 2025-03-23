@@ -1,42 +1,39 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { Tooltip } from 'components/ui/tooltip'
 
-export const TruncatedText = ({
-  text,
-  className = '',
-  disabledTooltip = false,
-}: {
-  text: string
-  className?: string
-  disabledTooltip?: boolean
-}) => {
+export const TruncatedText = ({ text, className = '' }: { text: string; className?: string }) => {
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState(false)
 
   const checkTruncation = useCallback(() => {
     const element = textRef.current
     if (element) {
-      setIsTruncated(element.scrollWidth > element.clientWidth)
+      setIsTruncated(element.scrollWidth > element.offsetWidth)
     }
   }, [])
 
   useEffect(() => {
     checkTruncation()
 
-    window.addEventListener('resize', checkTruncation) // Recalculate on resize
-    return () => window.removeEventListener('resize', checkTruncation)
+    const observer = new ResizeObserver(() => checkTruncation())
+    if (textRef.current) {
+      observer.observe(textRef.current) // Watch for size changes
+    }
+
+    window.addEventListener('resize', checkTruncation)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', checkTruncation)
+    }
   }, [text, checkTruncation])
 
   return (
-    <Tooltip content={text} disabled={!isTruncated || disabledTooltip}>
-      <span
-        ref={textRef}
-        title={isTruncated && !disabledTooltip ? text : undefined}
-        data-testid="truncated-text"
-        className={`block overflow-hidden truncate text-ellipsis whitespace-nowrap ${className}`}
-      >
-        {text}
-      </span>
-    </Tooltip>
+    <span
+      ref={textRef}
+      title={isTruncated ? text : undefined}
+      className={`block overflow-hidden truncate text-ellipsis whitespace-nowrap ${className}`}
+    >
+      {text}
+    </span>
   )
 }

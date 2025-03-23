@@ -1,19 +1,20 @@
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Issue } from 'types/user'
+import { TruncatedText } from './TruncatedText'
 
 export function IssueCard({ issue }: { issue: Issue }) {
   return (
     <div className="cursor-pointer rounded-lg border border-gray-300 p-4 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
-      <div className="flex justify-between">
-        <div>
+      <div className="grid grid-cols-[1fr_auto] items-center gap-4">
+        <div className="min-w-0">
           <a
             href={`https://github.com/${issue.repository.ownerKey}/${issue.repository.key}/issues/${issue.number}`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold text-black underline decoration-dotted hover:cursor-pointer dark:text-white"
           >
-            {issue.title}
+            <TruncatedText text={issue.title} />
           </a>
 
           <div className="mt-1 flex items-center gap-2 text-gray-600 dark:text-gray-400">

@@ -86,8 +86,9 @@ test.describe('Home Page', () => {
   })
 
   test('should have truncated text with overflow for all relevant elements', async ({ page }) => {
-    const truncatedElements = await page.locator('[data-testid="truncated-text"]').all()
+    const truncatedElements = await page.locator('span.truncate').all()
     expect(truncatedElements.length).toBeGreaterThan(0)
+
     for (const element of truncatedElements) {
       await expect(element).toHaveCSS('overflow', 'hidden')
       await expect(element).toHaveCSS('text-overflow', 'ellipsis')
