@@ -108,10 +108,10 @@ const UserDetailsPage: React.FC = () => {
         createdAt: issue.createdAt,
         title: issue.title,
         author: {
-          login: user.login || '',
-          avatarUrl: user.avatarUrl || '',
-          key: user.login || '',
-          name: user.name || user.login || '',
+          login: user?.login || '',
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          name: user?.name || user?.login || '',
         },
         url: issue.url,
       })) || []
@@ -124,10 +124,10 @@ const UserDetailsPage: React.FC = () => {
         createdAt: pullRequest.createdAt,
         title: pullRequest.title,
         author: {
-          login: user.login || '',
-          avatarUrl: user.avatarUrl || '',
-          key: user.login || '',
-          name: user.name || user.login || '',
+          login: user?.login || '',
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          name: user?.name || user?.login || '',
         },
         url: pullRequest.url,
       })) || []
@@ -142,10 +142,10 @@ const UserDetailsPage: React.FC = () => {
         publishedAt: release.publishedAt,
         tagName: release.tagName,
         author: {
-          login: user.login || '',
-          avatarUrl: user.avatarUrl || '',
-          key: user.login || '',
-          name: user.name || user.login || '',
+          login: user?.login || '',
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          name: user?.name || user?.login || '',
         },
         url: release.url,
       })) || []
