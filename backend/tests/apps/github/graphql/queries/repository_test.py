@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from apps.github.graphql.queries.repository import RepositoryQuery
-from apps.owasp.models.project import Project
+from apps.github.models.repository import Repository
 
 
 class TestRepositoryQuery:
@@ -17,49 +17,30 @@ class TestRepositoryQuery:
         return Mock()
 
     @pytest.fixture()
-    def mock_project(self):
-        """Project mock fixture."""
-        return Mock(spec=Project)
+    def mock_repository(self):
+        """Repository mock fixture."""
+        return Mock(spec=Repository)
 
-    def test_resolve_repository_existing(self, mock_project, mock_info):
+    def test_resolve_repository_existing(self, mock_repository, mock_info):
         """Test resolving an existing repository."""
-        mock_repository = Mock()
-        mock_project.repositories.filter.return_value.first.return_value = mock_repository
-
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_get:
-            mock_get.return_value = mock_project
+        with patch("apps.github.models.repository.Repository.objects.get") as mock_get:
+            mock_get.return_value = mock_repository
 
             result = RepositoryQuery.resolve_repository(
-                None, mock_info, project_key="test-project", repository_key="test-repo"
+                None, mock_info, repository_key="test-repo"
             )
 
             assert result == mock_repository
-            mock_get.assert_called_once_with(key="www-project-test-project")
-            mock_project.repositories.filter.assert_called_once_with(key="test-repo")
+            mock_get.assert_called_once_with(key="test-repo")
 
-    def test_resolve_repository_not_found_project(self, mock_info):
-        """Test resolving a non-existent project."""
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_get:
-            mock_get.side_effect = Project.DoesNotExist
+    def test_resolve_repository_not_found(self, mock_info):
+        """Test resolving a non-existent repository."""
+        with patch("apps.github.models.repository.Repository.objects.get") as mock_get:
+            mock_get.side_effect = Repository.DoesNotExist
 
             result = RepositoryQuery.resolve_repository(
-                None, mock_info, project_key="non-existent-project", repository_key="test-repo"
+                None, mock_info, repository_key="non-existent-repo"
             )
 
             assert result is None
-            mock_get.assert_called_once_with(key="www-project-non-existent-project")
-
-    def test_resolve_repository_not_found_repository(self, mock_project, mock_info):
-        """Test resolving a non-existent repository in an existing project."""
-        mock_project.repositories.filter.return_value.first.return_value = None
-
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_get:
-            mock_get.return_value = mock_project
-
-            result = RepositoryQuery.resolve_repository(
-                None, mock_info, project_key="test-project", repository_key="non-existent-repo"
-            )
-
-            assert result is None
-            mock_get.assert_called_once_with(key="www-project-test-project")
-            mock_project.repositories.filter.assert_called_once_with(key="non-existent-repo")
+            mock_get.assert_called_once_with(key="non-existent-repo")

@@ -2,6 +2,21 @@ import { gql } from '@apollo/client'
 
 export const GET_USER_DATA = gql`
   query GetUser($key: String!) {
+    recentPullRequests(login: $key) {
+      createdAt
+      title
+      url
+    }
+    topContributedRepositories(login: $key) {
+      contributorsCount
+      forksCount
+      key
+      name
+      openIssuesCount
+      starsCount
+      subscribersCount
+      url
+    }
     user(login: $key) {
       avatarUrl
       bio
@@ -13,12 +28,8 @@ export const GET_USER_DATA = gql`
       issues {
         commentsCount
         createdAt
-        number
-        repository {
-          key
-          ownerKey
-        }
         title
+        url
       }
       issuesCount
       location
@@ -29,11 +40,8 @@ export const GET_USER_DATA = gql`
         isPreRelease
         name
         publishedAt
-        repository {
-          key
-          ownerKey
-        }
         tagName
+        url
       }
       releasesCount
       url
