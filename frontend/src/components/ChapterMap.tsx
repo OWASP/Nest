@@ -74,20 +74,21 @@ const ChapterMap = ({
       })
 
       const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
+
+      // Create the popup content
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
-      popupContent.textContent = chapter.name
 
-      let clicked = false
-      popupContent.addEventListener('click', () => {
-        if (clicked) {
-          window.location.href = `/chapters/${chapter.key}`
-        }
-        clicked = true
-        setTimeout(() => (clicked = false), 500)
-      })
+      // Create a clickable name inside the popup
+      const chapterLink = document.createElement('a')
+      chapterLink.href = `/chapters/${chapter.key}`
+      chapterLink.textContent = chapter.name
+      chapterLink.style.textDecoration = 'underline'
+      chapterLink.style.cursor = 'pointer'
 
+      popupContent.appendChild(chapterLink)
       marker.bindPopup(popupContent)
+
       markerClusterGroup.addLayer(marker)
       bounds.push([chapter.lat, chapter.lng])
     })
@@ -111,4 +112,5 @@ const ChapterMap = ({
 
   return <div id="chapter-map" style={style} />
 }
+
 export default ChapterMap
