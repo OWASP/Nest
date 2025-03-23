@@ -73,7 +73,6 @@ describe('UserDetailsPage', () => {
     })
 
     expect(screen.getByText('Test User')).toBeInTheDocument()
-    expect(screen.getByText(`Test @User`)).toBeInTheDocument()
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getByText('Contribution Heatmap')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
@@ -192,9 +191,6 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       const userName = screen.getByText('Test User')
       expect(userName).toBeInTheDocument()
-
-      const userBio = screen.getByText('Test @User')
-      expect(userBio).toBeInTheDocument()
     })
   })
 

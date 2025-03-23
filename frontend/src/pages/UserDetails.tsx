@@ -108,10 +108,10 @@ const UserDetailsPage: React.FC = () => {
         createdAt: issue.createdAt,
         title: issue.title,
         author: {
-          login: user.login,
-          avatarUrl: user.avatarUrl,
-          key: user.login,
-          name: user.name || user.login,
+          login: user.login || '',
+          avatarUrl: user.avatarUrl || '',
+          key: user.login || '',
+          name: user.name || user.login || '',
         },
         url: issue.url,
       })) || []
@@ -124,10 +124,10 @@ const UserDetailsPage: React.FC = () => {
         createdAt: pullRequest.createdAt,
         title: pullRequest.title,
         author: {
-          login: user.login,
-          avatarUrl: user.avatarUrl,
-          key: user.login,
-          name: user.name || user.login,
+          login: user.login || '',
+          avatarUrl: user.avatarUrl || '',
+          key: user.login || '',
+          name: user.name || user.login || '',
         },
         url: pullRequest.url,
       })) || []
@@ -142,10 +142,10 @@ const UserDetailsPage: React.FC = () => {
         publishedAt: release.publishedAt,
         tagName: release.tagName,
         author: {
-          login: user.login,
-          avatarUrl: user.avatarUrl,
-          key: user.login,
-          name: user.name || user.login,
+          login: user.login || '',
+          avatarUrl: user.avatarUrl || '',
+          key: user.login || '',
+          name: user.name || user.login || '',
         },
         url: release.url,
       })) || []
@@ -177,7 +177,7 @@ const UserDetailsPage: React.FC = () => {
     {
       label: 'GitHub Profile',
       value: (
-        <Link href={user.url} className="hover:underline dark:text-sky-600">
+        <Link href={user.url || '#'} className="hover:underline dark:text-sky-600">
           @{user.login}
         </Link>
       ),
@@ -224,7 +224,7 @@ const UserDetailsPage: React.FC = () => {
           {privateContributor ? (
             <div className="h-40 rounded-lg bg-owasp-blue"></div>
           ) : imageLink ? (
-            <div className="bg-#10151c h-40">
+            <div className="bg-[#10151c] h-40">
               <img
                 src={imageLink || '/placeholder.svg'}
                 className="h-full w-full object-cover object-[54%_60%]"
@@ -232,7 +232,7 @@ const UserDetailsPage: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="bg-#10151c relative h-40 items-center justify-center">
+            <div className="bg-[#10151c] relative h-40 items-center justify-center">
               <img
                 src="/img/heatmapBackground.png"
                 className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
@@ -251,10 +251,10 @@ const UserDetailsPage: React.FC = () => {
       <img
         className="mr-4 h-16 w-16 rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
         src={user.avatarUrl || '/placeholder.svg'}
-        alt={user.name || user.login}
+        alt={user.name || user.login || 'User Avatar'}
       />
       <div>
-        <Link href={user.url} className="text-xl font-bold hover:underline dark:text-sky-600">
+        <Link href={user.url || '#'} className="text-xl font-bold hover:underline dark:text-sky-600">
           @{user.login}
         </Link>
         <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
@@ -263,10 +263,10 @@ const UserDetailsPage: React.FC = () => {
   )
 
   return (
-    <MetadataManager pageTitle={user?.name || user?.login} description={user?.bio} url={user.url}>
+    <MetadataManager pageTitle={user?.name || user?.login} description={user?.bio} url={user.url || '#'}>
       <DetailsCard
         showAvatar={false}
-        title={user.name || user.login}
+        title={user.name || user.login || 'User'}
         heatmap={<Heatmap />}
         details={userDetails}
         pullRequests={formattedPullRequest}
