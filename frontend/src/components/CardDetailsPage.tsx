@@ -103,8 +103,8 @@ const DetailsCard = ({
         {topContributors && (
           <TopContributors
             contributors={topContributors}
-            type="contributor"
             maxInitialDisplay={6}
+            type="contributor"
           />
         )}
         {(type === 'project' || type === 'repository' || type === 'user') && (

@@ -11,12 +11,15 @@ class PullRequestQuery(BaseQuery):
     """Pull request queries."""
 
     recent_pull_requests = graphene.List(
-        PullRequestNode, limit=graphene.Int(default_value=6), login=graphene.String()
+        PullRequestNode,
+        limit=graphene.Int(default_value=6),
+        login=graphene.String(required=False),
     )
 
     def resolve_recent_pull_requests(root, info, limit, login=None):
         """Resolve recent pull requests."""
-        queryset = PullRequest.objects.order_by("-created_at")
+        queryset = PullRequest.objects.select_related("author").order_by("-created_at")
         if login:
             queryset = queryset.filter(author__login=login)
+
         return queryset[:limit]

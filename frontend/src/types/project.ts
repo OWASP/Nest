@@ -7,11 +7,11 @@ export interface ProjectDataType {
 }
 
 export interface ProjectIssuesType {
+  author: { avatarUrl: string; key: string; name: string }
   commentsCount: number
   createdAt: number
   title: string
-  author: { avatarUrl: string; key: string; name: string }
-  repository: { key: string }
+  url: string
 }
 
 export interface ProjectStatsType {
@@ -91,9 +91,6 @@ export type ProjectReleaseType = {
   isPreRelease: boolean
   name: string
   publishedAt: number
-  repository: {
-    key: string
-  }
   tagName: string
   url: string
 }

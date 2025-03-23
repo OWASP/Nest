@@ -65,14 +65,6 @@ class UserNode(BaseNode):
         """Resolve created at."""
         return self.idx_created_at
 
-    def resolve_updated_at(self, info):
-        """Resolve updated at."""
-        return self.idx_updated_at
-
-    def resolve_url(self, info):
-        """Resolve URL."""
-        return self.url
-
     def resolve_issues(self, info):
         """Resolve issues."""
         return self.idx_issues
@@ -88,3 +80,11 @@ class UserNode(BaseNode):
     def resolve_releases_count(self, info):
         """Resolve releases count."""
         return self.idx_releases_count
+
+    def resolve_updated_at(self, info):
+        """Resolve updated at."""
+        return self.idx_updated_at
+
+    def resolve_url(self, info):
+        """Resolve URL."""
+        return self.url

@@ -25,7 +25,7 @@ import { toaster } from 'components/ui/toaster'
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
-  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>(null)
+  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
   const [pullRequests, setPullRequests] = useState<PullRequestsType[]>([])
   const [data, setData] = useState<HeatmapData | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -89,9 +89,6 @@ const UserDetailsPage: React.FC = () => {
           key: user.login,
           name: user.name || user.login,
         },
-        repository: {
-          key: issue.repository.key,
-        },
         url: issue.url,
       })) || []
     )
@@ -125,9 +122,6 @@ const UserDetailsPage: React.FC = () => {
           avatarUrl: user.avatarUrl,
           key: user.login,
           name: user.name || user.login,
-        },
-        repository: {
-          key: release.repository.key,
         },
         url: release.url,
       })) || []
