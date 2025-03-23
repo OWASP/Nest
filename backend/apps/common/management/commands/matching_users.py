@@ -14,7 +14,7 @@ MIN_NO_OF_WORDS = 2
 
 
 class Command(BaseCommand):
-    help = "Process raw leaders or Slack members and match with GitHub users."
+    help = "Match leaders or Slack members with GitHub users using exact and fuzzy matching."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -26,7 +26,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--threshold",
             type=int,
-            default=85,
+            default=75,
             help="Threshold for fuzzy matching (0-100)",
         )
 
@@ -80,7 +80,7 @@ class Command(BaseCommand):
         return len(login) >= MIN_NO_OF_WORDS and name and len(name) >= MIN_NO_OF_WORDS
 
     def process_leaders(self, leaders_raw, threshold, filtered_users):
-        """Process leaders with optimized matching."""
+        """Process leaders with optimized matching, capturing all exact matches."""
         if not leaders_raw:
             return [], [], []
 
@@ -99,28 +99,28 @@ class Command(BaseCommand):
             leader_lower = leader.lower()
 
             try:
-                exact_match = next(
-                    (
-                        u
-                        for u in user_list
-                        if u["login"].lower() == leader_lower
-                        or (u["name"].lower() == leader_lower)
-                    ),
-                    None,
-                )
+                # Find all exact matches
+                exact_matches_for_leader = [
+                    u
+                    for u in user_list
+                    if u["login"].lower() == leader_lower
+                    or (u["name"] and u["name"].lower() == leader_lower)
+                ]
 
-                if exact_match:
-                    exact_matches.append(exact_match)
-                    self.stdout.write(f"Exact match found for {leader}: {exact_match['login']}")
+                if exact_matches_for_leader:
+                    exact_matches.extend(exact_matches_for_leader)
+                    for match in exact_matches_for_leader:
+                        self.stdout.write(f"Exact match found for {leader}: {match['login']}")
                     continue
 
+                # Fuzzy matching with token_sort_ratio
                 matches = [
                     u
                     for u in user_list
-                    if (fuzz.partial_ratio(leader_lower, u["login"].lower()) >= threshold)
+                    if (fuzz.token_sort_ratio(leader_lower, u["login"].lower()) >= threshold)
                     or (
                         u["name"]
-                        and fuzz.partial_ratio(leader_lower, u["name"].lower()) >= threshold
+                        and fuzz.token_sort_ratio(leader_lower, u["name"].lower()) >= threshold
                     )
                 ]
 

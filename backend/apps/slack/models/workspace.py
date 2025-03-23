@@ -12,7 +12,7 @@ class Workspace(TimestampedModel):
         db_table = "slack_workspaces"
         verbose_name_plural = "Workspaces"
 
-    slack_workspace_id = models.CharField(verbose_name="Workspace ID", max_length=50)
+    slack_workspace_id = models.CharField(verbose_name="Workspace ID", max_length=50, unique=True)
     name = models.CharField(verbose_name="Workspace Name", max_length=100, default="")
     bot_token = models.CharField(verbose_name="Bot Token", max_length=200, default="")
 

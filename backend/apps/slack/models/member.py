@@ -1,4 +1,4 @@
-"""Slack app channel model."""
+"""Slack app member model."""
 
 from django.db import models
 
@@ -16,7 +16,7 @@ class Member(TimestampedModel):
 
     email = models.CharField(verbose_name="Email", max_length=100, default="")
     real_name = models.CharField(verbose_name="Real Name", max_length=100, default="")
-    slack_user_id = models.CharField(verbose_name="User ID", max_length=50)
+    slack_user_id = models.CharField(verbose_name="User ID", max_length=50, unique=True)
     username = models.CharField(verbose_name="Username", max_length=100, default="")
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="members")
     user = models.OneToOneField(

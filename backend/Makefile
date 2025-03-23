@@ -53,6 +53,10 @@ load-data:
 	@echo "Loading Nest data"
 	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
 
+load-slack-data:
+	@echo "Loading Slack data"
+	@CMD="python manage.py load_slack_data" $(MAKE) exec-backend-command
+
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
