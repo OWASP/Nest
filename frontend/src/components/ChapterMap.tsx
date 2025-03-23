@@ -18,7 +18,6 @@ const ChapterMap = ({
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
-  // Memoize processed chapter data
   const chapters = useMemo(() => {
     return geoLocData.map((chapter) => ({
       lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
@@ -28,7 +27,6 @@ const ChapterMap = ({
     }))
   }, [geoLocData])
 
-  // Function to initialize map (runs once)
   useEffect(() => {
     if (!mapRef.current) {
       const map = L.map('chapter-map', {
@@ -38,27 +36,27 @@ const ChapterMap = ({
           [90, 180],
         ],
         maxBoundsViscosity: 1.0,
+        preferCanvas: true,
       }).setView([20, 0], 2)
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         className: 'map-tiles',
+        useCache: false,
       }).addTo(map)
 
       mapRef.current = map
     }
   }, [])
 
-  // Function to update markers efficiently
   const updateMarkers = useCallback(() => {
     if (!mapRef.current) return
     const map = mapRef.current
 
-    // Clear existing markers if needed
-    if (markerClusterRef.current) {
-      markerClusterRef.current.clearLayers()
-    } else {
+    if (!markerClusterRef.current) {
       markerClusterRef.current = L.markerClusterGroup()
+    } else {
+      markerClusterRef.current.clearLayers()
     }
 
     const markerClusterGroup = markerClusterRef.current
@@ -75,37 +73,42 @@ const ChapterMap = ({
         shadowUrl: '/img/marker-shadow.png',
       })
 
-      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon }).bindPopup(
-        `<div class="popup-content">${chapter.name}</div>`
-      )
+      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
+      const popupContent = document.createElement('div')
+      popupContent.className = 'popup-content'
+      popupContent.textContent = chapter.name
 
-      marker.on('click', () => {
-        window.location.href = `/chapters/${chapter.key}`
+      let clicked = false
+      popupContent.addEventListener('click', () => {
+        if (clicked) {
+          window.location.href = `/chapters/${chapter.key}`
+        }
+        clicked = true
+        setTimeout(() => (clicked = false), 500)
       })
 
+      marker.bindPopup(popupContent)
       markerClusterGroup.addLayer(marker)
       bounds.push([chapter.lat, chapter.lng])
     })
 
     map.addLayer(markerClusterGroup)
 
-    // Zoom to local area if enabled
     if (showLocal && chapters.length > 0) {
       const maxNearestChapters = 5
       const localChapters = chapters.slice(0, maxNearestChapters)
       const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
-      const maxZoom = 7
+      const nearestChapter = chapters[0]
 
-      map.fitBounds(localBounds, { maxZoom })
+      map.setView([nearestChapter.lat, nearestChapter.lng], 7)
+      map.fitBounds(localBounds, { maxZoom: 7 })
     }
   }, [chapters, showLocal])
 
-  // Update markers when geoLocData changes
   useEffect(() => {
     updateMarkers()
   }, [updateMarkers])
 
   return <div id="chapter-map" style={style} />
 }
-
 export default ChapterMap
