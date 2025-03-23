@@ -15,29 +15,42 @@ test.describe('User Details Page', () => {
     })
     await page.goto('community/users/test-user')
   })
-
-  test('should have a user name and avatar', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible()
-    await expect(page.getByRole('link', { name: '@testuser' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Test User' })).toBeVisible()
+  test('should have a heading and summary', async ({ page }) => {
+    await expect(getFirstHeading(page, 'Test User')).toBeVisible()
+    await expect(page.getByText('Test @User')).toBeVisible()
   })
 
-  test('should have user details', async ({ page }) => {
-    await expect(page.getByText('Test Company')).toBeVisible()
-    await expect(page.getByText('Test Location')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'testuser@example.com' })).toBeVisible()
+  test('should have user details block', async ({ page }) => {
+    await expect(getFirstHeading(page, 'User Details')).toBeVisible()
+    await expect(page.getByText('Location: Test Location')).toBeVisible()
+    await expect(page.getByText('Email: testuser@example.com')).toBeVisible()
+    await expect(page.getByText('Company: Test Company')).toBeVisible()
   })
 
-  test('should have recent issues', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Recent Issues')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Test Issue' })).toBeVisible()
-    await expect(page.getByText('8/7/2024').first()).toBeVisible()
+  test('should have user stats block', async ({ page }) => {
+    await expect(page.getByText('10 Followers')).toBeVisible()
+    await expect(page.getByText('5 Following')).toBeVisible()
+    await expect(page.getByText('3 Repositories')).toBeVisible()
   })
 
-  test('should have recent releases', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Recent Releases')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'v1.0.0' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'testuser/test-repo' }).nth(1)).toBeVisible()
-    await expect(page.getByText('8/7/2024').first()).toBeVisible()
+  test('should have user issues', async ({ page }) => {
+    await expect(getFirstHeading(page, 'Issues')).toBeVisible()
+    await expect(page.getByText('Test Issue')).toBeVisible()
+    await expect(page.getByText('5 Comments')).toBeVisible()
+  })
+
+  test('should have user releases', async ({ page }) => {
+    await expect(getFirstHeading(page, 'Releases')).toBeVisible()
+    await expect(page.getByText('v1.0.0')).toBeVisible()
+  })
+
+  test('should have user pull requests', async ({ page }) => {
+    await expect(getFirstHeading(page, 'Pull Requests')).toBeVisible()
+    await expect(page.getByText('Test Pull Request')).toBeVisible()
+  })
+
+  test('should have top repositories', async ({ page }) => {
+    await expect(getFirstHeading(page, 'Repositories')).toBeVisible()
+    await expect(page.getByText('Test Repo')).toBeVisible()
   })
 })

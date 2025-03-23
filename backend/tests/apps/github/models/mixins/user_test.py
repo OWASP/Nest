@@ -36,6 +36,7 @@ def user_index_mixin_instance():
                 owner=MagicMock(login="owner_login"),
             ),
             title="Issue Title",
+            url="https://example.com/issue/1",
         )
     ]
     instance.issues.count.return_value = 5
@@ -100,6 +101,7 @@ class TestUserIndexMixin:
                         "number": 1,
                         "repository": {"key": "repo_key", "owner_key": "owner_login"},
                         "title": "Issue Title",
+                        "url": "https://example.com/issue/1",
                     }
                 ],
             ),

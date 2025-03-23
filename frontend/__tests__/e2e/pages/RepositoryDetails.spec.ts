@@ -13,7 +13,7 @@ test.describe('Repository Details Page', () => {
         json: { data: mockRepositoryData },
       })
     })
-    await page.goto('/projects/test-project/repositories/test-repository')
+    await page.goto('/repositories/test-repository')
   })
 
   test('should have a heading and summary', async ({ page }) => {
