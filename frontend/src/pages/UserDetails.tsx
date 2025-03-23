@@ -224,7 +224,7 @@ const UserDetailsPage: React.FC = () => {
           {privateContributor ? (
             <div className="h-40 rounded-lg bg-owasp-blue"></div>
           ) : imageLink ? (
-            <div className="bg-[#10151c] h-40">
+            <div className="h-40 bg-[#10151c]">
               <img
                 src={imageLink || '/placeholder.svg'}
                 className="h-full w-full object-cover object-[54%_60%]"
@@ -232,7 +232,7 @@ const UserDetailsPage: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="bg-[#10151c] relative h-40 items-center justify-center">
+            <div className="relative h-40 items-center justify-center bg-[#10151c]">
               <img
                 src="/img/heatmapBackground.png"
                 className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
@@ -254,7 +254,10 @@ const UserDetailsPage: React.FC = () => {
         alt={user.name || user.login || 'User Avatar'}
       />
       <div>
-        <Link href={user.url || '#'} className="text-xl font-bold hover:underline dark:text-sky-600">
+        <Link
+          href={user.url || '#'}
+          className="text-xl font-bold hover:underline dark:text-sky-600"
+        >
           @{user.login}
         </Link>
         <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
@@ -263,7 +266,11 @@ const UserDetailsPage: React.FC = () => {
   )
 
   return (
-    <MetadataManager pageTitle={user?.name || user?.login} description={user?.bio} url={user.url || '#'}>
+    <MetadataManager
+      pageTitle={user?.name || user?.login}
+      description={user?.bio}
+      url={user.url || '#'}
+    >
       <DetailsCard
         showAvatar={false}
         title={user.name || user.login || 'User'}
