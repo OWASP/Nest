@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 export const GET_REPOSITORY_DATA = gql`
-  query GetRepository($projectKey: String!, $repositoryKey: String!) {
-    repository(projectKey: $projectKey, repositoryKey: $repositoryKey) {
+  query GetRepository($repositoryKey: String!) {
+    repository(repositoryKey: $repositoryKey) {
       commitsCount
       contributorsCount
       createdAt

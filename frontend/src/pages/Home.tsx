@@ -117,7 +117,7 @@ export default function Home() {
   return (
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <div className="pt-20 pt-5 text-center sm:mb-20">
+        <div className="pt-5 text-center sm:mb-20">
           <div className="flex flex-col items-center py-10">
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
@@ -249,7 +249,7 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributors contributors={data.topContributors} maxInitialDisplay={6} />
+        <TopContributors contributors={data.topContributors} type="company" maxInitialDisplay={9} />
         <div className="grid-cols-2 gap-4 lg:grid">
           <ItemCardList
             title="Recent Issues"

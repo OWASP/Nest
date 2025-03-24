@@ -118,23 +118,25 @@ def sync_repository(gh_repository, organization=None, user=None):
     if not repository.is_archived:
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
-        until = timezone.now() - td(days=30)
+        month_ago = timezone.now() - td(days=30)
+
         if repository.track_issues and project_track_issues:
             kwargs = {
                 "direction": "desc",
                 "sort": "updated",
                 "state": "all",
             }
-            if latest_updated_issue := repository.latest_updated_issue:
-                # Get only what has been updated after the latest sync.
-                kwargs.update({"since": latest_updated_issue.updated_at})
-
+            until = (
+                latest_updated_issue.updated_at
+                if (latest_updated_issue := repository.latest_updated_issue)
+                else month_ago
+            )
             for gh_issue in gh_repository.get_issues(**kwargs):
-                if gh_issue.updated_at < until:
-                    break
-
                 if gh_issue.pull_request:  # Skip pull requests.
                     continue
+
+                if gh_issue.updated_at < until:
+                    break
 
                 author = User.update_data(gh_issue.user)
                 issue = Issue.update_data(gh_issue, author=author, repository=repository)
@@ -160,6 +162,11 @@ def sync_repository(gh_repository, organization=None, user=None):
             "sort": "updated",
             "state": "all",
         }
+        until = (
+            latest_updated_pull_request.updated_at
+            if (latest_updated_pull_request := repository.latest_updated_pull_request)
+            else month_ago
+        )
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
             if gh_pull_request.updated_at < until:
                 break
