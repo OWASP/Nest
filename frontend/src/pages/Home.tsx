@@ -29,6 +29,7 @@ import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
+import { TruncatedText } from 'components/TruncatedText'
 import { toaster } from 'components/ui/toaster'
 
 export default function Home() {
@@ -135,16 +136,16 @@ export default function Home() {
             />
           </div>
         </div>
-        <SecondaryCard title="Upcoming Events">
+        <SecondaryCard title="Upcoming Events" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: EventType, index: number) => (
-              <div key={`card-${event.name}`}>
+              <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
                     className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
-                    <h3 className="truncate text-wrap md:text-nowrap">{event.name}</h3>
+                    <TruncatedText text={event.name} />
                   </button>
                   <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
                     <div className="mr-2 flex items-center">
@@ -173,13 +174,13 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
-          <SecondaryCard title="New Chapters">
+          <SecondaryCard title="New Chapters" className="overflow-hidden">
             <div className="space-y-4">
               {data.recentChapters.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <a href={`/chapters/${chapter.key}`} className="hover:underline">
-                      {chapter.name}
+                      <TruncatedText text={chapter.name} />
                     </a>
                   </h3>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
@@ -202,15 +203,15 @@ export default function Home() {
               ))}
             </div>
           </SecondaryCard>
-          <SecondaryCard title="New Projects">
+          <SecondaryCard title="New Projects" className="overflow-hidden">
             <div className="space-y-4">
               {data.recentProjects.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <h3 className="mb-2 text-lg font-semibold">
-                    <a href={`/projects/${project.key}`} className="hover:underline">
-                      {project.name}
-                    </a>
-                  </h3>
+                  <a href={`/projects/${project.key}`} className="hover:underline">
+                    <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
+                      <TruncatedText text={project.name} />
+                    </h3>
+                  </a>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -280,22 +281,22 @@ export default function Home() {
             )}
           />
         </div>
-        <SecondaryCard title="Recent News & Opinions">
+        <SecondaryCard title="Recent News & Opinions" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data.recentPosts.map((post) => (
               <div
                 key={post.title}
-                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
                 data-testid="post-container"
               >
-                <h3 className="mb-1 truncate text-wrap text-lg font-semibold text-blue-500 md:text-nowrap">
+                <h3 className="mb-1 text-lg font-semibold">
                   <a
                     href={post.url}
-                    className="hover:underline"
+                    className="text-blue-500 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {post.title}
+                    <TruncatedText text={post.title} />
                   </a>
                 </h3>
                 <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
