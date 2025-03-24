@@ -44,7 +44,7 @@ const ChapterMap = ({
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        className: 'map-tiles',
+        className: '',
         useCache: false,
       }).addTo(map)
 
@@ -81,18 +81,9 @@ const ChapterMap = ({
 
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
-
-
-      if (isDarkMode) {
-        popupContent.style.backgroundColor = '#2b2b2b'
-        popupContent.style.color = '#ffffff'
-        popupContent.style.border = '1px solid #ffffff'
-      } else {
-        popupContent.style.backgroundColor = '#ffffff'
-        popupContent.style.color = '#000000'
-        popupContent.style.border = '1px solid #000000'
-      }
-
+      popupContent.style.backgroundColor = isDarkMode ? '#2b2b2b' : '#ffffff'
+      popupContent.style.color = isDarkMode ? '#ffffff' : '#000000'
+      popupContent.style.border = isDarkMode ? '1px solid #ffffff' : '1px solid #000000'
 
       const chapterLink = document.createElement('a')
       chapterLink.href = `/chapters/${chapter.key}`
@@ -116,7 +107,7 @@ const ChapterMap = ({
       const nearestChapter = chapters[0]
 
       map.setView([nearestChapter.lat, nearestChapter.lng], 7)
-      map.fitBounds(localBounds, { maxZoom: 7 }) // Restored maxZoom
+      map.fitBounds(localBounds, { maxZoom: 7 })
     }
   }, [chapters, showLocal, isDarkMode])
 
