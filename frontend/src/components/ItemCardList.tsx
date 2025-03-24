@@ -1,4 +1,4 @@
-import { JSX } from 'react'
+import React, { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
@@ -9,7 +9,7 @@ const ItemCardList = ({
   showAvatar = true,
   renderDetails,
 }: {
-  title: string
+  title: React.ReactNode
   data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[]
   showAvatar?: boolean
   renderDetails: (item: {
@@ -54,7 +54,7 @@ const ItemCardList = ({
         ))}
       </div>
     ) : (
-      <p>No {title.toLowerCase()}.</p>
+      <p> Nothing to display.</p>
     )}
   </SecondaryCard>
 )

@@ -5,6 +5,7 @@ import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 import { getSocialIcon } from 'utils/urlIconMappings'
+import AnchorTitle from 'components/AnchorTitle'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
@@ -43,17 +44,27 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard title="Summary">
+          <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
-        {userSummary && <SecondaryCard title="Summary">{userSummary}</SecondaryCard>}
+        {userSummary && (
+          <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
+            {userSummary}
+          </SecondaryCard>
+        )}
 
-        {heatmap && <SecondaryCard title="Contribution Heatmap">{heatmap}</SecondaryCard>}
+        {heatmap && (
+          <SecondaryCard
+            title={<AnchorTitle href="#contribution-heatmap" title="Contribution Heatmap" />}
+          >
+            {heatmap}
+          </SecondaryCard>
+        )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            title={`${capitalize(type)} Details`}
+            title={<AnchorTitle href={`#${type}-details`} title={`${capitalize(type)} Details`} />}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details &&
@@ -70,7 +81,10 @@ const DetailsCard = ({
             type === 'repository' ||
             type === 'committee' ||
             type === 'user') && (
-            <SecondaryCard title="Statistics" className="md:col-span-2">
+            <SecondaryCard
+              title={<AnchorTitle href="#statistics" title="Statistics" />}
+              className="md:col-span-2"
+            >
               {stats.map((stat, index) => (
                 <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
               ))}
@@ -96,8 +110,18 @@ const DetailsCard = ({
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages.length !== 0 && (
+              <ToggleableList
+                items={languages}
+                label={<AnchorTitle href="#languages" title="Languages" />}
+              />
+            )}
+            {topics.length !== 0 && (
+              <ToggleableList
+                items={topics}
+                label={<AnchorTitle href="#topics" title="Topics" />}
+              />
+            )}
           </div>
         )}
         {topContributors && (
@@ -110,7 +134,7 @@ const DetailsCard = ({
         {(type === 'project' || type === 'repository' || type === 'user') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList
-              title="Recent Issues"
+              title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
               data={recentIssues}
               showAvatar={showAvatar}
               renderDetails={(item) => (
@@ -130,7 +154,7 @@ const DetailsCard = ({
             />
             {type === 'user' ? (
               <ItemCardList
-                title="Recent Pull Requests"
+                title={<AnchorTitle href="#recent-pull-requests" title="Recent Pull Requests" />}
                 data={pullRequests}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
@@ -150,7 +174,7 @@ const DetailsCard = ({
               />
             ) : (
               <ItemCardList
-                title="Recent Releases"
+                title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
                 data={recentReleases}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
@@ -166,7 +190,7 @@ const DetailsCard = ({
           </div>
         )}
         {type === 'user' && (
-          <SecondaryCard title="Recent Releases">
+          <SecondaryCard title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}>
             {recentReleases && recentReleases.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {recentReleases.map((item, index) => (
@@ -211,12 +235,15 @@ const DetailsCard = ({
                 ))}
               </div>
             ) : (
-              <p>No recent releases.</p>
+              <p>Nothing to display.</p>
             )}
           </SecondaryCard>
         )}
         {(type === 'project' || type === 'user') && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
+          <SecondaryCard
+            title={<AnchorTitle href="#repositories" title="Repositories" />}
+            className="mt-6"
+          >
             <RepositoriesCard repositories={repositories} />
           </SecondaryCard>
         )}
