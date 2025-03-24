@@ -4,10 +4,6 @@ import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { CommitteeDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
 
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
-
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
@@ -84,7 +80,7 @@ describe('CommitteeDetailsPage Component', () => {
           {
             avatarUrl: 'https://example.com/avatar1.jpg',
             contributionsCount: 30,
-            login: 'user1',
+            login: 'Contributor 1',
             name: '',
             __typename: 'UserNode',
           },
@@ -98,7 +94,7 @@ describe('CommitteeDetailsPage Component', () => {
     render(<CommitteeDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('user1')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
   })
 

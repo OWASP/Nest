@@ -6,6 +6,7 @@ import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contri
 import { IconType } from './icon'
 import { Level } from './level'
 import { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from './project'
+import { ItemCardPullRequests } from './user'
 
 export interface CardProps {
   button: ButtonType
@@ -30,18 +31,22 @@ export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   geolocationData?: GeoLocDataGraphQL
+  heatmap?: JSX.Element
   is_active?: boolean
   languages?: string[]
+  pullRequests?: ItemCardPullRequests[]
   recentIssues?: ProjectIssuesType[]
   recentReleases?: ProjectReleaseType[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
   stats?: stats[]
   summary?: string
+  showAvatar?: boolean
   title?: string
   topContributors?: TopContributorsTypeGraphql[]
   topics?: string[]
   type: string
+  userSummary?: JSX.Element
 }
 
 export interface UserCardProps {

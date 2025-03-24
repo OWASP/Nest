@@ -72,6 +72,16 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("owasp-committee-summary")
 
     @staticmethod
+    def get_owasp_event_suggested_location():
+        """Return OWASP event suggested location prompt."""
+        return Prompt.get_text("owasp-event-suggested-location")
+
+    @staticmethod
+    def get_owasp_event_summary():
+        """Return OWASP event summary prompt."""
+        return Prompt.get_text("owasp-event-summary")
+
+    @staticmethod
     def get_owasp_project_summary():
         """Return OWASP project summary prompt."""
         return Prompt.get_text("owasp-project-summary")
