@@ -19,6 +19,17 @@ describe('TruncatedText Component', () => {
     expect(textElement).toHaveAttribute('title', 'Short text')
   })
 
+  test('truncates text when it exceeds container width', () => {
+    render(
+      <div style={{ width: '100px' }}>
+        <TruncatedText text={longText} />
+      </div>
+    )
+    const textElement = screen.getByText(longText)
+    expect(textElement).toHaveClass('truncate')
+    expect(textElement).toHaveClass('text-ellipsis')
+  })
+
   test('title attribute is always present', () => {
     render(<TruncatedText text={longText} />)
     const textElement = screen.getByText(longText)
