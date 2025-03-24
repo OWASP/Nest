@@ -28,6 +28,14 @@ beforeAll(() => {
   }
 })
 
+beforeAll(() => {
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+})
+
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
     throw new Error(`Console error: ${args.join(' ')}`)

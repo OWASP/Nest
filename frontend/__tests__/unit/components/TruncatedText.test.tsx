@@ -1,14 +1,6 @@
 import { render, screen } from 'wrappers/testUtil'
 import { TruncatedText } from 'components/TruncatedText'
 
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe = jest.fn()
-    unobserve = jest.fn()
-    disconnect = jest.fn()
-  } as unknown as typeof ResizeObserver
-})
-
 describe('TruncatedText Component', () => {
   const longText = 'This is very long text that should be truncated for display.'
 
