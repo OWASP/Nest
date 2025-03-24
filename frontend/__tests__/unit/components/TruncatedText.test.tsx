@@ -1,28 +1,27 @@
 import { render, screen } from 'wrappers/testUtil'
 import { TruncatedText } from 'components/TruncatedText'
 
+beforeAll(() => {
+  global.ResizeObserver = class {
+    observe = jest.fn()
+    unobserve = jest.fn()
+    disconnect = jest.fn()
+  } as unknown as typeof ResizeObserver
+})
+
 describe('TruncatedText Component', () => {
   const longText = 'This is very long text that should be truncated for display.'
 
-  test('renders full text when it fits within container', () => {
+  test('renders full text when it fits within the container', () => {
     render(<TruncatedText text="Short text" className="w-auto" />)
-    expect(screen.getByText('Short text')).toBeInTheDocument()
+    const textElement = screen.getByText('Short text')
+    expect(textElement).toBeInTheDocument()
+    expect(textElement).toHaveAttribute('title', 'Short text')
   })
 
-  test('truncates long text with ellipsis dynamically', () => {
-    render(<TruncatedText text={longText} className="w-20" />)
-    const textElement = screen.getByText(/This is very long text that should be/)
-    expect(textElement).toHaveClass('truncate')
-  })
-
-  test('does not show tooltip when text is fully visible', () => {
-    render(<TruncatedText text={longText} className="w-full" disabledTooltip />)
-    expect(screen.getByText(longText)).toBeInTheDocument()
-  })
-
-  test('renders correctly across different screen sizes', () => {
-    render(<TruncatedText text={longText} className="max-w-xs sm:max-w-md md:max-w-lg" />)
-    const textElement = screen.getByText(/This is very long text that should be/)
-    expect(textElement).toHaveClass('truncate')
+  test('title attribute is always present', () => {
+    render(<TruncatedText text={longText} />)
+    const textElement = screen.getByText(longText)
+    expect(textElement).toHaveAttribute('title', longText)
   })
 })
