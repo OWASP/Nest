@@ -10,10 +10,12 @@ const ChapterMap = ({
   geoLocData,
   showLocal,
   style,
+  isDarkMode,
 }: {
   geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
   showLocal: boolean
   style: React.CSSProperties
+  isDarkMode?: boolean
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
@@ -38,6 +40,7 @@ const ChapterMap = ({
         maxBoundsViscosity: 1.0,
         preferCanvas: true,
       }).setView([20, 0], 2)
+
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
@@ -75,11 +78,22 @@ const ChapterMap = ({
 
       const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
 
-      // Create the popup content
+
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
 
-      // Create a clickable name inside the popup
+
+      if (isDarkMode) {
+        popupContent.style.backgroundColor = '#2b2b2b'
+        popupContent.style.color = '#ffffff'
+        popupContent.style.border = '1px solid #ffffff'
+      } else {
+        popupContent.style.backgroundColor = '#ffffff'
+        popupContent.style.color = '#000000'
+        popupContent.style.border = '1px solid #000000'
+      }
+
+
       const chapterLink = document.createElement('a')
       chapterLink.href = `/chapters/${chapter.key}`
       chapterLink.textContent = chapter.name
@@ -102,15 +116,25 @@ const ChapterMap = ({
       const nearestChapter = chapters[0]
 
       map.setView([nearestChapter.lat, nearestChapter.lng], 7)
-      map.fitBounds(localBounds, { maxZoom: 7 })
+      map.fitBounds(localBounds, { maxZoom: 7 }) // Restored maxZoom
     }
-  }, [chapters, showLocal])
+  }, [chapters, showLocal, isDarkMode])
 
   useEffect(() => {
     updateMarkers()
   }, [updateMarkers])
 
-  return <div id="chapter-map" style={style} />
+  return (
+    <div
+      id="chapter-map"
+      style={{
+        ...style,
+        backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
+        padding: '10px',
+        borderRadius: '8px',
+      }}
+    />
+  )
 }
 
 export default ChapterMap
