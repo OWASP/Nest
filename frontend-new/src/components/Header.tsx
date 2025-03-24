@@ -1,19 +1,19 @@
 'use client'
-import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
+import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
 import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
-import { usePathname } from 'next/navigation'
 import { cn } from 'utils/utility'
 import { ModeToggle } from './ModeToggle'
 import NavButton from './NavButton'
 import { Button } from './ui/button'
-import Link from 'next/link'
-import Image from 'next/image'
 
 export default function Header() {
   const pathname = usePathname()
@@ -116,7 +116,7 @@ export default function Header() {
           <div className="md:hidden">
             <Button
               onClick={toggleMobileMenu}
-              className="text-slate-300 hover:text-slate-100 focus:outline-none"
+              className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-none"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (

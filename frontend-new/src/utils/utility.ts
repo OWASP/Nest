@@ -2,13 +2,13 @@ import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
-import { IconKeys, Icons, urlMappings } from 'utils/data'
 import { ChapterTypeGraphQL } from 'types/chapter'
 
 import { CommitteeTypeAlgolia } from 'types/committee'
 import { IconType } from 'types/icon'
 import { IssueType } from 'types/issue'
 import { ProjectTypeAlgolia, ProjectTypeGraphql } from 'types/project'
+import { IconKeys, Icons, urlMappings } from 'utils/data'
 
 dayjs.extend(relativeTime)
 

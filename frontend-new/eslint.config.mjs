@@ -1,6 +1,7 @@
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { FlatCompat } from '@eslint/eslintrc'
+import path from 'path'
 
 import js from '@eslint/js'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
@@ -23,7 +24,7 @@ const compat = new FlatCompat({
 })
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...compat.extends('next/typescript'),
   react.configs.flat['jsx-runtime'],
   {
     ignores: ['node_modules', 'build', 'dist', '.cache', '.next'],
@@ -55,9 +56,15 @@ const eslintConfig = [
     settings: {
       'import/resolver': {
         alias: {
-          map: [['@', './app']],
+          map: [
+            ['@tests', path.resolve(__dirname, '__tests__')],
+            ['@', path.resolve(__dirname, 'src')],
+          ],
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
         },
+      },
+      react: {
+        version: 'detect',
       },
     },
     rules: {
@@ -89,7 +96,7 @@ const eslintConfig = [
         },
       ],
       'no-console': 'error',
-      'no-unused-vars': 'off',
+      'no-unused-vars': 'warn',
       'import/no-relative-parent-imports': 'error',
 
       ...jsxA11y.configs.recommended.rules,

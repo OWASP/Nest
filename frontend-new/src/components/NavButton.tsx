@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Link from 'next/link'
 import { useState } from 'react'
 import { NavButtonProps } from 'types/button'
 import { cn } from 'utils/utility'
