@@ -1,46 +1,32 @@
-import { Tooltip as ChakraTooltip, Portal } from "@chakra-ui/react"
-import * as React from "react"
+'use client'
 
-export interface TooltipProps extends ChakraTooltip.RootProps {
-  showArrow?: boolean
-  portalled?: boolean
-  portalRef?: React.RefObject<HTMLElement>
-  content: React.ReactNode
-  contentProps?: ChakraTooltip.ContentProps
-  disabled?: boolean
-}
+import * as React from 'react'
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
-export const Tooltip = React.forwardRef<HTMLDivElement, TooltipProps>(
-  function Tooltip(props, ref) {
-    const {
-      showArrow,
-      children,
-      disabled,
-      portalled = true,
-      content,
-      contentProps,
-      portalRef,
-      ...rest
-    } = props
+import { cn } from 'utils/utility'
 
-    if (disabled) return children
+const TooltipProvider = TooltipPrimitive.Provider
 
-    return (
-      <ChakraTooltip.Root {...rest}>
-        <ChakraTooltip.Trigger asChild>{children}</ChakraTooltip.Trigger>
-        <Portal disabled={!portalled} container={portalRef}>
-          <ChakraTooltip.Positioner>
-            <ChakraTooltip.Content ref={ref} {...contentProps}>
-              {showArrow && (
-                <ChakraTooltip.Arrow>
-                  <ChakraTooltip.ArrowTip />
-                </ChakraTooltip.Arrow>
-              )}
-              {content}
-            </ChakraTooltip.Content>
-          </ChakraTooltip.Positioner>
-        </Portal>
-      </ChakraTooltip.Root>
-    )
-  },
-)
+const Tooltip = TooltipPrimitive.Root
+
+const TooltipTrigger = TooltipPrimitive.Trigger
+
+const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        'z-50 origin-[--radix-tooltip-content-transform-origin] overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+        className
+      )}
+      {...props}
+    />
+  </TooltipPrimitive.Portal>
+))
+TooltipContent.displayName = TooltipPrimitive.Content.displayName
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }

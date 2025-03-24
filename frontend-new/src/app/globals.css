@@ -1,4 +1,6 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
@@ -84,6 +86,7 @@
 }
 
 @keyframes fade-in-out {
+
   0%,
   100% {
     opacity: 0;
@@ -102,12 +105,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 h1 {
@@ -182,9 +179,18 @@ a {
   list-style: decimal;
 }
 
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 :root {
-  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3)
-    brightness(0.7);
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -263,6 +269,10 @@ a {
 
 .dark .leaflet-popup-tip {
   background-color: #2c3e50;
+}
+
+.leaflet-marker-icon {
+  color: #4b5563;
 }
 
 .heatmap-background-loader {
