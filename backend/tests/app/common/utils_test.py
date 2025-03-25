@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
+import os
 
 import pytest
 from django.conf import settings
@@ -12,16 +13,19 @@ from apps.common.utils import (
     natural_number,
 )
 
+PUBLIC_DNS_IP = os.environ.get("PUBLIC_DNS_IP")
+PUBLIC_IP_ADDRESS = os.environ.get("PUBLIC_IP_ADDRESS")
+
 
 class TestUtils:
     @pytest.mark.parametrize(
         ("path", "expected"),
         [
-            ("some/view", "http://example.com/some/view"),
-            ("another/view", "http://example.com/another/view"),
+            ("some/view", "https://example.com/some/view"),
+            ("another/view", "https://example.com/another/view"),
         ],
     )
-    @patch.object(settings, "SITE_URL", "http://example.com")
+    @patch.object(settings, "SITE_URL", "https://example.com")
     def test_get_absolute_url(self, path, expected):
         assert get_absolute_url(path) == expected
 
@@ -62,8 +66,8 @@ class TestUtils:
     @pytest.mark.parametrize(
         ("mock_request", "expected"),
         [
-            ({"HTTP_X_FORWARDED_FOR": "8.8.8.8"}, "8.8.8.8"),
-            ({"REMOTE_ADDR": "192.168.1.2"}, "192.168.1.2"),
+            ({"https_X_FORWARDED_FOR": PUBLIC_DNS_IP}, PUBLIC_DNS_IP),
+            ({"REMOTE_ADDR": PUBLIC_IP_ADDRESS}, PUBLIC_IP_ADDRESS),
         ],
     )
     def test_get_user_ip_address(self, mock_request, expected):

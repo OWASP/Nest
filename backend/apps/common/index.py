@@ -4,7 +4,7 @@ import logging
 from functools import lru_cache
 from pathlib import Path
 
-from algoliasearch.http.exceptions import AlgoliaException
+from algoliasearch.https.exceptions import AlgoliaException
 from algoliasearch.search.client import SearchClientSync
 from algoliasearch.search.config import SearchConfig
 from algoliasearch_django import AlgoliaIndex
