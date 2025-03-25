@@ -71,14 +71,14 @@
 
       - name: Ensure data directory exists
         ansible.builtin.file:
-          path: ~/data
+          path: ~/backend/data
           state: directory
           mode: '0755'
 
       - name: Copy directory recursively
         copy:
           src: '{{ github_workspace }}/backend/data'
-          dest: ~/
+          dest: ~/backend/data
           mode: '0755'
 
       - name: Copy .env.backend
