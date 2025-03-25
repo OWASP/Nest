@@ -272,7 +272,7 @@ const UserDetailsPage: React.FC = () => {
       url={user.url || '#'}
     >
       <DetailsCard
-        showAvatar={false}
+        showAvatar={true}
         title={user.name || user.login || 'User'}
         heatmap={<Heatmap />}
         details={userDetails}
