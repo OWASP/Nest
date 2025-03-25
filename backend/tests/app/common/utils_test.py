@@ -15,6 +15,7 @@ from apps.common.utils import (
 
 PUBLIC_DNS_IP = os.environ.get("PUBLIC_DNS_IP")
 PUBLIC_IP_ADDRESS = os.environ.get("PUBLIC_IP_ADDRESS")
+REMOTE_IP = os.environ.get("REMOTE_IP")
 
 
 class TestUtils:
@@ -67,7 +68,7 @@ class TestUtils:
         ("mock_request", "expected"),
         [
             ({"https_X_FORWARDED_FOR": PUBLIC_DNS_IP}, PUBLIC_DNS_IP),
-            ({"REMOTE_ADDR": PUBLIC_IP_ADDRESS}, PUBLIC_IP_ADDRESS),
+            ({"REMOTE_ADDR": REMOTE_IP}, REMOTE_IP),
         ],
     )
     def test_get_user_ip_address(self, mock_request, expected):
@@ -80,6 +81,6 @@ class TestUtils:
         request.META = {}
 
         mocker.patch.object(settings, "ENVIRONMENT", "Local")
-        mocker.patch.dict(settings._wrapped.__dict__, {"PUBLIC_IP_ADDRESS": "1.1.1.1"})
+        mocker.patch.dict(settings._wrapped.__dict__, {"PUBLIC_IP_ADDRESS": "PUBLIC_IP_ADDRESS"})
 
-        assert get_user_ip_address(request) == "1.1.1.1"
+        assert get_user_ip_address(request) == "PUBLIC_IP_ADDRESS"
