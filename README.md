@@ -9,6 +9,12 @@
 ![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&?label=Build&style=for-the-badge)
 ![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge)
 
+[![Snyk Security](https://img.shields.io/badge/Snyk-Security-blueviolet?style=for-the-badge)](https://snyk.io/test/github/owasp/nest)
+[![SonarQube](https://img.shields.io/badge/SonarQube-Passing-brightgreen?style=for-the-badge)](https://sonarcloud.io/dashboard?id=owasp_nest)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml)
+
+[![OpenSSF](https://www.bestpractices.dev/projects/10174/badge?&style=for-the-badge)](https://www.bestpractices.dev/projects/10174)
+
 ![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)
 ![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)
 
@@ -62,3 +68,6 @@ OWASP Nest was **originally created by Arkadii Yakovets** (Ark) to address chall
 Over time, OWASP Nest has expanded to address broader OWASP community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, along with NestBot, has become a popular entry point for various OWASP aspects, including projects, chapters, users, and aggregated contribution opportunities -- with even more features planned. OWASP Nest's success is also the result of many valuable [contributions](https://github.com/OWASP/Nest/graphs/contributors) from the broader [OWASP Nest community](https://owasp.slack.com/archives/project-nest), whose efforts have helped shape and improve the project in countless ways.
 
 **No other OWASP projects' code was used in OWASP Nest's development.** While explicit attribution (other than per MIT license) is not required, contributors and other OWASP project leaders are welcome to provide it at their discretion.
+
+
+[def]: https://img.shields.io/badge/OpenSSF-Best%20Practices-brightgreen?style=for-the-badge
