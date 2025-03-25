@@ -19,6 +19,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import LeaderLinks from 'components/ui/LeadersLinks'
 import { toaster } from 'components/ui/toaster'
 
 const ProjectDetailsPage = () => {
@@ -63,7 +64,7 @@ const ProjectDetailsPage = () => {
     )
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
-    { label: 'Leaders', value: project.leaders.join(', ') },
+    { label: 'Leaders', value: <LeaderLinks leaders={project.leaders} /> },
     {
       label: 'Level',
       value: capitalize(project.level),
