@@ -2,6 +2,7 @@ import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
+import { TruncatedText } from './TruncatedText'
 
 const ItemCardList = ({
   title,
@@ -44,7 +45,7 @@ const ItemCardList = ({
                     href={item?.url}
                     target="_blank"
                   >
-                    {item.title || item.name}
+                    <TruncatedText text={item.title || item.name} />
                   </a>
                 </h3>
               </div>

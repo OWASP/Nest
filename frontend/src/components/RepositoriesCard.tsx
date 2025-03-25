@@ -13,6 +13,7 @@ import type React from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RepositoriesCardProps } from 'types/project'
+import { TruncatedText } from './TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
@@ -59,7 +60,7 @@ const RepositoryItem = ({ details }) => {
         onClick={handleClick}
         className="text-start font-semibold text-blue-500 hover:underline dark:text-blue-400"
       >
-        {details?.name}
+        <TruncatedText text={details?.name} />
       </button>
 
       <div className="space-y-2 text-sm">
