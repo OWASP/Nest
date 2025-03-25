@@ -33,16 +33,26 @@ const ChapterMap = ({ geoLocData, showLocal, style, isDarkMode }) => {
         preferCanvas: true,
       }).setView([20, 0], 2);
 
-      const tileLayerUrl = isDarkMode
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-      L.tileLayer(tileLayerUrl, {
-        attribution: '&copy; OpenStreetMap contributors &copy; CartoDB',
-      }).addTo(map);
-
       mapRef.current = map;
     }
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    mapRef.current.eachLayer(layer => {
+      if (layer instanceof L.TileLayer) {
+        mapRef.current.removeLayer(layer);
+      }
+    });
+
+    const tileLayerUrl = isDarkMode
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+    L.tileLayer(tileLayerUrl, {
+      attribution: '&copy; OpenStreetMap contributors &copy; CartoDB',
+    }).addTo(mapRef.current);
   }, [isDarkMode]);
 
   const updateMarkers = useCallback(() => {
