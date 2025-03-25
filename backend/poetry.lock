@@ -1208,14 +1208,14 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "humanize"
-version = "4.12.1"
+version = "4.12.2"
 description = "Python humanize utilities"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "humanize-4.12.1-py3-none-any.whl", hash = "sha256:86014ca5c52675dffa1d404491952f1f5bf03b07c175a51891a343daebf01fea"},
-    {file = "humanize-4.12.1.tar.gz", hash = "sha256:1338ba97415c96556758a6e2f65977ed406dddf4620d4c6db9bbdfd07f0f1232"},
+    {file = "humanize-4.12.2-py3-none-any.whl", hash = "sha256:e4e44dced598b7e03487f3b1c6fd5b1146c30ea55a110e71d5d4bca3e094259e"},
+    {file = "humanize-4.12.2.tar.gz", hash = "sha256:ce0715740e9caacc982bb89098182cf8ded3552693a433311c6a4ce6f4e12a2c"},
 ]
 
 [package.extras]
@@ -2920,4 +2920,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "defcb17629ba4de68195b11720e61b7a084f226cf1a4e4005d186010dea5012b"
+content-hash = "6790ac85b99cf955b4fd1802843a93f8186b32d50a314b856b0d7c0e26921cd7"
