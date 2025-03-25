@@ -44,6 +44,8 @@ pyyaml = "^6.0.2"
 requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
+django-extensions = "^3.2.3"
+pydotplus = "^2.0.2"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
