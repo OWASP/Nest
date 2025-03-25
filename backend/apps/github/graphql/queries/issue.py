@@ -1,3 +1,5 @@
+"""GraphQL queries for handling GitHub issues."""
+
 import graphene
 
 from apps.common.graphql.queries import BaseQuery
@@ -6,7 +8,7 @@ from apps.github.models.issue import Issue
 
 
 class IssueQuery(BaseQuery):
-    """Issue queries."""
+    """GraphQL query class for retrieving GitHub issues."""
 
     recent_issues = graphene.List(
         IssueNode,
@@ -16,13 +18,29 @@ class IssueQuery(BaseQuery):
     )
 
     def resolve_recent_issues(root, info, limit=15, distinct=False, login=None):
-        """Resolve recent issues."""
+        """Resolve recent issues with optional filtering.
+
+        Args:
+        ----
+            root: The root query object.
+            info: The GraphQL execution context.
+            limit (int): Maximum number of issues to return.
+            distinct (bool): Whether to return unique issues per author and repository.
+            login (str, optional): Filter issues by a specific author's login.
+
+        Returns:
+        -------
+            Queryset containing the filtered list of issues.
+
+        """
         queryset = Issue.objects.select_related("author").order_by("-created_at")
 
         if login:
             queryset = queryset.filter(author__login=login)
 
         if distinct:
-            queryset = queryset.order_by("author_id", "repository_id", "-created_at").distinct("author_id", "repository_id")
+            queryset = queryset.order_by("author_id", "repository_id", "-created_at").distinct(
+                "author_id", "repository_id"
+            )
 
         return queryset[:limit]
