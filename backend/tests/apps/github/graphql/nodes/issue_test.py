@@ -19,9 +19,8 @@ class TestIssueNode:
             "author",
             "comments_count",
             "created_at",
-            "number",
             "state",
-            "url",
             "title",
+            "url",
         }
         assert set(IssueNode._meta.fields) == expected_fields

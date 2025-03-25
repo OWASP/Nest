@@ -10,8 +10,16 @@ from apps.github.models.issue import Issue
 class IssueQuery(BaseQuery):
     """Issue queries."""
 
-    recent_issues = graphene.List(IssueNode, limit=graphene.Int(default_value=15))
+    recent_issues = graphene.List(
+        IssueNode,
+        limit=graphene.Int(default_value=6),
+        login=graphene.String(required=False),
+    )
 
-    def resolve_recent_issues(root, info, limit):
-        """Resolve recent issue."""
-        return Issue.objects.order_by("-created_at")[:limit]
+    def resolve_recent_issues(root, info, limit, login=None):
+        """Resolve recent issues."""
+        queryset = Issue.objects.select_related("author").order_by("-created_at")
+        if login:
+            queryset = queryset.filter(author__login=login)
+
+        return queryset[:limit]

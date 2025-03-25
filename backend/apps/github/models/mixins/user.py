@@ -130,6 +130,7 @@ class UserIndexMixin:
                     "owner_key": i.repository.owner.login,
                 },
                 "title": i.title,
+                "url": i.url,
             }
             for i in self.issues.select_related(
                 "repository",
@@ -155,6 +156,7 @@ class UserIndexMixin:
                     "owner_key": r.repository.owner.login,
                 },
                 "tag_name": r.tag_name,
+                "url": r.url,
             }
             for r in self.releases.select_related(
                 "repository",

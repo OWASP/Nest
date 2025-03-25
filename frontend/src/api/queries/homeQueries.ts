@@ -35,7 +35,6 @@ export const GET_MAIN_PAGE_DATA = gql`
     recentIssues(limit: 5) {
       commentsCount
       createdAt
-      number
       title
       url
       author {

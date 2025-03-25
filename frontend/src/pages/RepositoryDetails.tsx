@@ -19,11 +19,11 @@ import MetadataManager from 'components/MetadataManager'
 import { toaster } from 'components/ui/toaster'
 
 const RepositoryDetailsPage = () => {
-  const { projectKey, repositoryKey } = useParams()
+  const { repositoryKey } = useParams()
   const [repository, setRepository] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
-    variables: { projectKey: projectKey, repositoryKey: repositoryKey },
+    variables: { repositoryKey: repositoryKey },
   })
   useEffect(() => {
     if (data) {
@@ -38,7 +38,7 @@ const RepositoryDetailsPage = () => {
       })
       setIsLoading(false)
     }
-  }, [data, graphQLRequestError, projectKey])
+  }, [data, graphQLRequestError, repositoryKey])
 
   if (isLoading) {
     return (
