@@ -84,4 +84,15 @@ test.describe('Home Page', () => {
     await expect(page.getByText('Feb 27 — 28, 2025')).toBeVisible()
     await page.getByRole('button', { name: 'Event 1' }).click()
   })
+
+  test('should have truncated text with overflow for all relevant elements', async ({ page }) => {
+    const truncatedElements = await page.locator('span.truncate').all()
+    expect(truncatedElements.length).toBeGreaterThan(0)
+
+    for (const element of truncatedElements) {
+      await expect(element).toHaveCSS('overflow', 'hidden')
+      await expect(element).toHaveCSS('text-overflow', 'ellipsis')
+      await expect(element).toHaveCSS('white-space', 'nowrap')
+    }
+  })
 })
