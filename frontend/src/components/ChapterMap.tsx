@@ -1,33 +1,25 @@
-import L from 'leaflet'
-import React, { useEffect, useMemo, useRef, useCallback } from 'react'
-import 'leaflet/dist/leaflet.css'
-import 'leaflet.markercluster/dist/MarkerCluster.css'
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import 'leaflet.markercluster'
-import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
+import L from 'leaflet';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
+import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter';
 
-const ChapterMap = ({
-  geoLocData,
-  showLocal,
-  style,
-  isDarkMode,
-}: {
-  geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
-  showLocal: boolean
-  style: React.CSSProperties
-  isDarkMode?: boolean
-}) => {
-  const mapRef = useRef<L.Map | null>(null)
-  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
+const ChapterMap = ({ geoLocData, showLocal, style, isDarkMode }) => {
+  const mapRef = useRef(null);
+  const markerClusterRef = useRef(null);
 
-  const chapters = useMemo(() => {
-    return geoLocData.map((chapter) => ({
-      lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
-      lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
-      key: chapter.key,
-      name: chapter.name,
-    }))
-  }, [geoLocData])
+  const chapters = useMemo(
+    () =>
+      geoLocData.map((chapter) => ({
+        lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
+        lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
+        key: chapter.key,
+        name: chapter.name,
+      })),
+    [geoLocData]
+  );
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -39,31 +31,32 @@ const ChapterMap = ({
         ],
         maxBoundsViscosity: 1.0,
         preferCanvas: true,
-      }).setView([20, 0], 2)
+      }).setView([20, 0], 2);
 
+      const tileLayerUrl = isDarkMode
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        className: '',
-        useCache: false,
-      }).addTo(map)
+      L.tileLayer(tileLayerUrl, {
+        attribution: '&copy; OpenStreetMap contributors &copy; CartoDB',
+      }).addTo(map);
 
-      mapRef.current = map
+      mapRef.current = map;
     }
-  }, [])
+  }, [isDarkMode]);
 
   const updateMarkers = useCallback(() => {
-    if (!mapRef.current) return
-    const map = mapRef.current
+    if (!mapRef.current) return;
+    const map = mapRef.current;
 
     if (!markerClusterRef.current) {
-      markerClusterRef.current = L.markerClusterGroup()
+      markerClusterRef.current = L.markerClusterGroup();
     } else {
-      markerClusterRef.current.clearLayers()
+      markerClusterRef.current.clearLayers();
     }
 
-    const markerClusterGroup = markerClusterRef.current
-    const bounds: [number, number][] = []
+    const markerClusterGroup = markerClusterRef.current;
+    const bounds = [];
 
     chapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
@@ -74,46 +67,48 @@ const ChapterMap = ({
         popupAnchor: [1, -34],
         shadowSize: [41, 41],
         shadowUrl: '/img/marker-shadow.png',
-      })
+      });
 
-      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
+      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon });
 
+      const popupContent = document.createElement('div');
+      popupContent.className = 'leaflet-popup-content-wrapper';
+      popupContent.style.backgroundColor = isDarkMode ? '#2b2b2b' : '#ffffff';
+      popupContent.style.color = isDarkMode ? '#ffffff' : '#000000';
+      popupContent.style.border = 'none';
+      popupContent.style.padding = '10px 15px';
+      popupContent.style.borderRadius = '8px';
+      popupContent.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+      popupContent.style.textAlign = 'center';
+      popupContent.style.fontSize = '14px';
+      popupContent.style.fontWeight = 'bold';
 
-      const popupContent = document.createElement('div')
-      popupContent.className = 'popup-content'
-      popupContent.style.backgroundColor = isDarkMode ? '#2b2b2b' : '#ffffff'
-      popupContent.style.color = isDarkMode ? '#ffffff' : '#000000'
-      popupContent.style.border = isDarkMode ? '1px solid #ffffff' : '1px solid #000000'
+      const chapterTitle = document.createElement('span');
+      chapterTitle.textContent = chapter.name;
+      popupContent.appendChild(chapterTitle);
 
-      const chapterLink = document.createElement('a')
-      chapterLink.href = `/chapters/${chapter.key}`
-      chapterLink.textContent = chapter.name
-      chapterLink.style.textDecoration = 'underline'
-      chapterLink.style.cursor = 'pointer'
+      marker.bindPopup(popupContent, { closeButton: false });
 
-      popupContent.appendChild(chapterLink)
-      marker.bindPopup(popupContent)
+      markerClusterGroup.addLayer(marker);
+      bounds.push([chapter.lat, chapter.lng]);
+    });
 
-      markerClusterGroup.addLayer(marker)
-      bounds.push([chapter.lat, chapter.lng])
-    })
-
-    map.addLayer(markerClusterGroup)
+    map.addLayer(markerClusterGroup);
 
     if (showLocal && chapters.length > 0) {
-      const maxNearestChapters = 5
-      const localChapters = chapters.slice(0, maxNearestChapters)
-      const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
-      const nearestChapter = chapters[0]
+      const maxNearestChapters = 5;
+      const localChapters = chapters.slice(0, maxNearestChapters);
+      const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]));
+      const nearestChapter = chapters[0];
 
-      map.setView([nearestChapter.lat, nearestChapter.lng], 7)
-      map.fitBounds(localBounds, { maxZoom: 7 })
+      map.setView([nearestChapter.lat, nearestChapter.lng], 7);
+      map.fitBounds(localBounds, { maxZoom: 7 });
     }
-  }, [chapters, showLocal, isDarkMode])
+  }, [chapters, showLocal, isDarkMode]);
 
   useEffect(() => {
-    updateMarkers()
-  }, [updateMarkers])
+    updateMarkers();
+  }, [updateMarkers]);
 
   return (
     <div
@@ -123,9 +118,10 @@ const ChapterMap = ({
         backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
         padding: '10px',
         borderRadius: '8px',
+        border: isDarkMode ? '1px solid #444' : '1px solid #ddd',
       }}
     />
-  )
-}
+  );
+};
 
-export default ChapterMap
+export default ChapterMap;
