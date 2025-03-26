@@ -1,20 +1,33 @@
 import L from 'leaflet';
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useCallback } from 'react';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
-import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter';
 
-const ChapterMap = ({ geoLocData, showLocal, style, isDarkMode }) => {
-  const mapRef = useRef(null);
-  const markerClusterRef = useRef(null);
+interface Chapter {
+  lat: number;
+  lng: number;
+  key: string;
+  name: string;
+}
 
-  const chapters = useMemo(
+interface ChapterMapProps {
+  geoLocData: { _geoloc?: { lat: number; lng: number }; geoLocation?: { lat: number; lng: number }; key: string; name: string }[];
+  showLocal: boolean;
+  style?: React.CSSProperties;
+  isDarkMode: boolean;
+}
+
+const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, isDarkMode }) => {
+  const mapRef = useRef<L.Map | null>(null);
+  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
+
+  const chapters: Chapter[] = useMemo(
     () =>
       geoLocData.map((chapter) => ({
-        lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
-        lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
+        lat: chapter._geoloc ? chapter._geoloc.lat : chapter.geoLocation?.lat || 0,
+        lng: chapter._geoloc ? chapter._geoloc.lng : chapter.geoLocation?.lng || 0,
         key: chapter.key,
         name: chapter.name,
       })),
@@ -23,7 +36,7 @@ const ChapterMap = ({ geoLocData, showLocal, style, isDarkMode }) => {
 
   useEffect(() => {
     if (!mapRef.current) {
-      const map = L.map('chapter-map', {
+      mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
         maxBounds: [
           [-90, -180],
@@ -32,17 +45,15 @@ const ChapterMap = ({ geoLocData, showLocal, style, isDarkMode }) => {
         maxBoundsViscosity: 1.0,
         preferCanvas: true,
       }).setView([20, 0], 2);
-
-      mapRef.current = map;
     }
   }, []);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    mapRef.current.eachLayer(layer => {
+    mapRef.current.eachLayer((layer) => {
       if (layer instanceof L.TileLayer) {
-        mapRef.current.removeLayer(layer);
+        mapRef.current?.removeLayer(layer);
       }
     });
 
@@ -51,7 +62,7 @@ const ChapterMap = ({ geoLocData, showLocal, style, isDarkMode }) => {
       : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     L.tileLayer(tileLayerUrl, {
-      attribution: '&copy; OpenStreetMap contributors &copy; CartoDB',
+      attribution: '&copy; OpenStreetMap contributors &copy; CartoDB Maps',
     }).addTo(mapRef.current);
   }, [isDarkMode]);
 
@@ -66,7 +77,7 @@ const ChapterMap = ({ geoLocData, showLocal, style, isDarkMode }) => {
     }
 
     const markerClusterGroup = markerClusterRef.current;
-    const bounds = [];
+    const bounds: L.LatLngExpression[] = [];
 
     chapters.forEach((chapter) => {
       const markerIcon = new L.Icon({
