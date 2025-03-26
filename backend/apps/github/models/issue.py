@@ -21,11 +21,11 @@ class Issue(GenericIssueModel):
 
     class Meta:
         db_table = "github_issues"
-        ordering = ("-updated_at", "-state")
-        verbose_name_plural = "Issues"
         indexes = [
             models.Index(fields=["-created_at"]),
         ]
+        ordering = ("-updated_at", "-state")
+        verbose_name_plural = "Issues"
 
     summary = models.TextField(
         verbose_name="Summary", default="", blank=True

@@ -12,10 +12,10 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
 
     class Meta:
         db_table = "github_releases"
-        verbose_name_plural = "Releases"
         indexes = [
             models.Index(fields=["-created_at"]),
         ]
+        verbose_name_plural = "Releases"
 
     name = models.CharField(verbose_name="Name", max_length=200)
     tag_name = models.CharField(verbose_name="Tag name", max_length=100)
