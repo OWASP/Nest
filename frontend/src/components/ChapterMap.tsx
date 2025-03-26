@@ -38,10 +38,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
-        maxBounds: [
-          [-90, -180],
-          [90, 180],
-        ],
+        maxBounds: [[-90, -180], [90, 180]],
         maxBoundsViscosity: 1.0,
         preferCanvas: true,
       }).setView([20, 0], 2);
@@ -50,7 +47,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
 
   useEffect(() => {
     if (!mapRef.current) return;
-
     mapRef.current.eachLayer((layer) => {
       if (layer instanceof L.TileLayer) {
         mapRef.current?.removeLayer(layer);
@@ -106,10 +102,14 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
 
       const chapterTitle = document.createElement('span');
       chapterTitle.textContent = chapter.name;
+      chapterTitle.style.cursor = 'pointer';
+      chapterTitle.style.textDecoration = 'underline';
+      chapterTitle.addEventListener('click', () => {
+        window.location.href = `/chapters/${chapter.key}`;
+      });
+
       popupContent.appendChild(chapterTitle);
-
       marker.bindPopup(popupContent, { closeButton: false });
-
       markerClusterGroup.addLayer(marker);
       bounds.push([chapter.lat, chapter.lng]);
     });
