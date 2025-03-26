@@ -1,5 +1,6 @@
 import { Box, Button, Heading, Link, List, Text } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { faGithub, faSlack, faBluesky } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useCallback } from 'react'
 import { Section } from 'types/section'
@@ -15,6 +16,25 @@ export default function Footer() {
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
 
+  // Social media links configuration
+  const socialLinks = [
+    {
+      icon: faBluesky,
+      href: 'https://bsky.app/profile/nest.owasp.org',
+      label: 'Bluesky'
+    },
+    {
+      icon: faGithub,
+      href: 'https://github.com/owasp/nest',
+      label: 'GitHub'
+    },
+    {
+      icon: faSlack,
+      href: 'https://owasp.slack.com/archives/project-nest',
+      label: 'Slack'
+    }
+  ]
+
   return (
     <Box
       as="footer"
@@ -22,7 +42,7 @@ export default function Footer() {
     >
       <Box className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
         <Box className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
-          {/* Iterate over footerSections to render each section */}
+          {/* Existing footer sections */}
           {footerSections.map((section: Section) => (
             <Box key={section.title} className="space-y-4">
               <Button
@@ -47,7 +67,7 @@ export default function Footer() {
                   openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
                 }`}
               >
-                {/* Iterate through section links */}
+                {/* Existing section links */}
                 {section.links.map((link, index) => (
                   <List.Item key={index} className="py-1">
                     {link.isSpan ? (
@@ -69,6 +89,23 @@ export default function Footer() {
             </Box>
           ))}
         </Box>
+        
+        {/* Social Media Icons Section */}
+        <Box className="flex justify-center space-x-6 mb-0">
+          {socialLinks.map((social) => (
+            <Link
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`OWASP Nest ${social.label}`}
+              className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors duration-200"
+            >
+              <FontAwesomeIcon icon={social.icon} className="h-6 w-6" />
+            </Link>
+          ))}
+        </Box>
+
         {/* Footer bottom section with copyright and links */}
         <Box className="grid w-full place-content-center">
           <Box className="flex w-full flex-col items-center gap-4 sm:flex-row sm:text-left">
