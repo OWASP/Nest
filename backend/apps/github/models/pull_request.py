@@ -18,6 +18,9 @@ class PullRequest(GenericIssueModel):
         db_table = "github_pull_requests"
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Pull Requests"
+        indexes = [
+            models.Index(fields=["-created_at"]),
+        ]
 
     merged_at = models.DateTimeField(verbose_name="Merged at", blank=True, null=True)
 
