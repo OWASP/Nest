@@ -12,6 +12,9 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
 
     class Meta:
         db_table = "github_releases"
+        indexes = [
+            models.Index(fields=["-created_at"]),
+        ]
         verbose_name_plural = "Releases"
 
     name = models.CharField(verbose_name="Name", max_length=200)
@@ -49,6 +52,11 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     def summary(self):
         """Return release summary."""
         return f"{self.tag_name} on {self.published_at.strftime('%b %d, %Y')}"
+
+    @property
+    def url(self):
+        """Return release URL."""
+        return f"{self.repository.url}/releases/tag/{self.tag_name}"
 
     def from_github(self, gh_release, author=None, repository=None):
         """Update instance based on GitHub release data."""

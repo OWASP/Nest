@@ -1,10 +1,14 @@
 """GitHub app utils."""
 
+import logging
 from urllib.parse import urlparse
 
 import requests
+from requests.exceptions import RequestException
 
 from apps.github.constants import GITHUB_REPOSITORY_RE
+
+logger = logging.getLogger(__name__)
 
 
 def check_owasp_site_repository(key):
@@ -36,7 +40,10 @@ def check_funding_policy_compliance(platform, target):
 
 def get_repository_file_content(url, timeout=30):
     """Get repository file content."""
-    return requests.get(url, timeout=timeout).text
+    try:
+        return requests.get(url, timeout=timeout).text
+    except RequestException as e:
+        logger.exception("Failed to fetch file", extra={"URL": url, "error": str(e)})
 
 
 def get_repository_path(url):
@@ -46,7 +53,7 @@ def get_repository_path(url):
 
 
 def normalize_url(url, check_path=False):
-    """Normalize GitHub URL."""
+    """Normalize URL."""
     parsed_url = urlparse(url)
     if not parsed_url.netloc or (check_path and not parsed_url.path):
         return None

@@ -102,9 +102,24 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.path
 
     @property
+    def latest_pull_request(self):
+        """Repository latest pull request."""
+        return self.pull_requests.order_by("-created_at").first()
+
+    @property
     def latest_release(self):
         """Repository latest release."""
         return self.published_releases.order_by("-published_at").first()
+
+    @property
+    def latest_updated_issue(self):
+        """Repository latest updated issue."""
+        return self.issues.order_by("-updated_at").first()
+
+    @property
+    def latest_updated_pull_request(self):
+        """Repository latest updated pull request (most recently modified)."""
+        return self.pull_requests.order_by("-updated_at").first()
 
     @property
     def nest_key(self):
@@ -124,7 +139,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @property
     def published_releases(self):
         """Return published releases."""
-        return self.releases.filter(is_draft=False, published_at__isnull=False)
+        return self.releases.filter(
+            is_draft=False,
+            is_pre_release=False,
+            published_at__isnull=False,
+        )
 
     @property
     def top_languages(self):

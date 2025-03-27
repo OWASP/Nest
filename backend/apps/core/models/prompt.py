@@ -39,7 +39,7 @@ class Prompt(TimestampedModel):
             return Prompt.objects.get(key=key).text
         except Prompt.DoesNotExist:
             if settings.OPEN_AI_SECRET_KEY != "None":  # noqa: S105
-                logger.exception("Prompt with key '%s' does not exist.", key)
+                logger.warning("Prompt with key '%s' does not exist.", key)
 
     @staticmethod
     def get_github_issue_hint():
@@ -70,6 +70,16 @@ class Prompt(TimestampedModel):
     def get_owasp_committee_summary():
         """Return OWASP committee summary prompt."""
         return Prompt.get_text("owasp-committee-summary")
+
+    @staticmethod
+    def get_owasp_event_suggested_location():
+        """Return OWASP event suggested location prompt."""
+        return Prompt.get_text("owasp-event-suggested-location")
+
+    @staticmethod
+    def get_owasp_event_summary():
+        """Return OWASP event summary prompt."""
+        return Prompt.get_text("owasp-event-summary")
 
     @staticmethod
     def get_owasp_project_summary():

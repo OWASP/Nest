@@ -1,8 +1,8 @@
-name: Update Nest test images
+name: Update Nest Test Images
 
 on:
   schedule:
-    - cron: '30 0 * * *'
+    - cron: 30 0 * * *
   workflow_dispatch:
 
 env:
@@ -31,22 +31,33 @@ jobs:
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache,mode=max
-          context: frontend
-          file: frontend/Dockerfile.test
+          context: backend
+          file: backend/docker/Dockerfile.test
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
-      - name: Update frontend test image
+      - name: Update frontend unit test image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.test
+          file: frontend/docker/Dockerfile.unit.test
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
+
+      - name: Update frontend end-to-end test image
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache,mode=max
+          context: frontend
+          file: frontend/docker/Dockerfile.e2e.test
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
 
       - name: Update schema test image
         uses: docker/build-push-action@v6
@@ -54,7 +65,7 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache,mode=max
           context: schema
-          file: schema/Dockerfile.test
+          file: schema/docker/Dockerfile.test
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest

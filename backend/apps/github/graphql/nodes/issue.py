@@ -13,7 +13,7 @@ class IssueNode(BaseNode):
             "author",
             "comments_count",
             "created_at",
-            "number",
             "state",
             "title",
+            "url",
         )

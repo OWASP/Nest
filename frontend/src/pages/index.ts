@@ -11,19 +11,22 @@ import FeedbackPage from './Feedback'
 import Home from './Home'
 import ProjectDetailsPage from './ProjectDetails'
 import ProjectsPage from './Projects'
+import RepositoryDetailsPage from './RepositoryDetails'
+import SnapshotDetailsPage from './SnapshotDetails'
 import UserDetailsPage from './UserDetails'
 import UsersPage from './Users'
-
 export {
-  Home,
-  ProjectsPage,
-  CommitteesPage,
-  ChaptersPage,
-  ContributePage,
-  CommitteeDetailsPage,
   ChapterDetailsPage,
+  ChaptersPage,
+  CommitteeDetailsPage,
+  CommitteesPage,
+  ContributePage,
+  Home,
   ProjectDetailsPage,
-  UsersPage,
+  ProjectsPage,
+  RepositoryDetailsPage,
+  SnapshotDetailsPage,
   UserDetailsPage,
   FeedbackPage,
+  UsersPage,
 }

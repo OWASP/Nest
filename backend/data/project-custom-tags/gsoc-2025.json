@@ -1,0 +1,12 @@
+{
+  "projects": [
+    "www-project-bug-logging-tool",
+    "www-project-devsecops-maturity-model",
+    "www-project-integration-standards",
+    "www-project-juice-shop",
+    "www-project-nest",
+    "www-project-nettacker",
+    "www-project-pygoat"
+  ],
+  "tags": ["gsoc2025"]
+}

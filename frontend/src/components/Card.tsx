@@ -1,10 +1,11 @@
 import { HStack, Link } from '@chakra-ui/react'
-import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect } from 'react'
 import { CardProps } from 'types/card'
 import { desktopViewMinWidth } from 'utils/constants'
 import { Icons } from 'utils/data'
 import { TooltipRecipe } from 'utils/theme'
+import { getSocialIcon } from 'utils/urlIconMappings'
 import { cn } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import ActionButton from 'components/ActionButton'
@@ -42,16 +43,17 @@ const Card = ({
   }, [])
 
   return (
-    <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
-      <div className="flex w-full flex-col items-start gap-4 pt-2 sm:flex-row sm:items-center sm:gap-6 md:pt-0">
+    <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white px-4 pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
+      <div className="mt-2 flex w-full flex-col items-start gap-4 pt-2 sm:flex-col sm:gap-4 md:pt-0">
         <div className="flex items-center gap-3">
           {/* Display project level badge (if available) */}
           {level && (
             <Tooltip
-              id="level-tooltip"
-              content={`${level.level} project`}
-              openDelay={100}
               closeDelay={100}
+              content={`${level.level} project`}
+              id={`level-tooltip-${title}`}
+              openDelay={100}
+              positioning={{ placement: 'top' }}
               recipe={TooltipRecipe}
               showArrow
             >
@@ -78,24 +80,19 @@ const Card = ({
           </Link>
         </div>
         {/* Icons associated with the project */}
-        <div className="flex min-w-[30%] flex-grow flex-row items-center justify-end overflow-auto">
-          {icons &&
-            Object.keys(Icons).map((key, index) =>
+        {icons && Object.keys(Icons).some((key) => icons[key]) ? (
+          <div className="-ml-1.5 flex flex-grow">
+            {Object.keys(Icons).map((key, index) =>
               icons[key] ? (
                 <DisplayIcon
                   key={`${key}-${index}`}
                   item={key}
-                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))} // only pass in truthy meta data
-                  idx={
-                    Object.keys(icons).findIndex((e) => e === key) ===
-                    Object.keys(icons).filter((key) => icons[key]).length - 1
-                      ? -1
-                      : Object.keys(icons).findIndex((e) => e === key)
-                  }
+                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))}
                 />
               ) : null
             )}
-        </div>
+          </div>
+        ) : null}
       </div>
       {/* Link to project name if provided */}
       {projectName && (
@@ -105,7 +102,6 @@ const Card = ({
       )}
       {/* Render project summary using Markdown */}
       <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
-
       <div
         className={
           social && social.length > 0
@@ -119,6 +115,7 @@ const Card = ({
             <ContributorAvatar
               key={contributor.login || `contributor-${index}`}
               contributor={contributor}
+              uniqueKey={index.toString()}
             />
           ))}
         </div>
@@ -157,12 +154,11 @@ const Card = ({
                       alignItems="center"
                       gap={2}
                     >
-                      <FontAwesomeIcon icon={item.icon as FontAwesomeIconProps['icon']} />
+                      <FontAwesomeIcon icon={getSocialIcon(item.url)} className="h-5 w-5" />
                     </Link>
                   ))}
                 </HStack>
               )}
-
               {/* Action Button */}
               <div className="flex items-center">
                 <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>

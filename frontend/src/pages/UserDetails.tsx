@@ -1,52 +1,60 @@
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
+import { useQuery } from '@apollo/client'
+import { Link } from '@chakra-ui/react'
 import {
-  faBuildingUser,
   faCodeBranch,
-  faLocationDot,
   faUserPlus,
   faUser,
+  faFileCode,
+  faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import React, { useState, useEffect, useRef } from 'react'
+import { GET_USER_DATA } from 'api/queries/userQueries'
+import millify from 'millify'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { UserDetailsProps } from 'types/user'
+import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 'types/project'
+import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
-import { fetchHeatmapData, drawContributions, HeatmapData } from 'utils/helpers/githubHeatmap'
-import logger from 'utils/logger'
+import { fetchHeatmapData, drawContributions, type HeatmapData } from 'utils/helpers/githubHeatmap'
+import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
+import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
-  const [isLoading, setIsLoading] = useState(true)
+  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
+  const [pullRequests, setPullRequests] = useState<PullRequestsType[]>([])
   const [data, setData] = useState<HeatmapData | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
   const [privateContributor, setPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { hits } = await fetchAlgoliaData('users', userKey, 1, userKey)
-        if (hits.length === 0) {
-          setUser(null)
-        } else {
-          setUser(hits[0] as unknown as UserDetailsProps)
-        }
-      } catch (error) {
-        logger.error(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+    variables: { key: userKey },
+  })
 
-    fetchUserData()
-  }, [userKey])
+  useEffect(() => {
+    if (graphQLData) {
+      setUser(graphQLData?.user)
+      setPullRequests(graphQLData?.recentPullRequests)
+      setTopRepositories(graphQLData?.topContributedRepositories)
+      setIsLoading(false)
+    }
+    if (graphQLRequestError) {
+      toaster.create({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        type: 'error',
+      })
+      setIsLoading(false)
+    }
+  }, [graphQLData, graphQLRequestError, userKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,9 +77,88 @@ const UserDetailsPage: React.FC = () => {
     }
   }, [username, data])
 
+  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+    // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
+    let mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
+    if (mentionMatch && mentionMatch.length > 1) {
+      let username = mentionMatch[1]
+      let punctuation = mentionMatch[2] || ''
+      return (
+        <React.Fragment key={index}>
+          <Link
+            href={`https://github.com/${username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            @{username}
+          </Link>
+          {punctuation}
+          <span> </span>
+        </React.Fragment>
+      )
+    }
+    return <span key={index}>{word} </span>
+  })
+
+  const formattedIssues: ProjectIssuesType[] = useMemo(() => {
+    return (
+      user?.issues?.map((issue) => ({
+        commentsCount: issue.commentsCount,
+        createdAt: issue.createdAt,
+        title: issue.title,
+        author: {
+          login: user?.login || '',
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          name: user?.name || user?.login || '',
+        },
+        url: issue.url,
+      })) || []
+    )
+  }, [user])
+
+  const formattedPullRequest: ItemCardPullRequests[] = useMemo(() => {
+    return (
+      pullRequests?.map((pullRequest) => ({
+        createdAt: pullRequest.createdAt,
+        title: pullRequest.title,
+        author: {
+          login: user?.login || '',
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          name: user?.name || user?.login || '',
+        },
+        url: pullRequest.url,
+      })) || []
+    )
+  }, [pullRequests, user])
+
+  const formattedReleases: ProjectReleaseType[] = useMemo(() => {
+    return (
+      user?.releases?.map((release) => ({
+        isPreRelease: release.isPreRelease,
+        name: release.name,
+        publishedAt: release.publishedAt,
+        tagName: release.tagName,
+        author: {
+          login: user?.login || '',
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          name: user?.name || user?.login || '',
+        },
+        url: release.url,
+      })) || []
+    )
+  }, [user])
+
   if (isLoading)
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div
+        className="flex min-h-[60vh] items-center justify-center"
+        aria-live="polite"
+        aria-busy="true"
+      >
         <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
       </div>
     )
@@ -86,122 +173,118 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
-  return (
-    <div className="mt-24 min-h-screen w-full p-4">
-      <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-      <div className="mx-auto md:max-w-3xl">
-        <div className="overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-gray-800">
-          <div className="relative">
-            {privateContributor ? (
-              <div className="h-32 bg-owasp-blue"></div>
-            ) : imageLink ? (
-              <div className="bg-#10151c h-32">
-                <img src={imageLink} className="h-full w-full object-cover object-[54%_60%]" />
-              </div>
-            ) : (
-              <div className="bg-#10151c relative h-32 items-center justify-center">
-                <img
-                  src="/img/heatmapBackground.png"
-                  className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
-                />
-                <div className="heatmap-loader"></div>
-              </div>
-            )}
-            <div className="relative px-6">
-              <div className="flex flex-col items-start justify-between sm:flex-row sm:space-x-6">
-                <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-center sm:space-x-6 sm:space-y-0">
-                  <div className="-mt-24 flex-shrink-0">
-                    <img
-                      className="h-40 w-40 rounded-full border-4 border-white bg-white object-cover shadow-lg transition-colors dark:border-gray-800 dark:bg-gray-600/60"
-                      src={user.avatar_url}
-                      alt={user.name}
-                    />
-                  </div>
-                  <div className="mt-6 sm:mt-0 sm:pb-4">
-                    <h1 className="text-nowrap text-3xl font-bold text-gray-900 dark:text-white">
-                      {user.name}
-                    </h1>
-                    <a
-                      href={`https://www.github.com/${user.login}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-lg text-gray-700 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-300"
-                    >
-                      @{user.login}
-                    </a>
-                  </div>
-                </div>
-                <a
-                  href={user.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group mt-4 inline-flex flex-nowrap items-center space-x-2 text-nowrap rounded-full bg-gray-200 px-4 py-2 align-top text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-600/60 dark:text-white dark:hover:bg-gray-600 dark:hover:text-gray-200"
-                >
-                  <FontAwesomeIcon icon={faGithub} className="text-sm" />
-                  <span>Visit GitHub Profile</span>
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="px-6 py-6">
-            {user.bio && <p className="text-lg text-gray-700 dark:text-gray-300">{user.bio}</p>}
+  const userDetails = [
+    {
+      label: 'GitHub Profile',
+      value: (
+        <Link href={user.url || '#'} className="hover:underline dark:text-sky-600">
+          @{user.login}
+        </Link>
+      ),
+    },
+    { label: 'Joined', value: formatDate(user.createdAt) },
+    { label: 'Email', value: user.email || 'Not provided' },
+    { label: 'Company', value: user.company || 'Not provided' },
+    { label: 'Location', value: user.location || 'Not provided' },
+  ]
 
-            <div className="mt-4 space-y-3">
-              {user.company && (
-                <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                  <FontAwesomeIcon icon={faBuildingUser} className="text-sm" />
-                  <span>{user.company}</span>
-                </div>
-              )}
-              {user.location && (
-                <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                  <FontAwesomeIcon icon={faLocationDot} className="text-sm" />
-                  <span>{user.location}</span>
-                </div>
-              )}
+  const userStats = [
+    {
+      icon: faUser,
+      value: `${user.followersCount ? millify(user.followersCount, { precision: 1 }) : 'No'}
+        ${pluralize(user.followersCount, 'Follower')}`,
+    },
+    {
+      icon: faUserPlus,
+      value: `${user.followingCount ? millify(user.followingCount, { precision: 1 }) : 'No'}
+        ${pluralize(user.followingCount, 'Following')}`,
+    },
+    {
+      icon: faCodeBranch,
+      value: `${user.publicRepositoriesCount ? millify(user.publicRepositoriesCount, { precision: 1 }) : 'No'}
+        ${pluralize(user.publicRepositoriesCount, 'Repository', 'Repositories')}`,
+    },
+    {
+      icon: faFileCode,
+      value: `${user.issuesCount ? millify(user.issuesCount, { precision: 1 }) : 'No'}
+        ${pluralize(user.issuesCount, 'Issue')}`,
+    },
+    {
+      icon: faBookmark,
+      value: `${user.releasesCount ? millify(user.releasesCount, { precision: 1 }) : 'No'}
+        ${pluralize(user.releasesCount, 'Release')}`,
+    },
+  ]
 
-              {user.email && (
-                <a
-                  href={`mailto:${user.email}`}
-                  className="flex w-fit items-center space-x-2 text-gray-600 decoration-dotted hover:underline hover:underline-offset-2 dark:text-gray-400"
-                >
-                  <FontAwesomeIcon icon={faEnvelope} className="text-sm" />
-                  <span>{user.email}</span>
-                </a>
-              )}
+  const Heatmap = () => (
+    <div className="flex flex-col gap-4">
+      <div className="overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
+        <div className="relative">
+          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+          {privateContributor ? (
+            <div className="h-40 rounded-lg bg-owasp-blue"></div>
+          ) : imageLink ? (
+            <div className="h-40 bg-[#10151c]">
+              <img
+                src={imageLink || '/placeholder.svg'}
+                className="h-full w-full object-cover object-[54%_60%]"
+                alt="Contribution Heatmap"
+              />
             </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 bg-gray-200 p-6 dark:bg-gray-900 sm:grid-cols-3">
-            {[
-              { icon: faUser, label: 'Followers', value: user.followers_count },
-              { icon: faUserPlus, label: 'Following', value: user.following_count },
-              {
-                icon: faCodeBranch,
-                label: 'Repositories',
-                value: user.public_repositories_count,
-              },
-            ].map(({ icon: Icon, label, value }) => (
-              <div
-                key={label}
-                className="flex flex-col items-center rounded-2xl bg-white p-6 shadow transition-transform hover:scale-105 dark:bg-gray-800"
-              >
-                <FontAwesomeIcon
-                  icon={Icon}
-                  className="mb-2 h-8 w-8 text-blue-600 dark:text-blue-400"
-                />
-                <span className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                  {value}
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            Joined {formatDate(user.created_at)}
-          </div>
+          ) : (
+            <div className="relative h-40 items-center justify-center bg-[#10151c]">
+              <img
+                src="/img/heatmapBackground.png"
+                className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                alt="Heatmap Background"
+              />
+              <div className="heatmap-loader"></div>
+            </div>
+          )}
         </div>
       </div>
     </div>
+  )
+
+  const UserSummary = () => (
+    <div className="mt-4 flex items-center">
+      <img
+        className="mr-4 h-16 w-16 rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+        src={user.avatarUrl || '/placeholder.svg'}
+        alt={user.name || user.login || 'User Avatar'}
+      />
+      <div>
+        <Link
+          href={user.url || '#'}
+          className="text-xl font-bold hover:underline dark:text-sky-600"
+        >
+          @{user.login}
+        </Link>
+        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+      </div>
+    </div>
+  )
+
+  return (
+    <MetadataManager
+      pageTitle={user?.name || user?.login}
+      description={user?.bio}
+      url={user.url || '#'}
+    >
+      <DetailsCard
+        showAvatar={false}
+        title={user.name || user.login || 'User'}
+        heatmap={<Heatmap />}
+        details={userDetails}
+        pullRequests={formattedPullRequest}
+        stats={userStats}
+        type="user"
+        recentIssues={formattedIssues}
+        recentReleases={formattedReleases}
+        repositories={topRepositories}
+        userSummary={<UserSummary />}
+      />
+    </MetadataManager>
   )
 }
 

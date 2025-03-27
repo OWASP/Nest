@@ -44,36 +44,42 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          cache: poetry
+          cache: 'poetry'
           cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Run npm format
+      - name: Run pnpm format
         working-directory: frontend
-        run: npm run format
+        run: pnpm run format
 
-      - name: Run npm lint check
+      - name: Run pnpm lint check
         working-directory: frontend
-        run: npm run lint:check
+        run: pnpm run lint:check
 
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check` and use `git add` to address it.' && exit 1)
+          Run `make check-all` and use `git add` to address it.' && exit 1)
 
   code-ql:
     name: CodeQL
@@ -96,23 +102,29 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
       - name: Set up Node
         if: matrix.language == 'javascript-typescript'
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies for frontend
         if: matrix.language == 'javascript-typescript'
         working-directory: frontend
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:${{ matrix.language }}'
+          category: /language:${{ matrix.language }}
 
   spellcheck:
     name: Run spell check
@@ -123,7 +135,7 @@ jobs:
 
       - name: Run cspell
         run: |
-          make spellcheck
+          make check-spelling
 
   run-backend-tests:
     name: Run backend tests
@@ -142,17 +154,17 @@ jobs:
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           context: backend
-          file: backend/Dockerfile.test
+          file: backend/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
       - name: Run backend tests
         run: |
-          docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest poetry run pytest
+          docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest
 
-  run-frontend-tests:
-    name: Run frontend tests
+  run-frontend-unit-tests:
+    name: Run frontend unit tests
     needs:
       - pre-commit
     runs-on: ubuntu-latest
@@ -163,19 +175,45 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build frontend test image
+      - name: Build frontend unit-testing image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:cache
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           context: frontend
-          file: frontend/Dockerfile.test
+          file: frontend/docker/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
 
-      - name: Run frontend tests
+      - name: Run frontend unit tests
         run: |
-          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend:latest npm run test
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest pnpm run test:unit
+
+  run-frontend-e2e-tests:
+    name: Run frontend e2e tests
+    needs:
+      - pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build frontend end-to-end testing image
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
+          context: frontend
+          file: frontend/docker/Dockerfile.e2e.test
+          load: true
+          platforms: linux/amd64
+          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
+
+      - name: Run frontend end-to-end tests
+        run: |
+          docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
 
   build-docker-staging-images:
     name: Build Docker Staging Images
@@ -186,7 +224,8 @@ jobs:
     needs:
       - code-ql
       - run-backend-tests
-      - run-frontend-tests
+      - run-frontend-e2e-tests
+      - run-frontend-unit-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -207,41 +246,40 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
           context: backend
-          file: backend/Dockerfile.staging
+          file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_ALGOLIA_APP_ID=${{ secrets.VITE_ALGOLIA_APP_ID }}" > frontend/.env.staging
-          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.VITE_ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.staging
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env.staging
-          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env.staging
-          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.staging
-          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env.staging
-          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.staging
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env
+          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.staging
+          file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
-  deploy-nest-staging:
+  deploy-staging-nest:
     name: Deploy Nest Staging
     env:
-      ANSIBLE_HOST_KEY_CHECKING: False
-      STAGING_HOST_IP_ADDRESS: '${{ secrets.STAGING_HOST_IP_ADDRESS }}'
-      STAGING_SSH_PRIVATE_KEY_PATH: '${{ vars.STAGING_SSH_PRIVATE_KEY_PATH }}'
+      ANSIBLE_HOST_KEY_CHECKING: false
+      NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
+      NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -256,14 +294,14 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.STAGING_SSH_PRIVATE_KEY_PATH }}
+          echo "${{ secrets.NEST_SSH_PRIVATE_KEY }}" > ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
 
       - name: Prepare secrets
         run: |
           # Backend
-          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" > .env.backend
-          echo "DJANGO_ALGOLIA_APPLICATION_REGION=${{ secrets.DJANGO_ALGOLIA_APPLICATION_REGION }}" >> .env.backend
+          touch .env.backend
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" >> .env.backend
           echo "DJANGO_ALGOLIA_WRITE_API_KEY=${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}" >> .env.backend
           echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env.backend
           echo "DJANGO_AWS_ACCESS_KEY_ID=${{ secrets.DJANGO_AWS_ACCESS_KEY_ID }}" >> .env.backend
@@ -284,13 +322,41 @@ jobs:
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
 
           # Database
-          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" > .env.db
+          touch .env.db
+          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
 
       - name: Run Nest deploy
         working-directory: .github/ansible
-        run: ansible-playbook -i inventory.yaml staging/deploy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+
+  deploy-staging-nest-proxy:
+    name: Deploy Staging Nest Proxy
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: false
+      PROXY_HOST_IP_ADDRESS: ${{ secrets.PROXY_HOST_IP_ADDRESS }}
+      PROXY_SSH_PRIVATE_KEY_PATH: ${{ vars.PROXY_SSH_PRIVATE_KEY_PATH }}
+    environment: staging
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
+    needs:
+      - deploy-staging-nest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "${{ secrets.PROXY_SSH_PRIVATE_KEY }}" > ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+
+      - name: Run proxy deploy
+        working-directory: .github/ansible
+        run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
   build-docker-production-images:
     name: Build Docker Production Images
@@ -301,7 +367,8 @@ jobs:
     needs:
       - code-ql
       - run-backend-tests
-      - run-frontend-tests
+      - run-frontend-e2e-tests
+      - run-frontend-unit-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -322,41 +389,41 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
           context: backend
-          file: backend/Dockerfile.production
+          file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}" > frontend/.env.production
-          echo "VITE_ALGOLIA_SEARCH_API_KEY=${{ secrets.ALGOLIA_SEARCH_API_KEY }}" >> frontend/.env.production
-          echo "VITE_API_URL=https://nest.owasp.org/api/v1" >> frontend/.env.production
-          echo "VITE_ENVIRONMENT=production" >> frontend/.env.production
-          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env.staging
-          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env.production
-          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> frontend/.env.production
+          touch frontend/.env
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
+          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:cache,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
+          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
           context: frontend
-          file: frontend/Dockerfile.production
+          file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
-  deploy-nest-production:
-    name: Deploy Nest Production
+  deploy-production-nest:
+    name: Deploy Nest to Production
     env:
-      ANSIBLE_HOST_KEY_CHECKING: False
-      PRODUCTION_HOST_IP_ADDRESS: '${{ secrets.PRODUCTION_HOST_IP_ADDRESS }}'
-      PRODUCTION_SSH_PRIVATE_KEY_PATH: '~/.ssh/nest_production_private_key'
+      ANSIBLE_HOST_KEY_CHECKING: false
+      NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
+      NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
     environment: production
     if: |
       github.event_name == 'release' &&
@@ -371,9 +438,66 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}" > ${{ env.PRODUCTION_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.PRODUCTION_SSH_PRIVATE_KEY_PATH }}
+          echo "${{ secrets.NEST_SSH_PRIVATE_KEY }}" > ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+
+      - name: Prepare secrets
+        run: |
+          # Backend
+          touch .env.backend
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}" >> .env.backend
+          echo "DJANGO_ALGOLIA_WRITE_API_KEY=${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}" >> .env.backend
+          echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env.backend
+          echo "DJANGO_AWS_ACCESS_KEY_ID=${{ secrets.DJANGO_AWS_ACCESS_KEY_ID }}" >> .env.backend
+          echo "DJANGO_AWS_SECRET_ACCESS_KEY=${{ secrets.DJANGO_AWS_SECRET_ACCESS_KEY }}" >> .env.backend
+          echo "DJANGO_CONFIGURATION=${{ secrets.DJANGO_CONFIGURATION }}" >> .env.backend
+          echo "DJANGO_DB_HOST=${{ secrets.DJANGO_DB_HOST }}" >> .env.backend
+          echo "DJANGO_DB_NAME=${{ secrets.DJANGO_DB_NAME }}" >> .env.backend
+          echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.backend
+          echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
+          echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
+          echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.backend
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
+          echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
+          echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
+          echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
+          echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+
+          # Database
+          touch .env.db
+          echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
+          echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
+          echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
 
       - name: Run Nest deploy
         working-directory: .github/ansible
-        run: ansible-playbook -i inventory.yaml production/deploy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+
+  deploy-production-nest-proxy:
+    name: Deploy Production Nest Proxy
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: false
+      PROXY_HOST_IP_ADDRESS: ${{ secrets.PROXY_HOST_IP_ADDRESS }}
+      PROXY_SSH_PRIVATE_KEY_PATH: ${{ vars.PROXY_SSH_PRIVATE_KEY_PATH }}
+    environment: production
+    if: |
+      github.event_name == 'release' &&
+      github.event.action == 'published'
+    needs:
+      - deploy-production-nest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "${{ secrets.PROXY_SSH_PRIVATE_KEY }}" > ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+          chmod 400 ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+
+      - name: Run proxy deploy
+        working-directory: .github/ansible
+        run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"

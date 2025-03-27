@@ -7,13 +7,13 @@ import github
 from django.core.management.base import BaseCommand
 from github.GithubException import BadCredentialsException
 
+from apps.core.utils.index import register_indexes, unregister_indexes
 from apps.github.common import sync_repository
 from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
-from apps.owasp.models.event import Event
 from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *_args, **options):
+        unregister_indexes()  # Disable automatic indexing
+
         try:
             gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
             gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
@@ -41,14 +43,11 @@ class Command(BaseCommand):
             )
             return
 
-        remote_owasp_repositories_count = gh_owasp_organization.public_repos
-
         owasp_organization = None
         owasp_user = None
 
         chapters = []
         committees = []
-        events = []
         projects = []
 
         offset = options["offset"]
@@ -68,10 +67,12 @@ class Command(BaseCommand):
         for idx, gh_repository in enumerate(gh_repositories[offset:]):
             prefix = f"{idx + offset + 1} of {gh_repositories_count}"
             entity_key = gh_repository.name.lower()
-            print(f"{prefix:<12} https://owasp.org/{entity_key}")
+            print(f"{prefix:<12} https://github.com/OWASP/{entity_key}")
 
             owasp_organization, repository = sync_repository(
-                gh_repository, organization=owasp_organization, user=owasp_user
+                gh_repository,
+                organization=owasp_organization,
+                user=owasp_user,
             )
 
             # OWASP chapters.
@@ -82,31 +83,29 @@ class Command(BaseCommand):
             elif entity_key.startswith("www-project-"):
                 projects.append(Project.update_data(gh_repository, repository, save=False))
 
-            # OWASP events.
-            elif entity_key.startswith("www-event-"):
-                events.append(Event.update_data(gh_repository, repository, save=False))
-
             # OWASP committees.
             elif entity_key.startswith("www-committee-"):
                 committees.append(Committee.update_data(gh_repository, repository, save=False))
 
         Chapter.bulk_save(chapters)
         Committee.bulk_save(committees)
-        Event.bulk_save(events)
         Project.bulk_save(projects)
 
-        # Check repository counts.
-        local_owasp_repositories_count = Repository.objects.filter(
-            is_owasp_repository=True
-        ).count()
-        result = (
-            "==" if remote_owasp_repositories_count == local_owasp_repositories_count else "!="
-        )
-        print(
-            "\n"
-            f"OWASP GitHub repositories count {result} synced repositories count: "
-            f"{remote_owasp_repositories_count} {result} {local_owasp_repositories_count}"
-        )
+        if repository is None:
+            # Check repository counts.
+            local_owasp_repositories_count = Repository.objects.filter(
+                is_owasp_repository=True,
+            ).count()
+            remote_owasp_repositories_count = gh_owasp_organization.public_repos
+            has_same_repositories_count = (
+                local_owasp_repositories_count == remote_owasp_repositories_count
+            )
+            result = "==" if has_same_repositories_count else "!="
+            print(
+                "\n"
+                f"OWASP GitHub repositories count {result} synced repositories count: "
+                f"{remote_owasp_repositories_count} {result} {local_owasp_repositories_count}"
+            )
 
         gh.close()
 
@@ -114,3 +113,5 @@ class Command(BaseCommand):
         for project in Project.objects.all():
             if project.owasp_repository:
                 project.repositories.add(project.owasp_repository)
+
+        register_indexes()  # Enable automatic indexing

@@ -1,21 +1,39 @@
 import L from 'leaflet'
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
+import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
-const ChapterMap = ({ geoLocData, style }) => {
+const ChapterMap = ({
+  geoLocData,
+  showLocal,
+  style,
+}: {
+  geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
+  showLocal: boolean
+  style: React.CSSProperties
+}) => {
   const mapRef = useRef<L.Map | null>(null)
+  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
 
-  //for reference: https://leafletjs.com/reference.html#map-example
+  const chapters = useMemo(() => {
+    return geoLocData.map((chapter) => ({
+      lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
+      lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
+      key: chapter.key,
+      name: chapter.name,
+    }))
+  }, [geoLocData])
+
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
-        worldCopyJump: false, // Prevents the map from wrapping around the world
+        worldCopyJump: false,
         maxBounds: [
-          [-90, -180], // Southwest corner of the map bounds (latitude, longitude)
-          [90, 180], // Northeast corner of the map bounds (latitude, longitude)
+          [-90, -180],
+          [90, 180],
         ],
         maxBoundsViscosity: 1.0,
       }).setView([20, 0], 2)
@@ -27,7 +45,6 @@ const ChapterMap = ({ geoLocData, style }) => {
     }
 
     const map = mapRef.current
-
     // Remove previous markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
@@ -35,42 +52,48 @@ const ChapterMap = ({ geoLocData, style }) => {
       }
     })
 
+    // Create a new marker cluster group
     const markerClusterGroup = L.markerClusterGroup()
     const bounds: [number, number][] = []
-    geoLocData.forEach((chapter) => {
-      if (chapter._geoloc) {
-        const markerIcon = new L.Icon({
-          iconAnchor: [12, 41], // Anchor point
-          iconRetinaUrl: '/img/marker-icon-2x.png',
-          iconSize: [25, 41], // Default size for Leaflet markers
-          iconUrl: '/img/marker-icon.png',
-          popupAnchor: [1, -34], // Popup position relative to marker
-          shadowSize: [41, 41], // Shadow size
-          shadowUrl: '/img/marker-shadow.png',
-        })
-        const marker = L.marker([chapter._geoloc.lat, chapter._geoloc.lng], { icon: markerIcon })
-        const popup = L.popup()
-        const popupContent = document.createElement('div')
-        popupContent.className = 'popup-content'
-        popupContent.textContent = chapter.name
-        popupContent.addEventListener('click', () => {
-          window.location.href = `/chapters/${chapter.key}`
-        })
-        popup.setContent(popupContent)
-        marker.bindPopup(popup)
-        markerClusterGroup.addLayer(marker)
-        bounds.push([chapter._geoloc.lat, chapter._geoloc.lng])
-      }
+    markerClusterRef.current = markerClusterGroup
+    chapters.forEach((chapter) => {
+      const markerIcon = new L.Icon({
+        iconAnchor: [12, 41],
+        iconRetinaUrl: '/img/marker-icon-2x.png',
+        iconSize: [25, 41],
+        iconUrl: '/img/marker-icon.png',
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        shadowUrl: '/img/marker-shadow.png',
+      })
+      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
+      const popup = L.popup()
+      const popupContent = document.createElement('div')
+      popupContent.className = 'popup-content'
+      popupContent.textContent = chapter.name
+      popupContent.addEventListener('click', () => {
+        window.location.href = `/chapters/${chapter.key}`
+      })
+      popup.setContent(popupContent)
+      marker.bindPopup(popup)
+      markerClusterGroup.addLayer(marker)
+      bounds.push([chapter.lat, chapter.lng])
     })
 
     map.addLayer(markerClusterGroup)
 
-    if (bounds.length > 0) {
-      map.fitBounds(bounds as L.LatLngBoundsExpression, { maxZoom: 10 })
+    if (showLocal && chapters.length > 0) {
+      const maxNearestChapters = 5
+      const localChapters = chapters.slice(0, maxNearestChapters - 1)
+      const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
+      const maxZoom = 7
+      const nearestChapter = chapters[0]
+      map.setView([nearestChapter.lat, nearestChapter.lng], maxZoom)
+      map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
-  }, [geoLocData])
+  }, [chapters, showLocal])
 
-  return <div id="chapter-map" className="rounded-2xl" style={style} />
+  return <div id="chapter-map" style={style} />
 }
 
 export default ChapterMap

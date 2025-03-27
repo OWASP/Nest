@@ -1,12 +1,15 @@
 """GitHub app common module."""
 
 import logging
+from datetime import timedelta as td
 
+from django.utils import timezone
 from github.GithubException import UnknownObjectException
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
 from apps.github.models.organization import Organization
+from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -45,54 +48,79 @@ def sync_repository(gh_repository, organization=None, user=None):
         user=user,
     )
 
-    # GitHub repository issues.
-    if (
-        not repository.is_archived
-        and repository.track_issues
-        and repository.project
-        and repository.project.track_issues
-    ):
-        # Sync open issues for the first run.
-        kwargs = {
-            "direction": "asc",
-            "sort": "created",
-            "state": "open",
-        }
-        latest_issue = Issue.objects.filter(repository=repository).order_by("-updated_at").first()
-        if latest_issue:
-            # Sync open/closed issues for subsequent runs.
-            kwargs.update(
-                {
-                    "since": latest_issue.updated_at,
-                    "state": "all",
-                }
-            )
-        for gh_issue in gh_repository.get_issues(**kwargs):
-            # Skip pull requests.
-            if gh_issue.pull_request:
-                continue
+    if not repository.is_archived:
+        # GitHub repository issues.
+        project_track_issues = repository.project.track_issues if repository.project else True
+        month_ago = timezone.now() - td(days=30)
 
-            author = (
-                User.update_data(gh_issue.user)
-                if gh_issue.user and gh_issue.user.type != "Bot"
-                else None
+        if repository.track_issues and project_track_issues:
+            kwargs = {
+                "direction": "desc",
+                "sort": "updated",
+                "state": "all",
+            }
+            until = (
+                latest_updated_issue.updated_at
+                if (latest_updated_issue := repository.latest_updated_issue)
+                else month_ago
             )
-            issue = Issue.update_data(gh_issue, author=author, repository=repository)
+            for gh_issue in gh_repository.get_issues(**kwargs):
+                if gh_issue.pull_request:  # Skip pull requests.
+                    continue
+
+                if gh_issue.updated_at < until:
+                    break
+
+                author = User.update_data(gh_issue.user)
+                issue = Issue.update_data(gh_issue, author=author, repository=repository)
+
+                # Assignees.
+                issue.assignees.clear()
+                for gh_issue_assignee in gh_issue.assignees:
+                    issue.assignees.add(User.update_data(gh_issue_assignee))
+
+                # Labels.
+                issue.labels.clear()
+                for gh_issue_label in gh_issue.labels:
+                    try:
+                        issue.labels.add(Label.update_data(gh_issue_label))
+                    except UnknownObjectException:
+                        logger.info("Couldn't get GitHub issue label %s", issue.url)
+        else:
+            logger.info("Skipping issues sync for %s", repository.name)
+
+        # GitHub repository pull requests.
+        kwargs = {
+            "direction": "desc",
+            "sort": "updated",
+            "state": "all",
+        }
+        until = (
+            latest_updated_pull_request.updated_at
+            if (latest_updated_pull_request := repository.latest_updated_pull_request)
+            else month_ago
+        )
+        for gh_pull_request in gh_repository.get_pulls(**kwargs):
+            if gh_pull_request.updated_at < until:
+                break
+
+            author = User.update_data(gh_pull_request.user)
+            pull_request = PullRequest.update_data(
+                gh_pull_request, author=author, repository=repository
+            )
 
             # Assignees.
-            issue.assignees.clear()
-            for gh_issue_assignee in gh_issue.assignees:
-                issue.assignees.add(User.update_data(gh_issue_assignee))
+            pull_request.assignees.clear()
+            for gh_pull_request_assignee in gh_pull_request.assignees:
+                pull_request.assignees.add(User.update_data(gh_pull_request_assignee))
 
             # Labels.
-            issue.labels.clear()
-            for gh_issue_label in gh_issue.labels:
+            pull_request.labels.clear()
+            for gh_pull_request_label in gh_pull_request.labels:
                 try:
-                    issue.labels.add(Label.update_data(gh_issue_label))
+                    pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
-                    logger.info("Couldn't get GitHub issue label %s", issue.url)
-    else:
-        logger.info("Skipping issues sync for %s", repository.name)
+                    logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
 
     # GitHub repository releases.
     releases = []
@@ -107,26 +135,20 @@ def sync_repository(gh_repository, organization=None, user=None):
             if release_node_id in existing_release_node_ids:
                 break
 
-            author = (
-                User.update_data(gh_release.author)
-                if gh_release.author and gh_release.author.type != "Bot"
-                else None
-            )
+            author = User.update_data(gh_release.author)
             releases.append(Release.update_data(gh_release, author=author, repository=repository))
     Release.bulk_save(releases)
 
     # GitHub repository contributors.
-    repository_contributors = []
-    for gh_contributor in gh_repository.get_contributors():
-        user = (
-            User.update_data(gh_contributor)
-            if gh_contributor and gh_contributor.type != "Bot"
-            else None
-        )
-        if user:
-            repository_contributors.append(
-                RepositoryContributor.update_data(gh_contributor, repository=repository, user=user)
+    RepositoryContributor.bulk_save(
+        [
+            RepositoryContributor.update_data(
+                gh_contributor,
+                repository=repository,
+                user=User.update_data(gh_contributor),
             )
-    RepositoryContributor.bulk_save(repository_contributors)
+            for gh_contributor in gh_repository.get_contributors()
+        ]
+    )
 
     return organization, repository

@@ -1,7 +1,5 @@
 """GitHub issue mixins."""
 
-from apps.github.constants import GITHUB_GHOST_USER_LOGIN
-
 
 class IssueIndexMixin:
     """Issue index mixin."""
@@ -10,30 +8,24 @@ class IssueIndexMixin:
     def is_indexable(self):
         """Issues to index."""
         return (
-            self.state == self.State.OPEN
+            self.id
+            and self.state == self.State.OPEN
             and not self.is_locked
             and self.repository.is_indexable
             and self.repository.track_issues
+            and self.project
             and self.project.track_issues
         )
 
     @property
     def idx_author_login(self):
         """Return author login for indexing."""
-        return (
-            self.author.login
-            if self.author and self.author.login and self.author.login != GITHUB_GHOST_USER_LOGIN
-            else ""
-        )
+        return self.author.login if self.author else ""
 
     @property
     def idx_author_name(self):
         """Return author name for indexing."""
-        return (
-            self.author.name
-            if self.author and self.author.login != GITHUB_GHOST_USER_LOGIN
-            else ""
-        )
+        return self.author.name if self.author else ""
 
     @property
     def idx_comments_count(self):

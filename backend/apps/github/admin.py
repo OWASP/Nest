@@ -1,4 +1,4 @@
-"""Repository app admin."""
+"""GitHub app admin."""
 
 from django.contrib import admin
 from django.utils.safestring import mark_safe
@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
 from apps.github.models.organization import Organization
+from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -14,6 +15,38 @@ from apps.github.models.user import User
 
 class LabelAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
+
+
+class PullRequestAdmin(admin.ModelAdmin):
+    autocomplete_fields = (
+        "assignees",
+        "author",
+        "labels",
+        "repository",
+    )
+    list_display = (
+        "repository",
+        "title",
+        "state",
+        "custom_field_github_url",
+        "created_at",
+        "updated_at",
+    )
+    list_filter = (
+        "state",
+        "merged_at",
+    )
+    search_fields = (
+        "author__login",
+        "repository__name",
+        "title",
+    )
+
+    def custom_field_github_url(self, obj):
+        """Pull Request GitHub URL."""
+        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
+
+    custom_field_github_url.short_description = "GitHub 🔗"
 
 
 class IssueAdmin(admin.ModelAdmin):
@@ -117,6 +150,7 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Label, LabelAdmin)
 admin.site.register(Organization, OrganizationAdmin)
+admin.site.register(PullRequest, PullRequestAdmin)
 admin.site.register(Release, ReleaseAdmin)
 admin.site.register(Repository, RepositoryAdmin)
 admin.site.register(RepositoryContributor, RepositoryContributorAdmin)

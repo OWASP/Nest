@@ -5,13 +5,14 @@ import { Skeleton, SkeletonCircle, SkeletonText } from 'components/ui/Skeleton'
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({
   showLevel = true,
-  showIcons = 4,
+  showIcons = true,
   showProjectName = true,
   showSummary = true,
   showLink = true,
   showContributors = true,
   showSocial = true,
   showActionButton = true,
+  numIcons = 3,
 }) => {
   const NUM_CONTRIBUTORS = 8
 
@@ -27,16 +28,16 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
                 {showProjectName && <Skeleton className="h-8 w-[180px] sm:w-[250px]" />}
               </Flex>
             </Flex>
-
-            {showIcons && (
-              <Flex className="flex min-w-[30%] flex-grow flex-row items-center justify-end gap-2 overflow-auto">
-                {Array.from({ length: showIcons }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-16" />
-                ))}
-                <Skeleton />
-              </Flex>
-            )}
           </Flex>
+
+          {showIcons && (
+            <Flex className="flex min-w-[30%] flex-grow flex-row items-center justify-start gap-2 overflow-auto">
+              {Array.from({ length: numIcons }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-16" />
+              ))}
+              <Skeleton />
+            </Flex>
+          )}
 
           {/* Link Section */}
           {showLink && <SkeletonText className="w-[180px] md:w-[350px]" noOfLines={1} />}
@@ -48,7 +49,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
           <Flex className="items-center justify-between gap-4 pt-3">
             <div className="flex flex-col justify-start gap-2">
               {showContributors && (
-                <Flex className="items-center space-x-2">
+                <Flex className="mt-3 flex w-full flex-wrap items-center gap-2">
                   {[...Array(NUM_CONTRIBUTORS)].map((_, i) => (
                     <SkeletonCircle
                       key={i}

@@ -1,7 +1,8 @@
+import { Button } from '@chakra-ui/react'
 import * as Sentry from '@sentry/react'
-import { toast } from 'hooks/useToast'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toaster } from 'components/ui/toaster'
 
 interface ErrorDisplayProps {
   statusCode: number
@@ -35,12 +36,12 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, m
             {title}
           </h2>
           <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
-          <button
+          <Button
             onClick={() => navigate('/')}
             className="font-inter mt-8 h-12 w-40 rounded-lg bg-owasp-blue text-base font-medium text-white transition-colors hover:bg-blue-400"
           >
             Return To Home
-          </button>
+          </Button>
         </div>
       </div>
     </main>
@@ -72,8 +73,8 @@ export const handleAppError = (error: unknown) => {
   }
   const errorConfig = ERROR_CONFIGS[appError.statusCode === 404 ? '404' : '500']
 
-  toast({
-    variant: 'destructive',
+  toaster.create({
+    type: 'error',
     title: errorConfig.title,
     description: errorConfig.message || appError.message,
     duration: 5000,
