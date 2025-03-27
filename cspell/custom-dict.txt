@@ -80,10 +80,11 @@ Sivagangai
 slackbot
 SLF
 slideshare
+Sonarqube
 speakerdeck
+superfences
 tiktok
 Truncator
-superfences
 tsc
 Twitterbot
 usefixtures
