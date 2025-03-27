@@ -40,11 +40,10 @@ test.describe('Home Page', () => {
 
   test('should have recent posts', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
-    const postContainer = page.getByTestId('post-container').first()
-    await expect(postContainer.getByRole('link', { name: 'Post 1' })).toBeVisible()
-    await expect(postContainer.getByText('Author 1')).toBeVisible()
-    await expect(postContainer.getByText('Feb 23').first()).toBeVisible()
-    await postContainer.getByRole('link', { name: 'Post 1' }).click()
+    await expect(page.getByRole('link', { name: 'Post 1' })).toBeVisible()
+    await expect(page.getByText('Author 1')).toBeVisible()
+    await expect(page.getByText('Feb 23').first()).toBeVisible()
+    await page.getByRole('link', { name: 'Post 1' }).click()
   })
 
   test('should have top contributors', async ({ page }) => {
