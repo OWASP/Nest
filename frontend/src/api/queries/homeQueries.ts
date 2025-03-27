@@ -54,6 +54,16 @@ export const GET_MAIN_PAGE_DATA = gql`
       tagName
       url
     }
+    recentPullRequests(limit: 5) {
+      author {
+        avatarUrl
+        login
+        name
+      }
+      createdAt
+      title
+      url
+    }
     sponsors {
       imageUrl
       name

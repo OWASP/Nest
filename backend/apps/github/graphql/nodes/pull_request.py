@@ -16,6 +16,7 @@ class PullRequestNode(BaseNode):
         fields = (
             "created_at",
             "title",
+            "author",
         )
 
     def resolve_url(self, info):

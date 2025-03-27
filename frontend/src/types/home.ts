@@ -7,6 +7,7 @@ export type MainPageData = {
   recentIssues: ProjectIssuesType[]
   recentReleases: ProjectReleaseType[]
   upcomingEvents: EventType[]
+  recentPullRequests: PullRequestsType[]
   recentChapters: {
     createdAt: string
     key: string
@@ -44,4 +45,15 @@ export type SponsorType = {
   name: string
   sponsorType: string
   url: string
+}
+
+export type PullRequestsType = {
+  createdAt: string
+  title: string
+  url: string
+  author: {
+    login: string
+    avatarUrl: string
+    name: string
+  }
 }
