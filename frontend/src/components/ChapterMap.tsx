@@ -42,6 +42,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
         maxBounds: [[-90, -180], [90, 180]],
         maxBoundsViscosity: 1.0,
         preferCanvas: true,
+        attributionControl: false,
       }).setView([20, 0], 2);
     }
   }, []);
@@ -55,11 +56,11 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
     });
 
     const tileLayerUrl = isDarkMode
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      ? 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png'
+      : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png';
 
     L.tileLayer(tileLayerUrl, {
-      attribution: '&copy; OpenStreetMap contributors &copy; CartoDB Maps',
+      attribution: '',
     }).addTo(mapRef.current);
   }, [isDarkMode]);
 
@@ -68,7 +69,19 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
     const map = mapRef.current;
 
     if (!markerClusterRef.current) {
-      markerClusterRef.current = L.markerClusterGroup();
+      markerClusterRef.current = L.markerClusterGroup({
+        clusterPane: 'markers',
+        iconCreateFunction: (cluster) => {
+          const childCount = cluster.getChildCount();
+          const markerSize = childCount < 10 ? 'small' : childCount < 100 ? 'medium' : 'large';
+
+          return L.divIcon({
+            html: `<div><span>${childCount}</span></div>`,
+            className: `marker-cluster marker-cluster-${markerSize}`,
+            iconSize: L.point(40, 40)
+          });
+        }
+      });
     } else {
       markerClusterRef.current.clearLayers();
     }
@@ -77,41 +90,47 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
     const bounds: L.LatLngExpression[] = [];
 
     chapters.forEach((chapter) => {
-      const markerIcon = new L.Icon({
-        iconAnchor: [12, 41],
-        iconRetinaUrl: '/img/marker-icon-2x.png',
-        iconSize: [25, 41],
-        iconUrl: '/img/marker-icon.png',
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        shadowUrl: '/img/marker-shadow.png',
+      const markerIcon = L.divIcon({
+        className: 'custom-marker',
+        html: `<div class="marker-pin ${isDarkMode ? 'dark-mode' : 'light-mode'}"></div>`,
+        iconSize: [30, 42],
+        popupAnchor: [0, -20]
       });
 
       const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon });
 
-      const popupContent = document.createElement('div');
-      popupContent.className = 'leaflet-popup-content-wrapper';
-      popupContent.style.backgroundColor = isDarkMode ? '#2b2b2b' : '#ffffff';
-      popupContent.style.color = isDarkMode ? '#ffffff' : '#000000';
-      popupContent.style.border = 'none';
-      popupContent.style.padding = '10px 15px';
-      popupContent.style.borderRadius = '8px';
-      popupContent.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
-      popupContent.style.textAlign = 'center';
-      popupContent.style.fontSize = '14px';
-      popupContent.style.fontWeight = 'bold';
-
-      const chapterTitle = document.createElement('span');
-      chapterTitle.textContent = chapter.name;
-      chapterTitle.style.cursor = 'pointer';
-      chapterTitle.style.textDecoration = 'underline';
-      chapterTitle.addEventListener('click', () => {
-        window.location.href = `/chapters/${chapter.key}`;
+      // Create a label div that precisely matches the images
+      const labelDiv = L.divIcon({
+        className: `chapter-label ${isDarkMode ? 'dark-mode' : 'light-mode'}`,
+        html: `<div style="
+          position: absolute;
+          white-space: nowrap;
+          background-color: ${isDarkMode ? 'rgba(44, 44, 44, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
+          color: ${isDarkMode ? 'white' : 'black'};
+          font-size: 12px;
+          line-height: 16px;
+          padding: 2px 4px;
+          border-radius: 2px;
+          transform: translate(-50%, -120%);
+          pointer-events: none;
+          box-shadow: none;
+          border: none;
+          font-family: Arial, sans-serif;
+          text-align: center;
+        ">${chapter.name}</div>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
       });
 
-      popupContent.appendChild(chapterTitle);
-      marker.bindPopup(popupContent, { closeButton: false });
+      // Create a label marker that will always be visible
+      const labelMarker = L.marker([chapter.lat, chapter.lng], {
+        icon: labelDiv,
+        interactive: false,
+        zIndexOffset: 1000
+      });
+
       markerClusterGroup.addLayer(marker);
+      markerClusterGroup.addLayer(labelMarker);
       bounds.push([chapter.lat, chapter.lng]);
     });
 
@@ -133,16 +152,47 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
   }, [updateMarkers]);
 
   return (
-    <div
-      id="chapter-map"
-      style={{
-        ...style,
-        backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
-        padding: '10px',
-        borderRadius: '8px',
-        border: isDarkMode ? '1px solid #444' : '1px solid #ddd',
-      }}
-    />
+    <div>
+      <style>{`
+        .marker-pin {
+          width: 20px;
+          height: 20px;
+          border-radius: 50% 50% 50% 0;
+          background: #48c774; /* Changed to green */
+          position: absolute;
+          transform: rotate(-45deg);
+          left: 50%;
+          top: 50%;
+          margin: -10px 0 0 -10px;
+        }
+        .marker-pin.dark-mode {
+          background: #3ca753; /* Darker green for dark mode */
+        }
+        .chapter-label div {
+          transition: none !important;
+          outline: none !important;
+        }
+        .chapter-label.dark-mode div {
+          background-color: rgba(44, 44, 44, 0.8) !important;
+          color: white !important;
+        }
+        .chapter-label.light-mode div {
+          background-color: rgba(255, 255, 255, 0.8) !important;
+          color: black !important;
+        }
+      `}</style>
+      <div
+        id="chapter-map"
+        style={{
+          ...style,
+          height: '500px',
+          width: '100%',
+          backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
+          border: isDarkMode ? '1px solid #444' : '1px solid #ddd',
+          borderRadius: '8px',
+        }}
+      />
+    </div>
   );
 };
 
