@@ -49,7 +49,7 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
     >
       <Link href={`/community/users/${login}`} target="_blank" rel="noopener noreferrer">
         <img
-          className="h-[30px] w-[30px] rounded-full grayscale hover:grayscale-0"
+          className="h-[30px] w-[30px] rounded-full grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
           src={`${avatarUrl}${isAlgolia ? '&s=60' : ''}`}
           alt={`${displayName}'s avatar`}
         />
