@@ -6,7 +6,7 @@
 
 [![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue?style=for-the-badge)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue?style=for-the-badge) [![Project-Nest](https://img.shields.io/badge/OWASP-%23project--nest-8E44AD?logo=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
 
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&?label=Build&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml?query=branch%3Amain) [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml) [![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/project/information?id=OWASP_Nest)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&label=Build&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml?query=branch%3Amain) [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml) [![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/project/information?id=OWASP_Nest)
 
 ![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge) ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=for-the-badge&label=Last%20commit) ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors)
 
@@ -60,6 +60,3 @@ OWASP Nest was **originally created by Arkadii Yakovets** (Ark) to address chall
 Over time, OWASP Nest has expanded to address broader OWASP community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, along with NestBot, has become a popular entry point for various OWASP aspects, including projects, chapters, users, and aggregated contribution opportunities -- with even more features planned. OWASP Nest's success is also the result of many valuable [contributions](https://github.com/OWASP/Nest/graphs/contributors) from the broader [OWASP Nest community](https://owasp.slack.com/archives/project-nest), whose efforts have helped shape and improve the project in countless ways.
 
 **No other OWASP projects' code was used in OWASP Nest's development.** While explicit attribution (other than per MIT license) is not required, contributors and other OWASP project leaders are welcome to provide it at their discretion.
-
-
-[def]: https://img.shields.io/badge/OpenSSF-Best%20Practices-brightgreen?style=for-the-badge
