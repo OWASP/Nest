@@ -1,3 +1,4 @@
+import React from 'react';
 import L from 'leaflet';
 import { useEffect, useMemo, useRef, useCallback } from 'react';
 import 'leaflet/dist/leaflet.css';
