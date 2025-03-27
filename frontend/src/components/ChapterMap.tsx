@@ -60,7 +60,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
       : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png';
 
     L.tileLayer(tileLayerUrl, {
-      attribution: '',
+      attribution: '© <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(mapRef.current);
   }, [isDarkMode]);
 
@@ -99,7 +99,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
 
       const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon });
 
-      // Create a label div that precisely matches the images
       const labelDiv = L.divIcon({
         className: `chapter-label ${isDarkMode ? 'dark-mode' : 'light-mode'}`,
         html: `<div style="
@@ -122,7 +121,6 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
         iconAnchor: [0, 0]
       });
 
-      // Create a label marker that will always be visible
       const labelMarker = L.marker([chapter.lat, chapter.lng], {
         icon: labelDiv,
         interactive: false,
@@ -158,7 +156,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
           width: 20px;
           height: 20px;
           border-radius: 50% 50% 50% 0;
-          background: #48c774; /* Changed to green */
+          background: #48c774;
           position: absolute;
           transform: rotate(-45deg);
           left: 50%;
@@ -166,7 +164,7 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
           margin: -10px 0 0 -10px;
         }
         .marker-pin.dark-mode {
-          background: #3ca753; /* Darker green for dark mode */
+          background: #3ca753;
         }
         .chapter-label div {
           transition: none !important;
