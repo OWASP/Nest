@@ -10,10 +10,10 @@
 ![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge)
 
 [![Snyk Security](https://img.shields.io/badge/Snyk-Security-blueviolet?style=for-the-badge)](https://snyk.io/test/github/owasp/nest)
-[![SonarQube](https://img.shields.io/badge/SonarQube-Passing-brightgreen?style=for-the-badge)](https://sonarcloud.io/dashboard?id=owasp_nest)
+[![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/project/information?id=OWASP_Nest)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml)
 
-[![OpenSSF](https://www.bestpractices.dev/projects/10174/badge?&style=for-the-badge)](https://www.bestpractices.dev/projects/10174)
+[![OpenSSF](https://img.shields.io/badge/OpenSSF-84%25-yellow?style=for-the-badge)](https://www.bestpractices.dev/projects/10174)
 
 ![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)
 ![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)
