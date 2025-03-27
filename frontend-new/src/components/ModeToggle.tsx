@@ -1,53 +1,40 @@
-'use client'
-import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
+import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import { Tooltip } from '@heroui/tooltip'
 import { useTheme } from 'next-themes'
-import { cn } from 'utils/utility'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'components/ui/tooltip'
-
-export function ModeToggle({ className }: { className?: string }) {
+import { useState, useEffect } from 'react'
+export default function ModeToggle() {
+  const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
-  const isDark = theme === 'dark'
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark')
+  const darkModeHandler = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
+  if (!mounted) return null
+
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <label className="relative inline-flex cursor-pointer items-center">
-              <input
-                type="checkbox"
-                className="peer sr-only"
-                checked={!isDark}
-                onChange={toggleTheme}
-                aria-label={isDark ? 'Enable light mode' : 'Enable dark mode'}
-              />
-              <button
-                onClick={toggleTheme}
-                className="relative h-10 w-10 transform rounded-full bg-[#87a1bc] transition-all duration-200 hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
-                aria-label={isDark ? 'Enable light mode' : 'Enable dark mode'}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <FontAwesomeIcon
-                    icon={isDark ? faSun : faMoon}
-                    className="h-5 w-5 transform text-gray-900 transition-all duration-300 hover:rotate-12 dark:text-gray-100"
-                    fixedWidth
-                  />
-                </div>
-              </button>
-            </label>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">
-            {isDark ? 'Enable light mode' : 'Enable dark mode'}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+    <div className="flex items-center">
+      <Tooltip showArrow content={theme === 'dark' ? 'Enable light mode' : 'Enable dark mode'}>
+        <Button
+          onPress={darkModeHandler}
+          className="relative h-10 w-10 transform rounded-full bg-[#87a1bc] transition-all duration-200 hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
+          isIconOnly={true}
+          aria-label={theme === 'dark' ? 'Enable light mode' : 'Enable dark mode'}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <FontAwesomeIcon
+              icon={theme === 'dark' ? faSun : faMoon}
+              className="h-5 w-5 transform text-gray-900 transition-all duration-300 hover:rotate-12 dark:text-gray-100"
+              fixedWidth
+            />
+          </div>
+        </Button>
+      </Tooltip>
     </div>
   )
 }
-
-export default ModeToggle

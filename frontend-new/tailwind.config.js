@@ -1,7 +1,9 @@
 /** @type {import('tailwindcss').Config} */
+import { heroui } from "@heroui/react";
 module.exports = {
     content: [
         "./src/**/*.{js,ts,jsx,tsx,mdx}",
+        "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}"
     ],
     theme: {
         extend: {
@@ -65,7 +67,7 @@ module.exports = {
             scroll: 'scroll 0.5s linear infinite',
         },
     },
-    darkMode: ['class'],
-    plugins: [import('tailwindcss-animate')],
+    darkMode: "class",
+    plugins: [heroui(), import('tailwindcss-animate')],
 }
 

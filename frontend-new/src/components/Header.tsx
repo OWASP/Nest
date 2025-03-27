@@ -5,15 +5,15 @@ import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
 import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
-import { ModeToggle } from './ModeToggle'
+import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
-import { Button } from './ui/button'
 
 export default function Header() {
   const pathname = usePathname()
@@ -26,15 +26,15 @@ export default function Header() {
       }
     }
 
-    const handleOutsideClick = (event) => {
+    const handleOutsideClick = (event: Event) => {
       const navbar = document.getElementById('navbar-sticky')
       const sidebar = document.querySelector('.fixed.inset-y-0')
       if (
         mobileMenuOpen &&
         navbar &&
-        !navbar.contains(event.target) &&
+        !navbar.contains(event.target as Node) &&
         sidebar &&
-        !sidebar.contains(event.target)
+        !sidebar.contains(event.target as Node)
       ) {
         setMobileMenuOpen(false)
       }
@@ -115,7 +115,7 @@ export default function Header() {
           <ModeToggle />
           <div className="md:hidden">
             <Button
-              onClick={toggleMobileMenu}
+              onPress={toggleMobileMenu}
               className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-none"
             >
               <span className="sr-only">Open main menu</span>
