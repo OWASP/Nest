@@ -72,7 +72,14 @@ const DetailsCard = ({
             type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
-                <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
+                <InfoBlock
+                  key={index}
+                  className="pb-1"
+                  icon={stat.icon}
+                  value={stat.value}
+                  unit={stat.unit}
+                  pluralizedName={stat.pluralizedName}
+                />
               ))}
             </SecondaryCard>
           )}

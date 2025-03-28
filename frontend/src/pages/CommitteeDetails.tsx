@@ -75,11 +75,11 @@ export default function CommitteeDetailsPage() {
   ]
 
   const committeeStats = [
-    { icon: faUsers, value: `${committee?.contributorsCount || 'No'} Contributors` },
-    { icon: faCodeFork, value: `${committee?.forksCount || 'No'} Forks` },
-    { icon: faStar, value: `${committee?.starsCount || 'No'} Stars` },
-    { icon: faCode, value: `${committee?.repositoriesCount || 'No'} Repositories` },
-    { icon: faExclamationCircle, value: `${committee?.issuesCount || 'No'} Issues` },
+    { icon: faUsers, value: committee.contributorsCount, unit: 'Contributor' },
+    { icon: faCodeFork, value: committee.forksCount, unit: 'Fork' },
+    { icon: faStar, value: committee.starsCount, unit: 'Star' },
+    { icon: faCode, value: committee.repositoriesCount, unit: 'Repository' },
+    { icon: faExclamationCircle, value: committee.issuesCount, unit: 'Issue' },
   ]
 
   return (
