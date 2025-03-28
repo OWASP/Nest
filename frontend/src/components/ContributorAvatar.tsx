@@ -59,5 +59,4 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
 })
 
 ContributorAvatar.displayName = 'ContributorAvatar'
-
 export default ContributorAvatar

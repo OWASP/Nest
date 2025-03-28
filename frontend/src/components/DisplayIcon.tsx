@@ -70,4 +70,5 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
       </div>
     </Tooltip>
   ) : null
+
 }
