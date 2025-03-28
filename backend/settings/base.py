@@ -44,6 +44,7 @@ class Base(Configuration):
     LOCAL_APPS = (
         "apps.common",
         "apps.core",
+        "apps.feedback",
         "apps.github",
         "apps.owasp",
         "apps.slack",
@@ -120,6 +121,21 @@ class Base(Configuration):
         "API_KEY": ALGOLIA_WRITE_API_KEY,
         "APPLICATION_ID": ALGOLIA_APPLICATION_ID,
         "INDEX_PREFIX": ENVIRONMENT.lower(),
+    }
+
+    # AWS S3 Configuration
+    AWS_ACCESS_KEY_ID = values.SecretValue(environ_name="AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = values.SecretValue(environ_name="AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = values.SecretValue(environ_name="AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = values.SecretValue(environ_name="AWS_S3_REGION_NAME")
+    FEEDBACK_SHEET_KEY = values.SecretValue(environ_name="FEEDBACK_SHEET_KEY")
+
+    AWS = {
+        "ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
+        "SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
+        "STORAGE_BUCKET_NAME": AWS_STORAGE_BUCKET_NAME,
+        "S3_REGION_NAME": AWS_S3_REGION_NAME,
+        "FEEDBACK_SHEET_KEY": FEEDBACK_SHEET_KEY,
     }
 
     CACHES = {

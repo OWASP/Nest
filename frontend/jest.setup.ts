@@ -8,10 +8,12 @@ dotenv.config()
 
 global.React = React
 global.TextEncoder = TextEncoder
-
-if (!global.structuredClone) {
-  global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
+global.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
 }
+global.structuredClone = (val) => (val !== undefined ? JSON.parse(JSON.stringify(val)) : val)
 
 beforeAll(() => {
   if (typeof window !== 'undefined') {

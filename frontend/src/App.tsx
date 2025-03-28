@@ -10,7 +10,7 @@ import {
   RepositoryDetailsPage,
   SnapshotDetailsPage,
   UserDetailsPage,
-  UsersPage,
+  FeedbackPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
@@ -20,6 +20,7 @@ import Footer from 'components/Footer'
 import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
 import { Toaster } from 'components/ui/toaster'
+import UsersPage from 'pages/Users'
 
 function App() {
   const location = useLocation()
@@ -45,6 +46,7 @@ function App() {
         <Route path="/community/snapshots/:id" element={<SnapshotDetailsPage />}></Route>
         <Route path="/community/users" element={<UsersPage />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
+        <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />

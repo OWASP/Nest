@@ -3,6 +3,9 @@ import { screen, waitFor } from '@testing-library/react'
 import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
+global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
+
+jest.mock('api/fetchAlgoliaData')
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

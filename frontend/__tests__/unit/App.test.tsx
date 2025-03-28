@@ -18,6 +18,7 @@ jest.mock('pages', () => ({
   SnapshotDetailsPage: () => <div data-testid="snapshot-details-page">SnapshotDetails Page</div>,
   UserDetailsPage: () => <div data-testid="user-details-page">UserDetails Page</div>,
   UsersPage: () => <div data-testid="users-page">Users Page</div>,
+  FeedbackPage: () => <div data-testid="feedback-page">Feedback Page</div>,
 }))
 
 beforeAll(() => {
