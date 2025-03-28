@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Pagination from './Pagination'
 import SearchBar from './Search'
+import SkeletonBase from './SkeletonsBase'
 interface SearchPageLayoutProps {
   isLoaded: boolean
   totalPages: number
@@ -49,7 +50,7 @@ const SearchPageLayout = ({
         />
       </div>
       {!isLoaded ? (
-        <div>Loading</div>
+        <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
       ) : (
         <>
           <div>

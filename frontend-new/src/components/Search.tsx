@@ -89,7 +89,7 @@ const SearchBar: React.FC<SearchProps> = ({
             )}
           </>
         ) : (
-          <Skeleton className="h-16 rounded-lg" />
+          <Skeleton className="h-12 rounded-lg" />
         )}
       </div>
     </div>

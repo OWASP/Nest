@@ -61,7 +61,7 @@ export function useSearchPage<T>({
       }
     }
   }, [searchParams, order, searchQuery, sortBy, indexName])
-
+  // Sync URL with state changes
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
@@ -77,7 +77,7 @@ export function useSearchPage<T>({
 
     router.push(`?${params.toString()}`)
   }, [searchQuery, order, currentPage, sortBy, router])
-  // Update URL when sta
+  // Update URL when state changes
   useEffect(() => {
     setIsLoaded(false)
 
