@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends && \
 
 WORKDIR /home/owasp
 
-COPY package.json pnpm-lock.yaml ./
+COPY --chmod=644 --chown=node:node package.json pnpm-lock.yaml ./
 RUN pnpm config set store-dir /home/owasp/.local/share/pnpm/store/v10 --global && \
     pnpm install
 
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends && \
     chown -R node:node /home/owasp && \
     npm install -g pnpm
 
-COPY --from=builder --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
+COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
 
 EXPOSE 3000
 

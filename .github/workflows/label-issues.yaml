@@ -1,9 +1,13 @@
-name: "Auto Label Issues"
+name: Auto Label Issues
+
 on:
   issues:
     types:
       - edited
       - opened
+
+permissions:
+  issues: write
 
 jobs:
   label:
