@@ -78,7 +78,12 @@ export default function CommitteeDetailsPage() {
     { icon: faUsers, value: committee.contributorsCount, unit: 'Contributor' },
     { icon: faCodeFork, value: committee.forksCount, unit: 'Fork' },
     { icon: faStar, value: committee.starsCount, unit: 'Star' },
-    { icon: faCode, value: committee.repositoriesCount, unit: 'Repository' },
+    {
+      icon: faCode,
+      value: committee.repositoriesCount,
+      unit: 'Repository',
+      pluralizedName: 'Repositories',
+    },
     { icon: faExclamationCircle, value: committee.issuesCount, unit: 'Issue' },
   ]
 
