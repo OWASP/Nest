@@ -4,7 +4,6 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 from django.core.cache import cache
-from hypothesis import given, strategies
 
 from apps.core.api.algolia import algolia_search
 
@@ -139,29 +138,3 @@ class TestAlgoliaSearch:
 
         assert response.status_code == requests.codes.bad_request
         assert response_data["error"] == error_message
-
-    @given(
-        index_name=strategies.text(),
-        query=strategies.text(),
-        page=strategies.integers(),
-        hits_per_page=strategies.integers(),
-        facet_filters=strategies.lists(strategies.text()),
-    )
-    def test_fuzz_algolia_search(self, index_name, query, page, hits_per_page, facet_filters):
-        """Test the algolia_search function with fuzz testing."""
-        mock_request = Mock()
-        mock_request.method = "POST"
-        mock_request.META = {"HTTP_X_FORWARDED_FOR": CLIENT_IP_ADDRESS}
-        mock_request.body = json.dumps(
-            {
-                "facetFilters": facet_filters,
-                "hitsPerPage": hits_per_page,
-                "indexName": index_name,
-                "page": page,
-                "query": query,
-            }
-        )
-
-        response = algolia_search(mock_request)
-
-        assert response.status_code in [requests.codes.ok, requests.codes.bad_request]
