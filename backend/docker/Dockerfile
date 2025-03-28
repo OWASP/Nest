@@ -16,7 +16,7 @@ WORKDIR /home/owasp
 
 USER owasp
 
-COPY --chown=owasp:owasp poetry.lock pyproject.toml ./
+COPY --chmod=644 --chown=owasp:owasp poetry.lock pyproject.toml ./
 RUN poetry install --no-root --without dev --without test
 
 COPY apps apps
@@ -41,7 +41,7 @@ ENV PATH="/home/owasp/.venv/bin:$PATH" \
 
 WORKDIR /home/owasp
 
-COPY --from=builder --chown=owasp:owasp /home/owasp /home/owasp
+COPY --from=builder --chmod=755 --chown=owasp:owasp /home/owasp /home/owasp
 RUN chmod +x /home/owasp/entrypoint.sh
 
 USER owasp

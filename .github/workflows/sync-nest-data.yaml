@@ -8,6 +8,9 @@ on:
 env:
   FORCE_COLOR: 1
 
+permissions:
+  contents: read
+
 jobs:
   update-data:
     name: Run data sync
