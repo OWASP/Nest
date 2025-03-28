@@ -1,6 +1,5 @@
-import React from 'react';
 import L from 'leaflet';
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -14,13 +13,23 @@ interface Chapter {
 }
 
 interface ChapterMapProps {
-  geoLocData: { _geoloc?: { lat: number; lng: number }; geoLocation?: { lat: number; lng: number }; key: string; name: string }[];
-  showLocal: boolean;
+  geoLocData: {
+    _geoloc?: { lat: number; lng: number };
+    geoLocation?: { lat: number; lng: number };
+    key: string;
+    name: string
+  }[];
+  showLocal?: boolean;
   style?: React.CSSProperties;
   isDarkMode: boolean;
 }
 
-const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, isDarkMode }) => {
+const ChapterMap: React.FC<ChapterMapProps> = ({
+  geoLocData,
+  showLocal = false,
+  style,
+  isDarkMode
+}) => {
   const mapRef = useRef<L.Map | null>(null);
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
 
@@ -38,29 +47,35 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
+        center: [20.5937, 78.9629],
+        zoom: 4,
+        minZoom: 3,
+        maxZoom: 18,
         worldCopyJump: false,
-        maxBounds: [[-90, -180], [90, 180]],
-        maxBoundsViscosity: 1.0,
-        preferCanvas: true,
         attributionControl: false,
-      }).setView([20, 0], 2);
+      });
     }
   }, []);
 
   useEffect(() => {
     if (!mapRef.current) return;
+
+    // Remove existing tile layers
     mapRef.current.eachLayer((layer) => {
       if (layer instanceof L.TileLayer) {
         mapRef.current?.removeLayer(layer);
       }
     });
 
+    // Select tile layer based on mode with fallback
     const tileLayerUrl = isDarkMode
-      ? 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png'
-      : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png';
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
     L.tileLayer(tileLayerUrl, {
-      attribution: '© <a href="https://carto.com/attributions">CARTO</a>',
+      attribution: '© OpenStreetMap contributors, © CARTO',
+      maxZoom: 19,
+      subdomains: 'abcd'
     }).addTo(mapRef.current);
   }, [isDarkMode]);
 
@@ -68,80 +83,67 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
     if (!mapRef.current) return;
     const map = mapRef.current;
 
-    if (!markerClusterRef.current) {
-      markerClusterRef.current = L.markerClusterGroup({
-        clusterPane: 'markers',
-        iconCreateFunction: (cluster) => {
-          const childCount = cluster.getChildCount();
-          const markerSize = childCount < 10 ? 'small' : childCount < 100 ? 'medium' : 'large';
-
-          return L.divIcon({
-            html: `<div><span>${childCount}</span></div>`,
-            className: `marker-cluster marker-cluster-${markerSize}`,
-            iconSize: L.point(40, 40)
-          });
-        }
-      });
-    } else {
-      markerClusterRef.current.clearLayers();
+    // Clear existing marker cluster
+    if (markerClusterRef.current) {
+      map.removeLayer(markerClusterRef.current);
     }
 
-    const markerClusterGroup = markerClusterRef.current;
-    const bounds: L.LatLngExpression[] = [];
+    // Create new marker cluster group
+    markerClusterRef.current = L.markerClusterGroup({
+      iconCreateFunction: (cluster) => {
+        const childCount = cluster.getChildCount();
+        return L.divIcon({
+          html: `<div class="custom-cluster-icon ${isDarkMode ? 'dark-mode' : 'light-mode'}">
+                   <span>${childCount}</span>
+                 </div>`,
+          className: 'custom-cluster-marker',
+          iconSize: L.point(40, 40)
+        });
+      }
+    });
 
     chapters.forEach((chapter) => {
+      // Create custom marker
       const markerIcon = L.divIcon({
-        className: 'custom-marker',
-        html: `<div class="marker-pin ${isDarkMode ? 'dark-mode' : 'light-mode'}"></div>`,
+        className: `custom-marker ${isDarkMode ? 'dark-mode' : 'light-mode'}`,
+        html: `<div class="marker-pin"></div>`,
         iconSize: [30, 42],
         popupAnchor: [0, -20]
       });
 
-      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon });
-
-      const labelDiv = L.divIcon({
-        className: `chapter-label ${isDarkMode ? 'dark-mode' : 'light-mode'}`,
-        html: `<div style="
-          position: absolute;
-          white-space: nowrap;
-          background-color: ${isDarkMode ? 'rgba(44, 44, 44, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
-          color: ${isDarkMode ? 'white' : 'black'};
-          font-size: 12px;
-          line-height: 16px;
-          padding: 2px 4px;
-          border-radius: 2px;
-          transform: translate(-50%, -120%);
-          pointer-events: none;
-          box-shadow: none;
-          border: none;
-          font-family: Arial, sans-serif;
-          text-align: center;
-        ">${chapter.name}</div>`,
-        iconSize: [0, 0],
-        iconAnchor: [0, 0]
+      const marker = L.marker([chapter.lat, chapter.lng], {
+        icon: markerIcon
       });
 
-      const labelMarker = L.marker([chapter.lat, chapter.lng], {
-        icon: labelDiv,
-        interactive: false,
-        zIndexOffset: 1000
+      // Add popup
+      marker.bindPopup(`
+        <div class="owasp-popup ${isDarkMode ? 'dark-mode' : 'light-mode'}">
+          <div class="owasp-popup-content">
+            <span class="owasp-chapter-name">${chapter.name}</span>
+            <span class="owasp-chapter-tag">OWASP Chapter</span>
+          </div>
+        </div>
+      `, {
+        className: 'custom-popup-container',
+        minWidth: 200,
+        maxWidth: 300,
+        closeButton: false
       });
 
-      markerClusterGroup.addLayer(marker);
-      markerClusterGroup.addLayer(labelMarker);
-      bounds.push([chapter.lat, chapter.lng]);
+      // Add to cluster group
+      markerClusterRef.current.addLayer(marker);
     });
 
-    map.addLayer(markerClusterGroup);
+    // Add cluster group to map
+    map.addLayer(markerClusterRef.current);
 
+    // Optional: fit bounds if showLocal is true
     if (showLocal && chapters.length > 0) {
-      const maxNearestChapters = 5;
-      const localChapters = chapters.slice(0, maxNearestChapters);
-      const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]));
-      const nearestChapter = chapters[0];
-
-      map.setView([nearestChapter.lat, nearestChapter.lng], 7);
-      map.fitBounds(localBounds, { maxZoom: 7 });
+      const bounds = L.latLngBounds(chapters.map(ch => [ch.lat, ch.lng]));
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 7
+      });
     }
   }, [chapters, showLocal, isDarkMode]);
 
@@ -152,7 +154,43 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
   return (
     <div>
       <style>{`
-        .marker-pin {
+        .custom-popup-container .leaflet-popup-content-wrapper {
+          background: transparent !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+        .custom-popup-container .leaflet-popup-content {
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .owasp-popup {
+          display: flex;
+          align-items: center;
+          padding: 10px;
+          border-radius: 6px;
+        }
+        .owasp-popup.dark-mode {
+          background-color: rgba(44, 44, 44, 0.9);
+          color: white;
+        }
+        .owasp-popup.light-mode {
+          background-color: rgba(255, 255, 255, 0.9);
+          color: black;
+        }
+        .owasp-popup-content {
+          display: flex;
+          flex-direction: column;
+        }
+        .owasp-chapter-name {
+          font-size: 16px;
+          font-weight: 500;
+        }
+        .owasp-chapter-tag {
+          font-size: 12px;
+          opacity: 0.7;
+        }
+
+        .custom-marker .marker-pin {
           width: 20px;
           height: 20px;
           border-radius: 50% 50% 50% 0;
@@ -162,21 +200,10 @@ const ChapterMap: React.FC<ChapterMapProps> = ({ geoLocData, showLocal, style, i
           left: 50%;
           top: 50%;
           margin: -10px 0 0 -10px;
+          box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
-        .marker-pin.dark-mode {
+        .custom-marker.dark-mode .marker-pin {
           background: #3ca753;
-        }
-        .chapter-label div {
-          transition: none !important;
-          outline: none !important;
-        }
-        .chapter-label.dark-mode div {
-          background-color: rgba(44, 44, 44, 0.8) !important;
-          color: white !important;
-        }
-        .chapter-label.light-mode div {
-          background-color: rgba(255, 255, 255, 0.8) !important;
-          color: black !important;
         }
       `}</style>
       <div
