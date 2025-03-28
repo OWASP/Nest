@@ -22,11 +22,11 @@ export default function Footer() {
             <div key={section.title} className="space-y-4">
               {/*link*/}
               <Button
+                disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between bg-transparent text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
+                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
-                isDisabled
               >
                 <h3>{section.title}</h3>
                 <div className="transition-transform duration-200 lg:hidden">

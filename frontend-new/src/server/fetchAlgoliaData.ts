@@ -1,6 +1,7 @@
 'use server'
 import { AlgoliaResponseType } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
+import { AppError } from 'wrappers/ErrorWrapper'
 import { removeIdxPrefix } from './utility'
 
 export const fetchAlgoliaData = async <T>(
@@ -50,6 +51,9 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    console.log(error)
+    if (error instanceof AppError) {
+      throw error
+    }
+    throw new AppError(500, 'Search service error')
   }
 }

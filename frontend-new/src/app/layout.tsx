@@ -19,6 +19,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'OWASP Nest',
   description: 'OWASP Nest',
+  icons: {
+    icon: 'https://owasp.org/www--site-theme/favicon.ico',
+    shortcut: 'https://owasp.org/www--site-theme/favicon.ico',
+    apple: 'https://owasp.org/www--site-theme/favicon.ico',
+  },
 }
 
 export default function RootLayout({
