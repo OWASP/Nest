@@ -9,6 +9,9 @@ env:
   DOCKERHUB_USERNAME: arkid15r
   FORCE_COLOR: 1
 
+permissions:
+  contents: read
+
 jobs:
   update-nest-test-images:
     name: Update Nest test images

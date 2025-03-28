@@ -16,7 +16,7 @@ ENV FORCE_COLOR=1 \
 WORKDIR /home/owasp
 USER owasp
 
-COPY poetry.lock pyproject.toml ./
+COPY --chmod=644 --chown=owasp:owasp poetry.lock pyproject.toml ./
 RUN poetry install --no-root
 
 COPY *.json ./
@@ -40,4 +40,4 @@ ENV FORCE_COLOR=1 \
 WORKDIR /home/owasp
 USER owasp
 
-COPY --from=builder /home/owasp /home/owasp
+COPY --from=builder --chmod=755 --chown=owasp:owasp /home/owasp /home/owasp
