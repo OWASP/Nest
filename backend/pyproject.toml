@@ -2,9 +2,8 @@
 name = "OWASP Nest"
 version = "0.1.0"
 description = "Your gateway to OWASP"
-authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
+authors = ["Arkadii Yakovets"]
 readme = "README.md"
-
 packages = [{ include = "apps" }]
 
 [tool.coverage.run]
@@ -64,7 +63,6 @@ format_css = true
 format_js = true
 indent = 4
 
-
 [tool.pytest.ini_options]
 DJANGO_CONFIGURATION = "Test"
 DJANGO_SETTINGS_MODULE = "settings.test"
@@ -92,28 +90,34 @@ line-length = 99
 [tool.ruff.lint]
 extend-select = ["I"]
 ignore = [
-    "ANN",
-    "ARG002",
-    "C901",
-    "COM812",
-    "DJ012",
-    "ERA001",
-    "FBT002",
-    "FIX002",
-    "PD",
-    "PERF203",
-    "PLC0414",
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "RUF012",
-    "SLF001",
-    "TD003",
+    "ANN",    # Annotations
+    "ARG002", # Unused method argument
+    "C901",   # Function too complex
+    "COM812", # Missing trailing comma
+    "DJ012",  # Django-related
+    "ERA001", # Commented-out code
+    "FBT002", # Boolean parameter in function definition
+    "FIX002", # Line contains TODO
+    "PD",     # Pandas-related
+    "PERF203",# Performance warning
+    "PLC0414",# Import shadowing
+    "PLR0912",# Too many branches
+    "PLR0913",# Too many arguments
+    "PLR0915",# Too many statements
+    "RUF012", # Mutable class attributes
+    "SLF001", # Private member access
+    "TD003",  # TODO requires description
+
+    # Docstring style conflicts
+    "D203",   # One blank line before class
+    "D211",   # No blank line before class
+    "D212",   # Multi-line summary first line
+    "D213",   # Multi-line summary second line
 ]
 select = ["ALL"]
 
-[tool.ruff.per-file-ignores]
-"**/__init__.py" = ["D104", "F401"]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["D104", "F401"]
 "**/admin.py" = ["D100", "D101", "D104"]
 "**/api/*.py" = ["D106"]
 "**/apps.py" = ["D100", "D101", "D104"]
@@ -126,6 +130,8 @@ select = ["ALL"]
 "**/models/*.py" = ["D106"]
 "**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
 
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
