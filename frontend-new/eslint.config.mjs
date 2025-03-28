@@ -96,7 +96,7 @@ const eslintConfig = [
         },
       ],
       'no-console': 'error',
-      'no-unused-vars': 'warn',
+      'no-unused-vars': 'off',
       'import/no-relative-parent-imports': 'error',
 
       ...jsxA11y.configs.recommended.rules,
