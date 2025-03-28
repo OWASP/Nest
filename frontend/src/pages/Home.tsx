@@ -287,7 +287,6 @@ export default function Home() {
               <div
                 key={post.title}
                 className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                data-testid="post-container"
               >
                 <h3 className="mb-1 text-lg font-semibold">
                   <a
