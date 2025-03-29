@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Snapshots } from 'types/snapshot'
 import { METADATA_CONFIG } from 'utils/metadata'
@@ -34,12 +34,10 @@ const SnapshotsPage: React.FC = () => {
   const navigate = useNavigate()
 
   const handleButtonClick = (snapshot: Snapshots) => {
-    console.log('snapshot', snapshot)
     navigate(`/community/snapshots/${snapshot.key}`)
   }
 
   const renderSnapshotCard = (snapshot: Snapshots) => {
-    console.log(snapshot)
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
