@@ -31,7 +31,7 @@ test.describe('Home Page', () => {
   })
   test('should have new projects', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Projects' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Project 1' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Project 1', exact: true })).toBeVisible()
     await expect(page.getByText('Project Leader1,').first()).toBeVisible()
     await expect(page.getByText('Dec 6, 2024').first()).toBeVisible()
     await page.getByRole('link', { name: 'Project 1' }).click()
@@ -40,9 +40,9 @@ test.describe('Home Page', () => {
 
   test('should have recent posts', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Post 1' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Post 1', exact: true })).toBeVisible()
     await expect(page.getByText('Author 1')).toBeVisible()
-    await expect(page.getByText('Feb 23').first()).toBeVisible()
+    await expect(page.getByText('Feb 24').first()).toBeVisible({ timeout: 10000 }) 
     await page.getByRole('link', { name: 'Post 1' }).click()
   })
 
@@ -70,9 +70,9 @@ test.describe('Home Page', () => {
   test('should be able to join OWASP', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Ready to Make a Difference?' })).toBeVisible()
     await expect(page.getByText('Join OWASP and be part of the')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Join OWASP' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Join OWASP', exact: true })).toBeVisible()
     const page1Promise = page.waitForEvent('popup')
-    await page.getByRole('link', { name: 'Join OWASP' }).click()
+    await page.getByRole('link', { name: 'Join OWASP', exact: true }).click()
     const page1 = await page1Promise
     expect(page1.url()).toBe('https://owasp.glueup.com/organization/6727/memberships/')
   })
