@@ -29,6 +29,8 @@ const Card = ({
   projectLink,
   social,
   tooltipLabel,
+  labels,
+  repository_languages,
 }: CardProps) => {
   const [isMobile, setIsMobile] = useState(isMobileInitial)
 
@@ -45,7 +47,7 @@ const Card = ({
   return (
     <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white px-4 pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
       <div className="mt-2 flex w-full flex-col items-start gap-4 pt-2 sm:flex-col sm:gap-4 md:pt-0">
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-center gap-3">
           {/* Display project level badge (if available) */}
           {level && (
             <Tooltip
@@ -67,18 +69,29 @@ const Card = ({
               </span>
             </Tooltip>
           )}
-          {/* Project title and link */}
-          <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
-            <h1
-              className="max-w-full break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl"
-              style={{
-                transition: 'color 0.3s ease',
-              }}
-            >
-              {title}
-            </h1>
-          </Link>
+
+          <div className="flex flex-wrap items-center">
+            <Link href={url} target="_blank" rel="noopener noreferrer" className="inline-flex">
+              <h1
+                className="break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl"
+                style={{
+                  transition: 'color 0.3s ease',
+                }}
+              >
+                {title}
+                {labels?.map((label, index) => (
+                  <span
+                    key={`label-${index}`}
+                    className="mb-3 ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </h1>
+            </Link>
+          </div>
         </div>
+
         {/* Icons associated with the project */}
         {icons && Object.keys(Icons).some((key) => icons[key]) ? (
           <div className="-ml-1.5 flex flex-grow">
@@ -94,14 +107,31 @@ const Card = ({
           </div>
         ) : null}
       </div>
+
       {/* Link to project name if provided */}
       {projectName && (
         <Link href={projectLink} rel="noopener noreferrer" className="mt-2 font-medium">
           {projectName}
         </Link>
       )}
+
       {/* Render project summary using Markdown */}
       <Markdown content={summary} className="py-2 pr-4 text-gray-600 dark:text-gray-300" />
+
+      {/* Repository Languages */}
+      {repository_languages && repository_languages.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1 pr-4">
+          {repository_languages.map((lang, index) => (
+            <span
+              key={`lang-${index}`}
+              className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+            >
+              {lang}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div
         className={
           social && social.length > 0
