@@ -9,25 +9,28 @@ env:
   DOCKERHUB_USERNAME: arkid15r
   FORCE_COLOR: 1
 
+permissions:
+  contents: read
+
 jobs:
   update-nest-test-images:
     name: Update Nest test images
     if: ${{ github.repository == 'OWASP/Nest' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@941183f0a080fa6be59a9e3d3f4108c19a528204
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Update backend test image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache,mode=max
@@ -38,7 +41,7 @@ jobs:
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
       - name: Update frontend unit test image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache,mode=max
@@ -49,7 +52,7 @@ jobs:
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
 
       - name: Update frontend end-to-end test image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache,mode=max
@@ -60,7 +63,7 @@ jobs:
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
 
       - name: Update schema test image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache,mode=max
