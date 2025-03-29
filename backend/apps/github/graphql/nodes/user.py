@@ -44,6 +44,7 @@ class UserNode(BaseNode):
     releases_count = graphene.Int()
     updated_at = graphene.Float()
     url = graphene.String()
+    contributions_count = graphene.Int()
 
     class Meta:
         model = User
@@ -59,6 +60,7 @@ class UserNode(BaseNode):
             "login",
             "name",
             "public_repositories_count",
+            "contributions_count",
         )
 
     def resolve_created_at(self, info):
@@ -88,3 +90,7 @@ class UserNode(BaseNode):
     def resolve_url(self, info):
         """Resolve URL."""
         return self.url
+
+    def resolve_contributions_count(self, info):
+        """Resolve contributions count."""
+        return self.idx_contributions_count

@@ -1,6 +1,7 @@
 """Github app user model."""
 
 from django.db import models
+from django.db.models import Sum
 
 from apps.common.models import TimestampedModel
 from apps.github.constants import GITHUB_GHOST_USER_LOGIN, OWASP_FOUNDATION_LOGIN
@@ -22,6 +23,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     is_bot = models.BooleanField(verbose_name="Is bot", default=False)
 
+    contributions_count = models.IntegerField(verbose_name="Contributions count", default=0)
+
     def __str__(self):
         """User human readable representation."""
         return f"{self.name or self.login}"
@@ -38,6 +41,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     def from_github(self, gh_user):
         """Update instance based on GitHub user data."""
+        from apps.github.models.repository_contributor import RepositoryContributor
+
         super().from_github(gh_user)
 
         field_mapping = {
@@ -53,6 +58,14 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
                 setattr(self, model_field, value)
 
         self.is_bot = gh_user.type == "Bot"
+
+        contributions_count = (
+            RepositoryContributor.objects.by_humans()
+            .filter(user=self)
+            .aggregate(total_contributions=Sum("contributions_count"))["total_contributions"]
+            or 0
+        )
+        self.contributions_count = contributions_count
 
     @staticmethod
     def get_non_indexable_logins():
