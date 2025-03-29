@@ -29,6 +29,12 @@ const mockSnapshots = [
     startAt: '2023-01-01T00:00:00Z',
     endAt: '2023-01-02T00:00:00Z',
   },
+  {
+    key: '2024-11',
+    title: 'Snapshot 2',
+    startAt: '2022-12-01T00:00:00Z',
+    endAt: '2022-12-31T23:59:59Z',
+  },
 ]
 
 describe('SnapshotsPage', () => {
@@ -53,7 +59,7 @@ describe('SnapshotsPage', () => {
 
     await waitFor(() => {
       const loadingSpinners = screen.getAllByAltText('Loading indicator')
-      expect(loadingSpinners.length).toBeGreaterThan(0)
+      expect(loadingSpinners.length).toBe(2)
     })
   })
 
@@ -62,6 +68,7 @@ describe('SnapshotsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Snapshot 1')).toBeInTheDocument()
+      expect(screen.getByText('Snapshot 2')).toBeInTheDocument()
     })
   })
 
@@ -101,16 +108,15 @@ describe('SnapshotsPage', () => {
     render(<SnapshotsPage />)
 
     // Wait for the "View Snapshot" button to appear
-    const viewSnapshotButton = await screen.findByRole('button', { name: /view snapshot/i })
+    const viewSnapshotButton = await screen.findAllByRole('button', { name: /view snapshot/i })
 
     // Click the button
     await act(async () => {
-      fireEvent.click(viewSnapshotButton)
+      fireEvent.click(viewSnapshotButton[0])
     })
 
     // Check if navigate was called with the correct argument
     await waitFor(() => {
-      expect(viewSnapshotButton).toBeInTheDocument()
       expect(navigateMock).toHaveBeenCalledTimes(1)
       expect(navigateMock).toHaveBeenCalledWith('/community/snapshots/2024-12')
     })
