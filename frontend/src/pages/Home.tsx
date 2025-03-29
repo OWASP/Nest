@@ -28,7 +28,7 @@ import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/ToggleContributors'
+import TopContributors from 'components/TopContributors'
 import { TruncatedText } from 'components/TruncatedText'
 import { toaster } from 'components/ui/toaster'
 
