@@ -11,6 +11,8 @@ import { toaster } from 'components/ui/toaster'
 const SnapshotsPage = () => {
   const [snapshots, setSnapshots] = useState<Snapshots[] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const navigate = useNavigate()
+
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
 
   useEffect(() => {
@@ -28,13 +30,11 @@ const SnapshotsPage = () => {
     }
   }, [graphQLData, graphQLRequestError])
 
-  const navigate = useNavigate()
-
-  const handleButtonClick = (snapshot: Snapshots) => {
-    navigate(`/community/snapshots/${snapshot.key}`)
-  }
-
   const renderSnapshotCard = (snapshot: Snapshots) => {
+    const handleButtonClick = (snapshot: Snapshots) => {
+      navigate(`/community/snapshots/${snapshot.key}`)
+    }
+    
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
