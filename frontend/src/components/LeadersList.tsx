@@ -10,6 +10,7 @@ import { LeadersListProps } from 'types/leaders'
  * @param {string} props.leaders - Comma-separated string of leader names
  * @returns {JSX.Element} A list of leader links
  */
+import { TruncatedText } from './TruncatedText'
 
 const LeadersList = ({ leaders }: LeadersListProps) => {
   if (!leaders || leaders.trim() === '') return <>Unknown</>
@@ -17,19 +18,20 @@ const LeadersList = ({ leaders }: LeadersListProps) => {
   const leadersArray = leaders.split(',').map((leader) => leader.trim())
 
   return (
-    <>
+    <span className="flex flex-wrap items-center gap-x-1">
       {leadersArray.map((leader, index) => (
-        <span key={`${leader}-${index}`}>
+        <span key={`${leader}-${index}`} className="flex items-center">
           <Link
             to={`/community/users?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}
+            className="hover:underline"
           >
-            {leader}
+            <TruncatedText text={leader} />
           </Link>
-          {index < leadersArray.length - 1 && ', '}
+          {index < leadersArray.length - 1 && <span className="ml-1">, </span>}
         </span>
       ))}
-    </>
+    </span>
   )
 }
 

@@ -23,6 +23,7 @@ import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
+import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
@@ -196,10 +197,11 @@ export default function Home() {
                       <span>{chapter.suggestedLocation}</span>
                     </div>
                   </div>
+
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
-                      <span>{chapter.leaders.join(', ')}</span>
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-300">
+                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <LeadersList leaders={String(chapter.leaders)} />
                     </div>
                   )}
                 </div>
@@ -228,10 +230,11 @@ export default function Home() {
                       <span>{capitalize(project.type)}</span>
                     </div>
                   </div>
+
                   {project.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
-                      <span>{project.leaders.join(', ')}</span>
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-300">
+                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <LeadersList leaders={String(project.leaders)} />
                     </div>
                   )}
                 </div>
