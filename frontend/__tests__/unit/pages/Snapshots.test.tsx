@@ -61,8 +61,7 @@ describe('SnapshotsPage', () => {
     render(<SnapshotsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Snapshot 1')).toBeInTheDocument()
-      // expect(screen.getByText('Snapshot 2')).toBeInTheDocument();
+      expect(screen.getByText('Snapshot 1')).toBeInTheDocument();
     })
   })
 
@@ -96,14 +95,6 @@ describe('SnapshotsPage', () => {
     })
   })
 
-  it('renders a specific snapshot title when data is fetched successfully', async () => {
-    render(<SnapshotsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Snapshot 1')).toBeInTheDocument()
-    })
-  })
-
   it('navigates to the correct URL when "View Snapshot" button is clicked', async () => {
     const navigateMock = jest.fn()
     ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
@@ -120,7 +111,7 @@ describe('SnapshotsPage', () => {
     // Check if navigate was called with the correct argument
     await waitFor(() => {
       expect(viewSnapshotButton).toBeInTheDocument()
-      expect(navigateMock).toHaveBeenCalledTimes(1) //
+      expect(navigateMock).toHaveBeenCalledTimes(1)
       expect(navigateMock).toHaveBeenCalledWith('/community/snapshots/2024-12')
     })
   })
