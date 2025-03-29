@@ -3,14 +3,13 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import { ProjectTypeAlgolia } from 'types/project'
 import { level } from 'utils/data'
-// import { METADATA_CONFIG } from 'utils/metadata'
-// import { sortOptionsProject } from 'utils/sortingOptions'
+import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
-// import MetadataManager from 'components/MetadataManager'
+// SEO
 import SearchPageLayout from 'components/SearchPageLayout'
-// import SortBy from 'components/SortBy'
+import SortBy from 'components/SortBy'
 const ProjectsPage = () => {
   const {
     items: projects,
@@ -69,6 +68,15 @@ const ProjectsPage = () => {
       onSearch={handleSearch}
       searchPlaceholder="Search for OWASP projects..."
       searchQuery={searchQuery}
+      sortChildren={
+        <SortBy
+          onOrderChange={handleOrderChange}
+          onSortChange={handleSortChange}
+          selectedOrder={order}
+          selectedSortOption={sortBy}
+          sortOptions={sortOptionsProject}
+        />
+      }
       totalPages={totalPages}
     >
       {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}

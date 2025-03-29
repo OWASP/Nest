@@ -9,10 +9,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'owasp.org'
-      }
+        hostname: 'owasp.org',
+      },
     ],
   },
+  devIndicators: false
 }
 
 export default nextConfig
