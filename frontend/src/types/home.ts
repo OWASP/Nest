@@ -48,12 +48,12 @@ export type SponsorType = {
 }
 
 export type PullRequestsType = {
+  author: {
+    avatarUrl: string
+    login: string
+    name: string
+  }
   createdAt: string
   title: string
   url: string
-  author: {
-    login: string
-    avatarUrl: string
-    name: string
-  }
 }

@@ -1,6 +1,7 @@
 """GraphQL queries for handling OWASP releases."""
 
 import graphene
+from django.db.models import OuterRef, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.release import ReleaseNode
@@ -31,18 +32,22 @@ class ReleaseQuery(BaseQuery):
             Queryset containing the filtered list of releases.
 
         """
-        query = Release.objects.filter(
+        queryset = Release.objects.filter(
             is_draft=False,
             is_pre_release=False,
             published_at__isnull=False,
         ).order_by("-published_at")
 
         if distinct:
-            query = query.distinct(
-                "author_id",
-                "published_at",
+            latest_release_per_author = (
+                queryset.filter(author_id=OuterRef("author_id"))
+                .order_by("-published_at")
+                .values("id")[:1]
+            )
+            queryset = queryset.filter(
+                id__in=Subquery(latest_release_per_author),
             ).order_by(
                 "-published_at",
             )
 
-        return query[:limit]
+        return queryset[:limit]

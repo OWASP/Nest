@@ -43,6 +43,16 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
     }
+    recentPullRequests(limit: 5, distinct: $distinct) {
+      author {
+        avatarUrl
+        login
+        name
+      }
+      createdAt
+      title
+      url
+    }
     recentReleases(limit: 5, distinct: $distinct) {
       author {
         avatarUrl
@@ -52,16 +62,6 @@ export const GET_MAIN_PAGE_DATA = gql`
       name
       publishedAt
       tagName
-      url
-    }
-    recentPullRequests(limit: 5) {
-      author {
-        avatarUrl
-        login
-        name
-      }
-      createdAt
-      title
       url
     }
     sponsors {

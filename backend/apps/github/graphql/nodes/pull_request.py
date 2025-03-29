@@ -14,9 +14,9 @@ class PullRequestNode(BaseNode):
     class Meta:
         model = PullRequest
         fields = (
+            "author",
             "created_at",
             "title",
-            "author",
         )
 
     def resolve_url(self, info):
