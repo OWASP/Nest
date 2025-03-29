@@ -1,19 +1,18 @@
 import { useQuery } from '@apollo/client'
+import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Snapshots } from 'types/snapshot'
+import { METADATA_CONFIG } from 'utils/metadata'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
-import { toaster } from 'components/ui/toaster'
-import { Snapshots } from 'types/snapshot'
-import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
-import { METADATA_CONFIG } from 'utils/metadata'
 import SnapshotCard from 'components/SnapshotCard'
+import { toaster } from 'components/ui/toaster'
 
 const SnapshotsPage: React.FC = () => {
   const [snapshots, setSnapshots] = useState<Snapshots[]>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const navigate = useNavigate()
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
 
@@ -32,15 +31,19 @@ const SnapshotsPage: React.FC = () => {
     }
   }, [graphQLData, graphQLRequestError])
 
+  const navigate = useNavigate()
+
   const handleButtonClick = (snapshot: Snapshots) => {
+    console.log('snapshot', snapshot)
     navigate(`/community/snapshots/${snapshot.key}`)
   }
 
-  const renderSnapshotCard = (snapshot: Snapshots) => {    
+  const renderSnapshotCard = (snapshot: Snapshots) => {
+    console.log(snapshot)
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-      onClick: () => handleButtonClick(snapshot),
+      onclick: () => handleButtonClick(snapshot),
     }
 
     return (
@@ -80,4 +83,4 @@ const SnapshotsPage: React.FC = () => {
   )
 }
 
-export default SnapshotsPage;
+export default SnapshotsPage
