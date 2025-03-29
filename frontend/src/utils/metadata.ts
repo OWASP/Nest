@@ -38,4 +38,10 @@ export const METADATA_CONFIG: MetadataConfig = {
     pageTitle: 'Contribute',
     type: 'website',
   },
+  snapshot: {
+    description: 'Snapshots of OWASP',
+    keywords: ['OWASP snapshot', 'contribute'],
+    pageTitle: 'Snapshots',
+    type: 'website',
+  },
 }
