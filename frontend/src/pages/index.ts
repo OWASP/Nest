@@ -12,7 +12,7 @@ import ProjectDetailsPage from './ProjectDetails'
 import ProjectsPage from './Projects'
 import RepositoryDetailsPage from './RepositoryDetails'
 import SnapshotDetailsPage from './SnapshotDetails'
-import Snapshots from './Snapshots'
+import SnapshotsPage from './Snapshots'
 import UserDetailsPage from './UserDetails'
 import UsersPage from './Users'
 export {
@@ -25,8 +25,8 @@ export {
   ProjectDetailsPage,
   ProjectsPage,
   RepositoryDetailsPage,
+  SnapshotsPage,
   SnapshotDetailsPage,
   UserDetailsPage,
   UsersPage,
-  Snapshots,
 }

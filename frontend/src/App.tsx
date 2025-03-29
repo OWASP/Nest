@@ -11,7 +11,7 @@ import {
   SnapshotDetailsPage,
   UserDetailsPage,
   UsersPage,
-  Snapshots,
+  SnapshotsPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
@@ -45,7 +45,7 @@ function App() {
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
         <Route path="/community/snapshots/:id" element={<SnapshotDetailsPage />}></Route>
         <Route path="/community/users" element={<UsersPage />}></Route>
-        <Route path="/community/snapshots" element={<Snapshots />}></Route>
+        <Route path="/community/snapshots" element={<SnapshotsPage />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>

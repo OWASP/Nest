@@ -15,6 +15,7 @@ jest.mock('pages', () => ({
   RepositoryDetailsPage: () => (
     <div data-testid="repository-details-page">RepositoryDetails Page</div>
   ),
+  SnapshotsPage: () => <div data-testid="snapshot-page">Snapshots Page</div>,
   SnapshotDetailsPage: () => <div data-testid="snapshot-details-page">SnapshotDetails Page</div>,
   UserDetailsPage: () => <div data-testid="user-details-page">UserDetails Page</div>,
   UsersPage: () => <div data-testid="users-page">Users Page</div>,

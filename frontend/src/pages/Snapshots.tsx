@@ -1,15 +1,17 @@
 import { useQuery } from '@apollo/client'
-import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Snapshots } from 'types/snapshot'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
-import SnapshotCard from 'components/SnapshotCard'
+import MetadataManager from 'components/MetadataManager'
 import { toaster } from 'components/ui/toaster'
+import { Snapshots } from 'types/snapshot'
+import { GET_COMMUNITY_SNAPSHOTS } from 'api/queries/snapshotQueries'
+import { METADATA_CONFIG } from 'utils/metadata'
+import SnapshotCard from 'components/SnapshotCard'
 
-const SnapshotsPage = () => {
-  const [snapshots, setSnapshots] = useState<Snapshots[] | null>(null)
+const SnapshotsPage: React.FC = () => {
+  const [snapshots, setSnapshots] = useState<Snapshots[]>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const navigate = useNavigate()
 
@@ -17,7 +19,7 @@ const SnapshotsPage = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setSnapshots(graphQLData.snapshots || [])
+      setSnapshots(graphQLData?.snapshots)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -30,15 +32,15 @@ const SnapshotsPage = () => {
     }
   }, [graphQLData, graphQLRequestError])
 
-  const renderSnapshotCard = (snapshot: Snapshots) => {
-    const handleButtonClick = (snapshot: Snapshots) => {
-      navigate(`/community/snapshots/${snapshot.key}`)
-    }
-    
+  const handleButtonClick = (snapshot: Snapshots) => {
+    navigate(`/community/snapshots/${snapshot.key}`)
+  }
+
+  const renderSnapshotCard = (snapshot: Snapshots) => {    
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-      onclick: () => handleButtonClick(snapshot),
+      onClick: () => handleButtonClick(snapshot),
     }
 
     return (
@@ -59,22 +61,23 @@ const SnapshotsPage = () => {
       </div>
     )
   }
-
   return (
-    <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
-      <div className="mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {!snapshots?.length ? (
-            <div className="col-span-full py-8 text-center">No Snapshots found</div>
-          ) : (
-            snapshots.map((snapshot: Snapshots) => (
-              <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
-            ))
-          )}
+    <MetadataManager {...METADATA_CONFIG.snapshot}>
+      <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+        <div className="mt-16 flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {!snapshots?.length ? (
+              <div className="col-span-full py-8 text-center">No Snapshots found</div>
+            ) : (
+              snapshots.map((snapshot: Snapshots) => (
+                <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
+              ))
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </MetadataManager>
   )
 }
 
-export default SnapshotsPage
+export default SnapshotsPage;
