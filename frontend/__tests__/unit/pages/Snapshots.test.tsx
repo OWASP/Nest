@@ -61,7 +61,7 @@ describe('SnapshotsPage', () => {
     render(<SnapshotsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Snapshot 1')).toBeInTheDocument();
+      expect(screen.getByText('Snapshot 1')).toBeInTheDocument()
     })
   })
 
