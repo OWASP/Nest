@@ -34,26 +34,23 @@ class RepositoryContributorQuery(BaseQuery):
             List of top repository contributors.
 
         """
-        # Perform the complex query with annotations and filtering
         queryset = (
             BaseRepositoryContributor.objects.by_humans()
             .to_community_repositories()
             .filter(repository__project__isnull=False)
             .annotate(
-                # Consolidated project details subquery
-                project_details=Subquery(
+                 project_details=Subquery(
                     Project.repositories.through.objects.filter(
                         repository=OuterRef("repository_id")
                     ).values("project__name", "project__key")[:1]
                 ),
-                # Composite index-friendly ranking
                 rank=Window(
                     expression=DenseRank(),
                     partition_by=[F("user__login"), F("repository")],
                     order_by=F("contributions_count").desc(),
                 ),
-            )
-            .filter(rank=1)  # Keep only the highest contribution per user per repository
+            ) 
+            .filter(rank=1) 
             .values(
                 "contributions_count",
                 "user__avatar_url",
@@ -65,8 +62,6 @@ class RepositoryContributorQuery(BaseQuery):
             )
             .order_by("-contributions_count")[:limit]
         )
-
-        # Create RepositoryContributorNode instances
         return [
             RepositoryContributorNode(
                 avatar_url=contributor["user__avatar_url"],
@@ -98,17 +93,13 @@ class RepositoryContributor(BaseRepositoryContributor):
 
     class Meta(BaseRepositoryContributor.Meta):
         """Meta options for RepositoryContributor model."""
-
-        # Extend existing indexes with new composite indexes
         indexes = [
             *BaseRepositoryContributor.Meta.indexes,
-            # Composite index for efficient ranking and filtering
             models.Index(
                 fields=["user", "repository", "contributions_count"],
                 name="user_repo_contributions_composite_idx",
             ),
-            # Additional supporting indexes
-            models.Index(
+             models.Index(
                 fields=["repository", "contributions_count"], name="repo_contributions_idx"
             ),
             models.Index(fields=["user", "contributions_count"], name="user_contributions_idx"),
