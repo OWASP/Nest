@@ -56,7 +56,13 @@ class PullRequest(GenericIssueModel):
     )
 
     def from_github(self, gh_pull_request, author=None, repository=None):
-        """Update instance based on GitHub pull request data."""
+        """Update the instance based on GitHub pull request data.
+
+        Args:
+            gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
+            author (User, optional): The author of the pull request. Defaults to None.
+            repository (Repository, optional): The repository instance. Defaults to None.
+        """
         field_mapping = {
             "body": "body",
             "closed_at": "closed_at",
@@ -93,7 +99,17 @@ class PullRequest(GenericIssueModel):
 
     @staticmethod
     def update_data(gh_pull_request, author=None, repository=None, save=True):
-        """Update Pull Request data."""
+        """Update pull request data.
+
+        Args:
+            gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
+            author (User, optional): The author of the pull request. Defaults to None.
+            repository (Repository, optional): The repository instance. Defaults to None.
+            save (bool, optional): Whether to save the instance. Defaults to True.
+
+        Returns:
+            PullRequest: The updated or created pull request instance.
+        """
         pull_request_node_id = PullRequest.get_node_id(gh_pull_request)
         try:
             pull_request = PullRequest.objects.get(node_id=pull_request_node_id)

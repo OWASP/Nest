@@ -14,7 +14,14 @@ COMMAND = "/contribute"
 
 
 def contribute_handler(ack, command, client):
-    """Slack /contribute command handler."""
+    """
+    Handle the Slack /contribute command.
+
+    Args:
+        ack (function): Acknowledge the Slack command request.
+        command (dict): The Slack command payload.
+        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    """
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
         return

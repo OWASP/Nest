@@ -12,7 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 def check_owasp_site_repository(key):
-    """Check OWASP site repository."""
+    """Check if the repository is an OWASP site repository.
+
+    Args:
+        key (str): The repository key.
+
+    Returns:
+        bool: True if the repository is an OWASP site repository, False otherwise.
+    """
     return key.startswith(
         (
             "www-chapter-",
@@ -24,7 +31,15 @@ def check_owasp_site_repository(key):
 
 
 def check_funding_policy_compliance(platform, target):
-    """Check OWASP funding policy compliance."""
+    """Check OWASP funding policy compliance.
+
+    Args:
+        platform (str): The funding platform (e.g., 'github', 'custom').
+        target (str): The funding target.
+
+    Returns:
+        bool: True if the funding policy is compliant, False otherwise.
+    """
     if not target:
         return True
 
@@ -39,7 +54,15 @@ def check_funding_policy_compliance(platform, target):
 
 
 def get_repository_file_content(url, timeout=30):
-    """Get repository file content."""
+    """Get the content of a file from a repository.
+
+    Args:
+        url (str): The URL of the file.
+        timeout (int, optional): The request timeout in seconds. Defaults to 30.
+
+    Returns:
+        str: The content of the file, or None if the request fails.
+    """
     try:
         return requests.get(url, timeout=timeout).text
     except RequestException as e:
@@ -47,13 +70,28 @@ def get_repository_file_content(url, timeout=30):
 
 
 def get_repository_path(url):
-    """Parse repository URL to owner and repository name."""
+    """Parse a repository URL to extract the owner and repository name.
+
+    Args:
+        url (str): The repository URL.
+
+    Returns:
+        str: The repository path in the format 'owner/repository_name', or None if parsing fails.
+    """
     match = GITHUB_REPOSITORY_RE.search(url.split("#")[0])
     return "/".join((match.group(1), match.group(2))) if match else None
 
 
 def normalize_url(url, check_path=False):
-    """Normalize URL."""
+    """Normalize a URL.
+
+    Args:
+        url (str): The URL to normalize.
+        check_path (bool, optional): Whether to check if the URL has a path. Defaults to False.
+
+    Returns:
+        str: The normalized URL, or None if the URL is invalid.
+    """
     parsed_url = urlparse(url)
     if not parsed_url.netloc or (check_path and not parsed_url.path):
         return None

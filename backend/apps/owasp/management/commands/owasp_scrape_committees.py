@@ -16,9 +16,21 @@ class Command(BaseCommand):
     help = "Scrape owasp.org pages and update relevant committees."
 
     def add_arguments(self, parser):
+        """Add command-line arguments to the parser.
+
+        Args:
+            parser (argparse.ArgumentParser): The argument parser instance.
+        """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options):
+        """Handle the command execution.
+
+        Args:
+            *args: Variable length argument list.
+            **options: Arbitrary keyword arguments containing command options.
+                offset (int): The starting index for processing.
+        """
         active_committees = Committee.active_committees.order_by("-created_at")
         active_committees_count = active_committees.count()
         offset = options["offset"]

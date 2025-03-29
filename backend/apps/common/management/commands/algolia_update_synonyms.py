@@ -10,6 +10,12 @@ class Command(BaseCommand):
     help = "Update OWASP Nest index synonyms."
 
     def handle(self, *_args, **_options):
+        """Update synonyms for Algolia indices.
+
+        Args:
+            *_args: Positional arguments (not used).
+            **_options: Keyword arguments (not used).
+        """
         print("\nThe following models synonyms were reindexed:")
         for index in (IssueIndex, ProjectIndex):
             count = index.update_synonyms()

@@ -183,7 +183,11 @@ class Project(
         self.save(update_fields=("is_active",))
 
     def from_github(self, repository):
-        """Update instance based on GitHub repository data."""
+        """Update instance based on GitHub repository data.
+
+        Args:
+            repository (github.Repository): The GitHub repository instance.
+        """
         self.owasp_repository = repository
 
         project_metadata = RepositoryBasedEntityModel.from_github(
@@ -219,7 +223,12 @@ class Project(
         self.updated_at = repository.updated_at
 
     def save(self, *args, **kwargs):
-        """Save project."""
+        """Save the project instance.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         if self.is_active and not self.summary and (prompt := Prompt.get_owasp_project_summary()):
             self.generate_summary(prompt=prompt)
 
@@ -233,12 +242,26 @@ class Project(
 
     @staticmethod
     def bulk_save(projects, fields=None):
-        """Bulk save projects."""
+        """Bulk save projects.
+
+        Args:
+            projects (list[Project]): List of Project instances to save.
+            fields (list[str], optional): List of fields to update. Defaults to None.
+        """
         BulkSaveModel.bulk_save(Project, projects, fields=fields)
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):
-        """Update project data."""
+        """Update project data from GitHub repository.
+
+        Args:
+            gh_repository (github.Repository): The GitHub repository instance.
+            repository (github.Repository): The repository data to update from.
+            save (bool, optional): Whether to save the instance. Defaults to True.
+
+        Returns:
+            Project: The updated Project instance.
+        """
         key = gh_repository.name.lower()
         try:
             project = Project.objects.get(key=key)

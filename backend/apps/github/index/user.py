@@ -64,11 +64,18 @@ class UserIndex(IndexBase):
 
     @staticmethod
     def update_synonyms():
-        """Update synonyms."""
+        """
+        Update synonyms for the user index.
+        """
         UserIndex.reindex_synonyms("github", "users")
 
     def get_entities(self):
-        """Get entities for indexing."""
+        """
+        Get entities for indexing.
+
+        Returns:
+            QuerySet: A queryset of User objects to be indexed.
+        """
         return User.objects.exclude(
             is_bot=False,
             login__in=User.get_non_indexable_logins(),

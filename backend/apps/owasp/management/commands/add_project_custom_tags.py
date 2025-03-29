@@ -13,6 +13,11 @@ class Command(BaseCommand):
     help = "Add custom tags to OWASP projects."
 
     def add_arguments(self, parser):
+        """Add command-line arguments to the parser.
+
+        Args:
+            parser (argparse.ArgumentParser): The argument parser instance.
+        """
         parser.add_argument(
             "file-name",
             type=str,
@@ -22,6 +27,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *_args, **options):
+        """Handle the command execution.
+
+        Args:
+            *_args: Variable length argument list.
+            **options: Arbitrary keyword arguments containing command options.
+        """
         file_path = Path(settings.BASE_DIR / f"data/project-custom-tags/{options['file-name']}")
         if not file_path.exists():
             self.stderr.write(f"File not found: {file_path}")

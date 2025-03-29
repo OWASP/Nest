@@ -11,7 +11,14 @@ COMMAND = "/contact"
 
 
 def contact_handler(ack, command, client):
-    """Slack /contact command handler."""
+    """
+    Handle the Slack /contact command.
+
+    Args:
+        ack (function): Acknowledge the Slack command request.
+        command (dict): The Slack command payload.
+        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    """
     ack()
 
     if not settings.SLACK_COMMANDS_ENABLED:

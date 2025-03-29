@@ -58,11 +58,18 @@ class RepositoryIndex(IndexBase):
 
     @staticmethod
     def update_synonyms():
-        """Update synonyms."""
+        """
+        Update synonyms for the repository index.
+        """
         RepositoryIndex.reindex_synonyms("github", "repositories")
 
     def get_entities(self):
-        """Get entities for indexing."""
+        """
+        Get entities for indexing.
+
+        Returns:
+            QuerySet: A queryset of Repository objects to be indexed.
+        """
         return Repository.objects.filter(
             is_template=False,
         ).prefetch_related(

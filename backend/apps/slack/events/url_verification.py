@@ -4,7 +4,15 @@ from apps.slack.apps import SlackConfig
 
 
 def url_verification_handler(event, *_args, **_kwargs):
-    """Slack URL verification handler."""
+    """
+    Handle Slack URL verification events.
+
+    Args:
+        event (dict): The Slack event payload.
+
+    Returns:
+        str: The challenge token to verify the URL.
+    """
     return event["challenge"]
 
 

@@ -12,7 +12,13 @@ COMMAND = "/sponsors"
 
 
 def sponsors_handler(ack, command, client):
-    """Slack /sponsors command handler."""
+    """Slack /sponsors command handler.
+
+    Args:
+        ack (function): Function to acknowledge the Slack command.
+        command (dict): The Slack command payload.
+        client (SlackClient): The Slack client instance for sending messages.
+    """
     ack()
     if not settings.SLACK_COMMANDS_ENABLED:
         return

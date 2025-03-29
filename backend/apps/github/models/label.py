@@ -20,11 +20,19 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
     is_default = models.BooleanField(verbose_name="Is default", default=False)
 
     def __str__(self):
-        """Label human readable representation."""
+        """Return a human-readable representation of the label.
+
+        Returns:
+            str: The name and description of the label.
+        """
         return f"{self.name} ({self.description})" if self.description else self.name
 
     def from_github(self, gh_label):
-        """Update instance based on GitHub label data."""
+        """Update the instance based on GitHub label data.
+
+        Args:
+            gh_label (github.Label.Label): The GitHub label object.
+        """
         # TODO(arkid15r): uncomment after PyGithub supports all fields.
         field_mapping = {
             "color": "color",
@@ -47,7 +55,15 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
 
     @staticmethod
     def update_data(gh_label, save=True):
-        """Update label data."""
+        """Update label data.
+
+        Args:
+            gh_label (github.Label.Label): The GitHub label object.
+            save (bool, optional): Whether to save the instance. Defaults to True.
+
+        Returns:
+            Label: The updated or created label instance.
+        """
         label_node_id = Label.get_node_id(gh_label)
         try:
             label = Label.objects.get(node_id=label_node_id)

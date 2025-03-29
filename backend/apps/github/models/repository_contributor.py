@@ -34,14 +34,22 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     )
 
     def __str__(self):
-        """Repository contributor human readable representation."""
+        """Return a human-readable representation of the repository contributor.
+
+        Returns:
+            str: A string describing the user's contributions to the repository.
+        """
         return (
             f"{self.user} has made {self.contributions_count} "
             f"contribution{pluralize(self.contributions_count)} to {self.repository}"
         )
 
     def from_github(self, gh_contributions):
-        """Update instance based on GitHub contributor data."""
+        """Update the instance based on GitHub contributor data.
+
+        Args:
+            gh_contributions (github.NamedUser.Contributor): The GitHub contributor object.
+        """
         field_mapping = {
             "contributions_count": "contributions",
         }
@@ -59,7 +67,17 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
     @staticmethod
     def update_data(gh_contributor, repository, user, save=True):
-        """Update repository contributor data."""
+        """Update repository contributor data.
+
+        Args:
+            gh_contributor (github.NamedUser.Contributor): The GitHub contributor object.
+            repository (Repository): The repository instance.
+            user (User): The user instance.
+            save (bool, optional): Whether to save the instance. Defaults to True.
+
+        Returns:
+            RepositoryContributor: The updated or created repository contributor instance.
+        """
         try:
             repository_contributor = RepositoryContributor.objects.get(
                 repository=repository,

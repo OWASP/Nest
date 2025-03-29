@@ -41,7 +41,15 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="login/(?P<login>[^/.]+)")
     def get_user_by_login(self, request, login=None):
-        """Get user by login."""
+        """Retrieve a user by their login.
+
+        Args:
+            request (Request): The HTTP request object.
+            login (str, optional): The login of the user to retrieve.
+
+        Returns:
+            Response: The serialized user data or a 404 error if the user is not found.
+        """
         try:
             user = User.objects.get(login=login)
             serializer = self.get_serializer(user)

@@ -14,11 +14,25 @@ from apps.owasp.models.post import Post
 
 class Command(BaseCommand):
     def get_author_image_url(self, author_image_url):
-        """Return URL for author image."""
+        """Return URL for author image.
+
+        Args:
+            author_image_url (str): The relative URL of the author's image.
+
+        Returns:
+            str: The full URL of the author's image.
+        """
         return f"{OWASP_WEBSITE_URL}{author_image_url}" if author_image_url else ""
 
     def get_blog_url(self, path):
-        """Return OWASP blog URL for a given path."""
+        """Return OWASP blog URL for a given path.
+
+        Args:
+            path (str): The file path of the blog post.
+
+        Returns:
+            str: The full URL of the blog post.
+        """
         pattern = re.compile(
             r"(https://raw\.githubusercontent\.com/OWASP/owasp\.github\.io/main/_posts/)"
             r"(\d{4})-(\d{2})-(\d{2})-"
@@ -35,6 +49,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Handle the command execution.
+
+        Args:
+            *args: Variable length argument list.
+            **options: Arbitrary keyword arguments.
+        """
         # TODO(arkid15r): Add pagination support.
         post_repository_content = get_repository_file_content(
             "https://api.github.com/repos/OWASP/owasp.github.io/contents/_posts"

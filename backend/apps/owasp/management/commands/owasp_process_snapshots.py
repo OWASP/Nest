@@ -20,6 +20,12 @@ class Command(BaseCommand):
     help = "Process pending snapshots and populate them with new data"
 
     def handle(self, *args, **options):
+        """Handle the command execution.
+
+        Args:
+            *args: Variable length argument list.
+            **options: Arbitrary keyword arguments.
+        """
         try:
             self.process_snapshots()
         except Exception as e:
@@ -27,6 +33,7 @@ class Command(BaseCommand):
             raise SnapshotProcessingError(error_msg) from e
 
     def process_snapshots(self):
+        """Process all pending snapshots."""
         pending_snapshots = Snapshot.objects.filter(status=Snapshot.Status.PENDING)
 
         if not pending_snapshots.exists():
@@ -45,6 +52,11 @@ class Command(BaseCommand):
                 snapshot.save()
 
     def process_snapshot(self, snapshot):
+        """Process a single snapshot.
+
+        Args:
+            snapshot (Snapshot): The snapshot instance to process.
+        """
         logger.info(
             "Processing snapshot %s (%s to %s)",
             snapshot.id,

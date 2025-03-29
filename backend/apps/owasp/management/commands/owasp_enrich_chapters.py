@@ -15,9 +15,20 @@ class Command(BaseCommand):
     help = "Enrich OWASP chapters with extra data."
 
     def add_arguments(self, parser):
+        """Add command-line arguments to the parser.
+
+        Args:
+            parser (argparse.ArgumentParser): The argument parser instance.
+        """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options):
+        """Handle the command execution.
+
+        Args:
+            *args: Variable length argument list.
+            **options: Arbitrary keyword arguments containing command options.
+        """
         active_chapters = Chapter.active_chapters.without_geo_data.order_by("id")
         active_chapters_count = active_chapters.count()
 

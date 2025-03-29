@@ -2,12 +2,25 @@
 
 
 def divider():
-    """Return divider block."""
+    """
+    Return a divider block.
+
+    Returns:
+        dict: A Slack block representing a divider.
+    """
     return {"type": "divider"}
 
 
 def markdown(text):
-    """Return markdown block."""
+    """
+    Return a markdown block.
+
+    Args:
+        text (str): The markdown text to include in the block.
+
+    Returns:
+        dict: A Slack block containing markdown text.
+    """
     return {
         "type": "section",
         "text": {"type": "mrkdwn", "text": text},
@@ -15,7 +28,12 @@ def markdown(text):
 
 
 def get_header():
-    """Return the header block."""
+    """
+    Return the header block.
+
+    Returns:
+        list: A list of Slack blocks representing the header.
+    """
     return [
         {
             "type": "actions",
@@ -66,7 +84,17 @@ def get_header():
 
 
 def get_pagination_buttons(entity_type, page, total_pages):
-    """Get pagination buttons for the blocks."""
+    """
+    Get pagination buttons for Slack blocks.
+
+    Args:
+        entity_type (str): The type of entity being paginated (e.g., "projects").
+        page (int): The current page number.
+        total_pages (int): The total number of pages.
+
+    Returns:
+        list: A list of Slack blocks representing pagination buttons.
+    """
     pagination_buttons = []
 
     if page > 1:

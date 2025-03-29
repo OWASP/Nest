@@ -16,7 +16,16 @@ class RepositoryQuery(BaseQuery):
     )
 
     def resolve_repository(root, info, repository_key):
-        """Resolve project."""
+        """Resolve repository by key.
+
+        Args:
+            root (Any): The root query object.
+            info (ResolveInfo): The GraphQL execution context.
+            repository_key (str): The unique key of the repository.
+
+        Returns:
+            Repository or None: The repository object if found, otherwise None.
+        """
         try:
             return Repository.objects.get(key=repository_key)
         except Repository.DoesNotExist:

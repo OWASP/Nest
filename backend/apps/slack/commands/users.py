@@ -11,7 +11,14 @@ COMMAND = "/users"
 
 
 def users_handler(ack, command, client):
-    """Slack /users command handler."""
+    """
+    Handle the Slack /users command.
+
+    Args:
+        ack (function): Acknowledge the Slack command request.
+        command (dict): The Slack command payload.
+        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    """
     ack()
 
     if not settings.SLACK_COMMANDS_ENABLED:

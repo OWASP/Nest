@@ -43,7 +43,14 @@ class PullRequestAdmin(admin.ModelAdmin):
     )
 
     def custom_field_github_url(self, obj):
-        """Pull Request GitHub URL."""
+        """Pull Request GitHub URL.
+
+        Args:
+            obj (PullRequest): The pull request instance.
+
+        Returns:
+            str: A safe HTML link to the pull request on GitHub.
+        """
         return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
 
     custom_field_github_url.short_description = "GitHub 🔗"
@@ -68,7 +75,14 @@ class IssueAdmin(admin.ModelAdmin):
     search_fields = ("title",)
 
     def custom_field_github_url(self, obj):
-        """Issue GitHub URL."""
+        """Issue GitHub URL.
+
+        Args:
+            obj (Issue): The issue instance.
+
+        Returns:
+            str: A safe HTML link to the issue on GitHub.
+        """
         return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
 
     custom_field_github_url.short_description = "GitHub 🔗"
@@ -103,13 +117,27 @@ class RepositoryAdmin(admin.ModelAdmin):
     search_fields = ("name", "node_id")
 
     def custom_field_github_url(self, obj):
-        """Repository GitHub URL."""
+        """Repository GitHub URL.
+
+        Args:
+            obj (Repository): The repository instance.
+
+        Returns:
+            str: A safe HTML link to the repository on GitHub.
+        """
         return mark_safe(  # noqa: S308
             f"<a href='https://github.com/{obj.owner.login}/{obj.name}' target='_blank'>↗️</a>"
         )
 
     def custom_field_title(self, obj):
-        """Repository title."""
+        """Repository title.
+
+        Args:
+            obj (Repository): The repository instance.
+
+        Returns:
+            str: The formatted repository title as 'owner/repository_name'.
+        """
         return f"{obj.owner.login}/{obj.name}"
 
     custom_field_title.short_description = "Name"

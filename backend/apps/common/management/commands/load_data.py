@@ -11,6 +11,12 @@ class Command(BaseCommand):
     help = "Load OWASP Nest data."
 
     def handle(self, *_args, **_options):
+        """Load data into the OWASP Nest application.
+
+        Args:
+            *_args: Positional arguments (not used).
+            **_options: Keyword arguments (not used).
+        """
         # Disable indexing
         unregister_indexes()
 

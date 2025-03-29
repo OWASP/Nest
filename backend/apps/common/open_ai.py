@@ -12,7 +12,13 @@ class OpenAi:
     """Open AI communication class."""
 
     def __init__(self, model="gpt-4o-mini", max_tokens=1000, temperature=0.7):
-        """OpenAi constructor."""
+        """OpenAi constructor.
+
+        Args:
+            model (str, optional): The model to use. Defaults to "gpt-4o-mini".
+            max_tokens (int, optional): Maximum tokens for the response. Defaults to 1000.
+            temperature (float, optional): Sampling temperature. Defaults to 0.7.
+        """
         self.client = openai.OpenAI(
             api_key=settings.OPEN_AI_SECRET_KEY,
             timeout=30,  # In seconds.
@@ -23,25 +29,54 @@ class OpenAi:
         self.temperature = temperature
 
     def set_input(self, content):
-        """Set system role content."""
+        """Set system role content.
+
+        Args:
+            content (str): The input content.
+
+        Returns:
+            OpenAi: The current instance.
+        """
         self.input = content
 
         return self
 
     def set_max_tokens(self, max_tokens):
-        """Set max tokens."""
+        """Set max tokens.
+
+        Args:
+            max_tokens (int): Maximum tokens for the response.
+
+        Returns:
+            OpenAi: The current instance.
+        """
         self.max_tokens = max_tokens
 
         return self
 
     def set_prompt(self, content):
-        """Set system role content."""
+        """Set system role content.
+
+        Args:
+            content (str): The prompt content.
+
+        Returns:
+            OpenAi: The current instance.
+        """
         self.prompt = content
 
         return self
 
     def complete(self):
-        """Get API response."""
+        """Get API response.
+
+        Returns:
+            str: The response content.
+
+        Raises:
+            openai.APIConnectionError: If a connection error occurs.
+            Exception: For other errors during the API request.
+        """
         try:
             response = self.client.chat.completions.create(
                 max_tokens=self.max_tokens,

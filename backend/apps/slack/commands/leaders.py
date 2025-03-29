@@ -12,7 +12,14 @@ COMMAND = "/leaders"
 
 
 def leaders_handler(ack, command, client):
-    """Slack /leaders command handler."""
+    """
+    Handle the Slack /leaders command.
+
+    Args:
+        ack (function): Acknowledge the Slack command request.
+        command (dict): The Slack command payload.
+        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    """
     from apps.owasp.api.search.chapter import get_chapters
     from apps.owasp.api.search.project import get_projects
 

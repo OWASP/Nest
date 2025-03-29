@@ -24,13 +24,30 @@ class SlackConfig(AppConfig):
 if SlackConfig.app:
 
     @SlackConfig.app.error
-    def error_handler(error, body, *args, **kwargs):  # noqa: ARG001
-        """Handle Slack application errors."""
+    def error_handler(error, body, *args, **kwargs):
+        """
+        Handle Slack application errors.
+
+        Args:
+            error (Exception): The exception raised.
+            body (dict): The payload of the Slack event that caused the error.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+        """
         logger.exception(error, extra={"body": body})
 
     @SlackConfig.app.use
-    def log_events(client, context, logger, payload, next):  # noqa: A002, ARG001
-        """Log Slack events."""
+    def log_events(client, context, logger, payload, next):
+        """
+        Log Slack events.
+
+        Args:
+            client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+            context (dict): The context of the Slack event.
+            logger (logging.Logger): The logger instance.
+            payload (dict): The payload of the Slack event.
+            next (function): The next middleware function in the chain.
+        """
         from apps.slack.models.event import Event
 
         try:

@@ -52,7 +52,11 @@ class Event(BulkSaveModel, TimestampedModel):
 
     @staticmethod
     def upcoming_events():
-        """Get upcoming events."""
+        """Get upcoming events.
+
+        Returns:
+            QuerySet: A queryset of upcoming Event instances ordered by start date.
+        """
         return Event.objects.filter(
             start_date__gt=timezone.now(),
         ).order_by(
@@ -61,13 +65,29 @@ class Event(BulkSaveModel, TimestampedModel):
 
     @staticmethod
     def bulk_save(events, fields=None):
-        """Bulk save events."""
+        """Bulk save events.
+
+        Args:
+            events (list): A list of Event instances to be saved.
+            fields (list, optional): A list of fields to update during the bulk save. Defaults to None.
+
+        Returns:
+            None
+        """
         BulkSaveModel.bulk_save(Event, events, fields=fields)
 
     # TODO(arkid15r): refactor this when there is a chance.
     @staticmethod
     def parse_dates(dates, start_date):
-        """Parse event dates."""
+        """Parse event dates.
+
+        Args:
+            dates (str): A string representing the event dates. Can be a single date or a date range.
+            start_date (datetime.date): The start date of the event, used to infer the month for date ranges.
+
+        Returns:
+            datetime.date or None: The parsed end date if successful, otherwise None.
+        """
         if not dates:
             return None
 
@@ -110,7 +130,16 @@ class Event(BulkSaveModel, TimestampedModel):
 
     @staticmethod
     def update_data(category, data, save=True):
-        """Update event data."""
+        """Update event data.
+
+        Args:
+            category (str): The category of the event.
+            data (dict): A dictionary containing event data.
+            save (bool, optional): Whether to save the event instance. Defaults to True.
+
+        Returns:
+            Event: The updated or newly created Event instance.
+        """
         key = slugify(data["name"])
         try:
             event = Event.objects.get(key=key)
@@ -124,7 +153,15 @@ class Event(BulkSaveModel, TimestampedModel):
         return event
 
     def from_dict(self, category, data):
-        """Update instance based on the dict data."""
+        """Update instance based on the dict data.
+
+        Args:
+            category (str): The category of the event.
+            data (dict): A dictionary containing event data.
+
+        Returns:
+            None
+        """
         fields = {
             "category": {
                 "AppSec Days": Event.Category.APPSEC_DAYS,
@@ -144,7 +181,11 @@ class Event(BulkSaveModel, TimestampedModel):
             setattr(self, key, value)
 
     def generate_geo_location(self):
-        """Add latitude and longitude data."""
+        """Add latitude and longitude data.
+
+        Returns:
+            None
+        """
         location = None
         if self.suggested_location and self.suggested_location != "None":
             location = get_location_coordinates(self.suggested_location)
@@ -155,7 +196,14 @@ class Event(BulkSaveModel, TimestampedModel):
             self.longitude = location.longitude
 
     def generate_suggested_location(self, prompt):
-        """Generate a suggested location for the event."""
+        """Generate a suggested location for the event.
+
+        Args:
+            prompt (str): The prompt to be used for generating the suggested location.
+
+        Returns:
+            None
+        """
         open_ai = OpenAi()
         open_ai.set_input(self.get_context())
         open_ai.set_max_tokens(100).set_prompt(prompt)
@@ -168,7 +216,14 @@ class Event(BulkSaveModel, TimestampedModel):
             self.suggested_location = ""
 
     def generate_summary(self, prompt):
-        """Generate a summary for the event."""
+        """Generate a summary for the event.
+
+        Args:
+            prompt (str): The prompt to be used for generating the summary.
+
+        Returns:
+            None
+        """
         open_ai = OpenAi()
         open_ai.set_input(self.get_context(include_dates=True))
         open_ai.set_max_tokens(100).set_prompt(prompt)
@@ -179,7 +234,14 @@ class Event(BulkSaveModel, TimestampedModel):
             self.summary = ""
 
     def get_context(self, include_dates=False):
-        """Return geo string."""
+        """Return geo string.
+
+        Args:
+            include_dates (bool, optional): Whether to include event dates in the context. Defaults to False.
+
+        Returns:
+            str: The generated context string.
+        """
         context = [
             f"Name: {self.name}",
             f"Description: {self.description}",

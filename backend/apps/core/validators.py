@@ -7,7 +7,14 @@ from django.core.validators import validate_slug
 
 
 def validate_index_name(index_name):
-    """Validate index name."""
+    """Validate index name.
+
+    Args:
+        index_name (str): The name of the index to validate.
+
+    Raises:
+        ValidationError: If the index name is invalid or not a string.
+    """
     if not index_name or not isinstance(index_name, str):
         message = "indexName is required and must be a string."
         raise ValidationError(message)
@@ -23,7 +30,14 @@ def validate_index_name(index_name):
 
 
 def validate_limit(limit):
-    """Validate limit."""
+    """Validate limit.
+
+    Args:
+        limit (int): The number of hits per page.
+
+    Raises:
+        ValidationError: If the limit is not an integer or out of range.
+    """
     if not isinstance(limit, int):
         message = "hitsPerPage must be an integer."
         raise ValidationError(message)
@@ -36,7 +50,14 @@ def validate_limit(limit):
 
 
 def validate_page(page):
-    """Validate page."""
+    """Validate page.
+
+    Args:
+        page (int): The page number.
+
+    Raises:
+        ValidationError: If the page is not a positive integer.
+    """
     if not isinstance(page, int):
         message = "page value must be an integer."
         raise ValidationError(message)
@@ -47,7 +68,14 @@ def validate_page(page):
 
 
 def validate_query(query):
-    """Validate query."""
+    """Validate query.
+
+    Args:
+        query (str): The search query.
+
+    Raises:
+        ValidationError: If the query is not a string or contains invalid characters.
+    """
     if not query:
         return
 
@@ -64,14 +92,28 @@ def validate_query(query):
 
 
 def validate_facet_filters(facet_filters):
-    """Validate facet filters."""
+    """Validate facet filters.
+
+    Args:
+        facet_filters (list): The list of facet filters.
+
+    Raises:
+        ValidationError: If the facet filters are not a list.
+    """
     if not isinstance(facet_filters, list):
         message = "facetFilters must be a list."
         raise ValidationError(message)
 
 
 def validate_search_params(data):
-    """Validate search parameters."""
+    """Validate search parameters.
+
+    Args:
+        data (dict): The search parameters to validate.
+
+    Raises:
+        ValidationError: If any of the parameters are invalid.
+    """
     validate_facet_filters(data.get("facetFilters", []))
     validate_index_name(data.get("indexName"))
     validate_limit(data.get("hitsPerPage", 25))

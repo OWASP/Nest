@@ -21,12 +21,30 @@ class ProjectQuery(BaseQuery):
     )
 
     def resolve_project(root, info, key):
-        """Resolve project."""
+        """Resolve project.
+
+        Args:
+            root: The root object.
+            info: GraphQL execution info.
+            key (str): The key of the project.
+
+        Returns:
+            Project: The project object if found, otherwise None.
+        """
         try:
             return Project.objects.get(key=f"www-project-{key}")
         except Project.DoesNotExist:
             return None
 
     def resolve_recent_projects(root, info, limit):
-        """Resolve recent projects."""
+        """Resolve recent projects.
+
+        Args:
+            root: The root object.
+            info: GraphQL execution info.
+            limit (int): The maximum number of recent projects to return.
+
+        Returns:
+            QuerySet: A queryset of recent active projects.
+        """
         return Project.objects.filter(is_active=True).order_by("-created_at")[:limit]

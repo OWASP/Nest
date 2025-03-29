@@ -12,7 +12,14 @@ COMMAND = "/owasp"
 
 
 def owasp_handler(ack, command, client):
-    """Slack /owasp command handler."""
+    """
+    Handle the Slack /owasp command.
+
+    Args:
+        ack (function): Acknowledge the Slack command request.
+        command (dict): The Slack command payload.
+        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    """
     from apps.slack.commands import (
         board,
         chapters,
