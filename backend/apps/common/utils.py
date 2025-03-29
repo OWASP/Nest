@@ -117,7 +117,7 @@ def slugify(text):
 
     Returns:
     -------
-        str: The slugified text.
+        str: The slugify text.
 
     """
     return re.sub(r"-{2,}", "-", django_slugify(text))
