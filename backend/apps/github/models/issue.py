@@ -78,9 +78,11 @@ class Issue(GenericIssueModel):
         """Update the instance based on GitHub issue data.
 
         Args:
+        ----
             gh_issue (github.Issue.Issue): The GitHub issue object.
-            author (User, optional): The author of the issue. Defaults to None.
-            repository (Repository, optional): The repository instance. Defaults to None.
+            author (User, optional): The author of the issue.
+            repository (Repository, optional): The repository instance.
+
         """
         field_mapping = {
             "body": "body",
@@ -114,8 +116,10 @@ class Issue(GenericIssueModel):
         """Generate a hint for the issue using AI.
 
         Args:
-            open_ai (OpenAi, optional): The OpenAI instance. Defaults to None.
-            max_tokens (int, optional): The maximum number of tokens for the AI response. Defaults to 1000.
+        ----
+            open_ai (OpenAi, optional): The OpenAI instance.
+            max_tokens (int, optional): The maximum number of tokens for the AI response.
+
         """
         if not self.is_indexable or not (prompt := Prompt.get_github_issue_hint()):
             return
@@ -129,8 +133,10 @@ class Issue(GenericIssueModel):
         """Generate a summary for the issue using AI.
 
         Args:
-            open_ai (OpenAi, optional): The OpenAI instance. Defaults to None.
-            max_tokens (int, optional): The maximum number of tokens for the AI response. Defaults to 500.
+        ----
+            open_ai (OpenAi, optional): The OpenAI instance.
+            max_tokens (int, optional): The maximum number of tokens for the AI response.
+
         """
         if not self.is_indexable or not (
             prompt := (
@@ -173,13 +179,16 @@ class Issue(GenericIssueModel):
         """Update issue data.
 
         Args:
+        ----
             gh_issue (github.Issue.Issue): The GitHub issue object.
-            author (User, optional): The author of the issue. Defaults to None.
-            repository (Repository, optional): The repository instance. Defaults to None.
-            save (bool, optional): Whether to save the instance. Defaults to True.
+            author (User, optional): The author of the issue.
+            repository (Repository, optional): The repository instance.
+            save (bool, optional): Whether to save the instance.
 
         Returns:
+        -------
             Issue: The updated or created issue instance.
+
         """
         issue_node_id = Issue.get_node_id(gh_issue)
         try:

@@ -20,13 +20,16 @@ def get_blocks(
     """Get chapters blocks.
 
     Args:
+    ----
         page (int): The current page number for pagination.
         search_query (str): The search query for filtering chapters.
         limit (int): The maximum number of chapters to retrieve per page.
         presentation (EntityPresentation | None): Configuration for entity presentation.
 
     Returns:
+    -------
         list: A list of Slack blocks representing the chapters.
+
     """
     from apps.owasp.api.search.chapter import get_chapters
     from apps.owasp.models.chapter import Chapter

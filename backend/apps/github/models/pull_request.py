@@ -59,9 +59,11 @@ class PullRequest(GenericIssueModel):
         """Update the instance based on GitHub pull request data.
 
         Args:
+        ----
             gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
-            author (User, optional): The author of the pull request. Defaults to None.
-            repository (Repository, optional): The repository instance. Defaults to None.
+            author (User, optional): The author of the pull request.
+            repository (Repository, optional): The repository instance.
+
         """
         field_mapping = {
             "body": "body",
@@ -102,13 +104,16 @@ class PullRequest(GenericIssueModel):
         """Update pull request data.
 
         Args:
+        ----
             gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
-            author (User, optional): The author of the pull request. Defaults to None.
-            repository (Repository, optional): The repository instance. Defaults to None.
-            save (bool, optional): Whether to save the instance. Defaults to True.
+            author (User, optional): The author of the pull request.
+            repository (Repository, optional): The repository instance.
+            save (bool, optional): Whether to save the instance.
 
         Returns:
+        -------
             PullRequest: The updated or created pull request instance.
+
         """
         pull_request_node_id = PullRequest.get_node_id(gh_pull_request)
         try:

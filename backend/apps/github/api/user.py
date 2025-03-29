@@ -44,11 +44,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         """Retrieve a user by their login.
 
         Args:
+        ----
             request (Request): The HTTP request object.
             login (str, optional): The login of the user to retrieve.
 
         Returns:
+        -------
             Response: The serialized user data or a 404 error if the user is not found.
+
         """
         try:
             user = User.objects.get(login=login)

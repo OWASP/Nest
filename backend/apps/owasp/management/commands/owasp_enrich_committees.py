@@ -18,7 +18,9 @@ class Command(BaseCommand):
         """Add command-line arguments to the parser.
 
         Args:
+        ----
             parser (argparse.ArgumentParser): The argument parser instance.
+
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
         parser.add_argument(
@@ -30,11 +32,13 @@ class Command(BaseCommand):
         """Execute the enrichment process for OWASP committees.
 
         Args:
+        ----
             *args: Variable length argument list.
             **options: Arbitrary keyword arguments containing:
                 offset (int): The starting index for processing.
                 force_update_summary (bool): Whether to force updating summaries.
                 update_summary (bool): Whether to update summaries.
+
         """
         open_ai = OpenAi()
 

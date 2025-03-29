@@ -100,8 +100,10 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def __str__(self):
         """Return a human-readable representation of the repository.
 
-        Returns:
+        Returns
+        -------
             str: The repository path.
+
         """
         return self.path
 
@@ -109,8 +111,10 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def latest_pull_request(self):
         """Get the latest pull request for the repository.
 
-        Returns:
+        Returns
+        -------
             PullRequest: The most recently created pull request.
+
         """
         return self.pull_requests.order_by("-created_at").first()
 
@@ -118,8 +122,10 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def latest_release(self):
         """Get the latest release for the repository.
 
-        Returns:
+        Returns
+        -------
             Release: The most recently published release.
+
         """
         return self.published_releases.order_by("-published_at").first()
 
@@ -183,12 +189,14 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Update the repository instance based on GitHub repository data.
 
         Args:
+        ----
             gh_repository (github.Repository.Repository): The GitHub repository object.
-            commits (github.PaginatedList.PaginatedList, optional): List of commits. Defaults to None.
-            contributors (github.PaginatedList.PaginatedList, optional): List of contributors. Defaults to None.
-            languages (dict, optional): Dictionary of languages used in the repository. Defaults to None.
-            organization (Organization, optional): The organization instance. Defaults to None.
-            user (User, optional): The user instance. Defaults to None.
+            commits (github.PaginatedList.PaginatedList, optional): List of commits.
+            contributors (github.PaginatedList.PaginatedList, optional): List of contributors.
+            languages (dict, optional): Dictionary of languages used in the repository.
+            organization (Organization, optional): The organization instance.
+            user (User, optional): The user instance.
+
         """
         field_mapping = {
             "created_at": "created_at",
@@ -296,16 +304,19 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Update repository data.
 
         Args:
+        ----
             gh_repository (github.Repository.Repository): The GitHub repository object.
-            commits (github.PaginatedList.PaginatedList, optional): List of commits. Defaults to None.
-            contributors (github.PaginatedList.PaginatedList, optional): List of contributors. Defaults to None.
-            languages (dict, optional): Dictionary of languages used in the repository. Defaults to None.
-            organization (Organization, optional): The organization instance. Defaults to None.
-            user (User, optional): The user instance. Defaults to None.
-            save (bool, optional): Whether to save the instance. Defaults to True.
+            commits (github.PaginatedList.PaginatedList, optional): List of commits.
+            contributors (github.PaginatedList.PaginatedList, optional): List of contributors.
+            languages (dict, optional): Dictionary of languages used in the repository.
+            organization (Organization, optional): The organization instance.
+            user (User, optional): The user instance.
+            save (bool, optional): Whether to save the instance.
 
         Returns:
+        -------
             Repository: The updated or created repository instance.
+
         """
         repository_node_id = Repository.get_node_id(gh_repository)
         try:

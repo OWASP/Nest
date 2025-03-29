@@ -15,9 +15,11 @@ class OpenAi:
         """OpenAi constructor.
 
         Args:
-            model (str, optional): The model to use. Defaults to "gpt-4o-mini".
-            max_tokens (int, optional): Maximum tokens for the response. Defaults to 1000.
-            temperature (float, optional): Sampling temperature. Defaults to 0.7.
+        ----
+            model (str, optional): The model to use.
+            max_tokens (int, optional): Maximum tokens for the response.
+            temperature (float, optional): Sampling temperature.
+
         """
         self.client = openai.OpenAI(
             api_key=settings.OPEN_AI_SECRET_KEY,
@@ -32,10 +34,13 @@ class OpenAi:
         """Set system role content.
 
         Args:
+        ----
             content (str): The input content.
 
         Returns:
+        -------
             OpenAi: The current instance.
+
         """
         self.input = content
 
@@ -45,10 +50,13 @@ class OpenAi:
         """Set max tokens.
 
         Args:
+        ----
             max_tokens (int): Maximum tokens for the response.
 
         Returns:
+        -------
             OpenAi: The current instance.
+
         """
         self.max_tokens = max_tokens
 
@@ -58,10 +66,13 @@ class OpenAi:
         """Set system role content.
 
         Args:
+        ----
             content (str): The prompt content.
 
         Returns:
+        -------
             OpenAi: The current instance.
+
         """
         self.prompt = content
 
@@ -70,12 +81,15 @@ class OpenAi:
     def complete(self):
         """Get API response.
 
-        Returns:
+        Returns
+        -------
             str: The response content.
 
-        Raises:
+        Raises
+        ------
             openai.APIConnectionError: If a connection error occurs.
             Exception: For other errors during the API request.
+
         """
         try:
             response = self.client.chat.completions.create(

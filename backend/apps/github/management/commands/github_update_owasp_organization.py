@@ -25,11 +25,12 @@ class Command(BaseCommand):
     help = "Fetch OWASP GitHub repository and update relevant entities."
 
     def add_arguments(self, parser):
-        """
-        Add command-line arguments to the parser.
+        """Add command-line arguments to the parser.
 
         Args:
+        ----
             parser (argparse.ArgumentParser): The argument parser instance.
+
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
         parser.add_argument(
@@ -40,12 +41,13 @@ class Command(BaseCommand):
         )
 
     def handle(self, *_args, **options):
-        """
-        Handle the command execution.
+        """Handle the command execution.
 
         Args:
+        ----
             *_args: Variable length argument list.
             **options: Arbitrary keyword arguments containing command options.
+
         """
         unregister_indexes()  # Disable automatic indexing
 

@@ -14,8 +14,10 @@ class Command(BaseCommand):
         """Handle the command execution.
 
         Args:
+        ----
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
+
         """
         sponsors = yaml.safe_load(
             get_repository_file_content(

@@ -40,8 +40,10 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     def __str__(self):
         """Return a human-readable representation of the issue.
 
-        Returns:
+        Returns
+        -------
             str: The title of the issue along with the author's name.
+
         """
         return f"{self.title} by {self.author}"
 
@@ -49,8 +51,10 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     def is_open(self):
         """Check if the issue is open.
 
-        Returns:
+        Returns
+        -------
             bool: True if the issue is open, False otherwise.
+
         """
         return self.state == self.State.OPEN
 
@@ -58,8 +62,10 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     def project(self):
         """Get the project associated with the issue.
 
-        Returns:
+        Returns
+        -------
             Project: The project instance associated with the issue.
+
         """
         return self.repository.project
 
@@ -67,7 +73,9 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     def repository_id(self):
         """Get the repository ID associated with the issue.
 
-        Returns:
+        Returns
+        -------
             int: The ID of the repository.
+
         """
         return self.repository.id

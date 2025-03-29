@@ -32,13 +32,14 @@ logger = logging.getLogger(__name__)
 
 
 def team_join_handler(event, client, ack):
-    """
-    Handle the Slack team_join event.
+    """Handle the Slack team_join event.
 
     Args:
+    ----
         event (dict): The Slack event payload.
         client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
         ack (function): Acknowledge the Slack event request.
+
     """
     ack()
     if not settings.SLACK_EVENTS_ENABLED:

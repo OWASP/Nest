@@ -16,9 +16,11 @@ class BulkSaveModel(models.Model):
         """Bulk save objects.
 
         Args:
+        ----
             model (Model): The Django model class.
             objects (list): List of model instances to save.
-            fields (list, optional): List of fields to update. Defaults to None.
+            fields (list, optional): List of fields to update.
+
         """
         model.objects.bulk_create((o for o in objects if not o.id), BATCH_SIZE)
         model.objects.bulk_update(

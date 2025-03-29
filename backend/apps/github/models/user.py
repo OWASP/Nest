@@ -25,8 +25,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def __str__(self):
         """Return a human-readable representation of the user.
 
-        Returns:
+        Returns
+        -------
             str: The name or login of the user.
+
         """
         return f"{self.name or self.login}"
 
@@ -34,8 +36,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def issues(self):
         """Get issues created by the user.
 
-        Returns:
+        Returns
+        -------
             QuerySet: A queryset of issues created by the user.
+
         """
         return self.created_issues.all()
 
@@ -43,8 +47,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def releases(self):
         """Get releases created by the user.
 
-        Returns:
+        Returns
+        -------
             QuerySet: A queryset of releases created by the user.
+
         """
         return self.created_releases.all()
 
@@ -52,7 +58,9 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Update the user instance based on GitHub user data.
 
         Args:
+        ----
             gh_user (github.NamedUser.NamedUser): The GitHub user object.
+
         """
         super().from_github(gh_user)
 
@@ -74,8 +82,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def get_non_indexable_logins():
         """Get logins that should not be indexed.
 
-        Returns:
+        Returns
+        -------
             set: A set of non-indexable logins.
+
         """
         return {
             GITHUB_GHOST_USER_LOGIN,
@@ -88,11 +98,14 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Update GitHub user data.
 
         Args:
+        ----
             gh_user (github.NamedUser.NamedUser): The GitHub user object.
-            save (bool, optional): Whether to save the instance. Defaults to True.
+            save (bool, optional): Whether to save the instance.
 
         Returns:
+        -------
             User: The updated or created user instance.
+
         """
         user_node_id = User.get_node_id(gh_user)
         try:

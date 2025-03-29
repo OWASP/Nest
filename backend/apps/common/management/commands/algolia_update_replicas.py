@@ -12,8 +12,10 @@ class Command(BaseCommand):
         """Update replicas for Algolia indices.
 
         Args:
+        ----
             *_args: Positional arguments (not used).
             **_options: Keyword arguments (not used).
+
         """
         print("\n Starting replica configuration...")
         ProjectIndex.configure_replicas()

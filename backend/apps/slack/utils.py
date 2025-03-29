@@ -21,10 +21,13 @@ def escape(content):
     """Escape HTML content.
 
     Args:
+    ----
         content (str): The HTML content to escape.
 
     Returns:
+    -------
         str: The escaped HTML content.
+
     """
     return escape_html(content, quote=False)
 
@@ -34,10 +37,13 @@ def get_gsoc_projects(year):
     """Get GSoC projects.
 
     Args:
+    ----
         year (int): The year for which to fetch GSoC projects.
 
     Returns:
+    -------
         list: A list of GSoC projects with their attributes.
+
     """
     from apps.owasp.api.search.project import get_projects
 
@@ -58,11 +64,14 @@ def get_news_data(limit=10, timeout=30):
     """Get news data.
 
     Args:
-        limit (int, optional): The maximum number of news items to fetch. Defaults to 10.
-        timeout (int, optional): The request timeout in seconds. Defaults to 30.
+    ----
+        limit (int, optional): The maximum number of news items to fetch.
+        timeout (int, optional): The request timeout in seconds.
 
     Returns:
+    -------
         list: A list of dictionaries containing news data (author, title, and URL).
+
     """
     response = requests.get(OWASP_NEWS_URL, timeout=timeout)
     tree = html.fromstring(response.content)
@@ -93,10 +102,13 @@ def get_staff_data(timeout=30):
     """Get staff data.
 
     Args:
-        timeout (int, optional): The request timeout in seconds. Defaults to 30.
+    ----
+        timeout (int, optional): The request timeout in seconds.
 
     Returns:
+    -------
         list or None: A sorted list of staff data dictionaries, or None if an error occurs.
+
     """
     file_path = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
     try:
@@ -116,8 +128,10 @@ def get_staff_data(timeout=30):
 def get_events_data():
     """Get events data.
 
-    Returns:
-        QuerySet or None: A queryset of upcoming events ordered by start date, or None if an error occurs.
+    Returns
+    -------
+        QuerySet or None: A queryset of upcoming events.
+
     """
     from apps.owasp.models.event import Event
 
@@ -132,10 +146,13 @@ def get_sponsors_data(limit=10):
     """Get sponsors data.
 
     Args:
-        limit (int, optional): The maximum number of sponsors to fetch. Defaults to 10.
+    ----
+        limit (int, optional): The maximum number of sponsors to fetch.
 
     Returns:
+    -------
         QuerySet or None: A queryset of sponsors, or None if an error occurs.
+
     """
     from apps.owasp.models.sponsor import Sponsor
 
@@ -151,10 +168,13 @@ def get_posts_data(limit=5):
     """Get posts data.
 
     Args:
-        limit (int, optional): The maximum number of posts to fetch. Defaults to 5.
+    ----
+        limit (int, optional): The maximum number of posts to fetch.
 
     Returns:
+    -------
         QuerySet or None: A queryset of recent posts, or None if an error occurs.
+
     """
     from apps.owasp.models.post import Post
 
@@ -169,10 +189,13 @@ def get_text(blocks):
     """Convert blocks to plain text.
 
     Args:
+    ----
         blocks (list): A list of Slack block elements.
 
     Returns:
+    -------
         str: The plain text representation of the blocks.
+
     """
     text = []
 
@@ -221,10 +244,13 @@ def strip_markdown(text):
     """Strip markdown formatting.
 
     Args:
+    ----
         text (str): The text with markdown formatting.
 
     Returns:
+    -------
         str: The text with markdown formatting removed.
+
     """
     slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
     return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")

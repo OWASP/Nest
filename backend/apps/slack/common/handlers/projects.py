@@ -20,13 +20,16 @@ def get_blocks(
     """Get projects blocks.
 
     Args:
+    ----
         page (int): The current page number for pagination.
         search_query (str): The search query for filtering projects.
         limit (int): The maximum number of projects to retrieve per page.
         presentation (EntityPresentation | None): Configuration for entity presentation.
 
     Returns:
+    -------
         list: A list of Slack blocks representing the projects.
+
     """
     from apps.owasp.api.search.project import get_projects
     from apps.owasp.models.project import Project

@@ -11,13 +11,14 @@ COMMAND = "/policies"
 
 
 def policies_handler(ack, command, client):
-    """
-    Handle the Slack /policies command.
+    """Handle the Slack /policies command.
 
     Args:
+    ----
         ack (function): Acknowledge the Slack command request.
         command (dict): The Slack command payload.
         client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+
     """
     ack()
 

@@ -21,12 +21,15 @@ class RepositoryContributorQuery(BaseQuery):
         """Resolve top contributors only for repositories with projects.
 
         Args:
+        ----
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of contributors to return.
 
         Returns:
+        -------
             list: List of top contributors with their details.
+
         """
         top_contributors = (
             RepositoryContributor.objects.by_humans()

@@ -78,20 +78,22 @@ class IssueIndex(IndexBase):
 
     @staticmethod
     def update_synonyms():
-        """
-        Update synonyms for the issue index.
+        """Update synonyms for the issue index.
 
-        Returns:
+        Returns
+        -------
             None
+
         """
         return IndexBase.reindex_synonyms("github", "issues")
 
     def get_entities(self):
-        """
-        Get entities for indexing.
+        """Get entities for indexing.
 
-        Returns:
+        Returns
+        -------
             QuerySet: A queryset of Issue objects to be indexed.
+
         """
         return Issue.open_issues.assignable.select_related(
             "repository",

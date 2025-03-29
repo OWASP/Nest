@@ -22,15 +22,18 @@ def get_search_results(index_name, query, page, hits_per_page, facet_filters, ip
     """Return search results for the given parameters.
 
     Args:
+    ----
         index_name (str): The name of the index.
         query (str): The search query.
         page (int): The page number.
         hits_per_page (int): The number of hits per page.
         facet_filters (list): The list of facet filters.
-        ip_address (str, optional): The IP address of the user. Defaults to None.
+        ip_address (str, optional): The IP address of the user.
 
     Returns:
+    -------
         dict: The search results containing hits and number of pages.
+
     """
     search_params = get_params_for_index(index_name.split("_")[0])
     search_params.update(
@@ -57,10 +60,13 @@ def algolia_search(request):
     """Search Algolia API endpoint.
 
     Args:
+    ----
         request (HttpRequest): The HTTP request object.
 
     Returns:
+    -------
         JsonResponse: The search results or an error message.
+
     """
     if request.method != "POST":
         return JsonResponse(

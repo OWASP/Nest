@@ -52,17 +52,16 @@ class ReleaseIndex(IndexBase):
 
     @staticmethod
     def update_synonyms():
-        """
-        Update synonyms for the release index.
-        """
+        """Update synonyms for the release index."""
         ReleaseIndex.reindex_synonyms("github", "releases")
 
     def get_entities(self):
-        """
-        Get entities for indexing.
+        """Get entities for indexing.
 
-        Returns:
+        Returns
+        -------
             QuerySet: A queryset of Release objects to be indexed.
+
         """
         return Release.objects.filter(
             is_draft=False,

@@ -32,7 +32,9 @@ class Command(BaseCommand):
         """Add command-line arguments to the parser.
 
         Args:
+        ----
             parser (ArgumentParser): The argument parser instance.
+
         """
         parser.add_argument(
             "--output-dir",
@@ -44,8 +46,10 @@ class Command(BaseCommand):
         """Generate sitemaps for the OWASP Nest application.
 
         Args:
+        ----
             *args: Positional arguments (not used).
             **options: Command-line options.
+
         """
         output_dir = Path(options["output_dir"])
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -72,7 +76,9 @@ class Command(BaseCommand):
         """Generate a sitemap for projects.
 
         Args:
+        ----
             output_dir (Path): The directory to save the sitemap.
+
         """
         routes = self.static_routes["projects"]
         projects = Project.objects.all()
@@ -92,7 +98,9 @@ class Command(BaseCommand):
         """Generate a sitemap for chapters.
 
         Args:
+        ----
             output_dir (Path): The directory to save the sitemap.
+
         """
         routes = self.static_routes["chapters"]
         chapters = Chapter.objects.filter(is_active=True)
@@ -112,7 +120,9 @@ class Command(BaseCommand):
         """Generate a sitemap for committees.
 
         Args:
+        ----
             output_dir (Path): The directory to save the sitemap.
+
         """
         routes = self.static_routes["committees"]
         indexable_committees = Committee.objects.filter(is_active=True)
@@ -135,7 +145,9 @@ class Command(BaseCommand):
         """Generate a sitemap for users.
 
         Args:
+        ----
             output_dir (Path): The directory to save the sitemap.
+
         """
         routes = self.static_routes["users"]
         users = User.objects.all()
@@ -155,10 +167,13 @@ class Command(BaseCommand):
         """Generate the XML content for a sitemap.
 
         Args:
+        ----
             routes (list): A list of route dictionaries.
 
         Returns:
+        -------
             str: The XML content of the sitemap.
+
         """
         urls = []
         lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -178,10 +193,13 @@ class Command(BaseCommand):
         """Generate the sitemap index file.
 
         Args:
+        ----
             sitemap_files (list): A list of sitemap file names.
 
         Returns:
+        -------
             str: The XML content of the sitemap index.
+
         """
         sitemaps = []
         lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -196,10 +214,13 @@ class Command(BaseCommand):
         """Create a URL entry for the sitemap.
 
         Args:
+        ----
             url_data (dict): A dictionary containing URL data.
 
         Returns:
+        -------
             str: The XML entry for the URL.
+
         """
         return (
             "  <url>\n"
@@ -214,10 +235,13 @@ class Command(BaseCommand):
         """Create a sitemap index entry.
 
         Args:
+        ----
             sitemap_data (dict): A dictionary containing sitemap data.
 
         Returns:
+        -------
             str: The XML entry for the sitemap index.
+
         """
         return (
             "  <sitemap>\n"
@@ -230,10 +254,13 @@ class Command(BaseCommand):
         """Create the complete sitemap XML.
 
         Args:
+        ----
             urls (list): A list of URL entries.
 
         Returns:
+        -------
             str: The XML content of the sitemap.
+
         """
         return (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -246,10 +273,13 @@ class Command(BaseCommand):
         """Create the complete sitemap index XML.
 
         Args:
+        ----
             sitemaps (list): A list of sitemap index entries.
 
         Returns:
+        -------
             str: The XML content of the sitemap index.
+
         """
         return (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -263,8 +293,10 @@ class Command(BaseCommand):
         """Save the sitemap content to a file.
 
         Args:
+        ----
             content (str): The XML content of the sitemap.
             filepath (Path): The file path to save the sitemap.
+
         """
         with filepath.open("w", encoding="utf-8") as f:
             f.write(content)

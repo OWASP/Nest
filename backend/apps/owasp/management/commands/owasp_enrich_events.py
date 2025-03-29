@@ -18,7 +18,9 @@ class Command(BaseCommand):
         """Add command-line arguments to the parser.
 
         Args:
+        ----
             parser (argparse.ArgumentParser): The argument parser instance.
+
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
@@ -26,9 +28,11 @@ class Command(BaseCommand):
         """Handle the command execution.
 
         Args:
+        ----
             *args: Variable length argument list.
             **options: Arbitrary keyword arguments containing command options.
                 offset (int): The starting index for processing.
+
         """
         events = Event.objects.order_by("id")
         all_events = []

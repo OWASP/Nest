@@ -22,14 +22,17 @@ class PullRequestQuery(BaseQuery):
         """Resolve recent pull requests.
 
         Args:
+        ----
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of pull requests to return.
-            distinct (bool): Whether to return unique pull requests per author and repository. Defaults to False.
-            login (str, optional): Filter pull requests by a specific author's login. Defaults to None.
+            distinct (bool): Whether to return unique pull requests per author and repository.
+            login (str, optional): Filter pull requests by a specific author's login.
 
         Returns:
+        -------
             QuerySet: Queryset containing the filtered list of pull requests.
+
         """
         queryset = PullRequest.objects.select_related(
             "author",

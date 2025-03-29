@@ -22,8 +22,10 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
     def __str__(self):
         """Return a human-readable representation of the label.
 
-        Returns:
+        Returns
+        -------
             str: The name and description of the label.
+
         """
         return f"{self.name} ({self.description})" if self.description else self.name
 
@@ -31,7 +33,9 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
         """Update the instance based on GitHub label data.
 
         Args:
+        ----
             gh_label (github.Label.Label): The GitHub label object.
+
         """
         # TODO(arkid15r): uncomment after PyGithub supports all fields.
         field_mapping = {
@@ -58,11 +62,14 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
         """Update label data.
 
         Args:
+        ----
             gh_label (github.Label.Label): The GitHub label object.
-            save (bool, optional): Whether to save the instance. Defaults to True.
+            save (bool, optional): Whether to save the instance.
 
         Returns:
+        -------
             Label: The updated or created label instance.
+
         """
         label_node_id = Label.get_node_id(gh_label)
         try:

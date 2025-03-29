@@ -30,8 +30,10 @@ class Prompt(TimestampedModel):
         """Save prompt.
 
         Args:
+        ----
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
+
         """
         self.key = slugify(self.name)
 
@@ -42,10 +44,13 @@ class Prompt(TimestampedModel):
         """Return prompt by key.
 
         Args:
+        ----
             key (str): The key of the prompt.
 
         Returns:
+        -------
             str: The text of the prompt, or None if not found.
+
         """
         try:
             return Prompt.objects.get(key=key).text
@@ -57,8 +62,10 @@ class Prompt(TimestampedModel):
     def get_github_issue_hint():
         """Return GitHub issue hint prompt.
 
-        Returns:
+        Returns
+        -------
             str: The GitHub issue hint prompt text.
+
         """
         return Prompt.get_text("github-issue-hint")
 
@@ -66,8 +73,10 @@ class Prompt(TimestampedModel):
     def get_github_issue_documentation_project_summary():
         """Return GitHub issue documentation project summary prompt.
 
-        Returns:
+        Returns
+        -------
             str: The GitHub issue documentation project summary prompt text.
+
         """
         return Prompt.get_text("github-issue-documentation-project-summary")
 
@@ -75,8 +84,10 @@ class Prompt(TimestampedModel):
     def get_github_issue_project_summary():
         """Return GitHub issue project summary prompt.
 
-        Returns:
+        Returns
+        -------
             str: The GitHub issue project summary prompt text.
+
         """
         return Prompt.get_text("github-issue-project-summary")
 
@@ -84,8 +95,10 @@ class Prompt(TimestampedModel):
     def get_owasp_chapter_suggested_location():
         """Return OWASP chapter suggested location prompt.
 
-        Returns:
+        Returns
+        -------
             str: The OWASP chapter suggested location prompt text.
+
         """
         return Prompt.get_text("owasp-chapter-suggested-location")
 
@@ -93,8 +106,10 @@ class Prompt(TimestampedModel):
     def get_owasp_chapter_summary():
         """Return OWASP chapter summary prompt.
 
-        Returns:
+        Returns
+        -------
             str: The OWASP chapter summary prompt text.
+
         """
         return Prompt.get_text("owasp-chapter-summary")
 
@@ -102,8 +117,10 @@ class Prompt(TimestampedModel):
     def get_owasp_committee_summary():
         """Return OWASP committee summary prompt.
 
-        Returns:
+        Returns
+        -------
             str: The OWASP committee summary prompt text.
+
         """
         return Prompt.get_text("owasp-committee-summary")
 
@@ -111,8 +128,10 @@ class Prompt(TimestampedModel):
     def get_owasp_event_suggested_location():
         """Return OWASP event suggested location prompt.
 
-        Returns:
+        Returns
+        -------
             str: The OWASP event suggested location prompt text.
+
         """
         return Prompt.get_text("owasp-event-suggested-location")
 
@@ -120,8 +139,10 @@ class Prompt(TimestampedModel):
     def get_owasp_event_summary():
         """Return OWASP event summary prompt.
 
-        Returns:
+        Returns
+        -------
             str: The OWASP event summary prompt text.
+
         """
         return Prompt.get_text("owasp-event-summary")
 
@@ -129,7 +150,9 @@ class Prompt(TimestampedModel):
     def get_owasp_project_summary():
         """Return OWASP project summary prompt.
 
-        Returns:
+        Returns
+        -------
             str: The OWASP project summary prompt text.
+
         """
         return Prompt.get_text("owasp-project-summary")

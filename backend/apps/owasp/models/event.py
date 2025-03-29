@@ -54,8 +54,10 @@ class Event(BulkSaveModel, TimestampedModel):
     def upcoming_events():
         """Get upcoming events.
 
-        Returns:
+        Returns
+        -------
             QuerySet: A queryset of upcoming Event instances ordered by start date.
+
         """
         return Event.objects.filter(
             start_date__gt=timezone.now(),
@@ -68,11 +70,14 @@ class Event(BulkSaveModel, TimestampedModel):
         """Bulk save events.
 
         Args:
+        ----
             events (list): A list of Event instances to be saved.
-            fields (list, optional): A list of fields to update during the bulk save. Defaults to None.
+            fields (list, optional): A list of fields to update during the bulk save.
 
         Returns:
+        -------
             None
+
         """
         BulkSaveModel.bulk_save(Event, events, fields=fields)
 
@@ -82,11 +87,14 @@ class Event(BulkSaveModel, TimestampedModel):
         """Parse event dates.
 
         Args:
-            dates (str): A string representing the event dates. Can be a single date or a date range.
-            start_date (datetime.date): The start date of the event, used to infer the month for date ranges.
+        ----
+            dates (str): A string representing the event dates.
+            start_date (datetime.date): The start date of the event.
 
         Returns:
+        -------
             datetime.date or None: The parsed end date if successful, otherwise None.
+
         """
         if not dates:
             return None
@@ -133,12 +141,15 @@ class Event(BulkSaveModel, TimestampedModel):
         """Update event data.
 
         Args:
+        ----
             category (str): The category of the event.
             data (dict): A dictionary containing event data.
-            save (bool, optional): Whether to save the event instance. Defaults to True.
+            save (bool, optional): Whether to save the event instance.
 
         Returns:
+        -------
             Event: The updated or newly created Event instance.
+
         """
         key = slugify(data["name"])
         try:
@@ -156,11 +167,14 @@ class Event(BulkSaveModel, TimestampedModel):
         """Update instance based on the dict data.
 
         Args:
+        ----
             category (str): The category of the event.
             data (dict): A dictionary containing event data.
 
         Returns:
+        -------
             None
+
         """
         fields = {
             "category": {
@@ -183,8 +197,10 @@ class Event(BulkSaveModel, TimestampedModel):
     def generate_geo_location(self):
         """Add latitude and longitude data.
 
-        Returns:
+        Returns
+        -------
             None
+
         """
         location = None
         if self.suggested_location and self.suggested_location != "None":
@@ -199,10 +215,13 @@ class Event(BulkSaveModel, TimestampedModel):
         """Generate a suggested location for the event.
 
         Args:
+        ----
             prompt (str): The prompt to be used for generating the suggested location.
 
         Returns:
+        -------
             None
+
         """
         open_ai = OpenAi()
         open_ai.set_input(self.get_context())
@@ -219,10 +238,13 @@ class Event(BulkSaveModel, TimestampedModel):
         """Generate a summary for the event.
 
         Args:
+        ----
             prompt (str): The prompt to be used for generating the summary.
 
         Returns:
+        -------
             None
+
         """
         open_ai = OpenAi()
         open_ai.set_input(self.get_context(include_dates=True))
@@ -237,10 +259,13 @@ class Event(BulkSaveModel, TimestampedModel):
         """Return geo string.
 
         Args:
-            include_dates (bool, optional): Whether to include event dates in the context. Defaults to False.
+        ----
+            include_dates (bool, optional): Whether to include event dates in the context.
 
         Returns:
+        -------
             str: The generated context string.
+
         """
         context = [
             f"Name: {self.name}",

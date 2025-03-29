@@ -14,11 +14,12 @@ class Command(BaseCommand):
     help = "Enrich GitHub issue with AI generated data."
 
     def add_arguments(self, parser):
-        """
-        Add command-line arguments to the parser.
+        """Add command-line arguments to the parser.
 
         Args:
+        ----
             parser (argparse.ArgumentParser): The argument parser instance.
+
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
         parser.add_argument(
@@ -31,12 +32,13 @@ class Command(BaseCommand):
         parser.add_argument("--update-summary", default=True, required=False, action="store_true")
 
     def handle(self, *args, **options):
-        """
-        Handle the command execution.
+        """Handle the command execution.
 
         Args:
+        ----
             *args: Variable length argument list.
             **options: Arbitrary keyword arguments containing command options.
+
         """
         open_ai = OpenAi()
 

@@ -23,8 +23,10 @@ class Event(TimestampedModel):
     def __str__(self):
         """Event human readable representation.
 
-        Returns:
+        Returns
+        -------
             str: A string representation of the event.
+
         """
         return f"Event from {self.user_name or self.user_id} triggered by {self.trigger}"
 
@@ -32,8 +34,10 @@ class Event(TimestampedModel):
         """Create instance based on Slack data.
 
         Args:
+        ----
             context (dict): Context data from Slack, including user and channel information.
             payload (dict): Payload data from Slack, including command and text information.
+
         """
         self.channel_id = context.get("channel_id", "")
         self.channel_name = payload.get("channel_name", "")
@@ -59,12 +63,15 @@ class Event(TimestampedModel):
         """Create event.
 
         Args:
+        ----
             context (dict): Context data from Slack, including user and channel information.
             payload (dict): Payload data from Slack, including command and text information.
-            save (bool, optional): Whether to save the event to the database. Defaults to True.
+            save (bool, optional): Whether to save the event to the database.
 
         Returns:
+        -------
             Event: The created Event instance.
+
         """
         event = Event()
         event.from_slack(context, payload)

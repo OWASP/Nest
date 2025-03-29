@@ -16,12 +16,15 @@ class CommitteeQuery(BaseQuery):
         """Resolve committee by key.
 
         Args:
+        ----
             root: The root object.
             info: GraphQL execution info.
             key (str): The key of the committee.
 
         Returns:
+        -------
             Committee: The committee object if found, otherwise None.
+
         """
         try:
             return Committee.objects.get(key=f"www-committee-{key}")

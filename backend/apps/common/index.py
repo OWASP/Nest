@@ -52,18 +52,23 @@ class IndexRegistry:
         """Check if an index is enabled for indexing.
 
         Args:
+        ----
             name (str): The name of the index.
 
         Returns:
+        -------
             bool: True if the index is enabled, False otherwise.
+
         """
         return name.lower() not in self.excluded_local_index_names if IS_LOCAL_BUILD else True
 
     def load_excluded_local_index_names(self):
         """Load excluded local index names from settings.
 
-        Returns:
+        Returns
+        -------
             IndexRegistry: The current instance of the registry.
+
         """
         excluded_names = settings.ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES
         self.excluded_local_index_names = set(
@@ -83,10 +88,13 @@ def is_indexable(index_name: str):
     """Determine if an index should be created based on configuration.
 
     Args:
+    ----
         index_name (str): The name of the index.
 
     Returns:
+    -------
         bool: True if the index is indexable, False otherwise.
+
     """
     return IndexRegistry.get_instance().is_indexable(index_name)
 
@@ -95,11 +103,14 @@ def register(model, **kwargs):
     """Register an index if configuration allows.
 
     Args:
+    ----
         model (Model): The Django model to register.
         **kwargs: Additional arguments for the registration.
 
     Returns:
+    -------
         Callable: A wrapper function for the index class.
+
     """
 
     def wrapper(index_cls):
@@ -120,10 +131,13 @@ class IndexBase(AlgoliaIndex):
         """Return an instance of the search client.
 
         Args:
-            ip_address (str, optional): The IP address for the client. Defaults to None.
+        ----
+            ip_address (str, optional): The IP address for the client.
 
         Returns:
+        -------
             SearchClientSync: The search client instance.
+
         """
         config = SearchConfig(
             settings.ALGOLIA_APPLICATION_ID,
@@ -139,8 +153,10 @@ class IndexBase(AlgoliaIndex):
         """Configure replicas for an index.
 
         Args:
+        ----
             index_name (str): The name of the base index.
             replicas (dict): A dictionary of replica names and their ranking configurations.
+
         """
         if not is_indexable(index_name):
             return  # Skip replicas configuration if base index is off.
@@ -166,10 +182,13 @@ class IndexBase(AlgoliaIndex):
         """Parse a synonyms file and return its content.
 
         Args:
+        ----
             file_path (str): The path to the synonyms file.
 
         Returns:
+        -------
             list: A list of parsed synonyms or None if the file is not found.
+
         """
         try:
             with Path(file_path).open("r", encoding="utf-8") as f:
@@ -211,11 +230,14 @@ class IndexBase(AlgoliaIndex):
         """Reindex synonyms for a specific index.
 
         Args:
+        ----
             app_name (str): The name of the application.
             index_name (str): The name of the index.
 
         Returns:
+        -------
             int or None: The number of synonyms reindexed, or None if an error occurs.
+
         """
         file_path = Path(f"{settings.BASE_DIR}/apps/{app_name}/index/synonyms/{index_name}.txt")
 
@@ -242,11 +264,14 @@ class IndexBase(AlgoliaIndex):
         """Get the total count of records in an index.
 
         Args:
+        ----
             index_name (str): The name of the index.
-            search_filters (str, optional): Filters to apply to the search. Defaults to None.
+            search_filters (str, optional): Filters to apply to the search.
 
         Returns:
+        -------
             int: The total count of records in the index.
+
         """
         client = IndexBase.get_client()
         try:
@@ -268,8 +293,10 @@ class IndexBase(AlgoliaIndex):
     def get_queryset(self):
         """Get the queryset for the index.
 
-        Returns:
+        Returns
+        -------
             QuerySet: The queryset of entities to index.
+
         """
         qs = self.get_entities()
 

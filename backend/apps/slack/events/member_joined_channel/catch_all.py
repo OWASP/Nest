@@ -8,9 +8,11 @@ def catch_all_handler(event, client, ack):  # noqa: ARG001
     """Slack new member cache all handler.
 
     Args:
+    ----
         event (dict): The event payload from Slack.
         client (slack_sdk.WebClient): The Slack WebClient instance.
         ack (Callable): The acknowledgment function to confirm event processing.
+
     """
     ack()
 

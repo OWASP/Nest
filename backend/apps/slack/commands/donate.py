@@ -11,13 +11,14 @@ COMMAND = "/donate"
 
 
 def donate_handler(ack, command, client):
-    """
-    Handle the Slack /donate command.
+    """Handle the Slack /donate command.
 
     Args:
+    ----
         ack (function): Acknowledge the Slack command request.
         command (dict): The Slack command payload.
         client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+
     """
     ack()
 

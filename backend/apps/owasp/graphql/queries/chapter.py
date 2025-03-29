@@ -17,12 +17,15 @@ class ChapterQuery(BaseQuery):
         """Resolve chapter by key.
 
         Args:
+        ----
             root: The root object.
             info: GraphQL execution info.
             key (str): The key of the chapter.
 
         Returns:
+        -------
             Chapter: The chapter object if found, otherwise None.
+
         """
         try:
             return Chapter.objects.get(key=f"www-chapter-{key}")
@@ -33,11 +36,14 @@ class ChapterQuery(BaseQuery):
         """Resolve recent chapters.
 
         Args:
+        ----
             root: The root object.
             info: GraphQL execution info.
             limit (int): The maximum number of recent chapters to return.
 
         Returns:
+        -------
             QuerySet: A queryset of recent active chapters.
+
         """
         return Chapter.objects.filter(is_active=True).order_by("-created_at")[:limit]

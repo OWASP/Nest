@@ -75,8 +75,10 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         """Bulk save sponsors.
 
         Args:
+        ----
             sponsors (list[Sponsor]): List of Sponsor instances to save.
-            fields (list[str], optional): List of fields to update. Defaults to None.
+            fields (list[str], optional): List of fields to update.
+
         """
         BulkSaveModel.bulk_save(Sponsor, sponsors, fields=fields)
 
@@ -85,11 +87,14 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         """Update sponsor data.
 
         Args:
+        ----
             data (dict): Dictionary containing sponsor data.
-            save (bool, optional): Whether to save the instance. Defaults to True.
+            save (bool, optional): Whether to save the instance.
 
         Returns:
+        -------
             Sponsor: The updated Sponsor instance.
+
         """
         key = slugify(data["name"])
         try:
@@ -108,7 +113,9 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         """Update instance based on the dictionary data.
 
         Args:
+        ----
             data (dict): Dictionary containing sponsor data.
+
         """
         image_path = data.get("image", "").lstrip("/")
         image_url = f"https://raw.githubusercontent.com/OWASP/owasp.github.io/main/{image_path}"

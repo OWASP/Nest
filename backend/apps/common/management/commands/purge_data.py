@@ -12,8 +12,10 @@ class Command(BaseCommand):
         """Purge data from specified OWASP Nest applications.
 
         Args:
+        ----
             *_args: Positional arguments (not used).
             **options: Keyword arguments (not used).
+
         """
         nest_apps = ("github", "owasp")
 

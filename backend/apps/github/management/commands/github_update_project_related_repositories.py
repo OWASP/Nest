@@ -21,21 +21,23 @@ class Command(BaseCommand):
     help = "Updates OWASP project related repositories."
 
     def add_arguments(self, parser):
-        """
-        Add command-line arguments to the parser.
+        """Add command-line arguments to the parser.
 
         Args:
+        ----
             parser (argparse.ArgumentParser): The argument parser instance.
+
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options):
-        """
-        Handle the command execution.
+        """Handle the command execution.
 
         Args:
+        ----
             *args: Variable length argument list.
             **options: Arbitrary keyword arguments containing command options.
+
         """
         active_projects = Project.active_projects.order_by("-created_at")
         active_projects_count = active_projects.count()

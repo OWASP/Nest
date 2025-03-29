@@ -11,13 +11,14 @@ COMMAND = "/staff"
 
 
 def staff_handler(ack, command, client):
-    """
-    Handle the Slack /staff command.
+    """Handle the Slack /staff command.
 
     Args:
+    ----
         ack (function): Acknowledge the Slack command request.
         command (dict): The Slack command payload.
         client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+
     """
     ack()
 

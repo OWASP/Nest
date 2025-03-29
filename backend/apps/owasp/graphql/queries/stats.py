@@ -17,12 +17,15 @@ class StatsQuery:
         """Resolve stats overview.
 
         Args:
+        ----
             self: The StatsQuery instance.
             info: GraphQL execution info.
             **kwargs: Additional arguments.
 
         Returns:
+        -------
             StatsNode: A node containing aggregated statistics.
+
         """
         active_projects_stats = Project.active_projects_count()
         active_chapters_stats = Chapter.active_chapters_count()

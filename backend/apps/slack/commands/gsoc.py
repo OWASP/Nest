@@ -18,13 +18,14 @@ SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 
 
 
 def gsoc_handler(ack, command, client):
-    """
-    Handle the Slack /gsoc command.
+    """Handle the Slack /gsoc command.
 
     Args:
+    ----
         ack (function): Acknowledge the Slack command request.
         command (dict): The Slack command payload.
         client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+
     """
     from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
     from apps.slack.utils import get_gsoc_projects
