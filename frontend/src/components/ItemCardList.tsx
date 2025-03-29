@@ -18,6 +18,11 @@ const ItemCardList = ({
     commentsCount: number
     publishedAt: string
     tagName: string
+    author: {
+      avatarUrl: string
+      login: string
+      name: string
+    }
   }) => JSX.Element
 }) => (
   <SecondaryCard title={title}>
