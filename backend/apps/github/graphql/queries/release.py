@@ -35,9 +35,14 @@ class ReleaseQuery(BaseQuery):
             is_draft=False,
             is_pre_release=False,
             published_at__isnull=False,
-        ).order_by("author_id", "repository_id", "-published_at")
+        ).order_by("-published_at")
 
         if distinct:
-            query = query.distinct("author_id", "repository_id")
+            query = query.distinct(
+                "author_id",
+                "published_at",
+            ).order_by(
+                "-published_at",
+            )
 
         return query[:limit]

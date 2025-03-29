@@ -33,14 +33,22 @@ class IssueQuery(BaseQuery):
             Queryset containing the filtered list of issues.
 
         """
-        queryset = Issue.objects.select_related("author").order_by("-created_at")
+        queryset = Issue.objects.select_related(
+            "author",
+        ).order_by(
+            "-created_at",
+        )
 
         if login:
             queryset = queryset.filter(author__login=login)
 
         if distinct:
-            queryset = queryset.order_by("author_id", "repository_id", "-created_at").distinct(
-                "author_id", "repository_id"
+            queryset = queryset.distinct(
+                "author_id",
+                "created_at",
+            ).order_by(
+                "-created_at",
+                "author_id",
             )
 
         return queryset[:limit]

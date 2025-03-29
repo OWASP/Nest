@@ -19,8 +19,8 @@ class ProjectNode(GenericEntityNode):
     key = graphene.String()
     languages = graphene.List(graphene.String)
     level = graphene.String()
-    recent_issues = graphene.List(IssueNode, distinct=graphene.Boolean(default_value=False))
-    recent_releases = graphene.List(ReleaseNode, distinct=graphene.Boolean(default_value=False))
+    recent_issues = graphene.List(IssueNode)
+    recent_releases = graphene.List(ReleaseNode)
     repositories = graphene.List(RepositoryNode)
     repositories_count = graphene.Int()
     topics = graphene.List(graphene.String)
@@ -53,47 +53,13 @@ class ProjectNode(GenericEntityNode):
         """Resolve languages."""
         return self.idx_languages
 
-    def resolve_recent_issues(self, info, limit=RECENT_ISSUES_LIMIT, distinct=False):
-        """Resolve recent issues with optional distinct filtering.
+    def resolve_recent_issues(self, info):
+        """Resolve recent issues."""
+        return self.issues.select_related("author").order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-        Args:
-        ----
-            info (ResolveInfo): GraphQL execution context.
-            limit (int): Max number of recent issues to return.
-                Defaults to RECENT_ISSUES_LIMIT.
-            distinct (bool): Whether to return unique issues based on criteria.
-                Defaults to False.
-
-        Returns:
-        -------
-            QuerySet: Filtered queryset of recent issues.
-
-        """
-        from apps.github.models import Issue
-
-        query = Issue.objects.order_by("author_id", "repository_id", "-created_at")
-        if distinct:
-            query = query.distinct("author_id", "repository_id")
-        return query[:limit]
-
-    def resolve_recent_releases(self, info, distinct=False):
-        """Retrieve recent releases with optional distinct filtering.
-
-        Args:
-        ----
-            info (ResolveInfo): GraphQL execution context.
-            distinct (bool, optional): Whether to return unique releases
-                based on author and repository. Defaults to False.
-
-        Returns:
-        -------
-            QuerySet: A filtered list of recent releases.
-
-        """
-        query = self.published_releases.order_by("author_id", "repository_id", "-published_at")
-        if distinct:
-            query = query.distinct("author_id", "repository_id")
-        return query[:RECENT_RELEASES_LIMIT]
+    def resolve_recent_releases(self, info):
+        """Resolve recent releases."""
+        return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
     def resolve_repositories(self, info):
         """Resolve repositories."""
