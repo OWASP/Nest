@@ -60,12 +60,8 @@ const DetailsCard = ({
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="pb-1">
-                  <strong>
-                    {detail.label}:{' '}
-                    <LeadersList
-                      leaders={detail?.value != null ? String(detail.value) : 'Unknown'}
-                    />
-                  </strong>
+                  <strong>{detail.label}:</strong>{' '}
+                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
