@@ -16,6 +16,9 @@ class PullRequest(GenericIssueModel):
 
     class Meta:
         db_table = "github_pull_requests"
+        indexes = [
+            models.Index(fields=["-created_at"]),
+        ]
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Pull Requests"
 
