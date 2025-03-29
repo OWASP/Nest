@@ -13,6 +13,9 @@ collect-static:
 django-shell:
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
+match-user:
+	@CMD="python manage.py matching_users $(model)" $(MAKE) exec-backend-command-it
+
 dump-data:
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json
@@ -49,6 +52,10 @@ index-data:
 load-data:
 	@echo "Loading Nest data"
 	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
+
+load-slack-data:
+	@echo "Loading Slack data"
+	@CMD="python manage.py load_slack_data" $(MAKE) exec-backend-command
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
