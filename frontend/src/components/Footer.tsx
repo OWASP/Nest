@@ -1,6 +1,6 @@
 import { Box, Button, Heading, Link, List, Text } from '@chakra-ui/react'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { faGithub, faSlack, faBluesky } from '@fortawesome/free-brands-svg-icons'
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useCallback } from 'react'
 import { Section } from 'types/section'
@@ -21,18 +21,18 @@ export default function Footer() {
     {
       icon: faBluesky,
       href: 'https://bsky.app/profile/nest.owasp.org',
-      label: 'Bluesky'
+      label: 'Bluesky',
     },
     {
       icon: faGithub,
       href: 'https://github.com/owasp/nest',
-      label: 'GitHub'
+      label: 'GitHub',
     },
     {
       icon: faSlack,
       href: 'https://owasp.slack.com/archives/project-nest',
-      label: 'Slack'
-    }
+      label: 'Slack',
+    },
   ]
 
   return (
@@ -89,9 +89,9 @@ export default function Footer() {
             </Box>
           ))}
         </Box>
-        
+
         {/* Social Media Icons Section */}
-        <Box className="flex justify-center space-x-6 mb-0">
+        <Box className="mb-0 flex justify-center space-x-6">
           {socialLinks.map((social) => (
             <Link
               key={social.label}
@@ -99,7 +99,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`OWASP Nest ${social.label}`}
-              className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors duration-200"
+              className="text-slate-600 transition-colors duration-200 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             >
               <FontAwesomeIcon icon={social.icon} className="h-6 w-6" />
             </Link>
