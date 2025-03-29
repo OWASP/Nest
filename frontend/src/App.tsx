@@ -20,6 +20,7 @@ import Footer from 'components/Footer'
 import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
 import { Toaster } from 'components/ui/toaster'
+import About from 'pages/About'
 
 function App() {
   const location = useLocation()
@@ -33,6 +34,7 @@ function App() {
       <Toaster />
       <Header />
       <Routes>
+        <Route path="/about" element={<About />}></Route>
         <Route path="/" element={<Home />}></Route>
         <Route path="/projects" element={<ProjectsPage />}></Route>
         <Route path="/projects/:projectKey" element={<ProjectDetailsPage />}></Route>
