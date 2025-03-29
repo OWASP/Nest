@@ -15,7 +15,7 @@ const SnapshotsPage = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setSnapshots(graphQLData.snapshots)
+      setSnapshots(graphQLData.snapshots || [])
       setIsLoading(false)
     }
     if (graphQLRequestError) {

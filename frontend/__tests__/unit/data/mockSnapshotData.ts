@@ -85,3 +85,13 @@ export const mockSnapshotDetailsData = {
     ],
   },
 }
+
+export const mockSnapshotData = { snapshots : [
+  {
+    title: 'New Snapshot',
+    key: '2024-12',
+    startAt: '2024-12-01T00:00:00+00:00',
+    endAt: '2024-12-31T22:00:30+00:00',
+  },
+]
+}
