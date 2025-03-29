@@ -1,0 +1,61 @@
+name: Generate Graph Models
+
+on:
+  push:
+    paths:
+      - "backend/apps/*/models/*.py"
+  workflow_dispatch:
+
+jobs:
+  generate-graph:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install Graphviz
+        run: sudo apt-get install -y graphviz
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          cache: "poetry"
+          cache-dependency-path: backend/poetry.lock
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        working-directory: backend
+        run: poetry install --no-root
+
+      - name: Prepare Secrets
+        run: |
+          echo "DJANGO_SENTRY_DSN=None" >> $GITHUB_ENV
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=None" >> $GITHUB_ENV
+          echo "DJANGO_ALGOLIA_WRITE_API_KEY=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_PASSWORD=None" >> $GITHUB_ENV
+          echo "DJANGO_OPEN_AI_SECRET_KEY=None" >> $GITHUB_ENV
+          echo "DJANGO_SECRET_KEY=None" >> $GITHUB_ENV
+          echo "DJANGO_SLACK_BOT_TOKEN=None" >> $GITHUB_ENV
+          echo "DJANGO_SLACK_SIGNING_SECRET=None" >> $GITHUB_ENV
+
+      - name: Generate Graph Model Image
+        working-directory: backend
+        run: |
+          poetry run python manage.py graph_models -a -o ../docs/models_relations.png
+
+      - name: Upload Graph Image as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: models-relations
+          path: docs/models_relations.png
+
+      - name: Commit and Push Updated Image
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add docs/models_relations.png
+          git diff --staged --quiet || (git commit -m "Update models relations graph" && git push)
