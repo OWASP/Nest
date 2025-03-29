@@ -1,0 +1,58 @@
+name: Run CodeQL
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  code-ql:
+    name: CodeQL
+    permissions:
+      security-events: write
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language:
+          - javascript-typescript
+          - python
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9f45e7498becbbc08084a122b4be9ab534ac6d88
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@d648c2dd069001a242c621c8306af467f150e99d
+        with:
+          version: 10
+          run_install: false
+
+      - name: Set up Node
+        if: matrix.language == 'javascript-typescript'
+        uses: actions/setup-node@40337cb8f758cccdfe3475af609daa63f81c7e23
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies for frontend
+        if: matrix.language == 'javascript-typescript'
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@9f45e7498becbbc08084a122b4be9ab534ac6d88
+        with:
+          category: /language:${{ matrix.language }}

@@ -8,6 +8,9 @@ on:
 env:
   FORCE_COLOR: 1
 
+permissions:
+  contents: read
+
 jobs:
   update-data:
     name: Run data sync
@@ -20,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Prepare SSH key
         run: |

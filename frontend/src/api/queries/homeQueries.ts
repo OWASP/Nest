@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_MAIN_PAGE_DATA = gql`
-  query GetMainPageData {
+  query GetMainPageData($distinct: Boolean) {
     recentProjects(limit: 5) {
       createdAt
       key
@@ -32,7 +32,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       projectName
       projectUrl
     }
-    recentIssues(limit: 5) {
+    recentIssues(limit: 5, distinct: $distinct) {
       commentsCount
       createdAt
       title
@@ -43,7 +43,7 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
     }
-    recentReleases(limit: 5) {
+    recentReleases(limit: 5, distinct: $distinct) {
       author {
         avatarUrl
         login

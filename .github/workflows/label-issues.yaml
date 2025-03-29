@@ -1,16 +1,20 @@
-name: "Auto Label Issues"
+name: Auto Label Issues
+
 on:
   issues:
     types:
       - edited
       - opened
 
+permissions:
+  issues: write
+
 jobs:
   label:
     runs-on: ubuntu-latest
     steps:
       - name: Apply Labels to Issues
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@3908079ba1e7bce10117ad701c321d07e89017a9
         with:
           script: |
             const issue = context.payload.issue;
