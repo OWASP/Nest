@@ -39,7 +39,7 @@ class RepositoryContributorQuery(BaseQuery):
             .to_community_repositories()
             .filter(repository__project__isnull=False)
             .annotate(
-                 project_details=Subquery(
+                project_details=Subquery(
                     Project.repositories.through.objects.filter(
                         repository=OuterRef("repository_id")
                     ).values("project__name", "project__key")[:1]
@@ -49,8 +49,8 @@ class RepositoryContributorQuery(BaseQuery):
                     partition_by=[F("user__login"), F("repository")],
                     order_by=F("contributions_count").desc(),
                 ),
-            ) 
-            .filter(rank=1) 
+            )
+            .filter(rank=1)
             .values(
                 "contributions_count",
                 "user__avatar_url",
@@ -93,13 +93,14 @@ class RepositoryContributor(BaseRepositoryContributor):
 
     class Meta(BaseRepositoryContributor.Meta):
         """Meta options for RepositoryContributor model."""
+
         indexes = [
             *BaseRepositoryContributor.Meta.indexes,
             models.Index(
                 fields=["user", "repository", "contributions_count"],
                 name="user_repo_contributions_composite_idx",
             ),
-             models.Index(
+            models.Index(
                 fields=["repository", "contributions_count"], name="repo_contributions_idx"
             ),
             models.Index(fields=["user", "contributions_count"], name="user_contributions_idx"),
