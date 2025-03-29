@@ -1,6 +1,7 @@
 """GraphQL queries for handling GitHub issues."""
 
 import graphene
+from django.db.models import OuterRef, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.issue import IssueNode
@@ -43,12 +44,15 @@ class IssueQuery(BaseQuery):
             queryset = queryset.filter(author__login=login)
 
         if distinct:
-            queryset = queryset.distinct(
-                "author_id",
-                "created_at",
+            latest_issue_per_author = (
+                queryset.filter(author_id=OuterRef("author_id"))
+                .order_by("-created_at")
+                .values("id")[:1]
+            )
+            queryset = queryset.filter(
+                id__in=Subquery(latest_issue_per_author),
             ).order_by(
                 "-created_at",
-                "author_id",
             )
 
         return queryset[:limit]
