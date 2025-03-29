@@ -53,7 +53,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 5, distinct: $distinct) {
+    recentReleases(limit: 6, distinct: $distinct) {
       author {
         avatarUrl
         login
