@@ -3,7 +3,7 @@ import markdownit from 'markdown-it'
 
 export default function Markdown({ content, className }: { content: string; className?: string }) {
   const md = markdownit({
-    html: true,
+    html: false,
     linkify: true,
     typographer: true,
   })

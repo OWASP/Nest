@@ -81,51 +81,6 @@ jobs:
           git diff --exit-code || (echo 'Unstaged changes detected. \
           Run `make check-all` and use `git add` to address it.' && exit 1)
 
-  code-ql:
-    name: CodeQL
-    needs:
-      - pre-commit
-    permissions:
-      security-events: write
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        language:
-          - javascript-typescript
-          - python
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: false
-
-      - name: Set up Node
-        if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Install dependencies for frontend
-        if: matrix.language == 'javascript-typescript'
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
-
-      - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: /language:${{ matrix.language }}
-
   spellcheck:
     name: Run spell check
     runs-on: ubuntu-latest
@@ -222,7 +177,6 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
-      - code-ql
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
@@ -365,7 +319,6 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - code-ql
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests

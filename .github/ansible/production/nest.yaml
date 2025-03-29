@@ -69,12 +69,6 @@
           dest: ~/schema/Makefile
           mode: '0644'
 
-      - name: Copy directory recursively
-        copy:
-          src: '{{ github_workspace }}/backend/data'
-          dest: ~/
-          mode: '0755'
-
       - name: Copy .env.backend
         copy:
           src: '{{ github_workspace }}/.env.backend'

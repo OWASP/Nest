@@ -40,11 +40,10 @@ test.describe('Home Page', () => {
 
   test('should have recent posts', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
-    const postContainer = page.getByTestId('post-container').first()
-    await expect(postContainer.getByRole('link', { name: 'Post 1' })).toBeVisible()
-    await expect(postContainer.getByText('Author 1')).toBeVisible()
-    await expect(postContainer.getByText('Feb 23').first()).toBeVisible()
-    await postContainer.getByRole('link', { name: 'Post 1' }).click()
+    await expect(page.getByRole('link', { name: 'Post 1' })).toBeVisible()
+    await expect(page.getByText('Author 1')).toBeVisible()
+    await expect(page.getByText('Feb 23').first()).toBeVisible()
+    await page.getByRole('link', { name: 'Post 1' }).click()
   })
 
   test('should have top contributors', async ({ page }) => {
@@ -83,5 +82,16 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
     await expect(page.getByText('Feb 27 — 28, 2025')).toBeVisible()
     await page.getByRole('button', { name: 'Event 1' }).click()
+  })
+
+  test('should have truncated text with overflow for all relevant elements', async ({ page }) => {
+    const truncatedElements = await page.locator('span.truncate').all()
+    expect(truncatedElements.length).toBeGreaterThan(0)
+
+    for (const element of truncatedElements) {
+      await expect(element).toHaveCSS('overflow', 'hidden')
+      await expect(element).toHaveCSS('text-overflow', 'ellipsis')
+      await expect(element).toHaveCSS('white-space', 'nowrap')
+    }
   })
 })

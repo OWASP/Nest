@@ -13,6 +13,7 @@ import type React from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RepositoriesCardProps } from 'types/project'
+import { TruncatedText } from './TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
@@ -51,15 +52,15 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
 const RepositoryItem = ({ details }) => {
   const navigate = useNavigate()
   const handleClick = () => {
-    navigate(window.location.pathname + '/repositories/' + details?.key)
+    navigate('/repositories/' + details?.key)
   }
   return (
-    <div className="flex h-48 w-full flex-col justify-between rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
-        className="font-semibold text-blue-600 hover:cursor-pointer hover:underline dark:text-sky-400"
+        className="text-start font-semibold text-blue-500 hover:underline dark:text-blue-400"
       >
-        {details?.name}
+        <TruncatedText text={details?.name} />
       </button>
 
       <div className="space-y-2 text-sm">
