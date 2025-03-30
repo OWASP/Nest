@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name="repositorycontributor",
-            index=models.Index(fields=["user", "-contributions_count"], name="user_contrib_idx"),
+            index=models.Index(
+                fields=["user", "-contributions_count"], name="user_contributions_count_idx"
+            ),
         ),
     ]
