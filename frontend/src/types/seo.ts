@@ -23,6 +23,7 @@ export interface MetadataConfig {
   home: PageMetadata
   projectContribute: PageMetadata
   projects: PageMetadata
+  snapshot: PageMetadata
   users: PageMetadata
 }
 
