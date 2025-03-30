@@ -25,7 +25,6 @@ export const footerSections: Section[] = [
     title: 'OWASP Nest',
     links: [
       { text: 'About', href: '/about/' },
-      { text: 'Contact', href: 'https://owasp.slack.com/archives/project-nest' },
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
       { text: 'Leaders', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#leaders' },
       {
@@ -67,7 +66,6 @@ export const footerSections: Section[] = [
       { text: 'About', href: 'https://owasp.org/about/' },
       { text: 'Contact', href: 'https://owasp.org/contact/' },
       { text: 'Events', href: 'https://owasp.glueup.com/organization/6727/events/' },
-      { text: 'Membership', href: 'https://owasp.glueup.com/organization/6727/memberships/' },
       { text: 'Team', href: 'https://owasp.org/corporate/' },
     ],
   },

@@ -130,21 +130,23 @@ describe('About Component', () => {
 
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<About />)
-
     await waitFor(() => {
-      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
       expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
     })
 
-    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    const contributorsSection = screen
+      .getByRole('heading', { name: /Top Contributors/i })
+      .closest('div')
+    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
       expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
     })
 
-    const showLessButton = screen.getByRole('button', { name: /Show less/i })
+    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
