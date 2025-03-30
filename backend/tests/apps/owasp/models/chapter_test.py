@@ -79,8 +79,11 @@ class TestChapterModel:
         mock_prompt_manager = Mock()
         mock_prompt_manager.get.return_value = mock_prompt
 
-        with patch.object(Prompt, "objects", mock_prompt_manager), patch.object(
-            Prompt, "get_owasp_chapter_suggested_location", return_value=mock_prompt.text
+        with (
+            patch.object(Prompt, "objects", mock_prompt_manager),
+            patch.object(
+                Prompt, "get_owasp_chapter_suggested_location", return_value=mock_prompt.text
+            ),
         ):
             chapter.generate_suggested_location(open_ai=mock_open_ai)
 
