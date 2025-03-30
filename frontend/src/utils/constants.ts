@@ -13,8 +13,8 @@ export const headerLinks: Link[] = [
   {
     text: 'Community',
     submenu: [
-      { text: 'Users', href: '/community/users' },
       { text: 'Snapshots', href: '/community/snapshots' },
+      { text: 'Users', href: '/community/users' },
     ],
   },
   {

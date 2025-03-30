@@ -58,7 +58,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
 
 export const GET_COMMUNITY_SNAPSHOTS = gql`
   query GetCommunitySnapshots {
-    snapshots(limit: 24) {
+    snapshots(limit: 12) {
       key
       title
       startAt

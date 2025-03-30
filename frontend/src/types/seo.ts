@@ -23,8 +23,8 @@ export interface MetadataConfig {
   home: PageMetadata
   projectContribute: PageMetadata
   projects: PageMetadata
-  users: PageMetadata
   snapshot: PageMetadata
+  users: PageMetadata
 }
 
 export interface MetadataManagerProps {

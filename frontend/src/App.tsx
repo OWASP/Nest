@@ -9,9 +9,9 @@ import {
   ProjectsPage,
   RepositoryDetailsPage,
   SnapshotDetailsPage,
+  SnapshotsPage,
   UserDetailsPage,
   UsersPage,
-  SnapshotsPage,
 } from 'pages'
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
