@@ -1,4 +1,5 @@
 'use client'
+import { faBluesky, faGithub, faSlack } from '@fortawesome/free-brands-svg-icons'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
@@ -13,7 +14,24 @@ export default function Footer() {
   const toggleSection = useCallback((title: string) => {
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
-
+  // Social media links configuration
+  const socialLinks = [
+    {
+      icon: faBluesky,
+      href: 'https://bsky.app/profile/nest.owasp.org',
+      label: 'Bluesky',
+    },
+    {
+      icon: faGithub,
+      href: 'https://github.com/owasp/nest',
+      label: 'GitHub',
+    },
+    {
+      icon: faSlack,
+      href: 'https://owasp.slack.com/archives/project-nest',
+      label: 'Slack',
+    },
+  ]
   return (
     <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
       <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
@@ -62,6 +80,23 @@ export default function Footer() {
             </div>
           ))}
         </div>
+
+        {/* Social Media Icons Section */}
+        <div className="mb-0 flex justify-center space-x-6">
+          {socialLinks.map((social) => (
+            <Link
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`OWASP Nest ${social.label}`}
+              className="text-slate-600 transition-colors duration-200 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            >
+              <FontAwesomeIcon icon={social.icon} className="h-6 w-6" />
+            </Link>
+          ))}
+        </div>
+        {/* Footer bottom section with copyright and links */}
         <div className="grid w-full place-content-center">
           <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:text-left">
             <p className="text-sm text-slate-600 dark:text-slate-400">

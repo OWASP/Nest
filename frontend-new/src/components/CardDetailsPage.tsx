@@ -6,14 +6,14 @@ import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 import { getSocialIcon } from 'utils/urlIconMappings'
-//break
-//
+//chaptermap
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
+import LeadersList from './LeadersList'
 
 const DetailsCard = ({
   title,
@@ -58,12 +58,18 @@ const DetailsCard = ({
             title={`${capitalize(type)} Details`}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
-            {details &&
-              details.map((detail, index) => (
-                <div key={index} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail.value ? detail.value : 'Unknown'}
+            {details?.map((detail) =>
+              detail?.label === 'Leaders' ? (
+                <div key={detail.label} className="pb-1">
+                  <strong>{detail.label}:</strong>{' '}
+                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
-              ))}
+              ) : (
+                <div key={detail.label} className="pb-1">
+                  <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
+                </div>
+              )
+            )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
             )}

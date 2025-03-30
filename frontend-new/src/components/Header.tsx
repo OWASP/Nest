@@ -1,4 +1,5 @@
 'use client'
+// new migration needed
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'

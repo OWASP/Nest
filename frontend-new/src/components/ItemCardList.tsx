@@ -3,6 +3,7 @@ import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
+import { TruncatedText } from './TruncatedText'
 
 const ItemCardList = ({
   title,
@@ -18,6 +19,11 @@ const ItemCardList = ({
     commentsCount: number
     publishedAt: string
     tagName: string
+    author: {
+      avatarUrl: string
+      login: string
+      name: string
+    }
   }) => JSX.Element
 }) => (
   <SecondaryCard title={title}>
@@ -37,7 +43,7 @@ const ItemCardList = ({
                       width={24}
                       src={item?.author?.avatarUrl}
                       alt={item?.author?.name}
-                      className="rounded-full"
+                      className="mr-2 rounded-full"
                     />
                   </a>
                 )}
@@ -47,7 +53,7 @@ const ItemCardList = ({
                     href={item?.url}
                     target="_blank"
                   >
-                    {item.title || item.name}
+                    <TruncatedText text={item.title || item.name} />
                   </a>
                 </h3>
               </div>
