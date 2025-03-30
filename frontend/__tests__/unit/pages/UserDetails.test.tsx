@@ -173,6 +173,9 @@ describe('UserDetailsPage', () => {
 
       const repositoriesCount = screen.getByText('3 Repositories')
       expect(repositoriesCount).toBeInTheDocument()
+
+      const contributionsCount = screen.getByText('100 Contributions')
+      expect(contributionsCount).toBeInTheDocument()
     })
   })
 

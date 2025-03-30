@@ -12,6 +12,7 @@ export const mockUserDetailsData = {
     followingCount: 5,
     publicRepositoriesCount: 3,
     createdAt: 1723002473,
+    contributionsCount: 100,
     issues: [
       {
         title: 'Test Issue',
