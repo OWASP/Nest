@@ -170,8 +170,8 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
 
-  build-docker-staging-images:
-    name: Build Docker Staging Images
+  build-staging-images:
+    name: Build Staging Images
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -228,6 +228,25 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
+  scan-staging-images:
+    name: Scan Staging Images
+    needs: build-staging-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 1
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+          severity: 'HIGH,CRITICAL'
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 1
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+          severity: 'HIGH,CRITICAL'
+
   deploy-staging-nest:
     name: Deploy Nest Staging
     env:
@@ -239,7 +258,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
-      - build-docker-staging-images
+      - scan-staging-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -371,6 +390,25 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
+  scan-production-images:
+    name: Scan Production Images
+    needs: build-docker-production-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 1
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+          severity: 'HIGH,CRITICAL'
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 1
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+          severity: 'HIGH,CRITICAL'
+
   deploy-production-nest:
     name: Deploy Nest to Production
     env:
@@ -382,7 +420,7 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - build-docker-production-images
+      - scan-production-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
