@@ -10,7 +10,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@v5
+      - uses: actions/labeler@6463cdb00ee92c05bec55dffc4e1fce250301945
         with:
           configuration-path: .github/labeler.yml
           sync-labels: true
