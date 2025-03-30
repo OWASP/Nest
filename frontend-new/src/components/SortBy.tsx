@@ -1,6 +1,6 @@
 import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Select, SelectItem } from '@heroui/select'
+import { Select, SelectItem, SelectSection } from '@heroui/select'
 import { Tooltip } from '@heroui/tooltip'
 import { SortByProps } from 'types/sortBy'
 
@@ -15,11 +15,18 @@ const SortBy = ({
   return (
     <div className="flex items-center gap-2">
       {/* Sort Attribute Dropdown */}
-      <div className="rounded-lg px-2 shadow-md">
+      <div className="h-12items-center inline-flex rounded-lg bg-gray-200 dark:bg-[#323232]">
         <Select
-          className="min-w-56"
+          className=""
           labelPlacement="outside-left"
+          size="md"
           label="Sort By :"
+          classNames={{
+            label:
+              'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
+            trigger: 'bg-gray-200 dark:bg-[#323232] w-auto pl-0 text-nowrap w-32',
+            popoverContent: 'text-md text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
+          }}
           selectedKeys={sortOptions
             .filter((item: { key: string; label: string }) => item.key === selectedSortOption)
             .map((item) => item.key)}
@@ -28,7 +35,14 @@ const SortBy = ({
           }}
         >
           {sortOptions.map((option: { label: string; key: string }) => (
-            <SelectItem key={option.key}>{option.label}</SelectItem>
+            <SelectItem
+              key={option.key}
+              classNames={{
+                base: 'text-sm hover:bg-[#D1DBE6] dark:hover:bg-[#454545] rounded-none px-3 py-0.5',
+              }}
+            >
+              {option.label}
+            </SelectItem>
           ))}
         </Select>
       </div>
