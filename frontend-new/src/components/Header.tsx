@@ -1,5 +1,4 @@
 'use client'
-// new migration needed
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -78,19 +77,48 @@ export default function Header() {
         {/* Desktop Header Links */}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
           <div className="flex justify-start pl-6">
-            {headerLinks.map((link, i) => (
-              <Link
-                key={i}
-                href={link.href}
-                className={cn(
-                  'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                  pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                )}
-                aria-current="page"
-              >
-                {link.text}
-              </Link>
-            ))}
+            {headerLinks.map((link, i) => {
+              return link.submenu ? (
+                <div
+                  key={i}
+                  className={cn(
+                    'dropdown navlink group px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    link.submenu.map((sub) => sub.href).includes(pathname) &&
+                      'font-bold text-blue-800 dark:text-white'
+                  )}
+                >
+                  {link.text}
+                  <div className="dropdown-menu group-hover:visible group-hover:opacity-100">
+                    {link.submenu.map((sub, i) => (
+                      <Link
+                        key={i}
+                        href={sub.href || '/'}
+                        className={cn(
+                          'navlink px-3 py-2 text-sm text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                          pathname === sub.href &&
+                            '!bg-blue-100 !text-blue-800 dark:!bg-slate-700 dark:!text-white'
+                        )}
+                        aria-current="page"
+                      >
+                        {sub.text}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  aria-current="page"
+                >
+                  {link.text}
+                </Link>
+              )
+            })}
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">
@@ -159,19 +187,42 @@ export default function Header() {
                 </div>
               </div>
             </Link>
-            {headerLinks.map((link, i) => (
-              <Link
-                key={i}
-                href={link.href}
-                className={cn(
-                  'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                  pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                )}
-                onClick={toggleMobileMenu}
-              >
-                {link.text}
-              </Link>
-            ))}
+            {headerLinks.map((link) =>
+              link.submenu ? (
+                <div key={link.text} className="flex flex-col">
+                  <div className="block px-3 py-2 font-medium text-slate-700 dark:text-slate-300">
+                    {link.text}
+                  </div>
+                  <div className="ml-4">
+                    {link.submenu.map((sub, i) => (
+                      <Link
+                        key={i}
+                        href={sub.href || '/'}
+                        className={cn(
+                          'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                          pathname === sub.href && 'font-bold text-blue-800 dark:text-white'
+                        )}
+                        onClick={toggleMobileMenu}
+                      >
+                        {sub.text}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  onClick={toggleMobileMenu}
+                >
+                  {link.text}
+                </Link>
+              )
+            )}
           </div>
 
           <div className="flex flex-col gap-y-2">

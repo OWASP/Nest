@@ -86,6 +86,7 @@
 }
 
 @keyframes fade-in-out {
+
   0%,
   100% {
     opacity: 0;
@@ -189,8 +190,7 @@ a {
 }
 
 :root {
-  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3)
-    brightness(0.7);
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -292,4 +292,20 @@ a {
   top: 45%;
   left: 50%;
   opacity: 0.6;
+}
+
+/* Dropdown container */
+.dropdown {
+  @apply relative;
+}
+
+.dropdown-menu {
+  @apply absolute left-0 top-full mt-2 w-48 rounded-lg bg-white p-3 shadow-lg dark:bg-gray-800;
+  @apply invisible opacity-0 transition-all duration-200 ease-in-out;
+  @apply flex flex-col space-y-2;
+  /* Stack items vertically */
+}
+
+.dropdown:hover .dropdown-menu {
+  @apply visible opacity-100;
 }
