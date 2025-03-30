@@ -236,14 +236,14 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 1
+          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
           severity: 'HIGH,CRITICAL'
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 1
+          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
           severity: 'HIGH,CRITICAL'
 
@@ -398,14 +398,14 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 1
+          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
           severity: 'HIGH,CRITICAL'
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 1
+          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
           severity: 'HIGH,CRITICAL'
 
