@@ -27,7 +27,7 @@ export const footerSections: Section[] = [
   {
     title: 'OWASP Nest',
     links: [
-      { text: 'About', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#owasp-nest' },
+      { text: 'About', href: '/about/' },
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
       { text: 'Leaders', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#leaders' },
       {
