@@ -136,7 +136,7 @@ const LeaderData = ({ username }: { username: string }) => {
   return (
     <UserCard
       avatar={user.avatarUrl}
-      company={user.company || 'OWASP'}
+      company={user.company || user.location}
       name={user.name || username}
       button={{
         label: 'View Profile',
