@@ -191,9 +191,9 @@ const UserDetailsPage: React.FC = () => {
     { icon: faUserPlus, value: user.followingCount, unit: 'Following' },
     {
       icon: faCodeBranch,
-      value: user.publicRepositoriesCount,
-      unit: 'Repository',
       pluralizedName: 'Repositories',
+      unit: 'Repository',
+      value: user.publicRepositoriesCount,
     },
     { icon: faFileCode, value: user.issuesCount, unit: 'Issue' },
     { icon: faBookmark, value: user.releasesCount, unit: 'Release' },

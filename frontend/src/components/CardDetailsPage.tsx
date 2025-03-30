@@ -80,12 +80,12 @@ const DetailsCard = ({
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock
-                  key={index}
                   className="pb-1"
                   icon={stat.icon}
-                  value={stat.value}
-                  unit={stat.unit}
+                  key={index}
                   pluralizedName={stat.pluralizedName}
+                  unit={stat.unit}
+                  value={stat.value}
                 />
               ))}
             </SecondaryCard>

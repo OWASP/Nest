@@ -4,24 +4,23 @@ import millify from 'millify'
 import { pluralize } from 'utils/pluralize'
 
 const InfoBlock = ({
+  className = '',
   icon,
   label = '',
-  value,
+  pluralizedName,
   precision = 1,
   unit,
-  pluralizedName,
-  className = '',
+  value,
 }: {
+  className?: string
   icon: IconProp
   label?: string
-  value: number
-  className?: string
+  pluralizedName?: string
   precision?: number
   unit?: string
-  pluralizedName?: string
+  value: number
 }) => {
   const name = pluralizedName ? pluralize(value, unit, pluralizedName) : pluralize(value, unit)
-
   const formattedValue = value ? `${millify(value, { precision })} ${name}` : `No ${name}`
 
   return (

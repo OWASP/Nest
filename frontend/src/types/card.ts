@@ -26,8 +26,8 @@ export interface CardProps {
 interface stats {
   icon: IconDefinition
   pluralizedName?: string
-  value: number
   unit?: string
+  value: number
 }
 export interface DetailsCardProps {
   description?: string
