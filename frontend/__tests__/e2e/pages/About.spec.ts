@@ -35,6 +35,17 @@ test.describe('About Page', () => {
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
   })
 
+  test('displays technologies used', async ({ page }) => {
+    await expect(page.getByText('Ansible')).toBeVisible()
+    await expect(page.getByText('Docker')).toBeVisible()
+    await expect(page.getByText('Poetry')).toBeVisible()
+    await expect(page.getByText('PostgreSQL')).toBeVisible()
+    await expect(page.getByText('Pnpm')).toBeVisible()
+    await expect(page.getByText('React')).toBeVisible()
+    await expect(page.getByText('Tailwind CSS')).toBeVisible()
+    await expect(page.getByText('Typescript')).toBeVisible()
+  })
+
   test('loads roadmap items correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
     expect(await page.locator('li').count()).toBeGreaterThan(0)

@@ -3,7 +3,7 @@ import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
 import { GET_USER_DATA } from 'api/queries/userQueries'
 import { useEffect, useState } from 'react'
 import { ProjectTypeGraphql } from 'types/project'
-import { aboutText, roadmap } from 'utils/aboutData'
+import { aboutText, roadmap, technologies } from 'utils/aboutData'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -85,6 +85,33 @@ const About = () => {
             type="contributor"
           />
         )}
+
+        <SecondaryCard title="Technologies Used">
+          <div className="w-full">
+            <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
+              {technologies.map((tech) => (
+                <div key={tech.section} className="mb-2">
+                  <h3 className="mb-3 font-semibold text-blue-400">{tech.section}</h3>
+                  <ul className="space-y-3">
+                    {Object.entries(tech.tools).map(([name, details]) => (
+                      <li key={name} className="flex flex-row items-center gap-2">
+                        <i className={`${details.icon} text-xl`} style={{ color: '#9ca3af' }}></i>
+                        <a
+                          href={details.url}
+                          className="text-gray-600 hover:underline dark:text-gray-300"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SecondaryCard>
 
         <SecondaryCard title="Roadmap">
           <ul>

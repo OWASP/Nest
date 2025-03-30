@@ -27,3 +27,70 @@ export const roadmap = [
     issueLink: 'https://github.com/OWASP/Nest/issues/707',
   },
 ]
+
+export const technologies = [
+  {
+    section: 'Infrastructure',
+    tools: {
+      Ansible: {
+        icon: 'devicon-ansible-plain',
+        url: 'https://www.ansible.com/',
+      },
+      GitHub: {
+        icon: 'devicon-github-original',
+        url: 'https://www.github.com/',
+      },
+      Docker: {
+        icon: 'devicon-docker-plain',
+        url: 'https://www.docker.com/',
+      },
+    },
+  },
+  {
+    section: 'Frontend',
+    tools: {
+      Typescript: {
+        icon: 'devicon-typescript-plain',
+        url: 'https://www.typescriptlang.org/',
+      },
+      React: {
+        icon: 'devicon-react-original',
+        url: 'https://reactjs.org/',
+      },
+      'Tailwind CSS': {
+        icon: 'devicon-tailwindcss-plain',
+        url: 'https://tailwindcss.com/',
+      },
+    },
+  },
+  {
+    section: 'Backend',
+    tools: {
+      Python: {
+        icon: 'devicon-python-plain',
+        url: 'https://www.python.org/',
+      },
+      Django: {
+        icon: 'devicon-django-plain',
+        url: 'https://www.djangoproject.com/',
+      },
+      PostgreSQL: {
+        icon: 'devicon-postgresql-plain',
+        url: 'https://www.postgresql.org/',
+      },
+    },
+  },
+  {
+    section: 'Package Managers',
+    tools: {
+      Poetry: {
+        icon: 'devicon-poetry-plain',
+        url: 'https://python-poetry.org/',
+      },
+      Pnpm: {
+        icon: 'devicon-pnpm-plain',
+        url: 'https://pnpm.io/',
+      },
+    },
+  },
+]

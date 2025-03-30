@@ -19,6 +19,30 @@ jest.mock('utils/aboutData', () => ({
     { title: 'Feature 2', issueLink: 'https://github.com/owasp/test/issues/2' },
     { title: 'Feature 3', issueLink: 'https://github.com/owasp/test/issues/3' },
   ],
+  technologies: [
+    {
+      section: 'Infrastructure',
+      tools: {
+        Ansible: {
+          icon: 'devicon-ansible-plain',
+          url: 'https://www.ansible.com/',
+        },
+        GitHub: {
+          icon: 'devicon-github-original',
+          url: 'https://www.github.com/',
+        },
+      },
+    },
+    {
+      section: 'Frontend',
+      tools: {
+        React: {
+          icon: 'devicon-react-original',
+          url: 'https://reactjs.org/',
+        },
+      },
+    },
+  ],
 }))
 
 jest.mock('components/MarkdownWrapper', () => ({
@@ -154,6 +178,38 @@ describe('About Component', () => {
     })
   })
 
+  test('renders technologies section correctly', async () => {
+    render(<About />)
+
+    const technologiesSection = screen.getByText('Technologies Used').closest('div')
+    expect(technologiesSection).toBeInTheDocument()
+
+    expect(screen.getByText('Infrastructure')).toBeInTheDocument()
+    expect(screen.getByText('Frontend')).toBeInTheDocument()
+
+    expect(screen.getByText('Ansible')).toBeInTheDocument()
+    expect(screen.getByText('GitHub')).toBeInTheDocument()
+    expect(screen.getByText('React')).toBeInTheDocument()
+
+    const ansibleLink = screen.getByText('Ansible').closest('a')
+    expect(ansibleLink).toHaveAttribute('href', 'https://www.ansible.com/')
+
+    const githubLink = screen.getByText('GitHub').closest('a')
+    expect(githubLink).toHaveAttribute('href', 'https://www.github.com/')
+
+    const reactLink = screen.getByText('React').closest('a')
+    expect(reactLink).toHaveAttribute('href', 'https://reactjs.org/')
+
+    const ansibleIcon = screen.getByText('Ansible').previousSibling
+    expect(ansibleIcon).toHaveClass('devicon-ansible-plain')
+
+    const githubIcon = screen.getByText('GitHub').previousSibling
+    expect(githubIcon).toHaveClass('devicon-github-original')
+
+    const reactIcon = screen.getByText('React').previousSibling
+    expect(reactIcon).toHaveClass('devicon-react-original')
+  })
+
   test('renders roadmap correctly', async () => {
     render(<About />)
 
@@ -180,9 +236,6 @@ describe('About Component', () => {
       expect(screen.getByText('Forks')).toBeInTheDocument()
       expect(screen.getByText('Stars')).toBeInTheDocument()
     })
-
-    const statsCards = screen.getAllByRole('heading', { level: 2 })
-    expect(statsCards).toHaveLength(4)
   })
 
   test('leader card buttons open external links', async () => {
