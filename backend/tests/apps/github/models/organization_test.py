@@ -21,9 +21,10 @@ class TestOrganizationModel:
         gh_organization_mock = Mock()
         gh_organization_mock.raw_data = {"node_id": "12345"}
 
-        with patch.object(Organization, "save", return_value=None) as mock_save, patch.object(
-            Organization, "from_github"
-        ) as mock_from_github:
+        with (
+            patch.object(Organization, "save", return_value=None) as mock_save,
+            patch.object(Organization, "from_github") as mock_from_github,
+        ):
             Organization.update_data(gh_organization_mock)
 
             mock_save.assert_called_once()
