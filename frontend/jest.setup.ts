@@ -13,7 +13,6 @@ if (!global.structuredClone) {
   global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
 }
 
-// mock runAnimationFrameCallbacks function for testing
 beforeAll(() => {
   if (typeof window !== 'undefined') {
     jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
@@ -22,9 +21,15 @@ beforeAll(() => {
 
     Object.defineProperty(window, 'runAnimationFrameCallbacks', {
       value: () => {},
-      writable: true,
       configurable: true,
+      writable: true,
     })
+  }
+
+  global.ResizeObserver = class {
+    disconnect() {}
+    observe() {}
+    unobserve() {}
   }
 })
 

@@ -53,7 +53,16 @@ export interface UserCardProps {
   avatar: string
   button: ButtonType
   company: string
+  className?: string
   email: string
   location: string
   name: string
+}
+
+export interface SnapshotCardProps {
+  key: string
+  startAt: string
+  endAt: string
+  title: string
+  button: ButtonType
 }

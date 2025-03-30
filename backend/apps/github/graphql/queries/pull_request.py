@@ -1,6 +1,7 @@
 """Github pull requests GraphQL queries."""
 
 import graphene
+from django.db.models import OuterRef, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.pull_request import PullRequestNode
@@ -13,13 +14,31 @@ class PullRequestQuery(BaseQuery):
     recent_pull_requests = graphene.List(
         PullRequestNode,
         limit=graphene.Int(default_value=6),
+        distinct=graphene.Boolean(default_value=False),
         login=graphene.String(required=False),
     )
 
-    def resolve_recent_pull_requests(root, info, limit, login=None):
+    def resolve_recent_pull_requests(root, info, limit, distinct=False, login=None):
         """Resolve recent pull requests."""
-        queryset = PullRequest.objects.select_related("author").order_by("-created_at")
+        queryset = PullRequest.objects.select_related(
+            "author",
+        ).order_by(
+            "-created_at",
+        )
+
         if login:
             queryset = queryset.filter(author__login=login)
+
+        if distinct:
+            latest_pull_request_per_author = (
+                queryset.filter(author_id=OuterRef("author_id"))
+                .order_by("-created_at")
+                .values("id")[:1]
+            )
+            queryset = queryset.filter(
+                id__in=Subquery(latest_pull_request_per_author),
+            ).order_by(
+                "-created_at",
+            )
 
         return queryset[:limit]

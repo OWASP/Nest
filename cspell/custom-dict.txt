@@ -77,13 +77,15 @@ samm
 seo
 SEO
 Sivagangai
+skillstruck
 slackbot
 SLF
 slideshare
+Sonarqube
 speakerdeck
+superfences
 tiktok
 Truncator
-superfences
 tsc
 Twitterbot
 usefixtures
