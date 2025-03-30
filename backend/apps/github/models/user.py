@@ -41,8 +41,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     def from_github(self, gh_user):
         """Update instance based on GitHub user data."""
-        from apps.github.models.repository_contributor import RepositoryContributor
-
         super().from_github(gh_user)
 
         field_mapping = {
@@ -59,14 +57,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         self.is_bot = gh_user.type == "Bot"
 
-        contributions_count = (
-            RepositoryContributor.objects.by_humans()
-            .filter(user=self)
-            .aggregate(total_contributions=Sum("contributions_count"))["total_contributions"]
-            or 0
-        )
-        self.contributions_count = contributions_count
-
     @staticmethod
     def get_non_indexable_logins():
         """Return non-indexable logins."""
@@ -80,13 +70,30 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def update_data(gh_user, save=True):
         """Update GitHub user data."""
         user_node_id = User.get_node_id(gh_user)
+        # We will use this because we will do filtering.
+        # If we tried to filter a user that is created but not saved yet,
+        # it would raise an exception.
+        does_exist = False
         try:
             user = User.objects.get(node_id=user_node_id)
+            does_exist = True
         except User.DoesNotExist:
             user = User(node_id=user_node_id)
 
         user.from_github(gh_user)
         if save:
+            if does_exist:
+                from apps.github.models.repository_contributor import RepositoryContributor
+
+                contributions_count = (
+                    RepositoryContributor.objects.by_humans()
+                    .filter(user=user)
+                    .aggregate(total_contributions=Sum("contributions_count"))[
+                        "total_contributions"
+                    ]
+                    or 0
+                )
+                user.contributions_count = contributions_count
             user.save()
 
         return user
