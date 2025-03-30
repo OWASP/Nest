@@ -118,6 +118,21 @@ a {
   color: inherit;
 }
 
+/* Dropdown container */
+.dropdown {
+  @apply relative;
+}
+
+.dropdown-menu {
+  @apply absolute left-0 top-full mt-2 w-48 rounded-lg bg-white p-3 shadow-lg dark:bg-gray-800;
+  @apply invisible opacity-0 transition-all duration-200 ease-in-out;
+  @apply flex flex-col space-y-2; /* Stack items vertically */
+}
+
+.dropdown:hover .dropdown-menu {
+  @apply visible opacity-100;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
