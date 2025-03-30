@@ -7,12 +7,11 @@ export interface ProjectDataType {
 }
 
 export interface ProjectIssuesType {
-  commentsCount: number
-  createdAt: string
-  number: number
-  title: string
   author: { avatarUrl: string; key: string; name: string }
-  repository: { key: string; owner_key: string }
+  commentsCount: number
+  createdAt: number
+  title: string
+  url: string
 }
 
 export interface ProjectStatsType {
@@ -28,6 +27,7 @@ export interface ProjectTypeAlgolia {
   description: string
   forks_count: number
   is_active: boolean
+  issues_count: number
   key: string
   languages: string[]
   leaders: string[]
@@ -86,14 +86,12 @@ export type ProjectReleaseType = {
   author: {
     avatarUrl: string
     key: string
+    login: string
     name: string
   }
   isPreRelease: boolean
   name: string
   publishedAt: number
-  repository: {
-    key: string
-    owner_key: string
-  }
   tagName: string
+  url: string
 }
