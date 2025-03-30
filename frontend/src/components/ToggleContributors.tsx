@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
 
 import { useNavigate } from 'react-router-dom'
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
+import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 const TopContributors = ({
   contributors,
@@ -13,7 +13,7 @@ const TopContributors = ({
   className = '',
   type,
 }: {
-  contributors: TopContributorsTypeGraphql[] | TopContributorsTypeAlgolia[]
+  contributors: TopContributorsTypeGraphql[]
   label?: string
   maxInitialDisplay?: number
   className?: string
@@ -43,11 +43,7 @@ const TopContributors = ({
           >
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
-                <img
-                  src={item?.avatarUrl || item?.avatar_url}
-                  alt={item?.name}
-                  className="h-6 w-6 rounded-full"
-                />
+                <img src={item?.avatarUrl} alt={item?.name} className="h-6 w-6 rounded-full" />
                 <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-500">
                   {capitalize(item.name) || capitalize(item.login)}
                 </h3>
@@ -56,7 +52,7 @@ const TopContributors = ({
                 <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {type === 'contributor'
-                      ? `${(item.contributionsCount || item.contributions_count) ?? 0} contributions`
+                      ? `${item.contributionsCount ?? 0} contributions`
                       : item.projectName}
                   </span>
                 </div>

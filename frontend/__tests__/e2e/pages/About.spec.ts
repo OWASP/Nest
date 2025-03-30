@@ -3,15 +3,17 @@ import { mockAboutData } from '@unit/data/mockAboutData'
 
 test.describe('About Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/idx/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          hits: [mockAboutData.project],
-          nbPages: 1,
-        }),
-      })
+    await page.route('**/graphql/', async (route) => {
+      const request = route.request()
+      const postData = request.postDataJSON()
+
+      if (postData.query?.includes('user')) {
+        const username = postData.variables.key
+        const userData = mockAboutData.users[username]
+        await route.fulfill({ status: 200, json: { data: { user: userData } } })
+      } else {
+        await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
+      }
     })
 
     await page.goto('/about')
@@ -24,15 +26,13 @@ test.describe('About Page', () => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
   })
 
-  test('displays leader information correctly', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Arkadii Yakovets Arkadii' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Kateryna Golovanova Kateryna' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Starr Brown Starr Brown OWASP' })).toBeVisible()
-  })
-
   test('displays contributor information when data is loaded', async ({ page }) => {
     await expect(page.getByText('Contributor 1')).toBeVisible()
     await expect(page.getByText('Contributor 2')).toBeVisible()
+  })
+
+  test('displays leaders data when data is loaded', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
   })
 
   test('loads roadmap items correctly', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('About Page', () => {
     context,
   }) => {
     const pagePromise = context.waitForEvent('page')
-    await page.getByRole('button', { name: 'View profile' }).first().click()
+    await page.getByRole('button', { name: 'View Profile' }).first().click()
     const newPage = await pagePromise
     await newPage.waitForLoadState()
     expect(newPage.url()).toContain('github.com')

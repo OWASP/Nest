@@ -1,16 +1,65 @@
+import { useQuery } from '@apollo/client'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { render, screen, waitFor } from 'wrappers/testUtil'
+import { render } from 'wrappers/testUtil'
 import About from 'pages/About'
 
-jest.mock('api/fetchAlgoliaData', () => ({
-  fetchAlgoliaData: jest.fn(),
+jest.mock('@apollo/client', () => ({
+  ...jest.requireActual('@apollo/client'),
+  useQuery: jest.fn(),
 }))
 
-describe('About Page Component', () => {
+jest.mock('utils/aboutData', () => ({
+  aboutText: [
+    'This is a test paragraph about the project.',
+    'This is another paragraph about the project history.',
+  ],
+  roadmap: [
+    { title: 'Feature 1', issueLink: 'https://github.com/owasp/test/issues/1' },
+    { title: 'Feature 2', issueLink: 'https://github.com/owasp/test/issues/2' },
+    { title: 'Feature 3', issueLink: 'https://github.com/owasp/test/issues/3' },
+  ],
+}))
+
+jest.mock('components/MarkdownWrapper', () => ({
+  __esModule: true,
+  default: ({ content }) => <div data-testid="markdown-content">{content}</div>,
+}))
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}))
+
+const mockUserData = (username) => ({
+  data: { user: mockAboutData.users[username] },
+  loading: false,
+  error: null,
+})
+
+const mockProjectData = {
+  data: { project: mockAboutData.project },
+  loading: false,
+  error: null,
+}
+
+const mockError = {
+  error: new Error('GraphQL error'),
+}
+
+describe('About Component', () => {
   beforeEach(() => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [mockAboutData.project],
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (options?.variables?.key === 'nest') {
+        return mockProjectData
+      } else if (options?.variables?.key === 'arkid15r') {
+        return mockUserData('arkid15r')
+      } else if (options?.variables?.key === 'kasya') {
+        return mockUserData('kasya')
+      } else if (options?.variables?.key === 'mamicidal') {
+        return mockUserData('mamicidal')
+      }
+      return { loading: true }
     })
   })
 
@@ -18,33 +67,140 @@ describe('About Page Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders project data after loading', async () => {
+  test('renders project history correctly', async () => {
     render(<About />)
+
+    const historySection = screen.getByText('Project history').closest('div')
+    expect(historySection).toBeInTheDocument()
+
+    const markdownContents = await screen.findAllByTestId('markdown-content')
+    expect(markdownContents.length).toBe(2)
+    expect(markdownContents[0].textContent).toBe('This is a test paragraph about the project.')
+    expect(markdownContents[1].textContent).toBe(
+      'This is another paragraph about the project history.'
+    )
+  })
+
+  test('renders leaders section with three leaders', async () => {
+    render(<About />)
+
+    const leadersSection = screen.getByText('Leaders').closest('div')
+    expect(leadersSection).toBeInTheDocument()
+
     await waitFor(() => {
-      expect(screen.getByText('About')).toBeInTheDocument()
-      expect(screen.getByText('Project history')).toBeInTheDocument()
-      expect(screen.getByText('Leaders')).toBeInTheDocument()
-      expect(screen.getByText('Roadmap')).toBeInTheDocument()
+      expect(screen.getByText('Arkadii Yakovets')).toBeInTheDocument()
+      expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
+      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
     })
   })
 
-  test('displays "No data available." when no project data is found', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [] })
+  test('handles leader data loading error gracefully', async () => {
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (options?.variables?.key === 'nest') {
+        return mockProjectData
+      } else if (options?.variables?.key === 'arkid15r') {
+        return { data: null, loading: false, error: mockError }
+      } else if (options?.variables?.key === 'kasya') {
+        return mockUserData('kasya')
+      } else if (options?.variables?.key === 'mamicidal') {
+        return mockUserData('mamicidal')
+      }
+      return { loading: true }
+    })
+
     render(<About />)
+
     await waitFor(() => {
-      expect(screen.getByText('No data available.')).toBeInTheDocument()
+      expect(screen.getByText("Error loading arkid15r's data")).toBeInTheDocument()
+      expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
+      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
     })
   })
 
-  test('renders top contributors correctly', async () => {
+  test('renders top contributors section correctly', async () => {
     render(<About />)
+
     await waitFor(() => {
-      const firstContributor = mockAboutData.project.top_contributors[0]
-      expect(screen.getByText(firstContributor.name)).toBeInTheDocument()
-      const SecondContributor = mockAboutData.project.top_contributors[1]
-      expect(screen.getByText(SecondContributor.name)).toBeInTheDocument()
-      const thirdContributor = mockAboutData.project.top_contributors[2]
-      expect(screen.getByText(thirdContributor.name)).toBeInTheDocument()
+      expect(screen.getByText('Top Contributors')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
     })
+  })
+
+  test('toggles contributors list when show more/less is clicked', async () => {
+    render(<About />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+    })
+
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
+    })
+
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+    })
+  })
+
+  test('renders roadmap correctly', async () => {
+    render(<About />)
+
+    const roadmapSection = screen.getByText('Roadmap').closest('div')
+    expect(roadmapSection).toBeInTheDocument()
+
+    const roadmapItems = within(roadmapSection).getAllByRole('listitem')
+    expect(roadmapItems).toHaveLength(3)
+
+    expect(screen.getByText('Feature 1')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2')).toBeInTheDocument()
+    expect(screen.getByText('Feature 3')).toBeInTheDocument()
+
+    const links = within(roadmapSection).getAllByRole('link')
+    expect(links[0].getAttribute('href')).toBe('https://github.com/owasp/test/issues/1')
+  })
+
+  test('renders project stats cards correctly', async () => {
+    render(<About />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributors')).toBeInTheDocument()
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+      expect(screen.getByText('Forks')).toBeInTheDocument()
+      expect(screen.getByText('Stars')).toBeInTheDocument()
+    })
+
+    const statsCards = screen.getAllByRole('heading', { level: 2 })
+    expect(statsCards).toHaveLength(4)
+  })
+
+  test('leader card buttons open external links', async () => {
+    const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
+
+    render(<About />)
+
+    await waitFor(() => {
+      expect(screen.getAllByText('View Profile')).toHaveLength(3)
+    })
+
+    const viewProfileButtons = screen.getAllByText('View Profile')
+    fireEvent.click(viewProfileButtons[0])
+
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      'https://github.com/example1',
+      '_blank',
+      'noopener,noreferrer'
+    )
+
+    windowOpenSpy.mockRestore()
   })
 })

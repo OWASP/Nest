@@ -1,47 +1,44 @@
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { useQuery } from '@apollo/client'
+import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
+import { GET_USER_DATA } from 'api/queries/userQueries'
 import { useEffect, useState } from 'react'
-import { ProjectTypeAlgolia } from 'types/project'
-import { aboutText, leaders, roadmap } from 'utils/aboutData'
+import { ProjectTypeGraphql } from 'types/project'
+import { aboutText, roadmap } from 'utils/aboutData'
+import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
+import { toaster } from 'components/ui/toaster'
 import UserCard from 'components/UserCard'
 
+const leaders = ['arkid15r', 'kasya', 'mamicidal']
+
 const About = () => {
-  const [projectNestData, setProjectNestData] = useState<ProjectTypeAlgolia | null>(null)
+  const [project, setProject] = useState<ProjectTypeGraphql>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const projectKey = 'nest'
+
+  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
+    variables: { key: projectKey },
+  })
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const searchParams = {
-          indexName: 'projects',
-          query: '',
-          currentPage: 1,
-          hitsPerPage: 10,
-          facetFilters: ['idx_key:nest'],
-        }
-        const data = await fetchAlgoliaData<ProjectTypeAlgolia>(
-          searchParams.indexName,
-          searchParams.query,
-          searchParams.currentPage,
-          searchParams.hitsPerPage,
-          searchParams.facetFilters
-        )
-
-        if (data.hits.length > 0) {
-          setProjectNestData(data.hits[0])
-        }
-      } finally {
-        setIsLoading(false)
-      }
+    if (data) {
+      setProject(data?.project)
+      setIsLoading(false)
     }
-
-    fetchData()
-  }, [])
+    if (graphQLRequestError) {
+      toaster.create({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        type: 'error',
+      })
+      setIsLoading(false)
+    }
+  }, [data, graphQLRequestError, projectKey])
 
   if (isLoading) {
     return (
@@ -51,52 +48,39 @@ const About = () => {
     )
   }
 
-  if (!projectNestData) {
+  if (!project) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-gray-500">
-        No data available.
-      </div>
+      <ErrorDisplay
+        statusCode={404}
+        title="Data not found"
+        message="Sorry, the page you're looking for doesn't exist"
+      />
     )
   }
 
   return (
-    <div
-      data-testid="about-page"
-      className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300"
-    >
+    <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
-        {aboutText && (
-          <SecondaryCard title="Project history">
-            <Markdown content={aboutText} />
-          </SecondaryCard>
-        )}
+        <SecondaryCard title="Project history">
+          {aboutText.map((text) => (
+            <div key={text} className="mb-4">
+              <Markdown key={text} content={text} />
+            </div>
+          ))}
+        </SecondaryCard>
 
         <SecondaryCard title="Leaders">
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-            {leaders.map((leader) => (
-              <UserCard
-                key={leader.github_profile_url}
-                avatar={leader.avatar_url}
-                company={leader.company}
-                name={leader.name}
-                button={{
-                  label: 'View GitHub profile',
-                  icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-                  onclick: () =>
-                    window.open(leader.github_profile_url, '_blank', 'noopener,noreferrer'),
-                }}
-                email=""
-                location=""
-                className="h-64 w-40 bg-inherit"
-              />
+            {leaders.map((username) => (
+              <LeaderData key={username} username={username} />
             ))}
           </div>
         </SecondaryCard>
 
-        {projectNestData.top_contributors && (
+        {project.topContributors && (
           <TopContributors
-            contributors={projectNestData.top_contributors}
+            contributors={project.topContributors}
             maxInitialDisplay={6}
             type="contributor"
           />
@@ -105,9 +89,15 @@ const About = () => {
         <SecondaryCard title="Roadmap">
           <ul>
             {roadmap.map((item) => (
-              <li key={item} className="mb-4 flex flex-row items-center gap-2">
-                <div className="h-2 w-2 flex-shrink-0 rounded-full bg-white"></div>
-                {item}
+              <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
+                <div className="h-2 w-2 flex-shrink-0 rounded-full bg-gray-600 dark:bg-gray-300"></div>
+                <a
+                  href={item.issueLink}
+                  target="_blank"
+                  className="text-gray-600 hover:underline dark:text-gray-300"
+                >
+                  {item.title}
+                </a>
               </li>
             ))}
           </ul>
@@ -115,10 +105,10 @@ const About = () => {
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
-            { label: 'Contributors', value: projectNestData.contributors_count },
-            { label: 'Issues', value: projectNestData.issues_count },
-            { label: 'Forks', value: projectNestData.forks_count },
-            { label: 'Stars', value: projectNestData.stars_count },
+            { label: 'Contributors', value: project.contributorsCount },
+            { label: 'Issues', value: project.issuesCount },
+            { label: 'Forks', value: project.forksCount },
+            { label: 'Stars', value: project.starsCount },
           ].map((stat, index) => (
             <SecondaryCard key={index} className="text-center">
               <div className="mb-2 text-3xl font-bold text-blue-400">
@@ -130,6 +120,33 @@ const About = () => {
         </div>
       </div>
     </div>
+  )
+}
+
+const LeaderData = ({ username }: { username: string }) => {
+  const { data, loading, error } = useQuery(GET_USER_DATA, {
+    variables: { key: username },
+  })
+
+  if (loading) return <p>Loading {username}...</p>
+  if (error) return <p>Error loading {username}'s data</p>
+
+  const user = data?.user
+
+  return (
+    <UserCard
+      avatar={user.avatarUrl}
+      company={user.company || 'OWASP'}
+      name={user.name || username}
+      button={{
+        label: 'View Profile',
+        icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+        onclick: () => window.open(user.url, '_blank', 'noopener,noreferrer'),
+      }}
+      email={''}
+      location=""
+      className="h-64 w-40 bg-inherit"
+    />
   )
 }
 
