@@ -14,6 +14,7 @@ export type user = {
   name: string
   objectID: string
   public_repositories_count: number
+  contributions_count: number
 }
 
 export type RepositoryDetails = {
@@ -57,6 +58,7 @@ export type User = {
   releases?: Release[]
   releases_count?: number
   url: string
+  contributions_count: number
 }
 
 export interface UserDetailsProps {
@@ -77,6 +79,7 @@ export interface UserDetailsProps {
   releasesCount: number
   topRepositories: RepositoryCardProps[]
   url: string
+  contributionsCount: number
 }
 
 export interface PullRequestsType {

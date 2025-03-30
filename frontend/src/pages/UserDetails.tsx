@@ -6,6 +6,7 @@ import {
   faUser,
   faFileCode,
   faBookmark,
+  faCodeMerge,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_USER_DATA } from 'api/queries/userQueries'
 import millify from 'millify'
@@ -213,6 +214,11 @@ const UserDetailsPage: React.FC = () => {
       icon: faBookmark,
       value: `${user.releasesCount ? millify(user.releasesCount, { precision: 1 }) : 'No'}
         ${pluralize(user.releasesCount, 'Release')}`,
+    },
+    {
+      icon: faCodeMerge,
+      value: `${user.contributionsCount ? millify(user.contributionsCount, { precision: 1 }) : 'No'}
+        ${pluralize(user.contributionsCount, 'Contribution')}`,
     },
   ]
 
