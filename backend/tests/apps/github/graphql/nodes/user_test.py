@@ -34,5 +34,6 @@ class TestUserNode:
             "releases",
             "updated_at",
             "url",
+            "contributions_count",
         }
         assert set(UserNode._meta.fields) == expected_fields
