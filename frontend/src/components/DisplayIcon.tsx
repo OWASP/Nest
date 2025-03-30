@@ -33,7 +33,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
       openDelay={150}
       closeDelay={100}
       showArrow
-      positioning={{ placement: 'top' }}
+      positioning={{ placement: 'bottom' }}
     >
       <div
         className={containerClassName}
