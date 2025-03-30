@@ -29,13 +29,17 @@ import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/ToggleContributors'
+import TopContributors from 'components/TopContributors'
+import { TruncatedText } from 'components/TruncatedText'
 import { toaster } from 'components/ui/toaster'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA)
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA, {
+    variables: { distinct: true },
+  })
+
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
@@ -136,16 +140,19 @@ export default function Home() {
             />
           </div>
         </div>
-        <SecondaryCard title={<AnchorTitle href="#upcoming-events" title="Upcoming Events" />}>
+        <SecondaryCard
+          title={<AnchorTitle href="#upcoming-events" title="Upcoming Events" />}
+          className="overflow-hidden"
+        >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: EventType, index: number) => (
-              <div key={`card-${event.name}`}>
+              <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
                     className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
-                    <h3 className="truncate text-wrap md:text-nowrap">{event.name}</h3>
+                    <TruncatedText text={event.name} />
                   </button>
                   <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
                     <div className="mr-2 flex items-center">
@@ -174,13 +181,16 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
-          <SecondaryCard title={<AnchorTitle href="#new-chapters" title="New Chapters" />}>
+          <SecondaryCard
+            title={<AnchorTitle href="#new-chapters" title="New Chapters" />}
+            className="overflow-hidden"
+          >
             <div className="space-y-4">
               {data.recentChapters.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <a href={`/chapters/${chapter.key}`} className="hover:underline">
-                      {chapter.name}
+                      <TruncatedText text={chapter.name} />
                     </a>
                   </h3>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
@@ -203,15 +213,18 @@ export default function Home() {
               ))}
             </div>
           </SecondaryCard>
-          <SecondaryCard title={<AnchorTitle href="#new-Projects" title="New Projects" />}>
+          <SecondaryCard
+            title={<AnchorTitle href="#new-Projects" title="New Projects" />}
+            className="overflow-hidden"
+          >
             <div className="space-y-4">
               {data.recentProjects.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <h3 className="mb-2 text-lg font-semibold">
-                    <a href={`/projects/${project.key}`} className="hover:underline">
-                      {project.name}
-                    </a>
-                  </h3>
+                  <a href={`/projects/${project.key}`} className="hover:underline">
+                    <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
+                      <TruncatedText text={project.name} />
+                    </h3>
+                  </a>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -269,36 +282,87 @@ export default function Home() {
             )}
           />
           <ItemCardList
-            title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
-            data={data.recentReleases}
+            title={<AnchorTitle href="#recent-pull-requests" title="Recent Pull Requests" />}
+            data={data.recentPullRequests}
             renderDetails={(item) => (
               <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                 <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                <span>{formatDate(item.publishedAt)}</span>
-                <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
-                <span>{item.tagName}</span>
+                <span>{formatDate(item.createdAt)}</span>
+                {item?.author.name || item?.author.login ? (
+                  <>
+                    <FontAwesomeIcon icon={faUser} className="ml-4 mr-2 h-4 w-4" />
+                    <span>{item.author.name || item.author.login}</span>
+                  </>
+                ) : null}
               </div>
             )}
           />
         </div>
+        <SecondaryCard title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}>
+          {data.recentReleases && data.recentReleases.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {data.recentReleases.map((item, index) => (
+                <div
+                  key={index}
+                  className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                >
+                  <div className="flex w-full flex-col justify-between">
+                    <div className="flex w-full items-center">
+                      <a
+                        className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                        href={`/community/users/${item?.author?.login}`}
+                      >
+                        <img
+                          src={item?.author?.avatarUrl}
+                          alt={item?.author?.name}
+                          className="mr-2 h-6 w-6 rounded-full"
+                        />
+                      </a>
+
+                      <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
+                        <a
+                          className="text-blue-500 hover:underline dark:text-blue-400"
+                          href={item?.url}
+                          target="_blank"
+                        >
+                          {item.name}
+                        </a>
+                      </h3>
+                    </div>
+                    <div className="ml-0.5 w-full">
+                      <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                        <span>{formatDate(item.publishedAt)}</span>
+                        <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
+                        <span>{item.tagName}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No recent releases.</p>
+          )}
+        </SecondaryCard>
         <SecondaryCard
-          title={<AnchorTitle href="#recent-News-Opinions" title="Recent News & Opinions" />}
+          title={<AnchorTitle href="#recent-news-&-opinions" title="Recent News & Opinions" />}
+          className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data.recentPosts.map((post) => (
               <div
                 key={post.title}
-                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                data-testid="post-container"
+                className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
               >
-                <h3 className="mb-1 truncate text-wrap text-lg font-semibold text-blue-500 md:text-nowrap">
+                <h3 className="mb-1 text-lg font-semibold">
                   <a
                     href={post.url}
-                    className="hover:underline"
+                    className="text-blue-500 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {post.title}
+                    <TruncatedText text={post.title} />
                   </a>
                 </h3>
                 <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">

@@ -166,4 +166,18 @@ describe('Home', () => {
       })
     })
   })
+
+  test('renders Recent Pull Requests section', async () => {
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+      mockGraphQLData.recentPullRequests.forEach((pullRequest) => {
+        expect(screen.getByText(pullRequest.title)).toBeInTheDocument()
+        expect(
+          screen.getByText(pullRequest.author.name || pullRequest.author.login)
+        ).toBeInTheDocument()
+      })
+    })
+  })
 })
