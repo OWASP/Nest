@@ -170,6 +170,34 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
 
+  scan-code:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Run Trivy Code Scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: "repo"
+          severity: "HIGH,CRITICAL"
+          exit-code: 0
+
+  scan-ci-dependencies:
+    name: Scan CI Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Run Trivy on source code
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: "fs"
+          severity: "HIGH,CRITICAL"
+          exit-code: 0
+
   build-staging-images:
     name: Build Staging Images
     environment: staging
@@ -180,6 +208,8 @@ jobs:
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -341,6 +371,8 @@ jobs:
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
