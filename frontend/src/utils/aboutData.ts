@@ -1,16 +1,18 @@
 export const aboutText = [
-  "OWASP Nest OWASPs **originally created by Arkadii Yakovets** (Ark) to address challenges in navigating OWASP projects. The project was **built from scratch based on Ark's ideas and discussions with Starr Brown** (Starr), ensuring a well-structured system design aligned with OWASP's ecosystem. Ark, an experienced software development professional with over 10 years of expertise in Python, Django, Django REST Framework (DRF), and related backend technologies, led the development of the backend using widely adopted Python **open-source frameworks and libraries**, including DRF, django-filter, OpenAI, Algolia Search, slack-bolt, PyGitHub, pre-commit, pytest, and more. The initial frontend, based on Vue.js, was introduced by **Kateryna Golovanova** (Kate), who later became the project co-leader due to her invaluable frontend and project management skills. The **code is licensed under the MIT License**, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are OWASP members and adhere to the OWASP Code of Conduct.",
-  "Over time, OWASP Nest has expanded to address broader OWASP community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, along with NestBot, has become a popular entry point for various OWASP aspects, including projects, chapters, users, and aggregated contribution opportunities -- with even more features planned. OWASP Nest's success is also the result of many valuable [contributions](https://github.com/OWASP/Nest/graphs/contributors) from the broader [OWASP Nest community](https://owasp.slack.com/archives/project-nest), whose efforts have helped shape and improve the project in countless ways.",
+  'OWASP Nest was originally created by Arkadii Yakovets (Ark) to simplify OWASP projects navigation. Built from scratch based on Ark’s vision and discussions with Starr Brown (Starr), the platform integrates structured system design into the OWASP ecosystem. The initial frontend, based on Vue.js, was introduced by Kateryna Golovanova (Kate), who later became the project co-leader due to her invaluable frontend and project management skills.',
+  'Over time, OWASP Nest has expanded to address broader community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, alongside NestBot, has become a central hub for OWASP projects, chapters, users, and aggregated contribution opportunities.',
+  'The code is licensed under the MIT License, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are certified ISC2 professionals and OWASP members who adhere to the OWASP Code of Conduct.',
 ]
 
 export const roadmap = [
   {
-    title: 'Extend OWASP NestBot with AI agent/assistant capabilities',
-    issueLink: 'https://github.com/OWASP/Nest/issues/908',
-  },
-  {
     title: 'Create OWASP Contribution Hub to centralize collaboration opportunities',
     issueLink: 'https://github.com/OWASP/Nest/issues/710',
+  },
+  {
+    title:
+      'Design and launch the OWASP API for chapters, projects, committees, and other OWASP entities',
+    issueLink: 'https://github.com/OWASP/Nest/issues/707',
   },
   {
     title:
@@ -18,31 +20,30 @@ export const roadmap = [
     issueLink: 'https://github.com/OWASP/Nest/issues/709',
   },
   {
-    title: 'Implement OWASP Project Health Dashboard',
-    issueLink: 'https://github.com/OWASP/Nest/issues/711',
+    title: 'Extend OWASP NestBot with AI agent/assistant capabilities',
+    issueLink: 'https://github.com/OWASP/Nest/issues/908',
   },
   {
-    title:
-      'Design and launch the OWASP API for chapters, projects, committees, and other OWASP entities',
-    issueLink: 'https://github.com/OWASP/Nest/issues/707',
+    title: 'Implement OWASP Project Health Dashboard',
+    issueLink: 'https://github.com/OWASP/Nest/issues/711',
   },
 ]
 
 export const technologies = [
   {
-    section: 'Infrastructure',
+    section: 'Backend',
     tools: {
-      Ansible: {
-        icon: 'devicon-ansible-plain',
-        url: 'https://www.ansible.com/',
+      Python: {
+        icon: 'devicon-python-plain',
+        url: 'https://www.python.org/',
       },
-      GitHub: {
-        icon: 'devicon-github-original',
-        url: 'https://www.github.com/',
+      Django: {
+        icon: 'devicon-django-plain',
+        url: 'https://www.djangoproject.com/',
       },
-      Docker: {
-        icon: 'devicon-docker-plain',
-        url: 'https://www.docker.com/',
+      PostgreSQL: {
+        icon: 'devicon-postgresql-plain',
+        url: 'https://www.postgresql.org/',
       },
     },
   },
@@ -64,32 +65,36 @@ export const technologies = [
     },
   },
   {
-    section: 'Backend',
+    section: 'Tests',
     tools: {
-      Python: {
-        icon: 'devicon-python-plain',
-        url: 'https://www.python.org/',
+      Jest: {
+        icon: 'devicon-jest-plain',
+        url: 'https://jestjs.io/',
       },
-      Django: {
-        icon: 'devicon-django-plain',
-        url: 'https://www.djangoproject.com/',
+      PlayWright: {
+        icon: 'devicon-playwright-plain',
+        url: 'https://playwright.dev/',
       },
-      PostgreSQL: {
-        icon: 'devicon-postgresql-plain',
-        url: 'https://www.postgresql.org/',
+      Pytest: {
+        icon: 'devicon-pytest-plain',
+        url: 'https://docs.pytest.org/',
       },
     },
   },
   {
-    section: 'Package Managers',
+    section: 'Tools',
     tools: {
-      Poetry: {
-        icon: 'devicon-poetry-plain',
-        url: 'https://python-poetry.org/',
+      Ansible: {
+        icon: 'devicon-ansible-plain',
+        url: 'https://www.ansible.com/',
       },
-      Pnpm: {
-        icon: 'devicon-pnpm-plain',
-        url: 'https://pnpm.io/',
+      GitHub: {
+        icon: 'devicon-github-original',
+        url: 'https://www.github.com/',
+      },
+      Docker: {
+        icon: 'devicon-docker-plain',
+        url: 'https://www.docker.com/',
       },
     },
   },

@@ -21,15 +21,11 @@ jest.mock('utils/aboutData', () => ({
   ],
   technologies: [
     {
-      section: 'Infrastructure',
+      section: 'Backend',
       tools: {
-        Ansible: {
-          icon: 'devicon-ansible-plain',
-          url: 'https://www.ansible.com/',
-        },
-        GitHub: {
-          icon: 'devicon-github-original',
-          url: 'https://www.github.com/',
+        Python: {
+          icon: 'devicon-python-plain',
+          url: 'https://www.python.org/',
         },
       },
     },
@@ -39,6 +35,32 @@ jest.mock('utils/aboutData', () => ({
         React: {
           icon: 'devicon-react-original',
           url: 'https://reactjs.org/',
+        },
+      },
+    },
+    {
+      section: 'Tests',
+      tools: {
+        Jest: {
+          icon: 'devicon-jest-plain',
+          url: 'https://jestjs.io/',
+        },
+        Pytest: {
+          icon: 'devicon-pytest-plain',
+          url: 'https://docs.pytest.org/',
+        },
+      },
+    },
+    {
+      section: 'Tools',
+      tools: {
+        Ansible: {
+          icon: 'devicon-ansible-plain',
+          url: 'https://www.ansible.com/',
+        },
+        GitHub: {
+          icon: 'devicon-github-original',
+          url: 'https://www.github.com/',
         },
       },
     },
@@ -94,7 +116,7 @@ describe('About Component', () => {
   test('renders project history correctly', async () => {
     render(<About />)
 
-    const historySection = screen.getByText('Project history').closest('div')
+    const historySection = screen.getByText('History').closest('div')
     expect(historySection).toBeInTheDocument()
 
     const markdownContents = await screen.findAllByTestId('markdown-content')
@@ -181,11 +203,13 @@ describe('About Component', () => {
   test('renders technologies section correctly', async () => {
     render(<About />)
 
-    const technologiesSection = screen.getByText('Technologies Used').closest('div')
+    const technologiesSection = screen.getByText('Technologies & Tools').closest('div')
     expect(technologiesSection).toBeInTheDocument()
 
-    expect(screen.getByText('Infrastructure')).toBeInTheDocument()
+    expect(screen.getByText('Backend')).toBeInTheDocument()
     expect(screen.getByText('Frontend')).toBeInTheDocument()
+    expect(screen.getByText('Tests')).toBeInTheDocument()
+    expect(screen.getByText('Tools')).toBeInTheDocument()
 
     expect(screen.getByText('Ansible')).toBeInTheDocument()
     expect(screen.getByText('GitHub')).toBeInTheDocument()
@@ -251,7 +275,7 @@ describe('About Component', () => {
     fireEvent.click(viewProfileButtons[0])
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
-      'https://github.com/example1',
+      '/community/users/arkid15r',
       '_blank',
       'noopener,noreferrer'
     )

@@ -62,7 +62,7 @@ const About = () => {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
-        <SecondaryCard title="Project history">
+        <SecondaryCard title="History">
           {aboutText.map((text) => (
             <div key={text} className="mb-4">
               <Markdown key={text} content={text} />
@@ -86,7 +86,7 @@ const About = () => {
           />
         )}
 
-        <SecondaryCard title="Technologies Used">
+        <SecondaryCard title="Technologies & Tools">
           <div className="w-full">
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
@@ -172,7 +172,7 @@ const LeaderData = ({ username }: { username: string }) => {
       button={{
         label: 'View Profile',
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        onclick: () => window.open(user.url, '_blank', 'noopener,noreferrer'),
+        onclick: () => window.open(`/community/users/${username}`, '_blank', 'noopener,noreferrer'),
       }}
       email={''}
       location=""

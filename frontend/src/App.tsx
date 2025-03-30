@@ -35,7 +35,6 @@ function App() {
       <Toaster />
       <Header />
       <Routes>
-        <Route path="/about" element={<About />}></Route>
         <Route path="/" element={<Home />}></Route>
         <Route path="/projects" element={<ProjectsPage />}></Route>
         <Route path="/projects/:projectKey" element={<ProjectDetailsPage />}></Route>
@@ -49,6 +48,7 @@ function App() {
         <Route path="/community/users" element={<UsersPage />}></Route>
         <Route path="/community/snapshots" element={<SnapshotsPage />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
+        <Route path="/about" element={<About />}></Route>
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />

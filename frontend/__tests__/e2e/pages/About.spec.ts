@@ -21,7 +21,7 @@ test.describe('About Page', () => {
 
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Project history' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'History' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
   })
@@ -35,15 +35,22 @@ test.describe('About Page', () => {
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
   })
 
-  test('displays technologies used', async ({ page }) => {
-    await expect(page.getByText('Ansible')).toBeVisible()
-    await expect(page.getByText('Docker')).toBeVisible()
-    await expect(page.getByText('Poetry')).toBeVisible()
-    await expect(page.getByText('PostgreSQL')).toBeVisible()
-    await expect(page.getByText('Pnpm')).toBeVisible()
-    await expect(page.getByText('React')).toBeVisible()
-    await expect(page.getByText('Tailwind CSS')).toBeVisible()
-    await expect(page.getByText('Typescript')).toBeVisible()
+  test('displays technologies & Tools', async ({ page }) => {
+    const technologies = [
+      'Ansible',
+      'Docker',
+      'Jest',
+      'PlayWright',
+      'PostgreSQL',
+      'Pytest',
+      'React',
+      'Tailwind CSS',
+      'Typescript',
+    ]
+
+    for (const tech of technologies) {
+      await expect(page.getByText(tech)).toBeVisible()
+    }
   })
 
   test('loads roadmap items correctly', async ({ page }) => {
@@ -58,7 +65,7 @@ test.describe('About Page', () => {
     await expect(page.getByText('890+Stars')).toBeVisible()
   })
 
-  test('opens GitHub profile in new window when leader button is clicked', async ({
+  test('opens user profile in new window when leader button is clicked', async ({
     page,
     context,
   }) => {
@@ -66,6 +73,6 @@ test.describe('About Page', () => {
     await page.getByRole('button', { name: 'View Profile' }).first().click()
     const newPage = await pagePromise
     await newPage.waitForLoadState()
-    expect(newPage.url()).toContain('github.com')
+    expect(newPage.url()).toContain('/community/users/')
   })
 })
