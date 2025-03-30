@@ -325,6 +325,145 @@ git checkout -b feature/my-feature-name
     - Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
   - Restart the application with `make run` and verify the error is resolved.
 
+
+
+# Environment Variables Documentation
+
+## Frontend
+
+#### `VITE_API_URL`
+- **Description**: The base URL for the application's REST API.
+- **Example Value**: `http://localhost:8000/api/v1/`
+- **Usage**: Used to make API requests to the backend.
+
+#### `VITE_ENVIRONMENT`
+- **Description**: Specifies the current environment in which the application is running.
+- **Example Value**: `local`, `staging`, `production`
+- **Usage**: Helps in differentiating between environments for debugging or feature toggling.
+
+#### `VITE_GRAPHQL_URL`
+- **Description**: The endpoint for the GraphQL API.
+- **Example Value**: `http://localhost:8000/graphql/`
+- **Usage**: Used for making GraphQL queries and mutations.
+
+#### `VITE_GTM_AUTH`
+- **Description**: Authentication token for Google Tag Manager (GTM).
+- **Example Value**: `your-google-tag-manager-auth`
+- **Usage**: Enables secure integration with GTM.
+
+#### `VITE_GTM_ID`
+- **Description**: The unique ID for the Google Tag Manager container.
+- **Example Value**: `your-google-tag-manager-id`
+- **Usage**: Identifies the GTM container for tracking and analytics.
+
+#### `VITE_GTM_PREVIEW`
+- **Description**: Used for previewing GTM configurations.
+- **Example Value**: *(Empty by default)*
+- **Usage**: Optional, used during GTM debugging or testing.
+
+#### `VITE_IDX_URL`
+- **Description**: The base URL for IDX (Indexing Service).
+- **Example Value**: `http://localhost:8000/idx/`
+- **Usage**: Used for accessing indexing-related services.
+
+#### `VITE_RELEASE_VERSION`
+- **Description**: The current release version of the application.
+- **Example Value**: *(Empty by default)*
+- **Usage**: Helps in tracking the deployed version for debugging or monitoring.
+
+#### `VITE_SENTRY_DSN`
+- **Description**: The Data Source Name (DSN) for Sentry error tracking.
+- **Example Value**: *(Empty by default)*
+- **Usage**: Enables integration with Sentry for logging and monitoring errors.
+
+---
+
+## Backend
+
+### General Configuration
+
+#### `DJANGO_CONFIGURATION`
+- **Description**: Specifies the Django configuration to use.
+- **Example Value**: `Local`, `Production`, `Staging`
+
+### Algolia Search
+
+#### `DJANGO_ALGOLIA_APPLICATION_ID`
+- **Description**: The application ID for Algolia.
+
+#### `DJANGO_ALGOLIA_APPLICATION_REGION`
+- **Description**: The region of the Algolia application.
+
+#### `DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES`
+- **Description**: Index names to exclude locally (if any).
+
+#### `DJANGO_ALGOLIA_WRITE_API_KEY`
+- **Description**: The write API key for Algolia.
+
+### AWS Configuration
+
+#### `DJANGO_AWS_ACCESS_KEY_ID`
+- **Description**: AWS access key ID
+
+#### `DJANGO_AWS_SECRET_ACCESS_KEY`
+- **Description**: AWS secret access key.
+
+### Database Configuration
+
+#### `DJANGO_DB_HOST`
+- **Description**: The hostname of the database server.
+
+#### `DJANGO_DB_NAME`
+- **Description**: The name of the database.
+
+#### `DJANGO_DB_PASSWORD`
+- **Description**: The password for the database user.
+
+#### `DJANGO_DB_PORT`
+- **Description**: The port number for the database server.
+
+#### `DJANGO_DB_USER`
+- **Description**: The username for the database.
+
+### OpenAI
+
+#### `DJANGO_OPEN_AI_SECRET_KEY`
+- **Description**: The secret key for OpenAI API.
+
+### Release and Versioning
+
+#### `DJANGO_RELEASE_VERSION`
+- **Description**: The release version of the application.
+
+### Security
+
+#### `DJANGO_SECRET_KEY`
+- **Description**: The secret key for Django (used for cryptographic signing).
+
+#### `DJANGO_SENTRY_DSN`
+- **Description**: The DSN for Sentry (used for error tracking).
+
+### Slack Integration
+
+#### `DJANGO_SLACK_BOT_TOKEN`
+- **Description**: The token for the Slack bot.
+
+#### `DJANGO_SLACK_SIGNING_SECRET`
+- **Description**: The signing secret for Slack.
+
+### GitHub Integration
+
+#### `GITHUB_TOKEN`
+- **Description**: The token for accessing GitHub APIs.
+
+### Miscellaneous
+
+#### `DJANGO_ALLOWED_HOSTS`
+- **Description**: A comma-separated list of allowed hosts for the application.
+
+
+
+
 ## Code of Conduct
 
 Please follow the [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md) when interacting with other contributors.
