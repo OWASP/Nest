@@ -6,8 +6,6 @@ from django.conf import settings
 from apps.slack.commands.users import users_handler
 from apps.slack.common.presentation import EntityPresentation
 
-EXPECTED_BLOCK_COUNT_USERS = 2
-
 
 @pytest.fixture()
 def mock_command():
@@ -82,6 +80,6 @@ def test_users_handler_with_blocks(mock_get_blocks, mock_client, mock_command):
     ack.assert_called_once()
     mock_client.conversations_open.assert_called_once_with(users="U123456")
     blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-    assert len(blocks) == EXPECTED_BLOCK_COUNT_USERS
+    assert len(blocks) == len(mock_get_blocks.return_value)
     assert blocks[0]["text"]["text"] == "User: Test"
     assert blocks[1]["type"] == "divider"
