@@ -17,7 +17,7 @@ import UserCard from 'components/UserCard'
 const leaders = ['arkid15r', 'kasya', 'mamicidal']
 
 const About = () => {
-  const [project, setProject] = useState<ProjectTypeGraphql>(null)
+  const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const projectKey = 'nest'
 
@@ -159,6 +159,10 @@ const LeaderData = ({ username }: { username: string }) => {
   if (error) return <p>Error loading {username}'s data</p>
 
   const user = data?.user
+
+  if (!user) {
+    return <p>No data available for {username}</p>
+  }
 
   return (
     <UserCard
