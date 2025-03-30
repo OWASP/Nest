@@ -15,7 +15,7 @@ ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
 USER owasp
 WORKDIR /home/owasp
 
-COPY --chown=owasp:owasp poetry.lock pyproject.toml ./
+COPY --chmod=644 --chown=owasp:owasp poetry.lock pyproject.toml ./
 RUN poetry install --no-root --without dev --without test
 
 FROM python:3.13-slim
@@ -37,4 +37,4 @@ EXPOSE 8000
 USER owasp
 WORKDIR /home/owasp
 
-COPY --from=builder /home/owasp /home/owasp
+COPY --from=builder --chmod=755 --chown=owasp:owasp /home/owasp /home/owasp

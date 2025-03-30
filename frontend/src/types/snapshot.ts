@@ -17,3 +17,10 @@ export interface SnapshotDetailsProps {
   newProjects: ProjectTypeGraphql[]
   newChapters: ChapterTypeGraphQL[]
 }
+
+export interface Snapshots {
+  endAt: string
+  key: string
+  startAt: string
+  title: string
+}

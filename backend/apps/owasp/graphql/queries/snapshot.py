@@ -15,9 +15,9 @@ class SnapshotQuery(BaseQuery):
         key=graphene.String(required=True),
     )
 
-    recent_snapshots = graphene.List(
+    snapshots = graphene.List(
         SnapshotNode,
-        limit=graphene.Int(default_value=8),
+        limit=graphene.Int(default_value=12),
     )
 
     def resolve_snapshot(root, info, key):
@@ -27,6 +27,6 @@ class SnapshotQuery(BaseQuery):
         except Snapshot.DoesNotExist:
             return None
 
-    def resolve_recent_snapshots(root, info, limit):
-        """Resolve recent snapshots."""
+    def resolve_snapshots(root, info, limit):
+        """Resolve snapshots."""
         return Snapshot.objects.order_by("-created_at")[:limit]

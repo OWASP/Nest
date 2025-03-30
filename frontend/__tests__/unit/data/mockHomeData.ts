@@ -79,6 +79,26 @@ export const mockGraphQLData = {
       url: 'https://nest.owasp.org/events/event-1',
     },
   ],
+  recentPullRequests: [
+    {
+      createdAt: '2025-03-25T10:00:00Z',
+      title: 'Fix authentication bug',
+      author: {
+        name: 'John Doe',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/58754215?v=4',
+      },
+      url: 'https://github.com/example/repo/pull/1',
+    },
+    {
+      createdAt: '2025-03-24T15:30:00Z',
+      title: 'Add new feature',
+      author: {
+        login: 'jane-smith',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/58754221?v=4',
+      },
+      url: 'https://github.com/example/repo/pull/2',
+    },
+  ],
 }
 
 export const mockAlgoliaData = {

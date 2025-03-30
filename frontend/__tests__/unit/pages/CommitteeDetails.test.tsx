@@ -47,7 +47,8 @@ describe('CommitteeDetailsPage Component', () => {
       expect(screen.getByText('Test Committee')).toBeInTheDocument()
     })
     expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
-    expect(screen.getByText('Leader 1, Leader 2')).toBeInTheDocument()
+    expect(screen.getByText('Leader 1')).toBeInTheDocument()
+    expect(screen.getByText('Leader 2')).toBeInTheDocument()
     expect(screen.getByText('https://owasp.org/test-committee')).toBeInTheDocument()
   })
 

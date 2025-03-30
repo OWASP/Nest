@@ -112,10 +112,11 @@ describe('Dialog Component', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('manages body overflow style correctly', () => {
+  it('manages body overflow style correctly', async () => {
     const { unmount } = renderModal()
-
-    expect(document.body.style.overflow).toBe('hidden')
+    await waitFor(() => {
+      expect(document.body.style.overflow).toBe('hidden')
+    })
 
     unmount()
 

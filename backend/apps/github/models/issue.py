@@ -21,6 +21,9 @@ class Issue(GenericIssueModel):
 
     class Meta:
         db_table = "github_issues"
+        indexes = [
+            models.Index(fields=["-created_at"]),
+        ]
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Issues"
 
