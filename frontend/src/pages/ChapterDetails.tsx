@@ -59,7 +59,7 @@ export default function ChapterDetailsPage() {
     {
       label: 'URL',
       value: (
-        <Link href={chapter.url} className="hover:underline dark:text-sky-600">
+        <Link href={chapter.url} className="text-blue-400 hover:underline">
           {chapter.url}
         </Link>
       ),

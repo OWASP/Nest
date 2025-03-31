@@ -11,7 +11,7 @@ const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
       className="group flex h-40 w-full flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="text-center">
-        <h3 className="max-w-[250px] text-balance text-lg font-semibold text-gray-900 group-hover:text-blue-500 dark:text-white sm:text-xl">
+        <h3 className="max-w-[250px] text-balance text-lg font-semibold text-gray-900 group-hover:text-blue-400 dark:text-white sm:text-xl">
           <p>{title}</p>
         </h3>
       </div>
@@ -25,7 +25,7 @@ const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
         </div>
       </div>
 
-      <div className="mt-auto inline-flex items-center text-sm font-medium text-blue-500 dark:text-blue-400">
+      <div className="mt-auto inline-flex items-center text-sm font-medium text-blue-400">
         View Snapshot
         <FontAwesomeIcon
           icon={faChevronRight}
