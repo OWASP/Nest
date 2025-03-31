@@ -9,6 +9,12 @@ import { useState } from 'react'
 export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
   const [hovered, setHovered] = useState(false)
 
+
+  const socialMediaIcons: IconKeys[] = ['linkedin', 'youtube', 'twitter', 'github']
+
+  const isSocialMediaIcon = socialMediaIcons.includes(item as IconKeys)
+
+
   const containerClassName = [
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
     item === 'stars_count' || item === 'starsCount' ? 'rotate-container' : '',
@@ -22,10 +28,6 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     .filter(Boolean)
     .join(' ')
 
-  const iconClassName = `transition-colors duration-200 ${
-    hovered ? Icons[item as IconKeys]?.colorClass || 'text-gray-600' : 'text-gray-600 dark:text-gray-300'
-  }`
-
   return icons[item] ? (
     <Tooltip
       content={`${Icons[item as keyof typeof Icons]?.label}`}
@@ -37,15 +39,24 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     >
       <div
         className={containerClassName}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseEnter={() => isSocialMediaIcon && setHovered(true)}
+        onMouseLeave={() => isSocialMediaIcon && setHovered(false)}
       >
+        {/* Display formatted number if the value is a number */}
         <span className="text-gray-600 dark:text-gray-300">
-          {typeof icons[item] === 'number' ? millify(icons[item], { precision: 1 }) : icons[item]}
+          {typeof icons[item] === 'number'
+            ? millify(icons[item], { precision: 1 })
+            : icons[item]}
         </span>
         <span>
           <FontAwesomeIconWrapper
-            className={iconClassName}
+            className={`${
+              isSocialMediaIcon
+                ? hovered
+                  ? Icons[item as IconKeys]?.color || 'text-gray-600'
+                  : 'text-gray-400 dark:text-gray-500'
+                : 'text-gray-600 dark:text-gray-300'
+            } transition-colors duration-300`}
             icon={Icons[item as IconKeys]?.icon}
           />
         </span>
