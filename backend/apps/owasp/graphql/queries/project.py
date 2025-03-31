@@ -24,13 +24,11 @@ class ProjectQuery(BaseQuery):
         """Resolve project.
 
         Args:
-        ----
             root: The root object.
             info: GraphQL execution info.
             key (str): The key of the project.
 
         Returns:
-        -------
             Project: The project object if found, otherwise None.
 
         """
@@ -43,13 +41,11 @@ class ProjectQuery(BaseQuery):
         """Resolve recent projects.
 
         Args:
-        ----
             root: The root object.
             info: GraphQL execution info.
             limit (int): The maximum number of recent projects to return.
 
         Returns:
-        -------
             QuerySet: A queryset of recent active projects.
 
         """

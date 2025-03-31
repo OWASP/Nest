@@ -41,7 +41,6 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
         """Return a human-readable representation of the issue.
 
         Returns
-        -------
             str: The title of the issue along with the author's name.
 
         """
@@ -52,7 +51,6 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
         """Check if the issue is open.
 
         Returns
-        -------
             bool: True if the issue is open, False otherwise.
 
         """
@@ -63,7 +61,6 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
         """Get the project associated with the issue.
 
         Returns
-        -------
             Project: The project instance associated with the issue.
 
         """
@@ -74,7 +71,6 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
         """Get the repository ID associated with the issue.
 
         Returns
-        -------
             int: The ID of the repository.
 
         """

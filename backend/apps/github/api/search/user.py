@@ -9,7 +9,6 @@ def get_users(query, attributes=None, limit=25, page=1, searchable_attributes=No
     """Return users relevant to a search query.
 
     Args:
-    ----
         query (str): The search query string.
         attributes (list, optional): List of attributes to retrieve.
         limit (int): Maximum number of users to return.
@@ -17,7 +16,6 @@ def get_users(query, attributes=None, limit=25, page=1, searchable_attributes=No
         searchable_attributes (list, optional): List of attributes to restrict the search to.
 
     Returns:
-    -------
         dict: Search results containing users and metadata.
 
     """

@@ -24,7 +24,6 @@ class Event(TimestampedModel):
         """Event human readable representation.
 
         Returns
-        -------
             str: A string representation of the event.
 
         """
@@ -34,7 +33,6 @@ class Event(TimestampedModel):
         """Create instance based on Slack data.
 
         Args:
-        ----
             context (dict): Context data from Slack, including user and channel information.
             payload (dict): Payload data from Slack, including command and text information.
 
@@ -63,13 +61,11 @@ class Event(TimestampedModel):
         """Create event.
 
         Args:
-        ----
             context (dict): Context data from Slack, including user and channel information.
             payload (dict): Payload data from Slack, including command and text information.
             save (bool, optional): Whether to save the event to the database.
 
         Returns:
-        -------
             Event: The created Event instance.
 
         """

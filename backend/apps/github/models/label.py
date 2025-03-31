@@ -23,7 +23,6 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
         """Return a human-readable representation of the label.
 
         Returns
-        -------
             str: The name and description of the label.
 
         """
@@ -33,7 +32,6 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
         """Update the instance based on GitHub label data.
 
         Args:
-        ----
             gh_label (github.Label.Label): The GitHub label object.
 
         """
@@ -62,12 +60,10 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
         """Update label data.
 
         Args:
-        ----
             gh_label (github.Label.Label): The GitHub label object.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Label: The updated or created label instance.
 
         """

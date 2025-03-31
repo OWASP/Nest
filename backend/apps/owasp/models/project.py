@@ -186,7 +186,6 @@ class Project(
         """Update instance based on GitHub repository data.
 
         Args:
-        ----
             repository (github.Repository): The GitHub repository instance.
 
         """
@@ -228,7 +227,6 @@ class Project(
         """Save the project instance.
 
         Args:
-        ----
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
 
@@ -249,7 +247,6 @@ class Project(
         """Bulk save projects.
 
         Args:
-        ----
             projects (list[Project]): List of Project instances to save.
             fields (list[str], optional): List of fields to update.
 
@@ -261,13 +258,11 @@ class Project(
         """Update project data from GitHub repository.
 
         Args:
-        ----
             gh_repository (github.Repository): The GitHub repository instance.
             repository (github.Repository): The repository data to update from.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Project: The updated Project instance.
 
         """

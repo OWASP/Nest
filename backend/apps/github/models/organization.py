@@ -28,7 +28,6 @@ class Organization(
         """Return a human-readable representation of the organization.
 
         Returns
-        -------
             str: The name of the organization.
 
         """
@@ -38,7 +37,6 @@ class Organization(
         """Update the instance based on GitHub organization data.
 
         Args:
-        ----
             gh_organization (github.Organization.Organization): The GitHub organization object.
 
         """
@@ -70,12 +68,10 @@ class Organization(
         """Update organization data.
 
         Args:
-        ----
             gh_organization (github.Organization.Organization): The GitHub organization object.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Organization: The updated or created organization instance.
 
         """

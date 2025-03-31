@@ -52,11 +52,9 @@ class IndexRegistry:
         """Check if an index is enabled for indexing.
 
         Args:
-        ----
             name (str): The name of the index.
 
         Returns:
-        -------
             bool: True if the index is enabled, False otherwise.
 
         """
@@ -66,7 +64,6 @@ class IndexRegistry:
         """Load excluded local index names from settings.
 
         Returns
-        -------
             IndexRegistry: The current instance of the registry.
 
         """
@@ -88,11 +85,9 @@ def is_indexable(index_name: str):
     """Determine if an index should be created based on configuration.
 
     Args:
-    ----
         index_name (str): The name of the index.
 
     Returns:
-    -------
         bool: True if the index is indexable, False otherwise.
 
     """
@@ -103,12 +98,10 @@ def register(model, **kwargs):
     """Register an index if configuration allows.
 
     Args:
-    ----
         model (Model): The Django model to register.
         **kwargs: Additional arguments for the registration.
 
     Returns:
-    -------
         Callable: A wrapper function for the index class.
 
     """
@@ -131,11 +124,9 @@ class IndexBase(AlgoliaIndex):
         """Return an instance of the search client.
 
         Args:
-        ----
             ip_address (str, optional): The IP address for the client.
 
         Returns:
-        -------
             SearchClientSync: The search client instance.
 
         """
@@ -153,7 +144,6 @@ class IndexBase(AlgoliaIndex):
         """Configure replicas for an index.
 
         Args:
-        ----
             index_name (str): The name of the base index.
             replicas (dict): A dictionary of replica names and their ranking configurations.
 
@@ -182,11 +172,9 @@ class IndexBase(AlgoliaIndex):
         """Parse a synonyms file and return its content.
 
         Args:
-        ----
             file_path (str): The path to the synonyms file.
 
         Returns:
-        -------
             list: A list of parsed synonyms or None if the file is not found.
 
         """
@@ -230,12 +218,10 @@ class IndexBase(AlgoliaIndex):
         """Reindex synonyms for a specific index.
 
         Args:
-        ----
             app_name (str): The name of the application.
             index_name (str): The name of the index.
 
         Returns:
-        -------
             int or None: The number of synonyms reindexed, or None if an error occurs.
 
         """
@@ -264,12 +250,10 @@ class IndexBase(AlgoliaIndex):
         """Get the total count of records in an index.
 
         Args:
-        ----
             index_name (str): The name of the index.
             search_filters (str, optional): Filters to apply to the search.
 
         Returns:
-        -------
             int: The total count of records in the index.
 
         """
@@ -294,7 +278,6 @@ class IndexBase(AlgoliaIndex):
         """Get the queryset for the index.
 
         Returns
-        -------
             QuerySet: The queryset of entities to index.
 
         """

@@ -23,7 +23,6 @@ class Command(BaseCommand):
         """Handle the command execution.
 
         Args:
-        ----
             *args: Variable length argument list.
             **options: Arbitrary keyword arguments.
 
@@ -57,7 +56,6 @@ class Command(BaseCommand):
         """Process a single snapshot.
 
         Args:
-        ----
             snapshot (Snapshot): The snapshot instance to process.
 
         """

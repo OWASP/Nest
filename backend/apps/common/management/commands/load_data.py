@@ -14,7 +14,6 @@ class Command(BaseCommand):
         """Load data into the OWASP Nest application.
 
         Args:
-        ----
             *_args: Positional arguments (not used).
             **_options: Keyword arguments (not used).
 

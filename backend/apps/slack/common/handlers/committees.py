@@ -20,14 +20,12 @@ def get_blocks(
     """Get committees blocks.
 
     Args:
-    ----
         page (int): The current page number for pagination.
         search_query (str): The search query for filtering committees.
         limit (int): The maximum number of committees to retrieve per page.
         presentation (EntityPresentation | None): Configuration for entity presentation.
 
     Returns:
-    -------
         list: A list of Slack blocks representing the committees.
 
     """

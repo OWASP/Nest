@@ -55,7 +55,6 @@ class Event(BulkSaveModel, TimestampedModel):
         """Get upcoming events.
 
         Returns
-        -------
             QuerySet: A queryset of upcoming Event instances ordered by start date.
 
         """
@@ -70,12 +69,10 @@ class Event(BulkSaveModel, TimestampedModel):
         """Bulk save events.
 
         Args:
-        ----
             events (list): A list of Event instances to be saved.
             fields (list, optional): A list of fields to update during the bulk save.
 
         Returns:
-        -------
             None
 
         """
@@ -87,12 +84,10 @@ class Event(BulkSaveModel, TimestampedModel):
         """Parse event dates.
 
         Args:
-        ----
             dates (str): A string representing the event dates.
             start_date (datetime.date): The start date of the event.
 
         Returns:
-        -------
             datetime.date or None: The parsed end date if successful, otherwise None.
 
         """
@@ -141,13 +136,11 @@ class Event(BulkSaveModel, TimestampedModel):
         """Update event data.
 
         Args:
-        ----
             category (str): The category of the event.
             data (dict): A dictionary containing event data.
             save (bool, optional): Whether to save the event instance.
 
         Returns:
-        -------
             Event: The updated or newly created Event instance.
 
         """
@@ -167,12 +160,10 @@ class Event(BulkSaveModel, TimestampedModel):
         """Update instance based on the dict data.
 
         Args:
-        ----
             category (str): The category of the event.
             data (dict): A dictionary containing event data.
 
         Returns:
-        -------
             None
 
         """
@@ -198,7 +189,6 @@ class Event(BulkSaveModel, TimestampedModel):
         """Add latitude and longitude data.
 
         Returns
-        -------
             None
 
         """
@@ -215,11 +205,9 @@ class Event(BulkSaveModel, TimestampedModel):
         """Generate a suggested location for the event.
 
         Args:
-        ----
             prompt (str): The prompt to be used for generating the suggested location.
 
         Returns:
-        -------
             None
 
         """
@@ -238,11 +226,9 @@ class Event(BulkSaveModel, TimestampedModel):
         """Generate a summary for the event.
 
         Args:
-        ----
             prompt (str): The prompt to be used for generating the summary.
 
         Returns:
-        -------
             None
 
         """
@@ -259,11 +245,9 @@ class Event(BulkSaveModel, TimestampedModel):
         """Return geo string.
 
         Args:
-        ----
             include_dates (bool, optional): Whether to include event dates in the context.
 
         Returns:
-        -------
             str: The generated context string.
 
         """

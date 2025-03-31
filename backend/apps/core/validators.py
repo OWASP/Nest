@@ -10,11 +10,9 @@ def validate_index_name(index_name):
     """Validate index name.
 
     Args:
-    ----
         index_name (str): The name of the index to validate.
 
     Raises:
-    ------
         ValidationError: If the index name is invalid or not a string.
 
     """
@@ -36,11 +34,9 @@ def validate_limit(limit):
     """Validate limit.
 
     Args:
-    ----
         limit (int): The number of hits per page.
 
     Raises:
-    ------
         ValidationError: If the limit is not an integer or out of range.
 
     """
@@ -59,11 +55,9 @@ def validate_page(page):
     """Validate page.
 
     Args:
-    ----
         page (int): The page number.
 
     Raises:
-    ------
         ValidationError: If the page is not a positive integer.
 
     """
@@ -80,11 +74,9 @@ def validate_query(query):
     """Validate query.
 
     Args:
-    ----
         query (str): The search query.
 
     Raises:
-    ------
         ValidationError: If the query is not a string or contains invalid characters.
 
     """
@@ -107,11 +99,9 @@ def validate_facet_filters(facet_filters):
     """Validate facet filters.
 
     Args:
-    ----
         facet_filters (list): The list of facet filters.
 
     Raises:
-    ------
         ValidationError: If the facet filters are not a list.
 
     """
@@ -124,11 +114,9 @@ def validate_search_params(data):
     """Validate search parameters.
 
     Args:
-    ----
         data (dict): The search parameters to validate.
 
     Raises:
-    ------
         ValidationError: If any of the parameters are invalid.
 
     """

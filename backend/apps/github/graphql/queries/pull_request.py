@@ -22,7 +22,6 @@ class PullRequestQuery(BaseQuery):
         """Resolve recent pull requests.
 
         Args:
-        ----
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of pull requests to return.
@@ -30,7 +29,6 @@ class PullRequestQuery(BaseQuery):
             login (str, optional): Filter pull requests by a specific author's login.
 
         Returns:
-        -------
             QuerySet: Queryset containing the filtered list of pull requests.
 
         """

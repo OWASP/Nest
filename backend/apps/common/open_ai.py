@@ -15,7 +15,6 @@ class OpenAi:
         """OpenAi constructor.
 
         Args:
-        ----
             model (str, optional): The model to use.
             max_tokens (int, optional): Maximum tokens for the response.
             temperature (float, optional): Sampling temperature.
@@ -34,11 +33,9 @@ class OpenAi:
         """Set system role content.
 
         Args:
-        ----
             content (str): The input content.
 
         Returns:
-        -------
             OpenAi: The current instance.
 
         """
@@ -50,11 +47,9 @@ class OpenAi:
         """Set max tokens.
 
         Args:
-        ----
             max_tokens (int): Maximum tokens for the response.
 
         Returns:
-        -------
             OpenAi: The current instance.
 
         """
@@ -66,11 +61,9 @@ class OpenAi:
         """Set system role content.
 
         Args:
-        ----
             content (str): The prompt content.
 
         Returns:
-        -------
             OpenAi: The current instance.
 
         """
@@ -82,11 +75,9 @@ class OpenAi:
         """Get API response.
 
         Returns
-        -------
             str: The response content.
 
         Raises
-        ------
             openai.APIConnectionError: If a connection error occurs.
             Exception: For other errors during the API request.
 

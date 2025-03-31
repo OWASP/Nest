@@ -101,7 +101,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Return a human-readable representation of the repository.
 
         Returns
-        -------
             str: The repository path.
 
         """
@@ -112,7 +111,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Get the latest pull request for the repository.
 
         Returns
-        -------
             PullRequest: The most recently created pull request.
 
         """
@@ -123,7 +121,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Get the latest release for the repository.
 
         Returns
-        -------
             Release: The most recently published release.
 
         """
@@ -189,7 +186,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Update the repository instance based on GitHub repository data.
 
         Args:
-        ----
             gh_repository (github.Repository.Repository): The GitHub repository object.
             commits (github.PaginatedList.PaginatedList, optional): List of commits.
             contributors (github.PaginatedList.PaginatedList, optional): List of contributors.
@@ -304,7 +300,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Update repository data.
 
         Args:
-        ----
             gh_repository (github.Repository.Repository): The GitHub repository object.
             commits (github.PaginatedList.PaginatedList, optional): List of commits.
             contributors (github.PaginatedList.PaginatedList, optional): List of contributors.
@@ -314,7 +309,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Repository: The updated or created repository instance.
 
         """

@@ -43,7 +43,6 @@ class Snapshot(models.Model):
         """Save the snapshot instance.
 
         Args:
-        ----
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
 

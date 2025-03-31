@@ -59,7 +59,6 @@ class ReleaseIndex(IndexBase):
         """Get entities for indexing.
 
         Returns
-        -------
             QuerySet: A queryset of Release objects to be indexed.
 
         """

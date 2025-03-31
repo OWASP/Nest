@@ -8,7 +8,6 @@ class EntityPresentation:
     """Configuration for entities presentation.
 
     Attributes
-    ----------
         include_feedback (bool): Whether to include feedback in the presentation.
         include_metadata (bool): Whether to include metadata in the presentation.
         include_pagination (bool): Whether to include pagination in the presentation.

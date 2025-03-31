@@ -17,13 +17,11 @@ class ChapterQuery(BaseQuery):
         """Resolve chapter by key.
 
         Args:
-        ----
             root: The root object.
             info: GraphQL execution info.
             key (str): The key of the chapter.
 
         Returns:
-        -------
             Chapter: The chapter object if found, otherwise None.
 
         """
@@ -36,13 +34,11 @@ class ChapterQuery(BaseQuery):
         """Resolve recent chapters.
 
         Args:
-        ----
             root: The root object.
             info: GraphQL execution info.
             limit (int): The maximum number of recent chapters to return.
 
         Returns:
-        -------
             QuerySet: A queryset of recent active chapters.
 
         """

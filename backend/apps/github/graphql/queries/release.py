@@ -21,14 +21,12 @@ class ReleaseQuery(BaseQuery):
         """Resolve recent releases with optional distinct filtering.
 
         Args:
-        ----
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of releases to return.
             distinct (bool): Whether to return unique releases per author and repository.
 
         Returns:
-        -------
             QuerySet: Queryset containing the filtered list of releases.
 
         """

@@ -48,7 +48,6 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         """Return a human-readable representation of the release.
 
         Returns
-        -------
             str: The name of the release along with the author's name.
 
         """
@@ -68,7 +67,6 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         """Update the instance based on GitHub release data.
 
         Args:
-        ----
             gh_release (github.Release.Release): The GitHub release object.
             author (User, optional): The author of the release.
             repository (Repository, optional): The repository instance.
@@ -107,14 +105,12 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         """Update release data.
 
         Args:
-        ----
             gh_release (github.Release.Release): The GitHub release object.
             author (User, optional): The author of the release.
             repository (Repository, optional): The repository instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Release: The updated or created release instance.
 
         """

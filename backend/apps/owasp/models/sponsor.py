@@ -75,7 +75,6 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         """Bulk save sponsors.
 
         Args:
-        ----
             sponsors (list[Sponsor]): List of Sponsor instances to save.
             fields (list[str], optional): List of fields to update.
 
@@ -87,12 +86,10 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         """Update sponsor data.
 
         Args:
-        ----
             data (dict): Dictionary containing sponsor data.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Sponsor: The updated Sponsor instance.
 
         """
@@ -113,7 +110,6 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         """Update instance based on the dictionary data.
 
         Args:
-        ----
             data (dict): Dictionary containing sponsor data.
 
         """

@@ -26,7 +26,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Return a human-readable representation of the user.
 
         Returns
-        -------
             str: The name or login of the user.
 
         """
@@ -37,7 +36,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Get issues created by the user.
 
         Returns
-        -------
             QuerySet: A queryset of issues created by the user.
 
         """
@@ -48,7 +46,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Get releases created by the user.
 
         Returns
-        -------
             QuerySet: A queryset of releases created by the user.
 
         """
@@ -58,7 +55,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Update the user instance based on GitHub user data.
 
         Args:
-        ----
             gh_user (github.NamedUser.NamedUser): The GitHub user object.
 
         """
@@ -83,7 +79,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Get logins that should not be indexed.
 
         Returns
-        -------
             set: A set of non-indexable logins.
 
         """
@@ -98,12 +93,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """Update GitHub user data.
 
         Args:
-        ----
             gh_user (github.NamedUser.NamedUser): The GitHub user object.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             User: The updated or created user instance.
 
         """

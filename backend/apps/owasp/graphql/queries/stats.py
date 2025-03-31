@@ -17,13 +17,11 @@ class StatsQuery:
         """Resolve stats overview.
 
         Args:
-        ----
             self: The StatsQuery instance.
             info: GraphQL execution info.
             **kwargs: Additional arguments.
 
         Returns:
-        -------
             StatsNode: A node containing aggregated statistics.
 
         """

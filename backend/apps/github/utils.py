@@ -15,11 +15,9 @@ def check_owasp_site_repository(key):
     """Check if the repository is an OWASP site repository.
 
     Args:
-    ----
         key (str): The repository key.
 
     Returns:
-    -------
         bool: True if the repository is an OWASP site repository, False otherwise.
 
     """
@@ -37,12 +35,10 @@ def check_funding_policy_compliance(platform, target):
     """Check OWASP funding policy compliance.
 
     Args:
-    ----
         platform (str): The funding platform (e.g., 'github', 'custom').
         target (str): The funding target.
 
     Returns:
-    -------
         bool: True if the funding policy is compliant, False otherwise.
 
     """
@@ -63,12 +59,10 @@ def get_repository_file_content(url, timeout=30):
     """Get the content of a file from a repository.
 
     Args:
-    ----
         url (str): The URL of the file.
         timeout (int, optional): The request timeout in seconds.
 
     Returns:
-    -------
         str: The content of the file, or None if the request fails.
 
     """
@@ -82,11 +76,9 @@ def get_repository_path(url):
     """Parse a repository URL to extract the owner and repository name.
 
     Args:
-    ----
         url (str): The repository URL.
 
     Returns:
-    -------
         str: The repository path in the format 'owner/repository_name', or None if parsing fails.
 
     """
@@ -98,12 +90,10 @@ def normalize_url(url, check_path=False):
     """Normalize a URL.
 
     Args:
-    ----
         url (str): The URL to normalize.
         check_path (bool, optional): Whether to check if the URL has a path.
 
     Returns:
-    -------
         str: The normalized URL, or None if the URL is invalid.
 
     """

@@ -30,7 +30,6 @@ class Prompt(TimestampedModel):
         """Save prompt.
 
         Args:
-        ----
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
 
@@ -44,11 +43,9 @@ class Prompt(TimestampedModel):
         """Return prompt by key.
 
         Args:
-        ----
             key (str): The key of the prompt.
 
         Returns:
-        -------
             str: The text of the prompt, or None if not found.
 
         """
@@ -63,7 +60,6 @@ class Prompt(TimestampedModel):
         """Return GitHub issue hint prompt.
 
         Returns
-        -------
             str: The GitHub issue hint prompt text.
 
         """
@@ -74,7 +70,6 @@ class Prompt(TimestampedModel):
         """Return GitHub issue documentation project summary prompt.
 
         Returns
-        -------
             str: The GitHub issue documentation project summary prompt text.
 
         """
@@ -85,7 +80,6 @@ class Prompt(TimestampedModel):
         """Return GitHub issue project summary prompt.
 
         Returns
-        -------
             str: The GitHub issue project summary prompt text.
 
         """
@@ -96,7 +90,6 @@ class Prompt(TimestampedModel):
         """Return OWASP chapter suggested location prompt.
 
         Returns
-        -------
             str: The OWASP chapter suggested location prompt text.
 
         """
@@ -107,7 +100,6 @@ class Prompt(TimestampedModel):
         """Return OWASP chapter summary prompt.
 
         Returns
-        -------
             str: The OWASP chapter summary prompt text.
 
         """
@@ -118,7 +110,6 @@ class Prompt(TimestampedModel):
         """Return OWASP committee summary prompt.
 
         Returns
-        -------
             str: The OWASP committee summary prompt text.
 
         """
@@ -129,7 +120,6 @@ class Prompt(TimestampedModel):
         """Return OWASP event suggested location prompt.
 
         Returns
-        -------
             str: The OWASP event suggested location prompt text.
 
         """
@@ -140,7 +130,6 @@ class Prompt(TimestampedModel):
         """Return OWASP event summary prompt.
 
         Returns
-        -------
             str: The OWASP event summary prompt text.
 
         """
@@ -151,7 +140,6 @@ class Prompt(TimestampedModel):
         """Return OWASP project summary prompt.
 
         Returns
-        -------
             str: The OWASP project summary prompt text.
 
         """

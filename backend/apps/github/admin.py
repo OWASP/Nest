@@ -46,11 +46,9 @@ class PullRequestAdmin(admin.ModelAdmin):
         """Pull Request GitHub URL.
 
         Args:
-        ----
             obj (PullRequest): The pull request instance.
 
         Returns:
-        -------
             str: A safe HTML link to the pull request on GitHub.
 
         """
@@ -81,11 +79,9 @@ class IssueAdmin(admin.ModelAdmin):
         """Issue GitHub URL.
 
         Args:
-        ----
             obj (Issue): The issue instance.
 
         Returns:
-        -------
             str: A safe HTML link to the issue on GitHub.
 
         """
@@ -126,11 +122,9 @@ class RepositoryAdmin(admin.ModelAdmin):
         """Repository GitHub URL.
 
         Args:
-        ----
             obj (Repository): The repository instance.
 
         Returns:
-        -------
             str: A safe HTML link to the repository on GitHub.
 
         """
@@ -142,11 +136,9 @@ class RepositoryAdmin(admin.ModelAdmin):
         """Repository title.
 
         Args:
-        ----
             obj (Repository): The repository instance.
 
         Returns:
-        -------
             str: The formatted repository title as 'owner/repository_name'.
 
         """

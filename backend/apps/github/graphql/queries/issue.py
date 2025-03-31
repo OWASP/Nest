@@ -22,7 +22,6 @@ class IssueQuery(BaseQuery):
         """Resolve recent issues with optional filtering.
 
         Args:
-        ----
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of issues to return.
@@ -30,7 +29,6 @@ class IssueQuery(BaseQuery):
             login (str, optional): Filter issues by a specific author's login.
 
         Returns:
-        -------
             QuerySet: Queryset containing the filtered list of issues.
 
         """

@@ -78,7 +78,6 @@ class Issue(GenericIssueModel):
         """Update the instance based on GitHub issue data.
 
         Args:
-        ----
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
             repository (Repository, optional): The repository instance.
@@ -116,7 +115,6 @@ class Issue(GenericIssueModel):
         """Generate a hint for the issue using AI.
 
         Args:
-        ----
             open_ai (OpenAi, optional): The OpenAI instance.
             max_tokens (int, optional): The maximum number of tokens for the AI response.
 
@@ -133,7 +131,6 @@ class Issue(GenericIssueModel):
         """Generate a summary for the issue using AI.
 
         Args:
-        ----
             open_ai (OpenAi, optional): The OpenAI instance.
             max_tokens (int, optional): The maximum number of tokens for the AI response.
 
@@ -179,14 +176,12 @@ class Issue(GenericIssueModel):
         """Update issue data.
 
         Args:
-        ----
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
             repository (Repository, optional): The repository instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Issue: The updated or created issue instance.
 
         """

@@ -76,7 +76,6 @@ class Chapter(
         """Update instance based on GitHub repository data.
 
         Args:
-        ----
             repository (github.Repository): The GitHub repository instance.
 
         """
@@ -115,7 +114,6 @@ class Chapter(
         """Generate a suggested location using OpenAI.
 
         Args:
-        ----
             open_ai (OpenAi, optional): An instance of OpenAi.
             max_tokens (int, optional): Maximum tokens for the OpenAI prompt.
 
@@ -135,11 +133,9 @@ class Chapter(
         """Return a geo string for the chapter.
 
         Args:
-        ----
             include_name (bool, optional): Whether to include the chapter name.
 
         Returns:
-        -------
             str: The geo string.
 
         """
@@ -156,7 +152,6 @@ class Chapter(
         """Save the chapter instance.
 
         Args:
-        ----
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
 
@@ -174,7 +169,6 @@ class Chapter(
         """Bulk save chapters.
 
         Args:
-        ----
             chapters (list[Chapter]): List of Chapter instances to save.
             fields (list[str], optional): List of fields to update.
 
@@ -186,13 +180,11 @@ class Chapter(
         """Update chapter data from GitHub repository.
 
         Args:
-        ----
             gh_repository (github.Repository): The GitHub repository instance.
             repository (github.Repository): The repository data to update from.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             Chapter: The updated Chapter instance.
 
         """

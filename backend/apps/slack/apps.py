@@ -28,7 +28,6 @@ if SlackConfig.app:
         """Handle Slack application errors.
 
         Args:
-        ----
             error (Exception): The exception raised.
             body (dict): The payload of the Slack event that caused the error.
             *args: Additional positional arguments.
@@ -42,7 +41,6 @@ if SlackConfig.app:
         """Log Slack events.
 
         Args:
-        ----
             client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
             context (dict): The context of the Slack event.
             logger (logging.Logger): The logger instance.

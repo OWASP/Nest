@@ -25,13 +25,11 @@ class UserQuery(BaseQuery):
         """Resolve user top repositories.
 
         Args:
-        ----
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             login (str): The login of the user.
 
         Returns:
-        -------
             list: List of repositories the user has contributed to.
 
         """
@@ -46,13 +44,11 @@ class UserQuery(BaseQuery):
         """Resolve user by login.
 
         Args:
-        ----
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             login (str): The login of the user.
 
         Returns:
-        -------
             User or None: The user object if found, otherwise None.
 
         """

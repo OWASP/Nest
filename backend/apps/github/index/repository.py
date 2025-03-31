@@ -65,7 +65,6 @@ class RepositoryIndex(IndexBase):
         """Get entities for indexing.
 
         Returns
-        -------
             QuerySet: A queryset of Repository objects to be indexed.
 
         """

@@ -42,7 +42,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         """Return a human-readable representation of the repository contributor.
 
         Returns
-        -------
             str: A string describing the user's contributions to the repository.
 
         """
@@ -55,7 +54,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         """Update the instance based on GitHub contributor data.
 
         Args:
-        ----
             gh_contributions (github.NamedUser.Contributor): The GitHub contributor object.
 
         """
@@ -79,14 +77,12 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         """Update repository contributor data.
 
         Args:
-        ----
             gh_contributor (github.NamedUser.Contributor): The GitHub contributor object.
             repository (Repository): The repository instance.
             user (User): The user instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             RepositoryContributor: The updated or created repository contributor instance.
 
         """

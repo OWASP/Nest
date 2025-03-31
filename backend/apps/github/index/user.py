@@ -71,7 +71,6 @@ class UserIndex(IndexBase):
         """Get entities for indexing.
 
         Returns
-        -------
             QuerySet: A queryset of User objects to be indexed.
 
         """

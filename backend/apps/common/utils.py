@@ -14,11 +14,9 @@ def get_absolute_url(path):
     """Return the absolute URL for a given path.
 
     Args:
-    ----
         path (str): The relative path.
 
     Returns:
-    -------
         str: The absolute URL.
 
     """
@@ -29,7 +27,6 @@ def get_nest_user_agent():
     """Return the user agent string for the Nest application.
 
     Returns
-    -------
         str: The user agent string.
 
     """
@@ -40,11 +37,9 @@ def get_user_ip_address(request):
     """Retrieve the user's IP address from the request.
 
     Args:
-    ----
         request (HttpRequest): The HTTP request object.
 
     Returns:
-    -------
         str: The user's IP address.
 
     """
@@ -59,12 +54,10 @@ def join_values(fields, delimiter=" "):
     """Join non-empty field values using a specified delimiter.
 
     Args:
-    ----
         fields (list): A list of field values.
         delimiter (str, optional): The delimiter to use.
 
     Returns:
-    -------
         str: The joined string.
 
     """
@@ -75,11 +68,9 @@ def natural_date(value):
     """Convert a date or timestamp into a human-readable format.
 
     Args:
-    ----
         value (str or int or datetime): The date or timestamp to convert.
 
     Returns:
-    -------
         str: The humanized date string.
 
     """
@@ -95,12 +86,10 @@ def natural_number(value, unit=None):
     """Convert a number into a human-readable format.
 
     Args:
-    ----
         value (int): The number to convert.
         unit (str, optional): The unit to append.
 
     Returns:
-    -------
         str: The humanized number string.
 
     """
@@ -112,11 +101,9 @@ def slugify(text):
     """Generate a slug from the given text.
 
     Args:
-    ----
         text (str): The text to slugify.
 
     Returns:
-    -------
         str: The slugify text.
 
     """
@@ -127,13 +114,11 @@ def truncate(text, limit, truncate="..."):
     """Truncate text to a specified character limit.
 
     Args:
-    ----
         text (str): The text to truncate.
         limit (int): The character limit.
         truncate (str, optional): The truncation suffix.
 
     Returns:
-    -------
         str: The truncated text.
 
     """

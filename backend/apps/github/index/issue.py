@@ -81,7 +81,6 @@ class IssueIndex(IndexBase):
         """Update synonyms for the issue index.
 
         Returns
-        -------
             None
 
         """
@@ -91,7 +90,6 @@ class IssueIndex(IndexBase):
         """Get entities for indexing.
 
         Returns
-        -------
             QuerySet: A queryset of Issue objects to be indexed.
 
         """

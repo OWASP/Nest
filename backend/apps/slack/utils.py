@@ -21,11 +21,9 @@ def escape(content):
     """Escape HTML content.
 
     Args:
-    ----
         content (str): The HTML content to escape.
 
     Returns:
-    -------
         str: The escaped HTML content.
 
     """
@@ -37,11 +35,9 @@ def get_gsoc_projects(year):
     """Get GSoC projects.
 
     Args:
-    ----
         year (int): The year for which to fetch GSoC projects.
 
     Returns:
-    -------
         list: A list of GSoC projects with their attributes.
 
     """
@@ -64,12 +60,10 @@ def get_news_data(limit=10, timeout=30):
     """Get news data.
 
     Args:
-    ----
         limit (int, optional): The maximum number of news items to fetch.
         timeout (int, optional): The request timeout in seconds.
 
     Returns:
-    -------
         list: A list of dictionaries containing news data (author, title, and URL).
 
     """
@@ -102,11 +96,9 @@ def get_staff_data(timeout=30):
     """Get staff data.
 
     Args:
-    ----
         timeout (int, optional): The request timeout in seconds.
 
     Returns:
-    -------
         list or None: A sorted list of staff data dictionaries, or None if an error occurs.
 
     """
@@ -129,7 +121,6 @@ def get_events_data():
     """Get events data.
 
     Returns
-    -------
         QuerySet or None: A queryset of upcoming events.
 
     """
@@ -146,11 +137,9 @@ def get_sponsors_data(limit=10):
     """Get sponsors data.
 
     Args:
-    ----
         limit (int, optional): The maximum number of sponsors to fetch.
 
     Returns:
-    -------
         QuerySet or None: A queryset of sponsors, or None if an error occurs.
 
     """
@@ -168,11 +157,9 @@ def get_posts_data(limit=5):
     """Get posts data.
 
     Args:
-    ----
         limit (int, optional): The maximum number of posts to fetch.
 
     Returns:
-    -------
         QuerySet or None: A queryset of recent posts, or None if an error occurs.
 
     """
@@ -189,11 +176,9 @@ def get_text(blocks):
     """Convert blocks to plain text.
 
     Args:
-    ----
         blocks (list): A list of Slack block elements.
 
     Returns:
-    -------
         str: The plain text representation of the blocks.
 
     """
@@ -244,11 +229,9 @@ def strip_markdown(text):
     """Strip markdown formatting.
 
     Args:
-    ----
         text (str): The text with markdown formatting.
 
     Returns:
-    -------
         str: The text with markdown formatting removed.
 
     """

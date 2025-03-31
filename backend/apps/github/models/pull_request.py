@@ -59,7 +59,6 @@ class PullRequest(GenericIssueModel):
         """Update the instance based on GitHub pull request data.
 
         Args:
-        ----
             gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
             author (User, optional): The author of the pull request.
             repository (Repository, optional): The repository instance.
@@ -104,14 +103,12 @@ class PullRequest(GenericIssueModel):
         """Update pull request data.
 
         Args:
-        ----
             gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
             author (User, optional): The author of the pull request.
             repository (Repository, optional): The repository instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:
-        -------
             PullRequest: The updated or created pull request instance.
 
         """

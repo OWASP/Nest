@@ -32,7 +32,6 @@ class Command(BaseCommand):
         """Add command-line arguments to the parser.
 
         Args:
-        ----
             parser (ArgumentParser): The argument parser instance.
 
         """
@@ -46,7 +45,6 @@ class Command(BaseCommand):
         """Generate sitemaps for the OWASP Nest application.
 
         Args:
-        ----
             *args: Positional arguments (not used).
             **options: Command-line options.
 
@@ -76,7 +74,6 @@ class Command(BaseCommand):
         """Generate a sitemap for projects.
 
         Args:
-        ----
             output_dir (Path): The directory to save the sitemap.
 
         """
@@ -98,7 +95,6 @@ class Command(BaseCommand):
         """Generate a sitemap for chapters.
 
         Args:
-        ----
             output_dir (Path): The directory to save the sitemap.
 
         """
@@ -120,7 +116,6 @@ class Command(BaseCommand):
         """Generate a sitemap for committees.
 
         Args:
-        ----
             output_dir (Path): The directory to save the sitemap.
 
         """
@@ -145,7 +140,6 @@ class Command(BaseCommand):
         """Generate a sitemap for users.
 
         Args:
-        ----
             output_dir (Path): The directory to save the sitemap.
 
         """
@@ -167,11 +161,9 @@ class Command(BaseCommand):
         """Generate the XML content for a sitemap.
 
         Args:
-        ----
             routes (list): A list of route dictionaries.
 
         Returns:
-        -------
             str: The XML content of the sitemap.
 
         """
@@ -193,11 +185,9 @@ class Command(BaseCommand):
         """Generate the sitemap index file.
 
         Args:
-        ----
             sitemap_files (list): A list of sitemap file names.
 
         Returns:
-        -------
             str: The XML content of the sitemap index.
 
         """
@@ -214,11 +204,9 @@ class Command(BaseCommand):
         """Create a URL entry for the sitemap.
 
         Args:
-        ----
             url_data (dict): A dictionary containing URL data.
 
         Returns:
-        -------
             str: The XML entry for the URL.
 
         """
@@ -235,11 +223,9 @@ class Command(BaseCommand):
         """Create a sitemap index entry.
 
         Args:
-        ----
             sitemap_data (dict): A dictionary containing sitemap data.
 
         Returns:
-        -------
             str: The XML entry for the sitemap index.
 
         """
@@ -251,11 +237,9 @@ class Command(BaseCommand):
         """Create the complete sitemap XML.
 
         Args:
-        ----
             urls (list): A list of URL entries.
 
         Returns:
-        -------
             str: The XML content of the sitemap.
 
         """
@@ -270,11 +254,9 @@ class Command(BaseCommand):
         """Create the complete sitemap index XML.
 
         Args:
-        ----
             sitemaps (list): A list of sitemap index entries.
 
         Returns:
-        -------
             str: The XML content of the sitemap index.
 
         """
@@ -290,7 +272,6 @@ class Command(BaseCommand):
         """Save the sitemap content to a file.
 
         Args:
-        ----
             content (str): The XML content of the sitemap.
             filepath (Path): The file path to save the sitemap.
 

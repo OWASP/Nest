@@ -23,14 +23,12 @@ def get_blocks(
     """Get users blocks.
 
     Args:
-    ----
         page (int): The current page number for pagination.
         search_query (str): The search query for filtering users.
         limit (int): The maximum number of users to retrieve per page.
         presentation (EntityPresentation | None): Configuration for entity presentation.
 
     Returns:
-    -------
         list: A list of Slack blocks representing the users.
 
     """

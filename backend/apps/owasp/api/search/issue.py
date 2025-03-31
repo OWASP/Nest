@@ -11,7 +11,6 @@ def get_issues(query, attributes=None, distinct=False, limit=25, page=1):
     """Return issues relevant to a search query.
 
     Args:
-    ----
         query (str): The search query string.
         attributes (list, optional): List of attributes to retrieve.
         distinct (bool, optional): Whether to enable distinct mode.
@@ -19,7 +18,6 @@ def get_issues(query, attributes=None, distinct=False, limit=25, page=1):
         page (int, optional): Page number for pagination.
 
     Returns:
-    -------
         dict: Search results containing issues matching the query.
 
     """

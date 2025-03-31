@@ -14,7 +14,6 @@ class Command(BaseCommand):
         """Handle the command execution.
 
         Args:
-        ----
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
 

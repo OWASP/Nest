@@ -9,7 +9,6 @@ def get_chapters(query, attributes=None, limit=25, page=1, searchable_attributes
     """Return chapters relevant to a search query.
 
     Args:
-    ----
         query (str): The search query string.
         attributes (list, optional): List of attributes to retrieve.
         limit (int, optional): Number of results per page.
@@ -17,7 +16,6 @@ def get_chapters(query, attributes=None, limit=25, page=1, searchable_attributes
         searchable_attributes (list, optional): Attributes to restrict the search to.
 
     Returns:
-    -------
         dict: Search results containing chapters matching the query.
 
     """

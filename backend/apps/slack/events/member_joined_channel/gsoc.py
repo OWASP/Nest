@@ -19,7 +19,6 @@ def gsoc_handler(event, client, ack):
     """Slack #gsoc new member handler.
 
     Args:
-    ----
         event (dict): The event payload from Slack.
         client (slack_sdk.WebClient): The Slack WebClient instance.
         ack (Callable): The acknowledgment function to confirm event processing.

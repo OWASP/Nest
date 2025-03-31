@@ -16,7 +16,6 @@ class Command(BaseCommand):
         """Add command-line arguments to the parser.
 
         Args:
-        ----
             parser (argparse.ArgumentParser): The argument parser instance.
 
         """
@@ -32,7 +31,6 @@ class Command(BaseCommand):
         """Handle the command execution.
 
         Args:
-        ----
             *_args: Variable length argument list.
             **options: Arbitrary keyword arguments containing command options.
 

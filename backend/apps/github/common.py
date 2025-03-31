@@ -23,13 +23,11 @@ def sync_repository(gh_repository, organization=None, user=None):
     """Sync GitHub repository data.
 
     Args:
-    ----
         gh_repository (github.Repository.Repository): The GitHub repository object.
         organization (Organization, optional): The organization instance.
         user (User, optional): The user instance.
 
     Returns:
-    -------
         tuple: A tuple containing the updated organization and repository instances.
 
     """
