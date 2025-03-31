@@ -12,11 +12,18 @@ export const headerLinks: Link[] = [
   },
   {
     text: 'Community',
-    href: '/community/users',
+    submenu: [
+      { text: 'Snapshots', href: '/community/snapshots' },
+      { text: 'Users', href: '/community/users' },
+    ],
   },
   {
     text: 'Chapters',
     href: '/chapters',
+  },
+  {
+    text: 'About',
+    href: '/about',
   },
 ]
 
@@ -24,7 +31,7 @@ export const footerSections: Section[] = [
   {
     title: 'OWASP Nest',
     links: [
-      { text: 'About', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#owasp-nest' },
+      { text: 'About', href: '/about/' },
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
       { text: 'Leaders', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#leaders' },
       {
@@ -66,7 +73,6 @@ export const footerSections: Section[] = [
       { text: 'About', href: 'https://owasp.org/about/' },
       { text: 'Contact', href: 'https://owasp.org/contact/' },
       { text: 'Events', href: 'https://owasp.glueup.com/organization/6727/events/' },
-      { text: 'Membership', href: 'https://owasp.glueup.com/organization/6727/memberships/' },
       { text: 'Team', href: 'https://owasp.org/corporate/' },
     ],
   },

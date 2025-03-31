@@ -11,11 +11,11 @@ class TestUpdateOwaspPostsCommand:
     TOTAL_API_CALLS = 3
     TOTAL_UPDATE_CALLS = 2
 
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_repository_files(self):
         return [
             {
@@ -28,7 +28,7 @@ class TestUpdateOwaspPostsCommand:
             },
         ]
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_post_content(self):
         return """---
 title: Test Post

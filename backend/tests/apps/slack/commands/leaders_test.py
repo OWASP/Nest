@@ -8,20 +8,20 @@ from apps.slack.commands.leaders import leaders_handler
 
 
 class TestLeadersHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "text": "web application",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_chapter(self):
         return {
             "idx_key": "test-chapter",
@@ -29,7 +29,7 @@ class TestLeadersHandler:
             "idx_name": "Test Chapter",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_project(self):
         return {
             "idx_key": "test-project",

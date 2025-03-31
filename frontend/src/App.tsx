@@ -9,6 +9,7 @@ import {
   ProjectsPage,
   RepositoryDetailsPage,
   SnapshotDetailsPage,
+  SnapshotsPage,
   UserDetailsPage,
   UsersPage,
 } from 'pages'
@@ -20,6 +21,7 @@ import Footer from 'components/Footer'
 import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
 import { Toaster } from 'components/ui/toaster'
+import About from 'pages/About'
 
 function App() {
   const location = useLocation()
@@ -44,7 +46,9 @@ function App() {
         <Route path="/chapters/:chapterKey" element={<ChapterDetailsPage />}></Route>
         <Route path="/community/snapshots/:id" element={<SnapshotDetailsPage />}></Route>
         <Route path="/community/users" element={<UsersPage />}></Route>
+        <Route path="/community/snapshots" element={<SnapshotsPage />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
+        <Route path="/about" element={<About />}></Route>
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />

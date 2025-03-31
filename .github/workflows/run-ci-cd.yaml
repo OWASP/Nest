@@ -52,13 +52,13 @@ jobs:
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@d648c2dd069001a242c621c8306af467f150e99d
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
         with:
           version: 10
           run_install: false
 
       - name: Set up Node
-        uses: actions/setup-node@40337cb8f758cccdfe3475af609daa63f81c7e23
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
         with:
           node-version: 22
           cache: 'pnpm'
@@ -102,7 +102,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@941183f0a080fa6be59a9e3d3f4108c19a528204
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build backend test image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
@@ -128,7 +128,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@941183f0a080fa6be59a9e3d3f4108c19a528204
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend unit-testing image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
@@ -154,7 +154,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@941183f0a080fa6be59a9e3d3f4108c19a528204
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
@@ -170,8 +170,8 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
 
-  build-docker-staging-images:
-    name: Build Docker Staging Images
+  build-staging-images:
+    name: Build Staging Images
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -186,10 +186,10 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@fcd3152d8ad392d0e9c14d3f0de40f0a88b8ca0e
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@941183f0a080fa6be59a9e3d3f4108c19a528204
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Login to Docker Hub
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
@@ -228,6 +228,25 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
+  scan-staging-images:
+    name: Scan Staging Images
+    needs: build-staging-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 0
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+          severity: 'HIGH,CRITICAL'
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 0
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+          severity: 'HIGH,CRITICAL'
+
   deploy-staging-nest:
     name: Deploy Nest Staging
     env:
@@ -239,7 +258,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
-      - build-docker-staging-images
+      - scan-staging-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -328,10 +347,10 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@fcd3152d8ad392d0e9c14d3f0de40f0a88b8ca0e
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@941183f0a080fa6be59a9e3d3f4108c19a528204
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Login to Docker Hub
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
@@ -371,6 +390,25 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
+  scan-production-images:
+    name: Scan Production Images
+    needs: build-docker-production-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 0
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+          severity: 'HIGH,CRITICAL'
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          exit-code: 0
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+          severity: 'HIGH,CRITICAL'
+
   deploy-production-nest:
     name: Deploy Nest to Production
     env:
@@ -382,7 +420,7 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - build-docker-production-images
+      - scan-production-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
