@@ -43,7 +43,7 @@ def gsoc_handler(ack, command, client):
             )
             additional_info = []
             blocks = [
-                markdown(f"*GSoC {year} projects:*{2*NL}{gsoc_projects_markdown}"),
+                markdown(f"*GSoC {year} projects:*{2 * NL}{gsoc_projects_markdown}"),
             ]
             if year in SUPPORTED_ANNOUNCEMENT_YEARS:
                 additional_info.append(
