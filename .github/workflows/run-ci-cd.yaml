@@ -171,32 +171,34 @@ jobs:
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
 
   scan-code:
-    name: Static Code Analysis
+    name: Run Code Scan
+    needs:
+      - pre-commit
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Run Trivy Code Scan
+      - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          scan-type: "repo"
-          severity: "HIGH,CRITICAL"
-          exit-code: 0
+          scan-type: repo
+          severity: HIGH,CRITICAL
 
   scan-ci-dependencies:
-    name: Scan CI Dependencies
+    name: Run CI Denendencies Scan
+    needs:
+      - pre-commit
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Run Trivy on source code
+      - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          scan-type: "fs"
-          severity: "HIGH,CRITICAL"
-          exit-code: 0
+          scan-type: fs
+          severity: HIGH,CRITICAL
 
   build-staging-images:
     name: Build Staging Images
@@ -208,8 +210,6 @@ jobs:
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
-      - scan-code
-      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -260,22 +260,21 @@ jobs:
 
   scan-staging-images:
     name: Scan Staging Images
-    needs: build-staging-images
+    needs:
+      - build-staging-images
     runs-on: ubuntu-latest
     steps:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
-          severity: 'HIGH,CRITICAL'
+          severity: HIGH,CRITICAL
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
-          severity: 'HIGH,CRITICAL'
+          severity: HIGH,CRITICAL
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -288,7 +287,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
-      - scan-staging-images
+      - build-staging-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -371,8 +370,6 @@ jobs:
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
-      - scan-code
-      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -424,22 +421,21 @@ jobs:
 
   scan-production-images:
     name: Scan Production Images
-    needs: build-docker-production-images
+    needs:
+      - build-docker-production-images
     runs-on: ubuntu-latest
     steps:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
-          severity: 'HIGH,CRITICAL'
+          severity: HIGH,CRITICAL
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          exit-code: 0
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
-          severity: 'HIGH,CRITICAL'
+          severity: HIGH,CRITICAL
 
   deploy-production-nest:
     name: Deploy Nest to Production
@@ -452,7 +448,7 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - scan-production-images
+      - build-docker-production-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
