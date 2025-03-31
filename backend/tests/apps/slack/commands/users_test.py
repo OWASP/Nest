@@ -7,12 +7,12 @@ from apps.slack.commands.users import users_handler
 from apps.slack.common.presentation import EntityPresentation
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_command():
     return {"user_id": "U123456", "text": ""}
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_client():
     client = MagicMock()
     client.conversations_open.return_value = {"channel": {"id": "C123456"}}

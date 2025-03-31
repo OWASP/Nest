@@ -8,11 +8,11 @@ from apps.slack.commands.sponsor import sponsor_handler
 
 
 class TestSponsorHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {"user_id": "U123456"}
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
