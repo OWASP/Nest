@@ -72,7 +72,7 @@ const RepositoryDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <a href={repository.url} className="hover:underline dark:text-sky-600">
+        <a href={repository.url} className="text-blue-400 hover:underline">
           {repository.url}
         </a>
       ),

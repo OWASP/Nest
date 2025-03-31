@@ -70,7 +70,7 @@ const TopContributors = ({
       {contributors.length > maxInitialDisplay && (
         <Button
           onClick={toggleContributors}
-          className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+          className="mt-4 flex items-center text-blue-400 hover:underline"
         >
           {showAllContributors ? (
             <>

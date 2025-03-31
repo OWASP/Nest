@@ -30,7 +30,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
         <div className="mt-6 flex items-center justify-center text-center">
           <button
             onClick={() => setShowAllRepositories(!showAllRepositories)}
-            className="mt-4 flex items-center justify-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+            className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
           >
             {showAllRepositories ? (
               <>
@@ -57,7 +57,7 @@ const RepositoryItem = ({ details }) => {
     <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
-        className="text-start font-semibold text-blue-500 hover:underline dark:text-blue-400"
+        className="text-start font-semibold text-blue-400 hover:underline"
       >
         <TruncatedText text={details?.name} />
       </button>
