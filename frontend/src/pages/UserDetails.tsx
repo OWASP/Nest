@@ -9,14 +9,12 @@ import {
   faCodeMerge,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_USER_DATA } from 'api/queries/userQueries'
-import millify from 'millify'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 'types/project'
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { fetchHeatmapData, drawContributions, type HeatmapData } from 'utils/helpers/githubHeatmap'
-import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -190,20 +188,13 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   const userStats = [
-    {
-      icon: faUser,
-      value: `${user.followersCount ? millify(user.followersCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.followersCount, 'Follower')}`,
-    },
-    {
-      icon: faUserPlus,
-      value: `${user.followingCount ? millify(user.followingCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.followingCount, 'Following')}`,
-    },
+    { icon: faUser, value: user.followersCount, unit: 'Follower' },
+    { icon: faUserPlus, value: user.followingCount, unit: 'Following' },
     {
       icon: faCodeBranch,
-      value: `${user.publicRepositoriesCount ? millify(user.publicRepositoriesCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.publicRepositoriesCount, 'Repository', 'Repositories')}`,
+      pluralizedName: 'Repositories',
+      unit: 'Repository',
+      value: user.publicRepositoriesCount,
     },
     {
       icon: faFileCode,
