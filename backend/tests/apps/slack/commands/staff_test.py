@@ -10,19 +10,19 @@ FAILED_STAFF_DATA_ERROR_MESSAGE = "Failed to get OWASP Foundation staff data."
 
 
 class TestStaffHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_staff(self):
         return [
             {
