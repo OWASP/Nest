@@ -3,23 +3,20 @@ import { Section } from 'types/section'
 
 export const headerLinks: Link[] = [
   {
+    text: 'Community',
+    submenu: [
+      { text: 'Chapters', href: '/chapters' },
+      { text: 'Snapshots', href: '/community/snapshots' },
+      { text: 'Users', href: '/community/users' },
+    ],
+  },
+  {
     text: 'Projects',
     href: '/projects',
   },
   {
     text: 'Contribute',
     href: '/projects/contribute',
-  },
-  {
-    text: 'Community',
-    submenu: [
-      { text: 'Snapshots', href: '/community/snapshots' },
-      { text: 'Users', href: '/community/users' },
-    ],
-  },
-  {
-    text: 'Chapters',
-    href: '/chapters',
   },
   {
     text: 'About',
