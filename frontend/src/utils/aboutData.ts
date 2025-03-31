@@ -27,6 +27,10 @@ export const roadmap = [
     title: 'Implement OWASP Project Health Dashboard',
     issueLink: 'https://github.com/OWASP/Nest/issues/711',
   },
+  {
+    title: 'Migrate OWASP Nest to Kubernetes',
+    issueLink: 'https://github.com/OWASP/Nest/issues/706',
+  },
 ]
 
 export const technologies = [

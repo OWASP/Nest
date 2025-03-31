@@ -204,9 +204,7 @@ const UserDetailsPage: React.FC = () => {
       <div className="overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
         <div className="relative">
           <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
-          {privateContributor ? (
-            <div className="h-40 rounded-lg bg-owasp-blue"></div>
-          ) : imageLink ? (
+          {imageLink ? (
             <div className="h-40 bg-[#10151c]">
               <img
                 src={imageLink || '/placeholder.svg'}
@@ -257,7 +255,7 @@ const UserDetailsPage: React.FC = () => {
       <DetailsCard
         showAvatar={false}
         title={user.name || user.login || 'User'}
-        heatmap={<Heatmap />}
+        heatmap={privateContributor ? null : <Heatmap />}
         details={userDetails}
         pullRequests={formattedPullRequest}
         stats={userStats}
