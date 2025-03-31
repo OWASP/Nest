@@ -51,7 +51,7 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
         <Image
           height={30}
           width={30}
-          className="rounded-full grayscale hover:grayscale-0"
+          className="rounded-full grayscale transition-all duration-300 hover:scale-110 hover:grayscale-0"
           src={`${avatarUrl}${isAlgolia ? '&s=60' : ''}`}
           alt={`${displayName}'s avatar`}
         />

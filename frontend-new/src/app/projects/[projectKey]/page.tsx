@@ -8,7 +8,6 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { addToast } from '@heroui/toast'
-import millify from 'millify'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -16,7 +15,6 @@ import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { ProjectTypeGraphql } from 'types/project'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -81,34 +79,23 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-    {
-      icon: faStar,
-      value: `${project.starsCount ? millify(project.starsCount, { precision: 1 }) : 'No'}
-        ${pluralize(project.starsCount, 'Star')}`,
-    },
-    {
-      icon: faCodeFork,
-      value: `${project.forksCount ? millify(project.forksCount, { precision: 1 }) : 'No'}
-        ${pluralize(project.forksCount, 'Fork')}`,
-    },
+    { icon: faStar, value: project.starsCount, unit: 'Star' },
+    { icon: faCodeFork, value: project.forksCount, unit: 'Fork' },
     {
       icon: faUsers,
-      value: `${
-        project.contributorsCount ? millify(project.contributorsCount, { precision: 1 }) : 'No'
-      }
-        ${pluralize(project.contributorsCount, 'Contributor')}`,
+      value: project.contributorsCount,
+      unit: 'Contributor',
     },
     {
       icon: faExclamationCircle,
-      value: `${project.issuesCount ? millify(project.issuesCount, { precision: 1 }) : 'No'}
-        ${pluralize(project.issuesCount, 'Issue')}`,
+      value: project.issuesCount,
+      unit: 'Issue',
     },
     {
       icon: faCode,
-      value: `${
-        project.repositoriesCount ? millify(project.repositoriesCount, { precision: 1 }) : 'No'
-      }
-        ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
+      value: project.repositoriesCount,
+      unit: 'Repository',
+      pluralizedName: 'Repositories',
     },
   ]
   return (

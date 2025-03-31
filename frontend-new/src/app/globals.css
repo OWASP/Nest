@@ -309,3 +309,9 @@ a {
 .dropdown:hover .dropdown-menu {
   @apply visible opacity-100;
 }
+
+@layer utilities {
+  .dark ::selection {
+    @apply bg-blue-500 text-white;
+  }
+}
