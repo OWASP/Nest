@@ -254,7 +254,7 @@ const SocialLinks = ({ urls }: { urls: string[] }) => {
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
         {urls.map((url, index) => (
-          <a
+          <Link
             key={index}
             href={url}
             target="_blank"
@@ -262,7 +262,7 @@ const SocialLinks = ({ urls }: { urls: string[] }) => {
             className="text-gray-600 transition-colors hover:text-gray-800 dark:text-blue-600 dark:hover:text-gray-200"
           >
             <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-          </a>
+          </Link>
         ))}
       </div>
     </div>
