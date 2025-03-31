@@ -1,9 +1,8 @@
-import { Button } from '@chakra-ui/react'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-
 const ToggleableList = ({
   items,
   label,
@@ -14,11 +13,11 @@ const ToggleableList = ({
   limit?: number
 }) => {
   const [showAll, setShowAll] = useState(false)
-  const navigate = useNavigate()
+  const router = useRouter()
 
   const toggleShowAll = () => setShowAll(!showAll)
-  const handleButtonClick = ({ item }) => {
-    navigate(`/projects?q=${encodeURIComponent(item)}`)
+  const handleButtonClick = ({ item }: { item: string }) => {
+    router.push(`/projects?q=${encodeURIComponent(item)}`)
   }
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
@@ -36,7 +35,8 @@ const ToggleableList = ({
       </div>
       {items.length > limit && (
         <Button
-          onClick={toggleShowAll}
+          disableAnimation
+          onPress={toggleShowAll}
           className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
         >
           {showAll ? (

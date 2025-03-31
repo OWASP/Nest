@@ -7,25 +7,19 @@ export type MainPageData = {
   recentIssues: ProjectIssuesType[]
   recentReleases: ProjectReleaseType[]
   upcomingEvents: EventType[]
-  recentPullRequests: PullRequestsType[]
   recentChapters: {
+    name: string
     createdAt: string
     key: string
-    leaders: string[]
-    name: string
+    region: string
     suggestedLocation: string
-  }[]
-  recentPosts: {
-    authorName: string
-    authorImageUrl: string
-    publishedAt: string
-    title: string
-    url: string
+    topContributors: {
+      name: string
+    }[]
   }[]
   recentProjects: {
     createdAt: string
     key: string
-    leaders: string[]
     name: string
     openIssuesCount: number
     repositoriesCount: number
@@ -44,16 +38,5 @@ export type SponsorType = {
   imageUrl: string
   name: string
   sponsorType: string
-  url: string
-}
-
-export type PullRequestsType = {
-  author: {
-    avatarUrl: string
-    login: string
-    name: string
-  }
-  createdAt: string
-  title: string
   url: string
 }

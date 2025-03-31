@@ -1,15 +1,5 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { LeadersListProps } from 'types/leaders'
-
-/**
- * Component that renders a list of project leaders as clickable links.
- * Takes a comma-separated string of leader names and renders each as a link
- * to their user profile page.
- *
- * @param {LeadersListProps} props - Component props
- * @param {string} props.leaders - Comma-separated string of leader names
- * @returns {JSX.Element} A list of leader links
- */
 
 const LeadersList = ({ leaders }: LeadersListProps) => {
   if (!leaders || leaders.trim() === '') return <>Unknown</>
@@ -21,7 +11,7 @@ const LeadersList = ({ leaders }: LeadersListProps) => {
       {leadersArray.map((leader, index) => (
         <span key={`${leader}-${index}`}>
           <Link
-            to={`/community/users?q=${encodeURIComponent(leader)}`}
+            href={`/community/users?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}
           >
             {leader}

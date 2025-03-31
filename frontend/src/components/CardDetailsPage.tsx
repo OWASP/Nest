@@ -1,17 +1,18 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Image from 'next/image'
+import Link from 'next/link'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 import { getSocialIcon } from 'utils/urlIconMappings'
-import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
-import TopContributors from 'components/TopContributors'
+import TopContributors from 'components/ToggleContributors'
 import LeadersList from './LeadersList'
 
 const DetailsCard = ({
@@ -92,7 +93,7 @@ const DetailsCard = ({
           )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
-              <ChapterMap
+              {/* <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
                 showLocal={true}
                 style={{
@@ -102,16 +103,18 @@ const DetailsCard = ({
                   width: '100%',
                   zIndex: '0',
                 }}
-              />
+              /> */}
             </div>
           )}
         </div>
         {(type === 'project' || type === 'repository') && (
           <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            className={`mb-8 grid grid-cols-1 gap-6 ${topics?.length === 0 || languages?.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages && languages.length > 0 && (
+              <ToggleableList items={languages ?? []} label="Languages" />
+            )}
+            {topics && topics.length > 0 && <ToggleableList items={topics ?? []} label="Topics" />}
           </div>
         )}
         {topContributors && (
@@ -125,7 +128,7 @@ const DetailsCard = ({
           <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList
               title="Recent Issues"
-              data={recentIssues}
+              data={recentIssues || []}
               showAvatar={showAvatar}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -145,7 +148,7 @@ const DetailsCard = ({
             {type === 'user' ? (
               <ItemCardList
                 title="Recent Pull Requests"
-                data={pullRequests}
+                data={pullRequests || []}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -165,7 +168,7 @@ const DetailsCard = ({
             ) : (
               <ItemCardList
                 title="Recent Releases"
-                data={recentReleases}
+                data={recentReleases || []}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -191,25 +194,28 @@ const DetailsCard = ({
                     <div className="flex w-full flex-col justify-between">
                       <div className="flex w-full items-center">
                         {showAvatar && (
-                          <a
+                          <Link
                             className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
                             href={`/community/users/${item?.author?.login}`}
                           >
-                            <img
+                            <Image
+                              height={24}
+                              width={24}
                               src={item?.author?.avatarUrl}
                               alt={item?.author?.name}
-                              className="mr-2 h-6 w-6 rounded-full"
+                              className="mr-2 rounded-full"
                             />
-                          </a>
+                          </Link>
                         )}
                         <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                          <a
+                          <Link
                             className="text-blue-500 hover:underline dark:text-blue-400"
                             href={item?.url}
                             target="_blank"
+                            rel="noopener noreferrer"
                           >
                             {item.name}
-                          </a>
+                          </Link>
                         </h3>
                       </div>
                       <div className="ml-0.5 w-full">
@@ -241,14 +247,14 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-const SocialLinks = ({ urls }) => {
+const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
         {urls.map((url, index) => (
-          <a
+          <Link
             key={index}
             href={url}
             target="_blank"
@@ -256,7 +262,7 @@ const SocialLinks = ({ urls }) => {
             className="text-gray-600 transition-colors hover:text-gray-800 dark:text-blue-600 dark:hover:text-gray-200"
           >
             <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-          </a>
+          </Link>
         ))}
       </div>
     </div>

@@ -1,8 +1,8 @@
-import { Link } from '@chakra-ui/react'
+import { Tooltip } from '@heroui/tooltip'
+import Image from 'next/image'
+import Link from 'next/link'
 import { memo } from 'react'
 import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
-import { Tooltip } from 'components/ui/tooltip'
-
 type ContributorProps = {
   contributor: TopContributorsTypeAlgolia | TopContributorsTypeGraphql
   uniqueKey: string
@@ -42,14 +42,16 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
     <Tooltip
       id={`avatar-tooltip-${login}-${uniqueKey}`}
       content={`${contributionsCount} contributions${repositoryInfo} by ${displayName}`}
-      openDelay={100}
+      delay={100}
       closeDelay={100}
       showArrow
-      positioning={{ placement: 'bottom' }}
+      placement="top"
     >
       <Link href={`/community/users/${login}`} target="_blank" rel="noopener noreferrer">
-        <img
-          className="h-[30px] w-[30px] rounded-full grayscale transition-all duration-300 hover:scale-110 hover:grayscale-0"
+        <Image
+          height={30}
+          width={30}
+          className="rounded-full grayscale transition-all duration-300 hover:scale-110 hover:grayscale-0"
           src={`${avatarUrl}${isAlgolia ? '&s=60' : ''}`}
           alt={`${displayName}'s avatar`}
         />
@@ -59,4 +61,5 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
 })
 
 ContributorAvatar.displayName = 'ContributorAvatar'
+
 export default ContributorAvatar

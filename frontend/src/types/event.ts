@@ -5,6 +5,4 @@ export type EventType = {
   name: string
   startDate: string
   url: string
-  summary?: string
-  suggestedLocation?: string
 }

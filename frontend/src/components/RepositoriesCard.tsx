@@ -7,9 +7,9 @@ import {
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { RepositoriesCardProps } from 'types/project'
 import InfoItem from './InfoItem'
 import { TruncatedText } from './TruncatedText'
@@ -48,13 +48,24 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   )
 }
 
-const RepositoryItem = ({ details }) => {
-  const navigate = useNavigate()
+const RepositoryItem = ({
+  details,
+}: {
+  details: {
+    name: string
+    key?: string
+    starsCount: number
+    forksCount: number
+    contributorsCount: number
+    openIssuesCount: number
+  }
+}) => {
+  const router = useRouter()
   const handleClick = () => {
-    navigate('/repositories/' + details?.key)
+    router.push('/repositories/' + details?.key)
   }
   return (
-    <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-48 w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
         className="text-start font-semibold text-blue-500 hover:underline dark:text-blue-400"

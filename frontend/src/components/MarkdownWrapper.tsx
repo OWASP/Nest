@@ -1,9 +1,9 @@
 import DOMPurify from 'dompurify'
-import markdownit from 'markdown-it'
+import markdownit from 'markdown-it/index.js'
 
 export default function Markdown({ content, className }: { content: string; className?: string }) {
   const md = markdownit({
-    html: false,
+    html: true,
     linkify: true,
     typographer: true,
   })

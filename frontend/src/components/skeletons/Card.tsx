@@ -1,7 +1,6 @@
-import { Box, Flex } from '@chakra-ui/react'
+import { Skeleton } from '@heroui/skeleton'
 import type React from 'react'
 import { CardSkeletonProps } from 'types/skeleton'
-import { Skeleton, SkeletonCircle, SkeletonText } from 'components/ui/Skeleton'
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({
   showLevel = true,
@@ -18,64 +17,68 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
 
   return (
     <div role="status" className="flex w-full justify-center">
-      <Box className="mb-6 w-full rounded-lg border border-border bg-card p-6 transition-colors duration-300 ease-linear hover:bg-accent/10 md:max-w-6xl">
-        <Flex direction="column" className="flex flex-col sm:flex-row" gap={6}>
+      <div className="mb-6 w-full rounded-lg border border-border bg-card p-6 transition-colors duration-300 ease-linear hover:bg-accent/10 md:max-w-6xl">
+        <div className="flex flex-col gap-6">
           {/* Header Section */}
-          <Flex className="flex w-full flex-col items-start justify-between gap-4 sm:flex-row">
-            <Flex className="items-center gap-4">
-              {showLevel && <SkeletonCircle className="h-10 w-10" />}
-              <Flex direction="column" gap={2}>
+          <div className="flex w-full flex-col items-start justify-between gap-4 sm:flex-row">
+            <div className="flex items-center gap-4">
+              {showLevel && <Skeleton className="h-10 w-10 rounded-full" />}
+              <div className="flex flex-col gap-1">
                 {showProjectName && <Skeleton className="h-8 w-[180px] sm:w-[250px]" />}
-              </Flex>
-            </Flex>
-          </Flex>
+              </div>
+            </div>
+          </div>
 
           {showIcons && (
-            <Flex className="flex min-w-[30%] flex-grow flex-row items-center justify-start gap-2 overflow-auto">
+            <div className="flex min-w-[30%] flex-grow flex-row items-center justify-start gap-2 overflow-auto">
               {Array.from({ length: numIcons }).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-16" />
               ))}
               <Skeleton />
-            </Flex>
+            </div>
           )}
 
           {/* Link Section */}
-          {showLink && <SkeletonText className="w-[180px] md:w-[350px]" noOfLines={1} />}
+          {showLink && <Skeleton className="w-[180px] md:w-[350px]" />}
 
           {/* Description Section */}
-          {showSummary && <SkeletonText className="space-y-3" noOfLines={4} />}
+          {showSummary && (
+            <div className="flex flex-col space-y-3">
+              <Skeleton className="h-3 w-full gap-1" />
+              <Skeleton className="h-3 w-full gap-1" />
+              <Skeleton className="h-3 w-full gap-1" />
+              <Skeleton className="h-3 w-full gap-1" />
+            </div>
+          )}
 
           {/* Footer Section */}
-          <Flex className="items-center justify-between gap-4 pt-3">
+          <div className="flex items-center justify-between gap-4 pt-3">
             <div className="flex flex-col justify-start gap-2">
               {showContributors && (
-                <Flex className="mt-3 flex w-full flex-wrap items-center gap-2">
+                <div className="mt-3 flex w-full flex-wrap items-center gap-2">
                   {[...Array(NUM_CONTRIBUTORS)].map((_, i) => (
-                    <SkeletonCircle
-                      key={i}
-                      className="h-[30px] w-[30px] border-2 border-background"
-                    />
+                    <Skeleton key={i} className="h-8 w-8 rounded-full border-2 border-background" />
                   ))}
-                </Flex>
+                </div>
               )}
               {showSocial && (
-                <Flex className="space-x-2">
-                  <SkeletonCircle className="h-5 w-5" />
-                  <SkeletonCircle className="h-5 w-5" />
-                  <SkeletonCircle className="h-5 w-5" />
-                  <SkeletonCircle className="h-5 w-5" />
-                  <SkeletonCircle className="h-5 w-5" />
-                  <SkeletonCircle className="h-5 w-5" />
-                </Flex>
+                <div className="flex space-x-2">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
               )}
             </div>
 
-            <Flex gap={4} className="ml-auto items-center">
+            <div className="ml-auto flex items-center gap-1">
               {showActionButton && <Skeleton className="h-9 w-[100px]" />}
-            </Flex>
-          </Flex>
-        </Flex>
-      </Box>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

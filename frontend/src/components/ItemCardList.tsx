@@ -1,8 +1,10 @@
+import Image from 'next/image'
 import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
 import { TruncatedText } from './TruncatedText'
+import Link from 'next/link'
 
 const ItemCardList = ({
   title,
@@ -33,25 +35,27 @@ const ItemCardList = ({
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center">
                 {showAvatar && (
-                  <a
+                  <Link
                     className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
                     href={`/community/users/${item?.author?.login}`}
                   >
-                    <img
+                    <Image
+                      height={24}
+                      width={24}
                       src={item?.author?.avatarUrl}
                       alt={item?.author?.name}
-                      className="mr-2 h-6 w-6 rounded-full"
+                      className="mr-2 rounded-full"
                     />
-                  </a>
+                  </Link>
                 )}
                 <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                  <a
+                  <Link
                     className="text-blue-500 hover:underline dark:text-blue-400"
                     href={item?.url}
                     target="_blank"
                   >
                     <TruncatedText text={item.title || item.name} />
-                  </a>
+                  </Link>
                 </h3>
               </div>
               <div className="ml-0.5 w-full">{renderDetails(item)}</div>
