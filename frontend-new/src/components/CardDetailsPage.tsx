@@ -109,10 +109,12 @@ const DetailsCard = ({
         </div>
         {(type === 'project' || type === 'repository') && (
           <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            className={`mb-8 grid grid-cols-1 gap-6 ${topics?.length === 0 || languages?.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages?.length !== 0 && (
+              <ToggleableList items={languages ?? []} label="Languages" />
+            )}
+            {topics?.length !== 0 && <ToggleableList items={topics ?? []} label="Topics" />}
           </div>
         )}
         {topContributors && (
@@ -126,7 +128,7 @@ const DetailsCard = ({
           <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList
               title="Recent Issues"
-              data={recentIssues}
+              data={recentIssues || []}
               showAvatar={showAvatar}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -146,7 +148,7 @@ const DetailsCard = ({
             {type === 'user' ? (
               <ItemCardList
                 title="Recent Pull Requests"
-                data={pullRequests}
+                data={pullRequests || []}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -166,7 +168,7 @@ const DetailsCard = ({
             ) : (
               <ItemCardList
                 title="Recent Releases"
-                data={recentReleases}
+                data={recentReleases || []}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -244,7 +246,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-const SocialLinks = ({ urls }) => {
+const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

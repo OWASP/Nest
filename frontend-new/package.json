@@ -9,12 +9,7 @@
     "format:check": "prettier --check .",
     "lint": "next lint --fix",
     "lint:check": "next lint",
-    "start": "next start",
-    "test:all": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest && npx playwright test",
-    "test:e2e": "npx playwright test",
-    "test:unit:coverage": "jest --coverage && chmod +x scripts/open-coverage.sh && scripts/open-coverage.sh",
-    "test:unit": "tsc --noEmit && NODE_OPTIONS=--no-warnings=DEP0040 jest",
-    "watch": "jest --watch"
+    "start": "next start"
   },
   "dependencies": {
     "@apollo/client": "^3.13.5",
@@ -71,6 +66,7 @@
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
     "@types/leaflet": "^1.9.17",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

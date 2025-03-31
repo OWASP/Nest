@@ -14,7 +14,13 @@ function userCardRender() {
   )
 }
 
-const SkeletonBase = ({ indexName, loadingImageUrl }) => {
+const SkeletonBase = ({
+  indexName,
+  loadingImageUrl,
+}: {
+  indexName: string
+  loadingImageUrl: string
+}) => {
   let Component
   switch (indexName) {
     case 'chapters':

@@ -86,7 +86,6 @@
 }
 
 @keyframes fade-in-out {
-
   0%,
   100% {
     opacity: 0;
@@ -190,7 +189,8 @@ a {
 }
 
 :root {
-  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3)
+    brightness(0.7);
 }
 
 @media (prefers-color-scheme: dark) {

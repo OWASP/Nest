@@ -16,7 +16,7 @@ const ToggleableList = ({
   const router = useRouter()
 
   const toggleShowAll = () => setShowAll(!showAll)
-  const handleButtonClick = ({ item }) => {
+  const handleButtonClick = ({ item }: { item: string }) => {
     router.push(`/projects?q=${encodeURIComponent(item)}`)
   }
   return (

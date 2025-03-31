@@ -2,7 +2,7 @@
 import { AlgoliaResponseType } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
 import { AppError } from 'wrappers/ErrorWrapper'
-import { removeIdxPrefix } from './utility'
+import { IndexedObject, removeIdxPrefix } from './utility'
 
 export const fetchAlgoliaData = async <T>(
   indexName: string,
@@ -41,7 +41,7 @@ export const fetchAlgoliaData = async <T>(
     const results = await response.json()
     if (results && results.hits.length > 0) {
       const { hits, nbPages } = results
-      const cleanedHits = hits.map((hit) => removeIdxPrefix(hit)) as T[]
+      const cleanedHits = hits.map((hit: IndexedObject) => removeIdxPrefix(hit)) as T[]
 
       return {
         hits: cleanedHits,
@@ -54,5 +54,6 @@ export const fetchAlgoliaData = async <T>(
     if (error) {
       throw error
     }
+    return { hits: [], totalPages: 0 }
   }
 }

@@ -9,9 +9,9 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
-import InfoItem from './InfoItem'
 import { useState } from 'react'
 import { RepositoriesCardProps } from 'types/project'
+import InfoItem from './InfoItem'
 import { TruncatedText } from './TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
@@ -48,7 +48,18 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   )
 }
 
-const RepositoryItem = ({ details }) => {
+const RepositoryItem = ({
+  details,
+}: {
+  details: {
+    name: string
+    key?: string
+    starsCount: number
+    forksCount: number
+    contributorsCount: number
+    openIssuesCount: number
+  }
+}) => {
   const router = useRouter()
   const handleClick = () => {
     router.push('/repositories/' + details?.key)

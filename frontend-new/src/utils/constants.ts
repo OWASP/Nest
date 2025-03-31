@@ -20,7 +20,8 @@ export const headerLinks: Link[] = [
   {
     text: 'Chapters',
     href: '/chapters',
-  }, {
+  },
+  {
     text: 'About',
     href: '/about',
   },

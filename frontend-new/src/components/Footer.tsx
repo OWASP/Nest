@@ -69,7 +69,7 @@ export default function Footer() {
                       <Link
                         target="_blank"
                         className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-                        href={link.href}
+                        href={link.href || '/'}
                       >
                         {link.text}
                       </Link>

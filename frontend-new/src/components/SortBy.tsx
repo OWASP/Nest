@@ -1,6 +1,6 @@
 import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Select, SelectItem, SelectSection } from '@heroui/select'
+import { Select, SelectItem } from '@heroui/select'
 import { Tooltip } from '@heroui/tooltip'
 import { SortByProps } from 'types/sortBy'
 
