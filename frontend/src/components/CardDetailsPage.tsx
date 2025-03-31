@@ -79,7 +79,14 @@ const DetailsCard = ({
             type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
-                <InfoBlock key={index} className="pb-1" icon={stat.icon} value={stat.value} />
+                <InfoBlock
+                  className="pb-1"
+                  icon={stat.icon}
+                  key={index}
+                  pluralizedName={stat.pluralizedName}
+                  unit={stat.unit}
+                  value={stat.value}
+                />
               ))}
             </SecondaryCard>
           )}
@@ -185,7 +192,7 @@ const DetailsCard = ({
                       <div className="flex w-full items-center">
                         {showAvatar && (
                           <a
-                            className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                            className="flex-shrink-0 text-blue-400 hover:underline"
                             href={`/community/users/${item?.author?.login}`}
                           >
                             <img
@@ -197,7 +204,7 @@ const DetailsCard = ({
                         )}
                         <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                           <a
-                            className="text-blue-500 hover:underline dark:text-blue-400"
+                            className="text-blue-400 hover:underline"
                             href={item?.url}
                             target="_blank"
                           >
@@ -246,7 +253,7 @@ const SocialLinks = ({ urls }) => {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 transition-colors hover:text-gray-800 dark:text-blue-600 dark:hover:text-gray-200"
+            className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
           >
             <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
           </a>

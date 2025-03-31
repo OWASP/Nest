@@ -27,6 +27,7 @@ export interface ProjectTypeAlgolia {
   description: string
   forks_count: number
   is_active: boolean
+  issues_count: number
   key: string
   languages: string[]
   leaders: string[]
