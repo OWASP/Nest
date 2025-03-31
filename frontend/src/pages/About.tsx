@@ -132,14 +132,14 @@ const About = () => {
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
-            { label: 'Contributors', value: project.contributorsCount },
-            { label: 'Issues', value: project.issuesCount },
             { label: 'Forks', value: project.forksCount },
             { label: 'Stars', value: project.starsCount },
+            { label: 'Contributors', value: project.contributorsCount },
+            { label: 'Issues', value: project.issuesCount },
           ].map((stat, index) => (
             <SecondaryCard key={index} className="text-center">
               <div className="mb-2 text-3xl font-bold text-blue-400">
-                <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
+                <AnimatedCounter end={Math.floor(stat.value / 5) * 5} duration={2} />+
               </div>
               <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
             </SecondaryCard>
