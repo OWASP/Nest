@@ -65,7 +65,7 @@ const RepositoryItem = ({
     router.push('/repositories/' + details?.key)
   }
   return (
-    <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-48 w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
         className="text-start font-semibold text-blue-500 hover:underline dark:text-blue-400"

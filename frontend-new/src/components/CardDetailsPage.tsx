@@ -1,6 +1,7 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
+import Link from 'next/link'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
@@ -193,7 +194,7 @@ const DetailsCard = ({
                     <div className="flex w-full flex-col justify-between">
                       <div className="flex w-full items-center">
                         {showAvatar && (
-                          <a
+                          <Link
                             className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
                             href={`/community/users/${item?.author?.login}`}
                           >
@@ -204,16 +205,17 @@ const DetailsCard = ({
                               alt={item?.author?.name}
                               className="mr-2 rounded-full"
                             />
-                          </a>
+                          </Link>
                         )}
                         <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                          <a
+                          <Link
                             className="text-blue-500 hover:underline dark:text-blue-400"
                             href={item?.url}
                             target="_blank"
+                            rel="noopener noreferrer"
                           >
                             {item.name}
-                          </a>
+                          </Link>
                         </h3>
                       </div>
                       <div className="ml-0.5 w-full">

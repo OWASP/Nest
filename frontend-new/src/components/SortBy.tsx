@@ -15,7 +15,7 @@ const SortBy = ({
   return (
     <div className="flex items-center gap-2">
       {/* Sort Attribute Dropdown */}
-      <div className="h-12items-center inline-flex rounded-lg bg-gray-200 dark:bg-[#323232]">
+      <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
         <Select
           className=""
           labelPlacement="outside-left"
@@ -24,8 +24,8 @@ const SortBy = ({
           classNames={{
             label:
               'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-            trigger: 'bg-gray-200 dark:bg-[#323232] w-auto pl-0 text-nowrap w-32',
-            popoverContent: 'text-md text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
+            trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-32',
+            popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
           }}
           selectedKeys={sortOptions
             .filter((item: { key: string; label: string }) => item.key === selectedSortOption)
