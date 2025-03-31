@@ -45,7 +45,12 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     )
 
     def __str__(self):
-        """User human readable representation."""
+        """Return a human-readable representation of the release.
+
+        Returns
+            str: The name of the release along with the author's name.
+
+        """
         return f"{self.name} by {self.author}"
 
     @property
@@ -59,7 +64,14 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         return f"{self.repository.url}/releases/tag/{self.tag_name}"
 
     def from_github(self, gh_release, author=None, repository=None):
-        """Update instance based on GitHub release data."""
+        """Update the instance based on GitHub release data.
+
+        Args:
+            gh_release (github.Release.Release): The GitHub release object.
+            author (User, optional): The author of the release.
+            repository (Repository, optional): The repository instance.
+
+        """
         field_mapping = {
             "created_at": "created_at",
             "description": "body",
@@ -90,7 +102,18 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
 
     @staticmethod
     def update_data(gh_release, author=None, repository=None, save=True):
-        """Update release data."""
+        """Update release data.
+
+        Args:
+            gh_release (github.Release.Release): The GitHub release object.
+            author (User, optional): The author of the release.
+            repository (Repository, optional): The repository instance.
+            save (bool, optional): Whether to save the instance.
+
+        Returns:
+            Release: The updated or created release instance.
+
+        """
         release_node_id = Release.get_node_id(gh_release)
         try:
             release = Release.objects.get(node_id=release_node_id)

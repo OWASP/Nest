@@ -24,7 +24,7 @@ const LeadersList = ({ leaders }: LeadersListProps) => {
           <Link
             to={`/community/users?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}
-            className="hover:underline"
+            className="text-blue-400 hover:underline"
           >
             {leader}
           </Link>

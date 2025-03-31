@@ -70,7 +70,7 @@ const Card = ({
           {/* Project title and link */}
           <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
-              className="max-w-full break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl"
+              className="max-w-full break-words text-base font-semibold text-blue-400 sm:break-normal sm:text-lg lg:text-2xl"
               style={{
                 transition: 'color 0.3s ease',
               }}
