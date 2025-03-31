@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .dark ::selection {
+    @apply bg-blue-500 text-white;
+  }
+}
+
 @layer base {
   :root {
     --background: #f4f6fc;

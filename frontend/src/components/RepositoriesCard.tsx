@@ -5,14 +5,13 @@ import {
   faExclamationCircle,
   faChevronDown,
   faChevronUp,
-  IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import millify from 'millify'
 import type React from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RepositoriesCardProps } from 'types/project'
+import InfoItem from './InfoItem'
 import { TruncatedText } from './TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
@@ -64,43 +63,13 @@ const RepositoryItem = ({ details }) => {
       </button>
 
       <div className="space-y-2 text-sm">
-        <InfoItem
-          icon={faStar}
-          label="Stars"
-          value={millify(details.starsCount, { precision: 1 })}
-        />
-        <InfoItem
-          icon={faCodeFork}
-          label="Forks"
-          value={millify(details.forksCount, { precision: 1 })}
-        />
-        <InfoItem
-          icon={faUsers}
-          label="Contributors"
-          value={millify(details.contributorsCount, { precision: 1 })}
-        />
-        <InfoItem
-          icon={faExclamationCircle}
-          label="Issues"
-          value={millify(details.openIssuesCount, { precision: 1 })}
-        />
+        <InfoItem icon={faStar} unit="Star" value={details.starsCount} />
+        <InfoItem icon={faCodeFork} unit="Fork" value={details.forksCount} />
+        <InfoItem icon={faUsers} unit="Contributor" value={details.contributorsCount} />
+        <InfoItem icon={faExclamationCircle} unit="Issue" value={details.openIssuesCount} />
       </div>
     </div>
   )
 }
-
-const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: string }> = ({
-  icon,
-  label,
-  value,
-}) => (
-  <div className="flex items-center justify-between">
-    <span className="flex items-center">
-      <FontAwesomeIcon icon={icon} className="mr-2 h-4 w-4" />
-      {label}
-    </span>
-    <span className="font-medium">{value.toLocaleString()}</span>
-  </div>
-)
 
 export default RepositoriesCard

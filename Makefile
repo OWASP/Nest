@@ -47,4 +47,8 @@ update-dependencies: \
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \
-	update-frontend-dependencies
+	update-frontend-dependencies \
+	update-pre-commit
+
+update-pre-commit:
+	@pre-commit autoupdate

@@ -214,7 +214,7 @@ export default function Home() {
             </div>
           </SecondaryCard>
           <SecondaryCard
-            title={<AnchorTitle href="#new-Projects" title="New Projects" />}
+            title={<AnchorTitle href="#new-projects" title="New Projects" />}
             className="overflow-hidden"
           >
             <div className="space-y-4">

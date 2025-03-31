@@ -68,7 +68,7 @@ class MockAlgoliaRegister:
 
 @patch("apps.common.index.algolia_register", MockAlgoliaRegister)
 class TestConditionalRegister:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_model(self):
         model = MagicMock()
         model._meta.app_label = "test_app"

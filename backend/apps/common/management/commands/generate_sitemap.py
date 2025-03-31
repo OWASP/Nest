@@ -165,10 +165,7 @@ class Command(BaseCommand):
     def create_sitemap_index_entry(self, sitemap_data):
         """Create a sitemap entry for the index."""
         return (
-            "  <sitemap>\n"
-            "    <loc>{loc}</loc>\n"
-            "    <lastmod>{lastmod}</lastmod>\n"
-            "  </sitemap>"
+            "  <sitemap>\n    <loc>{loc}</loc>\n    <lastmod>{lastmod}</lastmod>\n  </sitemap>"
         ).format(**sitemap_data)
 
     def create_sitemap(self, urls):
