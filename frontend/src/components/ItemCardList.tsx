@@ -1,3 +1,4 @@
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
@@ -7,11 +8,13 @@ import { TruncatedText } from './TruncatedText'
 const ItemCardList = ({
   title,
   data,
+  icon,
   showAvatar = true,
   renderDetails,
 }: {
   title: string
   data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[]
+  icon?: IconProp
   showAvatar?: boolean
   renderDetails: (item: {
     createdAt: string
@@ -25,7 +28,7 @@ const ItemCardList = ({
     }
   }) => JSX.Element
 }) => (
-  <SecondaryCard title={title}>
+  <SecondaryCard icon={icon} title={title}>
     {data && data.length > 0 ? (
       <div className="overflow-y-auto pr-2">
         {data.map((item, index) => (
@@ -34,7 +37,7 @@ const ItemCardList = ({
               <div className="flex w-full items-center">
                 {showAvatar && (
                   <a
-                    className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                    className="flex-shrink-0 text-blue-400 hover:underline"
                     href={`/community/users/${item?.author?.login}`}
                   >
                     <img
@@ -45,11 +48,7 @@ const ItemCardList = ({
                   </a>
                 )}
                 <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                  <a
-                    className="text-blue-500 hover:underline dark:text-blue-400"
-                    href={item?.url}
-                    target="_blank"
-                  >
+                  <a className="text-blue-400 hover:underline" href={item?.url} target="_blank">
                     <TruncatedText text={item.title || item.name} />
                   </a>
                 </h3>

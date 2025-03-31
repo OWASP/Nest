@@ -1,4 +1,5 @@
 import { Button } from '@chakra-ui/react'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
@@ -12,12 +13,14 @@ const TopContributors = ({
   maxInitialDisplay = 6,
   className = '',
   type,
+  icon,
 }: {
   contributors: TopContributorsTypeGraphql[]
   label?: string
   maxInitialDisplay?: number
   className?: string
   type: string
+  icon?: IconProp
 }) => {
   const navigate = useNavigate()
   const [showAllContributors, setShowAllContributors] = useState(false)
@@ -33,7 +36,10 @@ const TopContributors = ({
   }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
-      <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
+      <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
+        <FontAwesomeIcon icon={icon} className="h-5 w-5" />
+        {label}
+      </h2>
       <div className="grid gap-x-5 sm:grid-cols-2 md:grid-cols-3">
         {displayContributors.map((item, index) => (
           <button
@@ -44,12 +50,12 @@ const TopContributors = ({
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
                 <img src={item?.avatarUrl} alt={item?.name} className="h-6 w-6 rounded-full" />
-                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-500">
+                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
                   {capitalize(item.name) || capitalize(item.login)}
                 </h3>
               </div>
               <div className="ml-0.5 w-full">
-                <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
+                <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-400">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {type === 'contributor'
                       ? `${item.contributionsCount ?? 0} contributions`
