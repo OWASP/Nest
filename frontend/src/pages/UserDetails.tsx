@@ -198,18 +198,21 @@ const UserDetailsPage: React.FC = () => {
     },
     {
       icon: faFileCode,
-      value: `${user.issuesCount ? millify(user.issuesCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.issuesCount, 'Issue')}`,
+      value: user.issuesCount,
+      pluralizedName: 'Issues',
+      unit: 'Issue',
     },
     {
       icon: faBookmark,
-      value: `${user.releasesCount ? millify(user.releasesCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.releasesCount, 'Release')}`,
+      value: user.releasesCount,
+      pluralizedName: 'Releases',
+      unit: 'Release',
     },
     {
       icon: faCodeMerge,
-      value: `${user.contributionsCount ? millify(user.contributionsCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.contributionsCount, 'Contribution')}`,
+      value: user.contributionsCount,
+      pluralizedName: 'Contributions',
+      unit: 'Contribution',
     },
   ]
 
