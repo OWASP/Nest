@@ -13,6 +13,7 @@ import {
   faTriangleExclamation,
   faCodePullRequest,
   faNewspaper,
+  faGlobe,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -244,7 +245,10 @@ export default function Home() {
           </SecondaryCard>
         </div>
         <div className="mb-20">
-          <h2 className="mb-4 text-2xl font-semibold">OWASP Chapters Worldwide</h2>
+          <h2 className="mb-4 text-2xl font-semibold">
+            <FontAwesomeIcon icon={faGlobe} className="mr-2 h-5 w-5" />
+            OWASP Chapters Worldwide
+          </h2>
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
