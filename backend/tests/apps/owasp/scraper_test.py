@@ -10,7 +10,7 @@ from apps.owasp.scraper import OwaspScraper
 
 
 class TestOwaspScraper:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_session(self):
         """Fixture to provide a mock session."""
         with patch("requests.Session") as mock:
@@ -18,7 +18,7 @@ class TestOwaspScraper:
             mock.return_value = session
             yield session
 
-    @pytest.fixture()
+    @pytest.fixture
     def sample_html(self):
         """Fixture to provide sample HTML content."""
         return b"""
@@ -35,7 +35,7 @@ class TestOwaspScraper:
             </div>
         """
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_response(self, sample_html):
         """Fixture to provide a mock response."""
         response = Mock()

@@ -18,7 +18,7 @@ MOCKED_SEARCH_RESULTS = {
 CLIENT_IP_ADDRESS = "127.0.0.1"
 
 
-@pytest.fixture()
+@pytest.fixture
 def _clear_cache():
     """Clear the cache before and after each test."""
     cache.clear()

@@ -19,7 +19,7 @@ from apps.owasp.models.project import Project
 class TestProjectNode:
     """Test cases for ProjectNode class."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_project(self):
         """Create a mock project with issues and releases."""
         project = Mock(spec=Project)

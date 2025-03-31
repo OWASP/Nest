@@ -11,12 +11,12 @@ from apps.github.models.repository import Repository
 class TestRepositoryQuery:
     """Test cases for RepositoryQuery class."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_info(self):
         """GraphQL info mock fixture."""
         return Mock()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_repository(self):
         """Repository mock fixture."""
         return Mock(spec=Repository)

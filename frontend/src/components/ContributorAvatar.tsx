@@ -45,11 +45,11 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
       openDelay={100}
       closeDelay={100}
       showArrow
-      positioning={{ placement: 'top' }}
+      positioning={{ placement: 'bottom' }}
     >
       <Link href={`/community/users/${login}`} target="_blank" rel="noopener noreferrer">
         <img
-          className="h-[30px] w-[30px] rounded-full grayscale hover:grayscale-0"
+          className="h-[30px] w-[30px] rounded-full grayscale transition-all duration-300 hover:scale-110 hover:grayscale-0"
           src={`${avatarUrl}${isAlgolia ? '&s=60' : ''}`}
           alt={`${displayName}'s avatar`}
         />
@@ -59,5 +59,4 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
 })
 
 ContributorAvatar.displayName = 'ContributorAvatar'
-
 export default ContributorAvatar
