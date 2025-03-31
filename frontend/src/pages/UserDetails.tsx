@@ -87,7 +87,7 @@ const UserDetailsPage: React.FC = () => {
             href={`https://github.com/${username}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
+            className="text-blue-400 hover:underline"
           >
             @{username}
           </Link>
@@ -175,7 +175,7 @@ const UserDetailsPage: React.FC = () => {
     {
       label: 'GitHub Profile',
       value: (
-        <Link href={user.url || '#'} className="hover:underline dark:text-sky-600">
+        <Link href={user.url || '#'} className="text-blue-400 hover:underline">
           @{user.login}
         </Link>
       ),
@@ -235,10 +235,7 @@ const UserDetailsPage: React.FC = () => {
         alt={user.name || user.login || 'User Avatar'}
       />
       <div>
-        <Link
-          href={user.url || '#'}
-          className="text-xl font-bold hover:underline dark:text-sky-600"
-        >
+        <Link href={user.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
           @{user.login}
         </Link>
         <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
