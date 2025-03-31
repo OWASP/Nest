@@ -15,6 +15,7 @@ class TestEventModel:
         }
         event = Event()
         event.from_slack(context, payload)
+
         assert event.channel_id == "C111"
         assert event.channel_name == "general"
         assert event.command == "owasp"
@@ -33,6 +34,7 @@ class TestEventModel:
         }
         event = Event()
         event.from_slack(context, payload)
+
         assert event.channel_id == "C222"
         assert event.channel_name == "random"
         assert event.command == "other"
@@ -46,7 +48,9 @@ class TestEventModel:
         event.user_name = "Charlie"
         event.user_id = "U333"
         event.trigger = "testtrigger"
+
         assert str(event) == "Event from Charlie triggered by testtrigger"
+
         event.user_name = ""
         assert str(event) == "Event from U333 triggered by testtrigger"
 
@@ -60,13 +64,14 @@ class TestEventModel:
         }
         with patch.object(Event, "save") as mock_save:
             event = Event.create(context, payload, save=True)
-            mock_save.assert_called_once()
-            assert event.channel_id == "C444"
-            assert event.channel_name == "dev"
-            assert event.command == "owasp"
-            assert event.text == "info"
-            assert event.user_id == "U444"
-            assert event.user_name == "Dana"
+
+        mock_save.assert_called_once()
+        assert event.channel_id == "C444"
+        assert event.channel_name == "dev"
+        assert event.command == "owasp"
+        assert event.text == "info"
+        assert event.user_id == "U444"
+        assert event.user_name == "Dana"
 
     def test_create_method_save_false(self):
         context = {"channel_id": "C555", "user_id": "U555"}
@@ -78,10 +83,11 @@ class TestEventModel:
         }
         with patch.object(Event, "save") as mock_save:
             event = Event.create(context, payload, save=False)
-            mock_save.assert_not_called()
-            assert event.channel_id == "C555"
-            assert event.channel_name == "support"
-            assert event.command == "other"
-            assert event.text == "query"
-            assert event.user_id == "U555"
-            assert event.user_name == "Eve"
+
+        mock_save.assert_not_called()
+        assert event.channel_id == "C555"
+        assert event.channel_name == "support"
+        assert event.command == "other"
+        assert event.text == "query"
+        assert event.user_id == "U555"
+        assert event.user_name == "Eve"
