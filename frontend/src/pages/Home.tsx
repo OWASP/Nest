@@ -28,6 +28,7 @@ import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import ItemCardList from 'components/ItemCardList'
+import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
@@ -82,11 +83,7 @@ export default function Home() {
   }, [])
 
   if (isLoading || !graphQLData || !geoLocData) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   const getProjectIcon = (projectType: string) => {
@@ -196,15 +193,16 @@ export default function Home() {
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
-                    <div className="mr-4 flex items-center">
+                    <div className="mr-4 flex flex-1 items-center overflow-hidden">
                       <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
-                      <span>{chapter.suggestedLocation}</span>
+                      <TruncatedText text={chapter.suggestedLocation} />
                     </div>
                   </div>
+
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
-                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
-                      <span>{chapter.leaders.join(', ')}</span>
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
+                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <LeadersList leaders={String(chapter.leaders)} />
                     </div>
                   )}
                 </div>
@@ -233,10 +231,11 @@ export default function Home() {
                       <span>{capitalize(project.type)}</span>
                     </div>
                   </div>
+
                   {project.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
-                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
-                      <span>{project.leaders.join(', ')}</span>
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
+                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <LeadersList leaders={String(project.leaders)} />
                     </div>
                   )}
                 </div>
