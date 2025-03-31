@@ -77,11 +77,7 @@ export default function Home() {
   }, [])
 
   if (isLoading || !graphQLData || !geoLocData) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   const getProjectIcon = (projectType: string) => {
