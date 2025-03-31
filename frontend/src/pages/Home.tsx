@@ -192,9 +192,9 @@ export default function Home() {
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
-                    <div className="mr-4 flex items-center">
+                    <div className="mr-4 flex flex-1 items-center overflow-hidden">
                       <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
-                      <span>{chapter.suggestedLocation}</span>
+                      <TruncatedText text={chapter.suggestedLocation} />
                     </div>
                   </div>
 
