@@ -9,6 +9,11 @@ import {
   faTag,
   faUsers,
   faUser,
+  faFolder,
+  faTriangleExclamation,
+  faCodePullRequest,
+  faNewspaper,
+  faGlobe,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -141,6 +146,7 @@ export default function Home() {
           </div>
         </div>
         <SecondaryCard
+          icon={faCalendar}
           title={<AnchorTitle href="#upcoming-events" title="Upcoming Events" />}
           className="overflow-hidden"
         >
@@ -149,12 +155,12 @@ export default function Home() {
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
-                    className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
+                    className="mb-2 w-full text-left text-lg font-semibold text-blue-400 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
                     <TruncatedText text={event.name} />
                   </button>
-                  <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
+                  <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
                     <div className="mr-2 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDateRange(event.startDate, event.endDate)}</span>
@@ -182,6 +188,7 @@ export default function Home() {
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
           <SecondaryCard
+            icon={faMapMarkerAlt}
             title={<AnchorTitle href="#new-chapters" title="New Chapters" />}
             className="overflow-hidden"
           >
@@ -189,11 +196,11 @@ export default function Home() {
               {data.recentChapters.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
-                    <a href={`/chapters/${chapter.key}`} className="hover:underline">
+                    <a href={`/chapters/${chapter.key}`} className="text-blue-400 hover:underline">
                       <TruncatedText text={chapter.name} />
                     </a>
                   </h3>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
@@ -204,7 +211,7 @@ export default function Home() {
                     </div>
                   </div>
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                       <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
                       <span>{chapter.leaders.join(', ')}</span>
                     </div>
@@ -214,18 +221,19 @@ export default function Home() {
             </div>
           </SecondaryCard>
           <SecondaryCard
+            icon={faFolder}
             title={<AnchorTitle href="#new-projects" title="New Projects" />}
             className="overflow-hidden"
           >
             <div className="space-y-4">
               {data.recentProjects.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <a href={`/projects/${project.key}`} className="hover:underline">
+                  <a href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
                     <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
                   </a>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
@@ -239,7 +247,7 @@ export default function Home() {
                     </div>
                   </div>
                   {project.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                       <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
                       <span>{project.leaders.join(', ')}</span>
                     </div>
@@ -250,7 +258,10 @@ export default function Home() {
           </SecondaryCard>
         </div>
         <div className="mb-20">
-          <AnchorTitle href="#owasp-chapters-worldwide" title="OWASP Chapters Worldwide" />
+          <div className="flex items-center gap-2">
+            <FontAwesomeIcon icon={faGlobe} className="h-5 w-5" />
+            <AnchorTitle href="#owasp-chapters-worldwide" title="OWASP Chapters Worldwide" />
+          </div>
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
@@ -263,11 +274,17 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributors contributors={data.topContributors} type="company" maxInitialDisplay={9} />
+        <TopContributors
+          icon={faUsers}
+          contributors={data.topContributors}
+          type="company"
+          maxInitialDisplay={9}
+        />
         <div className="grid-cols-2 gap-4 lg:grid">
           <ItemCardList
             title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
             data={data.recentIssues}
+            icon={faTriangleExclamation}
             renderDetails={(item) => (
               <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                 <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -284,6 +301,7 @@ export default function Home() {
           <ItemCardList
             title={<AnchorTitle href="#recent-pull-requests" title="Recent Pull Requests" />}
             data={data.recentPullRequests}
+            icon={faCodePullRequest}
             renderDetails={(item) => (
               <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                 <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -298,7 +316,10 @@ export default function Home() {
             )}
           />
         </div>
-        <SecondaryCard title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}>
+        <SecondaryCard
+          icon={faTag}
+          title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
+        >
           {data.recentReleases && data.recentReleases.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {data.recentReleases.map((item, index) => (
@@ -309,7 +330,7 @@ export default function Home() {
                   <div className="flex w-full flex-col justify-between">
                     <div className="flex w-full items-center">
                       <a
-                        className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                        className="flex-shrink-0 text-blue-400 hover:underline"
                         href={`/community/users/${item?.author?.login}`}
                       >
                         <img
@@ -321,7 +342,7 @@ export default function Home() {
 
                       <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                         <a
-                          className="text-blue-500 hover:underline dark:text-blue-400"
+                          className="text-blue-400 hover:underline"
                           href={item?.url}
                           target="_blank"
                         >
@@ -346,6 +367,7 @@ export default function Home() {
           )}
         </SecondaryCard>
         <SecondaryCard
+          icon={faNewspaper}
           title={<AnchorTitle href="#recent-news-&-opinions" title="Recent News & Opinions" />}
           className="overflow-hidden"
         >
@@ -358,14 +380,14 @@ export default function Home() {
                 <h3 className="mb-1 text-lg font-semibold">
                   <a
                     href={post.url}
-                    className="text-blue-500 hover:underline"
+                    className="text-blue-400 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <TruncatedText text={post.title} />
                   </a>
                 </h3>
-                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
+                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
                   <div className="mr-4 flex items-center">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
@@ -381,19 +403,21 @@ export default function Home() {
         </SecondaryCard>
         <div className="grid gap-6 md:grid-cols-4">
           {counterData.map((stat, index) => (
-            <SecondaryCard key={index} className="text-center">
-              <div className="mb-2 text-3xl font-bold text-blue-400">
-                <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
-              </div>
-              <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
-            </SecondaryCard>
+            <div key={index}>
+              <SecondaryCard className="text-center">
+                <div className="mb-2 text-3xl font-bold text-blue-400">
+                  <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
+                </div>
+                <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+              </SecondaryCard>
+            </div>
           ))}
         </div>
 
         <div className="mb-20 mt-8">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-300">
+            <p className="mb-6 text-gray-600 dark:text-gray-400">
               Join OWASP and be part of the global cybersecurity community.
             </p>
             <a

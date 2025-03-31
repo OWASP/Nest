@@ -37,7 +37,7 @@ const ToggleableList = ({
       {items.length > limit && (
         <Button
           onClick={toggleShowAll}
-          className="mt-4 flex items-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+          className="mt-4 flex items-center text-blue-400 hover:underline"
         >
           {showAll ? (
             <>
