@@ -33,6 +33,7 @@ graphiql
 GSOC
 GTM
 gunicorn
+heroui
 hsl
 igoat
 inlinehilite

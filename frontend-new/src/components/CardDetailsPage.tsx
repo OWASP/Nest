@@ -6,7 +6,6 @@ import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 import { getSocialIcon } from 'utils/urlIconMappings'
-//chaptermap
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
