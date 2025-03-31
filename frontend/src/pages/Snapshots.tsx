@@ -56,11 +56,7 @@ const SnapshotsPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
   return (
     <MetadataManager {...METADATA_CONFIG.snapshot}>

@@ -150,16 +150,9 @@ const UserDetailsPage: React.FC = () => {
     )
   }, [user])
 
-  if (isLoading)
-    return (
-      <div
-        className="flex min-h-[60vh] items-center justify-center"
-        aria-live="polite"
-        aria-busy="true"
-      >
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
 
   if (!isLoading && user == null) {
     return (
