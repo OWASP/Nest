@@ -22,4 +22,4 @@ class Command(BaseCommand):
         for index in (IssueIndex, ProjectIndex):
             count = index.update_synonyms()
             if count:
-                print(f"{7*' '} * {index.index_name.capitalize()} --> {count}")
+                print(f"{7 * ' '} * {index.index_name.capitalize()} --> {count}")

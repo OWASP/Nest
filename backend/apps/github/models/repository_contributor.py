@@ -16,6 +16,11 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
     class Meta:
         db_table = "github_repository_contributors"
+        indexes = [
+            models.Index(
+                fields=["user", "-contributions_count"], name="user_contributions_count_idx"
+            ),
+        ]
         unique_together = ("repository", "user")
         verbose_name_plural = "Repository contributors"
 

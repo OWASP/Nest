@@ -244,10 +244,7 @@ class Command(BaseCommand):
 
         """
         return (
-            "  <sitemap>\n"
-            "    <loc>{loc}</loc>\n"
-            "    <lastmod>{lastmod}</lastmod>\n"
-            "  </sitemap>"
+            "  <sitemap>\n    <loc>{loc}</loc>\n    <lastmod>{lastmod}</lastmod>\n  </sitemap>"
         ).format(**sitemap_data)
 
     def create_sitemap(self, urls):
