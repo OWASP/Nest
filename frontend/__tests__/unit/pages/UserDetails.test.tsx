@@ -19,6 +19,10 @@ jest.mock('components/ui/toaster', () => ({
   },
 }))
 
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+}))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ userKey: 'test-user' }),

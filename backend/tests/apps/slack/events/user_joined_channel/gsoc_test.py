@@ -8,11 +8,11 @@ from apps.slack.events.member_joined_channel.gsoc import gsoc_handler
 
 
 class TestGsocEventHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_event(self):
         return {"user": "U123456", "channel": OWASP_GSOC_CHANNEL_ID}
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}

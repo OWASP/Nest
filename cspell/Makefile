@@ -15,7 +15,7 @@ cspell-run:
 		--rm \
 		cspell -c cspell/cspell.json "$(CMD)"
 
-cspell-update-deps: cspell-install
+update-cspell-dependencies: cspell-install
 	@-docker run \
 		--mount type=bind,src="$(PWD)",dst=/nest \
 		--entrypoint=/bin/sh \

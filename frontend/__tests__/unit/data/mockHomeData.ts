@@ -5,7 +5,35 @@ export const mockGraphQLData = {
       key: 'gamesec-framework',
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP GameSec Framework',
-      type: 'documentation',
+      type: 'Tool',
+    },
+    {
+      createdAt: '2024-12-06T20:46:54+00:00',
+      key: 'owasp-project-2',
+      leaders: ['Project Leader1', 'Project Leader2'],
+      name: 'OWASP project 2',
+      type: 'Documentation',
+    },
+    {
+      createdAt: '2024-12-06T20:46:54+00:00',
+      key: 'owasp-project-3',
+      leaders: ['Project Leader1', 'Project Leader2'],
+      name: 'OWASP project 3',
+      type: 'Code',
+    },
+    {
+      createdAt: '2024-12-06T20:46:54+00:00',
+      key: 'owasp-project-4',
+      leaders: ['Project Leader1', 'Project Leader2'],
+      name: 'OWASP project 4',
+      type: 'Other',
+    },
+    {
+      createdAt: '2024-12-06T20:46:54+00:00',
+      key: 'owasp-project-5',
+      leaders: ['Project Leader1', 'Project Leader2'],
+      name: 'OWASP project 5',
+      type: '',
     },
   ],
   recentPosts: [
@@ -77,6 +105,26 @@ export const mockGraphQLData = {
       summary: 'Event Summary',
       suggestedLocation: 'Location 1',
       url: 'https://nest.owasp.org/events/event-1',
+    },
+  ],
+  recentPullRequests: [
+    {
+      createdAt: '2025-03-25T10:00:00Z',
+      title: 'Fix authentication bug',
+      author: {
+        name: 'John Doe',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/58754215?v=4',
+      },
+      url: 'https://github.com/example/repo/pull/1',
+    },
+    {
+      createdAt: '2025-03-24T15:30:00Z',
+      title: 'Add new feature',
+      author: {
+        login: 'jane-smith',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/58754221?v=4',
+      },
+      url: 'https://github.com/example/repo/pull/2',
     },
   ],
 }
