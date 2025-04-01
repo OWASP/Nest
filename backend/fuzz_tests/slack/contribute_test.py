@@ -1,9 +1,11 @@
+"""Test Slack contribute event handler."""
+
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
+from django.test import override_settings
 from hypothesis import given
 from hypothesis import strategies as st
-from django.test import TestCase, override_settings
 
 from apps.slack.constants import (
     OWASP_CONTRIBUTE_CHANNEL_ID,
@@ -12,6 +14,8 @@ from apps.slack.events.member_joined_channel.contribute import contribute_handle
 
 
 class TestContributeEventHandler:
+    """Test cases for the Contribute Slack event handler."""
+
     @override_settings(DATABASES={"default": settings.DATABASES["fuzz_tests"]})
     @given(
         events_enabled=st.booleans(),
@@ -28,6 +32,7 @@ class TestContributeEventHandler:
         project_count,
         issue_count,
     ):
+        """Test the contribute event handler responses."""
         settings.SLACK_EVENTS_ENABLED = events_enabled
         mock_active_projects_count.return_value = project_count
         mock_open_issues_count.return_value = issue_count
@@ -36,5 +41,3 @@ class TestContributeEventHandler:
         mock_slack_client.conversations_open.return_value = {"channel": {"id": "C123456"}}
 
         contribute_handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
-
-        assert True
