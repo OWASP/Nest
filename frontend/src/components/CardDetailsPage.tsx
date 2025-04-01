@@ -1,5 +1,6 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { DetailsCardProps } from 'types/card'
@@ -14,6 +15,8 @@ import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
 import LeadersList from './LeadersList'
+
+const ChapterMap = dynamic(() => import('components/ChapterMap'), { ssr: false })
 
 const DetailsCard = ({
   title,
@@ -79,7 +82,7 @@ const DetailsCard = ({
             type === 'committee' ||
             type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
-              {stats.map((stat, index) => (
+              {stats?.map((stat, index) => (
                 <InfoBlock
                   className="pb-1"
                   icon={stat.icon}
@@ -93,7 +96,7 @@ const DetailsCard = ({
           )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
-              {/* <ChapterMap
+              <ChapterMap
                 geoLocData={geolocationData ? [geolocationData] : []}
                 showLocal={true}
                 style={{
@@ -103,7 +106,7 @@ const DetailsCard = ({
                   width: '100%',
                   zIndex: '0',
                 }}
-              /> */}
+              />
             </div>
           )}
         </div>
