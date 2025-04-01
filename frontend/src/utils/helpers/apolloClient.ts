@@ -1,7 +1,7 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { GRAPHQL_URL } from 'utils/credentials'
-import { getCSRFToken } from 'utils/utility'
+import { getCsrfToken } from 'utils/utility'
 import { AppError, handleAppError } from 'wrappers/ErrorWrapper'
 
 const createApolloClient = () => {
@@ -20,7 +20,7 @@ const createApolloClient = () => {
     return {
       headers: {
         ...headers,
-        'X-CSRFToken': getCSRFToken() || '',
+        'X-CSRFToken': getCsrfToken() || '',
       },
     }
   })

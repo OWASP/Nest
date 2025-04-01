@@ -65,9 +65,10 @@ export type IndexedObject = {
   [key: string]: unknown
 }
 
-export const getCSRFToken = (): string | undefined => {
+export const getCsrfToken = (): string | undefined => {
   return document.cookie
     .split(';')
-    .find((row) => row.trim().startsWith('csrftoken='))
-    ?.split('=')[1]
+    .map((cookie) => cookie.split('='))
+    .find(([key]) => key.trim() === 'csrftoken')?.[1]
+    ?.trim()
 }
