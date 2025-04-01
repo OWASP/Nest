@@ -325,11 +325,9 @@ git checkout -b feature/my-feature-name
     - Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
   - Restart the application with `make run` and verify the error is resolved.
 
+## Environment Variables Documentation
 
-
-# Environment Variables Documentation
-
-## Frontend
+### Frontend
 
 #### `VITE_API_URL`
 - **Description**: The base URL for the application's REST API.
@@ -378,15 +376,10 @@ git checkout -b feature/my-feature-name
 
 ---
 
-## Backend
-
-### General Configuration
+### Backend
 
 #### `DJANGO_CONFIGURATION`
 - **Description**: Specifies the Django configuration to use.
-- **Example Value**: `Local`, `Production`, `Staging`
-
-### Algolia Search
 
 #### `DJANGO_ALGOLIA_APPLICATION_ID`
 - **Description**: The application ID for Algolia.
@@ -400,15 +393,11 @@ git checkout -b feature/my-feature-name
 #### `DJANGO_ALGOLIA_WRITE_API_KEY`
 - **Description**: The write API key for Algolia.
 
-### AWS Configuration
-
 #### `DJANGO_AWS_ACCESS_KEY_ID`
 - **Description**: AWS access key ID
 
 #### `DJANGO_AWS_SECRET_ACCESS_KEY`
 - **Description**: AWS secret access key.
-
-### Database Configuration
 
 #### `DJANGO_DB_HOST`
 - **Description**: The hostname of the database server.
@@ -425,17 +414,11 @@ git checkout -b feature/my-feature-name
 #### `DJANGO_DB_USER`
 - **Description**: The username for the database.
 
-### OpenAI
-
 #### `DJANGO_OPEN_AI_SECRET_KEY`
 - **Description**: The secret key for OpenAI API.
 
-### Release and Versioning
-
 #### `DJANGO_RELEASE_VERSION`
 - **Description**: The release version of the application.
-
-### Security
 
 #### `DJANGO_SECRET_KEY`
 - **Description**: The secret key for Django (used for cryptographic signing).
@@ -443,25 +426,17 @@ git checkout -b feature/my-feature-name
 #### `DJANGO_SENTRY_DSN`
 - **Description**: The DSN for Sentry (used for error tracking).
 
-### Slack Integration
-
 #### `DJANGO_SLACK_BOT_TOKEN`
 - **Description**: The token for the Slack bot.
 
 #### `DJANGO_SLACK_SIGNING_SECRET`
 - **Description**: The signing secret for Slack.
 
-### GitHub Integration
-
 #### `GITHUB_TOKEN`
 - **Description**: The token for accessing GitHub APIs.
 
-### Miscellaneous
-
 #### `DJANGO_ALLOWED_HOSTS`
 - **Description**: A comma-separated list of allowed hosts for the application.
-
-
 
 
 ## Code of Conduct
