@@ -31,12 +31,12 @@ class TestChapterQuery:
 class TestChapterResolution:
     """Test cases for chapter resolution."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_chapter(self):
         """Chapter mock fixture."""
         return Mock(spec=Chapter)
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_info(self):
         """GraphQL info mock fixture."""
         return Mock()

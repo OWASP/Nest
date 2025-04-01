@@ -31,12 +31,12 @@ class TestCommitteeQuery:
 class TestCommitteeResolution:
     """Test cases for committee resolution."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_committee(self):
         """Committee mock fixture."""
         return Mock(spec=Committee)
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_info(self):
         """GraphQL info mock fixture."""
         return Mock()

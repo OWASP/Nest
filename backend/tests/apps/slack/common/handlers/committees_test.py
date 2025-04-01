@@ -7,7 +7,7 @@ from apps.slack.common.presentation import EntityPresentation
 
 
 class TestCommitteeHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_committee_data(self):
         return {
             "hits": [
@@ -21,7 +21,7 @@ class TestCommitteeHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_empty_committee_data(self):
         return {
             "hits": [],
@@ -30,9 +30,10 @@ class TestCommitteeHandler:
 
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
-        with patch("apps.owasp.api.search.committee.get_committees") as mock_get_committees, patch(
-            "apps.owasp.models.committee.Committee"
-        ) as mock_committee_model:
+        with (
+            patch("apps.owasp.api.search.committee.get_committees") as mock_get_committees,
+            patch("apps.owasp.models.committee.Committee") as mock_committee_model,
+        ):
             mock_committee_model.active_committees_count.return_value = 15
             yield {"get_committees": mock_get_committees, "committee_model": mock_committee_model}
 

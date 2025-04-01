@@ -8,14 +8,12 @@ import {
   faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_USER_DATA } from 'api/queries/userQueries'
-import millify from 'millify'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 'types/project'
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { fetchHeatmapData, drawContributions, type HeatmapData } from 'utils/helpers/githubHeatmap'
-import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -89,7 +87,7 @@ const UserDetailsPage: React.FC = () => {
             href={`https://github.com/${username}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
+            className="text-blue-400 hover:underline"
           >
             @{username}
           </Link>
@@ -152,16 +150,9 @@ const UserDetailsPage: React.FC = () => {
     )
   }, [user])
 
-  if (isLoading)
-    return (
-      <div
-        className="flex min-h-[60vh] items-center justify-center"
-        aria-live="polite"
-        aria-busy="true"
-      >
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
 
   if (!isLoading && user == null) {
     return (
@@ -177,7 +168,7 @@ const UserDetailsPage: React.FC = () => {
     {
       label: 'GitHub Profile',
       value: (
-        <Link href={user.url || '#'} className="hover:underline dark:text-sky-600">
+        <Link href={user.url || '#'} className="text-blue-400 hover:underline">
           @{user.login}
         </Link>
       ),
@@ -189,31 +180,16 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   const userStats = [
-    {
-      icon: faUser,
-      value: `${user.followersCount ? millify(user.followersCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.followersCount, 'Follower')}`,
-    },
-    {
-      icon: faUserPlus,
-      value: `${user.followingCount ? millify(user.followingCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.followingCount, 'Following')}`,
-    },
+    { icon: faUser, value: user.followersCount, unit: 'Follower' },
+    { icon: faUserPlus, value: user.followingCount, unit: 'Following' },
     {
       icon: faCodeBranch,
-      value: `${user.publicRepositoriesCount ? millify(user.publicRepositoriesCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.publicRepositoriesCount, 'Repository', 'Repositories')}`,
+      pluralizedName: 'Repositories',
+      unit: 'Repository',
+      value: user.publicRepositoriesCount,
     },
-    {
-      icon: faFileCode,
-      value: `${user.issuesCount ? millify(user.issuesCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.issuesCount, 'Issue')}`,
-    },
-    {
-      icon: faBookmark,
-      value: `${user.releasesCount ? millify(user.releasesCount, { precision: 1 }) : 'No'}
-        ${pluralize(user.releasesCount, 'Release')}`,
-    },
+    { icon: faFileCode, value: user.issuesCount, unit: 'Issue' },
+    { icon: faBookmark, value: user.releasesCount, unit: 'Release' },
   ]
 
   const Heatmap = () => (
@@ -221,9 +197,7 @@ const UserDetailsPage: React.FC = () => {
       <div className="overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
         <div className="relative">
           <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
-          {privateContributor ? (
-            <div className="h-40 rounded-lg bg-owasp-blue"></div>
-          ) : imageLink ? (
+          {imageLink ? (
             <div className="h-40 bg-[#10151c]">
               <img
                 src={imageLink || '/placeholder.svg'}
@@ -254,10 +228,7 @@ const UserDetailsPage: React.FC = () => {
         alt={user.name || user.login || 'User Avatar'}
       />
       <div>
-        <Link
-          href={user.url || '#'}
-          className="text-xl font-bold hover:underline dark:text-sky-600"
-        >
+        <Link href={user.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
           @{user.login}
         </Link>
         <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
@@ -274,7 +245,7 @@ const UserDetailsPage: React.FC = () => {
       <DetailsCard
         showAvatar={false}
         title={user.name || user.login || 'User'}
-        heatmap={<Heatmap />}
+        heatmap={privateContributor ? null : <Heatmap />}
         details={userDetails}
         pullRequests={formattedPullRequest}
         stats={userStats}

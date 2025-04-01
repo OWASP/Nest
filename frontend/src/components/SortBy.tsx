@@ -61,10 +61,7 @@ const SortBy = ({
               >
                 {attribute.label}
                 {attribute.value === selectedSortOption && (
-                  <FontAwesomeIcon
-                    icon={faCheck}
-                    className="text-sm text-blue-500 dark:text-sky-600"
-                  />
+                  <FontAwesomeIcon icon={faCheck} className="text-sm text-blue-400" />
                 )}
               </SelectItem>
             ))}

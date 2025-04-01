@@ -36,11 +36,7 @@ export default function ChapterDetailsPage() {
   }, [data, graphQLRequestError, chapterKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!chapter && !isLoading)
@@ -59,7 +55,7 @@ export default function ChapterDetailsPage() {
     {
       label: 'URL',
       value: (
-        <Link href={chapter.url} className="hover:underline dark:text-sky-600">
+        <Link href={chapter.url} className="text-blue-400 hover:underline">
           {chapter.url}
         </Link>
       ),

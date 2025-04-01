@@ -32,12 +32,12 @@ def test_add_arguments(argument_name, expected_properties):
     mock_parser.add_argument.assert_any_call(argument_name, **expected_properties)
 
 
-@pytest.fixture()
+@pytest.fixture
 def command():
     return Command()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_gh_repo():
     repo = mock.Mock(spec=Repository)
     repo.name = "test-repo"

@@ -7,7 +7,7 @@ from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.user import User
 
 
-@pytest.fixture()
+@pytest.fixture
 def user_index_mixin_instance():
     instance = UserIndexMixin()
     instance.avatar_url = "https://example.com/avatar.png"

@@ -77,6 +77,7 @@ samm
 seo
 SEO
 Sivagangai
+skillstruck
 slackbot
 SLF
 slideshare
