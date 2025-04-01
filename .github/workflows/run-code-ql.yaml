@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@9f45e7498becbbc08084a122b4be9ab534ac6d88
+        uses: github/codeql-action/init@efffb483ec7bb162c4b7935f8b35ab6b94136c7b
         with:
           languages: ${{ matrix.language }}
 
@@ -53,6 +53,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@9f45e7498becbbc08084a122b4be9ab534ac6d88
+        uses: github/codeql-action/analyze@efffb483ec7bb162c4b7935f8b35ab6b94136c7b
         with:
           category: /language:${{ matrix.language }}
