@@ -1,5 +1,6 @@
 include backend/Makefile
 include cspell/Makefile
+include docs/Makefile
 include frontend/Makefile
 include schema/Makefile
 
@@ -47,6 +48,8 @@ update-dependencies: \
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \
+	update-cspell-dependencies \
+	update-docs-dependencies \
 	update-frontend-dependencies \
 	update-pre-commit
 
