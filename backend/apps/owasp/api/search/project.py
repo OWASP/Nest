@@ -6,7 +6,19 @@ from apps.owasp.models.project import Project
 
 
 def get_projects(query, attributes=None, limit=25, page=1, searchable_attributes=None):
-    """Return projects relevant to a search query."""
+    """Return projects relevant to a search query.
+
+    Args:
+        query (str): The search query string.
+        attributes (list, optional): List of attributes to retrieve.
+        limit (int, optional): Number of results per page.
+        page (int, optional): Page number for pagination.
+        searchable_attributes (list, optional): Attributes to restrict the search to.
+
+    Returns:
+        dict: Search results containing projects matching the query.
+
+    """
     params = {
         "attributesToHighlight": [],
         "attributesToRetrieve": attributes
