@@ -41,18 +41,16 @@ class Command(BaseCommand):
 
                 try:
                     gh_repository = gh.get_repo(repository_path)
+                    organization, repository = sync_repository(gh_repository)
+
+                    organization.save()
+                    project.repositories.add(repository)
                 except UnknownObjectException as e:
                     if e.data["status"] == "404" and "Not Found" in e.data["message"]:
                         project.invalid_urls.add(repository_url)
                         project.related_urls.remove(repository_url)
                         project.save(update_fields=("invalid_urls", "related_urls"))
                         continue
-
-                organization, repository = sync_repository(gh_repository)
-                if organization is not None:
-                    organization.save()
-
-                project.repositories.add(repository)
 
             projects.append(project)
 

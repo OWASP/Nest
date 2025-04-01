@@ -3,7 +3,6 @@
 from django.conf import settings
 
 from apps.slack.apps import SlackConfig
-from apps.slack.common.handlers.committees import get_blocks
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.utils import get_text
 
@@ -17,6 +16,9 @@ def committees_handler(ack, command, client):
         return
 
     search_query = command["text"].strip()
+
+    from apps.slack.common.handlers.committees import get_blocks
+
     blocks = get_blocks(
         search_query=search_query,
         limit=10,

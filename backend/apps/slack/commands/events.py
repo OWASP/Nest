@@ -19,7 +19,10 @@ def events_handler(ack, command, client):
 
     events_data = get_events_data()
 
-    valid_events = [event for event in events_data if event.start_date]
+    valid_events = []
+    if events_data:
+        valid_events = [event for event in events_data if event.start_date]
+
     sorted_events = sorted(valid_events, key=lambda x: x.start_date)
 
     categorized_events = {}

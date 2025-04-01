@@ -1,11 +1,14 @@
 """Test cases for ReleaseNode."""
 
+from unittest.mock import Mock
+
 from graphene import Field
 
 from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.user import UserNode
 from apps.github.models.release import Release
+from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 
 
 class TestReleaseNode:
@@ -34,3 +37,25 @@ class TestReleaseNode:
         author_field = ReleaseNode._meta.fields.get("author")
         assert isinstance(author_field, Field)
         assert author_field.type == UserNode
+
+    def test_resolve_project_name(self):
+        """Test resolve_project_name method."""
+        release_node = ReleaseNode()
+        release_node.repository = Mock()
+        release_node.repository.project = Mock()
+
+        release_node.repository.project.name = f"{OWASP_ORGANIZATION_NAME}Test Project"
+        assert release_node.resolve_project_name(None) == "Test Project"
+
+        release_node.repository.project.name = "Regular Project"
+        assert release_node.resolve_project_name(None) == "Regular Project"
+
+    def test_resolve_url(self):
+        """Test resolve_url method."""
+        release_node = ReleaseNode()
+        release_node.url = "https://github.com/owasp/test-repo/releases/tag/v1.0.0"
+
+        assert (
+            release_node.resolve_url(None)
+            == "https://github.com/owasp/test-repo/releases/tag/v1.0.0"
+        )

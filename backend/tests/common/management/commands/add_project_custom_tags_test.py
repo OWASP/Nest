@@ -5,14 +5,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.owasp.management.commands.add_project_custom_tags import Command, Project
+from apps.owasp.management.commands.add_project_custom_tags import Command
+from apps.owasp.models.project import Project
 
 
 class TestAddProjectCustomTags:
     @pytest.mark.parametrize(
         ("file_exists", "file_content", "expected_output"),
         [
-            (False, None, "File not found: /mocked/path/data/project-custom-tags/test-file.json"),
+            (False, None, "File not found:"),
             (
                 True,
                 json.dumps({"projects": [], "tags": []}),

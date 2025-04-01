@@ -55,6 +55,8 @@ class OpenAi:
 
             return response.choices[0].message.content
         except openai.APIConnectionError:
-            logger.exception("A connection error occurred during OpenAI API request.")
+            logger.exception("An error occurred during OpenAI API request.")
+            return None
         except Exception:
             logger.exception("An error occurred during OpenAI API request.")
+            return None

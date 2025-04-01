@@ -3,153 +3,222 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.common.constants import NL
-from apps.slack.commands.leaders import leaders_handler
+from apps.slack.commands.leaders import COMMAND, leaders_handler
 
 
 class TestLeadersHandler:
     @pytest.fixture()
-    def mock_slack_command(self):
+    def mock_command(self):
         return {
-            "text": "web application",
+            "text": "",
             "user_id": "U123456",
         }
 
     @pytest.fixture()
-    def mock_slack_client(self):
+    def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
     @pytest.fixture()
-    def mock_chapter(self):
-        return {
-            "idx_key": "test-chapter",
-            "idx_leaders": ["Leader A", "Leader B"],
-            "idx_name": "Test Chapter",
-        }
+    def mock_get_chapters(self):
+        with patch("apps.owasp.api.search.chapter.get_chapters") as mock:
+            mock.return_value = {"hits": []}
+            yield mock
 
     @pytest.fixture()
-    def mock_project(self):
-        return {
-            "idx_key": "test-project",
-            "idx_leaders": ["Leader C"],
-            "idx_name": "Test Project",
-        }
+    def mock_get_projects(self):
+        with patch("apps.owasp.api.search.project.get_projects") as mock:
+            mock.return_value = {"hits": []}
+            yield mock
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "has_results", "expected_message"),
-        [
-            (False, True, None),
-            (True, False, "No results found for"),
-            (True, True, "Chapters"),
-            (True, True, "Projects"),
-        ],
-    )
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    @patch("apps.owasp.api.search.project.get_projects")
-    def test_handler_responses(
-        self,
-        mock_get_projects,
-        mock_get_chapters,
-        commands_enabled,
-        has_results,
-        expected_message,
-        mock_slack_client,
-        mock_slack_command,
-        mock_chapter,
-        mock_project,
-    ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    @pytest.fixture(autouse=True)
+    def mock_get_absolute_url(self):
+        with patch("apps.slack.commands.leaders.get_absolute_url") as mock:
+            mock.return_value = "http://example.com/test"
+            yield mock
 
-        mock_get_chapters.return_value = {"hits": [mock_chapter] if has_results else []}
-        mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
+    def test_handler_disabled(self, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = False
 
-        leaders_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-        if not commands_enabled:
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-        else:
-            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-            assert any(expected_message in str(block) for block in blocks)
-            if has_results:
-                assert any(mock_chapter["idx_name"] in str(block) for block in blocks)
-                assert any(mock_project["idx_name"] in str(block) for block in blocks)
+        mock_client.conversations_open.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
 
-    @pytest.mark.parametrize(
-        ("search_text", "expected_escaped"),
-        [
-            ("web app <>&", "web app &lt;&gt;&amp;"),
-            ("normal search", "normal search"),
-        ],
-    )
-    @patch("apps.slack.utils.escape")
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    @patch("apps.owasp.api.search.project.get_projects")
-    def test_handler_special_characters(
-        self,
-        mock_get_projects,
-        mock_get_chapters,
-        mock_escape,
-        search_text,
-        expected_escaped,
-        mock_slack_client,
-    ):
-        command = {"text": search_text, "user_id": "U123456"}
-
-        mock_escape.return_value = expected_escaped
-
-        settings.SLACK_COMMANDS_ENABLED = True
-        mock_get_chapters.return_value = {"hits": []}
-        mock_get_projects.return_value = {"hits": []}
-
-        leaders_handler(ack=MagicMock(), command=command, client=mock_slack_client)
-
-        blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-
-        assert any(expected_escaped in str(block) for block in blocks)
-
-    @pytest.mark.parametrize(
-        ("leaders_list", "expected_text"),
-        [
-            (["Leader A", "Leader B"], f"• Leader A{NL}    • Leader B{NL}"),
-            (["Leader C"], "Leader C"),
-            ([], ""),
-        ],
-    )
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    @patch("apps.owasp.api.search.project.get_projects")
-    def test_handler_leader_formatting(
-        self,
-        mock_get_projects,
-        mock_get_chapters,
-        leaders_list,
-        expected_text,
-        mock_slack_client,
-        mock_slack_command,
+    def test_handler_no_results(
+        self, mock_command, mock_client, mock_get_chapters, mock_get_projects
     ):
         settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "nonexistent"
 
-        mock_chapter = {
-            "idx_key": "test-chapter",
-            "idx_leaders": leaders_list,
-            "idx_name": "Test Chapter",
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+
+        assert "No results found for" in text
+        assert "nonexistent" in text
+
+        mock_get_chapters.assert_called_once()
+        mock_get_projects.assert_called_once()
+
+    def test_handler_with_chapter_results(
+        self, mock_command, mock_client, mock_get_chapters, mock_get_projects
+    ):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "test"
+
+        mock_get_chapters.return_value = {
+            "hits": [
+                {
+                    "idx_key": "test-chapter",
+                    "idx_name": "Test Chapter",
+                    "idx_leaders": ["Leader 1", "Test Leader 2"],
+                }
+            ]
         }
 
-        mock_project = {
-            "idx_key": "test-project",
-            "idx_leaders": ["Leader D"],
-            "idx_name": "Test Project",
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+
+        assert "Chapters" in text
+        assert "Test Chapter" in text
+        assert "Leader 1" in text
+        assert "`Test Leader 2`" in text
+
+    def test_handler_with_project_results(
+        self, mock_command, mock_client, mock_get_chapters, mock_get_projects
+    ):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "test"
+
+        mock_get_projects.return_value = {
+            "hits": [
+                {
+                    "idx_key": "test-project",
+                    "idx_name": "Test Project",
+                    "idx_leaders": ["Project Leader 1", "Test Project Leader 2"],
+                }
+            ]
         }
 
-        mock_get_chapters.return_value = {"hits": [mock_chapter]}
-        mock_get_projects.return_value = {"hits": [mock_project]}
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-        leaders_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
 
-        blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-        block_texts = [
-            block.get("text", {}).get("text", "") for block in blocks if "text" in block
-        ]
-        assert any(expected_text in str(block) for block in block_texts)
+        assert "Projects" in text
+        assert "Test Project" in text
+        assert "Project Leader 1" in text
+        assert "`Test Project Leader 2`" in text
+
+    def test_handler_with_both_results(
+        self, mock_command, mock_client, mock_get_chapters, mock_get_projects
+    ):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "test"
+
+        mock_get_chapters.return_value = {
+            "hits": [
+                {
+                    "idx_key": "test-chapter",
+                    "idx_name": "Test Chapter",
+                    "idx_leaders": ["Chapter Leader 1", "Test Chapter Leader 2"],
+                }
+            ]
+        }
+
+        mock_get_projects.return_value = {
+            "hits": [
+                {
+                    "idx_key": "test-project",
+                    "idx_name": "Test Project",
+                    "idx_leaders": ["Project Leader 1", "Test Project Leader 2"],
+                }
+            ]
+        }
+
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+
+        assert "Chapters" in text
+        assert "Test Chapter" in text
+        assert "Chapter Leader 1" in text
+        assert "`Test Chapter Leader 2`" in text
+
+        assert "Projects" in text
+        assert "Test Project" in text
+        assert "Project Leader 1" in text
+        assert "`Test Project Leader 2`" in text
+
+    def test_handler_with_no_leaders(
+        self, mock_command, mock_client, mock_get_chapters, mock_get_projects
+    ):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "test"
+
+        mock_get_chapters.return_value = {
+            "hits": [
+                {
+                    "idx_key": "test-chapter",
+                    "idx_name": "Test Chapter",
+                    "idx_leaders": [],
+                }
+            ]
+        }
+
+        mock_get_projects.return_value = {
+            "hits": [
+                {
+                    "idx_key": "test-project",
+                    "idx_name": "Test Project",
+                    "idx_leaders": None,
+                }
+            ]
+        }
+
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.chat_postMessage.assert_called_once()
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+
+        assert len(blocks) > 0
+
+        headers_text = "".join(str(block) for block in blocks)
+        assert "Chapters" in headers_text
+        assert "Projects" in headers_text
+
+        assert "Test Chapter" not in headers_text
+        assert "Test Project" not in headers_text
+
+    def test_handler_with_empty_query(
+        self, mock_command, mock_client, mock_get_chapters, mock_get_projects
+    ):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = ""
+
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_get_chapters.assert_called_once()
+        mock_get_projects.assert_called_once()
+
+    @patch("apps.slack.apps.SlackConfig.app")
+    def test_command_registration(self, mock_app):
+        import importlib
+
+        from apps.slack.commands import leaders
+
+        mock_command_decorator = MagicMock()
+        mock_app.command.return_value = mock_command_decorator
+
+        importlib.reload(leaders)
+
+        mock_app.command.assert_called_once_with(COMMAND)
+        assert mock_command_decorator.call_count == 1
+        assert mock_command_decorator.call_args[0][0].__name__ == "leaders_handler"

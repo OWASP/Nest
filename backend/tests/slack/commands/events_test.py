@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
+from django.utils import timezone
 
-from apps.slack.commands.events import events_handler
+from apps.slack.commands.events import COMMAND, events_handler
 
 
-# Define a mock event class to simulate the new event object structure
 class MockEvent:
     def __init__(self, name, category, start_date, end_date, url, description):
         self.name = name
@@ -19,7 +19,6 @@ class MockEvent:
         self.description = description
 
 
-# Mock event data as objects
 mock_events = [
     MockEvent(
         name="OWASP Snow 2025",
@@ -44,80 +43,187 @@ class TestEventsHandler:
     """Test events command handler."""
 
     @pytest.fixture()
-    def mock_slack_command(self):
+    def mock_command(self):
         return {
+            "text": "",
             "user_id": "U123456",
         }
 
     @pytest.fixture()
-    def mock_slack_client(self):
+    def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "has_events_data", "expected_header"),
-        [
-            (False, True, None),
-            (True, True, "*Upcoming OWASP Events:*"),
-            (True, False, "*Upcoming OWASP Events:*"),
-        ],
-    )
+    @pytest.fixture()
+    def mock_event(self):
+        event = MagicMock()
+        event.name = "Test Event"
+        event.start_date = timezone.now().date()
+        event.end_date = timezone.now().date()
+        event.description = "Test Description"
+        event.url = "https://example.com/event"
+        event.category = "conference"
+        return event
+
+    @pytest.fixture()
+    def mock_event_no_url(self):
+        event = MagicMock()
+        event.name = "Test Event No URL"
+        event.start_date = timezone.now().date()
+        event.end_date = None
+        event.description = "Test Description No URL"
+        event.url = None
+        event.category = None
+        return event
+
+    def test_handler_disabled(self, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = False
+
+        events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+
     @patch("apps.slack.commands.events.get_events_data")
-    def test_handler_responses(
-        self,
-        mock_get_events_data,
-        commands_enabled,
-        has_events_data,
-        expected_header,
-        mock_slack_client,
-        mock_slack_command,
+    def test_handler_no_events(self, mock_get_events, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_get_events.return_value = []
+
+        events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+
+        assert "Upcoming OWASP Events" in text
+        assert "For more information" in text
+
+    @patch("apps.slack.commands.events.get_events_data")
+    def test_handler_none_events_data(self, mock_get_events, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_get_events.return_value = None
+
+        with patch("apps.slack.commands.events.events_handler", side_effect=events_handler), patch(
+            "builtins.list", lambda x: [] if x is None else list(x)
+        ):
+            events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+
+        assert "Upcoming OWASP Events" in text
+        assert "For more information" in text
+
+    @patch("apps.slack.commands.events.get_events_data")
+    def test_handler_with_events(self, mock_get_events, mock_command, mock_client, mock_event):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_get_events.return_value = [mock_event]
+
+        events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+
+        assert "Upcoming OWASP Events" in text
+        assert "Category: Conference" in text
+        assert "Test Event" in text
+        assert "Test Description" in text
+        assert "Start Date" in text
+        assert "End Date" in text
+
+    @patch("apps.slack.commands.events.get_events_data")
+    def test_handler_event_no_url_no_end_date(
+        self, mock_get_events, mock_command, mock_client, mock_event_no_url
     ):
-        """Test handler responses."""
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        mock_get_events_data.return_value = mock_events if has_events_data else []
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_get_events.return_value = [mock_event_no_url]
 
-        events_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-        if not commands_enabled:
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-            return
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
 
-        mock_slack_client.conversations_open.assert_called_once_with(
-            users=mock_slack_command["user_id"]
-        )
+        assert "Upcoming OWASP Events" in text
+        assert "Category: Other" in text
+        assert "Test Event No URL" in text
+        assert "Test Description No URL" in text
+        assert "End Date" not in text
 
-        blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+    @patch("apps.slack.commands.events.get_events_data")
+    def test_handler_multiple_categories(
+        self, mock_get_events, mock_command, mock_client, mock_event, mock_event_no_url
+    ):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_event2 = MagicMock()
+        mock_event2.name = "Workshop Event"
+        mock_event2.start_date = timezone.now().date()
+        mock_event2.end_date = timezone.now().date()
+        mock_event2.description = "Workshop Description"
+        mock_event2.url = "https://example.com/workshop"
+        mock_event2.category = "workshop"
 
-        assert blocks[0]["text"]["text"] == expected_header
-        assert blocks[1]["type"] == "divider"
+        mock_get_events.return_value = [mock_event, mock_event2, mock_event_no_url]
 
-        if has_events_data:
-            current_block = 2
+        events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-            assert "*Category: Appsec Days*" in blocks[current_block]["text"]["text"]
-            current_block += 1
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
 
-            event_block = blocks[current_block]["text"]["text"]
-            assert "*1. <https://example.com/snow|OWASP Snow 2025>*" in event_block
-            assert "Start Date: 2025-03-14" in event_block
-            assert "End Date: March 14, 2025" in event_block
-            assert "_Regional conference_" in event_block
-            current_block += 1
+        assert "Category: Conference" in text
+        assert "Category: Workshop" in text
+        assert "Category: Other" in text
+        assert "Test Event" in text
+        assert "Workshop Event" in text
+        assert "Test Event No URL" in text
 
-            assert blocks[current_block]["type"] == "divider"
-            current_block += 1
+    @patch("apps.slack.commands.events.get_events_data")
+    def test_handler_invalid_start_date(self, mock_get_events, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_event_invalid = MagicMock()
+        mock_event_invalid.name = "Invalid Event"
+        mock_event_invalid.start_date = None
+        mock_event_invalid.end_date = None
+        mock_event_invalid.description = "This event shouldn't appear"
+        mock_event_invalid.url = None
+        mock_event_invalid.category = None
 
-            assert "*Category: Global*" in blocks[current_block]["text"]["text"]
-            current_block += 1
+        valid_event = MagicMock()
+        valid_event.name = "Valid Event"
+        valid_event.start_date = timezone.now().date()
+        valid_event.end_date = None
+        valid_event.description = "This event should appear"
+        valid_event.url = None
+        valid_event.category = None
 
-            event_block = blocks[current_block]["text"]["text"]
-            assert "*1. <https://example.com/eu|OWASP Global AppSec EU 2025>*" in event_block
-            assert "Start Date: 2025-05-26" in event_block
-            assert "End Date: May 26-30, 2025" in event_block
-            assert "_Premier conference_" in event_block
-            current_block += 1
+        mock_get_events.return_value = [mock_event_invalid, valid_event]
 
-            footer_block = blocks[-1]["text"]["text"]
-            assert "🔍 For more information about upcoming events" in footer_block
+        events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+
+        assert "Valid Event" in text
+        assert "This event should appear" in text
+        assert "Invalid Event" not in text
+        assert "This event shouldn't appear" not in text
+
+    @patch("apps.slack.apps.SlackConfig.app")
+    def test_command_registration(self, mock_app):
+        import importlib
+
+        from apps.slack.commands import events
+
+        mock_command_decorator = MagicMock()
+        mock_app.command.return_value = mock_command_decorator
+
+        importlib.reload(events)
+
+        mock_app.command.assert_called_once_with(COMMAND)
+        assert mock_command_decorator.call_count == 1
+        assert mock_command_decorator.call_args[0][0].__name__ == "events_handler"

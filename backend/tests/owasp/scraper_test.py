@@ -1,26 +1,31 @@
-import logging
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
 from lxml import etree
-from requests import codes
 
-from apps.owasp.scraper import OwaspScraper
+from apps.owasp.scraper import TIMEOUT, OwaspScraper
 
 
 class TestOwaspScraper:
     @pytest.fixture()
     def mock_session(self):
-        """Fixture to provide a mock session."""
-        with patch("requests.Session") as mock:
-            session = Mock()
-            mock.return_value = session
-            yield session
+        session_mock = MagicMock()
+        with patch("requests.Session", return_value=session_mock):
+            yield session_mock
+
+    @pytest.fixture()
+    def mock_urlparse(self):
+        with patch("urllib.parse.urlparse") as mock_parse:
+            yield mock_parse
+
+    @pytest.fixture()
+    def mock_fromstring(self):
+        with patch("lxml.html.fromstring") as mock:
+            yield mock
 
     @pytest.fixture()
     def sample_html(self):
-        """Fixture to provide sample HTML content."""
         return b"""
             <div class="sidebar">
                 <div id="leaders"></div>
@@ -35,190 +40,233 @@ class TestOwaspScraper:
             </div>
         """
 
-    @pytest.fixture()
-    def mock_response(self, sample_html):
-        """Fixture to provide a mock response."""
-        response = Mock()
-        response.status_code = codes.ok
-        response.content = sample_html
-        return response
+    def test_init_success(self, mock_session, mock_fromstring):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b"<html><body><div class='sidebar'></div></body></html>"
+        mock_session.get.return_value = mock_response
 
-    def test_initialization_parser_error(self, mock_session):
-        """Test initialization with parser error."""
-        response = Mock()
-        response.status_code = codes.ok
-        response.content = b"<completely invalid>> html"
-        mock_session.get.return_value = response
-        mock_parser = Mock(side_effect=etree.ParserError("Parser error"))
+        tree_mock = MagicMock()
+        mock_fromstring.return_value = tree_mock
 
-        with patch("lxml.html.fromstring", mock_parser):
-            scraper = OwaspScraper("https://test.org")
+        scraper = OwaspScraper("https://example.com")
+
+        mock_session.get.assert_called_once_with("https://example.com", timeout=TIMEOUT)
+        assert scraper.page_tree == tree_mock
+
+    def test_init_request_exception(self, mock_session):
+        mock_session.get.side_effect = requests.exceptions.RequestException()
+
+        with patch("apps.owasp.scraper.logger") as mock_logger:
+            scraper = OwaspScraper("https://example.com")
+            mock_logger.exception.assert_called_once()
+            assert scraper.page_tree is None
+
+    def test_init_not_found(self, mock_session):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://example.com")
 
         assert scraper.page_tree is None
 
-    def test_verify_url_redirect_chain(self, mock_session, mock_response):
-        """Test URL verification with redirect chain."""
+    def test_init_parser_error(self, mock_session, mock_fromstring):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b"invalid html"
         mock_session.get.return_value = mock_response
-        scraper = OwaspScraper("https://test.org")
-        mock_session.get.reset_mock()
 
-        redirect_response = Mock()
-        redirect_response.status_code = codes.moved_permanently
-        redirect_response.headers = {"Location": "https://new-url.org"}
+        mock_fromstring.side_effect = etree.ParserError("Parser error")
 
-        final_response = Mock()
-        final_response.status_code = codes.ok
-        mock_session.get.side_effect = [redirect_response, final_response]
-
-        assert scraper.verify_url("https://old-url.org") == "https://new-url.org"
-
-    @pytest.mark.parametrize(
-        "status_code",
-        [
-            codes.moved_permanently,  # 301
-            codes.found,  # 302
-            codes.see_other,  # 303
-            codes.temporary_redirect,  # 307
-            codes.permanent_redirect,  # 308
-        ],
-    )
-    def test_verify_url_redirect_status_codes(self, mock_session, mock_response, status_code):
-        """Test URL verification with different redirect status codes."""
-        mock_session.get.return_value = mock_response
-        scraper = OwaspScraper("https://test.org")
-        mock_session.get.reset_mock()
-
-        redirect_response = Mock()
-        redirect_response.status_code = status_code
-        redirect_response.headers = {"Location": "https://new-url.org"}
-
-        final_response = Mock()
-        final_response.status_code = codes.ok
-        mock_session.get.side_effect = [redirect_response, final_response]
-
-        assert scraper.verify_url("https://old-url.org") == "https://new-url.org"
-        assert mock_session.get.call_count >= 1
-
-    def test_initialization_not_found(self, mock_session):
-        response = Mock()
-        response.status_code = codes.not_found
-        mock_session.get.return_value = response
-
-        scraper = OwaspScraper("https://test.org")
-
+        scraper = OwaspScraper("https://example.com")
         assert scraper.page_tree is None
 
-    def test_get_leaders_no_leaders(self, mock_session):
-        invalid_html = b"<div class='sidebar'><div id='leaders'></div></div>"
-        mock_response = Mock()
-        mock_response.content = invalid_html
-        mock_session.get.return_value = mock_response
+    def test_get_urls_with_domain(self):
+        scraper = OwaspScraper.__new__(OwaspScraper)
 
-        scraper = OwaspScraper("https://test.org")
+        mock_tree = MagicMock()
+        mock_tree.xpath.return_value = ["https://github.com/repo1", "https://github.com/repo2"]
+        scraper.page_tree = mock_tree
 
-        assert scraper.get_leaders() == []
+        urls = scraper.get_urls(domain="github.com")
 
-    def test_verify_url_invalid_url(self, mock_session):
-        response = Mock()
-        response.status_code = codes.ok
-        response.content = b"<html></html>"
-        mock_session.get.return_value = response
+        mock_tree.xpath.assert_called_once_with(
+            "//div[@class='sidebar']//a[contains(@href, 'github.com')]/@href"
+        )
+        assert urls == {"https://github.com/repo1", "https://github.com/repo2"}
 
-        scraper = OwaspScraper("https://test.org")
+    def test_get_urls_without_domain(self):
+        scraper = OwaspScraper.__new__(OwaspScraper)
 
-        assert scraper.verify_url("invalid-url") is None
+        mock_tree = MagicMock()
+        mock_tree.xpath.return_value = ["https://github.com/repo1", "https://example.com/other"]
+        scraper.page_tree = mock_tree
 
-    def test_verify_url_unsupported_status_code(self, mock_session):
-        response = Mock()
-        response.status_code = codes.im_a_teapot
-        response.content = b"<html></html>"
-        mock_session.get.return_value = response
+        urls = scraper.get_urls()
 
-        scraper = OwaspScraper("https://test.org")
+        mock_tree.xpath.assert_called_once_with("//div[@class='sidebar']//a/@href")
+        assert urls == {"https://github.com/repo1", "https://example.com/other"}
 
-        assert scraper.verify_url("https://test.org") is None
+    def test_get_leaders(self):
+        scraper = OwaspScraper.__new__(OwaspScraper)
 
-    def test_verify_url_logs_warning(self, mock_session, caplog):
-        response = Mock()
-        response.status_code = codes.forbidden
-        response.content = b"<html></html>"
-        mock_session.get.return_value = response
+        leaders_header = MagicMock()
+        next_element = MagicMock()
+        next_element.tag = "ul"
+        next_element.xpath.return_value = ["Leader One", "Leader Two"]
+        leaders_header.getnext.return_value = next_element
 
-        scraper = OwaspScraper("https://test.org")
-        with caplog.at_level(logging.WARNING):
-            result = scraper.verify_url("https://test.org")
+        mock_tree = MagicMock()
+        mock_tree.xpath.return_value = [leaders_header]
+        scraper.page_tree = mock_tree
+
+        leaders = scraper.get_leaders()
+
+        mock_tree.xpath.assert_called_once_with("//div[@class='sidebar']//*[@id='leaders']")
+        assert leaders == ["Leader One", "Leader Two"]
+
+    def test_get_leaders_no_leaders(self):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+
+        mock_tree = MagicMock()
+        mock_tree.xpath.return_value = []
+        scraper.page_tree = mock_tree
+
+        leaders = scraper.get_leaders()
+
+        assert leaders == []
+
+    def test_get_leaders_not_ul(self):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+
+        header = MagicMock()
+        next_el = MagicMock()
+        next_el.tag = "div"
+        header.getnext.return_value = next_el
+
+        mock_tree = MagicMock()
+        mock_tree.xpath.return_value = [header]
+        scraper.page_tree = mock_tree
+
+        leaders = scraper.get_leaders()
+
+        assert leaders == []
+
+    def test_verify_url_invalid_url(self, mock_urlparse):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+        scraper.session = MagicMock()
+
+        parsed_url = MagicMock()
+        parsed_url.netloc = ""
+        mock_urlparse.return_value = parsed_url
+
+        url = "invalid-url"
+        with patch("apps.owasp.scraper.urlparse", mock_urlparse):
+            result = scraper.verify_url(url)
 
         assert result is None
-        assert "Couldn't verify URL" in caplog.text
+        mock_urlparse.assert_called_once_with(url)
 
-    def test_get_urls_with_domain(self, mock_session, sample_html):
-        mock_response = Mock()
-        mock_response.content = sample_html
+    @pytest.mark.parametrize(
+        ("domain", "expected"),
+        [
+            ("linkedin.com", "https://linkedin.com/profile"),
+            ("slack.com", "https://slack.com/channel"),
+            ("youtube.com", "https://youtube.com/video"),
+        ],
+    )
+    def test_verify_url_social_media(self, mock_urlparse, domain, expected):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+        scraper.session = MagicMock()
+
+        url = f"https://{domain}/profile"
+        if domain == "slack.com":
+            url = "https://slack.com/channel"
+        elif domain == "youtube.com":
+            url = "https://youtube.com/video"
+
+        parsed_url = MagicMock()
+        parsed_url.netloc = domain
+        mock_urlparse.return_value = parsed_url
+
+        result = scraper.verify_url(url)
+
+        assert result == expected
+        scraper.session.get.assert_not_called()
+
+    def test_verify_url_success(self, mock_urlparse, mock_session):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+        scraper.session = mock_session
+
+        url = "https://test.com"
+        parsed_url = MagicMock()
+        parsed_url.netloc = "test.com"
+        mock_urlparse.return_value = parsed_url
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_session.get.return_value = mock_response
 
-        scraper = OwaspScraper("https://test.org")
+        result = scraper.verify_url(url)
 
-        assert scraper.get_urls(domain="owasp.org") == {
-            "https://owasp.org/link1",
-            "https://owasp.org/link2",
-            "https://owasp.org/link3",
-            "https://owasp.org/url1",
-            "https://owasp.org/url3",
-        }
+        mock_session.get.assert_called_once_with(url, allow_redirects=False, timeout=TIMEOUT)
+        assert result == url
 
-    def test_initialization_request_exception(self, mock_session):
-        """Test initialization with a RequestException."""
-        mock_session.get.side_effect = requests.exceptions.RequestException
+    def test_verify_url_redirect(self, mock_urlparse, mock_session):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+        scraper.session = mock_session
 
-        scraper = OwaspScraper("https://test.org")
+        url = "https://test.com"
 
-        assert scraper.page_tree is None
+        def mock_urlparse_side_effect(input_url):
+            parsed = MagicMock()
+            parsed.netloc = input_url.split("//")[1].split("/")[0]
+            return parsed
 
-    def test_get_urls_no_domain(self, mock_session, sample_html):
-        """Test get_urls without providing a domain."""
-        mock_response = Mock()
-        mock_response.content = sample_html
+        mock_urlparse.side_effect = mock_urlparse_side_effect
+
+        response1 = MagicMock()
+        response1.status_code = 301
+        response1.headers = {"Location": "https://redirect.com"}
+
+        response2 = MagicMock()
+        response2.status_code = 200
+
+        mock_session.get.side_effect = [response1, response2]
+
+        with patch.object(scraper, "verify_url", wraps=scraper.verify_url):
+            result = scraper.verify_url(url)
+            assert result == "https://redirect.com"
+
+    def test_verify_url_request_exception(self, mock_urlparse, mock_session):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+        scraper.session = mock_session
+
+        mock_session.get.side_effect = requests.exceptions.RequestException()
+
+        parsed_url = MagicMock()
+        parsed_url.netloc = "test.com"
+        mock_urlparse.return_value = parsed_url
+
+        with patch("apps.owasp.scraper.logger") as mock_logger:
+            result = scraper.verify_url("https://test.com")
+            mock_logger.exception.assert_called_once()
+            assert result is None
+
+    def test_verify_url_invalid_status(self, mock_urlparse, mock_session):
+        scraper = OwaspScraper.__new__(OwaspScraper)
+        scraper.session = mock_session
+
+        parsed_url = MagicMock()
+        parsed_url.netloc = "test.com"
+        mock_urlparse.return_value = parsed_url
+
+        mock_response = MagicMock()
+        mock_response.status_code = 500
         mock_session.get.return_value = mock_response
 
-        scraper = OwaspScraper("https://test.org")
-
-        assert scraper.get_urls() == {
-            "https://owasp.org/link1",
-            "https://owasp.org/link2",
-            "https://owasp.org/link3",
-            "https://owasp.org/url1",
-            "https://example.com/url2",
-            "https://owasp.org/url3",
-        }
-
-    def test_verify_url_supported_domain(self, mock_session):
-        """Test verify_url with a supported domain."""
-        response = Mock()
-        response.status_code = codes.ok
-        response.content = b"<html></html>"
-        mock_session.get.return_value = response
-
-        scraper = OwaspScraper("https://test.org")
-
-        assert (
-            scraper.verify_url("https://www.linkedin.com/in/test")
-            == "https://www.linkedin.com/in/test"
-        )
-
-    def test_get_urls_empty_sidebar(self, mock_session):
-        """Test get_urls when the sidebar is empty."""
-        empty_html = b"<div class='sidebar'></div>"
-        mock_response = Mock()
-        mock_response.content = empty_html
-        mock_session.get.return_value = mock_response
-
-        scraper = OwaspScraper("https://test.org")
-
-        assert scraper.get_urls() == set()
-
-    def test_initialization_timeout(self, mock_session):
-        """Test initialization with a timeout exception."""
-        mock_session.get.side_effect = requests.exceptions.Timeout
-        scraper = OwaspScraper("https://test.org")
-
-        assert scraper.page_tree is None
+        with patch("apps.owasp.scraper.logger") as mock_logger:
+            result = scraper.verify_url("https://test.com")
+            mock_logger.warning.assert_called_once()
+            assert result is None

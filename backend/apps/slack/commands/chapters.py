@@ -6,7 +6,6 @@ from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
-from apps.slack.common.handlers.chapters import get_blocks
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.utils import get_text
 
@@ -31,6 +30,8 @@ def chapters_handler(ack, command, client):
             ),
         ]
     else:
+        from apps.slack.common.handlers.chapters import get_blocks
+
         search_query = "" if command_text in COMMAND_START else command_text
         blocks = get_blocks(
             search_query=search_query,
