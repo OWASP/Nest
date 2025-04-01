@@ -138,6 +138,10 @@ class Base(Configuration):
             "HOST": values.Value(environ_name="DB_HOST"),
             "PORT": values.Value(environ_name="DB_PORT"),
         },
+        "fuzz_tests": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "fuzz_tests.db",
+        },
     }
 
     GRAPHENE = {

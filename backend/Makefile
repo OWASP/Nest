@@ -141,6 +141,13 @@ test-backend:
 		-t nest-test-backend
 	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend pytest
 
+fuzz-test-backend:
+	@DOCKER_BUILDKIT=1 docker build \
+		--cache-from nest-fuzz-test-backend \
+		-f backend/docker/Dockerfile.fuzz_tests backend \
+		-t nest-fuzz-test-backend
+	@docker run -e DJANGO_CONFIGURATION=Test nest-fuzz-test-backend pytest fuzz_tests
+
 update-backend-dependencies:
 	@CMD="poetry update" $(MAKE) exec-backend-command
 
