@@ -16,433 +16,213 @@ The project uses a **containerized approach** for both development and productio
 
 Before contributing, ensure you have the following installed:
 
-1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
-1. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using virtual environment with `pip install pre-commit` command, as OS package with `apt install pre-commit` / `brew install pre-commit` or any other method depending on your configuration.
+- **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/)
+- **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code.  
+  Install using:
+  ```bash
+  pip install pre-commit  # Via virtual environment
+  apt install pre-commit  # Linux (Ubuntu/Debian)
+  brew install pre-commit # macOS
+  ```
+- **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/)
+  - The `make run` command requires WSL to function properly.
+  - Must use the **WSL terminal**, not PowerShell.
+  - Ensure WSL integration is enabled in Docker Desktop settings (`Resources → WSL Integration`).
 
-1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
-   1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
-      If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
-   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
-   1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
+---
 
-## Starring the Project
+## **Setting up the Environment**
 
-[![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
-
-## Forking the Repository
-
-[![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
-
-## Setting up the Project
-
-Follow these steps to set up the OWASP Nest application:
-
-1. **Clone the Repository**:
-
-   - Clone the repository code from your GitHub account using the following command:
-
-     ```bash
-     git clone https://github.com/<your-account>/<nest-fork>
-     ```
-
-1. **Create Environment Files**:
-
-   - Create a local environment file in the `backend` directory:
-
-     ```bash
-     touch backend/.env
-     ```
-
-   - Copy the contents from the template file into your new local environment file:
-
-     ```bash
-     cat backend/.env.example > backend/.env
-     ```
-
-   - Create a local environment file in the `frontend` directory:
-
-     ```bash
-     touch frontend/.env
-     ```
-
-   - Copy the contents from the template file into your new local environment file:
-
-     ```bash
-     cat frontend/.env.example > frontend/.env
-     ```
-
-Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
-
-**Please note you need to restart the application in order to apply any `.env` file changes.**
-
-1. **Configure Environment Variables**:
-
-   - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
-
-     ```plaintext
-     DJANGO_CONFIGURATION=Local
-     ```
-
-1. **Set Up Algolia**:
-
-   - Go to [Algolia](https://www.algolia.com/) and create a free account.
-   - After creating an account, create an Algolia app.
-   - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
-
+### **Backend Environment Setup**
+1. Create a local environment file:
+   ```bash
+   touch backend/.env
+   ```
+2. Copy the contents from the template:
+   ```bash
+   cat backend/.env.example > backend/.env
+   ```
+3. Open the `.env` file and update necessary values:
    ```plaintext
-   DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
-   DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
+   DJANGO_CONFIGURATION=Local
+   DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-id>
+   DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-api-key>
    ```
 
-   - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
-   - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
+### **Frontend Environment Setup**
+1. Create a local environment file:
+   ```bash
+   touch frontend/.env
+   ```
+2. Copy the template:
+   ```bash
+   cat frontend/.env.example > frontend/.env
+   ```
 
-1. **Run the Application**:
+<details>
+  <summary>⚠️ Important Notes on Environment Files</summary>
 
-   - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
+  - Ensure all `.env` files are saved in **UTF-8 format without BOM** to prevent errors.
+  - **Restart the application** after making any `.env` changes.
+  - If you encounter an **"Unexpected Character"** error, check the encoding of your `.env` files.
+  
+  🔹 **Fix Encoding in VS Code**:
+  1. Open the `.env` file.
+  2. Click encoding info (bottom-right).
+  3. Select **"Save with Encoding → UTF-8 (without BOM)"**.
 
+  Restart the application:
+  ```bash
+  make run
+  ```
+</details>
+
+---
+
+## **Running the Project**
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/<your-account>/<nest-fork>
+   ```
+
+2. **Run the Application**:
+   - Navigate to the project root directory.
+   - Start the application:
      ```bash
      make run
      ```
+   - Wait until [Nest local](http://localhost:8000/api/v1) is accessible.
 
-   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
-   - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
-
-1. **Load Initial Data**:
-
-   - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
-
+3. **Load Initial Data**:
    ```bash
    make load-data
    ```
 
-1. **Index Data**:
+4. **Index Data**:
+   ```bash
+   make index-data
+   ```
 
-   - In the same terminal session, run the following command to index the data:
+5. **Verify API Endpoints**:
+   - [API](http://localhost:8000/api/v1/)
+   - [GraphQL](http://localhost:8000/graphql/)
 
-     ```bash
-     make index-data
-     ```
+---
 
-1. **Verify API Endpoints**:
-   - Check the following endpoints availability:
-     - [API](http://localhost:8000/api/v1/)
-     - [GraphQL](http://localhost:8000/graphql/)
-
-### Optional Steps
-
-#### GitHub Data Fetch
-
-If you plan to fetch GitHub OWASP data locally, follow these additional steps:
+## **Optional Steps**
+### **GitHub Data Fetch**
+If you plan to fetch GitHub OWASP data locally:
 
 1. **Create a Super User**:
+   ```bash
+   make setup
+   ```
 
-   - Run the following command to create a super user for accessing the admin interface:
+2. **Generate a GitHub Personal Access Token**:
+   - Create a [GitHub token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-     ```bash
-     make setup
-     ```
+3. **Update `.env` File**:
+   ```plaintext
+   GITHUB_TOKEN=<your-github-token>
+   ```
 
-1. **Generate a GitHub Personal Access Token**:
+4. **Sync Local Database Data**:
+   ```bash
+   make sync-data
+   ```
 
-   - Create a GitHub [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+---
 
-1. **Update Environment Variables with GitHub Token**:
-
-   - Open `backend/.env` again and update it with your GitHub token:
-
-     ```plaintext
-     GITHUB_TOKEN=<your-github-token>
-     ```
-
-1. **Sync Local Database Data**:
-
-   - Now you should be able to run the following command to sync your local database data with GitHub:
-
-     ```bash
-     make sync-data
-     ```
-
-#### NestBot Development
-
-:exclamation: **Never install your development Slack application in the OWASP Slack workspace.
-:exclamation: Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.
-:exclamation: Always use a different workspace (create your own if needed).**
-
-To setup NestBot development environment, follow these steps:
-
-1. **Set Up ngrok**:
-
-   - Go to [ngrok](https://ngrok.com/) and create a free account.
-   - Install and configure ngrok on your machine using these [instructions](https://ngrok.com/docs/getting-started/#step-1-install)
-   - Create your static domain by simply going to [ngrok domains](https://dashboard.ngrok.com/domains)
-   - Run the following commands to edit ngrok configuration:
-
-     ```bash
-     ngrok config edit
-     ```
-
-     ```plaintext
-     agent:
-         authtoken: <your-auth-token>
-     tunnels:
-         NestBot:
-           addr: 8000
-           proto: http
-           hostname: <your-static-domain>
-     ```
-
-   - Now ngrok is all set, you access your local setup over internet, running the following command:
-
-     ```bash
-     ngrok start NestBot
-     ```
-
-1. **Update environment Variables with your NestBot Configuration**:
-
-   - Update `backend/.env` with your Slack application tokens:
-
-     - Bot User OAuth Token from `Settings -- Install App -- OAuth Tokens` section
-     - Signing Secret from `Settings -- Basic Information -- App Credentials` section
-
-     ```plaintext
-     DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
-     DJANGO_SLACK_SIGNING_SECRET=<your-slack-signing-secret>
-     ```
-
-1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
-   - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
-
-#### OWASP Schema Development
-
-The OWASP Schema files are located in the `schema` directory. This is a standalone `pyproject.toml` project with its own test suite.
-
-Please follow these contribution guidelines for OWASP Schema-related changes:
-
-- Order all schema attributes alphabetically where applicable.
-- Use the `common.json` definition file for shared object definitions (e.g., chapter, project).
-- Include all schema attributes in both required and optional positive test cases.
-- Add negative tests for all mandatory attributes, covering empty, invalid, null, and undefined cases.
-- Always set `additionalProperties` to `false` and list all mandatory fields in the `required` section.
-- Always add `minItems`, `minLength`, and `uniqueItems` where applicable
-- When referencing definitions from `common.json`, test both the object's internal structure (in the `common` section) and its references in actual schemas (e.g., chapter, project).
-- Run `make check` and `make test-schema` before submitting a PR.
-
-## Code Quality Checks
-
-Nest enforces code quality standards to ensure consistency and maintainability. You can run automated checks locally before pushing your changes:
+## **Code Quality Checks**
+Nest enforces strict code quality standards:
 
 ```bash
 make check-all
 ```
 
-This command runs linters and other static analysis tools for both the frontend and backend.
-**Please note your PR won't be reviewed if it fails the code quality checks.**
+Your PR **won’t be reviewed** if it fails these checks.
 
-## Testing
+---
 
-Our CI/CD pipelines automatically run tests against every Pull Request. You can run tests locally before submitting a PR:
+## **Testing**
+Run all tests before submitting a PR:
 
 ```bash
 make test-all
 ```
 
-This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
-**Please note your PR won't be merged if it fails the code tests checks.**
+Your PR **won’t be merged** if it fails these checks.
 
-### Test Coverage
+### **Test Coverage**
+- Backend test coverage requirement: [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml)
+- Frontend test coverage requirement: [jest.config.ts](https://github.com/OWASP/Nest/blob/main/frontend/jest.config.ts)
 
-- There is a **minimum test coverage requirement** for the **backend** code -- see [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml).
-- There is a **minimum test coverage requirement** for the **frontend** code -- see [jest.config.ts](https://github.com/OWASP/Nest/blob/main/frontend/jest.config.ts).
-- Ensure your changes do not drop the overall test coverage percentage.
-
-If you are adding new functionality, include relevant test cases.
+Ensure your changes **do not drop overall test coverage**.
 
 ---
 
-## Contributing Workflow
+## **Contributing Workflow**
+### 1️⃣ Find Something to Work On
+- Check open issues: [GitHub Issues](https://github.com/owasp/nest/issues)
+- Ask maintainers before working on an issue.
 
-### 1. Find Something to Work On
-
-- Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)
-- Found a bug or have a feature request? Open a new issue.
-- Want to work on an existing issue? Ask the maintainers to assign it to you before submitting a pull request.
-- New to the project? Start with issues labeled `good first issue` for an easier onboarding experience.
-
-### 2. Create a Branch
-
-Always create a feature branch for your work:
-
+### 2️⃣ Create a Branch
 ```bash
 git checkout -b feature/my-feature-name
 ```
 
-### 3. Make Changes and Commit
-
-- Check that your commits include only related and intended changes. Do not include unrelated files.
-- Follow best practices for code style and testing.
-- Add tests for any new functionality or changes to ensure proper coverage.
-- Run the code quality checks and tests:
-
+### 3️⃣ Make Changes and Commit
+- Run checks:
   ```bash
   make check-test-all
   ```
-
-- Write meaningful commit messages:
-
+- Commit changes:
   ```bash
   git commit -m "Add feature: short description"
   ```
 
-### 4. Push Changes
+### 4️⃣ Push Changes
+```bash
+git push origin feature/my-feature-name
+```
 
-- Push your branch to the repository:
+### 5️⃣ Open a Pull Request (PR)
+- Submit a **PR** to the `main` branch.
+- PRs trigger automated CI/CD checks.
 
-  ```bash
-  git push origin feature/my-feature-name
-  ```
-
-### 5. Open a Pull Request
-
-- Submit a **Pull Request (PR)** to the `main` branch.
-- Your PR will trigger CI/CD pipelines that run automated checks and tests.
-
-### 6. Review and Merge
-
-- Address feedback from maintainers during code review.
-- Once approved, your PR will be merged into the main branch.
-
-## Troubleshooting
-
-- **"Unexpected character" error during application execution or Docker image building**
-  This error is usually caused by incorrect encoding of `.env` files.
-
-  - Open the `.env` files in a text editor (e.g., VS Code) and save them as "UTF-8 without BOM":
-    - Open the `.env` file in Visual Studio Code.
-    - Click on the encoding information in the bottom-right corner of the window.
-    - Select **"Save with Encoding"**.
-    - Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
-  - Restart the application with `make run` and verify the error is resolved.
-
-## Environment Variables Documentation
-
-### Frontend
-
-#### `VITE_API_URL`
-- **Description**: The base URL for the application's REST API.
-- **Example Value**: `http://localhost:8000/api/v1/`
-- **Usage**: Used to make API requests to the backend.
-
-#### `VITE_ENVIRONMENT`
-- **Description**: Specifies the current environment in which the application is running.
-- **Example Value**: `local`, `staging`, `production`
-- **Usage**: Helps in differentiating between environments for debugging or feature toggling.
-
-#### `VITE_GRAPHQL_URL`
-- **Description**: The endpoint for the GraphQL API.
-- **Example Value**: `http://localhost:8000/graphql/`
-- **Usage**: Used for making GraphQL queries and mutations.
-
-#### `VITE_GTM_AUTH`
-- **Description**: Authentication token for Google Tag Manager (GTM).
-- **Example Value**: `your-google-tag-manager-auth`
-- **Usage**: Enables secure integration with GTM.
-
-#### `VITE_GTM_ID`
-- **Description**: The unique ID for the Google Tag Manager container.
-- **Example Value**: `your-google-tag-manager-id`
-- **Usage**: Identifies the GTM container for tracking and analytics.
-
-#### `VITE_GTM_PREVIEW`
-- **Description**: Used for previewing GTM configurations.
-- **Example Value**: *(Empty by default)*
-- **Usage**: Optional, used during GTM debugging or testing.
-
-#### `VITE_IDX_URL`
-- **Description**: The base URL for IDX (Indexing Service).
-- **Example Value**: `http://localhost:8000/idx/`
-- **Usage**: Used for accessing indexing-related services.
-
-#### `VITE_RELEASE_VERSION`
-- **Description**: The current release version of the application.
-- **Example Value**: *(Empty by default)*
-- **Usage**: Helps in tracking the deployed version for debugging or monitoring.
-
-#### `VITE_SENTRY_DSN`
-- **Description**: The Data Source Name (DSN) for Sentry error tracking.
-- **Example Value**: *(Empty by default)*
-- **Usage**: Enables integration with Sentry for logging and monitoring errors.
+### 6️⃣ Review and Merge
+- Address feedback from maintainers.
+- Once approved, your PR will be merged.
 
 ---
 
-### Backend
+## **Environment Variables Documentation**
+### **Frontend**
+| Variable             | Description                             | Example Value                        |
+|----------------------|---------------------------------|----------------------------------|
+| `VITE_API_URL`      | Base API URL                    | `http://localhost:8000/api/v1/` |
+| `VITE_ENVIRONMENT`  | Deployment environment         | `local`, `staging`, `production` |
+| `VITE_GRAPHQL_URL`  | GraphQL API URL                | `http://localhost:8000/graphql/` |
+| `VITE_GTM_AUTH`     | Google Tag Manager auth        | `your-gtm-auth`                 |
+| `VITE_GTM_ID`       | Google Tag Manager ID          | `your-gtm-id`                   |
+| `VITE_SENTRY_DSN`   | Sentry DSN for error tracking | *(Optional, leave empty if unused)* |
 
-#### `DJANGO_CONFIGURATION`
-- **Description**: Specifies the Django configuration to use.
-
-#### `DJANGO_ALGOLIA_APPLICATION_ID`
-- **Description**: The application ID for Algolia.
-
-#### `DJANGO_ALGOLIA_APPLICATION_REGION`
-- **Description**: The region of the Algolia application.
-
-#### `DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES`
-- **Description**: Index names to exclude locally (if any).
-
-#### `DJANGO_ALGOLIA_WRITE_API_KEY`
-- **Description**: The write API key for Algolia.
-
-#### `DJANGO_AWS_ACCESS_KEY_ID`
-- **Description**: AWS access key ID
-
-#### `DJANGO_AWS_SECRET_ACCESS_KEY`
-- **Description**: AWS secret access key.
-
-#### `DJANGO_DB_HOST`
-- **Description**: The hostname of the database server.
-
-#### `DJANGO_DB_NAME`
-- **Description**: The name of the database.
-
-#### `DJANGO_DB_PASSWORD`
-- **Description**: The password for the database user.
-
-#### `DJANGO_DB_PORT`
-- **Description**: The port number for the database server.
-
-#### `DJANGO_DB_USER`
-- **Description**: The username for the database.
-
-#### `DJANGO_OPEN_AI_SECRET_KEY`
-- **Description**: The secret key for OpenAI API.
-
-#### `DJANGO_RELEASE_VERSION`
-- **Description**: The release version of the application.
-
-#### `DJANGO_SECRET_KEY`
-- **Description**: The secret key for Django (used for cryptographic signing).
-
-#### `DJANGO_SENTRY_DSN`
-- **Description**: The DSN for Sentry (used for error tracking).
-
-#### `DJANGO_SLACK_BOT_TOKEN`
-- **Description**: The token for the Slack bot.
-
-#### `DJANGO_SLACK_SIGNING_SECRET`
-- **Description**: The signing secret for Slack.
-
-#### `GITHUB_TOKEN`
-- **Description**: The token for accessing GitHub APIs.
-
-#### `DJANGO_ALLOWED_HOSTS`
-- **Description**: A comma-separated list of allowed hosts for the application.
-
-
-## Code of Conduct
-
-Please follow the [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md) when interacting with other contributors.
+### **Backend**
+| Variable                   | Description                     |
+|----------------------------|---------------------------------|
+| `DJANGO_CONFIGURATION`     | Django environment setup       |
+| `DJANGO_ALGOLIA_APPLICATION_ID` | Algolia app ID |
+| `DJANGO_ALGOLIA_WRITE_API_KEY`  | Algolia write API key |
+| `GITHUB_TOKEN`             | GitHub API token               |
+| `DJANGO_SECRET_KEY`        | Django secret key             |
+| `DJANGO_SENTRY_DSN`        | Sentry DSN for error tracking |
 
 ---
 
-Thank you for contributing to Nest! Your contributions help make this project better for everyone.
+## **Code of Conduct**
+Please follow our [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md) when interacting with contributors.
+
+---
+
+🚀 **Thank you for contributing to Nest!** 🚀
