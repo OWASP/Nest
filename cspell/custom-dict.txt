@@ -18,6 +18,7 @@ coraza
 corsheaders
 csrfguard
 csrfprotector
+csrftoken
 cva
 dismissable
 DRF
