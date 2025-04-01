@@ -1,10 +1,10 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
 import { TruncatedText } from './TruncatedText'
-import Link from 'next/link'
 
 const ItemCardList = ({
   title,

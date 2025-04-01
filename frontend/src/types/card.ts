@@ -41,7 +41,7 @@ export interface DetailsCardProps {
   recentReleases?: ProjectReleaseType[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
-  stats: stats[]
+  stats?: stats[]
   summary?: string
   showAvatar?: boolean
   title?: string
