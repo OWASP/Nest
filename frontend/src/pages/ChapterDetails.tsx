@@ -56,8 +56,8 @@ export default function ChapterDetailsPage() {
     {
       label: 'URL',
       value: (
-        <Link href={chapter.url} className="text-blue-400 hover:underline">
-          <TruncatedText text={chapter.url} className="w-96" />
+        <Link href={chapter.url} className="text-blue-400 hover:underline w-5/6">
+          <TruncatedText text={chapter.url} title={chapter.url} />
         </Link>
       ),
     },
