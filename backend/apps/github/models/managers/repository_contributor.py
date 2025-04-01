@@ -10,10 +10,12 @@ class RepositoryContributorQuerySet(models.QuerySet):
     """Repository contributor queryset."""
 
     def by_humans(self):
-        """Return human repository contributors only."""
-        return self.filter(user__is_bot=False).exclude(
-            user__login__in=User.get_non_indexable_logins()
-        )
+        """Filter out bots and non-indexable users."""
+        queryset = self.filter(user__is_bot=False)
+        non_indexable_logins = User.get_non_indexable_logins()
+        if non_indexable_logins:
+            queryset = queryset.exclude(user__login__in=non_indexable_logins)
+        return queryset
 
     def to_community_repositories(self):
         """Return community repositories contributors only."""

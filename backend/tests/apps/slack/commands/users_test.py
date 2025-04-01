@@ -3,86 +3,85 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.users import Users
-from apps.slack.common.presentation import EntityPresentation
+from apps.slack.commands.users import COMMAND, users_handler
 
 
-@pytest.fixture
-def mock_command():
-    return {"user_id": "U123456", "text": ""}
-
-
-@pytest.fixture
-def mock_client():
-    client = MagicMock()
-    client.conversations_open.return_value = {"channel": {"id": "C123456"}}
-    return client
-
-
-@pytest.mark.parametrize(
-    ("commands_enabled", "search_query", "expected_calls"),
-    [
-        (True, "", 1),
-        (True, "test user", 1),
-        (False, "", 0),
-        (False, "test user", 0),
-    ],
-)
-@patch("apps.slack.commands.users.get_blocks")
-def test_users_handler(
-    mock_get_blocks, mock_client, mock_command, commands_enabled, search_query, expected_calls
-):
-    settings.SLACK_COMMANDS_ENABLED = commands_enabled
-    mock_command["text"] = search_query
-    mock_get_blocks.return_value = [
-        {
-            "type": "section",
-            "text": {"type": "mrkdwn", "text": "Users"},
+class TestUsersHandler:
+    @pytest.fixture()
+    def mock_slack_command(self):
+        return {
+            "user_id": "U123456",
+            "text": "test query",
         }
-    ]
 
-    ack = MagicMock()
-    Users().handler(ack=ack, command=mock_command, client=mock_client)
+    @pytest.fixture()
+    def mock_slack_client(self):
+        client = MagicMock()
+        client.conversations_open.return_value = {"channel": {"id": "C123456"}}
+        return client
 
-    ack.assert_called_once()
+    @pytest.mark.parametrize(
+        ("commands_enabled", "expected_call_count"),
+        [
+            (False, 0),
+            (True, 1),
+        ],
+    )
+    @patch("apps.slack.commands.users.get_blocks")
+    def test_handler_responses(
+        self,
+        mock_get_blocks,
+        commands_enabled,
+        expected_call_count,
+        mock_slack_client,
+        mock_slack_command,
+    ):
+        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        mock_blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "Test blocks"}}]
+        mock_get_blocks.return_value = mock_blocks
 
-    ack.assert_called_once()
-    assert mock_client.chat_postMessage.call_count == expected_calls
+        users_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
 
-    if commands_enabled:
-        mock_client.conversations_open.assert_called_once_with(users="U123456")
-        mock_get_blocks.assert_called_once_with(
-            search_query=search_query,
-            limit=10,
-            presentation=EntityPresentation(
-                include_feedback=True,
-                include_metadata=True,
-                include_pagination=False,
-                include_timestamps=True,
-                name_truncation=80,
-                summary_truncation=300,
-            ),
-        )
-        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-        assert blocks == mock_get_blocks.return_value
-        assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
+        assert mock_get_blocks.call_count == expected_call_count
 
+        if commands_enabled:
+            mock_slack_client.conversations_open.assert_called_once_with(
+                users=mock_slack_command["user_id"]
+            )
+            mock_slack_client.chat_postMessage.assert_called_once()
 
-@patch("apps.slack.commands.users.get_blocks")
-def test_users_handler_with_blocks(mock_get_blocks, mock_client, mock_command):
-    settings.SLACK_COMMANDS_ENABLED = True
-    mock_get_blocks.return_value = [
-        {"type": "section", "text": {"type": "mrkdwn", "text": "User: Test"}},
-        {"type": "divider"},
-    ]
+            call_args = mock_slack_client.chat_postMessage.call_args[1]
+            assert call_args["blocks"] == mock_blocks
+            assert call_args["channel"] == "C123456"
+        else:
+            mock_slack_client.conversations_open.assert_not_called()
+            mock_slack_client.chat_postMessage.assert_not_called()
 
-    ack = MagicMock()
-    Users().handler(ack=ack, command=mock_command, client=mock_client)
+    @patch("apps.slack.commands.users.get_blocks")
+    def test_users_handler_with_empty_query(self, mock_get_blocks, mock_slack_client):
+        mock_command = {"user_id": "U123456", "text": "  "}
+        settings.SLACK_COMMANDS_ENABLED = True
 
-    ack.assert_called_once()
+        mock_blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "Test blocks"}}]
+        mock_get_blocks.return_value = mock_blocks
 
-    mock_client.conversations_open.assert_called_once_with(users="U123456")
-    blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-    assert len(blocks) == len(mock_get_blocks.return_value)
-    assert blocks[0]["text"]["text"] == "User: Test"
-    assert blocks[1]["type"] == "divider"
+        users_handler(ack=MagicMock(), command=mock_command, client=mock_slack_client)
+
+        mock_get_blocks.assert_called_once()
+        args, kwargs = mock_get_blocks.call_args
+        assert kwargs["search_query"] == ""
+
+    @patch("apps.slack.apps.SlackConfig.app")
+    def test_command_registration(self, mock_app):
+        import importlib
+
+        from apps.slack.commands import users
+
+        mock_command_decorator = MagicMock()
+        mock_app.command.return_value = mock_command_decorator
+
+        importlib.reload(users)
+
+        mock_app.command.assert_called_once_with(COMMAND)
+        assert mock_command_decorator.call_count == 1
+        assert mock_command_decorator.call_args[0][0].__name__ == "users_handler"

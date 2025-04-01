@@ -44,14 +44,22 @@ class Event(TimestampedModel):
 
         command = payload.get("command", "")
         text = payload.get("text", "")
+        self.command = command.lstrip("/")
+
         if command and command == OWASP_COMMAND:
             try:
-                command, *args = text.strip().split()
-                text = " ".join(args)
+                parts = text.strip().split(maxsplit=1)
+                if parts and parts[0]:
+                    self.command = parts[0]
+                    self.text = parts[1] if len(parts) > 1 else ""
+                else:
+                    self.command = OWASP_COMMAND.lstrip("/")
+                    self.text = text
             except ValueError:
-                pass
-        self.command = command.lstrip("/")
-        self.text = text
+                self.command = OWASP_COMMAND.lstrip("/")
+                self.text = text
+        else:
+            self.text = text
 
         # In this order.
         self.trigger = self.command or payload.get("action_id", "") or payload.get("type", "")

@@ -2,18 +2,32 @@
 
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
-from apps.slack.common.handlers.chapters import get_blocks
 from apps.slack.common.presentation import EntityPresentation
+from apps.slack.utils import get_text
+
+COMMAND = "/chapters"
 
 
-class Chapters(CommandBase):
-    """Slack bot /chapters command."""
+def chapters_handler(ack, command, client):
+    """Slack /chapters command handler."""
+    ack()
+    if not settings.SLACK_COMMANDS_ENABLED:
+        return
 
-    def get_render_blocks(self, command):
-        """Get the rendered blocks."""
-        command_text = command["text"].strip()
-        if command_text in COMMAND_HELP:
-            return super().get_render_blocks(command)
+    command_text = command["text"].strip()
+
+    if command_text in COMMAND_HELP:
+        blocks = [
+            markdown(
+                f"*Available Commands:*{NL}"
+                f"• `/chapters` - recent chapters{NL}"
+                f"• `/chapters [search term]` - Search for specific chapters{NL}"
+                f"• `/chapters [region]` - Search for specific region chapters{NL}"
+            ),
+        ]
+    else:
+        from apps.slack.common.handlers.chapters import get_blocks
+
         search_query = "" if command_text in COMMAND_START else command_text
         return get_blocks(
             search_query=search_query,

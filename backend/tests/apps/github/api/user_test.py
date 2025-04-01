@@ -2,8 +2,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.github.api.user import UserSerializer
+from apps.github.api.user import UserSerializer, UserViewSet
 from apps.github.models.user import User
+
+http_status_ok = 200
+http_status_not_found = 404
 
 
 class TestUserSerializer:
@@ -28,11 +31,10 @@ class TestUserSerializer:
             },
         ],
     )
-    # Ensures that test runs without actual database access by simulating behavior of a queryset.
     @patch("apps.github.models.user.User.objects.filter")
     def test_user_serializer(self, mock_filter, user_data):
         mock_qs = MagicMock()
-        # To mimic a queryset where no matching objects are found.
+
         mock_qs.exists.return_value = False
         mock_filter.return_value = mock_qs
 
@@ -51,9 +53,9 @@ class TestUserSerializer:
     @pytest.mark.parametrize(
         ("login", "organization_logins", "expected_result"),
         [
-            ("johndoe", ["github", "microsoft"], True),  # Normal user
-            ("github", ["github", "microsoft"], False),  # Organization login
-            ("ghost", ["github", "microsoft"], False),  # Special 'ghost' user
+            ("johndoe", ["github", "microsoft"], True),
+            ("github", ["github", "microsoft"], False),
+            ("ghost", ["github", "microsoft"], False),
         ],
     )
     @patch("apps.github.models.organization.Organization.get_logins")
@@ -61,3 +63,40 @@ class TestUserSerializer:
         mock_get_logins.return_value = organization_logins
         user = User(login=login)
         assert user.is_indexable == expected_result
+
+
+class TestUserViewSet:
+    @pytest.fixture()
+    def user_viewset(self):
+        viewset = UserViewSet()
+        viewset.request = None
+        viewset.format_kwarg = None
+        return viewset
+
+    @patch("apps.github.models.user.User.objects.get")
+    def test_get_user_by_login_success(self, mock_get, user_viewset):
+        mock_user = MagicMock(spec=User)
+        mock_user.login = "testuser"
+        mock_user.name = "Test User"
+        mock_get.return_value = mock_user
+
+        request = MagicMock()
+        user_viewset.request = request
+
+        response = user_viewset.get_user_by_login(request, login="testuser")
+
+        mock_get.assert_called_once_with(login="testuser")
+
+        assert response.status_code == http_status_ok
+
+    @patch("apps.github.models.user.User.objects.get")
+    def test_get_user_by_login_not_found(self, mock_get, user_viewset):
+        mock_get.side_effect = User.DoesNotExist
+
+        request = MagicMock()
+        user_viewset.request = request
+
+        response = user_viewset.get_user_by_login(request, login="nonexistentuser")
+
+        assert response.status_code == http_status_not_found
+        assert response.data == {"detail": "User not found."}

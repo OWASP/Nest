@@ -56,6 +56,11 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
         BulkSaveModel.bulk_save(Label, labels)
 
     @staticmethod
+    def get_node_id(gh_label):
+        """Get node ID from GitHub label."""
+        return gh_label.raw_data.get("node_id", "")
+
+    @staticmethod
     def update_data(gh_label, save=True):
         """Update label data.
 

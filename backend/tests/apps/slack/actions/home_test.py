@@ -6,57 +6,119 @@ from slack_sdk.errors import SlackApiError
 from apps.slack.actions.home import handle_home_actions
 from apps.slack.constants import (
     VIEW_CHAPTERS_ACTION,
+    VIEW_CHAPTERS_ACTION_NEXT,
+    VIEW_CHAPTERS_ACTION_PREV,
     VIEW_COMMITTEES_ACTION,
+    VIEW_COMMITTEES_ACTION_NEXT,
+    VIEW_COMMITTEES_ACTION_PREV,
+    VIEW_CONTRIBUTE_ACTION,
+    VIEW_CONTRIBUTE_ACTION_NEXT,
+    VIEW_CONTRIBUTE_ACTION_PREV,
     VIEW_PROJECTS_ACTION,
+    VIEW_PROJECTS_ACTION_NEXT,
+    VIEW_PROJECTS_ACTION_PREV,
 )
+
+PAGE_NUMBER = 2
+MIN_ACTION_CALLS = 12
 
 
 class TestHomeActions:
-    @pytest.fixture
+    @pytest.fixture()
     def mock_client(self):
         return MagicMock()
 
-    @pytest.fixture
-    def mock_body(self):
+    @pytest.fixture()
+    def mock_ack(self):
+        return MagicMock()
+
+    @pytest.fixture()
+    def mock_body_template(self):
         return {
-            "user": {"id": "U123456"},
-            "actions": [{"action_id": ""}],
+            "user": {"id": "U12345"},
+            "actions": [{"action_id": VIEW_CHAPTERS_ACTION, "value": "1"}],
         }
 
-    @pytest.fixture(autouse=True)
-    def _mock_external_calls(self):
-        """Mock all external API calls."""
-        with (
-            patch("apps.owasp.api.search.project.get_projects") as mock_projects,
-            patch("apps.owasp.api.search.chapter.get_chapters") as mock_chapters,
-            patch("apps.owasp.api.search.committee.get_committees") as mock_committees,
-        ):
-            mock_projects.return_value = {"hits": [], "nbPages": 1}
-            mock_chapters.return_value = {"hits": [], "nbPages": 1}
-            mock_committees.return_value = {"hits": [], "nbPages": 1}
-            yield
-
     @pytest.mark.parametrize(
-        ("action_id", "expected_blocks_length"),
+        ("action_id", "expected_handler"),
         [
-            (VIEW_PROJECTS_ACTION, 2),
-            (VIEW_COMMITTEES_ACTION, 2),
-            (VIEW_CHAPTERS_ACTION, 2),
-            ("invalid_action", 2),
+            (VIEW_CHAPTERS_ACTION, "apps.slack.common.handlers.chapters.get_blocks"),
+            (VIEW_CHAPTERS_ACTION_NEXT, "apps.slack.common.handlers.chapters.get_blocks"),
+            (VIEW_CHAPTERS_ACTION_PREV, "apps.slack.common.handlers.chapters.get_blocks"),
+            (VIEW_COMMITTEES_ACTION, "apps.slack.common.handlers.committees.get_blocks"),
+            (VIEW_COMMITTEES_ACTION_NEXT, "apps.slack.common.handlers.committees.get_blocks"),
+            (VIEW_COMMITTEES_ACTION_PREV, "apps.slack.common.handlers.committees.get_blocks"),
+            (VIEW_PROJECTS_ACTION, "apps.slack.common.handlers.projects.get_blocks"),
+            (VIEW_PROJECTS_ACTION_NEXT, "apps.slack.common.handlers.projects.get_blocks"),
+            (VIEW_PROJECTS_ACTION_PREV, "apps.slack.common.handlers.projects.get_blocks"),
+            (VIEW_CONTRIBUTE_ACTION, "apps.slack.common.handlers.contribute.get_blocks"),
+            (VIEW_CONTRIBUTE_ACTION_NEXT, "apps.slack.common.handlers.contribute.get_blocks"),
+            (VIEW_CONTRIBUTE_ACTION_PREV, "apps.slack.common.handlers.contribute.get_blocks"),
         ],
     )
-    def test_handle_home_actions(self, mock_client, mock_body, action_id, expected_blocks_length):
-        mock_body["actions"][0]["action_id"] = action_id
+    def test_handle_home_actions(
+        self, mock_ack, mock_client, mock_body_template, action_id, expected_handler
+    ):
+        mock_body = dict(mock_body_template)
+        mock_body["actions"] = [{"action_id": action_id, "value": "2"}]
 
-        handle_home_actions(MagicMock(), mock_body, mock_client)
+        with patch(expected_handler, return_value=[{"type": "section"}]) as mock_get_blocks:
+            handle_home_actions(ack=mock_ack, body=mock_body, client=mock_client)
+
+            mock_ack.assert_called_once()
+            mock_get_blocks.assert_called_once()
+            mock_client.views_publish.assert_called_once()
+
+            args, kwargs = mock_get_blocks.call_args
+            assert kwargs.get("page") == PAGE_NUMBER
+
+            publish_args, publish_kwargs = mock_client.views_publish.call_args
+            assert publish_kwargs["user_id"] == "U12345"
+            assert "blocks" in publish_kwargs["view"]
+
+    def test_handle_home_actions_invalid_value(self, mock_ack, mock_client, mock_body_template):
+        mock_body = dict(mock_body_template)
+        mock_body["actions"] = [{"action_id": VIEW_CHAPTERS_ACTION, "value": "invalid"}]
+
+        with patch(
+            "apps.slack.common.handlers.chapters.get_blocks", return_value=[{"type": "section"}]
+        ) as mock_get_blocks:
+            handle_home_actions(ack=mock_ack, body=mock_body, client=mock_client)
+
+            mock_get_blocks.assert_called_once()
+            args, kwargs = mock_get_blocks.call_args
+            assert kwargs.get("page") == 1
+
+    def test_handle_home_actions_unknown_action(self, mock_ack, mock_client, mock_body_template):
+        mock_body = dict(mock_body_template)
+        mock_body["actions"] = [{"action_id": "unknown_action", "value": "1"}]
+
+        handle_home_actions(ack=mock_ack, body=mock_body, client=mock_client)
 
         mock_client.views_publish.assert_called_once()
-        view = mock_client.views_publish.call_args[1]["view"]
-        assert len(view["blocks"]) >= expected_blocks_length
-        assert view["type"] == "home"
+        blocks = mock_client.views_publish.call_args[1]["view"]["blocks"]
 
-    def test_handle_home_actions_api_error(self, mock_client, mock_body):
+        error_block = next(block for block in blocks if block.get("type") == "section")
+        assert "Invalid action" in error_block["text"]["text"]
+
+    def test_handle_home_actions_api_error(self, mock_ack, mock_client, mock_body_template):
+        mock_body = dict(mock_body_template)
         mock_client.views_publish.side_effect = SlackApiError("Error", {"error": "test_error"})
-        mock_body["actions"][0]["action_id"] = VIEW_PROJECTS_ACTION
 
-        handle_home_actions(MagicMock(), mock_body, mock_client)
+        with patch(
+            "apps.slack.common.handlers.chapters.get_blocks", return_value=[{"type": "section"}]
+        ), patch("apps.slack.actions.home.logger") as mock_logger:
+            handle_home_actions(ack=mock_ack, body=mock_body, client=mock_client)
+            mock_logger.exception.assert_called_once()
+
+    def test_action_registration(self):
+        from apps.slack.actions.home import SlackConfig
+
+        with patch.object(SlackConfig, "app") as mock_app:
+            import importlib
+
+            from apps.slack import actions
+
+            importlib.reload(actions.home)
+
+            assert mock_app.action.call_count >= MIN_ACTION_CALLS

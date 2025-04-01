@@ -190,32 +190,33 @@ def get_text(blocks):
                 if "text" in block and block["text"].get("type") == "mrkdwn":
                     text.append(strip_markdown(block["text"]["text"]))
                 elif "fields" in block:
-                    text.append(
-                        NL.join(
-                            strip_markdown(field["text"])
-                            for field in block["fields"]
-                            if field.get("type") == "mrkdwn"
-                        )
-                    )
+                    field_texts = [
+                        strip_markdown(field["text"])
+                        for field in block["fields"]
+                        if field.get("type") == "mrkdwn"
+                    ]
+                    if field_texts:
+                        text.append(NL.join(field_texts))
             case "divider":
                 text.append("---")
             case "context":
-                text.append(
-                    NL.join(
-                        strip_markdown(element["text"])
-                        for element in block["elements"]
-                        if element.get("type") == "mrkdwn"
-                    )
-                )
+                context_texts = [
+                    strip_markdown(element["text"])
+                    for element in block.get("elements", [])
+                    if element.get("type") == "mrkdwn" and "text" in element
+                ]
+                if context_texts:
+                    text.append(NL.join(context_texts))
             case "actions":
-                text.append(
-                    NL.join(
-                        strip_markdown(element["text"]["text"])
-                        for element in block["elements"]
-                        if element.get("type") == "button"
-                    )
-                )
-            # TODO(arkid15r): consider removing this.
+                button_texts = [
+                    strip_markdown(element["text"]["text"])
+                    for element in block.get("elements", [])
+                    if element.get("type") == "button"
+                    and "text" in element
+                    and "text" in element["text"]
+                ]
+                if button_texts:
+                    text.append(NL.join(button_texts))
             case "image":
                 text.append(f"Image: {block.get('image_url', '')}")
             case "header":
@@ -236,4 +237,5 @@ def strip_markdown(text):
 
     """
     slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
-    return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")
+    text = slack_link_pattern.sub(r"\2 (\1)", text)
+    return text.replace("*", "")
