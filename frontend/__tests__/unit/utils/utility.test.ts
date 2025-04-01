@@ -10,7 +10,7 @@ describe('utility tests', () => {
   })
 
   test('returns CSRF token when it exists in cookies', () => {
-    document.cookie = 'csrftoken=abc123; sessionid=xyz789'
+    document.cookie = 'csrftoken=abc123; otherkey=xyz789'
     expect(getCSRFToken()).toBe('abc123')
   })
 
@@ -20,22 +20,22 @@ describe('utility tests', () => {
   })
 
   test('returns undefined when csrftoken cookie is not present', () => {
-    document.cookie = 'sessionid=xyz789; othercookie=123'
+    document.cookie = 'someid=xyz789; othercookie=123'
     expect(getCSRFToken()).toBeUndefined()
   })
 
   test('returns first csrftoken value when multiple cookies exist', () => {
-    document.cookie = 'csrftoken=first; csrftoken=second; sessionid=xyz789'
+    document.cookie = 'csrftoken=first; csrftoken=second; otherid=xyz789'
     expect(getCSRFToken()).toBe('first')
   })
 
   test('handles cookie with no value', () => {
-    document.cookie = 'csrftoken=; sessionid=xyz789'
+    document.cookie = 'csrftoken=; otherid=xyz789'
     expect(getCSRFToken()).toBe('')
   })
 
   test('handles malformed cookie string', () => {
-    document.cookie = 'csrftoken; sessionid=xyz789'
+    document.cookie = 'csrftoken; otherid=xyz789'
     expect(getCSRFToken()).toBeUndefined()
   })
 })
