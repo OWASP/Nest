@@ -129,7 +129,7 @@ const DetailsCard = ({
           <div className="grid-cols-2 gap-4 lg:grid">
             <ItemCardList
               title="Recent Issues"
-              data={recentIssues || []}
+              data={recentIssues}
               showAvatar={showAvatar}
               renderDetails={(item) => (
                 <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -149,7 +149,7 @@ const DetailsCard = ({
             {type === 'user' ? (
               <ItemCardList
                 title="Recent Pull Requests"
-                data={pullRequests || []}
+                data={pullRequests}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -169,7 +169,7 @@ const DetailsCard = ({
             ) : (
               <ItemCardList
                 title="Recent Releases"
-                data={recentReleases || []}
+                data={recentReleases}
                 showAvatar={showAvatar}
                 renderDetails={(item) => (
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">

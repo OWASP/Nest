@@ -214,8 +214,8 @@ export default function Home() {
                   </div>
 
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
-                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                    <div className="mr-4 mt-1 items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
+                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
                       <LeadersList leaders={String(chapter.leaders)} />
                     </div>
                   )}
