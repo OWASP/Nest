@@ -8,7 +8,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 from graphene_django.views import GraphQLView
 from rest_framework import routers
 
@@ -22,8 +22,8 @@ router.registry.extend(github_router.registry)
 router.registry.extend(owasp_router.registry)
 
 urlpatterns = [
-    path("idx/", csrf_exempt(algolia_search)),
-    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=settings.DEBUG))),
+    path("idx/", csrf_protect(algolia_search)),
+    path("graphql/", csrf_protect(GraphQLView.as_view(graphiql=settings.DEBUG))),
     path("api/v1/", include(router.urls)),
     path("a/", admin.site.urls),
 ]
