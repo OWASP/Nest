@@ -141,7 +141,7 @@ const Card = ({
             >
               {/* Render social links if available */}
               {social && social.length > 0 && (
-                <div id="social" className="mt-2 flex gap-1">
+                <div id="social" className="mt-2 flex flex-row gap-1">
                   {social.map((item) => (
                     <Link
                       key={`${item.title}-${item.url}`}

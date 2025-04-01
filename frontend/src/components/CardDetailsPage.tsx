@@ -15,6 +15,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
 import LeadersList from './LeadersList'
+import ChapterMapWrapper from './ChapterMapWrapper'
 
 const ChapterMap = dynamic(() => import('components/ChapterMap'), { ssr: false })
 
@@ -96,7 +97,7 @@ const DetailsCard = ({
           )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
-              <ChapterMap
+              <ChapterMapWrapper
                 geoLocData={geolocationData ? [geolocationData] : []}
                 showLocal={true}
                 style={{

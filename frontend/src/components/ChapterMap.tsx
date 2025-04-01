@@ -1,5 +1,6 @@
 'use client'
-import L from 'leaflet'
+import L, { MarkerClusterGroup } from 'leaflet'
+import 'leaflet.markercluster'
 import React, { useEffect, useMemo, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
@@ -17,7 +18,7 @@ const ChapterMap = ({
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
-  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
+  const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
 
   const chapters = useMemo(() => {
     return geoLocData.map((chapter) => ({
@@ -29,6 +30,7 @@ const ChapterMap = ({
   }, [geoLocData])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
