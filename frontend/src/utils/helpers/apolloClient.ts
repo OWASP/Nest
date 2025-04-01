@@ -12,8 +12,8 @@ const createApolloClient = () => {
   }
 
   const httpLink = createHttpLink({
-    uri: GRAPHQL_URL,
     credentials: 'include',
+    uri: GRAPHQL_URL,
   })
 
   const authLink = setContext((_, { headers }) => {
