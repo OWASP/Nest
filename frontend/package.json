@@ -7,8 +7,8 @@
     "build": "next build",
     "format": "prettier --log-level warn --write .",
     "format:check": "prettier --check .",
-    "lint": "next lint --fix",
-    "lint:check": "next lint",
+    "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
+    "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start"
   },
   "dependencies": {

@@ -1,8 +1,10 @@
 'use client'
 import { useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { GET_USER_DATA } from 'server/queries/userQueries'
-import { useEffect, useState } from 'react'
 import { ProjectTypeGraphql } from 'types/project'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
@@ -12,7 +14,6 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/ToggleContributors'
-import { addToast } from '@heroui/toast'
 import UserCard from 'components/UserCard'
 
 const leaders = ['arkid15r', 'kasya', 'mamicidal']
@@ -99,14 +100,14 @@ const About = () => {
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
                         <i className={`${details.icon} text-xl`} style={{ color: '#9ca3af' }}></i>
-                        <a
+                        <Link
                           href={details.url}
                           className="text-gray-600 hover:underline dark:text-gray-300"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           {name}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -121,13 +122,13 @@ const About = () => {
             {roadmap.map((item) => (
               <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
                 <div className="h-2 w-2 flex-shrink-0 rounded-full bg-gray-600 dark:bg-gray-300"></div>
-                <a
+                <Link
                   href={item.issueLink}
                   target="_blank"
                   className="text-gray-600 hover:underline dark:text-gray-300"
                 >
                   {item.title}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

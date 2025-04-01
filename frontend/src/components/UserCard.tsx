@@ -13,13 +13,7 @@ const UserCard = ({ avatar, name, company, email, location, button, className }:
       <div className="flex w-full flex-col items-center space-y-4">
         <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-400 dark:ring-gray-700">
           {avatar ? (
-            <Image
-              src={`${avatar}&s=160`}
-              alt={name}
-              width={80}
-              height={80}
-              className="h-full w-full object-cover"
-            />
+            <Image fill src={`${avatar}&s=160`} alt={name} objectFit="cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
               <FontAwesomeIcon
@@ -31,7 +25,7 @@ const UserCard = ({ avatar, name, company, email, location, button, className }:
         </div>
 
         <div className="text-center">
-          <h3 className="max-w-[250px] truncate text-lg font-semibold text-blue-400 text-gray-900 dark:text-white sm:text-xl">
+          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
             {name}
           </h3>
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">

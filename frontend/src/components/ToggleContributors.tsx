@@ -1,4 +1,5 @@
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faChevronDown, faChevronUp, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Image from 'next/image'
@@ -8,16 +9,18 @@ import { useState } from 'react'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 const TopContributors = ({
+  className = '',
   contributors,
+  icon,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
-  className = '',
   type,
 }: {
+  className?: string
   contributors: TopContributorsTypeGraphql[]
+  icon?: IconProp
   label?: string
   maxInitialDisplay?: number
-  className?: string
   type: string
 }) => {
   const router = useRouter()
@@ -34,7 +37,10 @@ const TopContributors = ({
   }
   return (
     <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
-      <h2 className="mb-4 text-2xl font-semibold">{label}</h2>
+      <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
+        <FontAwesomeIcon icon={icon || faUser} className="h-5 w-5" />
+        {label}
+      </h2>
       <div className="grid gap-x-5 sm:grid-cols-2 md:grid-cols-3">
         {displayContributors.map((item, index) => (
           <button
@@ -51,12 +57,12 @@ const TopContributors = ({
                   height={24}
                   width={24}
                 />
-                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-500">
+                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
                   {capitalize(item.name) || capitalize(item.login)}
                 </h3>
               </div>
               <div className="ml-0.5 w-full">
-                <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-300">
+                <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-400">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {type === 'contributor'
                       ? `${item.contributionsCount ?? 0} contributions`
@@ -72,7 +78,7 @@ const TopContributors = ({
         <Button
           disableAnimation
           onPress={toggleContributors}
-          className="mt-4 flex items-center bg-transparent text-[#1d7bd7] hover:underline dark:text-sky-600"
+          className="text-md mt-4 flex items-center bg-transparent text-blue-400 hover:underline dark:text-blue-400"
         >
           {showAllContributors ? (
             <>

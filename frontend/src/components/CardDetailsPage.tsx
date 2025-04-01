@@ -1,6 +1,5 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { DetailsCardProps } from 'types/card'
@@ -14,10 +13,8 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/ToggleContributors'
-import LeadersList from './LeadersList'
 import ChapterMapWrapper from './ChapterMapWrapper'
-
-const ChapterMap = dynamic(() => import('components/ChapterMap'), { ssr: false })
+import LeadersList from './LeadersList'
 
 const DetailsCard = ({
   title,
@@ -199,7 +196,7 @@ const DetailsCard = ({
                       <div className="flex w-full items-center">
                         {showAvatar && (
                           <Link
-                            className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                            className="flex-shrink-0 text-blue-400 hover:underline"
                             href={`/community/users/${item?.author?.login}`}
                           >
                             <Image
@@ -263,7 +260,7 @@ const SocialLinks = ({ urls }: { urls: string[] }) => {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 transition-colors hover:text-gray-800 dark:text-blue-600 dark:hover:text-gray-200"
+            className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
           >
             <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
           </Link>

@@ -11,9 +11,13 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'owasp.org',
       },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+      },
     ],
   },
-  devIndicators: false,
+  // devIndicators: true,
 }
 
 export default nextConfig
