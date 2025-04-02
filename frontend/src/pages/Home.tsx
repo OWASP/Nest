@@ -324,7 +324,7 @@ export default function Home() {
                         <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                         <span>{formatDate(item.publishedAt)}</span>
                         <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
-                        <span>{item.tagName}</span>
+                        <span>{item.repository.ownerKey || ''}/{item.repository?.key || ''}</span>
                       </div>
                     </div>
                   </div>

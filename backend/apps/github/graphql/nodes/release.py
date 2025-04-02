@@ -8,12 +8,20 @@ from apps.github.models.release import Release
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 
 
+class RepositoryType(graphene.ObjectType):
+    """Repository type for nested objects."""
+
+    key = graphene.String()
+    owner_key = graphene.String()
+
+
 class ReleaseNode(BaseNode):
     """GitHub release node."""
 
     author = graphene.Field(UserNode)
     project_name = graphene.String()
     url = graphene.String()
+    repository = graphene.Field(RepositoryType)
 
     class Meta:
         model = Release

@@ -42,6 +42,10 @@ export const GET_USER_DATA = gql`
         publishedAt
         tagName
         url
+        repository {
+          key
+          ownerKey
+        }
       }
       releasesCount
       url

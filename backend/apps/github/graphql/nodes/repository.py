@@ -33,7 +33,7 @@ class RepositoryNode(BaseNode):
             "description",
             "forks_count",
             "key",
-            "license",
+            "owner_keylicense",
             "name",
             "open_issues_count",
             "size",
