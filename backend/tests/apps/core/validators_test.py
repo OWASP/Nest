@@ -95,7 +95,7 @@ class TestAlgoliaValidators:
 
     @pytest.mark.parametrize(
         ("query"),
-        ["query_name", "query-name", "query name"],
+        ["query_name", "query-name", "query name", "çal Q. query"],
     )
     def test_valid_query(self, query):
         validate_query(query)
