@@ -31,8 +31,7 @@ pre-commit:
 	@pre-commit run -a
 
 run:
-	@docker compose -f docker/docker-compose-local.yaml build
-	@docker compose -f docker/docker-compose-local.yaml up --remove-orphans
+	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
 
 test-all: \
 	test-nest-app \
