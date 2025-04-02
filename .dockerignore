@@ -14,3 +14,8 @@ coverage
 dist
 node_modules
 venv
+npm-debug.log
+.dockerignore
+Dockerfile
+.next
+docker
