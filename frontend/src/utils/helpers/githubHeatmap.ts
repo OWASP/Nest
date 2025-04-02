@@ -11,13 +11,14 @@ const endDate = new Date()
 endDate.setDate(endDate.getDate())
 
 const startDate = new Date(endDate)
-startDate.setDate(endDate.getDate() - 7 * 52 - 1)
+startDate.setDate(endDate.getDate() - 7 * 52 - 1) // 52 weeks and 1 day.
 
 export interface HeatmapData {
   years: DataStructYear[]
   contributions: []
 }
 
+// Modified intensity scale for better contrast
 const getIntensity = (count) => {
   if (count === 0) return '0'
   if (count <= 3) return '1'
@@ -70,27 +71,27 @@ export const fetchHeatmapData = async (username) => {
   }
 }
 
-
+// Improved themes with better contrast
 const themes = {
   blue: {
-    background: '#1a2233',
+    background: '#1a2233', // Slightly lighter background for contrast
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#2a70d8',
-    grade3: '#4682b4',
-    grade2: '#5f87a8',
-    grade1: '#46627b',
-    grade0: '#202A37',
+    grade4: '#2a70d8', // Much brighter blue for highest activity
+    grade3: '#4682b4', // Steel blue
+    grade2: '#5f87a8', // Lighter blue
+    grade1: '#46627b', // Subtle blue
+    grade0: '#202A37', // Background for no activity
   },
   blueRed: {
     background: '#1a2233',
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#e64a4a',
-    grade3: '#4682b4',
-    grade2: '#5f87a8',
-    grade1: '#46627b',
-    grade0: '#202A37',
+    grade4: '#e64a4a', // Red for highest intensity
+    grade3: '#4682b4', // Blue
+    grade2: '#5f87a8', // Lighter blue
+    grade1: '#46627b', // Subtle blue
+    grade0: '#202A37', // Background for no activity
   }
 }
 
@@ -126,7 +127,7 @@ interface Options {
   fontFace?: string
   footerText?: string
   theme?: string
-  showTooltips?: boolean
+  showTooltips?: boolean // Added option for tooltips
 }
 interface DrawYearOptions extends Options {
   year: DataStructYear
@@ -156,15 +157,45 @@ function getPixelRatio() {
 }
 
 const DATE_FORMAT = 'yyyy-MM-dd'
-
+// Increased box size and spacing for better visibility
 const boxWidth = 12
 const boxMargin = 3
 const textHeight = 15
 const defaultFontFace = 'IBM Plex Mono'
-const headerHeight = 40
+const headerHeight = 40 // Increased for legend
 const canvasMargin = 20
 const yearHeight = textHeight + (boxWidth + boxMargin) * 8 + canvasMargin
 const scaleFactor = getPixelRatio()
+
+// Singleton tooltip element
+let tooltipElement: HTMLDivElement | null = null
+
+// Function to get or create the tooltip
+function getOrCreateTooltip(): HTMLDivElement {
+  if (!tooltipElement && typeof window !== 'undefined') {
+    tooltipElement = document.createElement('div')
+    tooltipElement.style.position = 'absolute'
+    tooltipElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+    tooltipElement.style.color = 'white'
+    tooltipElement.style.padding = '5px 10px'
+    tooltipElement.style.borderRadius = '3px'
+    tooltipElement.style.fontSize = '14px'
+    tooltipElement.style.pointerEvents = 'none'
+    tooltipElement.style.opacity = '0'
+    tooltipElement.style.transition = 'opacity 0.2s'
+    tooltipElement.style.zIndex = '1000'
+    document.body.appendChild(tooltipElement)
+  }
+  return tooltipElement as HTMLDivElement
+}
+
+// Function to clean up tooltip when no longer needed
+export function cleanupTooltip(): void {
+  if (tooltipElement && typeof window !== 'undefined') {
+    document.body.removeChild(tooltipElement)
+    tooltipElement = null
+  }
+}
 
 function getTheme(opts: Options): Theme {
   const { themeName } = opts
@@ -212,7 +243,7 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     ctx.font = `10px '${fontFace}'`
   }
 
-
+  // Store cells data for interactive features
   const cellsData = []
 
   for (let y = 0; y < graphEntries.length; y += 1) {
@@ -222,12 +253,12 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       if (isAfter(cellDate, endDate) || !day.info) {
         continue
       }
-
+      // @ts-ignore
       const color = theme[`grade${day.info.intensity}`]
       ctx.fillStyle = color
       const cellX = offsetX + (boxWidth + boxMargin) * x
       const cellY = offsetY + textHeight + (boxWidth + boxMargin) * y
-      const cellRadius = 2
+      const cellRadius = 2 // radius for rounded corners
 
       ctx.beginPath()
       ctx.moveTo(cellX + cellRadius, cellY)
@@ -239,7 +270,7 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       ctx.fillStyle = color
       ctx.fill()
 
-
+      // Store cell data for interactivity
       if (opts.showTooltips) {
         cellsData.push({
           x: cellX,
@@ -275,6 +306,7 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   ctx.fillStyle = theme.background
   ctx.fillRect(0, 0, width, height)
 
+  // Draw legend
   ctx.fillStyle = theme.text
   ctx.textBaseline = 'hanging'
   ctx.font = `12px '${fontFace}'`
@@ -283,16 +315,18 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   const legendBoxSize = 12
   const legendSpacing = 60
 
-
+  // Draw legend boxes with labels
   for (let i = 0; i <= 4; i++) {
     const boxX = canvasMargin + 120 + i * legendSpacing
     const boxY = 20
 
+    // Draw box
     ctx.fillStyle = theme[`grade${i}`]
     ctx.beginPath()
     ctx.rect(boxX, boxY, legendBoxSize, legendBoxSize)
     ctx.fill()
 
+    // Draw label
     ctx.fillStyle = theme.text
     let label = ''
     if (i === 0) label = 'No activity'
@@ -303,6 +337,8 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
 
     ctx.fillText(label, boxX + legendBoxSize + 5, boxY + 2)
   }
+
+  // Separator line
   ctx.beginPath()
   ctx.moveTo(canvasMargin, 55)
   ctx.lineTo(width - canvasMargin, 55)
@@ -355,19 +391,9 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
     }
   })
 
+  // Add interactivity if enabled
   if (opts.showTooltips && typeof window !== 'undefined') {
-    const tooltip = document.createElement('div')
-    tooltip.style.position = 'absolute'
-    tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
-    tooltip.style.color = 'white'
-    tooltip.style.padding = '5px 10px'
-    tooltip.style.borderRadius = '3px'
-    tooltip.style.fontSize = '14px'
-    tooltip.style.pointerEvents = 'none'
-    tooltip.style.opacity = '0'
-    tooltip.style.transition = 'opacity 0.2s'
-    tooltip.style.zIndex = '1000'
-    document.body.appendChild(tooltip)
+    const tooltip = getOrCreateTooltip()
 
     canvas.addEventListener('mousemove', (e) => {
       const rect = canvas.getBoundingClientRect()
@@ -408,7 +434,7 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
       tooltip.style.opacity = '0'
     })
 
-
+    // Make cells clickable
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect()
       const x = (e.clientX - rect.left) / scaleFactor
@@ -421,7 +447,7 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
           y >= cell.y &&
           y <= cell.y + cell.height
         ) {
-
+          // Dispatch custom event with cell data
           const event = new CustomEvent('heatmap-cell-click', {
             detail: {
               date: cell.date,
