@@ -1,12 +1,10 @@
-FROM python:3.13-slim AS builder
+FROM python:3.13-alpine AS builder
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libpq-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd --system owasp && \
-    useradd --system --create-home --home-dir /home/owasp -g owasp owasp && \
+RUN apk update && \
+    addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
     python -m pip install --no-cache-dir poetry
 
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
@@ -30,11 +28,9 @@ FROM python:3.13-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libpq-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd --system owasp && \
-    useradd --system --create-home --home-dir /home/owasp -g owasp owasp
+RUN apk update && \
+    addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp
 
 ENV PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
