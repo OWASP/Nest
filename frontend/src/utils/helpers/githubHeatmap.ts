@@ -71,27 +71,27 @@ export const fetchHeatmapData = async (username) => {
   }
 }
 
-// Improved themes with better contrast
+
 const themes = {
   blue: {
-    background: '#1a2233', // Slightly lighter background for contrast
+    background: '#1a2233',
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#2a70d8', // Much brighter blue for highest activity
-    grade3: '#4682b4', // Steel blue
-    grade2: '#5f87a8', // Lighter blue
-    grade1: '#46627b', // Subtle blue
-    grade0: '#202A37', // Background for no activity
+    grade4: '#2a70d8',
+    grade3: '#4682b4',
+    grade2: '#5f87a8',
+    grade1: '#46627b',
+    grade0: '#202A37',
   },
   blueRed: {
     background: '#1a2233',
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#e64a4a', // Red for highest intensity
-    grade3: '#4682b4', // Blue
-    grade2: '#5f87a8', // Lighter blue
-    grade1: '#46627b', // Subtle blue
-    grade0: '#202A37', // Background for no activity
+    grade4: '#e64a4a',
+    grade3: '#4682b4',
+    grade2: '#5f87a8',
+    grade1: '#46627b',
+    grade0: '#202A37',
   }
 }
 
@@ -127,7 +127,7 @@ interface Options {
   fontFace?: string
   footerText?: string
   theme?: string
-  showTooltips?: boolean // Added option for tooltips
+  showTooltips?: boolean
 }
 interface DrawYearOptions extends Options {
   year: DataStructYear
@@ -157,20 +157,26 @@ function getPixelRatio() {
 }
 
 const DATE_FORMAT = 'yyyy-MM-dd'
-// Increased box size and spacing for better visibility
+
 const boxWidth = 12
 const boxMargin = 3
 const textHeight = 15
 const defaultFontFace = 'IBM Plex Mono'
-const headerHeight = 40 // Increased for legend
+const headerHeight = 40
 const canvasMargin = 20
 const yearHeight = textHeight + (boxWidth + boxMargin) * 8 + canvasMargin
 const scaleFactor = getPixelRatio()
 
-// Singleton tooltip element
+
 let tooltipElement: HTMLDivElement | null = null
 
-// Function to get or create the tooltip
+
+let handleMouseMove: (e: MouseEvent) => void;
+let handleMouseOut: (e: MouseEvent) => void;
+let handleClick: (e: MouseEvent) => void;
+
+
+
 function getOrCreateTooltip(): HTMLDivElement {
   if (!tooltipElement && typeof window !== 'undefined') {
     tooltipElement = document.createElement('div')
@@ -189,11 +195,19 @@ function getOrCreateTooltip(): HTMLDivElement {
   return tooltipElement as HTMLDivElement
 }
 
-// Function to clean up tooltip when no longer needed
+
 export function cleanupTooltip(): void {
   if (tooltipElement && typeof window !== 'undefined') {
     document.body.removeChild(tooltipElement)
     tooltipElement = null
+  }
+}
+
+export function cleanupEventListeners(canvas: HTMLCanvasElement): void {
+  if (typeof window !== 'undefined') {
+    canvas.removeEventListener('mousemove', handleMouseMove);
+    canvas.removeEventListener('mouseout', handleMouseOut);
+    canvas.removeEventListener('click', handleClick);
   }
 }
 
@@ -243,7 +257,7 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     ctx.font = `10px '${fontFace}'`
   }
 
-  // Store cells data for interactive features
+
   const cellsData = []
 
   for (let y = 0; y < graphEntries.length; y += 1) {
@@ -253,12 +267,12 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       if (isAfter(cellDate, endDate) || !day.info) {
         continue
       }
-      // @ts-ignore
+
       const color = theme[`grade${day.info.intensity}`]
       ctx.fillStyle = color
       const cellX = offsetX + (boxWidth + boxMargin) * x
       const cellY = offsetY + textHeight + (boxWidth + boxMargin) * y
-      const cellRadius = 2 // radius for rounded corners
+      const cellRadius = 2
 
       ctx.beginPath()
       ctx.moveTo(cellX + cellRadius, cellY)
@@ -270,7 +284,7 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       ctx.fillStyle = color
       ctx.fill()
 
-      // Store cell data for interactivity
+
       if (opts.showTooltips) {
         cellsData.push({
           x: cellX,
@@ -284,7 +298,7 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     }
   }
 
-  // Draw Month Label
+
   let lastCountedMonth = 0
   for (let y = 0; y < graphEntries[0].length; y += 1) {
     const date = parseISO(graphEntries[0][y].date)
@@ -306,7 +320,6 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   ctx.fillStyle = theme.background
   ctx.fillRect(0, 0, width, height)
 
-  // Draw legend
   ctx.fillStyle = theme.text
   ctx.textBaseline = 'hanging'
   ctx.font = `12px '${fontFace}'`
@@ -315,18 +328,17 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   const legendBoxSize = 12
   const legendSpacing = 60
 
-  // Draw legend boxes with labels
+
   for (let i = 0; i <= 4; i++) {
     const boxX = canvasMargin + 120 + i * legendSpacing
     const boxY = 20
 
-    // Draw box
+
     ctx.fillStyle = theme[`grade${i}`]
     ctx.beginPath()
     ctx.rect(boxX, boxY, legendBoxSize, legendBoxSize)
     ctx.fill()
 
-    // Draw label
     ctx.fillStyle = theme.text
     let label = ''
     if (i === 0) label = 'No activity'
@@ -338,7 +350,6 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
     ctx.fillText(label, boxX + legendBoxSize + 5, boxY + 2)
   }
 
-  // Separator line
   ctx.beginPath()
   ctx.moveTo(canvasMargin, 55)
   ctx.lineTo(width - canvasMargin, 55)
@@ -390,12 +401,9 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
       allCellsData = [...allCellsData, ...cellsData]
     }
   })
-
-  // Add interactivity if enabled
   if (opts.showTooltips && typeof window !== 'undefined') {
     const tooltip = getOrCreateTooltip()
-
-    canvas.addEventListener('mousemove', (e) => {
+    handleMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect()
       const x = (e.clientX - rect.left) / scaleFactor
       const y = (e.clientY - rect.top) / scaleFactor
@@ -428,14 +436,13 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
       if (!found) {
         tooltip.style.opacity = '0'
       }
-    })
+    };
 
-    canvas.addEventListener('mouseout', () => {
+    handleMouseOut = () => {
       tooltip.style.opacity = '0'
-    })
+    };
 
-    // Make cells clickable
-    canvas.addEventListener('click', (e) => {
+    handleClick = (e) => {
       const rect = canvas.getBoundingClientRect()
       const x = (e.clientX - rect.left) / scaleFactor
       const y = (e.clientY - rect.top) / scaleFactor
@@ -447,7 +454,7 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
           y >= cell.y &&
           y <= cell.y + cell.height
         ) {
-          // Dispatch custom event with cell data
+
           const event = new CustomEvent('heatmap-cell-click', {
             detail: {
               date: cell.date,
@@ -457,6 +464,10 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
           canvas.dispatchEvent(event)
         }
       })
-    })
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove)
+    canvas.addEventListener('mouseout', handleMouseOut)
+    canvas.addEventListener('click', handleClick)
   }
 }
