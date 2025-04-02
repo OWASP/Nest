@@ -1,0 +1,8 @@
+Important OWASP policies:{{ NL }}
+{%- for title, url in policies -%}
+  • <{{ url }}|{{ title }}>{{ NL }}
+{%- endfor -%}
+{{ SECTION_BREAK }}
+{{ DIVIDER }}
+{{ SECTION_BREAK }}
+Please visit <https://owasp.org/www-policy/|OWASP policies> page for more information

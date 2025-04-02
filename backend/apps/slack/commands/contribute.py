@@ -8,6 +8,7 @@ from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.contribute import get_blocks
 from apps.slack.common.presentation import EntityPresentation
+from apps.slack.template_system.loader import env
 from apps.slack.utils import get_text
 
 COMMAND = "/contribute"
@@ -29,13 +30,9 @@ def contribute_handler(ack, command, client):
     command_text = command["text"].strip()
 
     if command_text in COMMAND_HELP:
-        blocks = [
-            markdown(
-                f"*Available Commands for Contributing:*{NL}"
-                f"•`/contribute` - View all available issues.{NL}"
-                f"•`/contribute <search term>` - Search for contribution opportunities.{NL}"
-            ),
-        ]
+        template = env.get_template("contribute_help.txt")
+        rendered_text = template.render(NL=NL)
+        blocks = [markdown(rendered_text)]
     else:
         search_query = "" if command_text in COMMAND_START else command_text
         blocks = get_blocks(

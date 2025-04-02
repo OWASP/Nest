@@ -4,8 +4,9 @@ from django.conf import settings
 
 from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.blocks import divider, markdown
+from apps.slack.constants import NEST_BOT_NAME, OWASP_PROJECT_NEST_CHANNEL_ID
+from apps.slack.template_system.loader import env
 from apps.slack.utils import get_sponsors_data, get_text
 
 COMMAND = "/sponsors"
@@ -25,34 +26,29 @@ def sponsors_handler(ack, command, client):
         return
 
     sponsors = get_sponsors_data()
+    template = env.get_template("sponsors.txt")
+
     if not sponsors:
-        client.chat_postMessage(
-            channel=command["user_id"], text="Failed to get OWASP sponsor data."
-        )
-        return
+        rendered_text = template.render(has_sponsors=False, NL=NL)
+        blocks = [markdown(rendered_text.strip())]
+    else:
+        blocks = []
+        title_text = template.render(mode="title", NL=NL).strip()
+        blocks.append(markdown(title_text))
 
-    blocks = []
-    blocks.append(markdown("*OWASP Sponsors:*"))
+        for idx, sponsor in enumerate(sponsors, start=1):
+            sponsor_text = template.render(mode="sponsor", idx=idx, sponsor=sponsor, NL=NL).strip()
+            blocks.append(markdown(sponsor_text))
 
-    for idx, sponsor in enumerate(sponsors, start=1):
-        if sponsor.url:
-            block_text = f"*{idx}. <{sponsor.url}|{sponsor.name}>*{NL}"
-        else:
-            block_text = f"*{idx}. {sponsor.name}*{NL}"
-
-        block_text += f"Member Type: {sponsor.member_type}{NL}"
-        block_text += f"{sponsor.description}{NL}"
-
-        blocks.append(markdown(block_text))
-
-    blocks.append({"type": "divider"})
-    blocks.append(
-        markdown(
-            f"* Please visit the <{OWASP_WEBSITE_URL}/supporters|OWASP supporters>"
-            f" for more information about the sponsors*{NL}"
-            f"{FEEDBACK_CHANNEL_MESSAGE}"
-        )
-    )
+        footer_text = template.render(
+            mode="footer",
+            website_url=OWASP_WEBSITE_URL,
+            feedback_channel=OWASP_PROJECT_NEST_CHANNEL_ID,
+            nest_bot_name=NEST_BOT_NAME,
+            NL=NL,
+        ).strip()
+        blocks.append(divider())
+        blocks.append(markdown(footer_text))
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(

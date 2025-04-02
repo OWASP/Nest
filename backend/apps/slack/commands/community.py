@@ -5,6 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
+from apps.slack.template_system.loader import env
 from apps.slack.utils import get_text
 
 COMMAND = "/community"
@@ -24,9 +25,13 @@ def community_handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    blocks = [
-        markdown(f"Please visit <https://nest.owasp.dev/members/|OWASP community> page{NL}"),
-    ]
+    template = env.get_template("community.txt")
+    rendered_text = template.render(
+        community_url="https://nest.owasp.dev/community/users/",
+        community_name="OWASP community",
+        NL=NL,
+    )
+    blocks = [markdown(rendered_text)]
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(

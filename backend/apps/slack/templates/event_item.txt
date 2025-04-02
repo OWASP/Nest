@@ -1,0 +1,1 @@
+*{{ idx }}. {% if event.url %}<{{ event.url }}|{{ event.name }}>{% else %}{{ event.name }}{% endif %}*{{ NL }} Start Date: {{ event.start_date }}{% if event.end_date %}{{ NL }} End Date: {{ event.end_date }}{% endif %}{% if event.description %}{{ NL }}_{{ event.description }}_{% endif %}{{ NL }}
