@@ -91,6 +91,7 @@ Truncator
 tsc
 Twitterbot
 usefixtures
+USLACKBOT
 Whistleblower
 winsrdf
 wsgi

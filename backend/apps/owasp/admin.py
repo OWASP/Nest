@@ -1,6 +1,6 @@
 """OWASP app admin."""
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
 from apps.owasp.models.chapter import Chapter
@@ -41,12 +41,31 @@ class GenericEntityAdminMixin:
             f"<a href='https://owasp.org/{obj.key}' target='_blank'>↗️</a>"
         )
 
+    def approve_suggested_leaders(self, request, queryset):
+        """Approve all suggested leaders for selected entities."""
+        for entity in queryset:
+            suggestions = entity.suggested_leaders.all()
+            entity.leaders.add(*suggestions)
+            self.message_user(
+                request,
+                f"Approved {suggestions.count()} leader suggestions for {entity.name}",
+                messages.SUCCESS,
+            )
+
     custom_field_github_urls.short_description = "GitHub 🔗"
     custom_field_owasp_url.short_description = "OWASP 🔗"
+    approve_suggested_leaders.short_description = "Approve all suggested leaders"
 
 
-class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
-    autocomplete_fields = ("owasp_repository",)
+class LeaderEntityAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
+    """Admin class for entities that have leaders."""
+
+    actions = ["approve_suggested_leaders"]
+    filter_horizontal = ("suggested_leaders",)
+
+
+class ChapterAdmin(LeaderEntityAdmin):
+    autocomplete_fields = ("owasp_repository", "leaders")
     list_display = (
         "name",
         "region",
@@ -62,8 +81,8 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     search_fields = ("name", "key")
 
 
-class CommitteeAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("owasp_repository",)
+class CommitteeAdmin(LeaderEntityAdmin):
+    autocomplete_fields = ("owasp_repository", "leaders")
     search_fields = ("name",)
 
 
@@ -92,12 +111,13 @@ class PostAdmin(admin.ModelAdmin):
     )
 
 
-class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
+class ProjectAdmin(LeaderEntityAdmin):
     autocomplete_fields = (
         "organizations",
         "owasp_repository",
         "owners",
         "repositories",
+        "leaders",
     )
     list_display = (
         "custom_field_name",
