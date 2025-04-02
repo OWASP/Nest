@@ -3,7 +3,7 @@ FROM python:3.13-alpine AS builder
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN addgroup -S owasp && \
-    adduser -S -D -H -G owasp -h /home/owasp owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
     mkdir -p /home/owasp && \
     chown owasp:owasp /home/owasp && \
     python -m pip install --no-cache-dir poetry
@@ -31,7 +31,7 @@ FROM python:3.13-alpine
 SHELL ["/bin/sh", "-c"]
 
 RUN addgroup -S owasp && \
-    adduser -S -D -H -G owasp -h /home/owasp owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
     mkdir -p /home/owasp && \
     chown owasp:owasp /home/owasp
 

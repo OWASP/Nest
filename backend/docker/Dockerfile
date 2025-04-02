@@ -24,9 +24,9 @@ COPY settings settings
 COPY static static
 COPY templates templates
 
-FROM python:3.13-slim
+FROM python:3.13-alpine
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
     addgroup -S owasp && \
