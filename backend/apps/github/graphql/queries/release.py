@@ -18,7 +18,7 @@ class ReleaseQuery(BaseQuery):
         login=graphene.String(required=False),
     )
 
-    def resolve_recent_releases(root, info, limit=6, distinct=False, login=None):
+    def resolve_recent_releases(root, info, limit, distinct=False, login=None):
         """Resolve recent releases with optional distinct filtering.
 
         Args:

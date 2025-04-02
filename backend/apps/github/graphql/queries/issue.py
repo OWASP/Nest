@@ -18,7 +18,7 @@ class IssueQuery(BaseQuery):
         login=graphene.String(required=False),
     )
 
-    def resolve_recent_issues(root, info, limit=15, distinct=False, login=None):
+    def resolve_recent_issues(root, info, limit, distinct=False, login=None):
         """Resolve recent issues with optional filtering.
 
         Args:
