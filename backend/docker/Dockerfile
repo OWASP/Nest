@@ -1,7 +1,5 @@
 FROM python:3.13-alpine AS builder
 
-SHELL ["/bin/sh", "-o", "pipefail", "-c"]
-
 RUN apk update && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \
@@ -25,8 +23,6 @@ COPY static static
 COPY templates templates
 
 FROM python:3.13-alpine
-
-SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
     addgroup -S owasp && \

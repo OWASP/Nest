@@ -1,7 +1,5 @@
 FROM python:3.13-alpine AS builder
 
-SHELL ["/bin/sh", "-o", "pipefail", "-c"]
-
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \
     mkdir -p /home/owasp && \
@@ -23,8 +21,6 @@ COPY tests tests
 COPY utils utils
 
 FROM python:3.13-alpine
-
-SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \

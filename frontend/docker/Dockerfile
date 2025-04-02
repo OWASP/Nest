@@ -3,7 +3,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm  && \
+RUN npm install -g pnpm && \
     pnpm install
 
 COPY . .
