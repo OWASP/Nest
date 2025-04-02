@@ -45,11 +45,7 @@ export default function CommitteeDetailsPage() {
   }, [data, graphQLRequestError, committeeKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!committee && !isLoading)
@@ -67,7 +63,7 @@ export default function CommitteeDetailsPage() {
     {
       label: 'URL',
       value: (
-        <a href={committee.url} className="hover:underline dark:text-sky-600">
+        <a href={committee.url} className="text-blue-400 hover:underline">
           {committee.url}
         </a>
       ),

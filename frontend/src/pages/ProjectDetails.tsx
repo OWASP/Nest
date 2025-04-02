@@ -44,11 +44,7 @@ const ProjectDetailsPage = () => {
   }, [data, graphQLRequestError, projectKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!project)
@@ -70,7 +66,7 @@ const ProjectDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <Link href={project.url} className="hover:underline dark:text-sky-600">
+        <Link href={project.url} className="text-blue-400 hover:underline">
           {project.url}
         </Link>
       ),

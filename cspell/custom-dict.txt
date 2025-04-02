@@ -18,6 +18,7 @@ coraza
 corsheaders
 csrfguard
 csrfprotector
+csrftoken
 cva
 dismissable
 DRF
@@ -57,6 +58,7 @@ nestbot
 NETTACKER
 noinput
 Nominatim
+nosniff
 owasppcitoolkit
 owtf
 pentest
