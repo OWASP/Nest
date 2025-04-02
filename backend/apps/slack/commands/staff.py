@@ -4,7 +4,9 @@ from django.conf import settings
 
 from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.blocks import divider, markdown
+from apps.slack.constants import NEST_BOT_NAME, OWASP_PROJECT_NEST_CHANNEL_ID
+from apps.slack.template_system.loader import env
 from apps.slack.utils import get_staff_data, get_text
 
 COMMAND = "/staff"
@@ -25,29 +27,30 @@ def staff_handler(ack, command, client):
         return
 
     items = get_staff_data()
-    if not items:
-        client.chat_postMessage(
-            channel=command["user_id"], text="Failed to get OWASP Foundation staff data."
-        )
-        return
+    template = env.get_template("staff.txt")
 
-    blocks = []
-    blocks.append(markdown("OWASP Foundation Staff:"))
-    for idx, item in enumerate(items, start=1):
-        blocks.append(
-            markdown(
-                f"*{idx}. {item['name']}, {item['title']}*{NL}"  # name
-                f"_{item['location']}_{NL}"  # title and location
-                f"{item['description'] or ''}"  # description
-            )
-        )
-    blocks.append({"type": "divider"})
-    blocks.append(
-        markdown(
-            f"Please visit <{OWASP_WEBSITE_URL}/corporate/|OWASP staff> page "
-            f"for more information.{NL}"
-        )
-    )
+    if not items:
+        rendered_text = template.render(has_staff=False, NL=NL)
+        blocks = [markdown(rendered_text.strip())]
+    else:
+        blocks = []
+
+        title_text = template.render(mode="title", NL=NL).strip()
+        blocks.append(markdown(title_text))
+
+        for idx, item in enumerate(items, start=1):
+            staff_text = template.render(mode="staff", idx=idx, item=item, NL=NL).strip()
+            blocks.append(markdown(staff_text))
+
+        footer_text = template.render(
+            mode="footer",
+            website_url=OWASP_WEBSITE_URL,
+            feedback_channel=OWASP_PROJECT_NEST_CHANNEL_ID,
+            nest_bot_name=NEST_BOT_NAME,
+            NL=NL,
+        ).strip()
+        blocks.append(divider())
+        blocks.append(markdown(footer_text))
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(

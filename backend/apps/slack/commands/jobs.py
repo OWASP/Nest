@@ -6,6 +6,7 @@ from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_JOBS_CHANNEL_ID
+from apps.slack.template_system.loader import env
 from apps.slack.utils import get_text
 
 COMMAND = "/jobs"
@@ -25,18 +26,16 @@ def jobs_handler(ack, command, client):
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
-    blocks = [
-        markdown(
-            f"Please join <{OWASP_JOBS_CHANNEL_ID}> channel{NL}"
-            "This Slack channel shares community-driven job opportunities, networking, "
-            "and career advice in cybersecurity and related fields."
-        ),
-        markdown(
-            "⚠️ *Disclaimer: This is not an official OWASP channel and its content is "
-            "not endorsed, reviewed, or approved by OWASP*."
-        ),
-        markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    ]
+    template = env.get_template("jobs.txt")
+    rendered_text = template.render(
+        jobs_channel=OWASP_JOBS_CHANNEL_ID, feedback_message=FEEDBACK_CHANNEL_MESSAGE, NL=NL
+    )
+
+    blocks = []
+    for section in rendered_text.split("{{ SECTION_BREAK }}"):
+        cleaned_section = section.strip()
+        if cleaned_section:
+            blocks.append(markdown(cleaned_section))
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(

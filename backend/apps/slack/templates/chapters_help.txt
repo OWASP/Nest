@@ -1,0 +1,4 @@
+*Available Commands:*
+• `/chapters` - recent chapters
+• `/chapters [search term]` - Search for specific chapters
+• `/chapters [region]` - Search for specific region chapters

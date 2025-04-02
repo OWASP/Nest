@@ -2,12 +2,12 @@
 
 from django.conf import settings
 
-from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.chapters import get_blocks
 from apps.slack.common.presentation import EntityPresentation
+from apps.slack.template_system.loader import env
 from apps.slack.utils import get_text
 
 COMMAND = "/chapters"
@@ -29,14 +29,9 @@ def chapters_handler(ack, command, client):
     command_text = command["text"].strip()
 
     if command_text in COMMAND_HELP:
-        blocks = [
-            markdown(
-                f"*Available Commands:*{NL}"
-                f"• `/chapters` - recent chapters{NL}"
-                f"• `/chapters [search term]` - Search for specific chapters{NL}"
-                f"• `/chapters [region]` - Search for specific region chapters{NL}"
-            ),
-        ]
+        template = env.get_template("chapters_help.txt")
+        rendered_text = template.render()
+        blocks = [markdown(rendered_text)]
     else:
         search_query = "" if command_text in COMMAND_START else command_text
         blocks = get_blocks(

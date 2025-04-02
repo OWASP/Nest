@@ -1,0 +1,11 @@
+{%- if mode == "title" -%}
+  OWASP Foundation Staff:{{ NL }}{{ NL }}
+{%- elif mode == "staff" -%}
+  *{{ idx }}. {{ item.name }}, {{ item.title }}*
+_{{ item.location }}_
+{{ item.description | default('', true) }}{{ NL }}{{ NL }}
+{%- elif mode == "footer" -%}
+  Please visit <{{ website_url }}/corporate/|OWASP staff> page for more information.{{ NL }}
+{%- else -%}
+  Failed to get OWASP Foundation staff data.
+{%- endif -%}

@@ -5,6 +5,7 @@ from django.conf import settings
 from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
+from apps.slack.template_system.loader import env
 from apps.slack.utils import get_events_data, get_text
 
 COMMAND = "/events"
@@ -25,7 +26,6 @@ def events_handler(ack, command, client):
         return
 
     events_data = get_events_data()
-
     valid_events = [event for event in events_data if event.start_date]
     sorted_events = sorted(valid_events, key=lambda x: x.start_date)
 
@@ -33,42 +33,40 @@ def events_handler(ack, command, client):
     for event in sorted_events:
         category = event.category or "Other"
         if category not in categorized_events:
-            categorized_events[category] = {
-                "events": [],
+            categorized_events[category] = {"events": []}
+        categorized_events[category]["events"].append(
+            {
+                "name": event.name,
+                "url": event.url,
+                "start_date": event.start_date,
+                "end_date": event.end_date,
+                "description": event.description,
             }
-        categorized_events[category]["events"].append(event)
+        )
+
+    frame_template = env.get_template("events_frame.txt")
+    event_item_template = env.get_template("event_item.txt")
 
     blocks = []
-    blocks.append(markdown("*Upcoming OWASP Events:*"))
+
+    rendered_main_header = frame_template.render(render_type="main")
+    blocks.append(markdown(rendered_main_header.strip()))
     blocks.append({"type": "divider"})
 
     for category, category_data in categorized_events.items():
-        blocks.append(markdown(f"*Category: {category.replace('_', ' ').title()}*"))
+        rendered_category_header = frame_template.render(render_type="category", category=category)
+        blocks.append(markdown(rendered_category_header.strip()))
 
         for idx, event in enumerate(category_data["events"], 1):
-            if event.url:
-                block_text = f"*{idx}. <{event.url}|{event.name}>*{NL}"
-            else:
-                block_text = f"*{idx}. {event.name}*{NL}"
-
-            block_text += f" Start Date: {event.start_date}{NL}"
-
-            if event.end_date:
-                block_text += f" End Date: {event.end_date}{NL}"
-
-            if event.description:
-                block_text += f"_{event.description}_{NL}"
-
-            blocks.append(markdown(block_text))
+            rendered_text = event_item_template.render(idx=idx, event=event, NL=NL)
+            blocks.append(markdown(rendered_text.strip()))
 
         blocks.append({"type": "divider"})
 
-    blocks.append(
-        markdown(
-            f"🔍 For more information about upcoming events, "
-            f"please visit <{OWASP_WEBSITE_URL}/events/|OWASP Events>{NL}"
-        )
+    rendered_footer = frame_template.render(
+        render_type="footer", website_url=OWASP_WEBSITE_URL, NL=NL
     )
+    blocks.append(markdown(rendered_footer.strip()))
 
     conversation = client.conversations_open(users=command["user_id"])
     client.chat_postMessage(
