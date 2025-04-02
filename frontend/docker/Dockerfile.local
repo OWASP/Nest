@@ -1,9 +1,8 @@
-FROM node:22-slim AS builder
+FROM node:22-alpine AS builder
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apt-get update && apt-get install -y --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/* && \
+RUN apk update && \
     mkdir -p /home/owasp && \
     chown -R node:node /home/owasp && \
     npm install -g pnpm
@@ -14,12 +13,11 @@ COPY --chmod=444 --chown=node:node package.json pnpm-lock.yaml ./
 RUN pnpm config set store-dir /home/owasp/.local/share/pnpm/store/v10 --global && \
     pnpm install
 
-FROM node:22-slim
+FROM node:22-alpine
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apt-get update && apt-get install -y --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/* && \
+RUN apk update && \
     mkdir -p /home/owasp && \
     chown -R node:node /home/owasp && \
     npm install -g pnpm

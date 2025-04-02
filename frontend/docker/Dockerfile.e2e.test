@@ -1,6 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.51.1-noble AS builder
-
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+FROM mcr.microsoft.com/playwright:v1.51.1-noble
 
 ENV FORCE_COLOR=1
 

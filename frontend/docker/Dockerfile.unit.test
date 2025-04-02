@@ -1,6 +1,4 @@
-FROM node:22-slim AS builder
-
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+FROM node:22-alpine
 
 ENV FORCE_COLOR=1
 
