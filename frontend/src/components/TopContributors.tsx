@@ -7,18 +7,17 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
+import SecondaryCard from './SecondaryCard'
 const TopContributors = ({
   contributors,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
-  className = '',
   type,
   icon,
 }: {
   contributors: TopContributorsTypeGraphql[]
   label?: string
   maxInitialDisplay?: number
-  className?: string
   type: string
   icon?: IconProp
 }) => {
@@ -35,17 +34,13 @@ const TopContributors = ({
     return
   }
   return (
-    <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
-      <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-        <FontAwesomeIcon icon={icon} className="h-5 w-5" />
-        {label}
-      </h2>
-      <div className="grid gap-x-5 sm:grid-cols-2 md:grid-cols-3">
+    <SecondaryCard icon={icon} title={label}>
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
         {displayContributors.map((item, index) => (
           <button
             key={index}
             onClick={() => navigate(`/community/users/${item.login}`)}
-            className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+            className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
           >
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
@@ -83,7 +78,7 @@ const TopContributors = ({
           )}
         </Button>
       )}
-    </div>
+    </SecondaryCard>
   )
 }
 
