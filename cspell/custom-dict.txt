@@ -58,6 +58,7 @@ nestbot
 NETTACKER
 noinput
 Nominatim
+nosniff
 owasppcitoolkit
 owtf
 pentest
