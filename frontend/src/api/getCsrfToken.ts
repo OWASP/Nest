@@ -1,8 +1,9 @@
+import { CSRF_URL } from 'utils/credentials'
 import { AppError } from 'wrappers/ErrorWrapper'
 
 export const getInitialCsrfToken = async () => {
   try {
-    const response = await fetch('http://localhost:8000/csrf', {
+    const response = await fetch(CSRF_URL, {
       method: 'GET',
     })
 

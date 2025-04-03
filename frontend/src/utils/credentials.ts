@@ -1,4 +1,5 @@
 export const API_URL = process.env.VITE_API_URL
+export const CSRF_URL = process.env.VITE_CSRF_URL
 export const ENVIRONMENT = process.env.VITE_ENVIRONMENT
 export const GRAPHQL_URL = process.env.VITE_GRAPHQL_URL
 export const GTM_AUTH = process.env.VITE_GTM_AUTH
