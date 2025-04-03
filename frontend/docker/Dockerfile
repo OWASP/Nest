@@ -18,6 +18,4 @@ RUN chmod -R a-w /usr/share/nginx/html
 
 EXPOSE 3000
 
-USER nginx
-
 CMD ["nginx", "-g", "daemon off;"]
