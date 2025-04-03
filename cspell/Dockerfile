@@ -10,3 +10,5 @@ RUN npm install --ignore-scripts -g pnpm && \
 WORKDIR /nest
 
 ENTRYPOINT ["/opt/node/node_modules/.bin/cspell"]
+
+USER node

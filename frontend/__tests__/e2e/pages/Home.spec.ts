@@ -39,7 +39,7 @@ test.describe('Home Page', () => {
   })
 
   test('should have recent posts', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'News & Opinions' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Post 1', exact: true })).toBeVisible()
     await expect(page.getByText('Author 1')).toBeVisible()
     await expect(page.getByText('Feb 24').first()).toBeVisible({ timeout: 10000 })

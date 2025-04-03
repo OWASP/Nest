@@ -200,7 +200,8 @@ export default function Home() {
                   </div>
 
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                      {' '}
                       <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
                       <LeadersList leaders={String(chapter.leaders)} />
                     </div>
@@ -218,7 +219,7 @@ export default function Home() {
                       <TruncatedText text={project.name} />
                     </h3>
                   </a>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
@@ -233,7 +234,7 @@ export default function Home() {
                   </div>
 
                   {project.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
                       <LeadersList leaders={String(project.leaders)} />
                     </div>
@@ -246,7 +247,7 @@ export default function Home() {
         <div className="mb-20">
           <h2 className="mb-4 text-2xl font-semibold">
             <FontAwesomeIcon icon={faGlobe} className="mr-2 h-5 w-5" />
-            OWASP Chapters Worldwide
+            Chapters Worldwide
           </h2>
           <ChapterMap
             geoLocData={geoLocData}
@@ -271,11 +272,7 @@ export default function Home() {
           <RecentPullRequests data={data.recentPullRequests} showAuthor={true} />
         </div>
         <RecentReleases data={data.recentReleases} />
-        <SecondaryCard
-          icon={faNewspaper}
-          title="Recent News & Opinions"
-          className="overflow-hidden"
-        >
+        <SecondaryCard icon={faNewspaper} title="News & Opinions" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data.recentPosts.map((post) => (
               <div
