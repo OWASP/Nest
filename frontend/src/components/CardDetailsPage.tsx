@@ -12,7 +12,7 @@ import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
-import TopContributors from 'components/ToggleContributors'
+import TopContributors from 'components/TopContributors'
 import ChapterMapWrapper from './ChapterMapWrapper'
 import LeadersList from './LeadersList'
 

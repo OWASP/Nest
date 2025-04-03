@@ -13,7 +13,7 @@ import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/ToggleContributors'
+import TopContributors from 'components/TopContributors'
 import UserCard from 'components/UserCard'
 
 const leaders = ['arkid15r', 'kasya', 'mamicidal']

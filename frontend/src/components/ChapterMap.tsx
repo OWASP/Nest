@@ -1,12 +1,12 @@
 'use client'
 import L, { MarkerClusterGroup } from 'leaflet'
-import 'leaflet.markercluster'
 import React, { useEffect, useMemo, useRef } from 'react'
+import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
+import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
-import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
 const ChapterMap = ({
   geoLocData,

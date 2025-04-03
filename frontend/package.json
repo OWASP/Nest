@@ -9,7 +9,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
     "@apollo/client": "^3.13.5",

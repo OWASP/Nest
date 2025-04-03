@@ -46,7 +46,7 @@ const ItemCardList = ({
                       height={24}
                       width={24}
                       src={item?.author?.avatarUrl}
-                      alt={item?.author?.name}
+                      alt={''}
                       className="mr-2 rounded-full"
                     />
                   </Link>
