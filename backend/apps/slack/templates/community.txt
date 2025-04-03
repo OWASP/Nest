@@ -1,1 +1,0 @@
-Please visit <{{ community_url }}|{{ community_name }}> page{{ NL }}

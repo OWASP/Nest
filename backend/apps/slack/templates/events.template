@@ -1,0 +1,12 @@
+*Upcoming OWASP Events:*{{ NL }}{{ NL }}
+{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
+{%- for category, category_data in categorized_events.items() %}
+*Category: {{ category.replace('_', ' ').title() }}*{{ NL }}
+{%- for event in category_data.events %}
+*{{ loop.index }}. {% if event.url %}<{{ event.url }}|{{ event.name }}>{% else %}{{ event.name }}{% endif %}*
+Start Date: {{ event.start_date }}{% if event.end_date %}{{ NL }}End Date: {{ event.end_date }}{% endif %}{% if event.description %}{{ NL }}_{{ event.description }}_{% endif %}{{ NL }}{{ NL }}
+{{ SECTION_BREAK }}
+{%- endfor %}
+{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
+{%- endfor %}
+🔍 For more information about upcoming events, please visit <{{ website_url }}/events/|OWASP Events>{{ NL }}

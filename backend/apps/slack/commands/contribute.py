@@ -1,41 +1,28 @@
 """Slack bot contribute command."""
 
-from django.conf import settings
-
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.contribute import get_blocks
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.template_system.loader import env
-from apps.slack.utils import get_text
-
-COMMAND = "/contribute"
 
 
-def contribute_handler(ack, command, client):
-    """Handle the Slack /contribute command.
+class Contribute(CommandBase):
+    """Slack bot /contribute command."""
 
-    Args:
-        ack (function): Acknowledge the Slack command request.
-        command (dict): The Slack command payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    def get_render_text(self, command):
+        """Get the rendered text."""
+        template = self.get_template_file()
+        return template.render(NL=NL)
 
-    """
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
-
-    command_text = command["text"].strip()
-
-    if command_text in COMMAND_HELP:
-        template = env.get_template("contribute_help.txt")
-        rendered_text = template.render(NL=NL)
-        blocks = [markdown(rendered_text)]
-    else:
+    def get_render_blocks(self, command):
+        """Get the rendered blocks."""
+        command_text = command["text"].strip()
+        if command_text in COMMAND_HELP:
+            return super().get_render_blocks(command)
         search_query = "" if command_text in COMMAND_START else command_text
-        blocks = get_blocks(
+        return get_blocks(
             search_query=search_query,
             limit=10,
             presentation=EntityPresentation(
@@ -48,13 +35,6 @@ def contribute_handler(ack, command, client):
             ),
         )
 
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        channel=conversation["channel"]["id"],
-        blocks=blocks,
-        text=get_text(blocks),
-    )
-
 
 if SlackConfig.app:
-    contribute_handler = SlackConfig.app.command(COMMAND)(contribute_handler)
+    Contribute().config_command()
