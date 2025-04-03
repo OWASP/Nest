@@ -44,7 +44,11 @@ const TopContributors = ({
           >
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
-                <img src={item?.avatarUrl} alt={item?.name} className="h-6 w-6 rounded-full" />
+                <img
+                  alt={item?.name}
+                  className="h-6 w-6 rounded-full"
+                  src={`${item?.avatarUrl}&s=60`}
+                />
                 <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
                   {capitalize(item.name) || capitalize(item.login)}
                 </h3>
