@@ -6,7 +6,13 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
 
-COPY . .
+COPY --chmod=755 src src
+COPY --chmod=755 public public
+COPY --chmod=444 tsconfig.json vite.config.ts ./
+COPY --chmod=444 .env.example .env
+COPY --chmod=444 index.html index.html
+COPY --chmod=444 tailwind.config.js ./
+COPY --chmod=444 nginx.conf nginx.conf
 
 RUN pnpm run build
 

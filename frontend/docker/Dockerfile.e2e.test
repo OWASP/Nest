@@ -8,4 +8,8 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
 
-COPY . .
+COPY __tests__/e2e __tests__/e2e
+COPY public public
+COPY src src
+COPY playwright.config.ts playwright.config.ts
+COPY tsconfig.json tsconfig.json
