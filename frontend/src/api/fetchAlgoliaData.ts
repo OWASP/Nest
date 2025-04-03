@@ -1,5 +1,6 @@
 import { AlgoliaResponseType } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
+import { getCsrfToken } from 'utils/utility'
 import { AppError } from 'wrappers/ErrorWrapper'
 import { removeIdxPrefix } from './utility'
 
@@ -19,7 +20,9 @@ export const fetchAlgoliaData = async <T>(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken() || '',
       },
+      credentials: 'include',
       body: JSON.stringify({
         facetFilters,
         hitsPerPage,

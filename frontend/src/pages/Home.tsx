@@ -272,14 +272,16 @@ export default function Home() {
             data={data.recentIssues}
             icon={faTriangleExclamation}
             renderDetails={(item) => (
-              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                <span>{formatDate(item.createdAt)}</span>
+              <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
+                <div className="mr-4 flex items-center">
+                  <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                  <span>{formatDate(item.createdAt)}</span>
+                </div>
                 {item?.commentsCount ? (
-                  <>
-                    <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+                  <div className="flex items-center">
+                    <FontAwesomeIcon icon={faFileCode} className="mr-2 h-4 w-4" />
                     <span>{item.commentsCount} comments</span>
-                  </>
+                  </div>
                 ) : null}
               </div>
             )}
@@ -289,26 +291,29 @@ export default function Home() {
             data={data.recentPullRequests}
             icon={faCodePullRequest}
             renderDetails={(item) => (
-              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                <span>{formatDate(item.createdAt)}</span>
+              <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
+                <div className="mr-4 flex items-center">
+                  <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                  <span>{formatDate(item.createdAt)}</span>
+                </div>
+
                 {item?.author.name || item?.author.login ? (
-                  <>
-                    <FontAwesomeIcon icon={faUser} className="ml-4 mr-2 h-4 w-4" />
+                  <div className="flex items-center">
+                    <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
                     <span>{item.author.name || item.author.login}</span>
-                  </>
+                  </div>
                 ) : null}
               </div>
             )}
           />
         </div>
-        <SecondaryCard icon={faTag} title="Recent Releases">
+        <SecondaryCard icon={faTag} title="Recent Releases" className="overflow-hidden">
           {data.recentReleases && data.recentReleases.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {data.recentReleases.map((item, index) => (
                 <div
                   key={index}
-                  className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                  className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
                 >
                   <div className="flex w-full flex-col justify-between">
                     <div className="flex w-full items-center">
@@ -333,11 +338,13 @@ export default function Home() {
                         </a>
                       </h3>
                     </div>
-                    <div className="ml-0.5 w-full">
-                      <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
+                      <div className="mr-4 flex items-center">
                         <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                         <span>{formatDate(item.publishedAt)}</span>
-                        <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
+                      </div>
+                      <div className="flex items-center">
+                        <FontAwesomeIcon icon={faTag} className="mr-2 h-4 w-4" />
                         <span>{item.tagName}</span>
                       </div>
                     </div>
