@@ -4,6 +4,7 @@ Aichi
 Aissue
 algoliasearch
 ansa
+apk
 arithmatex
 arkid15r
 askowasp

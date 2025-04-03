@@ -1,4 +1,5 @@
 __pycache__
+.ash_history
 .bash_history
 .cache
 .coverage

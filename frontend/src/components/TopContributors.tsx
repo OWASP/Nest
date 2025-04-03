@@ -35,7 +35,7 @@ const TopContributors = ({
   }
   return (
     <SecondaryCard icon={icon} title={label}>
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
         {displayContributors.map((item, index) => (
           <button
             key={index}
@@ -44,7 +44,11 @@ const TopContributors = ({
           >
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
-                <img src={item?.avatarUrl} alt={item?.name} className="h-6 w-6 rounded-full" />
+                <img
+                  alt={item?.name}
+                  className="h-6 w-6 rounded-full"
+                  src={`${item?.avatarUrl}&s=60`}
+                />
                 <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
                   {capitalize(item.name) || capitalize(item.login)}
                 </h3>

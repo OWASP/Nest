@@ -1,14 +1,12 @@
-FROM node:22-slim AS builder
-
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+FROM node:22-alpine
 
 ENV FORCE_COLOR=1
 
 WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm && \
-    pnpm install
+RUN npm install --ignore-scripts -g pnpm && \
+    pnpm install --ignore-scripts
 
 COPY __tests__/unit __tests__/unit
 COPY jest.config.ts jest.config.ts

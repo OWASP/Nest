@@ -127,7 +127,7 @@ setup:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 shell-backend:
-	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
+	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
 sync-data: \
 	update-data \
