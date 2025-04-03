@@ -4,6 +4,7 @@ Aichi
 Aissue
 algoliasearch
 ansa
+apk
 arithmatex
 arkid15r
 askowasp
@@ -58,6 +59,7 @@ nestbot
 NETTACKER
 noinput
 Nominatim
+nosniff
 owasppcitoolkit
 owtf
 pentest
