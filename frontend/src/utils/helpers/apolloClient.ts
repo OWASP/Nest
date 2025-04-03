@@ -16,11 +16,11 @@ const createApolloClient = () => {
     uri: GRAPHQL_URL,
   })
 
-  const authLink = setContext((_, { headers }) => {
+  const authLink = setContext(async (_, { headers }) => {
     return {
       headers: {
         ...headers,
-        'X-CSRFToken': getCsrfToken() || '',
+        'X-CSRFToken': (await getCsrfToken()) || '',
       },
     }
   })

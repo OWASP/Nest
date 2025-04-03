@@ -1,3 +1,4 @@
+import { getInitialCsrfToken } from 'api/getCsrfToken'
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -65,10 +66,17 @@ export type IndexedObject = {
   [key: string]: unknown
 }
 
-export const getCsrfToken = (): string | undefined => {
-  return document.cookie
+export const getCsrfToken = async () => {
+  const csrfToken = document.cookie
     .split(';')
     .map((cookie) => cookie.split('='))
     .find(([key]) => key.trim() === 'csrftoken')?.[1]
     ?.trim()
+
+  if (csrfToken) {
+    return csrfToken
+  }
+
+  const res = await getInitialCsrfToken()
+  return res
 }
