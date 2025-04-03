@@ -91,7 +91,11 @@ const About = () => {
                   <ul className="space-y-3">
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
-                        <i className={`${details.icon} text-xl`} style={{ color: '#9ca3af' }}></i>
+                        <span
+                          className="text-xl"
+                          style={{ color: '#9ca3af' }}
+                          dangerouslySetInnerHTML={{ __html: details.icon }}
+                        />
                         <a
                           href={details.url}
                           className="text-gray-600 hover:underline dark:text-gray-300"
