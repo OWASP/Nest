@@ -5,6 +5,7 @@ export const getInitialCsrfToken = async () => {
   try {
     const response = await fetch(CSRF_URL, {
       method: 'GET',
+      credentials: 'include',
     })
 
     if (!response.ok) {
@@ -12,7 +13,6 @@ export const getInitialCsrfToken = async () => {
     }
 
     const data = await response.json()
-    document.cookie = `csrftoken=${data.csrftoken}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
     return data.csrftoken
   } catch (error) {
     if (error instanceof AppError) {
