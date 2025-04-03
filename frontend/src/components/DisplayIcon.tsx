@@ -30,8 +30,8 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     <Tooltip
       content={`${Icons[item as keyof typeof Icons]?.label}`}
       recipe={TooltipRecipe}
-      openDelay={150}
-      closeDelay={100}
+      openDelay={50}
+      closeDelay={250}
       showArrow
       positioning={{ placement: 'bottom' }}
       isOpen={isTooltipOpen}
