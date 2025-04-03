@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.slack.commands.owasp import COMMAND as OWASP_COMMAND
+from apps.slack.commands.owasp import Owasp
 
 
 class Event(TimestampedModel):
@@ -42,7 +42,7 @@ class Event(TimestampedModel):
 
         command = payload.get("command", "")
         text = payload.get("text", "")
-        if command and command == OWASP_COMMAND:
+        if command and command == Owasp().get_command():
             try:
                 command, *args = text.strip().split()
                 text = " ".join(args)

@@ -1,116 +1,51 @@
 """Slack bot owasp command."""
 
-from django.conf import settings
-
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP
-from apps.slack.template_system.loader import env
-from apps.slack.utils import get_text
-
-COMMAND = "/owasp"
 
 
-def owasp_handler(ack, command, client):
-    """Handle the Slack /owasp command.
+class Owasp(CommandBase):
+    """Slack bot /owasp command."""
 
-    Args:
-        ack (function): Acknowledge the Slack command request.
-        command (dict): The Slack command payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    def all_commands(self):
+        """Get all commands."""
+        return [cls for cls in CommandBase.__subclasses__() if cls is not Owasp]
 
-    """
-    from apps.slack.commands import (
-        board,
-        chapters,
-        committees,
-        community,
-        contact,
-        contribute,
-        donate,
-        events,
-        gsoc,
-        jobs,
-        leaders,
-        news,
-        projects,
-        sponsor,
-        sponsors,
-        staff,
-        users,
-    )
+    def find_command(self, command_name):
+        """Find the command class by name."""
+        if not command_name:
+            return None
 
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+        for cmd_class in self.all_commands():
+            if cmd_class.__name__.lower() == command_name.lower():
+                return cmd_class()
+        return None
 
-    template = env.get_template("owasp.txt")
+    def handler(self, ack, command, client):
+        """Handle the command."""
+        command_tokens = command["text"].split()
+        cmd = self.find_command(command_tokens[0].strip().lower() if command_tokens else "")
+        if cmd:
+            command["text"] = " ".join(command_tokens[1:]).strip()
+            return cmd.handler(ack, command, client)
 
-    command_tokens = command["text"].split()
-    if not command_tokens or command_tokens[0] in COMMAND_HELP:
-        context = {
-            "help": True,
-            "command": COMMAND,
-        }
-        rendered_text = template.render(context)
-        blocks = [markdown(rendered_text)]
-        conversation = client.conversations_open(users=command["user_id"])
-        client.chat_postMessage(
-            channel=conversation["channel"]["id"],
-            blocks=blocks,
-            text=get_text(blocks),
-        )
-    else:
-        handler = command_tokens[0].strip().lower()
-        command["text"] = " ".join(command_tokens[1:]).strip()
-        match handler:
-            case "board":
-                board.board_handler(ack, command, client)
-            case "chapters":
-                chapters.chapters_handler(ack, command, client)
-            case "committees":
-                committees.committees_handler(ack, command, client)
-            case "community":
-                community.community_handler(ack, command, client)
-            case "contact":
-                contact.contact_handler(ack, command, client)
-            case "contribute":
-                contribute.contribute_handler(ack, command, client)
-            case "donate":
-                donate.donate_handler(ack, command, client)
-            case "events":
-                events.events_handler(ack, command, client)
-            case "gsoc":
-                gsoc.gsoc_handler(ack, command, client)
-            case "jobs":
-                jobs.jobs_handler(ack, command, client)
-            case "leaders":
-                leaders.leaders_handler(ack, command, client)
-            case "news":
-                news.news_handler(ack, command, client)
-            case "projects":
-                projects.projects_handler(ack, command, client)
-            case "sponsor":
-                sponsor.sponsor_handler(ack, command, client)
-            case "sponsors":
-                sponsors.sponsors_handler(ack, command, client)
-            case "staff":
-                staff.staff_handler(ack, command, client)
-            case "users":
-                users.users_handler(ack, command, client)
-            case _:
-                context = {"help": False, "command": COMMAND, "handler": handler}
-                rendered_text = template.render(context)
-                blocks = [
-                    markdown(rendered_text),
-                ]
-                conversation = client.conversations_open(users=command["user_id"])
-                client.chat_postMessage(
-                    blocks=blocks,
-                    channel=conversation["channel"]["id"],
-                    text=get_text(blocks),
-                )
+        return super().handler(ack, command, client)
+
+    def get_render_text(self, command):
+        """Get the rendered text."""
+        command_tokens = command["text"].split()
+        if not command_tokens or command_tokens[0] in COMMAND_HELP:
+            context = {
+                "help": True,
+                "command": self.get_command(),
+            }
+        else:
+            cmd = command_tokens[0].strip().lower()
+            context = {"help": False, "command": self.get_command(), "handler": cmd}
+
+        return self.get_template_file().render(context)
 
 
 if SlackConfig.app:
-    owasp_handler = SlackConfig.app.command(COMMAND)(owasp_handler)
+    Owasp().config_command()

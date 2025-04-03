@@ -14,7 +14,7 @@
 {{ NL }}
   {%- endif %}
 {%- endfor %}
-===SECTION_BREAK===
+{{ SECTION_BREAK }}
 {%- endif %}
 {%- if projects|length > 0 %}
 *Projects*{{ NL }}

@@ -1,7 +1,0 @@
-{% if render_type == "main" %}
-*Upcoming OWASP Events:*
-{% elif render_type == "category" %}
-*Category: {{ category.replace('_', ' ').title() }}*
-{% elif render_type == "footer" %}
-🔍 For more information about upcoming events, please visit <{{ website_url }}/events/|OWASP Events>{{ NL }}
-{% endif %}

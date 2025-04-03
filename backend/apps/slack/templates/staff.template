@@ -1,10 +1,12 @@
-{%- if mode == "title" -%}
+{%- if has_staff -%}
   OWASP Foundation Staff:{{ NL }}{{ NL }}
-{%- elif mode == "staff" -%}
-  *{{ idx }}. {{ item.name }}, {{ item.title }}*
+{% for item in items -%}
+  *{{ loop.index }}. {{ item.name }}, {{ item.title }}*
 _{{ item.location }}_
 {{ item.description | default('', true) }}{{ NL }}{{ NL }}
-{%- elif mode == "footer" -%}
+{{ SECTION_BREAK }}
+{%- endfor -%}
+{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
   Please visit <{{ website_url }}/corporate/|OWASP staff> page for more information.{{ NL }}
 {%- else -%}
   Failed to get OWASP Foundation staff data.

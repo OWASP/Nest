@@ -1,1 +1,0 @@
-Please visit <{{ contact_url }}|{{ contact_name }}> page{{ NL }}
