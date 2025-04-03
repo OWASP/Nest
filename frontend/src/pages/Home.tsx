@@ -246,7 +246,7 @@ export default function Home() {
         <div className="mb-20">
           <h2 className="mb-4 text-2xl font-semibold">
             <FontAwesomeIcon icon={faGlobe} className="mr-2 h-5 w-5" />
-            OWASP Chapters Worldwide
+            Chapters Worldwide
           </h2>
           <ChapterMap
             geoLocData={geoLocData}
@@ -356,11 +356,7 @@ export default function Home() {
             <p>No recent releases.</p>
           )}
         </SecondaryCard>
-        <SecondaryCard
-          icon={faNewspaper}
-          title="Recent News & Opinions"
-          className="overflow-hidden"
-        >
+        <SecondaryCard icon={faNewspaper} title="News & Opinions" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data.recentPosts.map((post) => (
               <div
