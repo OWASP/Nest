@@ -77,6 +77,5 @@ export const getCsrfToken = async () => {
     return csrfToken
   }
 
-  const res = await getInitialCsrfToken()
-  return res
+  return await getInitialCsrfToken()
 }

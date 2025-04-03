@@ -12,7 +12,7 @@ export const getInitialCsrfToken = async () => {
     }
 
     const data = await response.json()
-    document.cookie = `csrftoken=${data.csrftoken}; path=/; SameSite=Lax`
+    document.cookie = `csrftoken=${data.csrftoken}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
     return data.csrftoken
   } catch (error) {
     if (error instanceof AppError) {
