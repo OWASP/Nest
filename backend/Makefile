@@ -146,7 +146,7 @@ fuzz-test-backend:
 		--cache-from nest-fuzz-test-backend \
 		-f backend/docker/Dockerfile.fuzz_tests backend \
 		-t nest-fuzz-test-backend
-	@docker run -e DJANGO_CONFIGURATION=Test nest-fuzz-test-backend pytest fuzz_tests
+	@docker run --env-file backend/.env nest-fuzz-test-backend
 
 update-backend-dependencies:
 	@CMD="poetry update" $(MAKE) exec-backend-command

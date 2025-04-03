@@ -22,13 +22,14 @@ COPY --chmod=444 poetry.lock pyproject.toml ./
 RUN poetry install --no-root
 
 # Copy application files
-COPY .env.example .env.example
+COPY .env .env
 COPY apps apps
 COPY manage.py wsgi.py ./
 COPY settings settings
 COPY static static
 COPY templates templates
 COPY fuzz_tests fuzz_tests
+COPY docker/entrypoint_fuzz.sh entrypoint.sh
 
 FROM python:3.13-slim
 
@@ -51,5 +52,9 @@ USER owasp
 # Copy built application from the builder stage
 COPY --from=builder --chmod=555 --chown=owasp:owasp /home/owasp /home/owasp
 
+RUN touch /home/owasp/fuzz_tests.db && \
+    chmod +x /home/owasp/fuzz_tests.db /home/owasp/entrypoint.sh
+
 # Run fuzz tests
-CMD ["bash", "-c", "poetry run pytest fuzz_tests"]
+
+CMD ["/home/owasp/entrypoint.sh"]
