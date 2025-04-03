@@ -1,19 +1,17 @@
+import { useState } from 'react'
 import { millify } from 'millify'
 import { IconType } from 'types/icon'
 import { IconKeys, Icons } from 'utils/data'
 import { TooltipRecipe } from 'utils/theme'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { Tooltip } from 'components/ui/tooltip'
-import { useState } from 'react'
 
 export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
   const [hovered, setHovered] = useState(false)
-
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false)
 
   const socialMediaIcons: IconKeys[] = ['linkedin', 'youtube', 'twitter', 'github']
-
   const isSocialMediaIcon = socialMediaIcons.includes(item as IconKeys)
-
 
   const containerClassName = [
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
@@ -36,11 +34,19 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
       closeDelay={100}
       showArrow
       positioning={{ placement: 'bottom' }}
+      isOpen={isTooltipOpen}
+      onOpenChange={setIsTooltipOpen}
     >
       <div
         className={containerClassName}
-        onMouseEnter={() => isSocialMediaIcon && setHovered(true)}
-        onMouseLeave={() => isSocialMediaIcon && setHovered(false)}
+        onMouseEnter={() => {
+          if (isSocialMediaIcon) setHovered(true);
+          setIsTooltipOpen(true);
+        }}
+        onMouseLeave={() => {
+          if (isSocialMediaIcon) setHovered(false);
+          setIsTooltipOpen(false);
+        }}
       >
         {/* Display formatted number if the value is a number */}
         <span className="text-gray-600 dark:text-gray-300">
