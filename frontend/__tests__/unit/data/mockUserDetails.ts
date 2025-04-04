@@ -13,24 +13,24 @@ export const mockUserDetailsData = {
     publicRepositoriesCount: 3,
     createdAt: 1723002473,
     contributionsCount: 100,
-    issues: [
-      {
-        title: 'Test Issue',
-        createdAt: 1723002473,
-        commentsCount: 5,
-        url: 'https://github.com/OWASP/Nest/issues/798',
-      },
-    ],
-    releases: [
-      {
-        isPreRelease: false,
-        name: 'v1.0.0',
-        publishedAt: 1723002473,
-        tagName: '1.0.0',
-        url: 'https://github.com/testuser/test-repo/releases/tag/1.0.0',
-      },
-    ],
   },
+  recentIssues: [
+    {
+      title: 'Test Issue',
+      createdAt: 1723002473,
+      commentsCount: 5,
+      url: 'https://github.com/OWASP/Nest/issues/798',
+    },
+  ],
+  recentReleases: [
+    {
+      isPreRelease: false,
+      name: 'v1.0.0',
+      publishedAt: 1723002473,
+      tagName: '1.0.0',
+      url: 'https://github.com/testuser/test-repo/releases/tag/1.0.0',
+    },
+  ],
   recentPullRequests: [
     {
       createdAt: 1723002473,

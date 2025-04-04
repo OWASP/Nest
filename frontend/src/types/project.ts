@@ -92,6 +92,7 @@ export type ProjectReleaseType = {
   isPreRelease: boolean
   name: string
   publishedAt: number
+  repositoryName: string
   tagName: string
   url: string
 }

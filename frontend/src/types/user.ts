@@ -48,14 +48,12 @@ export type User = {
   email?: string | null
   followers_count: number
   following_count: number
-  issues?: Issue[]
   issues_count?: number
   key: string
   location?: string | null
   login: string
   name?: string | null
   public_repositories_count: number
-  releases?: Release[]
   releases_count?: number
   url: string
   contributions_count: number
