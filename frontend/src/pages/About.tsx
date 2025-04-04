@@ -13,8 +13,9 @@ import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import { toaster } from 'components/ui/toaster'
 import UserCard from 'components/UserCard'
-
+import SVGRenderer from 'components/skeletons/svgRenderer'
 const leaders = ['arkid15r', 'kasya', 'mamicidal']
+
 
 const About = () => {
   const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
@@ -91,11 +92,9 @@ const About = () => {
                   <ul className="space-y-3">
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
-                        <span
-                          className="text-xl"
-                          style={{ color: '#9ca3af' }}
-                          dangerouslySetInnerHTML={{ __html: details.icon }}
-                        />
+                        <span className="text-xl" style={{ color: '#9ca3af' }}>
+                         <SVGRenderer svgContent={details.icon} />
+                        </span>
                         <a
                           href={details.url}
                           className="text-gray-600 hover:underline dark:text-gray-300"
