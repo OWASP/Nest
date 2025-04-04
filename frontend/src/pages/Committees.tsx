@@ -18,7 +18,7 @@ const CommitteesPage = () => {
     handleSearch,
     handlePageChange,
   } = useSearchPage<CommitteeTypeAlgolia>({
-    indexName: 'committees',
+    indexName: 'committee',
     pageTitle: 'OWASP Committees',
   })
   const navigate = useNavigate()

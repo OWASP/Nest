@@ -7,3 +7,4 @@ export const GTM_PREVIEW = process.env.VITE_GTM_PREVIEW
 export const IDX_URL = process.env.VITE_IDX_URL
 export const RELEASE_VERSION = process.env.VITE_RELEASE_VERSION
 export const SENTRY_DSN = process.env.VITE_SENTRY_DSN
+export const TYPESENSE_URL = process.env.VITE_TYPESENSE_URL

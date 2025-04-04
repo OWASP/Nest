@@ -20,8 +20,8 @@ const ChapterMap = ({
 
   const chapters = useMemo(() => {
     return geoLocData.map((chapter) => ({
-      lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
-      lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
+      lat: '_geoloc' in chapter ? chapter._geoloc[0] : chapter.geoLocation?.lat,
+      lng: '_geoloc' in chapter ? chapter._geoloc[1] : chapter.geoLocation?.lng,
       key: chapter.key,
       name: chapter.name,
     }))

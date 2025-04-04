@@ -2723,6 +2723,21 @@ slack = ["slack-sdk"]
 telegram = ["requests"]
 
 [[package]]
+name = "typesense"
+version = "0.21.0"
+description = "Python client for Typesense, an open source and typo tolerant search engine."
+optional = false
+python-versions = ">=3"
+groups = ["main"]
+files = [
+    {file = "typesense-0.21.0-py3-none-any.whl", hash = "sha256:e4330f103a40af98ba2b0ffd817392a84a537e04816221c9a283faadea7718f0"},
+    {file = "typesense-0.21.0.tar.gz", hash = "sha256:24470525b577300bd81fe43029dddd9269b942b20b49236edf049f6ecead7c8e"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.13.1"
 description = "Backported and Experimental Type Hints for Python 3.8+"
