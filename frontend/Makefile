@@ -3,6 +3,10 @@ check-frontend: \
 	format-frontend-code \
 	lint-frontend-code
 
+clean-frontend:
+	@rm -rf frontend/.pnpm-store
+	@rm -rf frontend/node_modules
+
 exec-frontend-command:
 	@docker exec -t nest-frontend $(CMD)
 
@@ -19,8 +23,8 @@ shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
 test-frontend: \
-	test-frontend-e2e \
-	test-frontend-unit
+	test-frontend-unit \
+	test-frontend-e2e
 
 test-frontend-e2e:
 	@DOCKER_BUILDKIT=1 docker build \

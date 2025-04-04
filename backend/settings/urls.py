@@ -13,7 +13,7 @@ from graphene_django.views import GraphQLView
 from rest_framework import routers
 
 from apps.core.api.algolia import algolia_search
-from apps.core.api.csrf_token import get_csrf_token
+from apps.core.api.csrf import get_csrf_token
 from apps.github.api.urls import router as github_router
 from apps.owasp.api.urls import router as owasp_router
 from apps.slack.apps import SlackConfig
@@ -23,9 +23,9 @@ router.registry.extend(github_router.registry)
 router.registry.extend(owasp_router.registry)
 
 urlpatterns = [
+    path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(graphiql=settings.DEBUG))),
-    path("csrf/", get_csrf_token),
     path("api/v1/", include(router.urls)),
     path("a/", admin.site.urls),
 ]

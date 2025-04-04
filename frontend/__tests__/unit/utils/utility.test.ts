@@ -1,7 +1,7 @@
 import { getCsrfToken } from 'utils/utility'
 
-jest.mock('api/getCsrfToken', () => ({
-  getInitialCsrfToken: jest.fn(() => Promise.resolve('abc123')),
+jest.mock('api/fetchCsrfToken', () => ({
+  fetchCsrfToken: jest.fn(() => Promise.resolve('abc123')),
 }))
 
 describe('utility tests', () => {
