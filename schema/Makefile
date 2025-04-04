@@ -3,7 +3,7 @@ test-schema:
 		--cache-from nest-test-schema \
 		-f schema/docker/Dockerfile.test schema \
 		-t nest-test-schema
-	@docker run nest-test-schema pytest
+	@docker run --rm nest-test-schema pytest
 
 update-schema-dependencies:
 	cd schema && poetry update

@@ -146,7 +146,7 @@ export const mockHomeData = {
         isPreRelease: true,
         name: 'Release 1',
         publishedAt: '2025-02-22T10:15:00+00:00',
-        tagName: 'v1',
+        repositoryName: 'nest-repository-1',
         __typename: 'ReleaseNode',
       },
       {
@@ -154,7 +154,7 @@ export const mockHomeData = {
         isPreRelease: false,
         name: 'Release 2',
         publishedAt: '2025-02-24T10:15:00+00:00',
-        tagName: 'v3',
+        repositoryName: 'owasp-repository-2',
         __typename: 'ReleaseNode',
       },
     ],

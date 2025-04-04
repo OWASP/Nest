@@ -1,9 +1,9 @@
 import { Box, Button, Heading, Link, List, Text } from '@chakra-ui/react'
-import { faGithub, faSlack, faBluesky } from '@fortawesome/free-brands-svg-icons'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useCallback } from 'react'
 import { Section } from 'types/section'
+import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
 
 export default function Footer() {
@@ -15,25 +15,6 @@ export default function Footer() {
     // If the section is already open, close it, otherwise open it
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
-
-  // Social media links configuration
-  const socialLinks = [
-    {
-      icon: faBluesky,
-      href: 'https://bsky.app/profile/nest.owasp.org',
-      label: 'Bluesky',
-    },
-    {
-      icon: faGithub,
-      href: 'https://github.com/owasp/nest',
-      label: 'GitHub',
-    },
-    {
-      icon: faSlack,
-      href: 'https://owasp.slack.com/archives/project-nest',
-      label: 'Slack',
-    },
-  ]
 
   return (
     <Box
@@ -92,7 +73,7 @@ export default function Footer() {
 
         {/* Social Media Icons Section */}
         <Box className="mb-0 flex justify-center space-x-6">
-          {socialLinks.map((social) => (
+          {footerIcons.map((social) => (
             <Link
               key={social.label}
               href={social.href}

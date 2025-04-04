@@ -23,7 +23,7 @@ services:
       - 127.0.0.1:8000:8000
     volumes:
       - ../backend:/home/owasp
-      - backend-data:/home/owasp/.venv
+      - backend-alpine:/home/owasp/.venv
 
   db:
     container_name: nest-db
@@ -55,7 +55,7 @@ services:
     volumes:
       - ../docs:/home/owasp/docs
       - ../schema:/home/owasp/schema
-      - docs-data:/home/owasp/.venv
+      - docs-alpine:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -70,12 +70,12 @@ services:
       - 127.0.0.1:3000:3000
     volumes:
       - ../frontend:/home/owasp
-      - frontend-data:/home/owasp/node_modules
+      - frontend-alpine:/home/owasp/node_modules
     environment:
       NODE_ENV: local
 
 volumes:
-  backend-data:
+  backend-alpine:
   db-data:
-  docs-data:
-  frontend-data:
+  docs-alpine:
+  frontend-alpine:

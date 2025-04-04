@@ -9,7 +9,7 @@ from apps.slack.commands.chapters import chapters_handler
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
@@ -66,7 +66,7 @@ class TestChaptersHandler:
                 {
                     "idx_name": "Test Chapter",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com",
+                    "idx_url": "https://example.com",
                     "idx_leaders": ["Leader 1"],
                     "idx_country": "Test Country",
                     "idx_suggested_location": "Test Location",

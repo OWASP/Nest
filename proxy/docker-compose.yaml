@@ -5,6 +5,7 @@ services:
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./security.conf:/etc/nginx/conf.d/security.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
     entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
@@ -18,6 +19,7 @@ services:
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./security.conf:/etc/nginx/conf.d/security.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
     networks:

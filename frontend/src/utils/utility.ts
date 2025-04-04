@@ -64,3 +64,11 @@ export const handleSocialUrls = (related_urls: string[]) => {
 export type IndexedObject = {
   [key: string]: unknown
 }
+
+export const getCsrfToken = (): string | undefined => {
+  return document.cookie
+    .split(';')
+    .map((cookie) => cookie.split('='))
+    .find(([key]) => key.trim() === 'csrftoken')?.[1]
+    ?.trim()
+}

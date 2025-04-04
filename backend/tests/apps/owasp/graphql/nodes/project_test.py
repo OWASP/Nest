@@ -36,7 +36,7 @@ class TestProjectNode:
 
         project.issues = mock_issues
         project.published_releases = mock_releases
-        project.nest_url = "http://example.com/project"
+        project.nest_url = "https://example.com/project"
         return project
 
     def test_project_node_inheritance(self):
