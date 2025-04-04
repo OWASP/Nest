@@ -149,6 +149,7 @@ const UserDetailsPage: React.FC = () => {
           key: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        repositoryName: release.repositoryName,
         url: release.url,
       })) || []
     )

@@ -17,6 +17,7 @@ export const GET_USER_DATA = gql`
       isPreRelease
       name
       publishedAt
+      repositoryName
       tagName
       url
     }
