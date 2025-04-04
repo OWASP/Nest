@@ -19,6 +19,10 @@ jest.mock('components/ui/toaster', () => ({
   },
 }))
 
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+}))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ userKey: 'test-user' }),
@@ -281,8 +285,9 @@ describe('UserDetailsPage', () => {
   test('handles no recent issues gracefully', async () => {
     const noIssuesData = {
       ...mockUserDetailsData,
-      user: { ...mockUserDetailsData.user, issues: [] },
+      recentIssues: [],
     }
+
     ;(useQuery as jest.Mock).mockReturnValue({
       data: noIssuesData,
       loading: false,
@@ -290,6 +295,7 @@ describe('UserDetailsPage', () => {
     })
 
     render(<UserDetailsPage />)
+
     await waitFor(() => {
       expect(screen.getByText('Recent Issues')).toBeInTheDocument()
       expect(screen.queryByText('Test Issue')).not.toBeInTheDocument()

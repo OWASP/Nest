@@ -61,12 +61,9 @@ export const GET_MAIN_PAGE_DATA = gql`
       }
       name
       publishedAt
+      repositoryName
       tagName
       url
-      repository {
-        key
-        ownerKey
-      }
     }
     sponsors {
       imageUrl

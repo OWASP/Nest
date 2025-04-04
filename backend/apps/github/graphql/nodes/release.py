@@ -8,20 +8,13 @@ from apps.github.models.release import Release
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 
 
-class RepositoryType(graphene.ObjectType):
-    """Repository type for nested objects."""
-
-    key = graphene.String()
-    owner_key = graphene.String()
-
-
 class ReleaseNode(BaseNode):
     """GitHub release node."""
 
     author = graphene.Field(UserNode)
     project_name = graphene.String()
+    repository_name = graphene.String()
     url = graphene.String()
-    repository = graphene.Field(RepositoryType)
 
     class Meta:
         model = Release
@@ -36,6 +29,10 @@ class ReleaseNode(BaseNode):
     def resolve_project_name(self, info):
         """Return project name."""
         return self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
+
+    def resolve_repository_name(self, info):
+        """Return repository name."""
+        return self.repository.name
 
     def resolve_url(self, info):
         """Return release URL."""

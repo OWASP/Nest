@@ -1,12 +1,9 @@
-FROM python:3.13-slim AS builder
+FROM python:3.13-alpine AS builder
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends gcc libpq-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd --system owasp && \
-    useradd --system --create-home --home-dir /home/owasp -g owasp owasp && \
+RUN apk update && apk upgrade && \
+    addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
     python -m pip install --no-cache-dir poetry
 
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
@@ -15,18 +12,17 @@ ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
 USER owasp
 WORKDIR /home/owasp
 
-COPY --chmod=644 --chown=owasp:owasp poetry.lock pyproject.toml ./
+COPY --chmod=444 --chown=owasp:owasp poetry.lock pyproject.toml ./
 RUN poetry install --no-root --without dev --without test
 
-FROM python:3.13-slim
+FROM python:3.13-alpine
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libpq-dev postgresql-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd --system owasp && \
-    useradd --system --create-home --home-dir /home/owasp -g owasp owasp && \
+RUN apk update && \
+    apk add postgresql-client && \
+    addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
     python -m pip install --no-cache-dir poetry
 
 ENV PATH="/home/owasp/.venv/bin:$PATH" \

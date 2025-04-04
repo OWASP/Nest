@@ -9,6 +9,9 @@ import {
   faTag,
   faUsers,
   faUser,
+  faFolder,
+  faNewspaper,
+  faGlobe,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -22,11 +25,14 @@ import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
-import ItemCardList from 'components/ItemCardList'
+import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
+import RecentIssues from 'components/RecentIssues'
+import RecentPullRequests from 'components/RecentPullRequests'
+import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import { TruncatedText } from 'components/TruncatedText'
@@ -77,11 +83,7 @@ export default function Home() {
   }, [])
 
   if (isLoading || !graphQLData || !geoLocData) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   const getProjectIcon = (projectType: string) => {
@@ -139,18 +141,18 @@ export default function Home() {
             />
           </div>
         </div>
-        <SecondaryCard title="Upcoming Events" className="overflow-hidden">
+        <SecondaryCard icon={faCalendar} title="Upcoming Events" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: EventType, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
-                    className="mb-2 w-full text-left text-lg font-semibold text-blue-500 hover:underline"
+                    className="mb-2 w-full text-left text-lg font-semibold text-blue-400 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
                     <TruncatedText text={event.name} />
                   </button>
-                  <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
+                  <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
                     <div className="mr-2 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDateRange(event.startDate, event.endDate)}</span>
@@ -177,45 +179,47 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
-          <SecondaryCard title="New Chapters" className="overflow-hidden">
+          <SecondaryCard icon={faMapMarkerAlt} title="New Chapters" className="overflow-hidden">
             <div className="space-y-4">
               {data.recentChapters.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
-                    <a href={`/chapters/${chapter.key}`} className="hover:underline">
+                    <a href={`/chapters/${chapter.key}`} className="text-blue-400 hover:underline">
                       <TruncatedText text={chapter.name} />
                     </a>
                   </h3>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
-                    <div className="mr-4 flex items-center">
+                    <div className="mr-4 flex flex-1 items-center overflow-hidden">
                       <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
-                      <span>{chapter.suggestedLocation}</span>
+                      <TruncatedText text={chapter.suggestedLocation} />
                     </div>
                   </div>
+
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
-                      <span>{chapter.leaders.join(', ')}</span>
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                      {' '}
+                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <LeadersList leaders={String(chapter.leaders)} />
                     </div>
                   )}
                 </div>
               ))}
             </div>
           </SecondaryCard>
-          <SecondaryCard title="New Projects" className="overflow-hidden">
+          <SecondaryCard icon={faFolder} title="New Projects" className="overflow-hidden">
             <div className="space-y-4">
               {data.recentProjects.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <a href={`/projects/${project.key}`} className="hover:underline">
+                  <a href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
                     <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
                   </a>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
@@ -228,10 +232,11 @@ export default function Home() {
                       <span>{capitalize(project.type)}</span>
                     </div>
                   </div>
+
                   {project.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-300">
-                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
-                      <span>{project.leaders.join(', ')}</span>
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <LeadersList leaders={String(project.leaders)} />
                     </div>
                   )}
                 </div>
@@ -240,7 +245,10 @@ export default function Home() {
           </SecondaryCard>
         </div>
         <div className="mb-20">
-          <h2 className="mb-4 text-2xl font-semibold">OWASP Chapters Worldwide</h2>
+          <h2 className="mb-4 text-2xl font-semibold">
+            <FontAwesomeIcon icon={faGlobe} className="mr-2 h-5 w-5" />
+            Chapters Worldwide
+          </h2>
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
@@ -253,89 +261,18 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributors contributors={data.topContributors} type="company" maxInitialDisplay={9} />
+        <TopContributors
+          icon={faUsers}
+          contributors={data.topContributors}
+          type="company"
+          maxInitialDisplay={9}
+        />
         <div className="grid-cols-2 gap-4 lg:grid">
-          <ItemCardList
-            title="Recent Issues"
-            data={data.recentIssues}
-            renderDetails={(item) => (
-              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                <span>{formatDate(item.createdAt)}</span>
-                {item?.commentsCount ? (
-                  <>
-                    <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{item.commentsCount} comments</span>
-                  </>
-                ) : null}
-              </div>
-            )}
-          />
-          <ItemCardList
-            title="Recent Pull Requests"
-            data={data.recentPullRequests}
-            renderDetails={(item) => (
-              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                <span>{formatDate(item.createdAt)}</span>
-                {item?.author.name || item?.author.login ? (
-                  <>
-                    <FontAwesomeIcon icon={faUser} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{item.author.name || item.author.login}</span>
-                  </>
-                ) : null}
-              </div>
-            )}
-          />
+          <RecentIssues data={data.recentIssues} />
+          <RecentPullRequests data={data.recentPullRequests} showAuthor={true} />
         </div>
-        <SecondaryCard title="Recent Releases">
-          {data.recentReleases && data.recentReleases.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {data.recentReleases.map((item, index) => (
-                <div
-                  key={index}
-                  className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                >
-                  <div className="flex w-full flex-col justify-between">
-                    <div className="flex w-full items-center">
-                      <a
-                        className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
-                        href={`/community/users/${item?.author?.login}`}
-                      >
-                        <img
-                          src={item?.author?.avatarUrl}
-                          alt={item?.author?.name}
-                          className="mr-2 h-6 w-6 rounded-full"
-                        />
-                      </a>
-
-                      <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                        <a
-                          className="text-blue-500 hover:underline dark:text-blue-400"
-                          href={item?.url}
-                          target="_blank"
-                        >
-                          {item.name}
-                        </a>
-                      </h3>
-                    </div>
-                    <div className="ml-0.5 w-full">
-                      <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                        <span>{formatDate(item.publishedAt)}</span>
-                        <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
-                        <span>{item.repository.ownerKey || ''}/{item.repository?.key || ''}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No recent releases.</p>
-          )}
-        </SecondaryCard>
-        <SecondaryCard title="Recent News & Opinions" className="overflow-hidden">
+        <RecentReleases data={data.recentReleases} />
+        <SecondaryCard icon={faNewspaper} title="News & Opinions" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data.recentPosts.map((post) => (
               <div
@@ -345,14 +282,14 @@ export default function Home() {
                 <h3 className="mb-1 text-lg font-semibold">
                   <a
                     href={post.url}
-                    className="text-blue-500 hover:underline"
+                    className="text-blue-400 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <TruncatedText text={post.title} />
                   </a>
                 </h3>
-                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-300 md:flex-row">
+                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
                   <div className="mr-4 flex items-center">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
@@ -372,7 +309,7 @@ export default function Home() {
               <div className="mb-2 text-3xl font-bold text-blue-400">
                 <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
               </div>
-              <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
+              <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
             </SecondaryCard>
           ))}
         </div>
@@ -380,7 +317,7 @@ export default function Home() {
         <div className="mb-20 mt-8">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-300">
+            <p className="mb-6 text-gray-600 dark:text-gray-400">
               Join OWASP and be part of the global cybersecurity community.
             </p>
             <a

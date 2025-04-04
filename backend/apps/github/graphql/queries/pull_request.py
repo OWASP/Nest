@@ -13,13 +13,25 @@ class PullRequestQuery(BaseQuery):
 
     recent_pull_requests = graphene.List(
         PullRequestNode,
-        limit=graphene.Int(default_value=6),
+        limit=graphene.Int(default_value=5),
         distinct=graphene.Boolean(default_value=False),
         login=graphene.String(required=False),
     )
 
     def resolve_recent_pull_requests(root, info, limit, distinct=False, login=None):
-        """Resolve recent pull requests."""
+        """Resolve recent pull requests.
+
+        Args:
+            root (Any): The root query object.
+            info (ResolveInfo): The GraphQL execution context.
+            limit (int): Maximum number of pull requests to return.
+            distinct (bool): Whether to return unique pull requests per author and repository.
+            login (str, optional): Filter pull requests by a specific author's login.
+
+        Returns:
+            QuerySet: Queryset containing the filtered list of pull requests.
+
+        """
         queryset = PullRequest.objects.select_related(
             "author",
         ).order_by(

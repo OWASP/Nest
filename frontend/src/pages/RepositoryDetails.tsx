@@ -39,11 +39,7 @@ const RepositoryDetailsPage = () => {
   }, [data, graphQLRequestError, repositoryKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!isLoading && !repository) {
@@ -72,7 +68,7 @@ const RepositoryDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <a href={repository.url} className="hover:underline dark:text-sky-600">
+        <a href={repository.url} className="text-blue-400 hover:underline">
           {repository.url}
         </a>
       ),
