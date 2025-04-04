@@ -68,10 +68,12 @@ export type IndexedObject = {
 
 export const getCsrfToken = async (): Promise<string> => {
   const csrfToken = document.cookie
-    .split(';')
-    .map((cookie) => cookie.split('='))
-    .find(([key]) => key.trim() === 'csrftoken')?.[1]
-    ?.trim()
+    ? document.cookie
+        .split(';')
+        .map((cookie) => cookie.split('='))
+        .find(([key]) => key.trim() === 'csrftoken')?.[1]
+        ?.trim()
+    : undefined
 
   if (csrfToken) {
     return csrfToken
