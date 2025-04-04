@@ -13,7 +13,7 @@ class IssueQuery(BaseQuery):
 
     recent_issues = graphene.List(
         IssueNode,
-        limit=graphene.Int(default_value=6),
+        limit=graphene.Int(default_value=5),
         distinct=graphene.Boolean(default_value=False),
         login=graphene.String(required=False),
     )

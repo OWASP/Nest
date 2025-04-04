@@ -2,18 +2,18 @@ import { gql } from '@apollo/client'
 
 export const GET_USER_DATA = gql`
   query GetUser($key: String!) {
-    recentIssues(login: $key) {
+    recentIssues(limit: 5, login: $key) {
       commentsCount
       createdAt
       title
       url
     }
-    recentPullRequests(login: $key) {
+    recentPullRequests(limit: 5, login: $key) {
       createdAt
       title
       url
     }
-    recentReleases(login: $key) {
+    recentReleases(limit: 6, login: $key) {
       isPreRelease
       name
       publishedAt
