@@ -5,7 +5,6 @@ import logging
 import typesense
 from django.apps import apps
 from django.conf import settings
-from typesense.exceptions import TypesenseClientError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -77,11 +76,11 @@ class IndexBase:
         try:
             try:
                 client.collections[self.index_name].delete()
-            except TypesenseClientError as e:
+            except typesense.exceptions.TypesenseClientError as e:
                 logging.info("%s", e)
             client.collections.create(self.schema)
             logging.info("Created collection: %s", self.index_name)
-        except TypesenseClientError:
+        except typesense.exceptions.TypesenseClientError:
             logging.exception("Error while creating collection %s", self.index_name)
 
     def populate_collection(self):
@@ -105,7 +104,7 @@ class IndexBase:
             if errors:
                 logging.info("Errors while populating '%s': %s", self.index_name, errors)
             logging.info("Populated '%s'", self.index_name)
-        except TypesenseClientError:
+        except typesense.exceptions.TypesenseClientError:
             logging.exception("Error while populating '%s'", self.index_name)
 
     def prepare_document(self, obj):
