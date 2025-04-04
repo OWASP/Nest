@@ -6,8 +6,8 @@ ADD src/ /app/src/
 ADD public/ /app/public/
 ADD tsconfig.json vite.config.js index.html .eslintrc.js /app/
 
-RUN npm install -g pnpm && \
-    pnpm install && \
+RUN npm install -g pnpm --ignore-scripts && \
+    pnpm install--ignore-scripts && \
     pnpm run build && \
     find /app -type f -exec chmod 644 {} \; && \
     find /app -type d -exec chmod 755 {} \;

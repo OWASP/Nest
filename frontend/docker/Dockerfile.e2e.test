@@ -6,7 +6,7 @@ ADD package.json pnpm-lock.yaml /app/
 ADD src/ /app/src/
 ADD tests/ /app/tests/
 ADD playwright.config.ts tsconfig.json .eslintrc.js /app/
-RUN npm install -g pnpm && \
-    pnpm install && \
+RUN npm install -g pnpm --ignore-scripts && \
+    pnpm install --ignore-scripts && \
     find /app -type f -exec chmod 644 {} \; && \
     find /app -type d -exec chmod 755 {} \;
