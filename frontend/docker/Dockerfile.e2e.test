@@ -8,4 +8,8 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
 
-COPY . .
+COPY vite.config.ts tsconfig.json tailwind.config.js ./
+COPY index.html ./
+COPY src ./src
+COPY playwright.config.ts ./
+COPY __tests__ ./__tests__

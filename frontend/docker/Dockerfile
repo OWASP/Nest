@@ -6,8 +6,11 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
 
-COPY . .
-
+COPY vite.config.ts tsconfig.json components.json tailwind.config.js ./
+COPY postcss.config.js* ./
+COPY index.html ./
+COPY public ./public
+COPY src ./src
 RUN pnpm run build
 
 FROM nginx:stable-alpine
