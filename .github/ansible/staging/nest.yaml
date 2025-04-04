@@ -35,6 +35,18 @@
           dest: ~/cspell/Makefile
           mode: '0644'
 
+      - name: Ensure docs directory exists
+        ansible.builtin.file:
+          path: ~/docs
+          state: directory
+          mode: '0755'
+
+      - name: Copy docs makefile
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/docs/Makefile'
+          dest: ~/docs/Makefile
+          mode: '0644'
+
       - name: Ensure frontend directory exists
         ansible.builtin.file:
           path: ~/frontend
