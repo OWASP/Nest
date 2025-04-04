@@ -1,7 +1,6 @@
 name: Run CI/CD
 
 on:
-  merge_group:
   pull_request:
     branches:
       - main
@@ -240,6 +239,7 @@ jobs:
 
       - name: Prepare frontend environment
         run: |
+          touch frontend/.env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
