@@ -41,7 +41,7 @@ const Modal: React.FC<ModalProps> = ({
       >
         <DialogCloseTrigger
           asChild={false}
-          className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:text-gray-500 dark:hover:text-gray-400 dark:focus:ring-gray-600"
+          className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 hover:outline-none hover:ring-2 hover:ring-gray-500 hover:ring-offset-2 dark:text-gray-500 dark:hover:text-gray-400 dark:hover:ring-gray-600"
           aria-label="Close modal"
         >
           <FontAwesomeIcon icon={faX} size="xs" onClick={onClose} />

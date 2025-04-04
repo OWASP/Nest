@@ -9,6 +9,10 @@ jest.mock('@apollo/client', () => ({
   useQuery: jest.fn(),
 }))
 
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+}))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -47,7 +51,8 @@ describe('CommitteeDetailsPage Component', () => {
       expect(screen.getByText('Test Committee')).toBeInTheDocument()
     })
     expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
-    expect(screen.getByText('Leader 1, Leader 2')).toBeInTheDocument()
+    expect(screen.getByText('Leader 1')).toBeInTheDocument()
+    expect(screen.getByText('Leader 2')).toBeInTheDocument()
     expect(screen.getByText('https://owasp.org/test-committee')).toBeInTheDocument()
   })
 

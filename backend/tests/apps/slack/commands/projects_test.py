@@ -10,7 +10,7 @@ from apps.slack.commands.projects import projects_handler
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
@@ -22,14 +22,14 @@ def mock_active_projects_count():
 
 
 class TestProjectsHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -67,7 +67,7 @@ class TestProjectsHandler:
                 {
                     "idx_name": "Test Project",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com",
+                    "idx_url": "https://example.com",
                     "idx_leaders": ["Leader 1"],
                     "idx_level": "Lab",
                     "idx_contributors_count": 5,

@@ -21,6 +21,9 @@ class Issue(GenericIssueModel):
 
     class Meta:
         db_table = "github_issues"
+        indexes = [
+            models.Index(fields=["-created_at"]),
+        ]
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Issues"
 
@@ -72,7 +75,14 @@ class Issue(GenericIssueModel):
     )
 
     def from_github(self, gh_issue, author=None, repository=None):
-        """Update instance based on GitHub issue data."""
+        """Update the instance based on GitHub issue data.
+
+        Args:
+            gh_issue (github.Issue.Issue): The GitHub issue object.
+            author (User, optional): The author of the issue.
+            repository (Repository, optional): The repository instance.
+
+        """
         field_mapping = {
             "body": "body",
             "comments_count": "comments",
@@ -102,7 +112,13 @@ class Issue(GenericIssueModel):
         self.repository = repository
 
     def generate_hint(self, open_ai=None, max_tokens=1000):
-        """Generate issue hint."""
+        """Generate a hint for the issue using AI.
+
+        Args:
+            open_ai (OpenAi, optional): The OpenAI instance.
+            max_tokens (int, optional): The maximum number of tokens for the AI response.
+
+        """
         if not self.is_indexable or not (prompt := Prompt.get_github_issue_hint()):
             return
 
@@ -112,7 +128,13 @@ class Issue(GenericIssueModel):
         self.hint = open_ai.complete() or ""
 
     def generate_summary(self, open_ai=None, max_tokens=500):
-        """Generate issue summary."""
+        """Generate a summary for the issue using AI.
+
+        Args:
+            open_ai (OpenAi, optional): The OpenAI instance.
+            max_tokens (int, optional): The maximum number of tokens for the AI response.
+
+        """
         if not self.is_indexable or not (
             prompt := (
                 Prompt.get_github_issue_documentation_project_summary()
@@ -151,7 +173,18 @@ class Issue(GenericIssueModel):
 
     @staticmethod
     def update_data(gh_issue, author=None, repository=None, save=True):
-        """Update issue data."""
+        """Update issue data.
+
+        Args:
+            gh_issue (github.Issue.Issue): The GitHub issue object.
+            author (User, optional): The author of the issue.
+            repository (Repository, optional): The repository instance.
+            save (bool, optional): Whether to save the instance.
+
+        Returns:
+            Issue: The updated or created issue instance.
+
+        """
         issue_node_id = Issue.get_node_id(gh_issue)
         try:
             issue = Issue.objects.get(node_id=issue_node_id)

@@ -18,6 +18,7 @@ class Base(Configuration):
         load_dotenv(BASE_DIR / ".env.example")
 
     ALLOWED_HOSTS = values.ListValue()
+    CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
     SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
@@ -78,7 +79,6 @@ class Base(Configuration):
         "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
-        "django.middleware.clickjacking.XFrameOptionsMiddleware",
     ]
 
     REST_FRAMEWORK = {
