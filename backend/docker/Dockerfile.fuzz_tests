@@ -22,13 +22,11 @@ COPY --chmod=444 poetry.lock pyproject.toml ./
 RUN poetry install --no-root
 
 # Copy application files
-COPY .env .env
 COPY apps apps
 COPY manage.py wsgi.py ./
 COPY settings settings
-COPY static static
-COPY templates templates
 COPY fuzz_tests fuzz_tests
+COPY fuzz_tests/.env .env
 COPY docker/entrypoint_fuzz.sh entrypoint.sh
 
 FROM python:3.13-slim

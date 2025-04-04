@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock
 
 from django.conf import settings
-from django.test import override_settings
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -14,7 +13,6 @@ from apps.slack.events.member_joined_channel.gsoc import gsoc_handler
 class TestGsocEventHandler:
     """Test cases for the GSOC Slack event handler."""
 
-    @override_settings(DATABASES={"default": settings.DATABASES["fuzz_tests"]})
     @given(
         channel_id=st.text(),
     )
@@ -32,7 +30,6 @@ class TestGsocEventHandler:
 
         check_gsoc_handler({"channel": channel_id})
 
-    @override_settings(DATABASES={"default": settings.DATABASES["fuzz_tests"]})
     @given(
         events_enabled=st.booleans(),
     )

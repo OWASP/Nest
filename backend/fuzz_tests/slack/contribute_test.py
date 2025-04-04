@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
-from django.test import override_settings
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -16,7 +15,6 @@ from apps.slack.events.member_joined_channel.contribute import contribute_handle
 class TestContributeEventHandler:
     """Test cases for the Contribute Slack event handler."""
 
-    @override_settings(DATABASES={"default": settings.DATABASES["fuzz_tests"]})
     @given(
         events_enabled=st.booleans(),
         project_count=st.integers(),
