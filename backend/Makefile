@@ -146,7 +146,7 @@ fuzz-test-backend:
 		--cache-from nest-fuzz-test-backend \
 		-f backend/docker/Dockerfile.fuzz_tests backend \
 		-t nest-fuzz-test-backend
-	@docker run --env-file backend/fuzz_tests/.env nest-fuzz-test-backend
+	@docker run --env-file backend/fuzz_tests/.env -p 8000:8000 nest-fuzz-test-backend
 
 update-backend-dependencies:
 	@CMD="poetry update" $(MAKE) exec-backend-command

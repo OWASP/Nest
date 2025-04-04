@@ -23,6 +23,8 @@ RUN poetry install --no-root
 COPY apps apps
 COPY manage.py wsgi.py ./
 COPY settings settings
+COPY static static
+COPY templates templates
 COPY fuzz_tests fuzz_tests
 COPY fuzz_tests/.env .env
 COPY docker/entrypoint_fuzz.sh entrypoint.sh
@@ -49,6 +51,10 @@ COPY --from=builder --chmod=555 --chown=owasp:owasp /home/owasp /home/owasp
 
 RUN touch /home/owasp/fuzz_tests.db && \
     chmod +x /home/owasp/fuzz_tests.db /home/owasp/entrypoint.sh
+
+
+# Expose the running port
+EXPOSE 8000
 
 # Run fuzz tests
 

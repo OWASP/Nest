@@ -9,7 +9,7 @@ class Fuzz(Base):
     """Fuzz configuration."""
 
     BASE_DIR = Base.BASE_DIR
-    DEBUG = False
+    DEBUG = True
     APP_NAME = "OWASP Nest Fuzz"
 
     DATABASES = {
