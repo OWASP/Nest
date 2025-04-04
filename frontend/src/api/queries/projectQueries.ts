@@ -32,6 +32,7 @@ export const GET_PROJECT_DATA = gql`
         }
         name
         publishedAt
+        repositoryName
         tagName
         url
       }

@@ -22,7 +22,7 @@ RUN apk update && \
     chown -R node:node /home/owasp && \
     npm install --ignore-scripts -g pnpm
 
-COPY --from=builder --chmod=555 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
+COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
 
 EXPOSE 3000
 

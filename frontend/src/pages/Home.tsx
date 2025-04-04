@@ -10,8 +10,6 @@ import {
   faUsers,
   faUser,
   faFolder,
-  faTriangleExclamation,
-  faCodePullRequest,
   faNewspaper,
   faGlobe,
 } from '@fortawesome/free-solid-svg-icons'
@@ -27,12 +25,14 @@ import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
-import ItemCardList from 'components/ItemCardList'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Modal from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
+import RecentIssues from 'components/RecentIssues'
+import RecentPullRequests from 'components/RecentPullRequests'
+import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import { TruncatedText } from 'components/TruncatedText'
@@ -268,95 +268,10 @@ export default function Home() {
           maxInitialDisplay={9}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
-          <ItemCardList
-            title="Recent Issues"
-            data={data.recentIssues}
-            icon={faTriangleExclamation}
-            renderDetails={(item) => (
-              <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
-                <div className="mr-4 flex items-center">
-                  <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                  <span>{formatDate(item.createdAt)}</span>
-                </div>
-                {item?.commentsCount ? (
-                  <div className="flex items-center">
-                    <FontAwesomeIcon icon={faFileCode} className="mr-2 h-4 w-4" />
-                    <span>{item.commentsCount} comments</span>
-                  </div>
-                ) : null}
-              </div>
-            )}
-          />
-          <ItemCardList
-            title="Recent Pull Requests"
-            data={data.recentPullRequests}
-            icon={faCodePullRequest}
-            renderDetails={(item) => (
-              <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
-                <div className="mr-4 flex items-center">
-                  <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                  <span>{formatDate(item.createdAt)}</span>
-                </div>
-
-                {item?.author.name || item?.author.login ? (
-                  <div className="flex items-center">
-                    <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                    <span>{item.author.name || item.author.login}</span>
-                  </div>
-                ) : null}
-              </div>
-            )}
-          />
+          <RecentIssues data={data.recentIssues} />
+          <RecentPullRequests data={data.recentPullRequests} showAuthor={true} />
         </div>
-        <SecondaryCard icon={faTag} title="Recent Releases" className="overflow-hidden">
-          {data.recentReleases && data.recentReleases.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {data.recentReleases.map((item, index) => (
-                <div
-                  key={index}
-                  className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                >
-                  <div className="flex w-full flex-col justify-between">
-                    <div className="flex w-full items-center">
-                      <a
-                        className="flex-shrink-0 text-blue-400 hover:underline"
-                        href={`/community/users/${item?.author?.login}`}
-                      >
-                        <img
-                          src={item?.author?.avatarUrl}
-                          alt={item?.author?.name}
-                          className="mr-2 h-6 w-6 rounded-full"
-                        />
-                      </a>
-
-                      <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                        <a
-                          className="text-blue-400 hover:underline"
-                          href={item?.url}
-                          target="_blank"
-                        >
-                          {item.name}
-                        </a>
-                      </h3>
-                    </div>
-                    <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
-                      <div className="mr-4 flex items-center">
-                        <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                        <span>{formatDate(item.publishedAt)}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <FontAwesomeIcon icon={faTag} className="mr-2 h-4 w-4" />
-                        <span>{item.tagName}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No recent releases.</p>
-          )}
-        </SecondaryCard>
+        <RecentReleases data={data.recentReleases} />
         <SecondaryCard icon={faNewspaper} title="News & Opinions" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data.recentPosts.map((post) => (
