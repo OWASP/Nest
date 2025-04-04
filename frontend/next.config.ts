@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  //devIndicators: true,
+  devIndicators: false,
 }
 
 export default nextConfig

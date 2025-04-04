@@ -10,7 +10,8 @@
     "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start",
-    "test": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
+    "test:e2e": "npx playwright test",
+    "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
     "@apollo/client": "^3.13.5",
@@ -60,7 +61,7 @@
     "@axe-core/react": "^4.10.1",
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.22.0",
-    "@playwright/test": "^1.51.0",
+    "@playwright/test": "^1.51.1",
     "@swc/core": "^1.11.8",
     "@swc/jest": "^0.2.37",
     "@tailwindcss/postcss": "^4.0.12",

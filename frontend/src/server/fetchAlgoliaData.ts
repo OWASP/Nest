@@ -1,4 +1,3 @@
-'use server'
 import { AlgoliaResponseType } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
 import { AppError } from 'wrappers/ErrorWrapper'
