@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
+from apps.owasp.models.post import Post
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
@@ -54,6 +55,7 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
     list_filter = (
         "is_active",
+        "is_leaders_policy_compliant",
         "country",
         "region",
     )
@@ -71,6 +73,23 @@ class EventAdmin(admin.ModelAdmin):
         "suggested_location",
     )
     search_fields = ("name",)
+
+
+class PostAdmin(admin.ModelAdmin):
+    """Admin configuration for Post model."""
+
+    list_display = (
+        "author_name",
+        "published_at",
+        "title",
+    )
+    search_fields = (
+        "author_image_url",
+        "author_name",
+        "published_at",
+        "title",
+        "url",
+    )
 
 
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
@@ -93,6 +112,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
     list_filter = (
         "is_active",
+        "is_leaders_policy_compliant",
         "has_active_repositories",
         "level",
         "type",
@@ -178,6 +198,7 @@ class SponsorAdmin(admin.ModelAdmin):
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
+admin.site.register(Post, PostAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectHealthMetrics)
 admin.site.register(ProjectHealthRequirements)

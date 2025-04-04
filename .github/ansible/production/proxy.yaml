@@ -13,6 +13,12 @@
           dest: ~/production.conf
           mode: '0644'
 
+      - name: Copy security.conf
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/proxy/security.conf'
+          dest: ~/security.conf
+          mode: '0644'
+
       - name: Update Docker images
         shell:
           cmd: docker compose pull

@@ -23,7 +23,7 @@ services:
       - 127.0.0.1:8000:8000
     volumes:
       - ../backend:/home/owasp
-      - backend-data:/home/owasp/.venv
+      - backend-alpine:/home/owasp/.venv
 
   db:
     container_name: nest-db
@@ -40,6 +40,23 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
+  docs:
+    container_name: nest-docs
+    command: >
+      sh -c '
+        python docs/scripts/generate_schema_docs.py &&
+        mkdocs serve -a 0.0.0.0:8001
+      '
+    build:
+      context: ..
+      dockerfile: docs/docker/Dockerfile.local
+    ports:
+      - 127.0.0.1:8001:8001
+    volumes:
+      - ../docs:/home/owasp/docs
+      - ../schema:/home/owasp/schema
+      - docs-alpine:/home/owasp/.venv
+
   frontend:
     container_name: nest-frontend
     command: >
@@ -53,7 +70,7 @@ services:
       - 127.0.0.1:3000:3000
     volumes:
       - ../frontend:/home/owasp
-      - frontend-data:/home/owasp/node_modules
+      - frontend-alpine:/home/owasp/node_modules
     environment:
       NODE_ENV: local
 
@@ -69,7 +86,9 @@ services:
       - typesense-data:/data
 
 volumes:
-  backend-data:
+  backend-alpine:
   db-data:
-  frontend-data:
+  docs-alpine:
+  frontend-alpine:
   typesense-data:
+ 

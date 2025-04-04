@@ -12,7 +12,19 @@ def get_chapters(
     searchable_attributes=None,
     searchable_attributes_weights=None,
 ):
-    """Return chapters relevant to a search query."""
+    """Return chapters relevant to a search query.
+
+    Args:
+        query (str): The search query string.
+        attributes (list, optional): List of attributes to retrieve.
+        limit (int, optional): Number of results per page.
+        page (int, optional): Page number for pagination.
+        searchable_attributes (list, optional): Attributes to restrict the search to.
+
+    Returns:
+        dict: Search results containing chapters matching the query.
+
+    """
     search_parameters = get_typesense_params_for_index("chapter")
     search_parameters.update(
         {

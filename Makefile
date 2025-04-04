@@ -1,5 +1,6 @@
 include backend/Makefile
 include cspell/Makefile
+include docs/Makefile
 include frontend/Makefile
 include schema/Makefile
 
@@ -30,8 +31,7 @@ pre-commit:
 	@pre-commit run -a
 
 run:
-	@docker compose -f docker/docker-compose-local.yaml build
-	@docker compose -f docker/docker-compose-local.yaml up --remove-orphans
+	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
 
 test-all: \
 	test-nest-app \
@@ -47,4 +47,10 @@ update-dependencies: \
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \
-	update-frontend-dependencies
+	update-cspell-dependencies \
+	update-docs-dependencies \
+	update-frontend-dependencies \
+	update-pre-commit
+
+update-pre-commit:
+	@pre-commit autoupdate

@@ -1,7 +1,7 @@
 audience: breaker
 events:
-  - https://example.com/event1
-  - https://example.com/event1
+  - url: https://example.com/event1
+  - url: https://example.com/event1
 leaders:
   - github: leader-1-github
     name: Leader 1 Name

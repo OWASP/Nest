@@ -10,7 +10,7 @@ from apps.owasp.models.event import Event
 class EventQuery(BaseQuery):
     """Event queries."""
 
-    upcoming_events = graphene.List(EventNode, limit=graphene.Int(default_value=8))
+    upcoming_events = graphene.List(EventNode, limit=graphene.Int(default_value=6))
 
     def resolve_upcoming_events(root, info, limit):
         """Resolve all events."""

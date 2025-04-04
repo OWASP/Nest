@@ -4,6 +4,6 @@ leaders:
   - github: leader1
 name: OWASP Chapter
 tags:
-  - chapter-tag-1
-  - chapter-tag-2
-  - chapter-tag-3
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

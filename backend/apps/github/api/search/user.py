@@ -5,7 +5,19 @@ from apps.core.utils.params_mapping_typesense import get_typesense_params_for_in
 
 
 def get_users(query, attributes=None, limit=25, page=1, searchable_attributes=None):
-    """Return users relevant to a search query."""
+    """Return users relevant to a search query.
+
+    Args:
+        query (str): The search query string.
+        attributes (list, optional): List of attributes to retrieve.
+        limit (int): Maximum number of users to return.
+        page (int): The page number for pagination.
+        searchable_attributes (list, optional): List of attributes to restrict the search to.
+
+    Returns:
+        dict: Search results containing users and metadata.
+
+    """
     search_parameters = get_typesense_params_for_index("user")
     search_parameters.update(
         {

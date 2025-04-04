@@ -84,7 +84,7 @@ code block
     render(<Markdown content="test" />)
 
     expect(markdownIt).toHaveBeenCalledWith({
-      html: true,
+      html: false,
       linkify: true,
       typographer: true,
     })

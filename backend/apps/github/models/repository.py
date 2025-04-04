@@ -98,18 +98,43 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     )
 
     def __str__(self):
-        """Repository human readable representation."""
+        """Return a human-readable representation of the repository.
+
+        Returns
+            str: The repository path.
+
+        """
         return self.path
 
     @property
+    def latest_pull_request(self):
+        """Get the latest pull request for the repository.
+
+        Returns
+            PullRequest: The most recently created pull request.
+
+        """
+        return self.pull_requests.order_by("-created_at").first()
+
+    @property
     def latest_release(self):
-        """Repository latest release."""
+        """Get the latest release for the repository.
+
+        Returns
+            Release: The most recently published release.
+
+        """
         return self.published_releases.order_by("-published_at").first()
 
     @property
     def latest_updated_issue(self):
         """Repository latest updated issue."""
         return self.issues.order_by("-updated_at").first()
+
+    @property
+    def latest_updated_pull_request(self):
+        """Repository latest updated pull request (most recently modified)."""
+        return self.pull_requests.order_by("-updated_at").first()
 
     @property
     def nest_key(self):
@@ -158,7 +183,17 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         organization=None,
         user=None,
     ):
-        """Update instance based on GitHub repository data."""
+        """Update the repository instance based on GitHub repository data.
+
+        Args:
+            gh_repository (github.Repository.Repository): The GitHub repository object.
+            commits (github.PaginatedList.PaginatedList, optional): List of commits.
+            contributors (github.PaginatedList.PaginatedList, optional): List of contributors.
+            languages (dict, optional): Dictionary of languages used in the repository.
+            organization (Organization, optional): The organization instance.
+            user (User, optional): The user instance.
+
+        """
         field_mapping = {
             "created_at": "created_at",
             "default_branch": "default_branch",
@@ -262,7 +297,21 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         user=None,
         save=True,
     ):
-        """Update repository data."""
+        """Update repository data.
+
+        Args:
+            gh_repository (github.Repository.Repository): The GitHub repository object.
+            commits (github.PaginatedList.PaginatedList, optional): List of commits.
+            contributors (github.PaginatedList.PaginatedList, optional): List of contributors.
+            languages (dict, optional): Dictionary of languages used in the repository.
+            organization (Organization, optional): The organization instance.
+            user (User, optional): The user instance.
+            save (bool, optional): Whether to save the instance.
+
+        Returns:
+            Repository: The updated or created repository instance.
+
+        """
         repository_node_id = Repository.get_node_id(gh_repository)
         try:
             repository = Repository.objects.get(node_id=repository_node_id)

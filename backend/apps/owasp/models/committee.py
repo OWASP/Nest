@@ -33,19 +33,19 @@ class Committee(
 
     def from_github(self, repository):
         """Update instance based on GitHub repository data."""
-        field_mapping = {
-            "description": "pitch",
-            "name": "title",
-            "tags": "tags",
-        }
-        RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
-
-        if repository:
-            self.created_at = repository.created_at
-            self.updated_at = repository.updated_at
-
-        # FKs.
         self.owasp_repository = repository
+
+        RepositoryBasedEntityModel.from_github(
+            self,
+            {
+                "description": "pitch",
+                "name": "title",
+                "tags": "tags",
+            },
+        )
+
+        self.created_at = repository.created_at
+        self.updated_at = repository.updated_at
 
     def save(self, *args, **kwargs):
         """Save committee."""
