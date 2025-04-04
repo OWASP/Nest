@@ -72,7 +72,7 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Release 1' })).toBeVisible()
     await expect(page.getByText('Feb 22,')).toBeVisible()
-    await expect(page.getByText('v1', { exact: true })).toBeVisible()
+    await expect(page.getByText('nest-repository-1', { exact: true })).toBeVisible()
   })
 
   test('should be able to join OWASP', async ({ page }) => {
