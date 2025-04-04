@@ -230,6 +230,27 @@ describe('About Component', () => {
     })
   })
 
+  test('shows fallback when user data is missing', async () => {
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (options?.variables?.key === 'nest') {
+        return mockProjectData
+      } else if (options?.variables?.key === 'arkid15r') {
+        return { data: null, loading: false, error: false }
+      } else if (options?.variables?.key === 'kasya') {
+        return mockUserData('kasya')
+      } else if (options?.variables?.key === 'mamicidal') {
+        return mockUserData('mamicidal')
+      }
+      return { loading: true }
+    })
+
+    render(<About />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/No data available for arkid15r/i)).toBeInTheDocument()
+    })
+  })
+
   test('renders top contributors section correctly', async () => {
     render(<About />)
 

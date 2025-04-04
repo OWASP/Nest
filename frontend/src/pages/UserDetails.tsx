@@ -23,8 +23,10 @@ import { toaster } from 'components/ui/toaster'
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
+  const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
   const [pullRequests, setPullRequests] = useState<PullRequestsType[]>([])
+  const [releases, setReleases] = useState<ProjectReleaseType[]>([])
   const [data, setData] = useState<HeatmapData | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
@@ -40,7 +42,9 @@ const UserDetailsPage: React.FC = () => {
   useEffect(() => {
     if (graphQLData) {
       setUser(graphQLData?.user)
+      setIssues(graphQLData?.recentIssues)
       setPullRequests(graphQLData?.recentPullRequests)
+      setReleases(graphQLData?.recentReleases)
       setTopRepositories(graphQLData?.topContributedRepositories)
       setIsLoading(false)
     }
@@ -101,7 +105,7 @@ const UserDetailsPage: React.FC = () => {
 
   const formattedIssues: ProjectIssuesType[] = useMemo(() => {
     return (
-      user?.issues?.map((issue) => ({
+      issues?.map((issue) => ({
         commentsCount: issue.commentsCount,
         createdAt: issue.createdAt,
         title: issue.title,
@@ -114,7 +118,7 @@ const UserDetailsPage: React.FC = () => {
         url: issue.url,
       })) || []
     )
-  }, [user])
+  }, [issues, user])
 
   const formattedPullRequest: ItemCardPullRequests[] = useMemo(() => {
     return (
@@ -134,7 +138,7 @@ const UserDetailsPage: React.FC = () => {
 
   const formattedReleases: ProjectReleaseType[] = useMemo(() => {
     return (
-      user?.releases?.map((release) => ({
+      releases?.map((release) => ({
         isPreRelease: release.isPreRelease,
         name: release.name,
         publishedAt: release.publishedAt,
@@ -148,7 +152,7 @@ const UserDetailsPage: React.FC = () => {
         url: release.url,
       })) || []
     )
-  }, [user])
+  }, [releases, user])
 
   if (isLoading) {
     return <LoadingSpinner />

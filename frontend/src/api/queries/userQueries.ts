@@ -2,9 +2,22 @@ import { gql } from '@apollo/client'
 
 export const GET_USER_DATA = gql`
   query GetUser($key: String!) {
-    recentPullRequests(login: $key) {
+    recentIssues(limit: 5, login: $key) {
+      commentsCount
       createdAt
       title
+      url
+    }
+    recentPullRequests(limit: 5, login: $key) {
+      createdAt
+      title
+      url
+    }
+    recentReleases(limit: 6, login: $key) {
+      isPreRelease
+      name
+      publishedAt
+      tagName
       url
     }
     topContributedRepositories(login: $key) {
@@ -25,24 +38,11 @@ export const GET_USER_DATA = gql`
       email
       followersCount
       followingCount
-      issues {
-        commentsCount
-        createdAt
-        title
-        url
-      }
       issuesCount
       location
       login
       name
       publicRepositoriesCount
-      releases {
-        isPreRelease
-        name
-        publishedAt
-        tagName
-        url
-      }
       releasesCount
       url
     }

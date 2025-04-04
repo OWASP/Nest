@@ -285,8 +285,9 @@ describe('UserDetailsPage', () => {
   test('handles no recent issues gracefully', async () => {
     const noIssuesData = {
       ...mockUserDetailsData,
-      user: { ...mockUserDetailsData.user, issues: [] },
+      recentIssues: [],
     }
+
     ;(useQuery as jest.Mock).mockReturnValue({
       data: noIssuesData,
       loading: false,
@@ -294,6 +295,7 @@ describe('UserDetailsPage', () => {
     })
 
     render(<UserDetailsPage />)
+
     await waitFor(() => {
       expect(screen.getByText('Recent Issues')).toBeInTheDocument()
       expect(screen.queryByText('Test Issue')).not.toBeInTheDocument()
