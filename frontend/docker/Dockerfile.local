@@ -3,8 +3,8 @@ FROM node:22-alpine AS builder
 SHELL ["/bin/sh", "-c"]
 
 RUN apk update && \
-  mkdir -p /home/owasp && \
-  chown -R node:node /home/owasp
+    mkdir -p /home/owasp && \
+    chown -R node:node /home/owasp
 
 WORKDIR /home/owasp
 
@@ -16,9 +16,9 @@ FROM node:22-alpine AS development
 SHELL ["/bin/sh", "-c"]
 
 RUN apk update && \
-  mkdir -p /home/owasp && \
-  mkdir -p /home/owasp/.next && \
-  chown -R node:node /home/owasp
+    mkdir -p /home/owasp && \
+    mkdir -p /home/owasp/.next && \
+    chown -R node:node /home/owasp
 
 COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
 

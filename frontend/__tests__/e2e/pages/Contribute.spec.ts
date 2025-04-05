@@ -36,8 +36,9 @@ test.describe('Contribute Page', () => {
 
   test('handles page change correctly', async ({ page }) => {
     const nextPageButton = await page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
-    expect(await page.url()).toContain('page=2')
+    await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens dialog on View Details button click', async ({ page }) => {

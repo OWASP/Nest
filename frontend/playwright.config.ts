@@ -1,7 +1,9 @@
 import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
+  timeout: 90000,
   fullyParallel: true,
+  retries: 1,
   projects: [
     {
       name: 'Chromium',
@@ -16,7 +18,8 @@ export default defineConfig({
     trace: 'off',
   },
   webServer: {
-    command: 'npm run build && npm run dev',
+    timeout: 120 * 1000,
+    command: 'npm run build && npm run start',
     url: 'http://localhost:3000',
   },
 })

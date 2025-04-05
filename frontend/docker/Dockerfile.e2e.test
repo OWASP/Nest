@@ -11,4 +11,5 @@ COPY __tests__/e2e __tests__/e2e
 COPY __tests__/unit/data __tests__/unit/data
 COPY playwright.config.ts playwright.config.ts
 COPY src src
+COPY public public
 COPY tailwind.config.js tsconfig.json next.config.ts ./
