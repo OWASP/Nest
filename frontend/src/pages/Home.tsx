@@ -23,6 +23,7 @@ import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
+import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import ChapterMap from 'components/ChapterMap'
 import LeadersList from 'components/LeadersList'
@@ -141,7 +142,11 @@ export default function Home() {
             />
           </div>
         </div>
-        <SecondaryCard icon={faCalendar} title="Upcoming Events" className="overflow-hidden">
+        <SecondaryCard
+          icon={faCalendar}
+          title={<AnchorTitle href="#upcoming-events" title="Upcoming Events" />}
+          className="overflow-hidden"
+        >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: EventType, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
@@ -179,7 +184,11 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
-          <SecondaryCard icon={faMapMarkerAlt} title="New Chapters" className="overflow-hidden">
+          <SecondaryCard
+            icon={faMapMarkerAlt}
+            title={<AnchorTitle href="#new-chapters" title="New Chapters" />}
+            className="overflow-hidden"
+          >
             <div className="space-y-4">
               {data.recentChapters.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -210,7 +219,11 @@ export default function Home() {
               ))}
             </div>
           </SecondaryCard>
-          <SecondaryCard icon={faFolder} title="New Projects" className="overflow-hidden">
+          <SecondaryCard
+            icon={faFolder}
+            title={<AnchorTitle href="#new-projects" title="New Projects" />}
+            className="overflow-hidden"
+          >
             <div className="space-y-4">
               {data.recentProjects.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -245,10 +258,10 @@ export default function Home() {
           </SecondaryCard>
         </div>
         <div className="mb-20">
-          <h2 className="mb-4 text-2xl font-semibold">
+          <div className="flex items-center gap-2">
             <FontAwesomeIcon icon={faGlobe} className="mr-2 h-5 w-5" />
-            Chapters Worldwide
-          </h2>
+            <AnchorTitle href="#chapters-worldwide" title="Chapters Worldwide" />
+          </div>
           <ChapterMap
             geoLocData={geoLocData}
             showLocal={false}
@@ -272,7 +285,11 @@ export default function Home() {
           <RecentPullRequests data={data.recentPullRequests} showAuthor={true} />
         </div>
         <RecentReleases data={data.recentReleases} />
-        <SecondaryCard icon={faNewspaper} title="News & Opinions" className="overflow-hidden">
+        <SecondaryCard
+          icon={faNewspaper}
+          title={<AnchorTitle href="#news-&-opinions" title="News & Opinions" />}
+          className="overflow-hidden"
+        >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data.recentPosts.map((post) => (
               <div
@@ -305,12 +322,14 @@ export default function Home() {
         </SecondaryCard>
         <div className="grid gap-6 md:grid-cols-4">
           {counterData.map((stat, index) => (
-            <SecondaryCard key={index} className="text-center">
-              <div className="mb-2 text-3xl font-bold text-blue-400">
-                <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
-              </div>
-              <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
-            </SecondaryCard>
+            <div key={index}>
+              <SecondaryCard className="text-center">
+                <div className="mb-2 text-3xl font-bold text-blue-400">
+                  <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
+                </div>
+                <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+              </SecondaryCard>
+            </div>
           ))}
         </div>
 

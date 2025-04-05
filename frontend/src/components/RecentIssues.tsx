@@ -4,6 +4,7 @@ import React from 'react'
 import { ProjectIssuesType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
+import AnchorTitle from './AnchorTitle'
 import ItemCardList from './ItemCardList'
 
 interface RecentIssuesProps {
@@ -14,7 +15,7 @@ interface RecentIssuesProps {
 const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) => {
   return (
     <ItemCardList
-      title="Recent Issues"
+      title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
       data={data}
       showAvatar={showAvatar}
       icon={faTriangleExclamation}

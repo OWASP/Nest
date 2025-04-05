@@ -40,7 +40,7 @@ test.describe('Chapter Details Page', () => {
   })
 
   test('should have top contributors', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top Contributors' }).first()).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
     await expect(page.getByText('Contributor 1')).toBeVisible()
     await expect(page.getByText('10 Contributions')).toBeVisible()

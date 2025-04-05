@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
+import AnchorTitle from './AnchorTitle'
 import SecondaryCard from './SecondaryCard'
 
 interface RecentReleasesProps {
@@ -17,7 +18,10 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
   showSingleColumn = false,
 }) => {
   return (
-    <SecondaryCard icon={faFileCode} title="Recent Releases">
+    <SecondaryCard
+      icon={faFileCode}
+      title={<AnchorTitle href="#recent-releases" title="Recent Releases" />}
+    >
       {data && data.length > 0 ? (
         <div
           className={`grid ${showSingleColumn ? 'grid-cols-1' : 'grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
