@@ -26,5 +26,3 @@ EXPOSE 3000
 
 USER node
 WORKDIR /home/owasp
-
-CMD ["npm", "run", "dev"]

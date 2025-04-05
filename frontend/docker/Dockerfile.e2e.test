@@ -1,0 +1,14 @@
+FROM mcr.microsoft.com/playwright:v1.51.1-noble
+
+ENV FORCE_COLOR=1
+
+WORKDIR /app
+
+COPY --chmod=444 package.json package-lock.json ./
+RUN npm install --ignore-scripts
+
+COPY __tests__/e2e __tests__/e2e
+COPY __tests__/unit/data __tests__/unit/data
+COPY playwright.config.ts playwright.config.ts
+COPY src src
+COPY tailwind.config.js tsconfig.json next.config.ts ./
