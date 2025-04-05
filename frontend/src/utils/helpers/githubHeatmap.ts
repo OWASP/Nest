@@ -18,11 +18,12 @@ export interface HeatmapData {
   contributions: []
 }
 
+// Modified intensity scale for better contrast
 const getIntensity = (count) => {
   if (count === 0) return '0'
-  if (count <= 4) return '1'
-  if (count <= 8) return '2'
-  if (count <= 12) return '3'
+  if (count <= 3) return '1'
+  if (count <= 6) return '2'
+  if (count <= 10) return '3'
   return '4'
 }
 
@@ -69,20 +70,29 @@ export const fetchHeatmapData = async (username) => {
     return err.message
   }
 }
-// The code below is a modified version of 'github-contributions-canvas'
-// https://www.npmjs.com/package/github-contributions-canvas?activeTab=code
+
 
 const themes = {
   blue: {
-    background: '#10151C',
+    background: '#1a2233',
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#5F87A8',
-    grade3: '#46627B',
-    grade2: '#314257',
-    grade1: '#394d65',
+    grade4: '#2a70d8',
+    grade3: '#4682b4',
+    grade2: '#5f87a8',
+    grade1: '#46627b',
     grade0: '#202A37',
   },
+  blueRed: {
+    background: '#1a2233',
+    text: '#FFFFFF',
+    meta: '#A6B1C1',
+    grade4: '#e64a4a',
+    grade3: '#4682b4',
+    grade2: '#5f87a8',
+    grade1: '#46627b',
+    grade0: '#202A37',
+  }
 }
 
 interface DataStructYear {
@@ -117,6 +127,7 @@ interface Options {
   fontFace?: string
   footerText?: string
   theme?: string
+  showTooltips?: boolean
 }
 interface DrawYearOptions extends Options {
   year: DataStructYear
@@ -146,14 +157,59 @@ function getPixelRatio() {
 }
 
 const DATE_FORMAT = 'yyyy-MM-dd'
-const boxWidth = 10
-const boxMargin = 2
+
+const boxWidth = 12
+const boxMargin = 3
 const textHeight = 15
 const defaultFontFace = 'IBM Plex Mono'
-const headerHeight = 0
+const headerHeight = 40
 const canvasMargin = 20
 const yearHeight = textHeight + (boxWidth + boxMargin) * 8 + canvasMargin
 const scaleFactor = getPixelRatio()
+
+
+let tooltipElement: HTMLDivElement | null = null
+
+
+let handleMouseMove: (e: MouseEvent) => void;
+let handleMouseOut: (e: MouseEvent) => void;
+let handleClick: (e: MouseEvent) => void;
+
+
+
+function getOrCreateTooltip(): HTMLDivElement {
+  if (!tooltipElement && typeof window !== 'undefined') {
+    tooltipElement = document.createElement('div')
+    tooltipElement.style.position = 'absolute'
+    tooltipElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+    tooltipElement.style.color = 'white'
+    tooltipElement.style.padding = '5px 10px'
+    tooltipElement.style.borderRadius = '3px'
+    tooltipElement.style.fontSize = '14px'
+    tooltipElement.style.pointerEvents = 'none'
+    tooltipElement.style.opacity = '0'
+    tooltipElement.style.transition = 'opacity 0.2s'
+    tooltipElement.style.zIndex = '1000'
+    document.body.appendChild(tooltipElement)
+  }
+  return tooltipElement as HTMLDivElement
+}
+
+
+export function cleanupTooltip(): void {
+  if (tooltipElement && typeof window !== 'undefined') {
+    document.body.removeChild(tooltipElement)
+    tooltipElement = null
+  }
+}
+
+export function cleanupEventListeners(canvas: HTMLCanvasElement): void {
+  if (typeof window !== 'undefined') {
+    canvas.removeEventListener('mousemove', handleMouseMove);
+    canvas.removeEventListener('mouseout', handleMouseOut);
+    canvas.removeEventListener('click', handleClick);
+  }
+}
 
 function getTheme(opts: Options): Theme {
   const { themeName } = opts
@@ -201,6 +257,9 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     ctx.font = `10px '${fontFace}'`
   }
 
+
+  const cellsData = []
+
   for (let y = 0; y < graphEntries.length; y += 1) {
     for (let x = 0; x < graphEntries[y].length; x += 1) {
       const day = graphEntries[y][x]
@@ -208,12 +267,12 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       if (isAfter(cellDate, endDate) || !day.info) {
         continue
       }
-      // @ts-ignore
+
       const color = theme[`grade${day.info.intensity}`]
       ctx.fillStyle = color
       const cellX = offsetX + (boxWidth + boxMargin) * x
       const cellY = offsetY + textHeight + (boxWidth + boxMargin) * y
-      const cellRadius = 2 // radius for rounded corners
+      const cellRadius = 2
 
       ctx.beginPath()
       ctx.moveTo(cellX + cellRadius, cellY)
@@ -224,10 +283,22 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       ctx.closePath()
       ctx.fillStyle = color
       ctx.fill()
+
+
+      if (opts.showTooltips) {
+        cellsData.push({
+          x: cellX,
+          y: cellY,
+          width: boxWidth,
+          height: boxWidth,
+          date: day.date,
+          count: day.info.count
+        })
+      }
     }
   }
 
-  // Draw Month Label
+
   let lastCountedMonth = 0
   for (let y = 0; y < graphEntries[0].length; y += 1) {
     const date = parseISO(graphEntries[0][y].date)
@@ -239,6 +310,8 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       lastCountedMonth = month
     }
   }
+
+  return cellsData
 }
 
 function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) {
@@ -247,15 +320,41 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   ctx.fillStyle = theme.background
   ctx.fillRect(0, 0, width, height)
 
-  // chart legend
   ctx.fillStyle = theme.text
   ctx.textBaseline = 'hanging'
-  ctx.font = `20px '${fontFace}'`
+  ctx.font = `12px '${fontFace}'`
+  ctx.fillText('Contributions:', canvasMargin, 20)
+
+  const legendBoxSize = 12
+  const legendSpacing = 60
+
+
+  for (let i = 0; i <= 4; i++) {
+    const boxX = canvasMargin + 120 + i * legendSpacing
+    const boxY = 20
+
+
+    ctx.fillStyle = theme[`grade${i}`]
+    ctx.beginPath()
+    ctx.rect(boxX, boxY, legendBoxSize, legendBoxSize)
+    ctx.fill()
+
+    ctx.fillStyle = theme.text
+    let label = ''
+    if (i === 0) label = 'No activity'
+    else if (i === 1) label = '1-3'
+    else if (i === 2) label = '4-6'
+    else if (i === 3) label = '7-10'
+    else label = '10+'
+
+    ctx.fillText(label, boxX + legendBoxSize + 5, boxY + 2)
+  }
 
   ctx.beginPath()
-  ctx.moveTo(canvasMargin, 55 + 10)
-  ctx.lineTo(width - canvasMargin, 55 + 10)
+  ctx.moveTo(canvasMargin, 55)
+  ctx.lineTo(width - canvasMargin, 55)
   ctx.strokeStyle = theme.grade0
+  ctx.stroke()
 }
 
 export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
@@ -287,15 +386,88 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
     })
   }
 
+  let allCellsData = []
   data.years.forEach((year, i) => {
     const offsetY = yearHeight * i + canvasMargin + headerOffset + 10
     const offsetX = canvasMargin
-    drawYear(ctx, {
+    const cellsData = drawYear(ctx, {
       ...opts,
       year,
       offsetX,
       offsetY,
       data,
     })
+    if (cellsData) {
+      allCellsData = [...allCellsData, ...cellsData]
+    }
   })
+  if (opts.showTooltips && typeof window !== 'undefined') {
+    const tooltip = getOrCreateTooltip()
+    handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / scaleFactor
+      const y = (e.clientY - rect.top) / scaleFactor
+
+      let found = false
+      allCellsData.forEach(cell => {
+        if (
+          x >= cell.x &&
+          x <= cell.x + cell.width &&
+          y >= cell.y &&
+          y <= cell.y + cell.height
+        ) {
+          const date = new Date(cell.date).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })
+
+          tooltip.innerHTML = `
+            <div>${date}</div>
+            <div>${cell.count} contribution${cell.count !== 1 ? 's' : ''}</div>
+          `
+          tooltip.style.left = `${e.clientX + 10}px`
+          tooltip.style.top = `${e.clientY + 10}px`
+          tooltip.style.opacity = '1'
+          found = true
+        }
+      })
+
+      if (!found) {
+        tooltip.style.opacity = '0'
+      }
+    };
+
+    handleMouseOut = () => {
+      tooltip.style.opacity = '0'
+    };
+
+    handleClick = (e) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / scaleFactor
+      const y = (e.clientY - rect.top) / scaleFactor
+
+      allCellsData.forEach(cell => {
+        if (
+          x >= cell.x &&
+          x <= cell.x + cell.width &&
+          y >= cell.y &&
+          y <= cell.y + cell.height
+        ) {
+
+          const event = new CustomEvent('heatmap-cell-click', {
+            detail: {
+              date: cell.date,
+              count: cell.count
+            }
+          })
+          canvas.dispatchEvent(event)
+        }
+      })
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove)
+    canvas.addEventListener('mouseout', handleMouseOut)
+    canvas.addEventListener('click', handleClick)
+  }
 }
