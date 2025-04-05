@@ -78,7 +78,7 @@ jobs:
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check-all` and use `git add` to address it.' && exit 1)
+          Run `make check` and use `git add` to address it.' && exit 1)
 
   spellcheck:
     name: Run spell check
@@ -241,6 +241,7 @@ jobs:
         run: |
           touch frontend/.env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
           echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
@@ -404,6 +405,7 @@ jobs:
         run: |
           touch frontend/.env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
           echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env

@@ -20,7 +20,7 @@ export const fetchAlgoliaData = async <T>(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrfToken() || '',
+        'X-CSRFToken': (await getCsrfToken()) || '',
       },
       credentials: 'include',
       body: JSON.stringify({
