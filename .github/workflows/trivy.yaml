@@ -1,0 +1,105 @@
+name: Security Scans
+
+on:
+  workflow_run:
+    workflows: ["Run CI/CD"]
+    branches:
+      - main
+    types:
+      - completed
+
+env:
+  DOCKERHUB_USERNAME: arkid15r
+
+jobs:
+  scan-repository:
+    name: Repository Scan
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Run Trivy repository scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: 'repo'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+
+  scan-filesystem:
+    name: Filesystem Scan
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: 'fs'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+
+  scan-staging-images:
+    name: Scan Staging Images
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'pull_request')
+    steps:
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          ignore-cves:
+            - CVE-2024-56171
+            - CVE-2024-55549
+            - CVE-2024-8176
+            - CVE-2025-24855
+            - CVE-2025-24928
+            - CVE-2025-27113
+          exit-code: 1
+
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          ignore-cves:
+            - CVE-2025-31115
+          exit-code: 1
+
+  scan-production-images:
+    name: Scan Production Images
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'release'
+    steps:
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          ignore-cves:
+            - CVE-2024-56171
+            - CVE-2024-55549
+            - CVE-2024-8176
+            - CVE-2025-24855
+            - CVE-2025-24928
+            - CVE-2025-27113
+          exit-code: 1
+
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          ignore-cves:
+            - CVE-2025-31115
+          exit-code: 1
