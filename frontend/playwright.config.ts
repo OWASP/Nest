@@ -19,7 +19,7 @@ export default defineConfig({
   },
   webServer: {
     timeout: 120 * 1000,
-    command: 'npm run build && npm run start',
+    command: 'pnpm run build && pnpm run start',
     url: 'http://localhost:3000',
   },
 })

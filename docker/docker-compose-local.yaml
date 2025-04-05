@@ -67,7 +67,7 @@ services:
     container_name: nest-frontend
     command: >
       sh -c '
-        npm run dev
+        pnpm run dev
       '
     build:
       context: ../frontend
