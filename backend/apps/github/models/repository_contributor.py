@@ -38,7 +38,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         on_delete=models.CASCADE,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable representation of the repository contributor.
 
         Returns
@@ -50,7 +50,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             f"contribution{pluralize(self.contributions_count)} to {self.repository}"
         )
 
-    def from_github(self, gh_contributions):
+    def from_github(self, gh_contributions) -> None:
         """Update the instance based on GitHub contributor data.
 
         Args:
@@ -68,12 +68,14 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 setattr(self, model_field, value)
 
     @staticmethod
-    def bulk_save(repository_contributors):
+    def bulk_save(repository_contributors) -> None:
         """Bulk save repository contributors."""
         BulkSaveModel.bulk_save(RepositoryContributor, repository_contributors)
 
     @staticmethod
-    def update_data(gh_contributor, repository, user, save=True):
+    def update_data(
+        gh_contributor, repository, user, *, save: bool = True
+    ) -> "RepositoryContributor":
         """Update repository contributor data.
 
         Args:

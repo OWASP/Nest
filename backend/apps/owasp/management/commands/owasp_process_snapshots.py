@@ -13,13 +13,13 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot import Snapshot
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Process pending snapshots and populate them with new data"
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         """Handle the command execution.
 
         Args:
@@ -33,7 +33,7 @@ class Command(BaseCommand):
             error_msg = f"Failed to process snapshot: {e}"
             raise SnapshotProcessingError(error_msg) from e
 
-    def process_snapshots(self):
+    def process_snapshots(self) -> None:
         """Process all pending snapshots."""
         pending_snapshots = Snapshot.objects.filter(status=Snapshot.Status.PENDING)
 
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                 snapshot.error_message = error_msg
                 snapshot.save()
 
-    def process_snapshot(self, snapshot):
+    def process_snapshot(self, snapshot: Snapshot) -> None:
         """Process a single snapshot.
 
         Args:

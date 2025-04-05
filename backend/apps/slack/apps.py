@@ -3,8 +3,9 @@ import logging
 from django.apps import AppConfig
 from django.conf import settings
 from slack_bolt import App
+from slack_sdk import WebClient
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class SlackConfig(AppConfig):
@@ -24,7 +25,7 @@ class SlackConfig(AppConfig):
 if SlackConfig.app:
 
     @SlackConfig.app.error
-    def error_handler(error, body, *args, **kwargs):  # noqa: ARG001
+    def error_handler(error, body, *args, **kwargs) -> None:
         """Handle Slack application errors.
 
         Args:
@@ -37,7 +38,9 @@ if SlackConfig.app:
         logger.exception(error, extra={"body": body})
 
     @SlackConfig.app.use
-    def log_events(client, context, logger, payload, next):  # noqa: A002, ARG001
+    def log_events(
+        client: WebClient, context: dict, logger: logging.Logger, payload: dict, next
+    ) -> None:
         """Log Slack events.
 
         Args:

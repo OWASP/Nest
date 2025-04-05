@@ -95,6 +95,8 @@ line-length = 99
 extend-select = ["I"]
 ignore = [
     "ANN",
+    "A002",
+    "ARG001",
     "ARG002",
     "C901",
     "COM812",
@@ -104,12 +106,15 @@ ignore = [
     "FBT002",
     "FIX002",
     "PD",
+    "TC002",
+    "TC003",
     "PERF203",
     "PLC0414",
     "PLR0912",
     "PLR0913",
     "PLR0915",
     "RUF012",
+    "RUF013",
     "SLF001",
     "TD003",
 ]
@@ -133,3 +138,14 @@ select = ["ALL"]
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = [
+    "arg-type",
+    "assignment",
+    "attr-defined",
+    "import-not-found",
+    "import-untyped",
+    "var-annotated",
+]

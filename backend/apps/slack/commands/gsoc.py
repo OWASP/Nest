@@ -1,6 +1,7 @@
 """Slack bot gsoc command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
@@ -17,7 +18,7 @@ SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
 
-def gsoc_handler(ack, command, client):
+def gsoc_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /gsoc command.
 
     Args:

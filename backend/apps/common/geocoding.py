@@ -3,11 +3,12 @@
 import time
 
 from geopy.geocoders import Nominatim
+from geopy.location import Location
 
 from apps.common.utils import get_nest_user_agent
 
 
-def get_location_coordinates(query, delay=2):
+def get_location_coordinates(query: str, delay: int = 2) -> Location:
     """Get location geo coordinates.
 
     Args:

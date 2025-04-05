@@ -7,7 +7,7 @@ from algoliasearch_django.registration import RegistrationError
 from django.apps import apps
 
 
-def get_params_for_index(index_name):
+def get_params_for_index(index_name: str) -> dict:
     """Return search parameters based on the index name.
 
     Args:
@@ -121,7 +121,7 @@ def get_params_for_index(index_name):
     return params
 
 
-def register_indexes(app_names=("github", "owasp")):
+def register_indexes(app_names: tuple[str, ...] = ("github", "owasp")) -> None:
     """Register indexes.
 
     Args:
@@ -134,7 +134,7 @@ def register_indexes(app_names=("github", "owasp")):
                 register(model)
 
 
-def unregister_indexes(app_names=("github", "owasp")):
+def unregister_indexes(app_names: tuple[str, ...] = ("github", "owasp")) -> None:
     """Unregister indexes.
 
     Args:

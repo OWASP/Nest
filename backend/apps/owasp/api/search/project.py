@@ -1,11 +1,19 @@
 """OWASP app project search API."""
 
+from __future__ import annotations
+
 from algoliasearch_django import raw_search
 
 from apps.owasp.models.project import Project
 
 
-def get_projects(query, attributes=None, limit=25, page=1, searchable_attributes=None):
+def get_projects(
+    query: str,
+    attributes: list = None,
+    limit: int = 25,
+    page: int = 1,
+    searchable_attributes: list = None,
+) -> dict:
     """Return projects relevant to a search query.
 
     Args:

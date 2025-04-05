@@ -26,6 +26,17 @@ repos:
         types:
           - html
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        args:
+          - --exclude
+          - backend/tests
+          - --explicit-package-bases
+          - --config-file
+          - backend/pyproject.toml
+
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
     hooks:

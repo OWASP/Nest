@@ -1,7 +1,9 @@
 """Github pull requests GraphQL queries."""
 
+from __future__ import annotations
+
 import graphene
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, QuerySet, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.pull_request import PullRequestNode
@@ -18,7 +20,9 @@ class PullRequestQuery(BaseQuery):
         login=graphene.String(required=False),
     )
 
-    def resolve_recent_pull_requests(root, info, limit, distinct=False, login=None):
+    def resolve_recent_pull_requests(
+        root, info, limit: int, *, distinct: bool = False, login: str | None = None
+    ) -> QuerySet:
         """Resolve recent pull requests.
 
         Args:

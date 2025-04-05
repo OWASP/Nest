@@ -9,13 +9,13 @@ from apps.github.utils import normalize_url
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.scraper import OwaspScraper
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Scrape owasp.org pages and update relevant chapters."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -24,7 +24,7 @@ class Command(BaseCommand):
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         """Handle the command execution.
 
         Args:

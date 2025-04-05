@@ -1,7 +1,7 @@
 """GraphQL queries for handling OWASP releases."""
 
 import graphene
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, QuerySet, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.release import ReleaseNode
@@ -18,7 +18,9 @@ class ReleaseQuery(BaseQuery):
         login=graphene.String(required=False),
     )
 
-    def resolve_recent_releases(root, info, limit, distinct=False, login=None):
+    def resolve_recent_releases(
+        root, info, limit: int, *, distinct: bool = False, login=None
+    ) -> QuerySet:
         """Resolve recent releases with optional distinct filtering.
 
         Args:

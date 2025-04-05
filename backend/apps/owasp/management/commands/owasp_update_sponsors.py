@@ -10,7 +10,7 @@ from apps.owasp.models.sponsor import Sponsor
 class Command(BaseCommand):
     help = "Import sponsors from the provided YAML file"
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs) -> None:
         """Handle the command execution.
 
         Args:

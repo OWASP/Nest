@@ -17,7 +17,7 @@ class RepositoryContributorQuery(BaseQuery):
         RepositoryContributorNode, limit=graphene.Int(default_value=15)
     )
 
-    def resolve_top_contributors(root, info, limit):
+    def resolve_top_contributors(root, info, limit: int) -> list[RepositoryContributorNode]:
         """Resolve top contributors only for repositories with projects.
 
         Args:

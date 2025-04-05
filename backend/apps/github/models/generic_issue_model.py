@@ -37,7 +37,7 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     created_at = models.DateTimeField(verbose_name="Created at")
     updated_at = models.DateTimeField(verbose_name="Updated at", db_index=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable representation of the issue.
 
         Returns

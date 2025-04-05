@@ -1,5 +1,7 @@
 """Algolia index common classes and helpers."""
 
+from __future__ import annotations
+
 import logging
 from functools import lru_cache
 from pathlib import Path
@@ -13,7 +15,7 @@ from django.conf import settings
 
 from apps.common.constants import NL
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 EXCLUDED_LOCAL_INDEX_NAMES = (
     "projects_contributors_count_asc",
@@ -36,19 +38,19 @@ class IndexRegistry:
 
     _instance = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize index registry."""
         self.excluded_local_index_names = set()
         self.load_excluded_local_index_names()
 
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls) -> IndexRegistry:
         """Get or create a singleton instance of IndexRegistry."""
         if cls._instance is None:
             cls._instance = IndexRegistry()
         return cls._instance
 
-    def is_indexable(self, name: str):
+    def is_indexable(self, name: str) -> bool:
         """Check if an index is enabled for indexing.
 
         Args:
@@ -60,7 +62,7 @@ class IndexRegistry:
         """
         return name.lower() not in self.excluded_local_index_names if IS_LOCAL_BUILD else True
 
-    def load_excluded_local_index_names(self):
+    def load_excluded_local_index_names(self) -> IndexRegistry:
         """Load excluded local index names from settings.
 
         Returns
@@ -81,7 +83,7 @@ class IndexRegistry:
         return self
 
 
-def is_indexable(index_name: str):
+def is_indexable(index_name: str) -> bool:
     """Determine if an index should be created based on configuration.
 
     Args:
@@ -120,7 +122,7 @@ class IndexBase(AlgoliaIndex):
     """Base index class."""
 
     @staticmethod
-    def get_client(ip_address=None):
+    def get_client(ip_address=None) -> SearchClientSync:
         """Return an instance of the search client.
 
         Args:
@@ -140,7 +142,7 @@ class IndexBase(AlgoliaIndex):
         return SearchClientSync(config=config)
 
     @staticmethod
-    def configure_replicas(index_name: str, replicas: dict):
+    def configure_replicas(index_name: str, replicas: dict) -> None:
         """Configure replicas for an index.
 
         Args:
@@ -168,7 +170,7 @@ class IndexBase(AlgoliaIndex):
                 client.set_settings(replica_name, {"ranking": replica_ranking})
 
     @staticmethod
-    def _parse_synonyms_file(file_path):
+    def _parse_synonyms_file(file_path) -> list | None:
         """Parse a synonyms file and return its content.
 
         Args:
@@ -214,7 +216,7 @@ class IndexBase(AlgoliaIndex):
         return synonyms
 
     @staticmethod
-    def reindex_synonyms(app_name, index_name):
+    def reindex_synonyms(app_name: str, index_name: str) -> int | None:
         """Reindex synonyms for a specific index.
 
         Args:
@@ -246,7 +248,7 @@ class IndexBase(AlgoliaIndex):
 
     @staticmethod
     @lru_cache(maxsize=1024)
-    def get_total_count(index_name, search_filters=None):
+    def get_total_count(index_name: str, search_filters=None) -> int | None:
         """Get the total count of records in an index.
 
         Args:

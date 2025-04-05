@@ -9,7 +9,7 @@ from apps.owasp.index.project import ProjectIndex
 class Command(BaseCommand):
     help = "Update OWASP Nest index synonyms."
 
-    def handle(self, *_args, **_options):
+    def handle(self, *_args, **_options) -> None:
         """Update synonyms for Algolia indices.
 
         Args:

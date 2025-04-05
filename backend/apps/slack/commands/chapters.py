@@ -1,6 +1,7 @@
 """Slack bot chapters command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
@@ -13,7 +14,7 @@ from apps.slack.utils import get_text
 COMMAND = "/chapters"
 
 
-def chapters_handler(ack, command, client):
+def chapters_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /chapters command.
 
     Args:

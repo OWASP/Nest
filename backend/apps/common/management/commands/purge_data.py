@@ -8,7 +8,7 @@ from django.db import connection
 class Command(BaseCommand):
     help = "Purge OWASP Nest data."
 
-    def handle(self, *_args, **options):
+    def handle(self, *_args, **options) -> None:
         """Purge data from specified OWASP Nest applications.
 
         Args:

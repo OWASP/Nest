@@ -1,6 +1,7 @@
 """Slack bot projects command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.slack.apps import SlackConfig
 from apps.slack.common.handlers.projects import get_blocks
@@ -10,7 +11,7 @@ from apps.slack.utils import get_text
 COMMAND = "/projects"
 
 
-def projects_handler(ack, command, client):
+def projects_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /projects command.
 
     Args:

@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from apps.common.constants import NL
@@ -12,10 +13,10 @@ from apps.slack.common.gsoc import GSOC_2025_MILESTONES
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
 from apps.slack.utils import get_text
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def gsoc_handler(event, client, ack):
+def gsoc_handler(event: dict, client: WebClient, ack) -> None:
     """Slack #gsoc new member handler.
 
     Args:

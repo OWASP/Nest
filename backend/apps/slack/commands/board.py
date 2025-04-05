@@ -1,6 +1,7 @@
 """Slack bot board command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
@@ -10,7 +11,7 @@ from apps.slack.utils import get_text
 COMMAND = "/board"
 
 
-def board_handler(ack, command, client):
+def board_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /board command.
 
     Args:

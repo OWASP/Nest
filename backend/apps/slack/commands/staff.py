@@ -1,6 +1,7 @@
 """Slack bot staff command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
@@ -10,7 +11,7 @@ from apps.slack.utils import get_staff_data, get_text
 COMMAND = "/staff"
 
 
-def staff_handler(ack, command, client):
+def staff_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /staff command.
 
     Args:

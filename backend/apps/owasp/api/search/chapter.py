@@ -5,7 +5,13 @@ from algoliasearch_django import raw_search
 from apps.owasp.models.chapter import Chapter
 
 
-def get_chapters(query, attributes=None, limit=25, page=1, searchable_attributes=None):
+def get_chapters(
+    query: str,
+    attributes: list = None,
+    limit: int = 25,
+    page: int = 1,
+    searchable_attributes: list = None,
+) -> dict:
     """Return chapters relevant to a search query.
 
     Args:

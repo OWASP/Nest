@@ -1,5 +1,7 @@
 """GitHub release Algolia index configuration."""
 
+from django.db.models import QuerySet
+
 from apps.common.index import IndexBase, register
 from apps.github.models.release import Release
 
@@ -51,11 +53,11 @@ class ReleaseIndex(IndexBase):
     should_index = "is_indexable"
 
     @staticmethod
-    def update_synonyms():
+    def update_synonyms() -> None:
         """Update synonyms for the release index."""
         ReleaseIndex.reindex_synonyms("github", "releases")
 
-    def get_entities(self):
+    def get_entities(self) -> QuerySet:
         """Get entities for indexing.
 
         Returns

@@ -10,7 +10,7 @@ from apps.owasp.models.event import Event
 class Command(BaseCommand):
     help = "Import events from the provided YAML file"
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs) -> None:
         """Handle the command execution.
 
         Args:

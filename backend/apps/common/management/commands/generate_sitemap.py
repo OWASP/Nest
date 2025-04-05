@@ -28,7 +28,7 @@ class Command(BaseCommand):
         ],
     }
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -41,7 +41,7 @@ class Command(BaseCommand):
             help="Directory where sitemap files will be saved",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         """Generate sitemaps for the OWASP Nest application.
 
         Args:
@@ -70,7 +70,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f"Successfully generated sitemaps in {output_dir}"))
 
-    def generate_project_sitemap(self, output_dir):
+    def generate_project_sitemap(self, output_dir: Path) -> None:
         """Generate a sitemap for projects.
 
         Args:
@@ -91,7 +91,7 @@ class Command(BaseCommand):
         content = self.generate_sitemap_content(routes)
         self.save_sitemap(content, output_dir / "sitemap-project.xml")
 
-    def generate_chapter_sitemap(self, output_dir):
+    def generate_chapter_sitemap(self, output_dir: Path) -> None:
         """Generate a sitemap for chapters.
 
         Args:
@@ -112,7 +112,7 @@ class Command(BaseCommand):
         content = self.generate_sitemap_content(routes)
         self.save_sitemap(content, output_dir / "sitemap-chapters.xml")
 
-    def generate_committee_sitemap(self, output_dir):
+    def generate_committee_sitemap(self, output_dir: Path) -> None:
         """Generate a sitemap for committees.
 
         Args:
@@ -136,7 +136,7 @@ class Command(BaseCommand):
         content = self.generate_sitemap_content(routes)
         self.save_sitemap(content, output_dir / "sitemap-committees.xml")
 
-    def generate_user_sitemap(self, output_dir):
+    def generate_user_sitemap(self, output_dir: Path) -> None:
         """Generate a sitemap for users.
 
         Args:
@@ -181,7 +181,7 @@ class Command(BaseCommand):
 
         return self.create_sitemap(urls)
 
-    def generate_index_sitemap(self, sitemap_files):
+    def generate_index_sitemap(self, sitemap_files: list) -> str:
         """Generate the sitemap index file.
 
         Args:
@@ -200,7 +200,7 @@ class Command(BaseCommand):
 
         return self.create_sitemap_index(sitemaps)
 
-    def create_url_entry(self, url_data):
+    def create_url_entry(self, url_data: dict) -> str:
         """Create a URL entry for the sitemap.
 
         Args:
@@ -219,7 +219,7 @@ class Command(BaseCommand):
             "  </url>"
         ).format(**url_data)
 
-    def create_sitemap_index_entry(self, sitemap_data):
+    def create_sitemap_index_entry(self, sitemap_data: dict) -> str:
         """Create a sitemap index entry.
 
         Args:
@@ -233,7 +233,7 @@ class Command(BaseCommand):
             "  <sitemap>\n    <loc>{loc}</loc>\n    <lastmod>{lastmod}</lastmod>\n  </sitemap>"
         ).format(**sitemap_data)
 
-    def create_sitemap(self, urls):
+    def create_sitemap(self, urls: list) -> str:
         """Create the complete sitemap XML.
 
         Args:
@@ -250,7 +250,7 @@ class Command(BaseCommand):
             "</urlset>"
         )
 
-    def create_sitemap_index(self, sitemaps):
+    def create_sitemap_index(self, sitemaps: list) -> str:
         """Create the complete sitemap index XML.
 
         Args:
@@ -268,7 +268,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def save_sitemap(content, filepath):
+    def save_sitemap(content: str, filepath: Path) -> None:
         """Save the sitemap content to a file.
 
         Args:

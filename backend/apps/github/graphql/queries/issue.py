@@ -1,7 +1,9 @@
 """GraphQL queries for handling GitHub issues."""
 
+from __future__ import annotations
+
 import graphene
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, QuerySet, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.issue import IssueNode
@@ -18,7 +20,9 @@ class IssueQuery(BaseQuery):
         login=graphene.String(required=False),
     )
 
-    def resolve_recent_issues(root, info, limit, distinct=False, login=None):
+    def resolve_recent_issues(
+        root, info, limit: int, *, distinct: bool = False, login: str | None = None
+    ) -> QuerySet:
         """Resolve recent issues with optional filtering.
 
         Args:

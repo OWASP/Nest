@@ -13,7 +13,7 @@ class StatsQuery:
 
     stats_overview = graphene.Field(StatsNode)
 
-    def resolve_stats_overview(self, info, **kwargs):
+    def resolve_stats_overview(self, info, **kwargs) -> StatsNode:
         """Resolve stats overview.
 
         Args:

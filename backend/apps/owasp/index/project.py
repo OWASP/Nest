@@ -77,7 +77,7 @@ class ProjectIndex(IndexBase):
     should_index = "is_indexable"
 
     @staticmethod
-    def configure_replicas():
+    def configure_replicas() -> None:
         """Configure the settings for project replicas."""
         replicas = {
             "contributors_count_asc": ["asc(idx_contributors_count)"],

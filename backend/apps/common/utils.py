@@ -1,5 +1,7 @@
 """Common app utils."""
 
+from __future__ import annotations
+
 import re
 from datetime import datetime, timezone
 
@@ -10,7 +12,7 @@ from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
 
-def get_absolute_url(path):
+def get_absolute_url(path: str) -> str:
     """Return the absolute URL for a given path.
 
     Args:
@@ -23,7 +25,7 @@ def get_absolute_url(path):
     return f"{settings.SITE_URL}/{path}"
 
 
-def get_nest_user_agent():
+def get_nest_user_agent() -> str:
     """Return the user agent string for the Nest application.
 
     Returns
@@ -33,7 +35,7 @@ def get_nest_user_agent():
     return settings.APP_NAME.replace(" ", "-").lower()
 
 
-def get_user_ip_address(request):
+def get_user_ip_address(request) -> str:
     """Retrieve the user's IP address from the request.
 
     Args:
@@ -50,7 +52,7 @@ def get_user_ip_address(request):
     return x_forwarded_for.split(",")[0] if x_forwarded_for else request.META.get("REMOTE_ADDR")
 
 
-def join_values(fields, delimiter=" "):
+def join_values(fields: list, delimiter: str = " ") -> str:
     """Join non-empty field values using a specified delimiter.
 
     Args:
@@ -64,7 +66,7 @@ def join_values(fields, delimiter=" "):
     return delimiter.join(field for field in fields if field)
 
 
-def natural_date(value):
+def natural_date(value: int | str) -> str:
     """Convert a date or timestamp into a human-readable format.
 
     Args:
@@ -97,7 +99,7 @@ def natural_number(value, unit=None):
     return f"{number} {unit}{pluralize(value)}" if unit else number
 
 
-def slugify(text):
+def slugify(text: str) -> str:
     """Generate a slug from the given text.
 
     Args:
@@ -110,7 +112,7 @@ def slugify(text):
     return re.sub(r"-{2,}", "-", django_slugify(text))
 
 
-def truncate(text, limit, truncate="..."):
+def truncate(text: str, limit: int, truncate: str = "...") -> str:
     """Truncate text to a specified character limit.
 
     Args:

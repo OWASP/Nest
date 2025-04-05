@@ -1,6 +1,7 @@
 """Slack bot leaders command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
@@ -11,7 +12,7 @@ from apps.slack.utils import escape, get_text
 COMMAND = "/leaders"
 
 
-def leaders_handler(ack, command, client):
+def leaders_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /leaders command.
 
     Args:

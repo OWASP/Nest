@@ -1,6 +1,7 @@
 """Slack bot events command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL, OWASP_WEBSITE_URL
 from apps.slack.apps import SlackConfig
@@ -10,7 +11,7 @@ from apps.slack.utils import get_events_data, get_text
 COMMAND = "/events"
 
 
-def events_handler(ack, command, client):
+def events_handler(ack, command: dict, client: WebClient) -> None:
     """Slack /events command handler.
 
     Args:
