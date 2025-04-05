@@ -10,8 +10,8 @@ const createApolloClient = () => {
   }
 
   return new ApolloClient({
-    cache: new InMemoryCache(),
     uri: GRAPHQL_URL,
+    cache: new InMemoryCache(),
   })
 }
 const apolloClient = createApolloClient()

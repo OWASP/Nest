@@ -1,12 +1,20 @@
-import { useRef, useEffect, useCallback } from 'react'
+import React, { useRef, useEffect, useCallback } from 'react'
 
-export const TruncatedText = ({ text, className = '' }: { text: string; className?: string }) => {
+export const TruncatedText = ({
+  text,
+  children,
+  className = '',
+}: {
+  text?: string
+  children?: React.ReactNode
+  className?: string
+}) => {
   const textRef = useRef<HTMLSpanElement>(null)
 
   const checkTruncation = useCallback(() => {
     const element = textRef.current
     if (element) {
-      element.title = text
+      element.title = text || element.textContent || ''
     }
   }, [text])
 
@@ -31,7 +39,7 @@ export const TruncatedText = ({ text, className = '' }: { text: string; classNam
       ref={textRef}
       className={`block overflow-hidden truncate text-ellipsis whitespace-nowrap ${className}`}
     >
-      {text}
+      {text || children}
     </span>
   )
 }

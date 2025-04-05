@@ -41,7 +41,7 @@ test.describe('Chapters Page', () => {
 
   test('opens window on View Details button click', async ({ page }) => {
     const contributeButton = await page.getByRole('button', { name: 'View Details' })
-    await contributeButton.click()
+    await contributeButton.click({ timeout: 10000 })
     expect(await page.url()).toContain('chapters/chapter_1')
   })
 })

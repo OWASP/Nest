@@ -1,6 +1,6 @@
-import { Skeleton } from '@chakra-ui/react'
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Skeleton } from '@heroui/skeleton'
 import { debounce } from 'lodash'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 import TagManager from 'react-gtm-module'
@@ -89,7 +89,7 @@ const SearchBar: React.FC<SearchProps> = ({
             )}
           </>
         ) : (
-          <Skeleton height="48px" width="100%" borderRadius="lg" />
+          <Skeleton className="h-12 rounded-lg" />
         )}
       </div>
     </div>

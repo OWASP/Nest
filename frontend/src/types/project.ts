@@ -75,6 +75,7 @@ export interface RepositoriesCardProps {
 export interface RepositoryCardProps {
   contributorsCount: number
   forksCount: number
+  key: string
   name: string
   openIssuesCount: number
   starsCount: number

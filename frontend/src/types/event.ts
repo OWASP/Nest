@@ -4,7 +4,7 @@ export type EventType = {
   key: string
   name: string
   startDate: string
-  url: string
-  summary?: string
   suggestedLocation?: string
+  summary?: string
+  url: string
 }

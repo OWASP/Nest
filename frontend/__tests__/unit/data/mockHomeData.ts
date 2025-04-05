@@ -6,6 +6,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP GameSec Framework',
       type: 'Tool',
+      url: `/projects/gamesec-framework`,
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -13,6 +14,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 2',
       type: 'Documentation',
+      url: `/projects/owasp-project-2`,
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -20,6 +22,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 3',
       type: 'Code',
+      url: `/projects/owasp-project-3`,
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -27,6 +30,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 4',
       type: 'Other',
+      url: `/projects/owasp-project-4`,
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -34,6 +38,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 5',
       type: '',
+      url: `/projects/owasp-project-5`,
     },
   ],
   recentPosts: [
@@ -48,7 +53,7 @@ export const mockGraphQLData = {
   sponsors: [
     {
       name: 'OWASP Foundation',
-      imageUrl: 'https://example.com/owasp-foundation.png',
+      imageUrl: 'https://avatars.githubusercontent.com/owasp-foundation.png',
     },
   ],
   recentChapters: [
@@ -58,6 +63,7 @@ export const mockGraphQLData = {
       leaders: ['Chapter Leader1', 'Chapter Leader2'],
       name: 'OWASP Sivagangai',
       suggestedLocation: 'Sivagangai, Tamil Nadu, India',
+      url: `/chapters/sivagangai`,
     },
   ],
   topContributors: [
@@ -79,15 +85,20 @@ export const mockGraphQLData = {
         url: 'https://github.com/arkid15r',
         name: 'Raj gupta',
       },
+      url: 'https://github,com/owasp/owasp-nest/issues/177',
     },
   ],
   recentReleases: [
     {
-      author: null,
+      author: {
+        avatarUrl: 'https://avatars.githubusercontent.com/u/134638667?v=4',
+        login: 'user',
+      },
       isPreRelease: false,
       name: 'v0.9.2',
       publishedAt: '2024-12-13T14:43:46+00:00',
       tagName: 'v0.9.2',
+      url: 'https://github.com/owasp/owasp-nest/releases/tag/v0.9.2',
     },
   ],
   statsOverview: {

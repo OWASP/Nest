@@ -1,20 +1,25 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
 import { mockChapterData } from '@unit/data/mockChapterData'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
+import ChaptersPage from 'app/chapters/page'
 
-import ChaptersPage from 'pages/Chapters'
-
-jest.mock('api/fetchAlgoliaData', () => ({
+jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useSearchParams: () => new URLSearchParams(),
 }))
+
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>
@@ -23,12 +28,24 @@ jest.mock('components/Pagination', () =>
   ))
 )
 
+jest.mock('@/components/MarkdownWrapper', () => {
+  return ({ content, className }: { content: string; className?: string }) => (
+    <div
+      className={`md-wrapper ${className || ''}`}
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
+  )
+})
+
 describe('ChaptersPage Component', () => {
+  let mockRouter: { push: jest.Mock }
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockChapterData.chapters,
       totalPages: 2,
     })
+    mockRouter = { push: jest.fn() }
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -100,9 +117,6 @@ describe('ChaptersPage Component', () => {
     expect(screen.queryByTestId('status')).not.toBeInTheDocument()
   })
   test('opens  window on View Details button click', async () => {
-    const navigateMock = jest.fn()
-    ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
-
     render(<ChaptersPage />)
 
     await waitFor(() => {
@@ -112,7 +126,7 @@ describe('ChaptersPage Component', () => {
     })
 
     //suppose index_key is chapter_1
-    expect(navigateMock).toHaveBeenCalledWith('/chapters/chapter_1')
+    expect(mockRouter.push).toHaveBeenCalledWith('/chapters/chapter_1')
 
     // Clean up the mock
     jest.restoreAllMocks()

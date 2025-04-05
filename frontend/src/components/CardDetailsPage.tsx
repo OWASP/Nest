@@ -1,17 +1,19 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Image from 'next/image'
+import Link from 'next/link'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 import { getSocialIcon } from 'utils/urlIconMappings'
-import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import ItemCardList from 'components/ItemCardList'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/TopContributors'
+import ChapterMapWrapper from './ChapterMapWrapper'
 import LeadersList from './LeadersList'
 
 const DetailsCard = ({
@@ -78,7 +80,7 @@ const DetailsCard = ({
             type === 'committee' ||
             type === 'user') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
-              {stats.map((stat, index) => (
+              {stats?.map((stat, index) => (
                 <InfoBlock
                   className="pb-1"
                   icon={stat.icon}
@@ -92,7 +94,7 @@ const DetailsCard = ({
           )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
-              <ChapterMap
+              <ChapterMapWrapper
                 geoLocData={geolocationData ? [geolocationData] : []}
                 showLocal={true}
                 style={{
@@ -108,10 +110,12 @@ const DetailsCard = ({
         </div>
         {(type === 'project' || type === 'repository') && (
           <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            className={`mb-8 grid grid-cols-1 gap-6 ${topics?.length === 0 || languages?.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages && languages.length > 0 && (
+              <ToggleableList items={languages ?? []} label="Languages" />
+            )}
+            {topics && topics.length > 0 && <ToggleableList items={topics ?? []} label="Topics" />}
           </div>
         )}
         {topContributors && (
@@ -191,25 +195,28 @@ const DetailsCard = ({
                     <div className="flex w-full flex-col justify-between">
                       <div className="flex w-full items-center">
                         {showAvatar && (
-                          <a
-                            className="flex-shrink-0 text-blue-400 hover:underline dark:text-blue-200"
+                          <Link
+                            className="flex-shrink-0 text-blue-400 hover:underline"
                             href={`/community/users/${item?.author?.login}`}
                           >
-                            <img
+                            <Image
+                              height={24}
+                              width={24}
                               src={item?.author?.avatarUrl}
                               alt={item?.author?.name}
-                              className="mr-2 h-6 w-6 rounded-full"
+                              className="mr-2 rounded-full"
                             />
-                          </a>
+                          </Link>
                         )}
                         <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                          <a
+                          <Link
                             className="text-blue-500 hover:underline dark:text-blue-400"
                             href={item?.url}
                             target="_blank"
+                            rel="noopener noreferrer"
                           >
                             {item.name}
-                          </a>
+                          </Link>
                         </h3>
                       </div>
                       <div className="ml-0.5 w-full">
@@ -241,22 +248,22 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-const SocialLinks = ({ urls }) => {
+const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
         {urls.map((url, index) => (
-          <a
+          <Link
             key={index}
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 transition-colors hover:text-gray-800 dark:text-blue-600 dark:hover:text-gray-200"
+            className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
           >
             <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-          </a>
+          </Link>
         ))}
       </div>
     </div>

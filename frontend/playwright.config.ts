@@ -16,7 +16,7 @@ export default defineConfig({
     trace: 'off',
   },
   webServer: {
-    command: 'npm run dev',
+    command: 'npm run build && npm run dev',
     url: 'http://localhost:3000',
   },
 })

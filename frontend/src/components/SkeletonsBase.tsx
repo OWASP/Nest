@@ -1,7 +1,7 @@
+import { Skeleton } from '@heroui/skeleton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import CardSkeleton from 'components/skeletons/Card'
 import UserCardSkeleton from 'components/skeletons/UserCard'
-import { Skeleton } from 'components/ui/Skeleton'
 
 function userCardRender() {
   const cardCount = 12
@@ -14,7 +14,13 @@ function userCardRender() {
   )
 }
 
-const SkeletonBase = ({ indexName, loadingImageUrl }) => {
+const SkeletonBase = ({
+  indexName,
+  loadingImageUrl,
+}: {
+  indexName: string
+  loadingImageUrl: string
+}) => {
   let Component
   switch (indexName) {
     case 'chapters':
@@ -49,7 +55,7 @@ const SkeletonBase = ({ indexName, loadingImageUrl }) => {
   return (
     <div className="flex w-full flex-col items-center justify-center">
       {indexName == 'chapters' ? (
-        <Skeleton className="mb-2 w-full max-w-6xl" h={400} />
+        <Skeleton className="mb-2 h-96 w-full max-w-6xl" />
       ) : (
         <Component />
       )}
