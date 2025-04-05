@@ -16,6 +16,15 @@ test.describe('About Page', () => {
       }
     })
 
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
+
     await page.goto('/about')
   })
 

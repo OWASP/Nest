@@ -1,3 +1,6 @@
+clean-schema:
+	@rm -rf schema/.venv
+
 test-schema:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-schema \

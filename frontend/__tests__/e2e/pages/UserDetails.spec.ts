@@ -9,6 +9,14 @@ test.describe('User Details Page', () => {
         json: { data: mockUserDetailsData },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('community/users/test-user')
   })
   test('should have a heading and summary', async ({ page }) => {
