@@ -9,6 +9,14 @@ test.describe('Chapter Details Page', () => {
         json: { data: { chapter: mockChapterDetailsData } },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/chapters/test-chapter')
   })
 
