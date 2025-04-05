@@ -1,9 +1,5 @@
 import { mockHomeData } from '@e2e/data/mockHomeData'
-import { test, expect, Page } from '@playwright/test'
-
-function getFirstHeading(page: Page, name: string) {
-  return page.getByRole('heading', { name }).first()
-}
+import { test, expect } from '@playwright/test'
 
 test.describe('Home Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,6 +9,14 @@ test.describe('Home Page', () => {
         json: mockHomeData,
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/')
   })
 
@@ -26,7 +30,7 @@ test.describe('Home Page', () => {
   })
 
   test('should have new chapters', async ({ page }) => {
-    await expect(getFirstHeading(page, 'New Chapters')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'New Chapters' }).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'chapter 1' })).toBeVisible()
     await expect(page.getByText('Chapter Leader1,').first()).toBeVisible()
     await expect(page.getByText('Feb 20, 2025').first()).toBeVisible()
@@ -35,7 +39,7 @@ test.describe('Home Page', () => {
   })
 
   test('should have new projects', async ({ page }) => {
-    await expect(getFirstHeading(page, 'New Projects')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'New Projects' }).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 1', exact: true })).toBeVisible()
     await expect(page.getByText('Project Leader1,').first()).toBeVisible()
     await expect(page.getByText('Dec 6, 2024').first()).toBeVisible()
@@ -44,7 +48,7 @@ test.describe('Home Page', () => {
   })
 
   test('should have recent posts', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Recent News & Opinions')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'News & Opinions' }).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Post 1', exact: true })).toBeVisible()
     await expect(page.getByText('Author 1')).toBeVisible()
     await expect(page.getByText('Feb 24').first()).toBeVisible({ timeout: 10000 })
@@ -52,24 +56,24 @@ test.describe('Home Page', () => {
   })
 
   test('should have top contributors', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Top Contributors')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top Contributors' }).first()).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
     await expect(page.getByText('Contributor 1')).toBeVisible()
     await expect(page.getByText('Project 21')).toBeVisible()
   })
 
   test('should have recent issues', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Recent Issues')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Issues' }).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Issue 1' })).toBeVisible()
     await expect(page.getByText('Feb 24,').first()).toBeVisible()
     await expect(page.getByText('5 comments')).toBeVisible()
   })
 
   test('should have recent Releases', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Recent Releases')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Releases' }).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Release 1' })).toBeVisible()
     await expect(page.getByText('Feb 22,')).toBeVisible()
-    await expect(page.getByText('v1', { exact: true })).toBeVisible()
+    await expect(page.getByText('nest-repository-1', { exact: true })).toBeVisible()
   })
 
   test('should be able to join OWASP', async ({ page }) => {
@@ -83,7 +87,7 @@ test.describe('Home Page', () => {
   })
 
   test('should have upcoming events', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Upcoming Events')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Upcoming Events' }).first()).toBeVisible()
     await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
     await expect(page.getByText('Feb 27 — 28, 2025')).toBeVisible()
     await page.getByRole('button', { name: 'Event 1' }).click()

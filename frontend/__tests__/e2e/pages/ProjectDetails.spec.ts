@@ -1,9 +1,5 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-
-function getFirstHeading(page: Page, name: string) {
-  return page.getByRole('heading', { name }).first()
-}
 
 test.describe('Project Details Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,6 +9,14 @@ test.describe('Project Details Page', () => {
         json: { data: mockProjectDetailsData },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/projects/test-project', { timeout: 60000 })
   })
 
@@ -24,7 +28,7 @@ test.describe('Project Details Page', () => {
   })
 
   test('should have project details block', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Project Details')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project Details' }).first()).toBeVisible()
     await expect(page.getByText('Last Updated: Feb 7, 2025')).toBeVisible()
     await expect(page.getByText('Level: Lab')).toBeVisible()
     await expect(page.getByText('Leaders: alice, bob')).toBeVisible()
@@ -40,21 +44,21 @@ test.describe('Project Details Page', () => {
   })
 
   test('should have project topics', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Topics')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Topics' }).first()).toBeVisible()
     await expect(page.getByText('graphql', { exact: true })).toBeVisible()
     await expect(page.getByText('django', { exact: true })).toBeVisible()
     await expect(page.getByText('backend')).toBeVisible()
   })
 
   test('should have project languages', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Languages')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Languages' }).first()).toBeVisible()
     await expect(page.getByText('Python', { exact: true })).toBeVisible()
     await expect(page.getByText('GraphQL', { exact: true })).toBeVisible()
     await expect(page.getByText('JavaScript', { exact: true })).toBeVisible()
   })
 
   test('should have top contributors', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Top Contributors')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top Contributors' }).first()).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
     await expect(page.getByText('Contributor 1')).toBeVisible()
     await expect(page.getByText('30 Contributions')).toBeVisible()
@@ -72,7 +76,7 @@ test.describe('Project Details Page', () => {
   })
 
   test('should have project recent issues', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Recent Issues')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Issues' }).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Fix authentication bug' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Dave Debugger' })).toBeVisible()
     await expect(page.getByText('Feb 5, 2025')).toBeVisible()
@@ -80,14 +84,14 @@ test.describe('Project Details Page', () => {
   })
 
   test('should have project recent releases', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Recent Releases')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Releases' }).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: 'V1.2.0' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Charlie Dev' })).toBeVisible()
     await expect(page.getByText('Jan 20, 2025')).toBeVisible()
   })
 
   test('should have project repositories', async ({ page }) => {
-    await expect(getFirstHeading(page, 'Repositories')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Repositories' }).first()).toBeVisible()
     await expect(page.getByText('Repo One')).toBeVisible()
     await expect(page.getByText('Stars95')).toBeVisible()
     await expect(page.getByText('Forks12')).toBeVisible()

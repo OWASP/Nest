@@ -23,10 +23,17 @@ class SnapshotQuery(BaseQuery):
     def resolve_snapshot(root, info, key):
         """Resolve snapshot by key."""
         try:
-            return Snapshot.objects.get(key=key)
+            return Snapshot.objects.get(
+                key=key,
+                status=Snapshot.Status.COMPLETED,
+            )
         except Snapshot.DoesNotExist:
             return None
 
     def resolve_snapshots(root, info, limit):
         """Resolve snapshots."""
-        return Snapshot.objects.order_by("-created_at")[:limit]
+        return Snapshot.objects.filter(
+            status=Snapshot.Status.COMPLETED,
+        ).order_by(
+            "-created_at",
+        )[:limit]

@@ -105,9 +105,8 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
     })
 
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div.mb-8') as HTMLElement
+    const contributorsSection = screen.getByTestId('top-contributors')
+
     const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 

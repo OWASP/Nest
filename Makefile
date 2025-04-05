@@ -1,12 +1,18 @@
 include backend/Makefile
 include cspell/Makefile
+include docs/Makefile
 include frontend/Makefile
 include schema/Makefile
 
 build:
 	@docker compose build
 
-check-all: \
+clean: \
+	clean-backend \
+	clean-frontend \
+	clean-schema
+
+check: \
 	check-backend \
 	check-frontend \
 	check-spelling
@@ -14,9 +20,9 @@ check-all: \
 check-backend: \
 	pre-commit
 
-check-test-all: \
-	check-all \
-	test-all
+check-test: \
+	check \
+	test
 
 check-test-backend: \
 	pre-commit \
@@ -30,10 +36,9 @@ pre-commit:
 	@pre-commit run -a
 
 run:
-	@docker compose -f docker/docker-compose-local.yaml build
-	@docker compose -f docker/docker-compose-local.yaml up --remove-orphans
+	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
 
-test-all: \
+test: \
 	test-nest-app \
 	test-schema
 
@@ -47,6 +52,8 @@ update-dependencies: \
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \
+	update-cspell-dependencies \
+	update-docs-dependencies \
 	update-frontend-dependencies \
 	update-pre-commit
 
