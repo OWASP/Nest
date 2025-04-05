@@ -83,7 +83,8 @@ services:
       - nest-network
     volumes:
       - ../frontend:/home/owasp
-      - /home/owasp/node_modules
+      - frontend-alpine:/home/owasp/node_modules
+      - frontend-next:/home/owasp/.next
 
 networks:
   nest-network:
@@ -92,4 +93,5 @@ volumes:
   backend-data:
   db-data:
   docs-data:
-  frontend-data:
+  frontend-alpine:
+  frontend-next:
