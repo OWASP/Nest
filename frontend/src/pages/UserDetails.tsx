@@ -6,6 +6,7 @@ import {
   faUser,
   faFileCode,
   faBookmark,
+  faCodeMerge,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_USER_DATA } from 'api/queries/userQueries'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
@@ -193,8 +194,24 @@ const UserDetailsPage: React.FC = () => {
       unit: 'Repository',
       value: user.publicRepositoriesCount,
     },
-    { icon: faFileCode, value: user.issuesCount, unit: 'Issue' },
-    { icon: faBookmark, value: user.releasesCount, unit: 'Release' },
+    {
+      icon: faFileCode,
+      value: user.issuesCount,
+      pluralizedName: 'Issues',
+      unit: 'Issue',
+    },
+    {
+      icon: faBookmark,
+      value: user.releasesCount,
+      pluralizedName: 'Releases',
+      unit: 'Release',
+    },
+    {
+      icon: faCodeMerge,
+      value: user.contributionsCount,
+      pluralizedName: 'Contributions',
+      unit: 'Contribution',
+    },
   ]
 
   const Heatmap = () => (
