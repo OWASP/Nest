@@ -10,6 +10,7 @@ import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
 import { toaster } from 'components/ui/toaster'
+import { TruncatedText } from 'components/TruncatedText'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -55,8 +56,8 @@ export default function ChapterDetailsPage() {
     {
       label: 'URL',
       value: (
-        <Link href={chapter.url} className="text-blue-400 hover:underline">
-          {chapter.url}
+        <Link href={chapter.url} className="text-blue-400 hover:underline w-5/6">
+          <TruncatedText text={chapter.url} title={chapter.url} />
         </Link>
       ),
     },
