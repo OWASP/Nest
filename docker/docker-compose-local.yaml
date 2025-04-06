@@ -25,7 +25,7 @@ services:
       - nest-network
     volumes:
       - ../backend:/home/owasp
-      - backend-data:/home/owasp/.venv
+      - backend-alpine:/home/owasp/.venv
 
   db:
     container_name: nest-db
@@ -61,7 +61,7 @@ services:
     volumes:
       - ../docs:/home/owasp/docs
       - ../schema:/home/owasp/schema
-      - docs-data:/home/owasp/.venv
+      - docs-alpine:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -90,7 +90,7 @@ networks:
   nest-network:
 
 volumes:
-  backend-data:
+  backend-alpine:
   db-data:
   docs-data:
   frontend-alpine:

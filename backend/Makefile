@@ -1,3 +1,8 @@
+clean-backend:
+	@rm -rf backend/.cache
+	@rm -rf backend/.local
+	@rm -rf backend/.venv
+
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
 
@@ -127,7 +132,7 @@ setup:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 shell-backend:
-	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
+	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
 sync-data: \
 	update-data \
@@ -139,7 +144,7 @@ test-backend:
 		--cache-from nest-test-backend \
 		-f backend/docker/Dockerfile.test backend \
 		-t nest-test-backend
-	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend pytest
+	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest
 
 update-backend-dependencies:
 	@CMD="poetry update" $(MAKE) exec-backend-command
