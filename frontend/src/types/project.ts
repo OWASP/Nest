@@ -75,7 +75,6 @@ export interface RepositoriesCardProps {
 export interface RepositoryCardProps {
   contributorsCount: number
   forksCount: number
-  key: string
   name: string
   openIssuesCount: number
   starsCount: number
@@ -93,6 +92,7 @@ export type ProjectReleaseType = {
   isPreRelease: boolean
   name: string
   publishedAt: number
+  repositoryName: string
   tagName: string
   url: string
 }
