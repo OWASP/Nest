@@ -16,7 +16,3 @@ class Donate(CommandBase):
             SECTION_BREAK="{{ SECTION_BREAK }}",
             DIVIDER="{{ DIVIDER }}",
         )
-
-
-if SlackConfig.app:
-    Donate().config_command()

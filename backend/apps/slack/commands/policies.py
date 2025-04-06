@@ -41,7 +41,3 @@ class Policies(CommandBase):
             SECTION_BREAK="{{ SECTION_BREAK }}",
             DIVIDER="{{ DIVIDER }}",
         )
-
-
-if SlackConfig.app:
-    Policies().config_command()

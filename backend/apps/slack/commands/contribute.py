@@ -34,7 +34,3 @@ class Contribute(CommandBase):
                 summary_truncation=300,
             ),
         )
-
-
-if SlackConfig.app:
-    Contribute().config_command()

@@ -24,7 +24,3 @@ class Projects(CommandBase):
                 summary_truncation=300,
             ),
         )
-
-
-if SlackConfig.app:
-    Projects().config_command()

@@ -28,7 +28,3 @@ class Chapters(CommandBase):
                 summary_truncation=300,
             ),
         )
-
-
-if SlackConfig.app:
-    Chapters().config_command()

@@ -14,7 +14,3 @@ class Jobs(CommandBase):
         return self.get_template_file().render(
             jobs_channel=OWASP_JOBS_CHANNEL_ID, feedback_message=FEEDBACK_CHANNEL_MESSAGE, NL=NL
         )
-
-
-if SlackConfig.app:
-    Jobs().config_command()

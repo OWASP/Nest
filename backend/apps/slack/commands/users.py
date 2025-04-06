@@ -24,7 +24,3 @@ class Users(CommandBase):
                 summary_truncation=300,
             ),
         )
-
-
-if SlackConfig.app:
-    Users().config_command()

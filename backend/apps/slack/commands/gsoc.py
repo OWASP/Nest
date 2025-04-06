@@ -18,9 +18,9 @@ SUPPORTED_YEAR_END = 2025
 SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
-SEPTEMBER = 9
+MARCH = 3
 now = timezone.now()
-previous_gsoc_year = now.year if now.month > SEPTEMBER else now.year - 1
+gsoc_year = now.year if now.month > MARCH else now.year - 1
 projects_url = get_absolute_url("projects")
 
 
@@ -37,7 +37,7 @@ class Gsoc(CommandBase):
                 mode="general",
                 gsoc_channel=OWASP_GSOC_CHANNEL_ID,
                 contribute_channel=OWASP_CONTRIBUTE_CHANNEL_ID,
-                previous_year=previous_gsoc_year,
+                previous_year=gsoc_year,
                 projects_url=projects_url,
                 NL=NL,
             )
@@ -64,7 +64,3 @@ class Gsoc(CommandBase):
         return template.render(
             mode="invalid", command_text=command_text, command=self.get_command(), NL=NL
         )
-
-
-if SlackConfig.app:
-    Gsoc().config_command()

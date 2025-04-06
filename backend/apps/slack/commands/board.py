@@ -17,7 +17,3 @@ class Board(CommandBase):
         return self.get_template_file().render(
             url="https://owasp.org/www-board/", name="Global board", NL=NL
         )
-
-
-if SlackConfig.app:
-    Board().config_command()
