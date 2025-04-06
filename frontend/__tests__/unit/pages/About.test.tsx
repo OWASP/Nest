@@ -432,4 +432,89 @@ describe('About Component', () => {
       expect(screen.getByText('Starr Brown')).toBeInTheDocument()
     })
   })
+
+  test('shows fallback when user data is missing', async () => {
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (options?.variables?.key === 'nest') {
+        return mockProjectData
+      } else if (options?.variables?.key === 'arkid15r') {
+        return { data: null, loading: false, error: false }
+      } else if (options?.variables?.key === 'kasya') {
+        return mockUserData('kasya')
+      } else if (options?.variables?.key === 'mamicidal') {
+        return mockUserData('mamicidal')
+      }
+      return { loading: true }
+    })
+
+    render(<About />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/No data available for arkid15r/i)).toBeInTheDocument()
+    })
+  })
+
+  test('renders LoadingSpinner when project data is loading', async () => {
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (options?.variables?.key === 'nest') {
+        return { loading: true, data: null, error: null }
+      }
+      return {
+        loading: false,
+        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
+        error: null,
+      }
+    })
+
+    render(<About />)
+    await waitFor(() => {
+      // Look for the element with alt text "Loading indicator"
+      const spinner = screen.getAllByAltText('Loading indicator')
+      expect(spinner.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('renders ErrorDisplay when project is null', async () => {
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (options?.variables?.key === 'nest') {
+        return { loading: false, data: { project: null }, error: null }
+      }
+      return {
+        loading: false,
+        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
+        error: null,
+      }
+    })
+    render(<About />)
+    await waitFor(() => {
+      expect(screen.getByText(/Data not found/)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Sorry, the page you're looking for doesn't exist/)
+      ).toBeInTheDocument()
+    })
+  })
+
+  test('triggers toaster error when GraphQL request fails for project', async () => {
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (options?.variables?.key === 'nest') {
+        return { loading: false, data: null, error: new Error('GraphQL error') }
+      }
+      return {
+        loading: false,
+        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
+        error: null,
+      }
+    })
+    render(<About />)
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
+      })
+    })
+  })
 })
