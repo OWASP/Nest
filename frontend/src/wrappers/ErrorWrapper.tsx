@@ -1,7 +1,7 @@
 'use client'
 import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
-import * as Sentry from '@sentry/react'
+// import * as Sentry from '@sentry/react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 interface ErrorDisplayProps {
@@ -68,9 +68,9 @@ export const handleAppError = (error: unknown) => {
       : new AppError(500, error instanceof Error ? error.message : ERROR_CONFIGS['500'].message)
 
   // Log to Sentry
-  if (appError.statusCode >= 500) {
-    Sentry.captureException(error instanceof Error ? error : appError)
-  }
+  // if (appError.statusCode >= 500) {
+  //   Sentry.captureException(error instanceof Error ? error : appError)
+  // }
   const errorConfig = ERROR_CONFIGS[appError.statusCode === 404 ? '404' : '500']
 
   addToast({
@@ -84,14 +84,15 @@ export const handleAppError = (error: unknown) => {
 // Main error boundary wrapper
 export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Sentry.ErrorBoundary
-      fallback={({ error }) => {
-        Sentry.captureException(error)
-        const errorConfig = ERROR_CONFIGS['500']
-        return <ErrorDisplay {...errorConfig} />
-      }}
-    >
-      {children}
-    </Sentry.ErrorBoundary>
+    <>{children}</>
+    // <Sentry.ErrorBoundary
+    //   fallback={({ error }) => {
+    //     Sentry.captureException(error)
+    //     const errorConfig = ERROR_CONFIGS['500']
+    //     return <ErrorDisplay {...errorConfig} />
+    //   }}
+    // >
+    //   {children}
+    // </Sentry.ErrorBoundary>
   )
 }
