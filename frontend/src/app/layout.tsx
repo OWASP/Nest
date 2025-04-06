@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
+      <
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ minHeight: '100vh' }}
       >
@@ -42,7 +42,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </Providers>
-      </body>
+      </>
     </html>
   )
 }
