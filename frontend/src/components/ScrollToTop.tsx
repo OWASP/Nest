@@ -1,3 +1,4 @@
+'use client'
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState, useEffect, useCallback } from 'react'
