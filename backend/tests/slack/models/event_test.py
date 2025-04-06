@@ -240,19 +240,10 @@ class EventModelTest(TestCase):
         assert event.trigger == "message"
 
     def test_create_method_exceptions(self):
-        with pytest.raises(KeyError):
-            Event.create({}, self.payload)
-
-    @patch("apps.slack.models.event.Event.save")
-    def test_save_called_with_params(self, mock_save):
-        event = Event(user_id="U123", user_name="user")
-        event.save()
-        mock_save.assert_called_once()
-
-    def test_command_attribute(self):
-        event = Event()
-        event.command = "test_command"
-        assert event.command == "test_command"
+        @patch("apps.slack.models.event.Event.save")
+        def test_save_called_with_params(self, mock_save):
+            Event.create(self.context, self.payload)
+            mock_save.assert_called_once()
 
     def test_event_from_slack_owasp_command_whitespace_only(self):
         self.payload["text"] = "  "

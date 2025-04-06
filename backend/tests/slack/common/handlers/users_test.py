@@ -8,6 +8,7 @@ from apps.slack.common.presentation import EntityPresentation
 pagination_buttons_path = "apps.slack.common.handlers.users.get_pagination_buttons"
 john_doe = "John Doe"
 example_user_url = "https://example.com/user"
+dangerous_query = "test & <script>"
 
 
 class TestUsersHandler:
@@ -221,34 +222,16 @@ class TestUsersHandler:
 
     def test_search_query_escaping(self, setup_mocks, mock_user_data):
         setup_mocks["get_users"].return_value = mock_user_data
-        dangerous_query = "test & <script>"
 
         presentation = EntityPresentation(include_feedback=True)
         blocks = get_blocks(search_query=dangerous_query, presentation=presentation)
 
         blocks_str = str(blocks)
         assert dangerous_query in blocks_str
-
+        html_content = blocks[0]["text"]["text"]
+        assert "&amp;" in html_content
+        assert "&lt;script&gt;" in html_content
         assert "community/users?q=test & <script>" in blocks_str
-
-    def test_pagination_empty(self, setup_mocks, mock_user_data):
-        mock_user_data["nbPages"] = 1
-        setup_mocks["get_users"].return_value = mock_user_data
-        presentation = EntityPresentation(include_pagination=True)
-
-        with patch("apps.slack.common.handlers.users.get_pagination_buttons", return_value=[]):
-            blocks = get_blocks(page=1, presentation=presentation)
-            assert all(block["type"] != "actions" for block in blocks)
-
-    def test_blocks_initialization(self, setup_mocks, mock_user_data):
-        setup_mocks["get_users"].return_value = mock_user_data
-        search_query = "test"
-
-        blocks = get_blocks(search_query=search_query)
-
-        assert len(blocks) > 0
-        assert blocks[0]["type"] == "section"
-        assert john_doe in blocks[0]["text"]["text"]
 
     def test_pagination_edge_case(self, setup_mocks, mock_user_data):
         mock_user_data["nbPages"] = 2

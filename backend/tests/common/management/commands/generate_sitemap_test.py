@@ -487,9 +487,6 @@ class TestSitemapCommand(SimpleTestCase):
 
 """Tests for the generate_sitemap management command."""
 
-EXPECTED_URL_COUNT = 2
-EXPECTED_ENTRY_COUNT = 2
-
 
 class TestGenerateSitemap:
     """Test suite for generate_sitemap command."""
