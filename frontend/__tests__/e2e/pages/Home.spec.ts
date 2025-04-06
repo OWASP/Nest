@@ -9,6 +9,14 @@ test.describe('Home Page', () => {
         json: mockHomeData,
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/')
   })
 
@@ -38,8 +46,8 @@ test.describe('Home Page', () => {
     await expect(page).toHaveURL('projects/project_1')
   })
 
-  test('should have recent posts', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent News & Opinions' })).toBeVisible()
+  test('should have posts', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'News & Opinions' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Post 1', exact: true })).toBeVisible()
     await expect(page.getByText('Author 1')).toBeVisible()
     await expect(page.getByText('Mar 6, 2025').first()).toBeVisible({ timeout: 10000 })
@@ -64,7 +72,7 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Release 1' })).toBeVisible()
     await expect(page.getByText('Mar 19, 2025')).toBeVisible()
-    await expect(page.getByText('v2.1.0')).toBeVisible()
+    await expect(page.getByText('cyclonedx-node-npm')).toBeVisible()
   })
 
   test('should be able to join OWASP', async ({ page }) => {
