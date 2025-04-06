@@ -1,0 +1,25 @@
+services:
+  graphql:
+    container_name: nest-graphqler-test
+    image: omar2535/graphqler
+    command: >
+      sh -c '
+        python -m graphqler --mode run --url http://localhost:8000/graphql/
+      '
+    depends_on:
+      backend:
+        condition: service_healthy
+  backend:
+    container_name: nest-fuzz-test-backend
+    build:
+      context: ../backend
+      dockerfile: docker/Dockerfile.fuzz_tests
+    env_file: ../backend/fuzz_tests/.env
+    ports:
+      - 127.0.0.1:8000:8000
+    healthcheck:
+      test: [CMD, curl, -f, http://127.0.0.1:8000/]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 80s
