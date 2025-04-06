@@ -2,11 +2,13 @@ __pycache__
 .ash_history
 .bash_history
 .cache
+.dockerignore
 .env
 .envs
 .git
 .gitignore
 .local
+.next
 .pnpm-store
 .pytest_cache
 .ruff_cache
@@ -18,5 +20,8 @@ backend/staticfiles
 build
 coverage
 dist
+docker
+Dockerfile.*
 node_modules
+npm-debug.log
 venv
