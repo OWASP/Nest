@@ -7,6 +7,7 @@ import Footer from 'components/Footer'
 import Header from 'components/Header'
 import './globals.css'
 import ScrollToTop from 'components/ScrollToTop'
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
