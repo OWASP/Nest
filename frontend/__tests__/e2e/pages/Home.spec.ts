@@ -72,7 +72,7 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Release 1' })).toBeVisible()
     await expect(page.getByText('Mar 19, 2025')).toBeVisible()
-    await expect(page.getByText('cyclonedx-node-npm')).toBeVisible()
+    await expect(page.getByText('repo-1')).toBeVisible()
   })
 
   test('should be able to join OWASP', async ({ page }) => {
