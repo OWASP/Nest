@@ -9,6 +9,7 @@ from apps.owasp.models.sponsor import Sponsor
 test_sponsor_name = "Test Sponsor"
 sponsor_objects_get = "apps.owasp.models.sponsor.Sponsor.objects.get"
 sponsor_slugify = "apps.owasp.models.sponsor.slugify"
+normalize_url_path = "apps.github.utils.normalize_url"
 
 
 class TestSponsor:
@@ -121,7 +122,7 @@ class TestSponsor:
 
     def test_from_dict_complete_data(self, sponsor_data):
         with patch(
-            "apps.github.utils.normalize_url",
+            normalize_url_path,
             side_effect=lambda x: f"https://{x.split('://')[-1]}" if x else "",
         ):
             sponsor = MagicMock()
@@ -141,7 +142,7 @@ class TestSponsor:
     def test_from_dict_minimal_data(self):
         minimal_data = {"name": "Minimal Sponsor"}
 
-        with patch("apps.github.utils.normalize_url", return_value=""):
+        with patch(normalize_url_path, return_value=""):
             sponsor = MagicMock()
 
             Sponsor.from_dict(sponsor, minimal_data)
@@ -167,7 +168,7 @@ class TestSponsor:
 
             sponsor = MagicMock()
             Sponsor.from_dict(sponsor, data)
-            sponsor.member_type = expected_type
+            assert sponsor.member_type == expected_type
 
     def test_from_dict_all_sponsor_types(self):
         mappings = [
@@ -185,10 +186,10 @@ class TestSponsor:
 
             sponsor = MagicMock()
             Sponsor.from_dict(sponsor, data)
-            sponsor.sponsor_type = expected_type
+            assert sponsor.sponsor_type == expected_type
 
     def test_normalize_url_calls(self):
-        with patch("apps.owasp.models.sponsor.normalize_url") as mock_normalize:
+        with patch(normalize_url_path) as mock_normalize:
             mock_normalize.side_effect = lambda x: f"normalized-{x}" if x else ""
 
             sponsor = MagicMock(spec=Sponsor)
