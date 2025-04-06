@@ -37,7 +37,3 @@ class Events(CommandBase):
             SECTION_BREAK="{{ SECTION_BREAK }}",
             DIVIDER="{{ DIVIDER }}",
         )
-
-
-if SlackConfig.app:
-    Events().config_command()

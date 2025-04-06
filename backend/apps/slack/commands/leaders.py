@@ -63,7 +63,3 @@ class Leaders(CommandBase):
             has_results=bool(chapters or projects),
             NL=NL,
         )
-
-
-if SlackConfig.app:
-    Leaders().config_command()

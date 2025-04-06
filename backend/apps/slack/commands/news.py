@@ -25,7 +25,3 @@ class News(CommandBase):
             has_news=False,
             NL=NL,
         )
-
-
-if SlackConfig.app:
-    News().config_command()

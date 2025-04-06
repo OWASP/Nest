@@ -25,7 +25,3 @@ class Sponsors(CommandBase):
             SECTION_BREAK="{{ SECTION_BREAK }}",
             DIVIDER="{{ DIVIDER }}",
         )
-
-
-if SlackConfig.app:
-    Sponsors().config_command()

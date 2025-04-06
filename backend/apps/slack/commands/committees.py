@@ -24,7 +24,3 @@ class Committees(CommandBase):
                 summary_truncation=300,
             ),
         )
-
-
-if SlackConfig.app:
-    Committees().config_command()

@@ -22,7 +22,3 @@ class Staff(CommandBase):
             SECTION_BREAK="{{ SECTION_BREAK }}",
             DIVIDER="{{ DIVIDER }}",
         )
-
-
-if SlackConfig.app:
-    Staff().config_command()

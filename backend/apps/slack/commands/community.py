@@ -19,7 +19,3 @@ class Community(CommandBase):
             name="OWASP community",
             NL=NL,
         )
-
-
-if SlackConfig.app:
-    Community().config_command()

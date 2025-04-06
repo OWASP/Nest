@@ -8,16 +8,12 @@ from apps.slack.common.constants import COMMAND_HELP
 class Owasp(CommandBase):
     """Slack bot /owasp command."""
 
-    def all_commands(self):
-        """Get all commands."""
-        return [cls for cls in CommandBase.__subclasses__() if cls is not Owasp]
-
     def find_command(self, command_name):
         """Find the command class by name."""
         if not command_name:
             return None
 
-        for cmd_class in self.all_commands():
+        for cmd_class in [cls for cls in CommandBase.get_all_commands() if cls is not Owasp]:
             if cmd_class.__name__.lower() == command_name.lower():
                 return cmd_class()
         return None
@@ -45,7 +41,3 @@ class Owasp(CommandBase):
             context = {"help": False, "command": self.get_command(), "handler": cmd}
 
         return self.get_template_file().render(context)
-
-
-if SlackConfig.app:
-    Owasp().config_command()

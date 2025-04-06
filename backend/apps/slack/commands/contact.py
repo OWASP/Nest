@@ -15,9 +15,7 @@ class Contact(CommandBase):
     def get_render_text(self, command):
         """Get the rendered text."""
         return self.get_template_file().render(
-            url="https://owasp.org/contact/", name="OWASP contact", NL=NL
+            url="https://owasp.org/contact/", 
+            name="OWASP contact", 
+            NL=NL
         )
-
-
-if SlackConfig.app:
-    Contact().config_command()
