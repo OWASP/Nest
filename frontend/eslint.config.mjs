@@ -108,7 +108,7 @@ const eslintConfig = [
     },
   },
   {
-    files: ['app/utils/logger.ts'],
+    files: ['src/utils/logger.ts'],
     rules: {
       'no-console': 'off',
     },

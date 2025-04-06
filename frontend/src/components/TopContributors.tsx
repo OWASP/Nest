@@ -71,8 +71,9 @@ const TopContributors = ({
       </div>
       {contributors.length > maxInitialDisplay && (
         <Button
+          disableAnimation
           onPress={toggleContributors}
-          className="mt-4 flex items-center text-blue-400 hover:underline"
+          className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
         >
           {showAllContributors ? (
             <>

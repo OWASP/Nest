@@ -92,6 +92,6 @@ networks:
 volumes:
   backend-alpine:
   db-data:
-  docs-data:
+  docs-alpine:
   frontend-alpine:
   frontend-next:

@@ -37,7 +37,7 @@ const ToggleableList = ({
         <Button
           disableAnimation
           onPress={toggleShowAll}
-          className="mt-4 flex items-center text-blue-400 hover:underline"
+          className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
         >
           {showAll ? (
             <>

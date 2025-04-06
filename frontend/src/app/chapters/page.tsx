@@ -1,6 +1,5 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -9,8 +8,8 @@ import { ChapterTypeAlgolia } from 'types/chapter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
+import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
-const ChapterMap = dynamic(() => import('components/ChapterMap'), { ssr: false })
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
@@ -89,7 +88,7 @@ const ChaptersPage = () => {
       totalPages={totalPages}
     >
       {chapters.length > 0 && (
-        <ChapterMap
+        <ChapterMapWrapper
           geoLocData={searchQuery ? chapters : geoLocData}
           showLocal={true}
           style={{

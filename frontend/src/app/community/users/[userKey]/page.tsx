@@ -150,6 +150,7 @@ const UserDetailsPage: React.FC = () => {
         name: release.name,
         publishedAt: release.publishedAt,
         tagName: release.tagName,
+        repositoryName: release.repositoryName,
         author: {
           login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',

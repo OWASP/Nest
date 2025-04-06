@@ -27,7 +27,7 @@ import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
-import ChapterMap from 'components/ChapterMap'
+import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
@@ -257,7 +257,7 @@ export default function Home() {
             <FontAwesomeIcon icon={faGlobe} className="mr-2 h-5 w-5" />
             Chapters Worldwide
           </h2>
-          <ChapterMap
+          <ChapterMapWrapper
             geoLocData={geoLocData}
             showLocal={false}
             style={{

@@ -56,6 +56,6 @@ export const fetchAlgoliaData = async <T>(
     if (error instanceof AppError) {
       throw error
     }
-    throw new AppError(500, 'Search service error')
+    //logger.error('Error fetching Algolia data:', error)
   }
 }
