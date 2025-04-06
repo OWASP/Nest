@@ -12,6 +12,7 @@ from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.github.models.organization import Organization
 
+
 class TestOrganizationNode:
     """Test cases for OrganizationNode class."""
 
