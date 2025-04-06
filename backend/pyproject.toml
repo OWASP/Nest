@@ -95,8 +95,6 @@ line-length = 99
 extend-select = ["I"]
 ignore = [
     "ANN",
-    "A002",
-    "ARG001",
     "ARG002",
     "C901",
     "COM812",
@@ -133,6 +131,7 @@ select = ["ALL"]
 "**/models.py" = ["D106"]
 "**/models/*.py" = ["D106"]
 "**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
+"**/slack/apps.py" = ["ARG001"]
 
 
 [build-system]

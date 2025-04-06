@@ -39,7 +39,11 @@ if SlackConfig.app:
 
     @SlackConfig.app.use
     def log_events(
-        client: WebClient, context: dict, logger: logging.Logger, payload: dict, next
+        client: WebClient,
+        context: dict,
+        logger: logging.Logger,
+        payload: dict,
+        next,  # noqa: A002
     ) -> None:
         """Log Slack events.
 
