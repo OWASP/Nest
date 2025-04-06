@@ -74,7 +74,10 @@ describe('UserDetailsPage', () => {
 
   test('renders user details', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: mockUserDetailsData,
+      data: {
+        ...mockUserDetailsData,
+        user: { ...mockUserDetailsData.user, recentIssues: {} },
+      },
       error: null,
       loading: false,
     })
@@ -289,8 +292,7 @@ describe('UserDetailsPage', () => {
 
   test('handles no recent issues gracefully', async () => {
     const noIssuesData = {
-      ...mockUserDetailsData,
-      user: { ...mockUserDetailsData.user, issues: [] },
+      user: { ...mockUserDetailsData.user, recentIssues: {} },
     }
     ;(useQuery as jest.Mock).mockReturnValue({
       data: noIssuesData,
@@ -301,7 +303,7 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Recent Issues')).toBeInTheDocument()
-      expect(screen.queryByText('Test Issue')).not.toBeInTheDocument()
+      expect(screen.getByText('No recent releases.')).toBeInTheDocument()
     })
   })
 

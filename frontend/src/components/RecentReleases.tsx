@@ -34,7 +34,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                       href={`/community/users/${item?.author?.login}`}
                     >
                       <Image
-                        alt={item?.author?.name}
+                        alt={item?.author?.name || 'author'}
                         className="mr-2 h-6 w-6 rounded-full"
                         height={24}
                         src={item?.author?.avatarUrl || ''}

@@ -49,7 +49,7 @@ const TopContributors = ({
                   src={`${item?.avatarUrl}&s=60`}
                   width={24}
                   height={24}
-                  alt={item?.name}
+                  alt={item?.name || ''}
                   className="rounded-full"
                 />
                 <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
