@@ -43,7 +43,7 @@ const Card = ({
   }, [])
 
   return (
-    <div className="mb-2 mt-4 flex w-full flex-col items-start rounded-md border border-border bg-white pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
+    <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white px-4 pb-4 pl-4 dark:bg-[#212529] md:max-w-6xl">
       <div className="mt-2 flex w-full flex-col items-start gap-4 pt-2 sm:flex-col sm:gap-4 md:pt-0">
         <div className="flex items-center gap-3">
           {/* Display project level badge (if available) */}
@@ -70,7 +70,7 @@ const Card = ({
           {/* Project title and link */}
           <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
-              className="max-w-full break-words text-base font-semibold dark:text-sky-600 sm:break-normal sm:text-lg lg:text-2xl"
+              className="max-w-full break-words text-base font-semibold text-blue-400 sm:break-normal sm:text-lg lg:text-2xl"
               style={{
                 transition: 'color 0.3s ease',
               }}

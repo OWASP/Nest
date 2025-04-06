@@ -1,10 +1,10 @@
 import {
   faSearch,
   faTimes,
-  faProjectDiagram,
-  faBook,
   faUser,
   faCalendarAlt,
+  faLocationPin,
+  faFolder,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
@@ -34,9 +34,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   } | null>(null)
   const navigate = useNavigate()
   const pageCount = 1
-  const suggestionCount = 3
+  const suggestionCount = 5
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
@@ -190,11 +191,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
       case 'chapters':
-        return faBook
+        return faLocationPin
       case 'events':
         return faCalendarAlt
       case 'projects':
-        return faProjectDiagram
+        return faFolder
       case 'users':
         return faUser
       default:
@@ -234,44 +235,38 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         )}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-            {suggestions.map((suggestion) => (
+            {suggestions.map((suggestion, index) => (
               <div
                 key={suggestion.indexName}
                 className="border-b text-gray-600 last:border-b-0 dark:border-gray-700 dark:text-gray-300"
               >
-                <h3 className="border-b p-2 text-start font-semibold">
-                  {suggestion.indexName.charAt(0).toUpperCase() + suggestion.indexName.slice(1)}
-                </h3>
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
                       key={subIndex}
-                      className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                        highlightedIndex &&
+                        highlightedIndex.index === index &&
+                        highlightedIndex.subIndex === subIndex
+                          ? 'bg-gray-100 dark:bg-gray-700'
+                          : ''
+                      }`}
                     >
                       <button
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                        className="flex w-full cursor-pointer items-center border-none bg-transparent p-0 text-left"
-                        style={{ all: 'unset', cursor: 'pointer' }}
+                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left"
                       >
                         <FontAwesomeIcon
                           icon={getIconForIndex(suggestion.indexName)}
-                          className="mr-2 text-gray-400"
+                          className="mr-2 flex-shrink-0 text-gray-400"
                         />
-                        <span className="whitespace-nowrap">{hit.name || hit.login}</span>
+                        <span className="block max-w-full truncate">{hit.name || hit.login}</span>
                       </button>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
-            <button
-              className="w-full border-t p-2 text-center text-sm text-muted-foreground hover:bg-accent"
-              onClick={() => setShowSuggestions(false)}
-            >
-              Press{' '}
-              <kbd className="rounded border bg-muted px-1 py-0.5 text-xs font-semibold">Esc</kbd>{' '}
-              to close
-            </button>
           </div>
         )}
       </div>

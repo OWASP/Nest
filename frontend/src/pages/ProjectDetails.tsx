@@ -8,18 +8,16 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_PROJECT_DATA } from 'api/queries/projectQueries'
-import { toast } from 'hooks/useToast'
-import millify from 'millify'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { ProjectTypeGraphql } from 'types/project'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
@@ -36,21 +34,17 @@ const ProjectDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, projectKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!project)
@@ -72,41 +66,31 @@ const ProjectDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <Link href={project.url} className="hover:underline dark:text-sky-600">
+        <Link href={project.url} className="text-blue-400 hover:underline">
           {project.url}
         </Link>
       ),
     },
   ]
+
   const projectStats = [
-    {
-      icon: faStar,
-      value: `${project.starsCount ? millify(project.starsCount, { precision: 1 }) : 'No'}
-        ${pluralize(project.starsCount, 'Star')}`,
-    },
-    {
-      icon: faCodeFork,
-      value: `${project.forksCount ? millify(project.forksCount, { precision: 1 }) : 'No'}
-        ${pluralize(project.forksCount, 'Fork')}`,
-    },
+    { icon: faStar, value: project.starsCount, unit: 'Star' },
+    { icon: faCodeFork, value: project.forksCount, unit: 'Fork' },
     {
       icon: faUsers,
-      value: `${
-        project.contributorsCount ? millify(project.contributorsCount, { precision: 1 }) : 'No'
-      }
-        ${pluralize(project.contributorsCount, 'Contributor')}`,
+      value: project.contributorsCount,
+      unit: 'Contributor',
     },
     {
       icon: faExclamationCircle,
-      value: `${project.issuesCount ? millify(project.issuesCount, { precision: 1 }) : 'No'}
-        ${pluralize(project.issuesCount, 'Issue')}`,
+      value: project.issuesCount,
+      unit: 'Issue',
     },
     {
       icon: faCode,
-      value: `${
-        project.repositoriesCount ? millify(project.repositoriesCount, { precision: 1 }) : 'No'
-      }
-        ${pluralize(project.repositoriesCount, 'Repository', 'Repositories')}`,
+      value: project.repositoriesCount,
+      unit: 'Repository',
+      pluralizedName: 'Repositories',
     },
   ]
   return (

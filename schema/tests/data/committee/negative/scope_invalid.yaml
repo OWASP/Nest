@@ -8,6 +8,6 @@ members:
     role: Vice Chair
 name: OWASP Committee
 tags:
-  - development
-  - education
-  - security
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

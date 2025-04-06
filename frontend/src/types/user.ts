@@ -1,3 +1,5 @@
+import { RepositoryCardProps } from './project'
+
 export type user = {
   avatar_url: string
   bio: string
@@ -25,6 +27,7 @@ export type Issue = {
   number: number
   repository: RepositoryDetails
   title: string
+  url: string
 }
 
 export type Release = {
@@ -33,6 +36,7 @@ export type Release = {
   publishedAt: number
   repository: RepositoryDetails
   tagName: string
+  url: string
 }
 
 export type User = {
@@ -43,14 +47,12 @@ export type User = {
   email?: string | null
   followers_count: number
   following_count: number
-  issues?: Issue[]
   issues_count?: number
   key: string
   location?: string | null
   login: string
   name?: string | null
   public_repositories_count: number
-  releases?: Release[]
   releases_count?: number
   url: string
 }
@@ -71,5 +73,24 @@ export interface UserDetailsProps {
   publicRepositoriesCount: number
   releases?: Release[]
   releasesCount: number
+  topRepositories: RepositoryCardProps[]
+  url: string
+}
+
+export interface PullRequestsType {
+  createdAt: string
+  title: string
+  url: string
+}
+
+export interface ItemCardPullRequests {
+  createdAt: string
+  title: string
+  author: {
+    login: string
+    avatarUrl: string
+    key: string
+    name: string
+  }
   url: string
 }

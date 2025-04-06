@@ -9,6 +9,14 @@ test.describe('Committee Details Page', () => {
         json: { data: mockCommitteeDetailsData },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/committees/test-committee')
   })
 

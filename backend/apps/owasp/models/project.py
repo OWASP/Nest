@@ -10,14 +10,13 @@ from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
 from apps.github.models.release import Release
-from apps.owasp.models.common import GenericEntityModel, RepositoryBasedEntityModel
+from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 
 
 class Project(
     BulkSaveModel,
-    GenericEntityModel,
     ProjectIndexMixin,
     RepositoryBasedEntityModel,
     TimestampedModel,
@@ -59,7 +58,7 @@ class Project(
     level = models.CharField(
         verbose_name="Level",
         max_length=20,
-        choices=ProjectLevel,
+        choices=ProjectLevel.choices,
         default=ProjectLevel.OTHER,
     )
     level_raw = models.CharField(verbose_name="Level raw", max_length=50, default="")
@@ -67,7 +66,7 @@ class Project(
     type = models.CharField(
         verbose_name="Type",
         max_length=20,
-        choices=ProjectType,
+        choices=ProjectType.choices,
         default=ProjectType.OTHER,
     )
     type_raw = models.CharField(verbose_name="Type raw", max_length=100, default="")
@@ -91,7 +90,7 @@ class Project(
     pushed_at = models.DateTimeField(verbose_name="Pushed at", blank=True, null=True)
     updated_at = models.DateTimeField(verbose_name="Updated at", blank=True, null=True)
 
-    custom_tags = models.JSONField(verbose_name="Custom tags", default=list)
+    custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
 
     # FKs.
@@ -184,19 +183,21 @@ class Project(
         self.save(update_fields=("is_active",))
 
     def from_github(self, repository):
-        """Update instance based on GitHub repository data."""
-        field_mapping = {
-            "description": "pitch",
-            "name": "title",
-            "tags": "tags",
-        }
-        project_metadata = RepositoryBasedEntityModel.from_github(self, field_mapping, repository)
+        """Update instance based on GitHub repository data.
 
-        # Normalize tags.
-        self.tags = (
-            [tag.strip(", ") for tag in self.tags.split("," if "," in self.tags else " ")]
-            if isinstance(self.tags, str)
-            else self.tags
+        Args:
+            repository (github.Repository): The GitHub repository instance.
+
+        """
+        self.owasp_repository = repository
+
+        project_metadata = RepositoryBasedEntityModel.from_github(
+            self,
+            {
+                "description": "pitch",
+                "name": "title",
+                "tags": "tags",
+            },
         )
 
         # Level.
@@ -219,12 +220,18 @@ class Project(
             )
             self.type_raw = project_type
 
-        # FKs.
-        self.owasp_repository = repository
+        self.created_at = repository.created_at
+        self.updated_at = repository.updated_at
 
     def save(self, *args, **kwargs):
-        """Save project."""
-        if not self.summary and (prompt := Prompt.get_owasp_project_summary()):
+        """Save the project instance.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        if self.is_active and not self.summary and (prompt := Prompt.get_owasp_project_summary()):
             self.generate_summary(prompt=prompt)
 
         super().save(*args, **kwargs)
@@ -237,12 +244,28 @@ class Project(
 
     @staticmethod
     def bulk_save(projects, fields=None):
-        """Bulk save projects."""
+        """Bulk save projects.
+
+        Args:
+            projects (list[Project]): List of Project instances to save.
+            fields (list[str], optional): List of fields to update.
+
+        """
         BulkSaveModel.bulk_save(Project, projects, fields=fields)
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):
-        """Update project data."""
+        """Update project data from GitHub repository.
+
+        Args:
+            gh_repository (github.Repository): The GitHub repository instance.
+            repository (github.Repository): The repository data to update from.
+            save (bool, optional): Whether to save the instance.
+
+        Returns:
+            Project: The updated Project instance.
+
+        """
         key = gh_repository.name.lower()
         try:
             project = Project.objects.get(key=key)

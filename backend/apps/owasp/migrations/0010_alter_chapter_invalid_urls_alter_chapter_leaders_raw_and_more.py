@@ -10,27 +10,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="chapter",
-            name="invalid_urls",
-            field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Entity invalid related URLs"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="chapter",
-            name="leaders_raw",
-            field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Entity leaders list"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="chapter",
-            name="related_urls",
-            field=models.JSONField(
-                blank=True, default=list, null=True, verbose_name="Entity related URLs"
-            ),
-        ),
-        migrations.AlterField(
             model_name="project",
             name="invalid_urls",
             field=models.JSONField(

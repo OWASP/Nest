@@ -7,23 +7,21 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_REPOSITORY_DATA } from 'api/queries/repositoryQueries'
-import { toast } from 'hooks/useToast'
-import millify from 'millify'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
-import { pluralize } from 'utils/pluralize'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 const RepositoryDetailsPage = () => {
-  const { projectKey, repositoryKey } = useParams()
+  const { repositoryKey } = useParams()
   const [repository, setRepository] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
-    variables: { projectKey: projectKey, repositoryKey: repositoryKey },
+    variables: { repositoryKey: repositoryKey },
   })
   useEffect(() => {
     if (data) {
@@ -31,21 +29,17 @@ const RepositoryDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
-  }, [data, graphQLRequestError, projectKey])
+  }, [data, graphQLRequestError, repositoryKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!isLoading && !repository) {
@@ -74,7 +68,7 @@ const RepositoryDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <a href={repository.url} className="hover:underline dark:text-sky-600">
+        <a href={repository.url} className="text-blue-400 hover:underline">
           {repository.url}
         </a>
       ),
@@ -84,36 +78,29 @@ const RepositoryDetailsPage = () => {
   const RepositoryStats = [
     {
       icon: faStar,
-      value: `${
-        repository.starsCount ? millify(repository.starsCount, { precision: 1 }) : 'No'
-      } ${pluralize(repository.starsCount, 'Star')}`,
+      value: repository.starsCount,
+      unit: 'Star',
     },
     {
       icon: faCodeFork,
-      value: `${
-        repository.forksCount ? millify(repository.forksCount, { precision: 1 }) : 'No'
-      } ${pluralize(repository.forksCount, 'Fork')}`,
+      value: repository.forksCount,
+      unit: 'Fork',
     },
     {
       icon: faUsers,
-      value: `${
-        repository.contributorsCount
-          ? millify(repository.contributorsCount, { precision: 1 })
-          : 'No'
-      } ${pluralize(repository.contributorsCount, 'Contributor')}`,
+      value: repository.contributorsCount,
+      unit: 'Contributor',
     },
 
     {
       icon: faExclamationCircle,
-      value: `${
-        repository.openIssuesCount ? millify(repository.openIssuesCount, { precision: 1 }) : 'No'
-      } ${pluralize(repository.openIssuesCount, 'Issue')}`,
+      value: repository.openIssuesCount,
+      unit: 'Issue',
     },
     {
       icon: faHistory,
-      value: `${
-        repository.commitsCount ? millify(repository.commitsCount, { precision: 1 }) : 'No'
-      } ${pluralize(repository.commitsCount, 'Commit')}`,
+      value: repository.commitsCount,
+      unit: 'Commit',
     },
   ]
   return (

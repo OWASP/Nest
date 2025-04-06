@@ -1,19 +1,26 @@
 import { useQuery } from '@apollo/client'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-import { toast } from 'hooks/useToast'
 import { ProjectDetailsPage } from 'pages'
 import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-
-jest.mock('hooks/useToast', () => ({
-  toast: jest.fn(),
-}))
+import { toaster } from 'components/ui/toaster'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
+
+jest.mock('components/ui/toaster', () => ({
+  toaster: {
+    create: jest.fn(),
+  },
+}))
+
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+}))
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ projectKey: 'test-project' }),
@@ -82,10 +89,10 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => screen.getByText('Project not found'))
     expect(screen.getByText('Project not found')).toBeInTheDocument()
-    expect(toast).toHaveBeenCalledWith({
+    expect(toaster.create).toHaveBeenCalledWith({
       description: 'Unable to complete the requested operation.',
       title: 'GraphQL Request Failed',
-      variant: 'destructive',
+      type: 'error',
     })
   })
 

@@ -14,25 +14,25 @@ schema_dir = tests_dir.parent
 
 
 # Fixtures.
-@pytest.fixture()
+@pytest.fixture
 def chapter_schema():
     with Path(schema_dir / "chapter.json").open() as file:
         yield json.load(file)
 
 
-@pytest.fixture()
+@pytest.fixture
 def common_schema():
     with Path(schema_dir / "common.json").open() as file:
         yield json.load(file)
 
 
-@pytest.fixture()
+@pytest.fixture
 def project_schema():
     with Path(schema_dir / "project.json").open() as file:
         yield json.load(file)
 
 
-@pytest.fixture()
+@pytest.fixture
 def committee_schema():
     with Path(schema_dir / "committee.json").open() as file:
         yield json.load(file)

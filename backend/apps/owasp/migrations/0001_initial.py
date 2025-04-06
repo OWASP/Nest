@@ -3,8 +3,6 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import apps.owasp.models.common
-
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -164,7 +162,6 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Chapters",
                 "db_table": "owasp_chapters",
             },
-            bases=(apps.owasp.models.common.GenericEntityModel, models.Model),
         ),
         migrations.CreateModel(
             name="Event",
@@ -205,7 +202,6 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Events",
                 "db_table": "owasp_events",
             },
-            bases=(apps.owasp.models.common.GenericEntityModel, models.Model),
         ),
         migrations.AddField(
             model_name="project",

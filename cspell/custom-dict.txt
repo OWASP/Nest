@@ -4,6 +4,8 @@ Aichi
 Aissue
 algoliasearch
 ansa
+apk
+arithmatex
 arkid15r
 askowasp
 Aupdated
@@ -17,6 +19,7 @@ coraza
 corsheaders
 csrfguard
 csrfprotector
+csrftoken
 cva
 dismissable
 DRF
@@ -34,15 +37,19 @@ GTM
 gunicorn
 hsl
 igoat
+inlinehilite
 isanori
 jumpstart
+kasya
 Kateryna
 linkify
 lxml
+mamicidal
 markdownit
 markercluster
 mastg
 mcr
+mdfile
 mern
 millify
 mpim
@@ -52,6 +59,7 @@ nestbot
 NETTACKER
 noinput
 Nominatim
+nosniff
 owasppcitoolkit
 owtf
 pentest
@@ -60,6 +68,7 @@ PLR
 psycopg
 pygithub
 pygoat
+pymdownx
 PYTHONUNBUFFERED
 pyyaml
 repositorycontributor
@@ -71,10 +80,13 @@ samm
 seo
 SEO
 Sivagangai
+skillstruck
 slackbot
 SLF
 slideshare
+Sonarqube
 speakerdeck
+superfences
 tiktok
 Truncator
 tsc

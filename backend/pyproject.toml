@@ -36,7 +36,9 @@ humanize = "^4.11.0"
 lxml = "^5.3.0"
 markdown = "^3.7"
 openai = "^1.60.1"
-psycopg = "^3.2.4"
+psycopg2-binary = "^2.9.9"
+pydantic = "^2.11.1"
+pydantic-core = "^2.33.0"
 pygithub = "^2.5.0"
 python = "^3.13"
 python-dateutil = "^2.9.0.post0"
@@ -45,11 +47,10 @@ requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 
-
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
-ruff = "^0.9.5"
+ruff = "^0.11.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
@@ -97,6 +98,7 @@ ignore = [
     "ARG002",
     "C901",
     "COM812",
+    "D407",
     "DJ012",
     "ERA001",
     "FBT002",

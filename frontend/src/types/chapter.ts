@@ -16,8 +16,8 @@ export interface ChapterTypeAlgolia {
   objectID: string
   region: string
   related_urls: string[]
-  summary: string
   suggested_location: string
+  summary: string
   top_contributors: TopContributorsTypeAlgolia[]
   updated_at: number
   url: string

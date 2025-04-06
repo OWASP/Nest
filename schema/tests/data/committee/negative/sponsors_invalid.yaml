@@ -12,6 +12,6 @@ sponsors:
   - name: Invalid Sponsor
     url: https://xyz
 tags:
-  - security
-  - education
-  - development
+  - example-tag-1
+  - example-tag-2
+  - example-tag-3

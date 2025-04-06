@@ -7,7 +7,6 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { GET_COMMITTEE_DATA } from 'api/queries/committeeQueries'
-import { toast } from 'hooks/useToast'
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import type { CommitteeDetailsTypeGraphQL } from 'types/committee'
@@ -16,6 +15,7 @@ import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetadataManager from 'components/MetadataManager'
+import { toaster } from 'components/ui/toaster'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
@@ -35,21 +35,17 @@ export default function CommitteeDetailsPage() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toast({
+      toaster.create({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        variant: 'destructive',
+        type: 'error',
       })
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, committeeKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!committee && !isLoading)
@@ -67,7 +63,7 @@ export default function CommitteeDetailsPage() {
     {
       label: 'URL',
       value: (
-        <a href={committee.url} className="hover:underline dark:text-sky-600">
+        <a href={committee.url} className="text-blue-400 hover:underline">
           {committee.url}
         </a>
       ),
@@ -75,11 +71,16 @@ export default function CommitteeDetailsPage() {
   ]
 
   const committeeStats = [
-    { icon: faUsers, value: `${committee?.contributorsCount || 'No'} Contributors` },
-    { icon: faCodeFork, value: `${committee?.forksCount || 'No'} Forks` },
-    { icon: faStar, value: `${committee?.starsCount || 'No'} Stars` },
-    { icon: faCode, value: `${committee?.repositoriesCount || 'No'} Repositories` },
-    { icon: faExclamationCircle, value: `${committee?.issuesCount || 'No'} Issues` },
+    { icon: faUsers, value: committee.contributorsCount, unit: 'Contributor' },
+    { icon: faCodeFork, value: committee.forksCount, unit: 'Fork' },
+    { icon: faStar, value: committee.starsCount, unit: 'Star' },
+    {
+      icon: faCode,
+      value: committee.repositoriesCount,
+      unit: 'Repository',
+      pluralizedName: 'Repositories',
+    },
+    { icon: faExclamationCircle, value: committee.issuesCount, unit: 'Issue' },
   ]
 
   return (

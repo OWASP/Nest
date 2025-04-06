@@ -16,5 +16,7 @@ class EventNode(BaseNode):
             "key",
             "name",
             "start_date",
+            "suggested_location",
+            "summary",
             "url",
         )
