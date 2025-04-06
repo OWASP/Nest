@@ -125,7 +125,6 @@ def get_params_for_index(index_name):
                 "idx_location",
                 "idx_login",
                 "idx_name",
-                "idx_public_repositories_count",
                 "idx_url",
             ]
 
