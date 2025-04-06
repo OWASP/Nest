@@ -8,8 +8,8 @@ __pycache__
 .git
 .gitignore
 .local
-.pnpm-store
 .next
+.pnpm-store
 .pytest_cache
 .ruff_cache
 .venv
@@ -21,7 +21,7 @@ build
 coverage
 dist
 docker
-Dockerfile
+Dockerfile.*
 node_modules
 npm-debug.log
 venv

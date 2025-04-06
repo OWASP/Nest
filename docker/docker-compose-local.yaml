@@ -19,13 +19,13 @@ services:
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
       DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
-    ports:
-      - 8000:8000
     networks:
       - nest-network
+    ports:
+      - 8000:8000
     volumes:
       - ../backend:/home/owasp
-      - backend-alpine:/home/owasp/.venv
+      - backend-venv:/home/owasp/.venv
 
   db:
     container_name: nest-db
@@ -54,14 +54,14 @@ services:
     build:
       context: ..
       dockerfile: docs/docker/Dockerfile.local
-    ports:
-      - 8001:8001
     networks:
       - nest-network
+    ports:
+      - 8001:8001
     volumes:
       - ../docs:/home/owasp/docs
       - ../schema:/home/owasp/schema
-      - docs-alpine:/home/owasp/.venv
+      - docs-venv:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -75,23 +75,23 @@ services:
     depends_on:
       - backend
     environment:
-      - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
-    ports:
-      - 3000:3000
+      - NODE_ENV=development
     networks:
       - nest-network
+    ports:
+      - 3000:3000
     volumes:
       - ../frontend:/home/owasp
-      - frontend-alpine:/home/owasp/node_modules
       - frontend-next:/home/owasp/.next
+      - frontend-node-modules:/home/owasp/node_modules
 
 networks:
   nest-network:
 
 volumes:
-  backend-alpine:
+  backend-venv:
   db-data:
-  docs-alpine:
-  frontend-alpine:
+  docs-venv:
   frontend-next:
+  frontend-node-modules:

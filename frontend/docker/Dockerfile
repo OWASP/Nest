@@ -1,9 +1,12 @@
 FROM node:22-alpine AS builder
 
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+
+COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
+
+# TODO(arkid15r): copy what's needed only.
 COPY . .
 
 RUN pnpm run build
