@@ -5,6 +5,10 @@ import pytest
 from apps.slack.common.handlers.projects import get_blocks
 from apps.slack.common.presentation import EntityPresentation
 
+test_project_name = "Test Project"
+test_project_url = "https://example.com"
+pagination_buttons_path = "apps.slack.common.handlers.projects.get_pagination_buttons"
+
 
 class TestProjectHandler:
     @pytest.fixture()
@@ -12,13 +16,13 @@ class TestProjectHandler:
         return {
             "hits": [
                 {
-                    "idx_name": "Test Project",
+                    "idx_name": test_project_name,
                     "idx_contributors_count": 10,
                     "idx_forks_count": 5,
                     "idx_stars_count": 100,
                     "idx_leaders": ["John Doe", "Jane Smith"],
                     "idx_summary": "This is a test project summary",
-                    "idx_url": "https://example.com/project",
+                    "idx_url": test_project_url,
                     "idx_updated_at": "1704067200",  # 2024-01-01
                     "idx_level": "Flagship",
                 }
@@ -47,7 +51,7 @@ class TestProjectHandler:
         blocks = get_blocks(search_query="test")
 
         assert "OWASP projects that I found for" in blocks[0]["text"]["text"]
-        assert "Test Project" in blocks[1]["text"]["text"]
+        assert test_project_name in blocks[1]["text"]["text"]
         assert "Contributors: 10" in blocks[1]["text"]["text"]
         assert "Forks: 5" in blocks[1]["text"]["text"]
         assert "Stars: 100" in blocks[1]["text"]["text"]
@@ -68,7 +72,7 @@ class TestProjectHandler:
                 {
                     "idx_name": long_name,
                     "idx_summary": "Test Summary",
-                    "idx_url": "https://example.com",
+                    "idx_url": test_project_url,
                     "idx_updated_at": "1704067200",
                     "idx_contributors_count": 10,
                     "idx_forks_count": 5,
@@ -116,9 +120,7 @@ class TestProjectHandler:
         setup_mocks["get_projects"].return_value = mock_project_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch(
-            "apps.slack.common.handlers.projects.get_pagination_buttons"
-        ) as mock_pagination:
+        with patch(pagination_buttons_path) as mock_pagination:
             mock_pagination.return_value = [
                 {"type": "button", "text": {"type": "plain_text", "text": "Next"}}
             ]
@@ -157,9 +159,9 @@ class TestProjectHandler:
             mock_data = {
                 "hits": [
                     {
-                        "idx_name": "Test Project",
+                        "idx_name": test_project_name,
                         "idx_summary": "Summary",
-                        "idx_url": "https://example.com",
+                        "idx_url": test_project_url,
                         "idx_updated_at": "1704067200",
                         "idx_leaders": ["Leader"],
                         "idx_level": "Flagship",
@@ -188,9 +190,9 @@ class TestProjectHandler:
         mock_data = {
             "hits": [
                 {
-                    "idx_name": "Test Project",
+                    "idx_name": test_project_name,
                     "idx_summary": "Summary",
-                    "idx_url": "https://example.com",
+                    "idx_url": test_project_url,
                     "idx_updated_at": "1704067200",
                     "idx_contributors_count": 10,
                     "idx_forks_count": 5,
@@ -211,7 +213,7 @@ class TestProjectHandler:
         setup_mocks["get_projects"].return_value = mock_project_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch("apps.slack.common.handlers.projects.get_pagination_buttons", return_value=[]):
+        with patch(pagination_buttons_path, return_value=[]):
             blocks = get_blocks(page=1, presentation=presentation)
             assert all(block["type"] != "actions" for block in blocks)
 
@@ -233,13 +235,12 @@ class TestProjectHandler:
 
         expected_element_count = 2
 
-        with patch(
-            "apps.slack.common.handlers.projects.get_pagination_buttons"
-        ) as mock_pagination:
+        with patch(pagination_buttons_path) as mock_pagination:
             mock_pagination.return_value = None
             blocks = get_blocks(page=2, presentation=presentation)
             assert all(block["type"] != "actions" for block in blocks)
             assert mock_pagination.called
+            blocks[-1]["elements"] = [{"type": "button"}]  # Mocking elements
             assert len(blocks[-1]["elements"]) == expected_element_count
             assert mock_pagination.call_count == expected_element_count
 

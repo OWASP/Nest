@@ -55,6 +55,12 @@ MOCK_STAFF_YAML = """
   email: bob@example.com
 """
 
+news_title = "News Title"
+news_url = "/news-url"
+href_query = ".//a[@href]"
+author_name = "Author Name"
+database_error = "Database error"
+
 
 @pytest.mark.parametrize(
     ("input_text", "expected_output"),
@@ -286,17 +292,17 @@ def test_get_news_data_with_patches(mock_fromstring, mock_requests_get):
     mock_tree.xpath.return_value = [mock_h2]
 
     mock_anchor = MagicMock()
-    mock_anchor.text_content.return_value = "News Title"
-    mock_anchor.get.return_value = "/news-url"
-    mock_h2.xpath.side_effect = lambda query: [mock_anchor] if query == ".//a[@href]" else []
+    mock_anchor.text_content = MagicMock(return_value=news_title)
+    mock_anchor.get.return_value = news_url
+    mock_h2.xpath.side_effect = lambda query: [mock_anchor] if query == href_query else []
 
     result = get_news_data(limit=1)
 
     assert result == [
         {
             "author": "",
-            "title": "News Title",
-            "url": urljoin(OWASP_NEWS_URL, "/news-url"),
+            "title": news_title,
+            "url": urljoin(OWASP_NEWS_URL, news_url),
         }
     ]
 
@@ -304,23 +310,23 @@ def test_get_news_data_with_patches(mock_fromstring, mock_requests_get):
 
     mock_h2_with_author = MagicMock()
     mock_author_tag = MagicMock()
-    mock_author_tag.text_content.return_value = "Author Name"
+    mock_author_tag.text_content.return_value = author_name
     mock_h2_with_author.xpath.side_effect = lambda query: (
-        [mock_anchor]
-        if query == ".//a[@href]"
-        else [mock_author_tag]
-        if query == "./following-sibling::p[@class='author']"
-        else []
+        [mock_anchor] if query == href_query else evaluate_author_query(query)
     )
+
+    def evaluate_author_query(query):
+        return [mock_author_tag] if query == "./following-sibling::p[@class='author']" else []
+
     mock_tree.xpath.return_value = [mock_h2_with_author]
 
     result = get_news_data(limit=1)
 
     assert result == [
         {
-            "author": "Author Name",
-            "title": "News Title",
-            "url": urljoin(OWASP_NEWS_URL, "/news-url"),
+            "author": author_name,
+            "title": news_title,
+            "url": urljoin(OWASP_NEWS_URL, news_url),
         }
     ]
 
@@ -330,11 +336,7 @@ def test_get_news_data_with_patches(mock_fromstring, mock_requests_get):
 
     mock_h2_with_author = MagicMock()
     mock_h2_with_author.xpath.side_effect = lambda query: (
-        [mock_anchor]
-        if query == ".//a[@href]"
-        else [mock_author_tag]
-        if query == "./following-sibling::p[@class='author']"
-        else []
+        [mock_anchor] if query == href_query else evaluate_author_query(query)
     )
 
     mock_tree.xpath.return_value = [mock_h2_without_anchor, mock_h2_with_author]
@@ -343,9 +345,9 @@ def test_get_news_data_with_patches(mock_fromstring, mock_requests_get):
 
     assert result == [
         {
-            "author": "Author Name",
-            "title": "News Title",
-            "url": urljoin(OWASP_NEWS_URL, "/news-url"),
+            "author": author_name,
+            "title": news_title,
+            "url": urljoin(OWASP_NEWS_URL, news_url),
         }
     ]
 
@@ -418,13 +420,13 @@ def test_get_events_data_success(mock_filter):
 @patch("apps.owasp.models.event.Event.objects.filter")
 def test_get_events_data_exception(mock_filter, caplog):
     """Test get_events_data function with exception."""
-    mock_filter.side_effect = Exception("Database error")
+    mock_filter.side_effect = Exception(database_error)
 
     result = get_events_data()
 
     assert result is None
     assert "Failed to fetch events data via database" in caplog.text
-    assert "Database error" in caplog.text
+    assert database_error in caplog.text
 
 
 @patch("apps.owasp.models.sponsor.Sponsor.objects.all")
@@ -448,13 +450,13 @@ def test_get_sponsors_data_success(mock_all):
 @patch("apps.owasp.models.sponsor.Sponsor.objects.all")
 def test_get_sponsors_data_exception(mock_all, caplog):
     """Test get_sponsors_data function with exception."""
-    mock_all.side_effect = Exception("Database error")
+    mock_all.side_effect = Exception(database_error)
 
     result = get_sponsors_data()
 
     assert result is None
     assert "Failed to fetch sponsors data via database" in caplog.text
-    assert "Database error" in caplog.text
+    assert database_error in caplog.text
 
 
 @patch("apps.owasp.models.sponsor.Sponsor.objects.all")

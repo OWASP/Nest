@@ -6,12 +6,16 @@ import pytest
 
 from apps.owasp.models.sponsor import Sponsor
 
+test_sponsor_name = "Test Sponsor"
+sponsor_objects_get = "apps.owasp.models.sponsor.Sponsor.objects.get"
+sponsor_slugify = "apps.owasp.models.sponsor.slugify"
+
 
 class TestSponsor:
     @pytest.fixture()
     def sponsor_data(self):
         return {
-            "name": "Test Sponsor",
+            "name": test_sponsor_name,
             "description": "Test Description",
             "image": "/assets/images/sponsors/test.png",
             "url": "https://example.com",
@@ -24,9 +28,9 @@ class TestSponsor:
 
     def test_str_method(self):
         sponsor = MagicMock(spec=Sponsor)
-        sponsor.name = "Test Sponsor"
+        sponsor.name = test_sponsor_name
         with patch.object(Sponsor, "__str__", return_value=sponsor.name):
-            assert Sponsor.__str__(sponsor) == "Test Sponsor"
+            assert Sponsor.__str__(sponsor) == test_sponsor_name
 
     def test_readable_member_type(self):
         for member_type, expected in [
@@ -76,10 +80,8 @@ class TestSponsor:
     def test_update_data_existing_sponsor(self, sponsor_data):
         mock_sponsor = MagicMock(spec=Sponsor)
 
-        with patch(
-            "apps.owasp.models.sponsor.Sponsor.objects.get", return_value=mock_sponsor
-        ) as mock_get, patch(
-            "apps.owasp.models.sponsor.slugify", return_value="test-sponsor"
+        with patch(sponsor_objects_get, return_value=mock_sponsor) as mock_get, patch(
+            sponsor_slugify, return_value="test-sponsor"
         ) as mock_slugify:
             result = Sponsor.update_data(sponsor_data)
 
@@ -92,10 +94,8 @@ class TestSponsor:
     def test_update_data_new_sponsor(self, sponsor_data):
         mock_sponsor = MagicMock(spec=Sponsor)
 
-        with patch(
-            "apps.owasp.models.sponsor.Sponsor.objects.get", side_effect=Sponsor.DoesNotExist
-        ) as mock_get, patch(
-            "apps.owasp.models.sponsor.slugify", return_value="test-sponsor"
+        with patch(sponsor_objects_get, side_effect=Sponsor.DoesNotExist) as mock_get, patch(
+            sponsor_slugify, return_value="test-sponsor"
         ) as mock_slugify, patch.object(Sponsor, "__new__", return_value=mock_sponsor):
             result = Sponsor.update_data(sponsor_data)
 
@@ -108,10 +108,8 @@ class TestSponsor:
     def test_update_data_without_save(self, sponsor_data):
         mock_sponsor = MagicMock(spec=Sponsor)
 
-        with patch(
-            "apps.owasp.models.sponsor.Sponsor.objects.get", side_effect=Sponsor.DoesNotExist
-        ) as mock_get, patch(
-            "apps.owasp.models.sponsor.slugify", return_value="test-sponsor"
+        with patch(sponsor_objects_get, side_effect=Sponsor.DoesNotExist) as mock_get, patch(
+            sponsor_slugify, return_value="test-sponsor"
         ) as mock_slugify, patch.object(Sponsor, "__new__", return_value=mock_sponsor):
             result = Sponsor.update_data(sponsor_data, save=False)
 
@@ -130,7 +128,7 @@ class TestSponsor:
 
             Sponsor.from_dict(sponsor, sponsor_data)
 
-            assert sponsor.name == "Test Sponsor"
+            assert sponsor.name == test_sponsor_name
             assert sponsor.description == "Test Description"
             assert (
                 sponsor.image_url
@@ -165,7 +163,7 @@ class TestSponsor:
         }
 
         for member_key, expected_type in member_mapping.items():
-            data = {"name": "Test Sponsor", "membertype": member_key}
+            data = {"name": test_sponsor_name, "membertype": member_key}
 
             sponsor = MagicMock()
             Sponsor.from_dict(sponsor, data)
@@ -183,7 +181,7 @@ class TestSponsor:
         ]
 
         for sponsor_key, expected_type in mappings:
-            data = {"name": "Test Sponsor", "sponsor": sponsor_key}
+            data = {"name": test_sponsor_name, "sponsor": sponsor_key}
 
             sponsor = MagicMock()
             Sponsor.from_dict(sponsor, data)

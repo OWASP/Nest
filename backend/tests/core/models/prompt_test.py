@@ -11,18 +11,21 @@ OPEN_AI_SECRET_KEY_VALID = os.getenv("OPEN_AI_SECRET_KEY_VALID", "default_valid_
 OPEN_AI_SECRET_KEY_NONE = os.getenv("OPEN_AI_SECRET_KEY_NONE", "default_none_key")
 
 
+test_prompt_name = "Test Prompt"
+mocked_text = "Mocked text"
+
+
 class TestPrompt:
     """Test the Prompt model."""
 
-    def test_str(self):
+    def test_string_representation(self):
         """Test the string representation of a prompt."""
-        prompt = Prompt(name="Test Prompt")
-        assert str(prompt) == "Test Prompt"
+        prompt = Prompt(name=test_prompt_name)
+        assert str(prompt) == test_prompt_name
 
     @patch("django.db.models.Model.save")
-    def test_save(self, mock_super_save):
-        """Test the save method with key generation."""
-        prompt = Prompt(name="Test Prompt", text="Test text")
+    def test_save_method_with_key_generation(self, mock_super_save):
+        prompt = Prompt(name=test_prompt_name, text="Test text")
         prompt.key = ""
         prompt.save()
 
@@ -32,7 +35,7 @@ class TestPrompt:
 
         mock_super_save.reset_mock()
 
-        prompt = Prompt(name="Test Prompt 2", key="custom-key", text="Test text")
+        prompt = Prompt(name=f"{test_prompt_name} 2", key="custom-key", text="Test text")
         prompt.save()
 
         assert prompt.key == "test-prompt-2"
@@ -64,6 +67,7 @@ class TestPrompt:
         result = Prompt.get_text("nonexistent")
         assert result is None
         mock_logger.warning.assert_not_called()
+        mock_logger.warning.reset_mock()
 
     @patch("apps.core.models.prompt.Prompt.objects.get")
     def test_get_text_existing_key(self, mock_get):
@@ -105,25 +109,25 @@ class TestPrompt:
     def test_all_getter_methods_with_mocks(self):
         """Test all getter methods with mocks to ensure 100% coverage."""
         with patch("apps.core.models.prompt.Prompt.get_text") as mock_get_text:
-            mock_get_text.return_value = "Mocked text"
+            mock_get_text.return_value = mocked_text
 
-            assert Prompt.get_github_issue_hint() == "Mocked text"
+            assert Prompt.get_github_issue_hint() == mocked_text
             mock_get_text.assert_called_with("github-issue-hint")
 
-            assert Prompt.get_github_issue_documentation_project_summary() == "Mocked text"
+            assert Prompt.get_github_issue_documentation_project_summary() == mocked_text
             mock_get_text.assert_called_with("github-issue-documentation-project-summary")
 
-            assert Prompt.get_github_issue_project_summary() == "Mocked text"
+            assert Prompt.get_github_issue_project_summary() == mocked_text
             mock_get_text.assert_called_with("github-issue-project-summary")
 
-            assert Prompt.get_owasp_chapter_suggested_location() == "Mocked text"
+            assert Prompt.get_owasp_chapter_suggested_location() == mocked_text
             mock_get_text.assert_called_with("owasp-chapter-suggested-location")
 
-            assert Prompt.get_owasp_chapter_summary() == "Mocked text"
+            assert Prompt.get_owasp_chapter_summary() == mocked_text
             mock_get_text.assert_called_with("owasp-chapter-summary")
 
-            assert Prompt.get_owasp_committee_summary() == "Mocked text"
+            assert Prompt.get_owasp_committee_summary() == mocked_text
             mock_get_text.assert_called_with("owasp-committee-summary")
 
-            assert Prompt.get_owasp_project_summary() == "Mocked text"
+            assert Prompt.get_owasp_project_summary() == mocked_text
             mock_get_text.assert_called_with("owasp-project-summary")
