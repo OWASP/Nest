@@ -9,10 +9,14 @@ class Local(Base):
     """Local configuration."""
 
     APP_NAME = "OWASP Nest Local"
-    CORS_ALLOWED_ORIGINS = (
+
+    ALLOWED_ORIGINS = (
         "http://127.0.0.1:3000",
         "http://localhost:3000",
     )
+    CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
+    CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
+
     DEBUG = True
     LOGGING = {}
     PUBLIC_IP_ADDRESS = values.Value()

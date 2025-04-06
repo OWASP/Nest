@@ -1,7 +1,16 @@
+import { faGithub, faSlack, faBluesky } from '@fortawesome/free-brands-svg-icons'
 import { Link } from 'types/link'
 import { Section } from 'types/section'
 
 export const headerLinks: Link[] = [
+  {
+    text: 'Community',
+    submenu: [
+      { text: 'Chapters', href: '/chapters' },
+      { text: 'Snapshots', href: '/community/snapshots' },
+      { text: 'Users', href: '/community/users' },
+    ],
+  },
   {
     text: 'Projects',
     href: '/projects',
@@ -11,12 +20,26 @@ export const headerLinks: Link[] = [
     href: '/projects/contribute',
   },
   {
-    text: 'Community',
-    href: '/community/users',
+    text: 'About',
+    href: '/about',
+  },
+]
+
+export const footerIcons = [
+  {
+    icon: faBluesky,
+    href: 'https://bsky.app/profile/nest.owasp.org',
+    label: 'Bluesky',
   },
   {
-    text: 'Chapters',
-    href: '/chapters',
+    icon: faGithub,
+    href: 'https://github.com/owasp/nest',
+    label: 'GitHub',
+  },
+  {
+    icon: faSlack,
+    href: 'https://owasp.slack.com/archives/project-nest',
+    label: 'Slack',
   },
 ]
 
@@ -24,10 +47,12 @@ export const footerSections: Section[] = [
   {
     title: 'OWASP Nest',
     links: [
-      { text: 'About', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#owasp-nest' },
-      { text: 'Contact', href: 'https://owasp.slack.com/archives/project-nest' },
+      { text: 'About', href: '/about' },
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
-      { text: 'Leaders', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#leaders' },
+      {
+        text: 'GSoC 2025',
+        href: 'https://owasp.org/www-community/initiatives/gsoc/gsoc2025ideas#owasp-nest',
+      },
       {
         text: 'Sponsor',
         href: 'https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest',
@@ -67,7 +92,6 @@ export const footerSections: Section[] = [
       { text: 'About', href: 'https://owasp.org/about/' },
       { text: 'Contact', href: 'https://owasp.org/contact/' },
       { text: 'Events', href: 'https://owasp.glueup.com/organization/6727/events/' },
-      { text: 'Membership', href: 'https://owasp.glueup.com/organization/6727/memberships/' },
       { text: 'Team', href: 'https://owasp.org/corporate/' },
     ],
   },

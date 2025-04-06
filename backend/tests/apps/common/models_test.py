@@ -6,7 +6,7 @@ from apps.common.models import BulkSaveModel, models
 
 
 class TestBulkSaveModel:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_model(self):
         class MockModel(models.Model):
             class Meta:
@@ -15,7 +15,7 @@ class TestBulkSaveModel:
         MockModel.objects = MagicMock()
         return MockModel
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_objects(self):
         mock_obj1 = MagicMock()
         mock_obj1.id = None

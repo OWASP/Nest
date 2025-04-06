@@ -25,7 +25,9 @@ export interface CardProps {
 
 interface stats {
   icon: IconDefinition
-  value: string
+  pluralizedName?: string
+  unit?: string
+  value: number
 }
 export interface DetailsCardProps {
   description?: string
@@ -53,7 +55,16 @@ export interface UserCardProps {
   avatar: string
   button: ButtonType
   company: string
+  className?: string
   email: string
   location: string
   name: string
+}
+
+export interface SnapshotCardProps {
+  key: string
+  startAt: string
+  endAt: string
+  title: string
+  button: ButtonType
 }
