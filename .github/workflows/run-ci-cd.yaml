@@ -183,7 +183,7 @@ jobs:
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           scan-type: repo
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   scan-ci-dependencies:
     name: Run CI Denendencies Scan
@@ -198,7 +198,7 @@ jobs:
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           scan-type: fs
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   build-staging-images:
     name: Build Staging Images
@@ -271,14 +271,14 @@ jobs:
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -435,14 +435,14 @@ jobs:
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production
