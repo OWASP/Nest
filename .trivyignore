@@ -1,7 +1,7 @@
-CVE-2024-56171
-CVE-2024-55549
-CVE-2024-8176
-CVE-2025-24855
-CVE-2025-24928
-CVE-2025-27113
-CVE-2025-31115
+CVE-2024-55549  # libxslt use-after-free
+CVE-2024-56171  # libxml2 use-after-free
+CVE-2024-8176   # libexpat stack overflow
+CVE-2025-24855  # libxslt use-after-free
+CVE-2025-24928  # libxml2 buffer overflow
+CVE-2025-27113  # libxml2 null dereference
+CVE-2025-31115  # xz heap use-after-free
