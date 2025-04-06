@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { memo } from 'react'
 import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
+
 type ContributorProps = {
   contributor: TopContributorsTypeAlgolia | TopContributorsTypeGraphql
   uniqueKey: string
@@ -45,7 +46,7 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
       delay={100}
       closeDelay={100}
       showArrow
-      placement="top"
+      placement="bottom"
     >
       <Link href={`/community/users/${login}`} target="_blank" rel="noopener noreferrer">
         <Image
@@ -61,5 +62,4 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
 })
 
 ContributorAvatar.displayName = 'ContributorAvatar'
-
 export default ContributorAvatar

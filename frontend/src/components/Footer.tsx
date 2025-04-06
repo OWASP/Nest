@@ -1,37 +1,23 @@
 'use client'
-import { faBluesky, faGithub, faSlack } from '@fortawesome/free-brands-svg-icons'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Link from 'next/link'
 import { useState, useCallback } from 'react'
 import { Section } from 'types/section'
+import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
 
 export default function Footer() {
+  // State to keep track of the open section in the footer
   const [openSection, setOpenSection] = useState<string | null>(null)
 
+  // Function to toggle the section open/closed
   const toggleSection = useCallback((title: string) => {
+    // If the section is already open, close it, otherwise open it
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
-  // Social media links configuration
-  const socialLinks = [
-    {
-      icon: faBluesky,
-      href: 'https://bsky.app/profile/nest.owasp.org',
-      label: 'Bluesky',
-    },
-    {
-      icon: faGithub,
-      href: 'https://github.com/owasp/nest',
-      label: 'GitHub',
-    },
-    {
-      icon: faSlack,
-      href: 'https://owasp.slack.com/archives/project-nest',
-      label: 'Slack',
-    },
-  ]
+
   return (
     <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
       <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
@@ -83,7 +69,7 @@ export default function Footer() {
 
         {/* Social Media Icons Section */}
         <div className="mb-0 flex justify-center space-x-6">
-          {socialLinks.map((social) => (
+          {footerIcons.map((social) => (
             <Link
               key={social.label}
               href={social.href}
