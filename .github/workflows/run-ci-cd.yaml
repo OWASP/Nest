@@ -182,7 +182,7 @@ jobs:
       - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          config: trivy.yaml
+          trivy-config: trivy.yaml
           scan-type: repo
 
   scan-ci-dependencies:
@@ -197,7 +197,7 @@ jobs:
       - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          config: trivy.yaml
+          trivy-config: trivy.yaml
           scan-type: fs
 
   build-staging-images:
@@ -269,14 +269,14 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          config: trivy.yaml
+          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          config: trivy.yaml
+          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
@@ -433,14 +433,14 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          config: trivy.yaml
+          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          config: trivy.yaml
+          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
