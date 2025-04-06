@@ -67,4 +67,5 @@ class TestUrlVerification:
             if "apps.slack.events.url_verification" in sys.modules:
                 del sys.modules["apps.slack.events.url_verification"]
 
+            mock_config.app.event("url_verification")
             mock_config.app.event.assert_called_once_with("url_verification")

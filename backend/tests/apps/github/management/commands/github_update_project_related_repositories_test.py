@@ -10,6 +10,9 @@ from apps.github.management.commands.github_update_project_related_repositories 
 )
 
 magic_value_two = 2
+builtins_print = "builtins.print"
+test_repo_url = "https://github.com/OWASP/test-repo"
+test_repo_path = "OWASP/test-repo"
 
 
 @pytest.fixture
@@ -21,7 +24,7 @@ def command():
 def mock_project():
     project = mock.Mock(spec=Project)
     project.owasp_url = "https://owasp.org/www-project-test"
-    project.related_urls = {"https://github.com/OWASP/test-repo"}
+    project.related_urls = {test_repo_url}
     project.invalid_urls = set()
     return project
 
@@ -57,7 +60,7 @@ def test_handle(
     mock_gh_client = mock.Mock()
     mock_github.return_value = mock_gh_client
 
-    mock_get_repository_path.return_value = "OWASP/test-repo"
+    mock_get_repository_path.return_value = test_repo_path
 
     mock_gh_repo = mock.Mock(name="test-repo")
     mock_gh_client.get_repo.return_value = mock_gh_repo
@@ -81,14 +84,14 @@ def test_handle(
     with (
         mock.patch.object(Project, "active_projects", mock_active_projects),
         mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
-        mock.patch("builtins.print") as mock_print,
+        mock.patch(builtins_print) as mock_print,
     ):
         command.handle(offset=offset)
 
         mock_github.assert_called_once_with("test-token", per_page=GITHUB_ITEMS_PER_PAGE)
 
-        mock_get_repository_path.assert_called_with("https://github.com/OWASP/test-repo")
-        mock_gh_client.get_repo.assert_called_with("OWASP/test-repo")
+        mock_get_repository_path.assert_called_with(test_repo_url)
+        mock_gh_client.get_repo.assert_called_with(test_repo_path)
 
         assert mock_organization.save.called
         assert mock_project.repositories.add.called
@@ -115,7 +118,7 @@ def test_handle_invalid_repository_path(
 ):
     mock_gh_client = mock.Mock()
     mock_github.return_value = mock_gh_client
-
+    builtins_print = "builtins.print"
     mock_get_repository_path.return_value = None
 
     mock_projects_list = [mock_project]
@@ -133,16 +136,14 @@ def test_handle_invalid_repository_path(
     with (
         mock.patch.object(Project, "active_projects", mock_active_projects),
         mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
-        mock.patch("builtins.print"),
+        mock.patch(builtins_print),
         mock.patch(
             "apps.github.management.commands.github_update_project_related_repositories.logger"
         ) as mock_logger,
     ):
         command.handle(offset=0)
 
-        mock_logger.info.assert_called_with(
-            "Couldn't get repository path for %s", "https://github.com/OWASP/test-repo"
-        )
+        mock_logger.info.assert_called_with("Couldn't get repository path for %s", test_repo_url)
         mock_project_bulk_save.assert_called_once()
         mock_gh_client.get_repo.assert_not_called()
 
@@ -163,7 +164,7 @@ def test_handle_github_not_found_exception(
     mock_gh_client = mock.Mock()
     mock_github.return_value = mock_gh_client
 
-    mock_get_repository_path.return_value = "OWASP/test-repo"
+    mock_get_repository_path.return_value = test_repo_path
 
     not_found_exception = UnknownObjectException(404, {"status": "404", "message": "Not Found"})
     mock_gh_client.get_repo.side_effect = not_found_exception
@@ -185,11 +186,11 @@ def test_handle_github_not_found_exception(
     with (
         mock.patch.object(Project, "active_projects", mock_active_projects),
         mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
-        mock.patch("builtins.print"),
+        mock.patch(builtins_print),
     ):
         command.handle(offset=0)
 
-        mock_gh_client.get_repo.assert_called_with("OWASP/test-repo")
+        mock_gh_client.get_repo.assert_called_with(test_repo_path)
 
         for url in original_related_urls:
             assert url in mock_project.invalid_urls
@@ -219,7 +220,7 @@ def test_handle_github_other_exception(
     mock_gh_client = mock.Mock()
     mock_github.return_value = mock_gh_client
 
-    mock_get_repository_path.return_value = "OWASP/test-repo"
+    mock_get_repository_path.return_value = test_repo_path
 
     other_exception = UnknownObjectException(500, {"status": "500", "message": "Server Error"})
     mock_gh_client.get_repo.side_effect = other_exception
@@ -239,12 +240,14 @@ def test_handle_github_other_exception(
     with (
         mock.patch.object(Project, "active_projects", mock_active_projects),
         mock.patch.object(Project, "bulk_save"),
-        mock.patch("builtins.print"),
+        mock.patch(builtins_print),
     ):
         with pytest.raises(UnknownObjectException):
             command.handle(offset=0)
 
-        mock_gh_client.get_repo.assert_called_with("OWASP/test-repo")
+        mock_gh_client.get_repo.side_effect = UnknownObjectException(500, {"status": "500"})
+
+        mock_gh_client.get_repo.assert_called_with(test_repo_path)
         mock_project.save.assert_not_called()
 
         mock_sync_repository.assert_not_called()
@@ -307,7 +310,7 @@ def test_handle_multiple_related_urls(
     with (
         mock.patch.object(Project, "active_projects", mock_active_projects),
         mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
-        mock.patch("builtins.print"),
+        mock.patch(builtins_print),
     ):
         command.handle(offset=0)
 

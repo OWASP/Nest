@@ -8,6 +8,8 @@ from apps.common.open_ai import OpenAi
 from apps.github.management.commands.github_enrich_issues import Command
 from apps.github.models.issue import Issue
 
+builtins_print = "builtins.print"
+
 
 class TestGitHubEnrichIssuesCommand:
     """Test suite for GitHub enrich issues command."""
@@ -60,11 +62,7 @@ class TestGitHubEnrichIssuesCommand:
         mock_filtered_issues = mock.MagicMock()
         mock_filtered_issues.__iter__.return_value = iter(mock_issues_list[offset:])
         mock_filtered_issues.count.return_value = len(mock_issues_list)
-        mock_filtered_issues.__getitem__ = (
-            lambda _, idx: mock_issues_list[idx]
-            if isinstance(idx, int)
-            else mock_issues_list[idx.start : idx.stop]
-        )
+        mock_filtered_issues.__getitem__ = lambda _: []
         mock_filtered_issues.order_by.return_value = mock_filtered_issues
 
         mock_open_issues = mock.MagicMock()
@@ -89,7 +87,7 @@ class TestGitHubEnrichIssuesCommand:
             mock.patch.object(Issue, "bulk_save") as mock_bulk_save,
             mock.patch.object(mock_issue, "generate_hint") as mock_generate_hint,
             mock.patch.object(mock_issue, "generate_summary") as mock_generate_summary,
-            mock.patch("builtins.print"),
+            mock.patch(builtins_print),
         ):
             command.handle(
                 offset=offset,
@@ -123,11 +121,7 @@ class TestGitHubEnrichIssuesCommand:
         mock_filtered_issues = mock.MagicMock()
         mock_filtered_issues.__iter__.return_value = iter(mock_issues_list)
         mock_filtered_issues.count.return_value = len(mock_issues_list)
-        mock_filtered_issues.__getitem__ = (
-            lambda _, idx: mock_issues_list[idx]
-            if isinstance(idx, int)
-            else mock_issues_list[idx.start : idx.stop]
-        )
+        mock_filtered_issues.__getitem__ = lambda _: []
         mock_filtered_issues.order_by.return_value = mock_filtered_issues
 
         mock_open_issues = mock.MagicMock()
@@ -146,7 +140,7 @@ class TestGitHubEnrichIssuesCommand:
             mock.patch.object(Issue, "bulk_save") as mock_bulk_save,
             mock.patch.object(mock_issue, "generate_hint") as mock_generate_hint,
             mock.patch.object(mock_issue, "generate_summary") as mock_generate_summary,
-            mock.patch("builtins.print"),
+            mock.patch(builtins_print),
         ):
 
             def side_effect():
@@ -178,20 +172,20 @@ class TestGitHubEnrichIssuesCommand:
         mock_filtered_issues = mock.MagicMock()
         mock_filtered_issues.__iter__.return_value = iter([])
         mock_filtered_issues.count.return_value = 0
-        mock_filtered_issues.__getitem__ = lambda _, idx: [] if isinstance(idx, int) else []
+        mock_filtered_issues.__getitem__ = lambda _: []
         mock_filtered_issues.order_by.return_value = mock_filtered_issues
 
         mock_open_issues = mock.MagicMock()
         mock_open_issues.__iter__.return_value = iter([])
         mock_open_issues.count.return_value = 0
-        mock_open_issues.__getitem__ = lambda _, idx: [] if isinstance(idx, int) else []
+        mock_open_issues.__getitem__ = lambda _: []
         mock_open_issues.order_by.return_value = mock_open_issues
         mock_open_issues.without_summary = mock_filtered_issues
 
         with (
             mock.patch.object(Issue, "open_issues", mock_open_issues),
             mock.patch.object(Issue, "bulk_save") as mock_bulk_save,
-            mock.patch("builtins.print"),
+            mock.patch(builtins_print),
         ):
             command.handle(
                 offset=0,
@@ -233,7 +227,7 @@ class TestGitHubEnrichIssuesCommand:
         with (
             mock.patch.object(Issue, "open_issues", mock_open_issues),
             mock.patch.object(Issue, "bulk_save"),
-            mock.patch("builtins.print"),
+            mock.patch(builtins_print),
         ):
             command.handle(
                 offset=0,
@@ -263,7 +257,7 @@ class TestGitHubEnrichIssuesCommand:
         with (
             mock.patch.object(Issue, "open_issues", mock_open_issues),
             mock.patch.object(Issue, "bulk_save") as mock_bulk_save,
-            mock.patch("builtins.print") as mock_print,
+            mock.patch(builtins_print) as mock_print,
         ):
             command.handle(
                 offset=0,

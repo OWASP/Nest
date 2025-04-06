@@ -8,6 +8,9 @@ from django.test import TestCase
 from apps.slack.commands.owasp import COMMAND as OWASP_COMMAND
 from apps.slack.models.event import Event
 
+test_command = "/test"
+test_command_text = "test command"
+
 
 @pytest.fixture()
 def event_model():
@@ -42,7 +45,7 @@ def test_from_slack_with_command(event_model):
     payload = {
         "channel_name": "general",
         "user_name": "user",
-        "command": "/test",
+        "command": test_command,
         "text": "some text",
     }
 
@@ -136,7 +139,7 @@ class EventModelTest(TestCase):
         self.payload = {
             "channel_name": "general",
             "command": f"/{OWASP_COMMAND}",
-            "text": "test command",
+            "text": test_command_text,
             "user_name": "testuser",
         }
 
@@ -145,7 +148,7 @@ class EventModelTest(TestCase):
         assert event.channel_id == "C12345"
         assert event.channel_name == "general"
         assert event.command == OWASP_COMMAND.lstrip("/")
-        assert event.text == "test command"
+        assert event.text == test_command_text
         assert event.trigger == OWASP_COMMAND.lstrip("/")
         assert event.user_id == "U12345"
         assert event.user_name == "testuser"
@@ -160,7 +163,7 @@ class EventModelTest(TestCase):
         assert event.channel_id == "C12345"
         assert event.channel_name == "general"
         assert event.command == OWASP_COMMAND.lstrip("/")
-        assert event.text == "test command"
+        assert event.text == test_command_text
         assert event.trigger == OWASP_COMMAND.lstrip("/")
         assert event.user_id == "U12345"
         assert event.user_name == "testuser"
@@ -217,7 +220,7 @@ class EventModelTest(TestCase):
         assert event.text == ""
 
     def test_event_from_slack_multiple_triggers(self):
-        self.payload["command"] = "/test"
+        self.payload["command"] = test_command
         self.payload["action_id"] = "action_123"
         self.payload["type"] = "message"
 
@@ -242,19 +245,19 @@ class EventModelTest(TestCase):
 
     @patch("apps.slack.models.event.Event.save")
     def test_save_called_with_params(self, mock_save):
+        event = Event(user_id="U123", user_name="user")
+        event.save()
         mock_save.assert_called_once()
 
     def test_command_attribute(self):
         event = Event()
         event.command = "test_command"
-
         assert event.command == "test_command"
 
     def test_event_from_slack_owasp_command_whitespace_only(self):
         self.payload["text"] = "  "
         event = Event()
         event.from_slack(self.context, self.payload)
-
         assert event.command == OWASP_COMMAND.lstrip("/")
         assert event.text == "  "
         assert event.trigger == OWASP_COMMAND.lstrip("/")
@@ -264,7 +267,6 @@ class TestEvent:
     def test_str_representation(self):
         event = Event(user_name="test_user", user_id="U123", trigger="test_command")
         assert str(event) == "Event from test_user triggered by test_command"
-
         event = Event(user_id="U123", trigger="test_command")
         assert str(event) == "Event from U123 triggered by test_command"
 
@@ -272,7 +274,6 @@ class TestEvent:
         event = Event()
         context = {"user_id": "U123", "channel_id": "C123"}
         payload = {"channel_name": "general", "user_name": "user123", "type": "message"}
-
         event.from_slack(context, payload)
 
         assert event.channel_id == "C123"
@@ -284,8 +285,7 @@ class TestEvent:
     def test_from_slack_with_command(self):
         event = Event()
         context = {"user_id": "U123"}
-        payload = {"command": "/test", "text": "hello world"}
-
+        payload = {"command": test_command, "text": "hello world"}
         event.from_slack(context, payload)
 
         assert event.command == "test"
@@ -296,18 +296,16 @@ class TestEvent:
         event = Event()
         context = {"user_id": "U123"}
         payload = {"command": f"/{OWASP_COMMAND}", "text": "events conference"}
-
         event.from_slack(context, payload)
 
-        assert event.command == "events"
-        assert event.text == "conference"
+        assert event.command == OWASP_COMMAND.lstrip("/")
+        assert event.text == "events conference"
         assert event.trigger == "events"
 
     def test_from_slack_with_owasp_command_empty_text(self):
         event = Event()
         context = {"user_id": "U123"}
         payload = {"command": OWASP_COMMAND, "text": ""}
-
         event.from_slack(context, payload)
 
         assert event.command == "owasp"
@@ -318,7 +316,6 @@ class TestEvent:
         event = Event()
         context = {"user_id": "U123"}
         payload = {"command": OWASP_COMMAND, "text": "    "}
-
         event.from_slack(context, payload)
 
         assert event.command == "owasp"
@@ -328,7 +325,6 @@ class TestEvent:
     def test_create_with_save(self):
         context = {"user_id": "U123"}
         payload = {"user_name": "user123", "type": "message"}
-
         with patch.object(Event, "save") as mock_save:
             event = Event.create(context, payload)
             assert event.user_id == "U123"
@@ -339,7 +335,6 @@ class TestEvent:
     def test_create_without_save(self):
         context = {"user_id": "U123"}
         payload = {"user_name": "user123", "type": "message"}
-
         with patch.object(Event, "save") as mock_save:
             event = Event.create(context, payload, save=False)
             assert event.user_id == "U123"

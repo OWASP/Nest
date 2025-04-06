@@ -5,6 +5,10 @@ import pytest
 from apps.slack.common.handlers.users import get_blocks
 from apps.slack.common.presentation import EntityPresentation
 
+pagination_buttons_path = "apps.slack.common.handlers.users.get_pagination_buttons"
+john_doe = "John Doe"
+example_user_url = "https://example.com/user"
+
 
 class TestUsersHandler:
     @pytest.fixture()
@@ -12,10 +16,10 @@ class TestUsersHandler:
         return {
             "hits": [
                 {
-                    "idx_name": "John Doe",
+                    "idx_name": john_doe,
                     "idx_login": "johndoe",
                     "idx_bio": "This is a test bio",
-                    "idx_url": "https://example.com/user",
+                    "idx_url": example_user_url,
                     "idx_company": "OWASP",
                     "idx_location": "New York",
                     "idx_followers_count": 100,
@@ -43,7 +47,7 @@ class TestUsersHandler:
             "hits": [
                 {
                     "idx_login": "minimaluser",
-                    "idx_url": "https://example.com/user",
+                    "idx_url": example_user_url,
                 }
             ],
             "nbPages": 1,
@@ -59,7 +63,7 @@ class TestUsersHandler:
 
         blocks = get_blocks(search_query="test")
 
-        assert "John Doe" in blocks[0]["text"]["text"]
+        assert john_doe in blocks[0]["text"]["text"]
         assert "This is a test bio" in blocks[0]["text"]["text"]
         assert "Company: OWASP" in blocks[0]["text"]["text"]
         assert "Location: New York" in blocks[0]["text"]["text"]
@@ -81,7 +85,7 @@ class TestUsersHandler:
         blocks = get_blocks()
 
         assert len(blocks) > 0
-        assert "John Doe" in blocks[0]["text"]["text"]
+        assert john_doe in blocks[0]["text"]["text"]
 
     def test_get_blocks_no_results_without_query(self, setup_mocks, mock_empty_user_data):
         setup_mocks["get_users"].return_value = mock_empty_user_data
@@ -116,7 +120,7 @@ class TestUsersHandler:
         setup_mocks["get_users"].return_value = mock_user_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch("apps.slack.common.handlers.users.get_pagination_buttons") as mock_pagination:
+        with patch(pagination_buttons_path) as mock_pagination:
             mock_pagination.return_value = [
                 {"type": "button", "text": {"type": "plain_text", "text": "Next"}}
             ]
@@ -184,7 +188,7 @@ class TestUsersHandler:
 
         for case in test_cases:
             mock_data = {
-                "hits": [{"idx_url": "https://example.com/user", "idx_bio": "Bio text", **case}],
+                "hits": [{"idx_url": example_user_url, "idx_bio": "Bio text", **case}],
                 "nbPages": 1,
             }
             setup_mocks["get_users"].return_value = mock_data
@@ -194,33 +198,19 @@ class TestUsersHandler:
             user_name = case.get("idx_name") or case.get("idx_login")
             assert user_name in blocks[0]["text"]["text"]
 
-            if case["idx_company"]:
-                assert f"Company: {case['idx_company']}" in blocks[0]["text"]["text"]
-            else:
-                assert "Company:" not in blocks[0]["text"]["text"]
+            metadata_checks = [
+                ("Company:", case["idx_company"]),
+                ("Location:", case["idx_location"]),
+                ("Followers:", case["idx_followers_count"]),
+                ("Following:", case["idx_following_count"]),
+                ("Repositories:", case["idx_public_repositories_count"]),
+            ]
 
-            if case["idx_location"]:
-                assert f"Location: {case['idx_location']}" in blocks[0]["text"]["text"]
-            else:
-                assert "Location:" not in blocks[0]["text"]["text"]
-
-            if case["idx_followers_count"]:
-                assert f"Followers: {case['idx_followers_count']}" in blocks[0]["text"]["text"]
-            else:
-                assert "Followers:" not in blocks[0]["text"]["text"]
-
-            if case["idx_following_count"]:
-                assert f"Following: {case['idx_following_count']}" in blocks[0]["text"]["text"]
-            else:
-                assert "Following:" not in blocks[0]["text"]["text"]
-
-            if case["idx_public_repositories_count"]:
-                assert (
-                    f"Repositories: {case['idx_public_repositories_count']}"
-                    in blocks[0]["text"]["text"]
-                )
-            else:
-                assert "Repositories:" not in blocks[0]["text"]["text"]
+            for label, value in metadata_checks:
+                if value:
+                    assert f"{label} {value}" in blocks[0]["text"]["text"]
+                else:
+                    assert label not in blocks[0]["text"]["text"]
 
     def test_no_bio(self, setup_mocks, mock_user_data):
         mock_user_data["hits"][0]["idx_bio"] = ""
@@ -258,14 +248,14 @@ class TestUsersHandler:
 
         assert len(blocks) > 0
         assert blocks[0]["type"] == "section"
-        assert "John Doe" in blocks[0]["text"]["text"]
+        assert john_doe in blocks[0]["text"]["text"]
 
     def test_pagination_edge_case(self, setup_mocks, mock_user_data):
         mock_user_data["nbPages"] = 2
         setup_mocks["get_users"].return_value = mock_user_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch("apps.slack.common.handlers.users.get_pagination_buttons") as mock_pagination:
+        with patch(pagination_buttons_path) as mock_pagination:
             mock_pagination.return_value = None
             blocks = get_blocks(page=2, presentation=presentation)
             assert all(block["type"] != "actions" for block in blocks)

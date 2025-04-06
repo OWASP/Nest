@@ -16,6 +16,16 @@ USER_SITEMAP_URL_LIMIT = 10000
 EXPECTED_URL_COUNT = 2
 EXPECTED_ENTRY_COUNT = 2
 
+sitemap_chapters_file = "sitemap-chapters.xml"
+sitemap_committees_file = "sitemap-committees.xml"
+sitemap_users_file = "sitemap-users.xml"
+project_sitemap_content = "project sitemap content"
+chapter_sitemap_content = "chapter sitemap content"
+committee_sitemap_content = "committee sitemap content"
+user_sitemap_content = "user sitemap content"
+sitemap_content = "SITEMAP CONTENT"
+index_content = "INDEX CONTENT"
+
 
 @pytest.fixture()
 def mock_file_open(monkeypatch):
@@ -131,10 +141,10 @@ class TestSitemapCommand(SimpleTestCase):
         mock_user_sitemap.assert_called_once_with(output_dir)
 
         expected_files = [
-            "sitemap-chapters.xml",
-            "sitemap-committees.xml",
+            sitemap_chapters_file,
+            sitemap_committees_file,
             "sitemap-projects.xml",
-            "sitemap-users.xml",
+            sitemap_users_file,
         ]
         mock_index_sitemap.assert_called_once_with(expected_files)
 
@@ -154,7 +164,7 @@ class TestSitemapCommand(SimpleTestCase):
         with patch.object(
             command, "generate_sitemap_content"
         ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
-            mock_generate_content.return_value = "project sitemap content"
+            mock_generate_content.return_value = project_sitemap_content
 
             command.generate_project_sitemap(self.temp_dir)
 
@@ -176,7 +186,7 @@ class TestSitemapCommand(SimpleTestCase):
                 ), f"Additional route {route} not found in actual routes"
 
             mock_save.assert_called_once_with(
-                "project sitemap content", self.temp_dir / "sitemap-project.xml"
+                project_sitemap_content, self.temp_dir / "sitemap-project.xml"
             )
 
     def test_generate_chapter_sitemap(self):
@@ -188,7 +198,7 @@ class TestSitemapCommand(SimpleTestCase):
         with patch.object(
             command, "generate_sitemap_content"
         ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
-            mock_generate_content.return_value = "chapter sitemap content"
+            mock_generate_content.return_value = chapter_sitemap_content
 
             command.generate_chapter_sitemap(self.temp_dir)
 
@@ -210,7 +220,7 @@ class TestSitemapCommand(SimpleTestCase):
                 ), f"Additional route {route} not found in actual routes"
 
             mock_save.assert_called_once_with(
-                "chapter sitemap content", self.temp_dir / "sitemap-chapters.xml"
+                chapter_sitemap_content, self.temp_dir / sitemap_chapters_file
             )
 
     def test_generate_committee_sitemap(self):
@@ -222,7 +232,7 @@ class TestSitemapCommand(SimpleTestCase):
         with patch.object(
             command, "generate_sitemap_content"
         ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
-            mock_generate_content.return_value = "committee sitemap content"
+            mock_generate_content.return_value = committee_sitemap_content
 
             command.generate_committee_sitemap(self.temp_dir)
 
@@ -244,7 +254,7 @@ class TestSitemapCommand(SimpleTestCase):
                 ), f"Additional route {route} not found in actual routes"
 
             mock_save.assert_called_once_with(
-                "committee sitemap content", self.temp_dir / "sitemap-committees.xml"
+                committee_sitemap_content, self.temp_dir / sitemap_committees_file
             )
 
     def test_generate_user_sitemap(self):
@@ -256,7 +266,7 @@ class TestSitemapCommand(SimpleTestCase):
         with patch.object(
             command, "generate_sitemap_content"
         ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
-            mock_generate_content.return_value = "user sitemap content"
+            mock_generate_content.return_value = user_sitemap_content
 
             command.generate_user_sitemap(self.temp_dir)
 
@@ -278,7 +288,7 @@ class TestSitemapCommand(SimpleTestCase):
                 ), f"Additional route {route} not found in actual routes"
 
             mock_save.assert_called_once_with(
-                "user sitemap content", self.temp_dir / "sitemap-users.xml"
+                user_sitemap_content, self.temp_dir / sitemap_users_file
             )
 
     @pytest.mark.freeze_time("2023-01-01")
@@ -292,7 +302,7 @@ class TestSitemapCommand(SimpleTestCase):
             command, "create_sitemap"
         ) as mock_create_sitemap:
             mock_create_url.side_effect = lambda data: f"URL:{data['loc']}"
-            mock_create_sitemap.return_value = "SITEMAP CONTENT"
+            mock_create_sitemap.return_value = sitemap_content
 
             routes = [
                 {"path": "/test1", "changefreq": "daily", "priority": 0.9},
@@ -323,7 +333,7 @@ class TestSitemapCommand(SimpleTestCase):
                 ["URL:https://example.com/test1", "URL:https://example.com/test2"]
             )
 
-            assert result == "SITEMAP CONTENT"
+            assert result == sitemap_content
 
     @pytest.mark.freeze_time("2023-01-01")
     def test_generate_index_sitemap(self):
@@ -336,7 +346,7 @@ class TestSitemapCommand(SimpleTestCase):
             command, "create_sitemap_index_entry"
         ) as mock_create_entry, patch.object(command, "create_sitemap_index") as mock_create_index:
             mock_create_entry.side_effect = lambda data: f"ENTRY:{data['loc']}"
-            mock_create_index.return_value = "INDEX CONTENT"
+            mock_create_index.return_value = index_content
 
             sitemap_files = ["file1.xml", "file2.xml"]
 
@@ -360,7 +370,7 @@ class TestSitemapCommand(SimpleTestCase):
                 ["ENTRY:https://example.com/file1.xml", "ENTRY:https://example.com/file2.xml"]
             )
 
-            assert result == "INDEX CONTENT"
+            assert result == index_content
 
     def test_create_url_entry(self):
         """Test URL entry creation."""
@@ -521,14 +531,14 @@ class TestGenerateSitemap:
             patch.object(command, "generate_sitemap_content") as mock_generate_content,
             patch.object(command, "save_sitemap") as mock_save,
         ):
-            mock_generate_content.return_value = "project sitemap content"
+            mock_generate_content.return_value = project_sitemap_content
 
             with self.caplog.at_level(logging.INFO):
                 command.generate_project_sitemap(self.temp_dir)
 
             mock_generate_content.assert_called_once()
             mock_save.assert_called_once_with(
-                "project sitemap content", self.temp_dir / "sitemap-project.xml"
+                project_sitemap_content, self.temp_dir / "sitemap-project.xml"
             )
 
     def test_command_generate_chapter_sitemap(self):
@@ -539,14 +549,14 @@ class TestGenerateSitemap:
             patch.object(command, "generate_sitemap_content") as mock_generate_content,
             patch.object(command, "save_sitemap") as mock_save,
         ):
-            mock_generate_content.return_value = "chapter sitemap content"
+            mock_generate_content.return_value = chapter_sitemap_content
 
             with self.caplog.at_level(logging.INFO):
                 command.generate_chapter_sitemap(self.temp_dir)
 
             mock_generate_content.assert_called_once()
             mock_save.assert_called_once_with(
-                "chapter sitemap content", self.temp_dir / "sitemap-chapters.xml"
+                chapter_sitemap_content, self.temp_dir / sitemap_chapters_file
             )
 
     def test_command_generate_committee_sitemap(self):
@@ -557,14 +567,14 @@ class TestGenerateSitemap:
             patch.object(command, "generate_sitemap_content") as mock_generate_content,
             patch.object(command, "save_sitemap") as mock_save,
         ):
-            mock_generate_content.return_value = "committee sitemap content"
+            mock_generate_content.return_value = committee_sitemap_content
 
             with self.caplog.at_level(logging.INFO):
                 command.generate_committee_sitemap(self.temp_dir)
 
             mock_generate_content.assert_called_once()
             mock_save.assert_called_once_with(
-                "committee sitemap content", self.temp_dir / "sitemap-committees.xml"
+                committee_sitemap_content, self.temp_dir / sitemap_committees_file
             )
 
     def test_command_generate_user_sitemap(self):
@@ -575,14 +585,14 @@ class TestGenerateSitemap:
             patch.object(command, "generate_sitemap_content") as mock_generate_content,
             patch.object(command, "save_sitemap") as mock_save,
         ):
-            mock_generate_content.return_value = "user sitemap content"
+            mock_generate_content.return_value = user_sitemap_content
 
             with self.caplog.at_level(logging.INFO):
                 command.generate_user_sitemap(self.temp_dir)
 
             mock_generate_content.assert_called_once()
             mock_save.assert_called_once_with(
-                "user sitemap content", self.temp_dir / "sitemap-users.xml"
+                user_sitemap_content, self.temp_dir / sitemap_users_file
             )
 
     def test_generate_sitemap_content(self):
@@ -599,7 +609,7 @@ class TestGenerateSitemap:
             patch.object(command, "create_sitemap") as mock_create_sitemap,
         ):
             mock_create_url.side_effect = lambda data: f"URL:{data['loc']}"
-            mock_create_sitemap.return_value = "SITEMAP CONTENT"
+            mock_create_sitemap.return_value = sitemap_content
 
             result = command.generate_sitemap_content(routes)
 
@@ -622,7 +632,7 @@ class TestGenerateSitemap:
             )
 
             mock_create_sitemap.assert_called_once()
-            assert result == "SITEMAP CONTENT"
+            assert result == sitemap_content
 
     def test_generate_index_content(self):
         """Test generating the sitemap index content."""
@@ -634,11 +644,11 @@ class TestGenerateSitemap:
             patch.object(command, "create_sitemap_index") as mock_create_index,
         ):
             mock_create_entry.side_effect = lambda data: f"ENTRY:{data['loc']}"
-            mock_create_index.return_value = "INDEX CONTENT"
+            mock_create_index.return_value = index_content
 
             result = command.generate_index_sitemap(sitemap_files)
 
             assert mock_create_entry.call_count == EXPECTED_ENTRY_COUNT
 
             mock_create_index.assert_called_once()
-            assert result == "INDEX CONTENT"
+            assert result == index_content
