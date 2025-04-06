@@ -43,6 +43,7 @@ isanori
 jumpstart
 kasya
 Kateryna
+libexpat
 linkify
 lxml
 mamicidal
