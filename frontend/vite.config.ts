@@ -15,6 +15,7 @@ export default defineConfig({
     react(),
     EnvironmentPlugin({
       VITE_API_URL: process.env.VITE_API_URL,
+      VITE_CSRF_URL: process.env.VITE_CSRF_URL,
       VITE_ENVIRONMENT: process.env.VITE_ENVIRONMENT,
       VITE_GRAPHQL_URL: process.env.VITE_GRAPHQL_URL,
       VITE_IDX_URL: process.env.VITE_IDX_URL,
