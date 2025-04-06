@@ -1,10 +1,10 @@
-FROM mcr.microsoft.com/playwright:v1.51.1-noble
+FROM mcr.microsoft.com/playwright:v1.51.1-jammy
 
 ENV FORCE_COLOR=1
 
 WORKDIR /app
 
-COPY --chmod=444 package.json pnpm-lock.yaml ./
+COPY --chmod=777 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
 
@@ -13,4 +13,4 @@ COPY __tests__/unit/data __tests__/unit/data
 COPY playwright.config.ts playwright.config.ts
 COPY src src
 COPY public public
-COPY tailwind.config.js tsconfig.json next.config.ts ./
+COPY tailwind.config.js tsconfig.json next.config.ts postcss.config.js ./

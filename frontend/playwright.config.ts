@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
-  timeout: 60000,
+  timeout: 45000,
   fullyParallel: true,
   retries: 1,
   projects: [
