@@ -79,7 +79,7 @@ jobs:
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check-all` and use `git add` to address it.' && exit 1)
+          Run `make check` and use `git add` to address it.' && exit 1)
 
   spellcheck:
     name: Run spell check
@@ -182,8 +182,8 @@ jobs:
       - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
+          config: trivy.yaml
           scan-type: repo
-          severity: HIGH,CRITICAL
 
   scan-ci-dependencies:
     name: Run CI Denendencies Scan
@@ -197,8 +197,8 @@ jobs:
       - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
+          config: trivy.yaml
           scan-type: fs
-          severity: HIGH,CRITICAL
 
   build-staging-images:
     name: Build Staging Images
@@ -240,7 +240,9 @@ jobs:
 
       - name: Prepare frontend environment
         run: |
+          touch frontend/.env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
           echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
@@ -267,16 +269,16 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
+          config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
-          severity: HIGH,CRITICAL
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
+          config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
-          severity: HIGH,CRITICAL
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -404,6 +406,7 @@ jobs:
         run: |
           touch frontend/.env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "VITE_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
           echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
@@ -430,16 +433,16 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
+          config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
-          severity: HIGH,CRITICAL
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
+          config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
-          severity: HIGH,CRITICAL
 
   deploy-production-nest:
     name: Deploy Nest to Production

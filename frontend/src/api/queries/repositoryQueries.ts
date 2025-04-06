@@ -32,6 +32,7 @@ export const GET_REPOSITORY_DATA = gql`
         isPreRelease
         name
         publishedAt
+        repositoryName
         tagName
       }
       size

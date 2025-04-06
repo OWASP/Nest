@@ -9,6 +9,14 @@ test.describe('Project Details Page', () => {
         json: { data: mockProjectDetailsData },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/projects/test-project', { timeout: 60000 })
   })
 

@@ -7,7 +7,12 @@ include schema/Makefile
 build:
 	@docker compose build
 
-check-all: \
+clean: \
+	clean-backend \
+	clean-frontend \
+	clean-schema
+
+check: \
 	check-backend \
 	check-frontend \
 	check-spelling
@@ -15,9 +20,9 @@ check-all: \
 check-backend: \
 	pre-commit
 
-check-test-all: \
-	check-all \
-	test-all
+check-test: \
+	check \
+	test
 
 check-test-backend: \
 	pre-commit \
@@ -33,7 +38,7 @@ pre-commit:
 run:
 	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
 
-test-all: \
+test: \
 	test-nest-app \
 	test-schema
 
@@ -41,16 +46,16 @@ test-nest-app: \
 	test-backend \
 	test-frontend
 
-update-dependencies: \
+update: \
+	update-docs-dependencies \
 	update-nest-app-dependencies \
+	update-pre-commit \
 	update-schema-dependencies
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \
 	update-cspell-dependencies \
-	update-docs-dependencies \
-	update-frontend-dependencies \
-	update-pre-commit
+	update-frontend-dependencies
 
 update-pre-commit:
 	@pre-commit autoupdate
