@@ -14,7 +14,7 @@ export const mockHomeData = {
       {
         createdAt: '2025-03-05T13:45:28+00:00',
         key: 'eks-goat',
-        leaders: ['Anjali Shukla', 'Divyanshu Shukla'],
+        leaders: ['Leader 3', 'Leader 4'],
         name: 'OWASP EKS Goat',
         openIssuesCount: 0,
         repositoriesCount: 1,
@@ -24,7 +24,7 @@ export const mockHomeData = {
       {
         createdAt: '2025-03-03T16:23:05+00:00',
         key: 'dojo-shield',
-        leaders: ['Fernando Guisso', 'Geovana Silva'],
+        leaders: ['Leader 5', 'Leader 6'],
         name: 'OWASP Dojo Shield',
         openIssuesCount: 1,
         repositoriesCount: 1,
@@ -72,7 +72,7 @@ export const mockHomeData = {
         key: 'chapter_2',
         leaders: ['Leader 1', 'Leader 2'],
         name: 'Chapter 2',
-        suggestedLocation: 'Kalyani, West Bengal, India',
+        suggestedLocation: 'Location 2',
         __typename: 'ChapterNode',
       },
       {
@@ -80,7 +80,7 @@ export const mockHomeData = {
         key: 'chapter_3',
         leaders: ['Leader 1', 'Leader 2'],
         name: 'Chapter 3',
-        suggestedLocation: 'Cebu City, Central Visayas, Philippines',
+        suggestedLocation: 'Location 3',
         __typename: 'ChapterNode',
       },
     ],
@@ -118,7 +118,7 @@ export const mockHomeData = {
         url: 'https://github.com/DependencyTrack/hyades/issues/1724',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/5693141?v=4',
-          login: 'nscuro',
+          login: 'user1',
           name: 'Niklas',
           __typename: 'UserNode',
         },
@@ -144,7 +144,7 @@ export const mockHomeData = {
         url: 'https://github.com/l3montree-dev/devguard/issues/336',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/38261809?v=4',
-          login: 'timbastin',
+          login: 'user2',
           name: 'Tim Bastin',
           __typename: 'UserNode',
         },
@@ -161,7 +161,7 @@ export const mockHomeData = {
         },
         name: 'Release 1',
         publishedAt: '2025-03-19T13:51:35+00:00',
-        repositoryName: 'cyclonedx-node-npm',
+        repositoryName: 'repo-1',
         tagName: 'v2.1.0',
         url: 'https://github.com/CycloneDX/cyclonedx-node-npm/releases/tag/v2.1.0',
         __typename: 'ReleaseNode',
@@ -184,7 +184,7 @@ export const mockHomeData = {
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/13718901?v=4',
           login: 'J12934',
-          name: 'Jannik Hollenbach',
+          name: 'author 3',
           __typename: 'UserNode',
         },
         name: 'v4.14.0',
@@ -207,7 +207,7 @@ export const mockHomeData = {
       {
         imageUrl:
           'https://raw.githubusercontent.com/OWASP/owasp.github.io/main/assets/images/corp-member-logo/Zimperiumlogo_300x90px.jpeg',
-        name: 'Zimperium',
+        name: 'Sponsor 2',
         sponsorType: 'GOLD',
         url: 'https://www.zimperium.com',
         __typename: 'SponsorNode',
@@ -248,7 +248,7 @@ export const mockHomeData = {
         name: 'Event 2',
         startDate: '2025-05-19',
         summary:
-          'The NDC 2025 event will take place in Oslo from May 19 to May 23, 2025. Attendees can find discounted tickets by using the provided link. This event will focus on various topics related to technology and development. It promises to be an informative experience for those interested in these fields.',
+          'The github 2025 event will take place in Oslo from May 19 to May 23, 2025. Attendees can find discounted tickets by using the provided link. This event will focus on various topics related to technology and development. It promises to be an informative experience for those interested in these fields.',
         suggestedLocation: 'Oslo, Norway',
         url: 'https://event.checkin.no/82562/ndc-oslo-2025?action=campaignInvite&campaignInviteHash=ZGF3bi5haXRrZW5Ab3dhc3AuY29t&campaignInviteId=4927',
         __typename: 'EventNode',
