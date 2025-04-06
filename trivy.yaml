@@ -1,0 +1,17 @@
+filesystem:
+  skip-dirs:
+    - backend/.venv/
+    - frontend/node_modules/
+
+timeout: 10m
+
+vulnerability:
+  ignore-unfixed: true
+  ignorefile: .trivyignore
+  security-checks:
+    - config
+    - secret
+    - vuln
+  severity:
+    - CRITICAL
+    - HIGH
