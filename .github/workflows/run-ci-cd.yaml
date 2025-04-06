@@ -182,8 +182,8 @@ jobs:
       - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          trivy-config: trivy.yaml
           scan-type: repo
+          trivy-config: trivy.yaml
 
   scan-ci-dependencies:
     name: Run CI Denendencies Scan
@@ -197,8 +197,8 @@ jobs:
       - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          trivy-config: trivy.yaml
           scan-type: fs
+          trivy-config: trivy.yaml
 
   build-staging-images:
     name: Build Staging Images
@@ -269,16 +269,16 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+          trivy-config: trivy.yaml
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+          trivy-config: trivy.yaml
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -433,16 +433,16 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+          trivy-config: trivy.yaml
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
-          trivy-config: trivy.yaml
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+          trivy-config: trivy.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production
