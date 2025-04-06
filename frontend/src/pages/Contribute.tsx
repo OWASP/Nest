@@ -52,6 +52,8 @@ const ContributePage = () => {
           url={issue.url}
           projectName={issue.project_name}
           projectLink={issue.project_url}
+          labels={issue.labels}
+          repository_languages={issue.repository_languages}
           summary={issue.summary}
           icons={filteredIcons}
           button={SubmitButton}
