@@ -1,9 +1,18 @@
 import { Button } from '@chakra-ui/react'
-import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UserCardProps } from 'types/card'
 
-const UserCard = ({ avatar, name, company, email, location, button, className }: UserCardProps) => {
+const UserCard = ({
+  avatar,
+  name,
+  company,
+  email,
+  location,
+  button,
+  className,
+  members,
+}: UserCardProps) => {
   return (
     <Button
       onClick={button.onclick}
@@ -30,6 +39,12 @@ const UserCard = ({ avatar, name, company, email, location, button, className }:
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email}
           </p>
+          {members && (
+            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+              <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
+              {members}
+            </p>
+          )}
         </div>
       </div>
 

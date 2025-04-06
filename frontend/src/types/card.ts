@@ -58,6 +58,7 @@ export interface UserCardProps {
   className?: string
   email: string
   location: string
+  members?: number
   name: string
 }
 

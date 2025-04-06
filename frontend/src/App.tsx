@@ -5,6 +5,8 @@ import {
   CommitteesPage,
   ContributePage,
   Home,
+  OrganizationPage,
+  OrganizationDetailsPage,
   ProjectDetailsPage,
   ProjectsPage,
   RepositoryDetailsPage,
@@ -49,6 +51,8 @@ function App() {
         <Route path="/community/snapshots" element={<SnapshotsPage />}></Route>
         <Route path="/community/users/:userKey" element={<UserDetailsPage />}></Route>
         <Route path="/about" element={<About />}></Route>
+        <Route path="/organizations" element={<OrganizationPage />} />
+        <Route path="/organization/:organizationKey" element={<OrganizationDetailsPage />} />
         <Route path="*" element={<ErrorDisplay {...ERROR_CONFIGS['404']} />} />
       </Routes>
       <Footer />

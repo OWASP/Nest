@@ -1,0 +1,70 @@
+import { useSearchPage } from 'hooks/useSearchPage'
+import { useNavigate } from 'react-router-dom'
+import { OrganizationTypeAlgolia } from 'types/organization'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import SearchPageLayout from 'components/SearchPageLayout'
+import UserCard from 'components/UserCard'
+
+const OrganizationPage = () => {
+  const {
+    items: organizations,
+    isLoaded,
+    currentPage,
+    totalPages,
+    searchQuery,
+    handleSearch,
+    handlePageChange,
+  } = useSearchPage<OrganizationTypeAlgolia>({
+    indexName: 'organizations',
+    pageTitle: 'GitHub Organizations',
+    hitsPerPage: 24,
+  })
+
+  const navigate = useNavigate()
+
+  const renderOrganizationCard = (organization: OrganizationTypeAlgolia) => {
+    const handleButtonClick = () => {
+      navigate(`/organization/${organization.login}`)
+    }
+
+    const SubmitButton = {
+      label: 'View Details',
+      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      onclick: handleButtonClick,
+    }
+
+    return (
+      <UserCard
+        button={SubmitButton}
+        key={organization.objectID}
+        avatar={organization.avatar_url}
+        name={organization.name}
+        company={organization.company || ''}
+        email={organization.email || ''}
+        location={organization.location || ''}
+        members={organization.collaborators_count}
+        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+      />
+    )
+  }
+
+  return (
+    <SearchPageLayout
+      currentPage={currentPage}
+      empty="No organizations found"
+      indexName="organizations"
+      isLoaded={isLoaded}
+      onPageChange={handlePageChange}
+      onSearch={handleSearch}
+      searchPlaceholder="Search for GitHub organizations..."
+      searchQuery={searchQuery}
+      totalPages={totalPages}
+    >
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {organizations && organizations.map(renderOrganizationCard)}
+      </div>
+    </SearchPageLayout>
+  )
+}
+
+export default OrganizationPage

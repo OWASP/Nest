@@ -8,6 +8,8 @@ import CommitteeDetailsPage from './CommitteeDetails'
 import CommitteesPage from './Committees'
 import ContributePage from './Contribute'
 import Home from './Home'
+import OrganizationPage from './Organization'
+import OrganizationDetailsPage from './OrganizationDetails'
 import ProjectDetailsPage from './ProjectDetails'
 import ProjectsPage from './Projects'
 import RepositoryDetailsPage from './RepositoryDetails'
@@ -22,6 +24,8 @@ export {
   CommitteesPage,
   ContributePage,
   Home,
+  OrganizationDetailsPage,
+  OrganizationPage,
   ProjectDetailsPage,
   ProjectsPage,
   RepositoryDetailsPage,

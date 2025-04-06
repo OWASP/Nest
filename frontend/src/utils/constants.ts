@@ -9,6 +9,7 @@ export const headerLinks: Link[] = [
       { text: 'Chapters', href: '/chapters' },
       { text: 'Snapshots', href: '/community/snapshots' },
       { text: 'Users', href: '/community/users' },
+      { text: 'Organizations', href: '/organizations' },
     ],
   },
   {
