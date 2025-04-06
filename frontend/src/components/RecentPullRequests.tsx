@@ -4,6 +4,7 @@ import React from 'react'
 import { PullRequestsType } from 'types/home'
 import { ItemCardPullRequests } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
+import AnchorTitle from './AnchorTitle'
 import ItemCardList from './ItemCardList'
 
 interface RecentPullRequestsProps {
@@ -19,7 +20,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
 }) => {
   return (
     <ItemCardList
-      title="Recent Pull Requests"
+      title={<AnchorTitle href="#recent-pull-requests" title="Recent Pull Requests" />}
       data={data}
       showAvatar={showAvatar}
       icon={faCodePullRequest}

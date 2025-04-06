@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
+import AnchorTitle from 'components/AnchorTitle'
 import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import RecentIssues from 'components/RecentIssues'
@@ -43,17 +44,27 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard title="Summary">
+          <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
-        {userSummary && <SecondaryCard title="Summary">{userSummary}</SecondaryCard>}
+        {userSummary && (
+          <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
+            {userSummary}
+          </SecondaryCard>
+        )}
 
-        {heatmap && <SecondaryCard title="Contribution Heatmap">{heatmap}</SecondaryCard>}
+        {heatmap && (
+          <SecondaryCard
+            title={<AnchorTitle href="#contribution-heatmap" title="Contribution Heatmap" />}
+          >
+            {heatmap}
+          </SecondaryCard>
+        )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            title={`${capitalize(type)} Details`}
+            title={<AnchorTitle href={`#${type}-details`} title={`${capitalize(type)} Details`} />}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details?.map((detail) =>
@@ -76,7 +87,10 @@ const DetailsCard = ({
             type === 'repository' ||
             type === 'committee' ||
             type === 'user') && (
-            <SecondaryCard title="Statistics" className="md:col-span-2">
+            <SecondaryCard
+              title={<AnchorTitle href="#statistics" title="Statistics" />}
+              className="md:col-span-2"
+            >
               {stats.map((stat, index) => (
                 <InfoBlock
                   className="pb-1"
@@ -109,8 +123,18 @@ const DetailsCard = ({
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages.length !== 0 && (
+              <ToggleableList
+                items={languages}
+                label={<AnchorTitle href="#languages" title="Languages" />}
+              />
+            )}
+            {topics.length !== 0 && (
+              <ToggleableList
+                items={topics}
+                label={<AnchorTitle href="#topics" title="Topics" />}
+              />
+            )}
           </div>
         )}
         {topContributors && (
@@ -136,7 +160,10 @@ const DetailsCard = ({
         )}
         {type === 'user' && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
         {(type === 'project' || type === 'user') && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
+          <SecondaryCard
+            title={<AnchorTitle href="#repositories" title="Repositories" />}
+            className="mt-6"
+          >
             <RepositoriesCard repositories={repositories} />
           </SecondaryCard>
         )}
