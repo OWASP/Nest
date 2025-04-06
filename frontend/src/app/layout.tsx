@@ -6,6 +6,7 @@ import Footer from 'components/Footer'
 
 import Header from 'components/Header'
 import './globals.css'
+import ScrollToTop from 'components/ScrollToTop'
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -33,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <
+      <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ minHeight: '100vh' }}
       >
@@ -41,8 +42,9 @@ export default function RootLayout({
           <Header />
           {children}
           <Footer />
+          <ScrollToTop />
         </Providers>
-      </>
+      </body>
     </html>
   )
 }
