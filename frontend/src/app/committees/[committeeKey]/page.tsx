@@ -8,6 +8,7 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { addToast } from '@heroui/toast'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { GET_COMMITTEE_DATA } from 'server/queries/committeeQueries'
@@ -48,11 +49,7 @@ export default function CommitteeDetailsPage() {
   }, [data, graphQLRequestError, committeeKey])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!committee && !isLoading)
@@ -70,9 +67,9 @@ export default function CommitteeDetailsPage() {
     {
       label: 'URL',
       value: (
-        <a href={committee.url} className="text-blue-400 hover:underline">
+        <Link href={committee.url} className="text-blue-400 hover:underline">
           {committee.url}
-        </a>
+        </Link>
       ),
     },
   ]

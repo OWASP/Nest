@@ -9,7 +9,6 @@ import { ChapterTypeAlgolia } from 'types/chapter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
-//SEO
 import SearchPageLayout from 'components/SearchPageLayout'
 const ChapterMap = dynamic(() => import('components/ChapterMap'), { ssr: false })
 

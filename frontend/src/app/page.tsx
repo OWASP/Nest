@@ -11,15 +11,11 @@ import {
   faUsers,
   faUser,
   faFolder,
-  faTriangleExclamation,
-  faCodePullRequest,
   faNewspaper,
   faGlobe,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
-import dynamic from 'next/dynamic'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -31,20 +27,22 @@ import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnimatedCounter from 'components/AnimatedCounter'
-import ItemCardList from 'components/ItemCardList'
+import ChapterMap from 'components/ChapterMap'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import DialogComp from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
+import RecentIssues from 'components/RecentIssues'
+import RecentPullRequests from 'components/RecentPullRequests'
+import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import { TruncatedText } from 'components/TruncatedText'
 
-const ChapterMap = dynamic(() => import('components/ChapterMap'), { ssr: false })
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [data, setData] = useState<MainPageData | null>(null)
+  const [data, setData] = useState<MainPageData>(null)
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA, {
     variables: { distinct: true },
   })
@@ -90,11 +88,7 @@ export default function Home() {
   }, [])
 
   if (isLoading || !graphQLData || !geoLocData) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <LoadingSpinner imageUrl="/img/owasp_icon_white_sm.png" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   const getProjectIcon = (projectType: string) => {
@@ -192,7 +186,7 @@ export default function Home() {
         <div className="grid gap-4 md:grid-cols-2">
           <SecondaryCard icon={faMapMarkerAlt} title="New Chapters" className="overflow-hidden">
             <div className="space-y-4">
-              {data?.recentChapters.map((chapter) => (
+              {data?.recentChapters?.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <Link
@@ -214,8 +208,9 @@ export default function Home() {
                   </div>
 
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
-                      <FontAwesomeIcon icon={faUsers} className="mr-2 h-4 w-4" />
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                      {' '}
+                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
                       <LeadersList leaders={String(chapter.leaders)} />
                     </div>
                   )}
@@ -225,14 +220,14 @@ export default function Home() {
           </SecondaryCard>
           <SecondaryCard icon={faFolder} title="New Projects" className="overflow-hidden">
             <div className="space-y-4">
-              {data?.recentProjects.map((project) => (
+              {data?.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
                     <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
                   </Link>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
@@ -247,7 +242,7 @@ export default function Home() {
                   </div>
 
                   {project.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm [&_a]:text-gray-600 dark:[&_a]:text-gray-400">
+                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
                       <LeadersList leaders={String(project.leaders)} />
                     </div>
@@ -260,7 +255,7 @@ export default function Home() {
         <div className="mb-20">
           <h2 className="mb-4 text-2xl font-semibold">
             <FontAwesomeIcon icon={faGlobe} className="mr-2 h-5 w-5" />
-            OWASP Chapters Worldwide
+            Chapters Worldwide
           </h2>
           <ChapterMap
             geoLocData={geoLocData}
@@ -281,95 +276,11 @@ export default function Home() {
           maxInitialDisplay={9}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
-          <ItemCardList
-            title="Recent Issues"
-            data={data?.recentIssues}
-            icon={faTriangleExclamation}
-            renderDetails={(item) => (
-              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                <span>{formatDate(item.createdAt)}</span>
-                {item?.commentsCount ? (
-                  <>
-                    <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{item.commentsCount} comments</span>
-                  </>
-                ) : null}
-              </div>
-            )}
-          />
-          <ItemCardList
-            title="Recent Pull Requests"
-            data={data?.recentPullRequests}
-            icon={faCodePullRequest}
-            renderDetails={(item) => (
-              <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                <span>{formatDate(item.createdAt)}</span>
-                {item?.author.name || item?.author.login ? (
-                  <>
-                    <FontAwesomeIcon icon={faUser} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{item.author.name || item.author.login}</span>
-                  </>
-                ) : null}
-              </div>
-            )}
-          />
+          <RecentIssues data={data?.recentIssues} />
+          <RecentPullRequests data={data?.recentPullRequests} showAuthor={true} />
         </div>
-        <SecondaryCard icon={faTag} title="Recent Releases">
-          {data?.recentReleases && data?.recentReleases.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {data.recentReleases.map((item, index) => (
-                <div
-                  key={index}
-                  className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                >
-                  <div className="flex w-full flex-col justify-between">
-                    <div className="flex w-full items-center">
-                      <Link
-                        className="flex-shrink-0 text-blue-400 hover:underline"
-                        href={`/community/users/${item?.author?.login}`}
-                      >
-                        <Image
-                          height={24}
-                          width={24}
-                          src={item?.author?.avatarUrl}
-                          alt={''}
-                          className="mr-2 rounded-full"
-                        />
-                      </Link>
-
-                      <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                        <Link
-                          className="text-blue-400 hover:underline"
-                          href={item?.url}
-                          target="_blank"
-                        >
-                          {item.name}
-                        </Link>
-                      </h3>
-                    </div>
-                    <div className="ml-0.5 w-full">
-                      <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                        <span>{formatDate(item.publishedAt)}</span>
-                        <FontAwesomeIcon icon={faTag} className="ml-4 mr-2 h-4 w-4" />
-                        <span>{item.tagName}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No recent releases.</p>
-          )}
-        </SecondaryCard>
-        <SecondaryCard
-          icon={faNewspaper}
-          title="Recent News & Opinions"
-          className="overflow-hidden"
-        >
+        <RecentReleases data={data?.recentReleases} />
+        <SecondaryCard icon={faNewspaper} title="News & Opinions" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {data?.recentPosts.map((post) => (
               <div

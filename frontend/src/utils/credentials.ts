@@ -1,4 +1,5 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL
+export const CSRF_URL = process.env.NEXT_PUBLIC_CSRF_URL
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 export const GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL
 export const GTM_AUTH = process.env.NEXT_PUBLIC_GTM_AUTH

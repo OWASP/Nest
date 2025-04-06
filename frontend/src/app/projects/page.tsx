@@ -7,7 +7,6 @@ import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
-// SEO
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
 const ProjectsPage = () => {

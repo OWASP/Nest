@@ -1,5 +1,7 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
+import { setContext } from '@apollo/client/link/context'
 import { GRAPHQL_URL } from 'utils/credentials'
+import { getCsrfToken } from 'utils/utility'
 import { AppError, handleAppError } from 'wrappers/ErrorWrapper'
 
 const createApolloClient = () => {
@@ -9,9 +11,23 @@ const createApolloClient = () => {
     return null
   }
 
-  return new ApolloClient({
+  const httpLink = createHttpLink({
+    credentials: 'include',
     uri: GRAPHQL_URL,
+  })
+
+  const authLink = setContext(async (_, { headers }) => {
+    return {
+      headers: {
+        ...headers,
+        'X-CSRFToken': (await getCsrfToken()) || '',
+      },
+    }
+  })
+
+  return new ApolloClient({
     cache: new InMemoryCache(),
+    link: authLink.concat(httpLink),
   })
 }
 const apolloClient = createApolloClient()

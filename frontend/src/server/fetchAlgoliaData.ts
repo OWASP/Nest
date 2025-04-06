@@ -1,5 +1,6 @@
 import { AlgoliaResponseType } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
+import { getCsrfToken } from 'utils/utility'
 import { AppError } from 'wrappers/ErrorWrapper'
 import { IndexedObject, removeIdxPrefix } from './utility'
 
@@ -23,7 +24,9 @@ export const fetchAlgoliaData = async <T>(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-CSRFToken': (await getCsrfToken()) || '',
       },
+      credentials: 'include',
       body: JSON.stringify({
         facetFilters,
         hitsPerPage,
@@ -50,9 +53,9 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    if (error) {
+    if (error instanceof AppError) {
       throw error
     }
-    return { hits: [], totalPages: 0 }
+    throw new AppError(500, 'Search service error')
   }
 }
