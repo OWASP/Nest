@@ -2,7 +2,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
-import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
@@ -11,6 +10,7 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/TopContributors'
+import ChapterMapWrapper from './ChapterMapWrapper'
 import LeadersList from './LeadersList'
 
 const DetailsCard = ({
@@ -91,7 +91,7 @@ const DetailsCard = ({
           )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
-              <ChapterMap
+              <ChapterMapWrapper
                 geoLocData={geolocationData ? [geolocationData] : []}
                 showLocal={true}
                 style={{

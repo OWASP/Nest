@@ -41,15 +41,17 @@ test.describe('Users Page', () => {
 
   test('handles page change correctly', async ({ page }) => {
     const nextPageButton = await page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
-    expect(await page.url()).toContain('page=2')
+    await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on button click', async ({ page }) => {
     const userButton = await page.getByRole('button', {
       name: 'John Doe John Doe OWASP View',
     })
+    await userButton.waitFor({ state: 'visible' })
     await userButton.click()
-    expect(await page.url()).toContain('community/users/user_1')
+    await expect(page).toHaveURL('community/users/user_1')
   })
 })

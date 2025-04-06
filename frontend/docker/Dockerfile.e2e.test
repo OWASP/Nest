@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.51.1-noble
+FROM mcr.microsoft.com/playwright:v1.51.1-jammy
 
 ENV FORCE_COLOR=1
 
@@ -10,7 +10,6 @@ RUN npm install --ignore-scripts -g pnpm && \
 
 COPY __tests__/e2e __tests__/e2e
 COPY __tests__/unit/data __tests__/unit/data
-COPY index.html index.html
-COPY playwright.config.ts playwright.config.ts
+COPY next.config.ts postcss.config.js playwright.config.ts tailwind.config.js tsconfig.json ./
+COPY public public
 COPY src src
-COPY tailwind.config.js tsconfig.json vite.config.ts ./
