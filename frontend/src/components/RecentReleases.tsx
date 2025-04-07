@@ -1,5 +1,7 @@
 import { faCalendar, faFileCode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
@@ -27,26 +29,28 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
                   {showAvatar && (
-                    <a
+                    <Link
                       className="flex-shrink-0 text-blue-400 hover:underline"
                       href={`/community/users/${item?.author?.login}`}
                     >
-                      <img
-                        src={item?.author?.avatarUrl}
-                        alt={item?.author?.name}
+                      <Image
+                        alt={item?.author?.name || 'author'}
                         className="mr-2 h-6 w-6 rounded-full"
+                        height={24}
+                        src={item?.author?.avatarUrl || ''}
+                        width={24}
                       />
-                    </a>
+                    </Link>
                   )}
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                    <a
+                    <Link
                       className="text-blue-400 hover:underline"
-                      href={item?.url}
+                      href={item?.url || '/'}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   </h3>
                 </div>
                 <div className="ml-0.5 w-full">
