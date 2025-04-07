@@ -1,54 +1,54 @@
 import { useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
-import { useNavigate } from 'react-router-dom'
 import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 import { render } from 'wrappers/testUtil'
-import { toaster } from 'components/ui/toaster'
-import UserDetailsPage from 'pages/UserDetails'
 import '@testing-library/jest-dom'
+import UserDetailsPage from 'app/community/users/[userKey]/page'
 
+// Mock Apollo Client
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
 
-jest.mock('components/ui/toaster', () => ({
-  toaster: {
-    create: jest.fn(),
-  },
-}))
-
+// Mock FontAwesome
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ userKey: 'test-user' }),
-  useNavigate: jest.fn(),
-}))
+const mockRouter = {
+  push: jest.fn(),
+}
 
 const mockError = {
   error: new Error('GraphQL error'),
 }
 
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useParams: () => ({ userKey: 'test-user' }),
+}))
+
+// Mock GitHub heatmap utilities
 jest.mock('utils/helpers/githubHeatmap', () => ({
   fetchHeatmapData: jest.fn(),
   drawContributions: jest.fn(() => {}),
 }))
 
-describe('UserDetailsPage', () => {
-  let navigateMock: jest.Mock
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
 
+describe('UserDetailsPage', () => {
   beforeEach(() => {
-    navigateMock = jest.fn()
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       loading: false,
       error: null,
     })
-    ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
     ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
       contributions: { years: [{ year: '2023' }] },
     })
@@ -74,12 +74,14 @@ describe('UserDetailsPage', () => {
 
   test('renders user details', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: mockUserDetailsData,
+      data: {
+        ...mockUserDetailsData,
+        user: { ...mockUserDetailsData.user, recentIssues: {} },
+      },
       error: null,
       loading: false,
     })
 
-    // Wait for the loading state to finish
     render(<UserDetailsPage />)
 
     await waitFor(() => {
@@ -233,17 +235,23 @@ describe('UserDetailsPage', () => {
 
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: null,
       error: mockError,
     })
 
     render(<UserDetailsPage />)
 
-    await waitFor(() => screen.getByText('User not found'))
-    expect(toaster.create).toHaveBeenCalledWith({
+    await waitFor(() => {
+      expect(screen.getByText('User not found')).toBeInTheDocument()
+    })
+
+    expect(addToast).toHaveBeenCalledWith({
       description: 'Unable to complete the requested operation.',
       title: 'GraphQL Request Failed',
-      type: 'error',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'danger',
+      variant: 'solid',
     })
   })
 
@@ -287,10 +295,8 @@ describe('UserDetailsPage', () => {
 
   test('handles no recent issues gracefully', async () => {
     const noIssuesData = {
-      ...mockUserDetailsData,
-      recentIssues: [],
+      user: { ...mockUserDetailsData.user, recentIssues: {} },
     }
-
     ;(useQuery as jest.Mock).mockReturnValue({
       data: noIssuesData,
       loading: false,
@@ -298,10 +304,9 @@ describe('UserDetailsPage', () => {
     })
 
     render(<UserDetailsPage />)
-
     await waitFor(() => {
       expect(screen.getByText('Recent Issues')).toBeInTheDocument()
-      expect(screen.queryByText('Test Issue')).not.toBeInTheDocument()
+      expect(screen.getByText('No recent releases.')).toBeInTheDocument()
     })
   })
 
@@ -369,7 +374,7 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getAllByText('Not provided').length).toBe(3) // Email, Company, Location
+      expect(screen.getAllByText('Not provided').length).toBe(3)
     })
   })
 })

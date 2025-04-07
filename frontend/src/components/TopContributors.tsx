@@ -1,13 +1,14 @@
-import { Button } from '@chakra-ui/react'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-
-import { useNavigate } from 'react-router-dom'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 import SecondaryCard from './SecondaryCard'
+
 const TopContributors = ({
   contributors,
   label = 'Top Contributors',
@@ -21,7 +22,7 @@ const TopContributors = ({
   type: string
   icon?: IconProp
 }) => {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [showAllContributors, setShowAllContributors] = useState(false)
 
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
@@ -39,15 +40,17 @@ const TopContributors = ({
         {displayContributors.map((item, index) => (
           <button
             key={index}
-            onClick={() => navigate(`/community/users/${item.login}`)}
+            onClick={() => router.push(`/community/users/${item.login}`)}
             className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
           >
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
-                <img
-                  alt={item?.name}
-                  className="h-6 w-6 rounded-full"
+                <Image
                   src={`${item?.avatarUrl}&s=60`}
+                  width={24}
+                  height={24}
+                  alt={item?.name || ''}
+                  className="rounded-full"
                 />
                 <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
                   {capitalize(item.name) || capitalize(item.login)}
@@ -68,8 +71,9 @@ const TopContributors = ({
       </div>
       {contributors.length > maxInitialDisplay && (
         <Button
-          onClick={toggleContributors}
-          className="mt-4 flex items-center text-blue-400 hover:underline"
+          disableAnimation
+          onPress={toggleContributors}
+          className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
         >
           {showAllContributors ? (
             <>
