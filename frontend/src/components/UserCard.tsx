@@ -1,6 +1,7 @@
-import { Button } from '@chakra-ui/react'
-import { faChevronRight, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import Image from 'next/image'
 import { UserCardProps } from 'types/card'
 
 const UserCard = ({
@@ -15,13 +16,13 @@ const UserCard = ({
 }: UserCardProps) => {
   return (
     <Button
-      onClick={button.onclick}
+      onPress={button.onclick}
       className={`group flex flex-col items-center rounded-lg p-6 ${className}`}
     >
       <div className="flex w-full flex-col items-center space-y-4">
         <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-400 dark:ring-gray-700">
           {avatar ? (
-            <img src={`${avatar}&s=160`} alt={name} className="h-full w-full object-cover" />
+            <Image fill src={`${avatar}&s=160`} alt={name || 'user'} objectFit="cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
               <FontAwesomeIcon
@@ -33,7 +34,7 @@ const UserCard = ({
         </div>
 
         <div className="text-center">
-          <h3 className="max-w-[250px] truncate text-lg font-semibold text-blue-400 text-gray-900 dark:text-white sm:text-xl">
+          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
             {name}
           </h3>
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">

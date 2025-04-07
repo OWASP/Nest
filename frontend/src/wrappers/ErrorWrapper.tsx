@@ -1,9 +1,9 @@
-import { Button } from '@chakra-ui/react'
-import * as Sentry from '@sentry/react'
+'use client'
+import { Button } from '@heroui/button'
+import { addToast } from '@heroui/toast'
+// import * as Sentry from '@sentry/react'
+import { useRouter } from 'next/navigation'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { toaster } from 'components/ui/toaster'
-
 interface ErrorDisplayProps {
   statusCode: number
   title: string
@@ -24,7 +24,7 @@ export const ERROR_CONFIGS: Record<string, ErrorDisplayProps> = {
 }
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, message }) => {
-  const navigate = useNavigate()
+  const router = useRouter()
   return (
     <main className="flex min-h-screen flex-col items-center bg-white pt-8 dark:bg-slate-900">
       <div className="flex flex-1 flex-col items-center justify-center px-4">
@@ -37,7 +37,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, m
           </h2>
           <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
           <Button
-            onClick={() => navigate('/')}
+            onPress={() => router.push('/')}
             className="font-inter mt-8 h-12 w-40 rounded-lg bg-owasp-blue text-base font-medium text-white transition-colors hover:bg-blue-400"
           >
             Return To Home
@@ -68,30 +68,31 @@ export const handleAppError = (error: unknown) => {
       : new AppError(500, error instanceof Error ? error.message : ERROR_CONFIGS['500'].message)
 
   // Log to Sentry
-  if (appError.statusCode >= 500) {
-    Sentry.captureException(error instanceof Error ? error : appError)
-  }
+  // if (appError.statusCode >= 500) {
+  //   Sentry.captureException(error instanceof Error ? error : appError)
+  // }
   const errorConfig = ERROR_CONFIGS[appError.statusCode === 404 ? '404' : '500']
 
-  toaster.create({
-    type: 'error',
+  addToast({
     title: errorConfig.title,
     description: errorConfig.message || appError.message,
-    duration: 5000,
+    timeout: 5000,
+    shouldShowTimeoutProgress: true,
   })
 }
 
 // Main error boundary wrapper
 export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Sentry.ErrorBoundary
-      fallback={({ error }) => {
-        Sentry.captureException(error)
-        const errorConfig = ERROR_CONFIGS['500']
-        return <ErrorDisplay {...errorConfig} />
-      }}
-    >
-      {children}
-    </Sentry.ErrorBoundary>
+    <>{children}</>
+    // <Sentry.ErrorBoundary
+    //   fallback={({ error }) => {
+    //     Sentry.captureException(error)
+    //     const errorConfig = ERROR_CONFIGS['500']
+    //     return <ErrorDisplay {...errorConfig} />
+    //   }}
+    // >
+    //   {children}
+    // </Sentry.ErrorBoundary>
   )
 }

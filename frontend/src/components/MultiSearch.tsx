@@ -8,11 +8,11 @@ import {
   faBuilding,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
 import { debounce } from 'lodash'
+import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { EventType } from 'types/event'
 import { OrganizationTypeAlgolia } from 'types/organization'
@@ -34,7 +34,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     index: number
     subIndex: number
   } | null>(null)
-  const navigate = useNavigate()
+  const router = useRouter()
   const pageCount = 1
   const suggestionCount = 5
   const searchBarRef = useRef<HTMLDivElement>(null)
@@ -55,7 +55,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                   | OrganizationTypeAlgolia[]
                   | ProjectTypeAlgolia[]
                   | User[],
-                totalPages: data.totalPages,
+                totalPages: data.totalPages || 0,
               }
             })
           )
@@ -86,21 +86,13 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [debouncedSearch])
 
   const handleSuggestionClick = useCallback(
-    (
-      suggestion:
-        | ChapterTypeAlgolia
-        | OrganizationTypeAlgolia
-        | ProjectTypeAlgolia
-        | User
-        | EventType,
-      indexName: string
-    ) => {
-      setSearchQuery(suggestion.name)
+    (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User | EventType, indexName: string) => {
+      setSearchQuery(suggestion.name ?? '')
       setShowSuggestions(false)
 
       switch (indexName) {
         case 'chapters':
-          navigate(`/chapters/${suggestion.key}`)
+          router.push(`/chapters/${suggestion.key}`)
           break
         case 'events':
           window.open((suggestion as EventType).url, '_blank')
@@ -109,14 +101,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           navigate(`/organization/${(suggestion as OrganizationTypeAlgolia).login}`)
           break
         case 'projects':
-          navigate(`/projects/${suggestion.key}`)
+          router.push(`/projects/${suggestion.key}`)
           break
         case 'users':
-          navigate(`/community/users/${suggestion.key}`)
+          router.push(`/community/users/${suggestion.key}`)
           break
       }
     },
-    [navigate]
+    [router]
   )
 
   useEffect(() => {
@@ -281,7 +273,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                           icon={getIconForIndex(suggestion.indexName)}
                           className="mr-2 flex-shrink-0 text-gray-400"
                         />
-                        <span className="block max-w-full truncate">{hit.name || hit.login}</span>
+                        <span className="block max-w-full truncate">
+                          {'name' in hit ? hit.name : 'login' in hit ? hit.login : ''}
+                        </span>
                       </button>
                     </li>
                   ))}
