@@ -101,3 +101,4 @@ xdg
 xdist
 xsser
 zsc
+graphqler
