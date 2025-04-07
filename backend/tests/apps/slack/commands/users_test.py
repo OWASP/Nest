@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.users import users_handler
+from apps.slack.commands.users import Users
 from apps.slack.common.presentation import EntityPresentation
 
 
@@ -42,7 +42,8 @@ def test_users_handler(
     ]
 
     ack = MagicMock()
-    users_handler(ack=ack, command=mock_command, client=mock_client)
+    users_instance = Users()
+    users_instance.handler(ack=ack, command=mock_command, client=mock_client)
 
     ack.assert_called_once()
     assert mock_client.chat_postMessage.call_count == expected_calls
@@ -75,7 +76,8 @@ def test_users_handler_with_blocks(mock_get_blocks, mock_client, mock_command):
     ]
 
     ack = MagicMock()
-    users_handler(ack=ack, command=mock_command, client=mock_client)
+    users_instance = Users()
+    users_instance.handler(ack=ack, command=mock_command, client=mock_client)
 
     ack.assert_called_once()
     mock_client.conversations_open.assert_called_once_with(users="U123456")

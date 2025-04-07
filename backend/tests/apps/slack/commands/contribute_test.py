@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.contribute import contribute_handler
+from apps.slack.commands.contribute import Contribute
 
 
 @pytest.fixture(autouse=True)
@@ -38,7 +38,7 @@ class TestContributeHandler:
         with patch(
             "apps.github.models.issue.Issue.open_issues_count", new_callable=MagicMock
         ) as mock:
-            mock.return_value = 10  # Example value
+            mock.return_value = 10
             yield mock
 
     @pytest.mark.parametrize(
@@ -56,8 +56,11 @@ class TestContributeHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
 
-        contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        contribute = Contribute()
+        ack = MagicMock()
+        contribute.handler(ack=ack, command=mock_command, client=mock_client)
 
+        ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_contribute_handler_with_results(
@@ -77,7 +80,9 @@ class TestContributeHandler:
             "nbPages": 1,
         }
 
-        contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        contribute = Contribute()
+        ack = MagicMock()
+        contribute.handler(ack=ack, command=mock_command, client=mock_client)
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Contribution" in str(block) for block in blocks)

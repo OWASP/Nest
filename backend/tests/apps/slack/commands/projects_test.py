@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.projects import projects_handler
+from apps.slack.commands.projects import Projects
 
 
 @pytest.fixture(autouse=True)
@@ -24,10 +24,7 @@ def mock_active_projects_count():
 class TestProjectsHandler:
     @pytest.fixture
     def mock_command(self):
-        return {
-            "text": "",
-            "user_id": "U123456",
-        }
+        return {"text": "", "user_id": "U123456"}
 
     @pytest.fixture
     def mock_client(self):
@@ -54,10 +51,14 @@ class TestProjectsHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = search_query
-
-        projects_handler(ack=MagicMock(), command=mock_command, client=mock_client)
-
-        assert mock_client.chat_postMessage.call_count == expected_calls
+        projects_instance = Projects()
+        projects_instance.handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        if commands_enabled:
+            mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+            assert mock_client.chat_postMessage.call_count == expected_calls
+        else:
+            mock_client.conversations_open.assert_not_called()
+            assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_projects_handler_with_results(self, mock_get_projects, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
@@ -78,9 +79,8 @@ class TestProjectsHandler:
             ],
             "nbPages": 1,
         }
-
-        projects_handler(ack=MagicMock(), command=mock_command, client=mock_client)
-
+        projects_instance = Projects()
+        projects_instance.handler(ack=MagicMock(), command=mock_command, client=mock_client)
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Project" in str(block) for block in blocks)
         assert any("Test Summary" in str(block) for block in blocks)

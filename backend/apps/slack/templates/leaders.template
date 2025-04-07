@@ -33,5 +33,5 @@
 {%- endfor %}
 {%- endif %}
 {%- else %}
-*No results found for `{{ command }} {{ search_query }}`*{{ NL }}
+*No results found for `{{ command }} {{ search_query|safe }}`*{{ NL }}
 {%- endif %}

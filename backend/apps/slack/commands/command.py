@@ -6,22 +6,22 @@ from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.template_system.loader import env
 from apps.slack.utils import get_text
-from apps.slack.commands import *
 
 
 class CommandBase:
     """Base class for Slack commands."""
-    
+
     @staticmethod
     def get_all_commands():
         """Get all commands."""
-        return [cls for cls in CommandBase.__subclasses__()] 
-    
+        return list(CommandBase.__subclasses__())
+
     @staticmethod
     def config_all_commands():
+        """Configure all commands."""
         for cmd_class in CommandBase.get_all_commands():
             cmd_class().config_command()
-    
+
     def get_render_text(self, command):
         """Get the rendered text.
 
@@ -74,7 +74,7 @@ class CommandBase:
     def config_command(self):
         """Command configuration."""
         SlackConfig.app.command(self.get_command())(self.handler)
-    
+
     def handler(self, ack, command, client):
         """Handle the Slack command.
 

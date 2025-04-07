@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import OWASP_WEBSITE_URL
-from apps.slack.commands.donate import donate_handler
+from apps.slack.commands.donate import Donate
 
 EXPECTED_BLOCK_COUNT_DONATE = 3
 
@@ -29,12 +29,11 @@ class TestDonateHandler:
     )
     def test_donate_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-
+        donate = Donate()
         ack = MagicMock()
-        donate_handler(ack=ack, command=mock_command, client=mock_client)
+        donate.handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
-
         assert mock_client.chat_postMessage.call_count == expected_calls
 
         if commands_enabled:
@@ -60,9 +59,9 @@ class TestDonateHandler:
 
     def test_donate_handler_block_structure(self, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
-
+        donate = Donate()
         ack = MagicMock()
-        donate_handler(ack=ack, command=mock_command, client=mock_client)
+        donate.handler(ack=ack, command=mock_command, client=mock_client)
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert len(blocks) == EXPECTED_BLOCK_COUNT_DONATE

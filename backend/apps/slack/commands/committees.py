@@ -1,6 +1,5 @@
 """Slack bot committees command."""
 
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.handlers.committees import get_blocks
 from apps.slack.common.presentation import EntityPresentation

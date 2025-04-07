@@ -1,11 +1,9 @@
-*Upcoming OWASP Events:*{{ NL }}{{ NL }}
-{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
+*Upcoming OWASP Events:*{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
 {%- for category, category_data in categorized_events.items() %}
-*Category: {{ category.replace('_', ' ').title() }}*{{ NL }}
+*Category: {{ category.replace('_', ' ').title() }}*{{ NL }}{{ SECTION_BREAK }}
 {%- for event in category_data.events %}
 *{{ loop.index }}. {% if event.url %}<{{ event.url }}|{{ event.name }}>{% else %}{{ event.name }}{% endif %}*
-Start Date: {{ event.start_date }}{% if event.end_date %}{{ NL }}End Date: {{ event.end_date }}{% endif %}{% if event.description %}{{ NL }}_{{ event.description }}_{% endif %}{{ NL }}{{ NL }}
-{{ SECTION_BREAK }}
+Start Date: {{ event.start_date }}{% if event.end_date %}{{ NL }}End Date: {{ event.end_date }}{% endif %}{% if event.description %}{{ NL }}_{{ event.description }}_{% endif %}{{ NL }}{{ NL }}{%- if not loop.last %}{{ SECTION_BREAK }}{% endif %}
 {%- endfor %}
 {{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
 {%- endfor %}

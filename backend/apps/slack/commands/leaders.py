@@ -2,7 +2,6 @@
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 from apps.slack.utils import escape
 

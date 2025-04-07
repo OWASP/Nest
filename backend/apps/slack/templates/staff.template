@@ -1,5 +1,5 @@
 {%- if has_staff -%}
-  OWASP Foundation Staff:{{ NL }}{{ NL }}
+  OWASP Foundation Staff:{{ NL }}{{ NL }}{{ SECTION_BREAK }}
 {% for item in items -%}
   *{{ loop.index }}. {{ item.name }}, {{ item.title }}*
 _{{ item.location }}_
