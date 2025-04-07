@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.chapters import chapters_handler
+from apps.slack.commands.chapters import Chapters
 
 
 @pytest.fixture(autouse=True)
@@ -54,9 +54,11 @@ class TestChaptersHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
+        chapters = Chapters()
+        ack = MagicMock()
+        chapters.handler(ack=ack, command=mock_command, client=mock_client)
 
-        chapters_handler(ack=MagicMock(), command=mock_command, client=mock_client)
-
+        ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_chapters_handler_with_results(self, mock_get_chapters, mock_client, mock_command):
@@ -76,8 +78,9 @@ class TestChaptersHandler:
             ],
             "nbPages": 1,
         }
-
-        chapters_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        chapters = Chapters()
+        ack = MagicMock()
+        chapters.handler(ack=ack, command=mock_command, client=mock_client)
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Chapter" in str(block) for block in blocks)

@@ -1,7 +1,6 @@
 """Slack bot contribute command."""
 
 from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.contribute import get_blocks

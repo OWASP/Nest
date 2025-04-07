@@ -1,7 +1,6 @@
 """Slack bot events command."""
 
 from apps.common.constants import NL, OWASP_WEBSITE_URL
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 from apps.slack.utils import get_events_data
 

@@ -1,7 +1,6 @@
 """Slack bot contact command."""
 
 from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 
 
@@ -15,7 +14,5 @@ class Contact(CommandBase):
     def get_render_text(self, command):
         """Get the rendered text."""
         return self.get_template_file().render(
-            url="https://owasp.org/contact/", 
-            name="OWASP contact", 
-            NL=NL
+            url="https://owasp.org/contact/", name="OWASP contact", NL=NL
         )

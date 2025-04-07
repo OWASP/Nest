@@ -1,7 +1,6 @@
 """Slack bot board command."""
 
 from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 
 

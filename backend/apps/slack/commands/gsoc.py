@@ -4,12 +4,13 @@ from django.utils import timezone
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_START
 from apps.slack.constants import (
+    NEST_BOT_NAME,
     OWASP_CONTRIBUTE_CHANNEL_ID,
     OWASP_GSOC_CHANNEL_ID,
+    OWASP_PROJECT_NEST_CHANNEL_ID,
 )
 from apps.slack.utils import get_gsoc_projects
 
@@ -40,6 +41,9 @@ class Gsoc(CommandBase):
                 previous_year=gsoc_year,
                 projects_url=projects_url,
                 NL=NL,
+                feedback_channel=OWASP_PROJECT_NEST_CHANNEL_ID,
+                nest_bot_name=NEST_BOT_NAME,
+                SECTION_BREAK="{{ SECTION_BREAK }}",
             )
         if command_text.isnumeric():
             year = int(command_text)

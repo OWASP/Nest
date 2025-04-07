@@ -1,6 +1,5 @@
 """Slack bot chapters command."""
 
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.chapters import get_blocks

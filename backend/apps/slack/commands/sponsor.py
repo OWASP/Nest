@@ -1,6 +1,5 @@
 """Slack bot sponsors command."""
 
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 
 

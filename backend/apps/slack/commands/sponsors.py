@@ -1,7 +1,6 @@
 """Slack bot sponsors command."""
 
 from apps.common.constants import NL, OWASP_WEBSITE_URL
-from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 from apps.slack.constants import NEST_BOT_NAME, OWASP_PROJECT_NEST_CHANNEL_ID
 from apps.slack.utils import get_sponsors_data
