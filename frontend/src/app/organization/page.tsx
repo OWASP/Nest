@@ -42,7 +42,7 @@ const OrganizationPage = () => {
         name={organization.name}
         company={organization.company || ''}
         email={organization.email || ''}
-        location={organization.location || ''}
+        location={organization.location || `@${organization.login}`}
         members={organization.collaborators_count}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       />
