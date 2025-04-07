@@ -1,4 +1,4 @@
-import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Image from 'next/image'

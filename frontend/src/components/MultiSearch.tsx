@@ -86,7 +86,15 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [debouncedSearch])
 
   const handleSuggestionClick = useCallback(
-    (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User | EventType, indexName: string) => {
+    (
+      suggestion:
+        | ChapterTypeAlgolia
+        | ProjectTypeAlgolia
+        | User
+        | EventType
+        | OrganizationTypeAlgolia,
+      indexName: string
+    ) => {
       setSearchQuery(suggestion.name ?? '')
       setShowSuggestions(false)
 
@@ -98,7 +106,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           window.open((suggestion as EventType).url, '_blank')
           break
         case 'organizations':
-          navigate(`/organization/${(suggestion as OrganizationTypeAlgolia).login}`)
+          // Use type guard to safely access login property
+          if ('login' in suggestion && suggestion.login) {
+            router.push(`/organization/${suggestion.login}`)
+          }
           break
         case 'projects':
           router.push(`/projects/${suggestion.key}`)

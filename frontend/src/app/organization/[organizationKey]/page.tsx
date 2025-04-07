@@ -1,3 +1,4 @@
+'use client'
 import { useQuery } from '@apollo/client'
 import {
   faCode,
@@ -6,14 +7,14 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { GET_ORGANIZATION_DATA } from 'api/queries/organizationQueries'
+import { addToast } from '@heroui/toast'
+import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
 import { formatDate } from 'utils/dateFormatter'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { toaster } from 'components/ui/toaster'
 
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams()
@@ -29,10 +30,13 @@ const OrganizationDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      toaster.create({
+      addToast({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        type: 'error',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
       })
       setIsLoading(false)
     }

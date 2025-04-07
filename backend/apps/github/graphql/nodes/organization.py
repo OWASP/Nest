@@ -64,9 +64,14 @@ class OrganizationNode(BaseNode):
         repositories = Repository.objects.filter(organization=self)
 
         total_repositories = repositories.count()
-        total_stars = sum(repo.stars_count for repo in repositories)
-        total_forks = sum(repo.forks_count for repo in repositories)
-        total_issues = sum(repo.open_issues_count for repo in repositories)
+        aggregated_stats = repositories.aggregate(
+            total_stars=models.Sum("stars_count"),
+            total_forks=models.Sum("forks_count"),
+            total_issues=models.Sum("open_issues_count"),
+        )
+        total_stars = aggregated_stats["total_stars"] or 0
+        total_forks = aggregated_stats["total_forks"] or 0
+        total_issues = aggregated_stats["total_issues"] or 0
 
         unique_contributors = (
             RepositoryContributor.objects.filter(repository__in=repositories)

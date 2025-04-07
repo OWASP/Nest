@@ -12,7 +12,15 @@ test.describe('Organization Page', () => {
         }),
       })
     })
-    await page.goto('/organizations')
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
+    await page.goto('/organization')
   })
 
   test('renders organization data correctly', async ({ page }) => {

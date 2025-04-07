@@ -1,5 +1,6 @@
+'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { OrganizationTypeAlgolia } from 'types/organization'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
@@ -20,15 +21,15 @@ const OrganizationPage = () => {
     hitsPerPage: 24,
   })
 
-  const navigate = useNavigate()
+  const router = useRouter()
 
   const renderOrganizationCard = (organization: OrganizationTypeAlgolia) => {
     const handleButtonClick = () => {
-      navigate(`/organization/${organization.login}`)
+      router.push(`/organization/${organization.login}`)
     }
 
     const SubmitButton = {
-      label: 'View Details',
+      label: 'View Profile',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
     }

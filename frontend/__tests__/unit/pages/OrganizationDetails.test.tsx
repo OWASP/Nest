@@ -1,44 +1,46 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
 import { mockOrganizationDetailsData } from '@unit/data/mockOrganizationData'
-import { useNavigate } from 'react-router-dom'
 import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
-import OrganizationDetailsPage from 'pages/OrganizationDetails'
+import OrganizationDetailsPage from 'app/organization/[organizationKey]/page'
 import '@testing-library/jest-dom'
+import { addToast } from '@heroui/toast'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
 
-jest.mock('components/ui/toaster', () => ({
-  toaster: {
-    create: jest.fn(),
-  },
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
 }))
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ organizationKey: 'test-org' }),
-  useNavigate: jest.fn(),
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useParams: () => ({ repositoryKey: 'test-org' }),
 }))
 
-describe('OrganizationDetailsPage', () => {
-  let navigateMock: jest.Mock
+const mockError = {
+  error: new Error('GraphQL error'),
+}
 
+describe('OrganizationDetailsPage', () => {
   beforeEach(() => {
-    navigateMock = jest.fn()
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       loading: false,
       error: null,
     })
-    ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
   })
 
   afterEach(() => {
@@ -46,7 +48,7 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -60,7 +62,7 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('renders organization details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       error: null,
     })
@@ -121,15 +123,22 @@ describe('OrganizationDetailsPage', () => {
 
   test('displays error message when there is a GraphQL error', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: null,
-      loading: false,
-      error: { message: 'GraphQL error' },
+      data: { repository: null },
+      error: mockError,
     })
 
     render(<OrganizationDetailsPage />)
 
     await waitFor(() => {
       expect(screen.getByText('Organization not found')).toBeInTheDocument()
+      expect(addToast).toHaveBeenCalledWith({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
+      })
     })
   })
 })

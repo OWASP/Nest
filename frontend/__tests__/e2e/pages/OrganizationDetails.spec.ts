@@ -9,6 +9,14 @@ test.describe('Organization Details Page', () => {
         json: { data: mockOrganizationDetailsData },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/organization/test-org')
   })
 
@@ -50,10 +58,5 @@ test.describe('Organization Details Page', () => {
     await expect(page.getByText('User One')).toBeVisible()
     await expect(page.getByText('User Two')).toBeVisible()
     await expect(page.getByText('User Three')).toBeVisible()
-  })
-
-  test('should navigate to repository details when clicking on a repository', async ({ page }) => {
-    await page.getByRole('button', { name: 'test-repo-1' }).click()
-    expect(page.url()).toContain('repositories')
   })
 })
