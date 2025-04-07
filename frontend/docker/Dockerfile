@@ -6,14 +6,9 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
 
-COPY .env ./
-COPY next.config.ts ./
-COPY postcss.config.js ./
-COPY tailwind.config.js ./
-COPY tsconfig.json ./
-
-COPY public ./public
-COPY src ./src
+COPY .env next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
+COPY public public
+COPY src src
 
 RUN pnpm run build
 
