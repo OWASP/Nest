@@ -203,7 +203,7 @@ const UserDetailsPage: React.FC = () => {
     },
     { icon: faFileCode, value: user?.issuesCount || 0, unit: 'Issue' },
     { icon: faBookmark, value: user?.releasesCount || 0, unit: 'Release' },
-    { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution', },
+    { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
   const Heatmap = () => (
