@@ -49,16 +49,16 @@ test-nest-app: \
 	test-backend \
 	test-frontend
 
-update-dependencies: \
+update: \
+	update-docs-dependencies \
 	update-nest-app-dependencies \
+	update-pre-commit \
 	update-schema-dependencies
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \
 	update-cspell-dependencies \
-	update-docs-dependencies \
-	update-frontend-dependencies \
-	update-pre-commit
+	update-frontend-dependencies
 
 update-pre-commit:
 	@pre-commit autoupdate
