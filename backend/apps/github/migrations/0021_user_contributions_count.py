@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0020_repositorycontributor_user_contrib_idx'),
+        ("github", "0020_repositorycontributor_user_contrib_idx"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='contributions_count',
-            field=models.IntegerField(default=0, verbose_name='Contributions count'),
+            model_name="user",
+            name="contributions_count",
+            field=models.IntegerField(default=0, verbose_name="Contributions count"),
         ),
     ]
