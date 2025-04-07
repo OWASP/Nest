@@ -1,11 +1,11 @@
 import { useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockOrganizationDetailsData } from '@unit/data/mockOrganizationData'
 import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
 import OrganizationDetailsPage from 'app/organization/[organizationKey]/page'
 import '@testing-library/jest-dom'
-import { addToast } from '@heroui/toast'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -36,7 +36,7 @@ const mockError = {
 
 describe('OrganizationDetailsPage', () => {
   beforeEach(() => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       loading: false,
       error: null,
@@ -48,7 +48,7 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -62,7 +62,7 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('renders organization details when data is available', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       error: null,
     })
