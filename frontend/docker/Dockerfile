@@ -6,8 +6,9 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
     pnpm install --ignore-scripts
 
-# TODO(arkid15r): copy what's needed only.
-COPY . .
+COPY .env next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
+COPY public public
+COPY src src
 
 RUN pnpm run build
 
