@@ -75,6 +75,7 @@ def sync_repository(gh_repository, organization=None, user=None):
                 else month_ago
             )
             for gh_issue in gh_repository.get_issues(**kwargs):
+                has_pr = bool(getattr(gh_issue, "pull_request", None))
                 if gh_issue.pull_request:  # Skip pull requests.
                     continue
 
@@ -82,7 +83,9 @@ def sync_repository(gh_repository, organization=None, user=None):
                     break
 
                 author = User.update_data(gh_issue.user)
-                issue = Issue.update_data(gh_issue, author=author, repository=repository)
+                issue = Issue.update_data(
+                    gh_issue, author=author, repository=repository, has_pull_request=has_pr
+                )
 
                 # Assignees.
                 issue.assignees.clear()
