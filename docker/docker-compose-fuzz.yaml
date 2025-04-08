@@ -2,7 +2,7 @@ services:
   graphql:
     container_name: nest-graphqler-test
     image: omar2535/graphqler
-    command: ["--url", "http://localhost:8000/graphql", "--mode", "run"]
+    command: [--url, http://backend:8000/graphql/, --mode, run]
     depends_on:
       backend:
         condition: service_healthy
