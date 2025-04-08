@@ -2,10 +2,7 @@ services:
   graphql:
     container_name: nest-graphqler-test
     image: omar2535/graphqler
-    command: >
-      sh -c '
-        python -m graphqler --mode run --url http://localhost:8000/graphql/
-      '
+    command: ["--url", "http://localhost:8000/graphql", "--mode", "run"]
     depends_on:
       backend:
         condition: service_healthy
@@ -18,8 +15,8 @@ services:
     ports:
       - 127.0.0.1:8000:8000
     healthcheck:
-      test: [CMD, curl, -f, http://127.0.0.1:8000/]
+      test: [CMD, wget, -O-, http://127.0.0.1:8000/api/v1]
       interval: 10s
       timeout: 5s
       retries: 20
-      start_period: 80s
+      start_period: 400s
