@@ -10,7 +10,7 @@ class Events(CommandBase):
 
     def get_template_context(self, command):
         """Get the template context."""
-        events_data = get_events_data()
+        events_data = get_events_data() or []
         valid_events = [event for event in events_data if event.start_date]
         sorted_events = sorted(valid_events, key=lambda x: x.start_date)
 
