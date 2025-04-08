@@ -19,8 +19,6 @@ SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
 MARCH = 3
-now = timezone.now()
-gsoc_year = now.year if now.month > MARCH else now.year - 1
 projects_url = get_absolute_url("projects")
 
 
@@ -29,6 +27,8 @@ class Gsoc(CommandBase):
 
     def get_template_context(self, command):
         """Get the template context."""
+        now = timezone.now()
+        gsoc_year = now.year if now.month > MARCH else now.year - 1
         command_text = command["text"].strip()
         context = super().get_template_context(command)
         template_context = {"mode": "", "command": self.get_command()}
