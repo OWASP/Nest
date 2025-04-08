@@ -1,6 +1,6 @@
 """Slack bot events command."""
 
-from apps.common.constants import NL, OWASP_WEBSITE_URL
+from apps.common.constants import OWASP_WEBSITE_URL
 from apps.slack.commands.command import CommandBase
 from apps.slack.utils import get_events_data
 
@@ -8,8 +8,8 @@ from apps.slack.utils import get_events_data
 class Events(CommandBase):
     """Slack bot /events command."""
 
-    def get_render_text(self, command):
-        """Get the rendered text."""
+    def get_template_context(self, command):
+        """Get the template context."""
         events_data = get_events_data()
         valid_events = [event for event in events_data if event.start_date]
         sorted_events = sorted(valid_events, key=lambda x: x.start_date)
@@ -29,10 +29,8 @@ class Events(CommandBase):
                 }
             )
 
-        return self.get_template_file().render(
-            categorized_events=categorized_events,
-            website_url=OWASP_WEBSITE_URL,
-            NL=NL,
-            SECTION_BREAK="{{ SECTION_BREAK }}",
-            DIVIDER="{{ DIVIDER }}",
-        )
+        return {
+            **super().get_template_context(command),
+            "categorized_events": categorized_events,
+            "website_url": OWASP_WEBSITE_URL,
+        }

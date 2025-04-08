@@ -2,7 +2,6 @@
 
 from django.utils import timezone
 
-from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_START
@@ -28,43 +27,51 @@ projects_url = get_absolute_url("projects")
 class Gsoc(CommandBase):
     """Slack bot /gsoc command."""
 
-    def get_render_text(self, command):
-        """Get the rendered text."""
+    def get_template_context(self, command):
+        """Get the template context."""
         command_text = command["text"].strip()
-        template = self.get_template_file()
+        context = super().get_template_context(command)
+        template_context = {"mode": "", "command": self.get_command()}
 
         if not command_text or command_text in COMMAND_START:
-            return template.render(
-                mode="general",
-                gsoc_channel=OWASP_GSOC_CHANNEL_ID,
-                contribute_channel=OWASP_CONTRIBUTE_CHANNEL_ID,
-                previous_year=gsoc_year,
-                projects_url=projects_url,
-                NL=NL,
-                feedback_channel=OWASP_PROJECT_NEST_CHANNEL_ID,
-                nest_bot_name=NEST_BOT_NAME,
-                SECTION_BREAK="{{ SECTION_BREAK }}",
+            template_context.update(
+                {
+                    "mode": "general",
+                    "gsoc_channel": OWASP_GSOC_CHANNEL_ID,
+                    "contribute_channel": OWASP_CONTRIBUTE_CHANNEL_ID,
+                    "previous_year": gsoc_year,
+                    "projects_url": projects_url,
+                    "feedback_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
+                    "nest_bot_name": NEST_BOT_NAME,
+                }
             )
-        if command_text.isnumeric():
+        elif command_text.isnumeric():
             year = int(command_text)
             if year in SUPPORTED_YEARS:
-                gsoc_projects = get_gsoc_projects(year)
-                projects_list = sorted(gsoc_projects, key=lambda p: p["idx_name"])
-                return template.render(
-                    mode="year",
-                    year=year,
-                    projects=projects_list,
-                    has_announcement=year in SUPPORTED_ANNOUNCEMENT_YEARS,
-                    NL=NL,
+                template_context.update(
+                    {
+                        "mode": "year",
+                        "year": year,
+                        "projects": sorted(get_gsoc_projects(year), key=lambda p: p["idx_name"]),
+                        "has_announcement": year in SUPPORTED_ANNOUNCEMENT_YEARS,
+                    }
                 )
-            return template.render(
-                mode="unsupported_year",
-                year=year,
-                supported_start=SUPPORTED_YEAR_START,
-                supported_end=SUPPORTED_YEAR_END,
-                command=self.get_command(),
-                NL=NL,
+            else:
+                template_context.update(
+                    {
+                        "mode": "unsupported_year",
+                        "year": year,
+                        "supported_start": SUPPORTED_YEAR_START,
+                        "supported_end": SUPPORTED_YEAR_END,
+                    }
+                )
+        else:
+            template_context.update(
+                {
+                    "mode": "invalid",
+                    "command_text": command_text,
+                }
             )
-        return template.render(
-            mode="invalid", command_text=command_text, command=self.get_command(), NL=NL
-        )
+
+        context.update(template_context)
+        return context

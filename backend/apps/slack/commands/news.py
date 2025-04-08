@@ -1,6 +1,6 @@
 """Slack bot news command."""
 
-from apps.common.constants import NL, OWASP_NEWS_URL
+from apps.common.constants import OWASP_NEWS_URL
 from apps.slack.commands.command import CommandBase
 from apps.slack.utils import get_news_data
 
@@ -8,19 +8,15 @@ from apps.slack.utils import get_news_data
 class News(CommandBase):
     """Slack bot /news command."""
 
-    def get_render_text(self, command):
-        """Get the rendered text."""
+    def get_template_context(self, command):
+        """Get the template context."""
         items = get_news_data()
-        if items:
-            return self.get_template_file().render(
-                has_news=True,
-                news_items=items,
-                news_url=OWASP_NEWS_URL,
-                SECTION_BREAK="{{ SECTION_BREAK }}",
-                DIVIDER="{{ DIVIDER }}",
-                NL=NL,
-            )
-        return self.get_template_file().render(
-            has_news=False,
-            NL=NL,
+        context = super().get_template_context(command)
+        context.update(
+            {
+                "has_news": bool(items),
+                "news_items": items,
+                "news_url": OWASP_NEWS_URL,
+            }
         )
+        return context

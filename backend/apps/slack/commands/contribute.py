@@ -1,6 +1,5 @@
 """Slack bot contribute command."""
 
-from apps.common.constants import NL
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.contribute import get_blocks
@@ -9,11 +8,6 @@ from apps.slack.common.presentation import EntityPresentation
 
 class Contribute(CommandBase):
     """Slack bot /contribute command."""
-
-    def get_render_text(self, command):
-        """Get the rendered text."""
-        template = self.get_template_file()
-        return template.render(NL=NL)
 
     def get_render_blocks(self, command):
         """Get the rendered blocks."""
@@ -33,3 +27,9 @@ class Contribute(CommandBase):
                 summary_truncation=300,
             ),
         )
+
+    def get_template_context(self, command):
+        """Get the template context."""
+        return {
+            **super().get_template_context(command),
+        }
