@@ -4,6 +4,7 @@ Aichi
 Aissue
 algoliasearch
 ansa
+apk
 arithmatex
 arkid15r
 askowasp
@@ -18,6 +19,7 @@ coraza
 corsheaders
 csrfguard
 csrfprotector
+csrftoken
 cva
 dismissable
 DRF
@@ -33,6 +35,7 @@ graphiql
 GSOC
 GTM
 gunicorn
+heroui
 hsl
 igoat
 inlinehilite
@@ -40,6 +43,7 @@ isanori
 jumpstart
 kasya
 Kateryna
+libexpat
 linkify
 lxml
 mamicidal
@@ -57,6 +61,8 @@ nestbot
 NETTACKER
 noinput
 Nominatim
+nosniff
+openstreetmap
 owasppcitoolkit
 owtf
 pentest

@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { fetchCsrfToken } from 'server/fetchCsrfToken'
 import { twMerge } from 'tailwind-merge'
 import { ChapterTypeGraphQL } from 'types/chapter'
 
@@ -63,4 +64,20 @@ export const handleSocialUrls = (related_urls: string[]) => {
 
 export type IndexedObject = {
   [key: string]: unknown
+}
+
+export const getCsrfToken = async (): Promise<string> => {
+  const csrfToken = document.cookie
+    ? document.cookie
+        .split(';')
+        .map((cookie) => cookie.split('='))
+        .find(([key]) => key.trim() === 'csrftoken')?.[1]
+        ?.trim()
+    : undefined
+
+  if (csrfToken) {
+    return csrfToken
+  }
+
+  return await fetchCsrfToken()
 }

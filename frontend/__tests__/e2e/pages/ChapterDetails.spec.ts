@@ -9,6 +9,14 @@ test.describe('Chapter Details Page', () => {
         json: { data: { chapter: mockChapterDetailsData } },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/chapters/test-chapter')
   })
 
@@ -26,6 +34,7 @@ test.describe('Chapter Details Page', () => {
   test('should have map with geolocation', async ({ page }) => {
     await expect(page.locator('#chapter-map')).toBeVisible()
     await expect(page.locator('#chapter-map').locator('img').nth(1)).toBeVisible()
+
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Marker' })).toBeVisible()

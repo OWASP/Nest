@@ -1,13 +1,15 @@
-FROM mcr.microsoft.com/playwright:v1.51.1-noble AS builder
-
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+FROM mcr.microsoft.com/playwright:v1.51.1-jammy
 
 ENV FORCE_COLOR=1
 
 WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm && \
-    pnpm install
+RUN npm install --ignore-scripts -g pnpm && \
+    pnpm install --ignore-scripts
 
-COPY . .
+COPY __tests__/e2e __tests__/e2e
+COPY __tests__/unit/data __tests__/unit/data
+COPY next.config.ts postcss.config.js playwright.config.ts tailwind.config.js tsconfig.json ./
+COPY public public
+COPY src src
