@@ -1,27 +1,24 @@
 """Slack bot leaders command."""
 
-from apps.common.constants import NL
 from apps.common.utils import get_absolute_url
 from apps.slack.commands.command import CommandBase
-from apps.slack.utils import escape
 
 
 class Leaders(CommandBase):
     """Slack bot /leaders command."""
 
-    def get_render_text(self, command):
-        """Get the rendered text."""
+    def get_template_context(self, command):
+        """Get the template context."""
         from apps.owasp.api.search.chapter import get_chapters
         from apps.owasp.api.search.project import get_projects
 
         search_query = command["text"].strip()
-        search_query_escaped = escape(search_query)
 
         attributes = ["idx_key", "idx_leaders", "idx_name"]
         searchable_attributes = ["idx_leaders", "idx_name"]
         limit = 5
         chapters = get_chapters(
-            query=search_query_escaped,
+            query=search_query,
             attributes=attributes,
             limit=limit,
             page=1,
@@ -29,7 +26,7 @@ class Leaders(CommandBase):
         )["hits"]
 
         projects = get_projects(
-            query=search_query_escaped,
+            query=search_query,
             attributes=attributes,
             limit=limit,
             page=1,
@@ -54,11 +51,13 @@ class Leaders(CommandBase):
             }
             for project in projects
         ]
-        return self.get_template_file().render(
-            chapters=chapters_with_urls,
-            projects=projects_with_urls,
-            search_query=search_query_escaped,
-            command=self.get_command(),
-            has_results=bool(chapters or projects),
-            NL=NL,
+        context = super().get_template_context(command)
+        context.update(
+            {
+                "chapters": chapters_with_urls,
+                "projects": projects_with_urls,
+                "search_query": search_query,
+                "has_results": bool(chapters or projects),
+            }
         )
+        return context

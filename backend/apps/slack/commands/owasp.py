@@ -27,16 +27,14 @@ class Owasp(CommandBase):
 
         return super().handler(ack, command, client)
 
-    def get_render_text(self, command):
-        """Get the rendered text."""
+    def get_template_context(self, command):
+        """Get the template context."""
         command_tokens = command["text"].split()
         if not command_tokens or command_tokens[0] in COMMAND_HELP:
-            context = {
+            return {
                 "help": True,
-                "command": self.get_command(),
             }
-        else:
-            cmd = command_tokens[0].strip().lower()
-            context = {"help": False, "command": self.get_command(), "handler": cmd}
-
-        return self.get_template_file().render(context)
+        return {
+            "help": False,
+            "handler": command_tokens[0].strip().lower(),
+        }

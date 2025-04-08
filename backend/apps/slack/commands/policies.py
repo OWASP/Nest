@@ -1,14 +1,13 @@
 """Slack bot policies command."""
 
-from apps.common.constants import NL
 from apps.slack.commands.command import CommandBase
 
 
 class Policies(CommandBase):
     """Slack bot /policies command."""
 
-    def get_render_text(self, command):
-        """Get the rendered text."""
+    def get_template_context(self, command):
+        """Get the template context."""
         policies_list = [
             ("Chapters Policy", "https://owasp.org/www-policy/operational/chapters"),
             ("Code of Conduct", "https://owasp.org/www-policy/operational/code-of-conduct"),
@@ -34,9 +33,7 @@ class Policies(CommandBase):
             ),
         ]
 
-        return self.get_template_file().render(
-            policies=policies_list,
-            NL=NL,
-            SECTION_BREAK="{{ SECTION_BREAK }}",
-            DIVIDER="{{ DIVIDER }}",
-        )
+        return {
+            **super().get_template_context(command),
+            "policies": policies_list,
+        }

@@ -1,6 +1,5 @@
 """Slack bot community command."""
 
-from apps.common.constants import NL
 from apps.slack.commands.command import CommandBase
 
 
@@ -11,10 +10,10 @@ class Community(CommandBase):
         """Get the template file name."""
         return "navigate.template"
 
-    def get_render_text(self, command):
-        """Get the rendered text."""
-        return self.get_template_file().render(
-            url="https://nest.owasp.dev/community/users/",
-            name="OWASP community",
-            NL=NL,
-        )
+    def get_template_context(self, command):
+        """Get the template context."""
+        return {
+            **super().get_template_context(command),
+            "url": "https://nest.owasp.dev/community/users/",
+            "name": "OWASP community",
+        }

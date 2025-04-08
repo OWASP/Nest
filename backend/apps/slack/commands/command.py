@@ -1,15 +1,25 @@
 """Slack bot board command."""
 
+import logging
+
 from django.conf import settings
 
+from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.template_system.loader import env
 from apps.slack.utils import get_text
 
+logger = logging.getLogger(__name__)
+
 
 class CommandBase:
-    """Base class for Slack commands."""
+    """Base class for Slack commands.
+
+    Template formatting notes:
+    - Use "{{ SECTION_BREAK }}" to separate content into different Slack blocks
+    - Use "{{ DIVIDER }}" to insert a horizontal divider
+    """
 
     @staticmethod
     def get_all_commands():
@@ -26,14 +36,31 @@ class CommandBase:
         """Get the rendered text.
 
         Args:
-            command (dict): The Slack command payload.
+            command: The Slack command payload.
 
         Returns:
             str: The rendered text.
 
         """
         template = self.get_template_file()
-        return template.render()
+        return template.render(**self.get_template_context(command))
+
+    def get_template_context(self, command):
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
+        return {
+            "command": self.get_command(),
+            "NL": NL,
+            "SECTION_BREAK": "{{ SECTION_BREAK }}",
+            "DIVIDER": "{{ DIVIDER }}",
+        }
 
     def get_render_blocks(self, command):
         """Get the rendered blocks.
@@ -89,10 +116,19 @@ class CommandBase:
         if not settings.SLACK_COMMANDS_ENABLED:
             return
 
-        blocks = self.get_render_blocks(command)
-        conversation = client.conversations_open(users=command["user_id"])
-        client.chat_postMessage(
-            blocks=blocks,
-            channel=conversation["channel"]["id"],
-            text=get_text(blocks),
-        )
+        try:
+            blocks = self.get_render_blocks(command)
+            conversation = client.conversations_open(users=command["user_id"])
+            client.chat_postMessage(
+                blocks=blocks,
+                channel=conversation["channel"]["id"],
+                text=get_text(blocks),
+            )
+        except Exception:
+            logger.exception("Failed to handle command '%s'", self.get_command())
+            conversation = client.conversations_open(users=command["user_id"])
+            client.chat_postMessage(
+                blocks=[markdown(":warning: An error occurred. Please try again later.")],
+                channel=conversation["channel"]["id"],
+                text="An error occurred while processing your command.",
+            )
