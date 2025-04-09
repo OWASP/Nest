@@ -1,8 +1,7 @@
-import { Link } from '@chakra-ui/react'
+import { Button } from '@heroui/button'
+import { Tooltip } from '@heroui/tooltip'
+import Link from 'next/link'
 import React, { ReactNode } from 'react'
-import { TooltipRecipe } from 'utils/theme'
-import { Button } from 'components/ui/button'
-import { Tooltip } from 'components/ui/tooltip'
 
 interface ActionButtonProps {
   url?: string
@@ -32,13 +31,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel,
     </TooltipWrapper>
   ) : (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
-      <Button
-        focusVisibleRing={'none'}
-        focusRingColor={'currentBg'}
-        onClick={onClick}
-        className={baseStyles}
-        aria-label={tooltipLabel}
-      >
+      <Button onPress={onClick} className={baseStyles} aria-label={tooltipLabel}>
         {children}
       </Button>
     </TooltipWrapper>
@@ -50,7 +43,7 @@ const TooltipWrapper: React.FC<{ tooltipLabel?: string; children: ReactNode }> =
   children,
 }) =>
   tooltipLabel ? (
-    <Tooltip id="button-tooltip" content={tooltipLabel} recipe={TooltipRecipe}>
+    <Tooltip id="button-tooltip" content={tooltipLabel}>
       {children}
     </Tooltip>
   ) : (
