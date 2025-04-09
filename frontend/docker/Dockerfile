@@ -11,8 +11,8 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN pnpm install --ignore-scripts
 
 COPY --chmod=444 .env next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
-COPY public public
-COPY src src
+COPY --chmod=555  public public
+COPY --chmod=555 src src
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -30,13 +30,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public public
+# Copying files with root as owner, so that executing user cannot change the container i.e immutable and reproducible
+COPY --from=builder --chown=root:root --chmod=555 /app/public public
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone .
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static .next/static
+COPY --from=builder --chown=root:root --chmod=555  /app/.next/standalone .
+# Create (if not there ) cache directory and assign ownership to nextjs user with write permission, so that cahce can be stored
+RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next/cache && chmod -R 755 /app/.next/cache
+COPY --from=builder --chown=root:root --chmod=555 /app/.next/static .next/static
 
 USER nextjs
 
