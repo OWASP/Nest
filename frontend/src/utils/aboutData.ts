@@ -38,15 +38,15 @@ export const technologies = [
     section: 'Backend',
     tools: {
       Python: {
-        icon: '/icons/Python.svg',
+        icon: '/images/icons/python.svg',
         url: 'https://www.python.org/',
       },
       Django: {
-        icon: '/icons/Django.svg',
+        icon: '/images/icons/django.svg',
         url: 'https://www.djangoproject.com/',
       },
       PostgreSQL: {
-        icon: '/icons/PostgresSQL.svg',
+        icon: '/images/icons/postgresql.svg',
         url: 'https://www.postgresql.org/',
       },
     },
@@ -55,15 +55,15 @@ export const technologies = [
     section: 'Frontend',
     tools: {
       Typescript: {
-        icon: '/icons/TypeScript.svg',
+        icon: '/images/icons/typescript.svg',
         url: 'https://www.typescriptlang.org/',
       },
-      React: {
-        icon: '/icons/React.svg',
-        url: 'https://reactjs.org/',
+      'Next.js': {
+        icon: '/images/icons/nextjs.svg',
+        url: 'https://nextjs.org/',
       },
       'Tailwind CSS': {
-        icon: '/icons/TailwindCSS.svg',
+        icon: '/images/icons/tailwindcss.svg',
         url: 'https://tailwindcss.com/',
       },
     },
@@ -72,15 +72,15 @@ export const technologies = [
     section: 'Tests',
     tools: {
       Jest: {
-        icon: '/icons/Jest.svg',
+        icon: '/images/icons/jest.svg',
         url: 'https://jestjs.io/',
       },
       PlayWright: {
-        icon: '/icons/Playwright.svg',
+        icon: '/images/icons/playwright.svg',
         url: 'https://playwright.dev/',
       },
       Pytest: {
-        icon: '/icons/Pytest.svg',
+        icon: '/images/icons/pytest.svg',
         url: 'https://docs.pytest.org/',
       },
     },
@@ -89,15 +89,15 @@ export const technologies = [
     section: 'Tools',
     tools: {
       Ansible: {
-        icon: '/icons/Ansible.svg',
+        icon: '/images/icons/ansible.svg',
         url: 'https://www.ansible.com/',
       },
       GitHub: {
-        icon: '/icons/GitHub.svg',
+        icon: '/images/icons/github.svg',
         url: 'https://www.github.com/',
       },
       Docker: {
-        icon: '/icons/Docker.svg',
+        icon: '/images/icons/docker.svg',
         url: 'https://www.docker.com/',
       },
     },

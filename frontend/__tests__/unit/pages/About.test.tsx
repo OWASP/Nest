@@ -42,7 +42,7 @@ jest.mock('utils/aboutData', () => ({
       section: 'Backend',
       tools: {
         Python: {
-          icon: '/icons/Python.svg',
+          icon: '/images/icons/python.svg',
           url: 'https://www.python.org/',
         },
       },
@@ -50,9 +50,9 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Frontend',
       tools: {
-        React: {
-          icon: '/icons/React.svg',
-          url: 'https://reactjs.org/',
+        'Next.js': {
+          icon: '/images/icons/nextjs.svg',
+          url: 'https://nextjs.org/',
         },
       },
     },
@@ -60,11 +60,11 @@ jest.mock('utils/aboutData', () => ({
       section: 'Tests',
       tools: {
         Jest: {
-          icon: '/icons/Jest.svg',
+          icon: '/images/icons/jest.svg',
           url: 'https://jestjs.io/',
         },
         Pytest: {
-          icon: '/icons/Pytest.svg',
+          icon: '/images/icons/pytest.svg',
           url: 'https://docs.pytest.org/',
         },
       },
@@ -73,11 +73,11 @@ jest.mock('utils/aboutData', () => ({
       section: 'Tools',
       tools: {
         Ansible: {
-          icon: '/icons/Ansible.svg',
+          icon: '/images/icons/ansible.svg',
           url: 'https://www.ansible.com/',
         },
         GitHub: {
-          icon: '/icons/GitHub.svg',
+          icon: '/images/icons/github.svg',
           url: 'https://www.github.com/',
         },
       },
@@ -229,7 +229,7 @@ describe('About Component', () => {
 
     expect(screen.getByText('Ansible')).toBeInTheDocument()
     expect(screen.getByText('GitHub')).toBeInTheDocument()
-    expect(screen.getByText('React')).toBeInTheDocument()
+    expect(screen.getByText('Next.js')).toBeInTheDocument()
 
     const ansibleLink = screen.getByText('Ansible').closest('a')
     expect(ansibleLink).toHaveAttribute('href', 'https://www.ansible.com/')
@@ -237,8 +237,8 @@ describe('About Component', () => {
     const githubLink = screen.getByText('GitHub').closest('a')
     expect(githubLink).toHaveAttribute('href', 'https://www.github.com/')
 
-    const reactLink = screen.getByText('React').closest('a')
-    expect(reactLink).toHaveAttribute('href', 'https://reactjs.org/')
+    const reactLink = screen.getByText('Next.js').closest('a')
+    expect(reactLink).toHaveAttribute('href', 'https://nextjs.org/')
 
     const ansibleIconContainer = screen.getByText('Ansible').previousSibling
     expect(ansibleIconContainer).toBeInTheDocument()
@@ -246,7 +246,7 @@ describe('About Component', () => {
     const githubIconContainer = screen.getByText('GitHub').previousSibling
     expect(githubIconContainer).toBeInTheDocument()
 
-    const reactIconContainer = screen.getByText('React').previousSibling
+    const reactIconContainer = screen.getByText('Next.js').previousSibling
     expect(reactIconContainer).toBeInTheDocument()
   })
 

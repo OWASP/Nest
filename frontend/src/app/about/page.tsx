@@ -1,8 +1,8 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { GET_USER_DATA } from 'server/queries/userQueries'
@@ -97,11 +97,11 @@ const About = () => {
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
                         <Image
-                          src={details.icon}
                           alt={`${name} icon`}
-                          width={24}
+                          className="inline-block align-middle grayscale"
                           height={24}
-                          className="inline-block align-middle"
+                          src={details.icon}
+                          width={24}
                         />
                         <Link
                           href={details.url}
