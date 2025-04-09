@@ -1,18 +1,10 @@
-import { useState } from 'react'
+import { Tooltip } from '@heroui/tooltip'
 import { millify } from 'millify'
 import { IconType } from 'types/icon'
 import { IconKeys, Icons } from 'utils/data'
-import { TooltipRecipe } from 'utils/theme'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { Tooltip } from 'components/ui/tooltip'
 
 export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
-  const [hovered, setHovered] = useState(false)
-  const [isTooltipOpen, setIsTooltipOpen] = useState(false)
-
-  const socialMediaIcons: IconKeys[] = ['linkedin', 'youtube', 'twitter', 'github']
-  const isSocialMediaIcon = socialMediaIcons.includes(item as IconKeys)
-
   const containerClassName = [
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
     item === 'stars_count' || item === 'starsCount' ? 'rotate-container' : '',
@@ -26,29 +18,30 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     .filter(Boolean)
     .join(' ')
 
+  const iconClassName = [
+    'transition-transform duration-200',
+    'hover:scale-110',
+    getBrandColorClass(item),
+    item === 'stars_count' || item === 'starsCount' ? 'icon-rotate' : '',
+    item === 'forks_count' ||
+    item === 'contributors_count' ||
+    item === 'forksCount' ||
+    item === 'contributionCount'
+      ? 'icon-flip'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return icons[item] ? (
     <Tooltip
       content={`${Icons[item as keyof typeof Icons]?.label}`}
-      recipe={TooltipRecipe}
-      openDelay={50}
-      closeDelay={250}
+      delay={150}
+      closeDelay={100}
       showArrow
-      positioning={{ placement: 'bottom' }}
-      isOpen={isTooltipOpen}
-      onOpenChange={setIsTooltipOpen}
+      placement="top"
     >
-      <div
-        className={containerClassName}
-        onMouseEnter={() => {
-          if (isSocialMediaIcon) setHovered(true);
-          setIsTooltipOpen(true);
-        }}
-        onMouseLeave={() => {
-          if (isSocialMediaIcon) setHovered(false);
-          setIsTooltipOpen(false);
-        }}
-      >
-        {/* Display formatted number if the value is a number */}
+      <div className={containerClassName}>
         <span className="text-gray-600 dark:text-gray-300">
           {typeof icons[item] === 'number'
             ? millify(icons[item], { precision: 1 })
@@ -56,17 +49,21 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
         </span>
         <span>
           <FontAwesomeIconWrapper
-            className={`${
-              isSocialMediaIcon
-                ? hovered
-                  ? Icons[item as IconKeys]?.color || 'text-gray-600'
-                  : 'text-gray-400 dark:text-gray-500'
-                : 'text-gray-600 dark:text-gray-300'
-            } transition-colors duration-300`}
+            className={iconClassName}
             icon={Icons[item as IconKeys]?.icon}
           />
         </span>
       </div>
     </Tooltip>
   ) : null
+}
+function getBrandColorClass(item: string): string {
+  const brandColors: Record<string, string> = {
+    discord: 'hover:text-[#5865F2]',
+    instagram: 'hover:text-[#E4405F]',
+    linkedin: 'hover:text-[#0077B5]',
+    youtube: 'hover:text-[#FF0000]',
+  }
+
+  return brandColors[item.toLowerCase()] || 'text-gray-600 dark:text-gray-300'
 }
