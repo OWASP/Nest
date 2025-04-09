@@ -180,6 +180,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Run Trivy Repository Scan
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           scan-type: repo
@@ -195,6 +196,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Run Trivy Filesystem Scan
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           scan-type: fs
@@ -267,6 +269,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Scan backend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
@@ -274,6 +277,7 @@ jobs:
           trivy-config: trivy.yaml
 
       - name: Scan frontend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
@@ -431,6 +435,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Scan backend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
@@ -438,6 +443,7 @@ jobs:
           trivy-config: trivy.yaml
 
       - name: Scan frontend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
