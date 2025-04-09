@@ -6,6 +6,7 @@ import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import SecondaryCard from './SecondaryCard'
+import { TruncatedText } from './TruncatedText'
 
 interface RecentReleasesProps {
   data: ProjectReleaseType[]
@@ -22,7 +23,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
     <SecondaryCard icon={faFileCode} title="Recent Releases">
       {data && data.length > 0 ? (
         <div
-          className={`grid ${showSingleColumn ? 'grid-cols-1' : 'grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+          className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
         >
           {data.map((item, index) => (
             <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -49,7 +50,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {item.name}
+                      <TruncatedText text={item?.name} />
                     </Link>
                   </h3>
                 </div>
