@@ -28,7 +28,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs && \
-adduser --system --uid 1001 nextjs
+adduser --system --uid 1001 -G nodejs nextjs
 # Copying files with root as owner, so that executing user cannot change the container.
 COPY --from=builder --chown=root:root --chmod=555 /app/public public
 
