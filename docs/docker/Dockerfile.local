@@ -1,4 +1,4 @@
-FROM python:3.13-alpine AS builder
+FROM python:3.13.3-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -19,7 +19,7 @@ COPY --chmod=444 --chown=owasp:owasp docs/poetry.lock docs/pyproject.toml mkdocs
 RUN poetry install --no-root && \
     rm -rf docs/poetry.lock docs/pyproject.toml
 
-FROM python:3.13-alpine
+FROM python:3.13.3-alpine
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
