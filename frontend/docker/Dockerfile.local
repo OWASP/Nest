@@ -18,11 +18,11 @@ FROM node:22-alpine
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
-    mkdir -p /home/owasp && \
+    mkdir -p /home/owasp/.next && \
     chown -R node:node /home/owasp && \
     npm install --ignore-scripts -g pnpm
 
-COPY --from=builder --chmod=555 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
+COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
 
 EXPOSE 3000
 

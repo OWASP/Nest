@@ -12,6 +12,14 @@ test.describe('Committees Page', () => {
         }),
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/committees')
   })
 
@@ -35,13 +43,15 @@ test.describe('Committees Page', () => {
 
   test('handles page change correctly', async ({ page }) => {
     const nextPageButton = await page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
-    expect(await page.url()).toContain('page=2')
+    await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on View Details button click', async ({ page }) => {
     const contributeButton = await page.getByRole('button', { name: 'Learn more about Committee' })
+    await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
-    expect(await page.url()).toContain('committees/committee_1')
+    await expect(page).toHaveURL('/committees/committee_1')
   })
 })

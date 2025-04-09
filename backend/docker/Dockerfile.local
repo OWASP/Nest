@@ -33,4 +33,4 @@ EXPOSE 8000
 USER owasp
 WORKDIR /home/owasp
 
-COPY --from=builder --chmod=555 --chown=owasp:owasp /home/owasp /home/owasp
+COPY --from=builder --chmod=755 --chown=owasp:owasp /home/owasp /home/owasp

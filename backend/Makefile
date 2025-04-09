@@ -1,3 +1,8 @@
+clean-backend:
+	@rm -rf backend/.cache
+	@rm -rf backend/.local
+	@rm -rf backend/.venv
+
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
 

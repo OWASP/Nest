@@ -24,6 +24,7 @@ class TestReleaseNode:
             "name",
             "project_name",
             "published_at",
+            "repository_name",
             "tag_name",
             "url",
         }

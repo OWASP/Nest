@@ -6,7 +6,8 @@ WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
-    pnpm install --ignore-scripts
+    pnpm install --ignore-scripts && \
+    chown node:node /app
 
 COPY __tests__/unit __tests__/unit
 COPY jest.config.ts jest.config.ts
@@ -14,3 +15,5 @@ COPY jest.setup.ts jest.setup.ts
 COPY public public
 COPY src src
 COPY tsconfig.json tsconfig.json
+
+USER node
