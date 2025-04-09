@@ -18,7 +18,7 @@ jobs:
         with:
           script: |
             const issue = context.payload.issue;
-            if (!issue || (!issue.title && !issue.body)) return;
+            if (!issue || !issue.body) return;
 
             const title = issue.title?.toLowerCase() || "";
             const body = issue.body?.toLowerCase() || "";
