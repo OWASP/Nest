@@ -88,6 +88,14 @@ filterwarnings = [
 ]
 log_level = "INFO"
 
+[tool.mypy]
+disable_error_code = [
+    "attr-defined",
+    "import-not-found",
+    "import-untyped",
+    "var-annotated",
+]
+
 [tool.ruff]
 line-length = 99
 
@@ -104,15 +112,12 @@ ignore = [
     "FBT002",
     "FIX002",
     "PD",
-    "TC002",
-    "TC003",
     "PERF203",
     "PLC0414",
     "PLR0912",
     "PLR0913",
     "PLR0915",
     "RUF012",
-    "RUF013",
     "SLF001",
     "TD003",
 ]
@@ -130,21 +135,10 @@ select = ["ALL"]
 "**/migrations/*.py" = ["D100", "D101", "D104"]
 "**/models.py" = ["D106"]
 "**/models/*.py" = ["D106"]
-"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
 "**/slack/apps.py" = ["ARG001"]
+"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
 
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
-
-[tool.mypy]
-ignore_missing_imports = true
-disable_error_code = [
-    "arg-type",
-    "assignment",
-    "attr-defined",
-    "import-not-found",
-    "import-untyped",
-    "var-annotated",
-]

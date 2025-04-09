@@ -121,7 +121,7 @@ def validate_search_params(data: dict) -> None:
 
     """
     validate_facet_filters(data.get("facetFilters", []))
-    validate_index_name(data.get("indexName"))
+    validate_index_name(data.get("indexName"))  # type: ignore[arg-type]
     validate_limit(data.get("hitsPerPage", 25))
     validate_page(data.get("page", 1))
     validate_query(data.get("query", ""))

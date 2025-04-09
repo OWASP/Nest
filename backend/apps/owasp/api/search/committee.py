@@ -1,11 +1,15 @@
 """OWASP app committee search API."""
 
+from __future__ import annotations
+
 from algoliasearch_django import raw_search
 
 from apps.owasp.models.committee import Committee
 
 
-def get_committees(query: str, attributes: list = None, limit: int = 25, page: int = 1) -> dict:
+def get_committees(
+    query: str, attributes: list | None = None, limit: int = 25, page: int = 1
+) -> dict:
     """Return committees relevant to a search query.
 
     Args:

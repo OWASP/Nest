@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 
 import requests
 import yaml
-from django.db.models import QuerySet
+from django.db.models import QuerySet  # noqa: TC002
 from django.utils import timezone
 from lxml import html
 from requests.exceptions import RequestException

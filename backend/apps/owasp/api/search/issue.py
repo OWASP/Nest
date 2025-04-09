@@ -1,5 +1,7 @@
 """OWASP app issue search API."""
 
+from __future__ import annotations
+
 from algoliasearch_django import raw_search
 
 from apps.github.models.issue import Issue
@@ -9,7 +11,7 @@ ISSUE_CACHE_PREFIX = "issue:"
 
 def get_issues(
     query: str,
-    attributes: list = None,
+    attributes: list | None = None,
     *,
     distinct: bool = False,
     limit: int = 25,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date  # noqa: TC003
 
 from dateutil import parser
 from django.db import models
@@ -120,7 +120,7 @@ class Event(BulkSaveModel, TimestampedModel):
                 end_day = int(day_range.split("-")[-1])
 
                 # Parse the year
-                year = int(year.strip())
+                year = int(year.strip())  # type: ignore[assignment]
 
                 # Use the start_date to determine the month if provided
                 if start_date:
@@ -178,7 +178,7 @@ class Event(BulkSaveModel, TimestampedModel):
                 "Partner": Event.Category.PARTNER,
             }.get(category, Event.Category.OTHER),
             "description": data.get("optional-text", ""),
-            "end_date": Event.parse_dates(data.get("dates", ""), data.get("start-date")),
+            "end_date": Event.parse_dates(data.get("dates", ""), data.get("start-date")),  # type: ignore[arg-type]
             "name": data["name"],
             "start_date": parser.parse(data["start-date"]).date()
             if isinstance(data["start-date"], str)

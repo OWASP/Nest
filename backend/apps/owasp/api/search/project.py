@@ -9,10 +9,10 @@ from apps.owasp.models.project import Project
 
 def get_projects(
     query: str,
-    attributes: list = None,
+    attributes: list | None = None,
     limit: int = 25,
     page: int = 1,
-    searchable_attributes: list = None,
+    searchable_attributes: list | None = None,
 ) -> dict:
     """Return projects relevant to a search query.
 

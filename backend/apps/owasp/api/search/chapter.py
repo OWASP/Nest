@@ -1,5 +1,7 @@
 """OWASP app chapter search API."""
 
+from __future__ import annotations
+
 from algoliasearch_django import raw_search
 
 from apps.owasp.models.chapter import Chapter
@@ -7,10 +9,10 @@ from apps.owasp.models.chapter import Chapter
 
 def get_chapters(
     query: str,
-    attributes: list = None,
+    attributes: list | None = None,
     limit: int = 25,
     page: int = 1,
-    searchable_attributes: list = None,
+    searchable_attributes: list | None = None,
 ) -> dict:
     """Return chapters relevant to a search query.
 
