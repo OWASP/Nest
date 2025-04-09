@@ -2,6 +2,7 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { GET_USER_DATA } from 'server/queries/userQueries'
@@ -95,7 +96,13 @@ const About = () => {
                   <ul className="space-y-3">
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
-                        <i className={`${details.icon} text-xl`} style={{ color: '#9ca3af' }}></i>
+                        <Image
+                          src={details.icon}
+                          alt={`${name} icon`}
+                          width={24}
+                          height={24}
+                          className="inline-block align-middle"
+                        />
                         <Link
                           href={details.url}
                           className="text-gray-600 hover:underline dark:text-gray-300"

@@ -42,7 +42,7 @@ jest.mock('utils/aboutData', () => ({
       section: 'Backend',
       tools: {
         Python: {
-          icon: 'devicon-python-plain',
+          icon: '/icons/Python.svg',
           url: 'https://www.python.org/',
         },
       },
@@ -51,7 +51,7 @@ jest.mock('utils/aboutData', () => ({
       section: 'Frontend',
       tools: {
         React: {
-          icon: 'devicon-react-original',
+          icon: '/icons/React.svg',
           url: 'https://reactjs.org/',
         },
       },
@@ -60,11 +60,11 @@ jest.mock('utils/aboutData', () => ({
       section: 'Tests',
       tools: {
         Jest: {
-          icon: 'devicon-jest-plain',
+          icon: '/icons/Jest.svg',
           url: 'https://jestjs.io/',
         },
         Pytest: {
-          icon: 'devicon-pytest-plain',
+          icon: '/icons/Pytest.svg',
           url: 'https://docs.pytest.org/',
         },
       },
@@ -73,11 +73,11 @@ jest.mock('utils/aboutData', () => ({
       section: 'Tools',
       tools: {
         Ansible: {
-          icon: 'devicon-ansible-plain',
+          icon: '/icons/Ansible.svg',
           url: 'https://www.ansible.com/',
         },
         GitHub: {
-          icon: 'devicon-github-original',
+          icon: '/icons/GitHub.svg',
           url: 'https://www.github.com/',
         },
       },
@@ -240,14 +240,14 @@ describe('About Component', () => {
     const reactLink = screen.getByText('React').closest('a')
     expect(reactLink).toHaveAttribute('href', 'https://reactjs.org/')
 
-    const ansibleIcon = screen.getByText('Ansible').previousSibling
-    expect(ansibleIcon).toHaveClass('devicon-ansible-plain')
+    const ansibleIconContainer = screen.getByText('Ansible').previousSibling
+    expect(ansibleIconContainer).toBeInTheDocument()
 
-    const githubIcon = screen.getByText('GitHub').previousSibling
-    expect(githubIcon).toHaveClass('devicon-github-original')
+    const githubIconContainer = screen.getByText('GitHub').previousSibling
+    expect(githubIconContainer).toBeInTheDocument()
 
-    const reactIcon = screen.getByText('React').previousSibling
-    expect(reactIcon).toHaveClass('devicon-react-original')
+    const reactIconContainer = screen.getByText('React').previousSibling
+    expect(reactIconContainer).toBeInTheDocument()
   })
 
   test('renders roadmap correctly', async () => {
