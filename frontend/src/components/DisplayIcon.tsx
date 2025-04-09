@@ -57,6 +57,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     </Tooltip>
   ) : null
 }
+
 function getBrandColorClass(item: string): string {
   const brandColors: Record<string, string> = {
     discord: 'hover:text-[#5865F2]',
