@@ -7,7 +7,7 @@ timeout: 10m
 
 vulnerability:
   ignore-unfixed: true
-  ignorefile: .trivyignore
+  ignorefile: trivyignore.yaml
   security-checks:
     - config
     - secret

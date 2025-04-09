@@ -1,9 +1,9 @@
-
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code
 
 clean-frontend:
+	@rm -rf frontend/.next
 	@rm -rf frontend/.pnpm-store
 	@rm -rf frontend/node_modules
 

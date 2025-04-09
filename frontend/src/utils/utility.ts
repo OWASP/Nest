@@ -1,7 +1,7 @@
-import { fetchCsrfToken } from 'api/fetchCsrfToken'
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { fetchCsrfToken } from 'server/fetchCsrfToken'
 import { twMerge } from 'tailwind-merge'
 import { ChapterTypeGraphQL } from 'types/chapter'
 

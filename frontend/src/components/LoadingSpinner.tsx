@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import React from 'react'
 
 interface LoadingSpinnerProps {
@@ -17,14 +18,14 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ imageUrl }) => {
       >
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="animate-fade-in-out">
-            <img
+            <Image
               src={image}
               alt="Loading indicator"
               className="hidden rounded-full dark:block"
               width={60}
               height={60}
             />
-            <img
+            <Image
               src={dark}
               alt="Loading indicator"
               className="rounded-full dark:hidden"
