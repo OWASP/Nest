@@ -41,7 +41,7 @@ test.describe('Header - Desktop (Chrome)', () => {
     ).toBeVisible()
   })
 
-  test('should have navlinks including community dropdown', async ({ page }) => {
+  test('should have nav links including community dropdown', async ({ page }) => {
     const navbar = page.locator('#navbar-sticky')
 
     // Check main nav links
