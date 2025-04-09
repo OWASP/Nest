@@ -39,7 +39,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
       delay={150}
       closeDelay={100}
       showArrow
-      placement="top"
+      placement="bottom"
     >
       <div className={containerClassName}>
         <span className="text-gray-600 dark:text-gray-300">
