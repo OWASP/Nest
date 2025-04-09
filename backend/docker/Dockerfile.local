@@ -1,4 +1,4 @@
-FROM python:3.13-alpine AS builder
+FROM python:3.13.3-alpine AS builder
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && apk upgrade && \
@@ -15,7 +15,7 @@ WORKDIR /home/owasp
 COPY --chmod=444 --chown=owasp:owasp poetry.lock pyproject.toml ./
 RUN poetry install --no-root --without dev --without test
 
-FROM python:3.13-alpine
+FROM python:3.13.3-alpine
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
