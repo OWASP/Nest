@@ -31,16 +31,16 @@ class TestOrganizationNode:
             "description",
             "email",
             "followers_count",
+            "issues",
             "location",
             "login",
             "name",
+            "releases",
+            "repositories",
+            "stats",
+            "top_contributors",
             "updated_at",
             "url",
-            "stats",
-            "repositories",
-            "issues",
-            "releases",
-            "top_contributors",
         }
         assert set(OrganizationNode._meta.fields) == expected_fields
 
@@ -87,10 +87,10 @@ class TestOrganizationStatsNode:
     def test_organization_stats_node(self):
         """Test if OrganizationStatsNode has the expected fields."""
         expected_fields = {
-            "total_repositories",
             "total_contributors",
-            "total_stars",
             "total_forks",
             "total_issues",
+            "total_repositories",
+            "total_stars",
         }
         assert set(OrganizationStatsNode._meta.fields) == expected_fields

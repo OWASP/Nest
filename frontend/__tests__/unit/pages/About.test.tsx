@@ -406,7 +406,7 @@ describe('About Component', () => {
           avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
           company: 'OWASP',
           // name is missing
-          url: '/community/users/arkid15r',
+          url: '/community/members/arkid15r',
         },
       },
       loading: false,

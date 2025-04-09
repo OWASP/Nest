@@ -16,7 +16,7 @@ from apps.github.models.repository_contributor import TOP_CONTRIBUTORS_LIMIT, Re
 
 RECENT_ISSUES_LIMIT = 6
 RECENT_RELEASES_LIMIT = 6
-RECENT_REPOSITORIES_LIMIT = 10
+RECENT_REPOSITORIES_LIMIT = 12
 
 
 class OrganizationStatsNode(graphene.ObjectType):
@@ -32,12 +32,12 @@ class OrganizationStatsNode(graphene.ObjectType):
 class OrganizationNode(BaseNode):
     """GitHub organization node."""
 
-    url = graphene.String()
-    stats = graphene.Field(OrganizationStatsNode)
-    repositories = graphene.List(RepositoryNode)
     issues = graphene.List(IssueNode)
     releases = graphene.List(ReleaseNode)
+    repositories = graphene.List(RepositoryNode)
+    stats = graphene.Field(OrganizationStatsNode)
     top_contributors = graphene.List(RepositoryContributorNode)
+    url = graphene.String()
 
     class Meta:
         model = Organization
@@ -54,10 +54,6 @@ class OrganizationNode(BaseNode):
             "name",
             "updated_at",
         )
-
-    def resolve_url(self, info):
-        """Resolve organization URL."""
-        return self.url
 
     def resolve_stats(self, info):
         """Resolve organization stats."""
@@ -118,10 +114,8 @@ class OrganizationNode(BaseNode):
         This method gets the top contributors across all repositories in the organization.
         It first groups by user and then orders by contributions count.
         """
-        repositories = Repository.objects.filter(organization=self)
-
         top_contributors = (
-            RepositoryContributor.objects.filter(repository__in=repositories)
+            RepositoryContributor.objects.filter(repository__in=self.repository_set.all())
             .values(
                 "user__id",
                 "user__login",
@@ -141,3 +135,7 @@ class OrganizationNode(BaseNode):
             )
             for tc in top_contributors
         ]
+
+    def resolve_url(self, info):
+        """Resolve organization URL."""
+        return self.url

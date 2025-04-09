@@ -25,7 +25,7 @@ const OrganizationPage = () => {
 
   const renderOrganizationCard = (organization: OrganizationTypeAlgolia) => {
     const handleButtonClick = () => {
-      router.push(`/organization/${organization.login}`)
+      router.push(`/organizations/${organization.login}`)
     }
 
     const SubmitButton = {
@@ -43,7 +43,7 @@ const OrganizationPage = () => {
         company={organization.company || ''}
         email={organization.email || ''}
         location={organization.location || `@${organization.login}`}
-        members={organization.collaborators_count}
+        followers_count={organization.followers_count}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       />
     )

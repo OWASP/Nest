@@ -108,14 +108,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         case 'organizations':
           // Use type guard to safely access login property
           if ('login' in suggestion && suggestion.login) {
-            router.push(`/organization/${suggestion.login}`)
+            router.push(`/organizations/${suggestion.login}`)
           }
           break
         case 'projects':
           router.push(`/projects/${suggestion.key}`)
           break
         case 'users':
-          router.push(`/community/users/${suggestion.key}`)
+          router.push(`/community/members/${suggestion.key}`)
           break
       }
     },

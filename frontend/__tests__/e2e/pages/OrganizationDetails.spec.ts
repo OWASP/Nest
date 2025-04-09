@@ -17,7 +17,7 @@ test.describe('Organization Details Page', () => {
         path: '/',
       },
     ])
-    await page.goto('/organization/test-org')
+    await page.goto('/organizations/test-org')
   })
 
   test('should have a heading and summary', async ({ page }) => {

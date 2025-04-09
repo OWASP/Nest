@@ -42,7 +42,8 @@ class TestCommunityHandler:
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             block_text = blocks[0]["text"]["text"]
             expected_text = (
-                f"Please visit <https://nest.owasp.dev/community/users/|OWASP community> page{NL}"
+                "Please visit <https://nest.owasp.dev/community/members/|"
+                f"OWASP community> page{NL}"
             )
             assert block_text == expected_text
             assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
@@ -58,4 +59,4 @@ class TestCommunityHandler:
         assert len(blocks) == 1
         assert blocks[0]["type"] == "section"
         assert blocks[0]["text"]["type"] == "mrkdwn"
-        assert "https://nest.owasp.dev/community/users/" in blocks[0]["text"]["text"]
+        assert "https://nest.owasp.dev/community/members/" in blocks[0]["text"]["text"]

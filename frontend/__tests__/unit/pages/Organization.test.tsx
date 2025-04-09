@@ -3,7 +3,7 @@ import { mockOrganizationData } from '@unit/data/mockOrganizationData'
 import { useRouter } from 'next/navigation'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-import Organization from 'app/organization/page'
+import Organization from 'app/organizations/page'
 
 const mockRouter = {
   push: jest.fn(),
@@ -79,7 +79,7 @@ describe('Organization', () => {
       fireEvent.click(viewDetailsButtons[0])
     })
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/organization/test-org')
+    expect(mockRouter.push).toHaveBeenCalledWith('/organizations/test-org')
 
     jest.restoreAllMocks()
   })

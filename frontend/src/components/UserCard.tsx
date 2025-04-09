@@ -12,7 +12,7 @@ const UserCard = ({
   location,
   button,
   className,
-  members,
+  followers_count,
 }: UserCardProps) => {
   return (
     <Button
@@ -40,10 +40,10 @@ const UserCard = ({
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email}
           </p>
-          {members > 0 && (
+          {followers_count > 0 && (
             <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
               <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
-              {members}
+              {followers_count}
             </p>
           )}
         </div>

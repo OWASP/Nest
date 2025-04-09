@@ -26,7 +26,7 @@ def community_handler(ack, command, client):
 
     blocks = [
         markdown(
-            f"Please visit <https://nest.owasp.dev/community/users/|OWASP community> page{NL}"
+            f"Please visit <https://nest.owasp.dev/community/members/|OWASP community> page{NL}"
         ),
     ]
 

@@ -20,7 +20,7 @@ test.describe('Organization Page', () => {
         path: '/',
       },
     ])
-    await page.goto('/organization')
+    await page.goto('/organizations')
   })
 
   test('renders organization data correctly', async ({ page }) => {
@@ -33,6 +33,6 @@ test.describe('Organization Page', () => {
 
   test('navigation to organization details works', async ({ page }) => {
     await page.getByRole('button', { name: 'View Profile' }).first().click()
-    expect(await page.url()).toContain('organization')
+    expect(await page.url()).toContain('organizations')
   })
 })
