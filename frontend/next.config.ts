@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     ],
   },
   devIndicators: false,
-  output: "standalone",
+  output: 'standalone',
 }
 
 export default nextConfig
