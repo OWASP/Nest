@@ -7,7 +7,6 @@ export const GET_ORGANIZATION_DATA = gql`
       collaboratorsCount
       company
       createdAt
-      description
       email
       followersCount
       location
@@ -22,42 +21,51 @@ export const GET_ORGANIZATION_DATA = gql`
         totalForks
         totalIssues
       }
-      repositories {
-        name
-        url
-        contributorsCount
-        forksCount
-        openIssuesCount
-        starsCount
-        key
-      }
-      issues {
-        title
-        state
-        createdAt
-        url
-        author {
-          login
-          avatarUrl
-        }
-      }
-      releases {
-        name
-        tagName
-        publishedAt
-        url
-        repositoryName
-        author {
-          login
-          avatarUrl
-        }
-      }
-      topContributors {
-        contributionsCount
+    }
+    topContributors(organization: $login) {
+      contributionsCount
+      login
+      name
+      avatarUrl
+    }
+    recentPullRequests(limit: 5, organization: $login) {
+      title
+      createdAt
+      url
+      author {
         login
-        name
         avatarUrl
       }
+    }
+    recentReleases(limit: 6, organization: $login) {
+      name
+      tagName
+      publishedAt
+      url
+      repositoryName
+      author {
+        login
+        avatarUrl
+      }
+    }
+    organizationRepositories(organization: $login, limit: 12) {
+      name
+      url
+      contributorsCount
+      forksCount
+      openIssuesCount
+      starsCount
+      key
+    }
+    recentIssues(limit: 5, organization: $login) {
+      author {
+        avatarUrl
+        login
+      }
+      commentsCount
+      createdAt
+      title
+      url
     }
   }
 `

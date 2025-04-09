@@ -111,6 +111,15 @@ describe('OrganizationDetailsPage', () => {
     })
   })
 
+  test('renders pull requests section correctly', async () => {
+    render(<OrganizationDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Pull Request 1')).toBeInTheDocument()
+      expect(screen.getByText('Test Pull Request 2')).toBeInTheDocument()
+    })
+  })
+
   test('renders top contributors section correctly', async () => {
     render(<OrganizationDetailsPage />)
 
@@ -123,7 +132,7 @@ describe('OrganizationDetailsPage', () => {
 
   test('displays error message when there is a GraphQL error', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: undefined,
       error: mockError,
     })
 

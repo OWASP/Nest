@@ -8,6 +8,7 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { addToast } from '@heroui/toast'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
@@ -19,14 +20,24 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams()
   const [organization, setOrganization] = useState(null)
+  const [issues, setIssues] = useState(null)
+  const [pullRequests, setPullRequests] = useState(null)
+  const [releases, setReleases] = useState(null)
+  const [repositories, setRepositories] = useState(null)
+  const [topContributors, setTopContributors] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GET_ORGANIZATION_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_ORGANIZATION_DATA, {
     variables: { login: organizationKey },
   })
 
   useEffect(() => {
-    if (data && data.organization) {
-      setOrganization(data.organization)
+    if (graphQLData) {
+      setOrganization(graphQLData?.organization)
+      setIssues(graphQLData?.recentIssues)
+      setPullRequests(graphQLData?.recentPullRequests)
+      setReleases(graphQLData?.recentReleases)
+      setRepositories(graphQLData?.organizationRepositories)
+      setTopContributors(graphQLData?.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -40,13 +51,13 @@ const OrganizationDetailsPage = () => {
       })
       setIsLoading(false)
     }
-  }, [data, graphQLRequestError, organizationKey])
+  }, [graphQLData, graphQLRequestError, organizationKey])
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !organization) {
+  if (!isLoading && !graphQLData) {
     return (
       <ErrorDisplay
         message="Sorry, the Organization you're looking for doesn't exist"
@@ -60,9 +71,9 @@ const OrganizationDetailsPage = () => {
     {
       label: 'GitHub Profile',
       value: (
-        <a href={organization.url} className="text-blue-400 hover:underline">
+        <Link href={organization.url} className="text-blue-400 hover:underline">
           @{organization.login}
-        </a>
+        </Link>
       ),
     },
     {
@@ -111,13 +122,14 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={organization.issues}
-      recentReleases={organization.releases}
-      repositories={organization.repositories}
+      recentIssues={issues}
+      recentReleases={releases}
+      pullRequests={pullRequests}
+      repositories={repositories}
       stats={organizationStats}
       summary={organization.description}
       title={organization.name}
-      topContributors={organization.topContributors}
+      topContributors={topContributors}
       type="organization"
     />
   )

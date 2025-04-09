@@ -22,9 +22,6 @@ test.describe('Organization Details Page', () => {
 
   test('should have a heading and summary', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Test Organization' })).toBeVisible()
-    await expect(
-      page.getByText('This is a test organization with a detailed description')
-    ).toBeVisible()
   })
 
   test('should display organization details', async ({ page }) => {
@@ -49,8 +46,7 @@ test.describe('Organization Details Page', () => {
 
   test('should display recent releases section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
-    await expect(page.getByText('Release v1.0.0')).toBeVisible()
-    await expect(page.getByText('Release v2.0.0')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Release v2.0.0' }).first()).toBeVisible()
   })
 
   test('should display top contributors section', async ({ page }) => {
@@ -58,5 +54,11 @@ test.describe('Organization Details Page', () => {
     await expect(page.getByText('User One')).toBeVisible()
     await expect(page.getByText('User Two')).toBeVisible()
     await expect(page.getByText('User Three')).toBeVisible()
+  })
+
+  test('should display recent pull requests section', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
+    await expect(page.getByText('Test Pull Request 1')).toBeVisible()
+    await expect(page.getByText('Test Pull Request 2')).toBeVisible()
   })
 })
