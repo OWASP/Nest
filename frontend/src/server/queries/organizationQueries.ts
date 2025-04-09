@@ -7,6 +7,7 @@ export const GET_ORGANIZATION_DATA = gql`
       collaboratorsCount
       company
       createdAt
+      description
       email
       followersCount
       location

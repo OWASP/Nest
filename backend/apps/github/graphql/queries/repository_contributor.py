@@ -45,6 +45,8 @@ class RepositoryContributorQuery(BaseQuery):
                     "user__login",
                     "user__name",
                     "user__avatar_url",
+                    "repository__project__name",
+                    "repository__project__key",
                 )
                 .annotate(total_contributions=Sum("contributions_count"))
                 .order_by("-total_contributions")[:limit]
@@ -56,6 +58,8 @@ class RepositoryContributorQuery(BaseQuery):
                     contributions_count=trc["total_contributions"],
                     login=trc["user__login"],
                     name=trc["user__name"],
+                    project_name=trc["repository__project__name"],
+                    project_url=trc["repository__project__key"],
                 )
                 for trc in top_contributors
             ]
