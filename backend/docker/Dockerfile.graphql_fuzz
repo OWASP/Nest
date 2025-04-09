@@ -1,0 +1,15 @@
+FROM python:3.12-alpine
+
+RUN apk update && apk upgrade && \
+    addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp
+
+RUN apk add --no-cache curl jq gcc musl-dev libffi-dev linux-headers
+RUN pip install --no-cache-dir graphqler
+
+WORKDIR /home/owasp
+USER owasp
+
+COPY docker/entrypoint_graphql_fuzz.sh entrypoint.sh
+
+CMD ["/home/owasp/entrypoint.sh"]
