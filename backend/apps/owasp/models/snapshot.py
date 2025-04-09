@@ -51,3 +51,22 @@ class Snapshot(models.Model):
             self.key = now().strftime("%Y-%m")
 
         super().save(*args, **kwargs)
+
+    def generate_summary(self):
+        """Generate a brief summary of the snapshot contents."""
+        parts = []
+
+        if self.new_chapters.exists():
+            parts.append(f"{self.new_chapters.count()} chapters")
+        if self.new_issues.exists():
+            parts.append(f"{self.new_issues.count()} issues")
+        if self.new_projects.exists():
+            parts.append(f"{self.new_projects.count()} projects")
+        if self.new_releases.exists():
+            parts.append(f"{self.new_releases.count()} releases")
+        if self.new_users.exists():
+            parts.append(f"{self.new_users.count()} users")
+
+        if parts:
+            return "Added: " + ", ".join(parts)
+        return "No new entities added in this snapshot."

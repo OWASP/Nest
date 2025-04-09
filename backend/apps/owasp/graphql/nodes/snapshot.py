@@ -17,6 +17,7 @@ class SnapshotNode(GenericEntityNode):
     """Snapshot node."""
 
     key = graphene.String()
+    summary = graphene.String()  # ✅ Added to expose summary
     new_chapters = graphene.List(ChapterNode)
     new_issues = graphene.List(IssueNode)
     new_projects = graphene.List(ProjectNode)
@@ -35,6 +36,10 @@ class SnapshotNode(GenericEntityNode):
     def resolve_key(self, info):
         """Resolve key."""
         return self.key
+
+    def resolve_summary(self, info):
+        """Resolve generated summary of the snapshot."""
+        return self.generate_summary()
 
     def resolve_new_chapters(self, info):
         """Resolve new chapters."""

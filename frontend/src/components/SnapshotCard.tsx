@@ -4,12 +4,19 @@ import { Button } from '@heroui/button'
 import { SnapshotCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 
-const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
+const SnapshotCard = ({ title, button, startAt, endAt, summary }: SnapshotCardProps) => {
   return (
     <Button
       onClick={button.onclick}
       className="group flex h-40 w-full flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
+      {/* Snapshot Summary */}
+      {summary && (
+        <div className="mb-2 w-full text-xs text-gray-500 dark:text-gray-300 text-center">
+          {summary}
+        </div>
+      )}
+
       <div className="text-center">
         <h3 className="max-w-[250px] text-balance text-lg font-semibold text-gray-900 group-hover:text-blue-400 dark:text-white sm:text-xl">
           <p>{title}</p>
