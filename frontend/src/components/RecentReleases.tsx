@@ -1,6 +1,6 @@
 import { faCalendar, faFileCode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Image from 'next/image'
+import Image from "next/image"
 import Link from 'next/link'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
@@ -59,7 +59,12 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(item.publishedAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{item.repositoryName}</span>
+                    <Link
+                        className="text-blue-400 hover:underline"
+                        href={`/repositories/${item?.repositoryName.toLowerCase() || ''}`}
+                    >
+                      <span>{item.repositoryName}</span>
+                    </Link>
                   </div>
                 </div>
               </div>
