@@ -24,7 +24,7 @@ const UsersPage = () => {
   const router = useRouter()
 
   const handleButtonClick = (user: User) => {
-    router.push(`/community/users/${user.key}`)
+    router.push(`/community/members/${user.key}`)
   }
 
   const renderUserCard = (user: User) => {
@@ -55,7 +55,7 @@ const UsersPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for OWASP users..."
+      searchPlaceholder="Search for members..."
       searchQuery={searchQuery}
       totalPages={totalPages}
     >

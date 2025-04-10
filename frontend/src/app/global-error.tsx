@@ -1,9 +1,11 @@
 'use client'
+
 import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
-// import * as Sentry from '@sentry/react'
+import * as Sentry from '@sentry/nextjs'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+
 interface ErrorDisplayProps {
   statusCode: number
   title: string
@@ -67,32 +69,36 @@ export const handleAppError = (error: unknown) => {
       ? error
       : new AppError(500, error instanceof Error ? error.message : ERROR_CONFIGS['500'].message)
 
-  // Log to Sentry
-  // if (appError.statusCode >= 500) {
-  //   Sentry.captureException(error instanceof Error ? error : appError)
-  // }
+  if (appError.statusCode >= 500) {
+    Sentry.captureException(error instanceof Error ? error : appError)
+  }
+
   const errorConfig = ERROR_CONFIGS[appError.statusCode === 404 ? '404' : '500']
 
   addToast({
     title: errorConfig.title,
-    description: errorConfig.message || appError.message,
+    description: appError.message || errorConfig.message,
     timeout: 5000,
     shouldShowTimeoutProgress: true,
   })
 }
-
-// Main error boundary wrapper
+// Error boundary wrapper component
 export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <>{children}</>
-    // <Sentry.ErrorBoundary
-    //   fallback={({ error }) => {
-    //     Sentry.captureException(error)
-    //     const errorConfig = ERROR_CONFIGS['500']
-    //     return <ErrorDisplay {...errorConfig} />
-    //   }}
-    // >
-    //   {children}
-    // </Sentry.ErrorBoundary>
+    <Sentry.ErrorBoundary
+      fallback={({ error }) => {
+        Sentry.captureException(error)
+        const errorConfig = ERROR_CONFIGS['500']
+        return <ErrorDisplay {...errorConfig} />
+      }}
+    >
+      {children}
+    </Sentry.ErrorBoundary>
   )
+}
+
+export default function GlobalError({ error }: { error: Error }) {
+  Sentry.captureException(error)
+  const errorConfig = ERROR_CONFIGS['500']
+  return <ErrorDisplay {...errorConfig} />
 }

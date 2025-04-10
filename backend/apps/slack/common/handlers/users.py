@@ -116,7 +116,7 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over OWASP community users is available at "
-                f"<{get_absolute_url('community/users')}?q={search_query}|{settings.SITE_NAME}>*{NL}"
+                f"<{get_absolute_url('community/members')}?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )
         )

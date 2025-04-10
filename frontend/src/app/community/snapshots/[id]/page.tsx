@@ -12,11 +12,11 @@ import { SnapshotDetailsProps } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIconsGraphql, handleSocialUrls } from 'utils/utility'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams()
@@ -42,6 +42,7 @@ const SnapshotDetailsPage: React.FC = () => {
         color: 'danger',
         variant: 'solid',
       })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError, snapshotKey])

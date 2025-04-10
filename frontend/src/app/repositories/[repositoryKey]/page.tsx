@@ -14,9 +14,9 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
 import { formatDate } from 'utils/dateFormatter'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey } = useParams()
@@ -39,6 +39,7 @@ const RepositoryDetailsPage = () => {
         color: 'danger',
         variant: 'solid',
       })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, repositoryKey])

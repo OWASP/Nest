@@ -110,7 +110,7 @@ describe('Contribute Component', () => {
 
   test('handles pagination for first page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      ...mockContributeData,
+      hits: mockContributeData.issues,
       totalPages: 2,
       currentPage: 1,
     })
@@ -147,7 +147,7 @@ describe('Contribute Component', () => {
     render(<ContributePage />)
 
     await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Search for OWASP issues...')
+      const searchInput = screen.getByPlaceholderText('Search for issues...')
       fireEvent.change(searchInput, { target: { value: '' } })
     })
 

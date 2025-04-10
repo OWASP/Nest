@@ -7,9 +7,9 @@ import { useState, useEffect } from 'react'
 import { GET_CHAPTER_DATA } from 'server/queries/chapterQueries'
 import { ChapterTypeGraphQL } from 'types/chapter'
 import { formatDate } from 'utils/dateFormatter'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -34,6 +34,7 @@ export default function ChapterDetailsPage() {
         color: 'danger',
         variant: 'solid',
       })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, chapterKey])

@@ -17,9 +17,9 @@ import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const UserDetailsPage: React.FC = () => {
   const { userKey } = useParams()
@@ -58,6 +58,7 @@ const UserDetailsPage: React.FC = () => {
         color: 'danger',
         variant: 'solid',
       })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError, userKey])
