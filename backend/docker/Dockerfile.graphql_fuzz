@@ -8,8 +8,18 @@ RUN apk add --no-cache curl jq gcc musl-dev libffi-dev linux-headers
 RUN pip install --no-cache-dir graphqler
 
 WORKDIR /home/owasp
-USER owasp
 
 COPY docker/entrypoint_graphql_fuzz.sh entrypoint.sh
+
+RUN touch /home/owasp/config.toml && \
+    chmod +x /home/owasp/config.toml && \
+    chown owasp:owasp /home/owasp/config.toml
+
+# Create the graphql output dir and give permissions to the owasp user
+RUN mkdir -p /home/owasp/fuzzing_results && \
+    chmod +x /home/owasp/fuzzing_results /home/owasp/entrypoint.sh && \
+    chown owasp:owasp /home/owasp/fuzzing_results
+
+USER owasp
 
 CMD ["/home/owasp/entrypoint.sh"]
