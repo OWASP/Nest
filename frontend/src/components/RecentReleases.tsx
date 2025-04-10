@@ -1,6 +1,6 @@
 import { faCalendar, faFileCode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Image from "next/image"
+import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
