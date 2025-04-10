@@ -38,15 +38,15 @@ export const technologies = [
     section: 'Backend',
     tools: {
       Python: {
-        icon: 'devicon-python-plain',
+        icon: '/images/icons/python.svg',
         url: 'https://www.python.org/',
       },
       Django: {
-        icon: 'devicon-django-plain',
+        icon: '/images/icons/django.svg',
         url: 'https://www.djangoproject.com/',
       },
       PostgreSQL: {
-        icon: 'devicon-postgresql-plain',
+        icon: '/images/icons/postgresql.svg',
         url: 'https://www.postgresql.org/',
       },
     },
@@ -55,15 +55,15 @@ export const technologies = [
     section: 'Frontend',
     tools: {
       Typescript: {
-        icon: 'devicon-typescript-plain',
+        icon: '/images/icons/typescript.svg',
         url: 'https://www.typescriptlang.org/',
       },
-      React: {
-        icon: 'devicon-react-original',
-        url: 'https://reactjs.org/',
+      'Next.js': {
+        icon: '/images/icons/nextjs.svg',
+        url: 'https://nextjs.org/',
       },
       'Tailwind CSS': {
-        icon: 'devicon-tailwindcss-plain',
+        icon: '/images/icons/tailwindcss.svg',
         url: 'https://tailwindcss.com/',
       },
     },
@@ -72,15 +72,15 @@ export const technologies = [
     section: 'Tests',
     tools: {
       Jest: {
-        icon: 'devicon-jest-plain',
+        icon: '/images/icons/jest.svg',
         url: 'https://jestjs.io/',
       },
       PlayWright: {
-        icon: 'devicon-playwright-plain',
+        icon: '/images/icons/playwright.svg',
         url: 'https://playwright.dev/',
       },
       Pytest: {
-        icon: 'devicon-pytest-plain',
+        icon: '/images/icons/pytest.svg',
         url: 'https://docs.pytest.org/',
       },
     },
@@ -89,15 +89,15 @@ export const technologies = [
     section: 'Tools',
     tools: {
       Ansible: {
-        icon: 'devicon-ansible-plain',
+        icon: '/images/icons/ansible.svg',
         url: 'https://www.ansible.com/',
       },
       GitHub: {
-        icon: 'devicon-github-original',
+        icon: '/images/icons/github.svg',
         url: 'https://www.github.com/',
       },
       Docker: {
-        icon: 'devicon-docker-plain',
+        icon: '/images/icons/docker.svg',
         url: 'https://www.docker.com/',
       },
     },
