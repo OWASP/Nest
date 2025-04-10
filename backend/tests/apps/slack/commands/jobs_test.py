@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.slack.commands.jobs import jobs_handler
+from apps.slack.commands.jobs import Jobs
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_JOBS_CHANNEL_ID
 
 EXPECTED_BLOCK_COUNT_JOBS = 3
@@ -30,16 +30,15 @@ class TestJobsHandler:
     )
     def test_jobs_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-
+        jobs_instance = Jobs()
         ack = MagicMock()
-        jobs_handler(ack=ack, command=mock_command, client=mock_client)
+        jobs_instance.handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
         if commands_enabled:
             mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
-
             call_args = mock_client.chat_postMessage.call_args[1]
             assert call_args["channel"] == "C123456"
 
@@ -58,4 +57,4 @@ class TestJobsHandler:
             assert "⚠️ *Disclaimer:" in block2_text
 
             block3_text = blocks[2]["text"]["text"]
-            assert FEEDBACK_CHANNEL_MESSAGE in block3_text
+            assert FEEDBACK_CHANNEL_MESSAGE.strip() in block3_text

@@ -3,11 +3,10 @@ from unittest.mock import MagicMock
 import pytest
 from django.conf import settings
 
-from apps.common.constants import NL
-from apps.slack.commands.sponsor import sponsor_handler
+from apps.slack.commands.sponsor import Sponsor
 
 
-class TestSponsorHandler:
+class TestSponsorCommand:
     @pytest.fixture
     def mock_command(self):
         return {"user_id": "U123456"}
@@ -28,7 +27,8 @@ class TestSponsorHandler:
     def test_sponsor_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         ack = MagicMock()
-        sponsor_handler(ack=ack, command=mock_command, client=mock_client)
+        sponsor_instance = Sponsor()
+        sponsor_instance.handler(ack=ack, command=mock_command, client=mock_client)
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
         if commands_enabled:
@@ -36,5 +36,5 @@ class TestSponsorHandler:
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             assert len(blocks) == 1
             block_text = blocks[0]["text"]["text"]
-            expected_text = f"Coming soon...{NL}"
+            expected_text = "Coming soon..."
             assert block_text == expected_text
