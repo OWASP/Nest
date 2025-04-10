@@ -39,7 +39,7 @@ run:
 	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
 
 fuzz-test-backend:
-	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-fuzz.yaml up --build --remove-orphans
+	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-fuzz.yaml up --build --abort-on-container-exit --remove-orphans
 
 test: \
 	test-nest-app \
