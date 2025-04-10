@@ -23,4 +23,5 @@ export interface Snapshots {
   key: string
   startAt: string
   title: string
+  summary: string
 }
