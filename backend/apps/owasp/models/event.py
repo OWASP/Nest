@@ -107,6 +107,8 @@ class Event(BulkSaveModel, TimestampedModel):
                 # Split the date range into parts
                 date_part, year = dates.rsplit(", ", 1)
                 parts = date_part.split()
+
+                # Extract month and day range
                 month = parts[0]
                 day_range = "".join(parts[1:])
 
