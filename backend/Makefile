@@ -134,6 +134,10 @@ setup:
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
+slack-sync-conversation-list:
+	@echo "Syncing Slack conversation list"
+	@CMD="python manage.py slack_sync_conversation_list" $(MAKE) exec-backend-command
+
 sync-data: \
 	update-data \
 	enrich-data \
