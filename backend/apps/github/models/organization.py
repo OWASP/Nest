@@ -24,7 +24,7 @@ class Organization(
 
     description = models.CharField(verbose_name="Description", max_length=1000, default="")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable representation of the organization.
 
         Returns
@@ -33,7 +33,7 @@ class Organization(
         """
         return f"{self.name}"
 
-    def from_github(self, gh_organization):
+    def from_github(self, gh_organization) -> None:
         """Update the instance based on GitHub organization data.
 
         Args:
@@ -59,12 +59,12 @@ class Organization(
         return set(Organization.objects.values_list("login", flat=True))
 
     @staticmethod
-    def bulk_save(organizations):
+    def bulk_save(organizations) -> None:
         """Bulk save organizations."""
         BulkSaveModel.bulk_save(Organization, organizations)
 
     @staticmethod
-    def update_data(gh_organization, save=True):
+    def update_data(gh_organization, *, save: bool = True) -> "Organization":
         """Update organization data.
 
         Args:

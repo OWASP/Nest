@@ -1,5 +1,7 @@
 """OWASP scraper."""
 
+from __future__ import annotations
+
 import logging
 from urllib.parse import urlparse
 
@@ -8,7 +10,7 @@ from lxml import etree, html
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 MAX_RETRIES = 3
 TIMEOUT = 5, 10
@@ -17,7 +19,7 @@ TIMEOUT = 5, 10
 class OwaspScraper:
     """OWASP scraper."""
 
-    def __init__(self, url):
+    def __init__(self, url: bytes | str) -> None:
         """Create OWASP site scraper."""
         self.page_tree = None
 

@@ -7,13 +7,13 @@ from django.core.management.base import BaseCommand
 from apps.common.open_ai import OpenAi
 from apps.github.models.issue import Issue
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Enrich GitHub issue with AI generated data."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -30,7 +30,7 @@ class Command(BaseCommand):
         parser.add_argument("--update-hint", default=True, required=False, action="store_true")
         parser.add_argument("--update-summary", default=True, required=False, action="store_true")
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         """Handle the command execution.
 
         Args:

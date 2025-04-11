@@ -28,7 +28,7 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
         """
         return f"{self.name} ({self.description})" if self.description else self.name
 
-    def from_github(self, gh_label):
+    def from_github(self, gh_label) -> None:
         """Update the instance based on GitHub label data.
 
         Args:
@@ -51,12 +51,12 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
                 setattr(self, model_field, value)
 
     @staticmethod
-    def bulk_save(labels):
+    def bulk_save(labels) -> None:
         """Bulk save labels."""
         BulkSaveModel.bulk_save(Label, labels)
 
     @staticmethod
-    def update_data(gh_label, save=True):
+    def update_data(gh_label, *, save: bool = True) -> "Label":
         """Update label data.
 
         Args:

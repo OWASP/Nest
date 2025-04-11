@@ -137,12 +137,12 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.pull_requests.order_by("-updated_at").first()
 
     @property
-    def nest_key(self):
+    def nest_key(self) -> str:
         """Return repository Nest key."""
         return f"{self.owner.login}-{self.name}"
 
     @property
-    def path(self):
+    def path(self) -> str:
         """Return repository path."""
         return f"{self.owner.login}/{self.name}"
 
@@ -161,7 +161,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         )
 
     @property
-    def top_languages(self):
+    def top_languages(self) -> list[str]:
         """Return a list of top used languages."""
         return sorted(
             k
@@ -170,7 +170,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         )
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Return repository URL."""
         return f"https://github.com/{self.path}"
 
@@ -182,7 +182,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         languages=None,
         organization=None,
         user=None,
-    ):
+    ) -> None:
         """Update the repository instance based on GitHub repository data.
 
         Args:
@@ -295,8 +295,9 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         languages=None,
         organization=None,
         user=None,
-        save=True,
-    ):
+        *,
+        save: bool = True,
+    ) -> "Repository":
         """Update repository data.
 
         Args:

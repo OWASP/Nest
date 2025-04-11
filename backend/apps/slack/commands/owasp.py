@@ -1,6 +1,7 @@
 """Slack bot owasp command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
@@ -11,7 +12,7 @@ from apps.slack.utils import escape, get_text
 COMMAND = "/owasp"
 
 
-def owasp_handler(ack, command, client):
+def owasp_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /owasp command.
 
     Args:

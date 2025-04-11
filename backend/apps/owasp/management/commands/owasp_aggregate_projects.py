@@ -8,7 +8,7 @@ from apps.owasp.models.project import Project
 class Command(BaseCommand):
     help = "Aggregate OWASP projects data."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -17,7 +17,7 @@ class Command(BaseCommand):
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *_args, **options):
+    def handle(self, *_args, **options) -> None:
         """Handle the command execution.
 
         Args:

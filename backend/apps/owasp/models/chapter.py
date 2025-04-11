@@ -1,5 +1,7 @@
 """OWASP app chapter model."""
 
+from __future__ import annotations
+
 from functools import lru_cache
 
 from django.db import models
@@ -57,7 +59,7 @@ class Chapter(
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Chapter human readable representation."""
         return f"{self.name or self.key}"
 
@@ -72,7 +74,7 @@ class Chapter(
         """Return active chapters count."""
         return IndexBase.get_total_count("chapters", search_filters="idx_is_active:true")
 
-    def from_github(self, repository):
+    def from_github(self, repository) -> None:
         """Update instance based on GitHub repository data.
 
         Args:
@@ -98,7 +100,7 @@ class Chapter(
         self.created_at = repository.created_at
         self.updated_at = repository.updated_at
 
-    def generate_geo_location(self):
+    def generate_geo_location(self) -> None:
         """Add latitude and longitude data based on suggested location or geo string."""
         location = None
         if self.suggested_location and self.suggested_location != "None":
@@ -110,7 +112,9 @@ class Chapter(
             self.latitude = location.latitude
             self.longitude = location.longitude
 
-    def generate_suggested_location(self, open_ai=None, max_tokens=100):
+    def generate_suggested_location(
+        self, open_ai: OpenAi | None = None, max_tokens: int = 100
+    ) -> None:
         """Generate a suggested location using OpenAI.
 
         Args:
@@ -129,7 +133,7 @@ class Chapter(
             suggested_location if suggested_location and suggested_location != "None" else ""
         )
 
-    def get_geo_string(self, include_name=True):
+    def get_geo_string(self, *, include_name: bool = True) -> str:
         """Return a geo string for the chapter.
 
         Args:
@@ -148,7 +152,7 @@ class Chapter(
             delimiter=", ",
         )
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """Save the chapter instance.
 
         Args:
@@ -165,7 +169,7 @@ class Chapter(
         super().save(*args, **kwargs)
 
     @staticmethod
-    def bulk_save(chapters, fields=None):
+    def bulk_save(chapters: list, fields: list | None = None) -> None:
         """Bulk save chapters.
 
         Args:
@@ -176,7 +180,7 @@ class Chapter(
         BulkSaveModel.bulk_save(Chapter, chapters, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, save=True):
+    def update_data(gh_repository, repository, *, save: bool = True) -> Chapter:
         """Update chapter data from GitHub repository.
 
         Args:

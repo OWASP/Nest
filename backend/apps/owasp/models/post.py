@@ -26,7 +26,7 @@ class Post(BulkSaveModel, TimestampedModel):
         return self.title
 
     @staticmethod
-    def bulk_save(posts, fields=None):
+    def bulk_save(posts, fields=None) -> None:
         """Bulk save posts."""
         BulkSaveModel.bulk_save(Post, posts, fields=fields)
 
@@ -36,7 +36,7 @@ class Post(BulkSaveModel, TimestampedModel):
         return Post.objects.order_by("-published_at")
 
     @staticmethod
-    def update_data(data, save=True):
+    def update_data(data, *, save: bool = True) -> "Post":
         """Update post data."""
         url = data.get("url")
 
@@ -51,7 +51,7 @@ class Post(BulkSaveModel, TimestampedModel):
 
         return post
 
-    def from_dict(self, data):
+    def from_dict(self, data) -> None:
         """Update instance based on dict data."""
         published_at = data["published_at"]
         published_at = (

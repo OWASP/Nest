@@ -16,7 +16,7 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
     help = "Fetch OWASP GitHub repository and update relevant entities."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -39,7 +39,7 @@ class Command(BaseCommand):
             help="The OWASP organization's repository name (e.g. Nest, www-project-nest')",
         )
 
-    def handle(self, *_args, **options):
+    def handle(self, *_args, **options) -> None:
         """Handle the command execution.
 
         Args:

@@ -1,5 +1,7 @@
 """OWASP app sponsor models."""
 
+from __future__ import annotations
+
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -56,22 +58,22 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         default=SponsorType.NOT_SPONSOR,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Sponsor human readable representation."""
         return f"{self.name}"
 
     @property
-    def readable_member_type(self):
+    def readable_member_type(self) -> str:
         """Get human-readable member type."""
         return self.MemberType(self.member_type).label
 
     @property
-    def readable_sponsor_type(self):
+    def readable_sponsor_type(self) -> str:
         """Get human-readable sponsor type."""
         return self.SponsorType(self.sponsor_type).label
 
     @staticmethod
-    def bulk_save(sponsors, fields=None):
+    def bulk_save(sponsors: list[Sponsor], fields: list[str] | None = None) -> None:
         """Bulk save sponsors.
 
         Args:
@@ -82,7 +84,7 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         BulkSaveModel.bulk_save(Sponsor, sponsors, fields=fields)
 
     @staticmethod
-    def update_data(data, save=True):
+    def update_data(data: dict, *, save: bool = True) -> Sponsor:
         """Update sponsor data.
 
         Args:
@@ -106,7 +108,7 @@ class Sponsor(BulkSaveModel, TimestampedModel):
 
         return sponsor
 
-    def from_dict(self, data):
+    def from_dict(self, data: dict) -> None:
         """Update instance based on the dictionary data.
 
         Args:

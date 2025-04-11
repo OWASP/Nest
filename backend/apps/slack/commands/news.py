@@ -1,6 +1,7 @@
 """Slack bot news command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL, OWASP_NEWS_URL
 from apps.slack.apps import SlackConfig
@@ -10,7 +11,7 @@ from apps.slack.utils import get_news_data, get_text
 COMMAND = "/news"
 
 
-def news_handler(ack, command, client):
+def news_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /news command.
 
     Args:

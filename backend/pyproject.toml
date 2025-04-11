@@ -88,6 +88,14 @@ filterwarnings = [
 ]
 log_level = "INFO"
 
+[tool.mypy]
+disable_error_code = [
+    "attr-defined",
+    "import-not-found",
+    "import-untyped",
+    "var-annotated",
+]
+
 [tool.ruff]
 line-length = 99
 

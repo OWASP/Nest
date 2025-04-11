@@ -8,7 +8,7 @@ from apps.owasp.index.project import ProjectIndex
 class Command(BaseCommand):
     help = "Update OWASP Nest index replicas."
 
-    def handle(self, *_args, **_options):
+    def handle(self, *_args, **_options) -> None:
         """Update replicas for Algolia indices.
 
         Args:

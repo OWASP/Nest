@@ -16,10 +16,12 @@ from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def sync_repository(gh_repository, organization=None, user=None):
+def sync_repository(
+    gh_repository, organization=None, user=None
+) -> tuple[Organization, Repository]:
     """Sync GitHub repository data.
 
     Args:
