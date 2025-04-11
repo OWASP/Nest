@@ -170,6 +170,42 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
 
+  run-fuzz-tests:
+    name: Run fuzz tests
+    needs:
+      - pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Create custom docker-compose.fuzz.yaml
+        run: |
+          cat << EOF > docker-compose.fuzz.yaml
+                  services:
+                    graphql:
+                      container_name: nest-graphqler-test
+                      image: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-graphql:latest
+                      depends_on:
+                        backend:
+                          condition: service_healthy
+                    backend:
+                      container_name: nest-fuzz-test-backend
+                      image: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-backend:latest
+                      env_file: backend/fuzz_tests/.env
+                      ports:
+                        - 127.0.0.1:8000:8000
+                      healthcheck:
+                        test: sh -c 'wget -O- http://127.0.0.1:8000/api/v1'
+                        interval: 10s
+                        timeout: 5s
+                        retries: 20
+                        start_period: 400s
+          EOF
+
+      - name: Run fuzz tests
+        run: docker compose -f docker-compose.fuzz.yaml up --abort-on-container-exit
+
   scan-code:
     name: Run Code Scan
     needs:
