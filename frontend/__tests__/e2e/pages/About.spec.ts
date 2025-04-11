@@ -82,6 +82,6 @@ test.describe('About Page', () => {
     await page.getByRole('button', { name: 'View Profile' }).first().click()
     const newPage = await pagePromise
     await newPage.waitForLoadState()
-    expect(newPage.url()).toContain('/community/members/')
+    expect(newPage.url()).toContain('/members/')
   })
 })

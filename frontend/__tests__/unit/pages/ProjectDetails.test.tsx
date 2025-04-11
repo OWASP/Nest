@@ -130,7 +130,7 @@ describe('ProjectDetailsPage', () => {
 
     screen.getByText('Contributor 1').closest('button')?.click()
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/community/members/contributor1')
+    expect(mockRouter.push).toHaveBeenCalledWith('/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {

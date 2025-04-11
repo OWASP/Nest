@@ -24,7 +24,7 @@ class Command(BaseCommand):
             {"path": "/projects/contribute", "changefreq": "daily", "priority": 0.6},
         ],
         "users": [
-            {"path": "/community/members", "changefreq": "daily", "priority": 0.7},
+            {"path": "/members", "changefreq": "daily", "priority": 0.7},
         ],
     }
 
@@ -150,7 +150,7 @@ class Command(BaseCommand):
         routes.extend(
             [
                 {
-                    "path": f"/community/members/{user.login}",
+                    "path": f"/members/{user.login}",
                     "changefreq": "weekly",
                     "priority": 0.7,
                 }

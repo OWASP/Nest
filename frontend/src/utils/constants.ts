@@ -7,9 +7,9 @@ export const headerLinks: Link[] = [
     text: 'Community',
     submenu: [
       { text: 'Chapters', href: '/chapters' },
-      { text: 'Members', href: '/community/members' },
+      { text: 'Members', href: '/members' },
       { text: 'Organizations', href: '/organizations' },
-      { text: 'Snapshots', href: '/community/snapshots' },
+      { text: 'Snapshots', href: '/snapshots' },
     ],
   },
   {

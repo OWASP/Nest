@@ -179,8 +179,7 @@ const LeaderData = ({ username }: { username: string }) => {
       button={{
         label: 'View Profile',
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        onclick: () =>
-          window.open(`/community/members/${username}`, '_blank', 'noopener,noreferrer'),
+        onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
       }}
       email={''}
       location=""
