@@ -15,7 +15,7 @@ class RepositoryQuery(BaseQuery):
         repository_key=graphene.String(required=True),
     )
 
-    organization_repositories = graphene.List(
+    repositories = graphene.List(
         RepositoryNode,
         organization=graphene.String(required=True),
         limit=graphene.Int(default_value=12),
@@ -38,8 +38,8 @@ class RepositoryQuery(BaseQuery):
         except Repository.DoesNotExist:
             return None
 
-    def resolve_organization_repositories(root, info, organization, limit):
-        """Resolve repositories for an organization.
+    def resolve_repositories(root, info, organization, limit):
+        """Resolve repositories.
 
         Args:
             root (Any): The root query object.
@@ -51,6 +51,12 @@ class RepositoryQuery(BaseQuery):
             QuerySet: Queryset containing the repositories for the organization.
 
         """
-        return Repository.objects.filter(organization__login=organization).order_by(
-            "-stars_count"
-        )[:limit]
+        return (
+            Repository.objects.select_related(
+                "organization",
+            )
+            .filter(
+                organization__login=organization,
+            )
+            .order_by("-stars_count")[:limit]
+        )

@@ -54,11 +54,11 @@ export interface DetailsCardProps {
 export interface UserCardProps {
   avatar: string
   button: ButtonType
-  company: string
   className?: string
+  company: string
   email: string
-  location: string
   followers_count?: number
+  location: string
   name: string
 }
 

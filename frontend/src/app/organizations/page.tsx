@@ -57,7 +57,7 @@ const OrganizationPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for GitHub organizations..."
+      searchPlaceholder="Search for organizations..."
       searchQuery={searchQuery}
       totalPages={totalPages}
     >

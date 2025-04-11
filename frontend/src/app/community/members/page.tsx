@@ -55,7 +55,7 @@ const UsersPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for OWASP users..."
+      searchPlaceholder="Search for members..."
       searchQuery={searchQuery}
       totalPages={totalPages}
     >

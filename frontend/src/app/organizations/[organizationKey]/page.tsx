@@ -36,7 +36,7 @@ const OrganizationDetailsPage = () => {
       setIssues(graphQLData?.recentIssues)
       setPullRequests(graphQLData?.recentPullRequests)
       setReleases(graphQLData?.recentReleases)
-      setRepositories(graphQLData?.organizationRepositories)
+      setRepositories(graphQLData?.repositories)
       setTopContributors(graphQLData?.topContributors)
       setIsLoading(false)
     }
@@ -60,7 +60,7 @@ const OrganizationDetailsPage = () => {
   if (!isLoading && !graphQLData) {
     return (
       <ErrorDisplay
-        message="Sorry, the Organization you're looking for doesn't exist"
+        message="Sorry, the organization you're looking for doesn't exist"
         statusCode={404}
         title="Organization not found"
       />

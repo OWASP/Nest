@@ -1,6 +1,4 @@
 export interface OrganizationTypeAlgolia {
-  key: string
-  objectID: string
   avatar_url: string
   collaborators_count: number
   company?: string
@@ -8,9 +6,11 @@ export interface OrganizationTypeAlgolia {
   description?: string
   email?: string
   followers_count: number
+  key: string
   location?: string
   login: string
   name: string
+  objectID: string
   updated_at: number
   url: string
 }

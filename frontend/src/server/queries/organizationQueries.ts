@@ -29,7 +29,7 @@ export const GET_ORGANIZATION_DATA = gql`
       name
       avatarUrl
     }
-    recentPullRequests(limit: 5, organization: $login) {
+    recentPullRequests(limit: 5, organization: $login, distinct: true) {
       title
       createdAt
       url
@@ -49,7 +49,7 @@ export const GET_ORGANIZATION_DATA = gql`
         avatarUrl
       }
     }
-    organizationRepositories(organization: $login, limit: 12) {
+    repositories(organization: $login, limit: 12) {
       name
       url
       contributorsCount
@@ -58,7 +58,7 @@ export const GET_ORGANIZATION_DATA = gql`
       starsCount
       key
     }
-    recentIssues(limit: 5, organization: $login) {
+    recentIssues(limit: 5, organization: $login, distinct: true) {
       author {
         avatarUrl
         login

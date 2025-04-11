@@ -36,16 +36,21 @@ class IssueQuery(BaseQuery):
         """
         queryset = Issue.objects.select_related(
             "author",
-            "repository",
         ).order_by(
             "-created_at",
         )
 
         if login:
-            queryset = queryset.filter(author__login=login)
+            queryset = queryset.filter(
+                author__login=login,
+            )
 
         if organization:
-            queryset = queryset.filter(repository__organization__login=organization)
+            queryset = queryset.select_related(
+                "repository__organization",
+            ).filter(
+                repository__organization__login=organization,
+            )
 
         if distinct:
             latest_issue_per_author = (

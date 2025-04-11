@@ -15,14 +15,6 @@ class OrganizationQuery(BaseQuery):
         login=graphene.String(required=True),
     )
 
-    organizations = graphene.List(
-        OrganizationNode,
-        search=graphene.String(),
-        limit=graphene.Int(default_value=6),
-        offset=graphene.Int(default_value=0),
-        order_by=graphene.String(default_value="-followers_count"),
-    )
-
     def resolve_organization(root, info, login):
         """Resolve organization by login.
 

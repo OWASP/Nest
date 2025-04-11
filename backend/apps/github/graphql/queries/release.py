@@ -41,12 +41,16 @@ class ReleaseQuery(BaseQuery):
         ).order_by("-published_at")
 
         if login:
-            queryset = queryset.filter(
+            queryset = queryset.select_related(
+                "author",
+            ).filter(
                 author__login=login,
             )
 
         if organization:
-            queryset = queryset.filter(
+            queryset = queryset.select_related(
+                "repository__organization",
+            ).filter(
                 repository__organization__login=organization,
             )
 
