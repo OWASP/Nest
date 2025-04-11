@@ -41,6 +41,12 @@ repos:
     rev: v1.15.0
     hooks:
       - id: mypy
+        additional_dependencies:
+          - types-jsonschema
+          - types-lxml
+          - types-python-dateutil
+          - types-PyYAML
+          - types-requests
         args:
           - --exclude
           - backend/tests

@@ -77,11 +77,13 @@ def natural_date(value: int | str) -> str:
 
     """
     if isinstance(value, str):
-        value = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc)  # type: ignore[assignment]
+        dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     elif isinstance(value, int):
-        value = datetime.fromtimestamp(value, tz=timezone.utc)  # type: ignore[assignment]
+        dt = datetime.fromtimestamp(value, tz=timezone.utc)
+    else:
+        dt = value
 
-    return naturaltime(value)
+    return naturaltime(dt)
 
 
 def natural_number(value, unit=None):

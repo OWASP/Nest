@@ -92,9 +92,14 @@ log_level = "INFO"
 disable_error_code = [
     "attr-defined",
     "import-not-found",
-    "import-untyped",
     "var-annotated",
 ]
+ignore_missing_imports = true
+mypy_path = "backend"
+
+[[tool.mypy.overrides]]
+module = "backend.apps.*.migrations.*"
+disable_error_code = ["var-annotated"]
 
 [tool.ruff]
 line-length = 99

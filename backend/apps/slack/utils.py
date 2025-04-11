@@ -6,11 +6,14 @@ import logging
 import re
 from functools import lru_cache
 from html import escape as escape_html
+from typing import TYPE_CHECKING
 from urllib.parse import urljoin
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 import requests
 import yaml
-from django.db.models import QuerySet  # noqa: TC002
 from django.utils import timezone
 from lxml import html
 from requests.exceptions import RequestException

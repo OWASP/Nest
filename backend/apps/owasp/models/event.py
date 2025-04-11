@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import date  # noqa: TC003
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import date
 
 from dateutil import parser
 from django.db import models
@@ -109,7 +112,7 @@ class Event(BulkSaveModel, TimestampedModel):
         if "-" in dates and "," in dates:
             try:
                 # Split the date range into parts
-                date_part, year = dates.rsplit(", ", 1)
+                date_part, year_part = dates.rsplit(", ", 1)
                 parts = date_part.split()
 
                 # Extract month and day range
@@ -120,7 +123,7 @@ class Event(BulkSaveModel, TimestampedModel):
                 end_day = int(day_range.split("-")[-1])
 
                 # Parse the year
-                year = int(year.strip())  # type: ignore[assignment]
+                year = int(year_part.strip())
 
                 # Use the start_date to determine the month if provided
                 if start_date:
@@ -128,8 +131,7 @@ class Event(BulkSaveModel, TimestampedModel):
                     month = start_date_parsed.strftime("%B")  # Full month name (e.g., "May")
 
                 # Parse the full end date string
-                end_date_str = f"{month} {end_day}, {year}"
-                return parser.parse(end_date_str).date()
+                return parser.parse(f"{month} {end_day}, {year}").date()
             except (ValueError, IndexError, AttributeError):
                 return None
 
@@ -178,7 +180,7 @@ class Event(BulkSaveModel, TimestampedModel):
                 "Partner": Event.Category.PARTNER,
             }.get(category, Event.Category.OTHER),
             "description": data.get("optional-text", ""),
-            "end_date": Event.parse_dates(data.get("dates", ""), data.get("start-date")),  # type: ignore[arg-type]
+            "end_date": Event.parse_dates(data.get("dates", ""), data["start-date"]),
             "name": data["name"],
             "start_date": parser.parse(data["start-date"]).date()
             if isinstance(data["start-date"], str)
