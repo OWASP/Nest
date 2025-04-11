@@ -39,9 +39,11 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
       ? ` in ${(contributor as TopContributorsTypeGraphql).projectName}`
       : ''
 
+  const projectName = !isAlgolia ? (contributor as TopContributorsTypeGraphql).projectName : null
+
   return (
     <Tooltip
-      id={`avatar-tooltip-${login}-${uniqueKey}`}
+      id={`avatar-tooltip-${login}-${uniqueKey}-${projectName || 'unknown-project'}`}
       content={`${contributionsCount} contributions${repositoryInfo} by ${displayName}`}
       delay={100}
       closeDelay={100}
