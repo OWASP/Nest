@@ -92,7 +92,17 @@ class CommandBase:
             Template: The Jinja2 template object.
 
         """
-        return env.get_template(self.get_template_file_name())
+        template_name = self.get_template_file_name()
+        try:
+            return env.get_template(template_name)
+        except Exception as e:
+            logger.error(
+                "Failed to load template '%s' for command '%s': %s",
+                template_name,
+                self.get_command(),
+                str(e),
+            )
+            raise
 
     def get_template_file_name(self):
         """Get the template file name."""
@@ -100,7 +110,12 @@ class CommandBase:
 
     def config_command(self):
         """Command configuration."""
-        SlackConfig.app.command(self.get_command())(self.handler)
+        if SlackConfig.app is not None:
+            SlackConfig.app.command(self.get_command())(self.handler)
+        else:
+            logger.warning(
+                "SlackConfig.app is None. Command '%s' not registered.", self.get_command()
+            )
 
     def handler(self, ack, command, client):
         """Handle the Slack command.
