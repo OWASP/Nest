@@ -185,11 +185,11 @@ jobs:
       - name: Create .env file for fuzz tests
         run: |
           touch backend/fuzz_tests/.env
-          echo "DJANGO_DB_HOST=${{ secrets.DJANGO_DB_HOST }}" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_NAME=${{ secrets.DJANGO_DB_NAME }}" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_HOST=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_NAME=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_PASSWORD=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_PORT=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_USER=None" >> backend/fuzz_tests/.env
           echo "DJANGO_SETTINGS_MODULE=settings.fuzz" >> backend/fuzz_tests/.env
           echo "DJANGO_CONFIGURATION=Fuzz" >> backend/fuzz_tests/.env
           echo "DJANGO_ALGOLIA_APPLICATION_ID=None" >> backend/fuzz_tests/.env
