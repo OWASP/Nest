@@ -58,8 +58,8 @@ const DetailsCard = ({
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
-                <div key={detail.label} className="pb-1">
-                  <strong>{detail.label}:</strong>{' '}
+                <div key={detail.label} className="flex flex-row gap-1 pb-1">
+                  <strong>{detail.label}:</strong>
                   <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
               ) : (
