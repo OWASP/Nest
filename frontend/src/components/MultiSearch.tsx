@@ -2,10 +2,10 @@ import {
   faSearch,
   faTimes,
   faUser,
-  faCalendarAlt,
-  faLocationPin,
+  faCalendar,
   faFolder,
   faBuilding,
+  faLocationDot,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { debounce } from 'lodash'
@@ -36,7 +36,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   } | null>(null)
   const router = useRouter()
   const pageCount = 1
-  const suggestionCount = 5
+  const suggestionCount = 3
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -213,9 +213,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
       case 'chapters':
-        return faLocationPin
+        return faLocationDot
       case 'events':
-        return faCalendarAlt
+        return faCalendar
       case 'organizations':
         return faBuilding
       case 'projects':
