@@ -40,7 +40,7 @@ const ItemCardList = ({
                 {showAvatar && (
                   <Link
                     className="flex-shrink-0 text-blue-400 hover:underline"
-                    href={`/community/users/${item?.author?.login}`}
+                    href={`/community/members/${item?.author?.login}`}
                   >
                     <Image
                       height={24}

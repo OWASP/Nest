@@ -83,7 +83,7 @@ const ChaptersPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for OWASP chapters..."
+      searchPlaceholder="Search for chapters..."
       searchQuery={searchQuery}
       totalPages={totalPages}
     >

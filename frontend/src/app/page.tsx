@@ -142,7 +142,7 @@ export default function Home() {
               eventData={data?.upcomingEvents}
               isLoaded={true}
               placeholder="Search the OWASP community"
-              indexes={['chapters', 'projects', 'users']}
+              indexes={['chapters', 'organizations', 'projects', 'users']}
             />
           </div>
         </div>

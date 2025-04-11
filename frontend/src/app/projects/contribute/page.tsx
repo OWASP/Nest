@@ -77,7 +77,7 @@ const ContributePage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for OWASP issues..."
+      searchPlaceholder="Search for issues..."
       searchQuery={searchQuery}
       totalPages={totalPages}
     >

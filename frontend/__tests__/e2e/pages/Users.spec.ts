@@ -20,7 +20,7 @@ test.describe('Users Page', () => {
         path: '/',
       },
     ])
-    await page.goto('/community/users')
+    await page.goto('/community/members')
   })
 
   test('renders user data correctly', async ({ page }) => {
@@ -35,7 +35,7 @@ test.describe('Users Page', () => {
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/community/users')
+    await page.goto('/community/members')
     await expect(page.getByText('No Users Found')).toBeVisible()
   })
 
@@ -52,6 +52,6 @@ test.describe('Users Page', () => {
     })
     await userButton.waitFor({ state: 'visible' })
     await userButton.click()
-    await expect(page).toHaveURL('community/users/user_1')
+    await expect(page).toHaveURL('community/members/user_1')
   })
 })

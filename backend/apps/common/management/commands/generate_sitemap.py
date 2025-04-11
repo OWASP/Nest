@@ -24,7 +24,7 @@ class Command(BaseCommand):
             {"path": "/projects/contribute", "changefreq": "daily", "priority": 0.6},
         ],
         "users": [
-            {"path": "/community/users", "changefreq": "daily", "priority": 0.7},
+            {"path": "/community/members", "changefreq": "daily", "priority": 0.7},
         ],
     }
 
@@ -149,7 +149,11 @@ class Command(BaseCommand):
 
         routes.extend(
             [
-                {"path": f"/community/users/{user.login}", "changefreq": "weekly", "priority": 0.7}
+                {
+                    "path": f"/community/members/{user.login}",
+                    "changefreq": "weekly",
+                    "priority": 0.7,
+                }
                 for user in indexable_users
             ]
         )
