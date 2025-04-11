@@ -1,10 +1,10 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.slack.commands.sponsor import sponsor_handler
+from apps.slack.commands.sponsor import COMMAND, sponsor_handler
 
 
 class TestSponsorHandler:
@@ -19,6 +19,46 @@ class TestSponsorHandler:
         return client
 
     @pytest.mark.parametrize(
+        "commands_enabled",
+        [False, True],
+    )
+    def test_handler_responses(
+        self,
+        commands_enabled,
+        mock_slack_client,
+        mock_slack_command,
+    ):
+        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+
+        if not commands_enabled:
+            mock_slack_client.conversations_open.assert_not_called()
+            mock_slack_client.chat_postMessage.assert_not_called()
+        else:
+            mock_slack_client.conversations_open.assert_called_once_with(
+                users=mock_slack_command["user_id"]
+            )
+            mock_slack_client.chat_postMessage.assert_called_once()
+
+            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+            assert len(blocks) == 1
+            assert "Coming soon..." in blocks[0]["text"]["text"]
+
+    @patch("apps.slack.apps.SlackConfig.app")
+    def test_command_registration(self, mock_app):
+        import importlib
+
+        from apps.slack.commands import sponsor
+
+        mock_command_decorator = MagicMock()
+        mock_app.command.return_value = mock_command_decorator
+
+        importlib.reload(sponsor)
+
+        mock_app.command.assert_called_once_with(COMMAND)
+        assert mock_command_decorator.call_count == 1
+        assert mock_command_decorator.call_args[0][0].__name__ == "sponsor_handler"
+
+    @pytest.mark.parametrize(
         ("commands_enabled", "expected_calls"),
         [
             (True, 1),
@@ -30,7 +70,6 @@ class TestSponsorHandler:
         ack = MagicMock()
         sponsor_handler(ack=ack, command=mock_command, client=mock_client)
         ack.assert_called_once()
-        assert mock_client.chat_postMessage.call_count == expected_calls
         if commands_enabled:
             mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]

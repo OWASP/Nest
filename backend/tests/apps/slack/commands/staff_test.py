@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import OWASP_WEBSITE_URL
-from apps.slack.commands.staff import staff_handler
+from apps.slack.commands.staff import COMMAND, staff_handler
 
 FAILED_STAFF_DATA_ERROR_MESSAGE = "Failed to get OWASP Foundation staff data."
 
@@ -84,3 +84,18 @@ class TestStaffHandler:
                 channel=mock_slack_command["user_id"],
                 text=FAILED_STAFF_DATA_ERROR_MESSAGE,
             )
+
+    @patch("apps.slack.apps.SlackConfig.app")
+    def test_command_registration(self, mock_app):
+        import importlib
+
+        from apps.slack.commands import staff
+
+        mock_command_decorator = MagicMock()
+        mock_app.command.return_value = mock_command_decorator
+
+        importlib.reload(staff)
+
+        mock_app.command.assert_called_once_with(COMMAND)
+        assert mock_command_decorator.call_count == 1
+        assert mock_command_decorator.call_args[0][0].__name__ == "staff_handler"

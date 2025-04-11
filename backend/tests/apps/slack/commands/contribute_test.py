@@ -3,7 +3,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.contribute import contribute_handler
+from apps.slack.commands.contribute import COMMAND, contribute_handler
+
+get_blocks_path = "apps.slack.commands.contribute.get_blocks"
+no_issues_found_text = "*No issues found*"
 
 
 @pytest.fixture(autouse=True)
@@ -27,41 +30,25 @@ class TestContributeHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture(autouse=True)
-    def mock_get_contributions(self):
-        with patch("apps.owasp.api.search.issue.get_issues") as mock:
-            mock.return_value = {"hits": [], "nbPages": 1}
+    @pytest.fixture
+    def mock_contribute_blocks(self):
+        with patch(get_blocks_path) as mock:
+            mock.return_value = [
+                {"type": "section", "text": {"type": "mrkdwn", "text": no_issues_found_text}}
+            ]
             yield mock
 
-    @pytest.fixture(autouse=True)
-    def mock_issue_active_contribute_count(self):
-        with patch(
-            "apps.github.models.issue.Issue.open_issues_count", new_callable=MagicMock
-        ) as mock:
-            mock.return_value = 10  # Example value
-            yield mock
-
-    @pytest.mark.parametrize(
-        ("commands_enabled", "command_text", "expected_calls"),
-        [
-            (True, "", 1),
-            (True, "search term", 1),
-            (True, "-h", 1),
-            (False, "", 0),
-        ],
-    )
-    def test_contribute_handler(
-        self, mock_client, mock_command, commands_enabled, command_text, expected_calls
-    ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        mock_command["text"] = command_text
+    def test_handler_disabled(self, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = False
 
         contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
-        assert mock_client.chat_postMessage.call_count == expected_calls
+        mock_client.conversations_open.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
 
-    def test_contribute_handler_with_results(
-        self, mock_get_contributions, mock_client, mock_command
+    @patch("apps.slack.commands.contribute.get_contributions")
+    def test_handler_default(
+        self, mock_get_contributions, mock_command, mock_client, mock_contribute_blocks
     ):
         settings.SLACK_COMMANDS_ENABLED = True
         mock_get_contributions.return_value = {
@@ -79,6 +66,95 @@ class TestContributeHandler:
 
         contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+        assert mock_contribute_blocks.call_count == 1
+        assert mock_contribute_blocks.call_args.kwargs["search_query"] == ""
+
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-        assert any("Test Contribution" in str(block) for block in blocks)
-        assert any("Test Project" in str(block) for block in blocks)
+        text = "".join(str(block) for block in blocks)
+        assert no_issues_found_text in text
+
+    def test_handler_with_search_term(self, mock_command, mock_client, mock_contribute_blocks):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "search term"
+
+        contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+        assert mock_contribute_blocks.call_count == 1
+        assert mock_contribute_blocks.call_args.kwargs["search_query"] == "search term"
+
+    def test_handler_with_start_flag(self, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "--start"
+
+        with patch(get_blocks_path) as mock_blocks:
+            mock_blocks.return_value = [
+                {"type": "section", "text": {"type": "mrkdwn", "text": no_issues_found_text}}
+            ]
+            contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        text = "".join(str(block) for block in blocks)
+        assert no_issues_found_text in text
+
+    def test_handler_with_advanced_flag(self, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "--advanced"
+
+        with patch(get_blocks_path) as mock_blocks:
+            mock_blocks.return_value = [
+                {"type": "section", "text": {"type": "mrkdwn", "text": no_issues_found_text}}
+            ]
+            contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+    def test_handler_with_invalid_flag(self, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "--invalid"
+
+        with patch(get_blocks_path) as mock_blocks:
+            mock_blocks.return_value = [
+                {"type": "section", "text": {"type": "mrkdwn", "text": no_issues_found_text}}
+            ]
+            contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+    def test_handler_with_help_flag(self, mock_command, mock_client):
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "-h"
+
+        with patch(get_blocks_path) as mock_blocks:
+            mock_blocks.return_value = [
+                {"type": "section", "text": {"type": "mrkdwn", "text": "Help information"}}
+            ]
+            contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        mock_client.chat_postMessage.assert_called_once()
+
+    @patch("apps.slack.apps.SlackConfig.app")
+    def test_command_registration(self, mock_app):
+        import importlib
+
+        from apps.slack.commands import contribute
+
+        mock_command_decorator = MagicMock()
+        mock_app.command.return_value = mock_command_decorator
+
+        importlib.reload(contribute)
+
+        mock_app.command.assert_called_once_with(COMMAND)
+        assert mock_command_decorator.call_count == 1
+        assert mock_command_decorator.call_args[0][0].__name__ == "contribute_handler"

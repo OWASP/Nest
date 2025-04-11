@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from github.GithubException import BadCredentialsException
 
 from apps.github.management.commands.github_update_owasp_organization import (
     Chapter,
@@ -43,6 +44,21 @@ def mock_gh_repo():
     repo.name = "test-repo"
     repo.html_url = "https://github.com/OWASP/test-repo"
     return repo
+
+
+@mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+@mock.patch("apps.github.management.commands.github_update_owasp_organization.github.Github")
+def test_handle_with_bad_credentials(mock_github, command):
+    """Test handling of bad GitHub credentials."""
+    mock_github.side_effect = BadCredentialsException(401, {})
+
+    with mock.patch(
+        "apps.github.management.commands.github_update_owasp_organization.logger"
+    ) as mock_logger:
+        command.handle()
+        mock_logger.warning.assert_called_once_with(
+            "Invalid GitHub token. Please create and update .env file with a valid token."
+        )
 
 
 @pytest.mark.parametrize(
@@ -121,9 +137,11 @@ def test_handle(
 
         paginated_repos = PaginatedListMock(mock_repos)
         mock_org.get_repos.return_value = paginated_repos
+        mock_org.public_repos = len(mock_repos)
 
     mock_sync_repository.return_value = (None, Repository())
     mock_repository = Repository()
+    mock_repository.id = 123
 
     with (
         mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
@@ -142,7 +160,14 @@ def test_handle(
         mock_chapter_update.return_value = mock_repository
         mock_committee_update.return_value = mock_repository
 
-        mock_project_objects.all.return_value = []
+        if repository_name and repository_name.startswith("www-project-"):
+            mock_project = mock.Mock()
+            mock_project.owasp_repository = mock_repository
+            mock_project.repositories = mock.Mock()
+            mock_project_objects.all.return_value = [mock_project]
+        else:
+            mock_project_objects.all.return_value = []
+
         mock_chapter_objects.all.return_value = []
         mock_committee_objects.all.return_value = []
         mock_repository_objects.filter.return_value.count.return_value = 1
@@ -154,6 +179,10 @@ def test_handle(
 
         if repository_name:
             mock_org.get_repo.assert_called_once_with(repository_name)
+
+            if repository_name.startswith("www-project-"):
+                assert mock_project.repositories.add.called
+                mock_project.repositories.add.assert_called_once_with(mock_repository)
         else:
             mock_org.get_repos.assert_called_once_with(
                 type="public", sort="created", direction="desc"
@@ -172,3 +201,4 @@ def test_handle(
         mock_project_bulk_save.assert_called_once()
         mock_chapter_bulk_save.assert_called_once()
         mock_committee_bulk_save.assert_called_once()
+        mock_gh_client.close.assert_called_once()
