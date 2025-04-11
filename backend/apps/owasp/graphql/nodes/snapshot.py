@@ -22,6 +22,7 @@ class SnapshotNode(GenericEntityNode):
     new_projects = graphene.List(ProjectNode)
     new_releases = graphene.List(ReleaseNode)
     new_users = graphene.List(UserNode)
+    summary = graphene.String()
 
     class Meta:
         model = Snapshot
@@ -55,3 +56,7 @@ class SnapshotNode(GenericEntityNode):
     def resolve_new_users(self, info):
         """Resolve recent new users."""
         return self.new_users.order_by("-created_at")
+
+    def resolve_summary(self, info):
+        """Resolve summary of the snapshot."""
+        return self.generate_summary()

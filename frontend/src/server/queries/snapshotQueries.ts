@@ -63,6 +63,7 @@ export const GET_COMMUNITY_SNAPSHOTS = gql`
       title
       startAt
       endAt
+      summary
     }
   }
 `
