@@ -49,10 +49,10 @@ test.describe('About Page', () => {
       'Ansible',
       'Docker',
       'Jest',
+      'Next.js',
       'PlayWright',
       'PostgreSQL',
       'Pytest',
-      'React',
       'Tailwind CSS',
       'Typescript',
     ]

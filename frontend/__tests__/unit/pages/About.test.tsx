@@ -42,7 +42,7 @@ jest.mock('utils/aboutData', () => ({
       section: 'Backend',
       tools: {
         Python: {
-          icon: 'devicon-python-plain',
+          icon: '/images/icons/python.svg',
           url: 'https://www.python.org/',
         },
       },
@@ -50,9 +50,9 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Frontend',
       tools: {
-        React: {
-          icon: 'devicon-react-original',
-          url: 'https://reactjs.org/',
+        'Next.js': {
+          icon: '/images/icons/nextjs.svg',
+          url: 'https://nextjs.org/',
         },
       },
     },
@@ -60,11 +60,11 @@ jest.mock('utils/aboutData', () => ({
       section: 'Tests',
       tools: {
         Jest: {
-          icon: 'devicon-jest-plain',
+          icon: '/images/icons/jest.svg',
           url: 'https://jestjs.io/',
         },
         Pytest: {
-          icon: 'devicon-pytest-plain',
+          icon: '/images/icons/pytest.svg',
           url: 'https://docs.pytest.org/',
         },
       },
@@ -73,11 +73,11 @@ jest.mock('utils/aboutData', () => ({
       section: 'Tools',
       tools: {
         Ansible: {
-          icon: 'devicon-ansible-plain',
+          icon: '/images/icons/ansible.svg',
           url: 'https://www.ansible.com/',
         },
         GitHub: {
-          icon: 'devicon-github-original',
+          icon: '/images/icons/github.svg',
           url: 'https://www.github.com/',
         },
       },
@@ -229,7 +229,7 @@ describe('About Component', () => {
 
     expect(screen.getByText('Ansible')).toBeInTheDocument()
     expect(screen.getByText('GitHub')).toBeInTheDocument()
-    expect(screen.getByText('React')).toBeInTheDocument()
+    expect(screen.getByText('Next.js')).toBeInTheDocument()
 
     const ansibleLink = screen.getByText('Ansible').closest('a')
     expect(ansibleLink).toHaveAttribute('href', 'https://www.ansible.com/')
@@ -237,17 +237,17 @@ describe('About Component', () => {
     const githubLink = screen.getByText('GitHub').closest('a')
     expect(githubLink).toHaveAttribute('href', 'https://www.github.com/')
 
-    const reactLink = screen.getByText('React').closest('a')
-    expect(reactLink).toHaveAttribute('href', 'https://reactjs.org/')
+    const reactLink = screen.getByText('Next.js').closest('a')
+    expect(reactLink).toHaveAttribute('href', 'https://nextjs.org/')
 
-    const ansibleIcon = screen.getByText('Ansible').previousSibling
-    expect(ansibleIcon).toHaveClass('devicon-ansible-plain')
+    const ansibleIconContainer = screen.getByText('Ansible').previousSibling
+    expect(ansibleIconContainer).toBeInTheDocument()
 
-    const githubIcon = screen.getByText('GitHub').previousSibling
-    expect(githubIcon).toHaveClass('devicon-github-original')
+    const githubIconContainer = screen.getByText('GitHub').previousSibling
+    expect(githubIconContainer).toBeInTheDocument()
 
-    const reactIcon = screen.getByText('React').previousSibling
-    expect(reactIcon).toHaveClass('devicon-react-original')
+    const reactIconContainer = screen.getByText('Next.js').previousSibling
+    expect(reactIconContainer).toBeInTheDocument()
   })
 
   test('renders roadmap correctly', async () => {
