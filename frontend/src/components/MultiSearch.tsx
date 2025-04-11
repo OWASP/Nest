@@ -5,6 +5,7 @@ import {
   faCalendarAlt,
   faLocationPin,
   faFolder,
+  faBuilding,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { debounce } from 'lodash'
@@ -14,6 +15,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { EventType } from 'types/event'
+import { OrganizationTypeAlgolia } from 'types/organization'
 import { ProjectTypeAlgolia } from 'types/project'
 import { MultiSearchBarProps, Suggestion } from 'types/search'
 import { User } from 'types/user'
@@ -50,6 +52,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 hits: data.hits as
                   | ChapterTypeAlgolia[]
                   | EventType[]
+                  | OrganizationTypeAlgolia[]
                   | ProjectTypeAlgolia[]
                   | User[],
                 totalPages: data.totalPages || 0,
@@ -83,7 +86,15 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [debouncedSearch])
 
   const handleSuggestionClick = useCallback(
-    (suggestion: ChapterTypeAlgolia | ProjectTypeAlgolia | User | EventType, indexName: string) => {
+    (
+      suggestion:
+        | ChapterTypeAlgolia
+        | ProjectTypeAlgolia
+        | User
+        | EventType
+        | OrganizationTypeAlgolia,
+      indexName: string
+    ) => {
       setSearchQuery(suggestion.name ?? '')
       setShowSuggestions(false)
 
@@ -94,11 +105,17 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         case 'events':
           window.open((suggestion as EventType).url, '_blank')
           break
+        case 'organizations':
+          // Use type guard to safely access login property
+          if ('login' in suggestion && suggestion.login) {
+            router.push(`/organizations/${suggestion.login}`)
+          }
+          break
         case 'projects':
           router.push(`/projects/${suggestion.key}`)
           break
         case 'users':
-          router.push(`/community/users/${suggestion.key}`)
+          router.push(`/community/members/${suggestion.key}`)
           break
       }
     },
@@ -114,7 +131,12 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
         handleSuggestionClick(
-          suggestion as ChapterTypeAlgolia | ProjectTypeAlgolia | User | EventType,
+          suggestion as
+            | ChapterTypeAlgolia
+            | OrganizationTypeAlgolia
+            | ProjectTypeAlgolia
+            | User
+            | EventType,
           suggestions[index].indexName
         )
       } else if (event.key === 'ArrowDown') {
@@ -194,6 +216,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         return faLocationPin
       case 'events':
         return faCalendarAlt
+      case 'organizations':
+        return faBuilding
       case 'projects':
         return faFolder
       case 'users':
