@@ -60,7 +60,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     <span>{formatDate(item.publishedAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
                     <Link
-                      className="text-blue-400 hover:underline"
+                      className="text-gray-600 hover:underline dark:text-gray-400"
                       href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
                     >
                       <span>{item.repositoryName}</span>
