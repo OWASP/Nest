@@ -192,6 +192,20 @@ jobs:
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> backend/fuzz_tests/.env
           echo "DJANGO_SETTINGS_MODULE=settings.fuzz" >> backend/fuzz_tests/.env
           echo "DJANGO_CONFIGURATION=Fuzz" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALGOLIA_WRITE_API_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALLOWED_HOSTS=*" >> backend/fuzz_tests/.env
+          echo "DJANGO_AWS_ACCESS_KEY_ID=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_AWS_SECRET_ACCESS_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_OPEN_AI_SECRET_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_PUBLIC_IP_ADDRESS=127.0.0.1" >> backend/fuzz_tests/.env
+          echo "DJANGO_RELEASE_VERSION=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SECRET_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SENTRY_DSN=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SLACK_BOT_TOKEN=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SLACK_SIGNING_SECRET=None" >> backend/fuzz_tests/.env
+          echo "GITHUB_TOKEN=None" >> backend/fuzz_tests/.env
 
       - name: Run fuzz tests
         run: make fuzz-test-backend
