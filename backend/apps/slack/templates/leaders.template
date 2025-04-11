@@ -11,9 +11,9 @@
     • {{ leader }}
   {%- endif %}
 {%- endfor %}
-{{ NL }}
+{{ SECTION_BREAK }}
   {%- endif %}
-{%- endfor %}
+{%- endfor -%}
 {{ SECTION_BREAK }}
 {%- endif %}
 {%- if projects|length > 0 %}
@@ -28,7 +28,7 @@
     • {{ leader }}
   {%- endif %}
 {%- endfor %}
-{{ NL }}
+{{ SECTION_BREAK }}
   {%- endif %}
 {%- endfor %}
 {%- endif %}

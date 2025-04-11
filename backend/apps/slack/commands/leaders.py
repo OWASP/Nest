@@ -51,13 +51,10 @@ class Leaders(CommandBase):
             }
             for project in projects
         ]
-        context = super().get_template_context(command)
-        context.update(
-            {
-                "chapters": chapters_with_urls,
-                "projects": projects_with_urls,
-                "search_query": search_query,
-                "has_results": bool(chapters or projects),
-            }
-        )
-        return context
+        return {
+            **super().get_template_context(command),
+            "chapters": chapters_with_urls,
+            "projects": projects_with_urls,
+            "search_query": search_query,
+            "has_results": bool(chapters or projects),
+        }

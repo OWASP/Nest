@@ -11,12 +11,9 @@ class News(CommandBase):
     def get_template_context(self, command):
         """Get the template context."""
         items = get_news_data()
-        context = super().get_template_context(command)
-        context.update(
-            {
-                "has_news": bool(items),
-                "news_items": items,
-                "news_url": OWASP_NEWS_URL,
-            }
-        )
-        return context
+        return {
+            **super().get_template_context(command),
+            "has_news": bool(items),
+            "news_items": items,
+            "news_url": OWASP_NEWS_URL,
+        }

@@ -1,4 +1,4 @@
-"""Slack bot board command."""
+"""Base class and common functionality for Slack commands."""
 
 import logging
 

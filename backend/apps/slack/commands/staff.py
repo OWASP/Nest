@@ -10,13 +10,10 @@ class Staff(CommandBase):
 
     def get_template_context(self, command):
         """Get the template context."""
-        context = super().get_template_context(command)
         items = get_staff_data()
-        context.update(
-            {
-                "has_staff": bool(items),
-                "items": items,
-                "website_url": OWASP_WEBSITE_URL,
-            }
-        )
-        return context
+        return {
+            **super().get_template_context(command),
+            "has_staff": bool(items),
+            "items": items,
+            "website_url": OWASP_WEBSITE_URL,
+        }
