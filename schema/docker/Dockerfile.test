@@ -1,4 +1,4 @@
-FROM python:3.13-alpine AS builder
+FROM python:3.13.3-alpine AS builder
 
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \
@@ -20,7 +20,7 @@ COPY *.json ./
 COPY tests tests
 COPY utils utils
 
-FROM python:3.13-alpine
+FROM python:3.13.3-alpine
 
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \

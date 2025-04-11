@@ -14,26 +14,39 @@ class RepositoryContributorQuery(BaseQuery):
     """Repository contributor queries."""
 
     top_contributors = graphene.List(
-        RepositoryContributorNode, limit=graphene.Int(default_value=15)
+        RepositoryContributorNode,
+        limit=graphene.Int(default_value=15),
+        organization=graphene.String(required=False),
     )
-
-    def resolve_top_contributors(root, info, limit: int) -> list[RepositoryContributorNode]:
+    
+    def resolve_top_contributors(root, info, limit: int, organization=None) -> list[RepositoryContributorNode]:
         """Resolve top contributors only for repositories with projects.
 
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of contributors to return.
+            organization (str, optional): Organization login to filter by.
 
         Returns:
             list: List of top contributors with their details.
 
         """
-        top_contributors = (
+        queryset = (
             RepositoryContributor.objects.by_humans()
             .to_community_repositories()
-            .filter(repository__project__isnull=False)  # Repositories with projects
-            .annotate(
+            .filter(repository__project__isnull=False)
+        )
+
+        if organization:
+            queryset = queryset.select_related(
+                "repository__organization",
+            ).filter(
+                repository__organization__login=organization,
+            )
+
+        top_contributors = (
+            queryset.annotate(
                 project_id=Subquery(
                     Project.repositories.through.objects.filter(
                         repository=OuterRef("repository_id")

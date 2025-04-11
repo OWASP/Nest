@@ -45,14 +45,13 @@ test.describe('Chapters Page', () => {
     const nextPageButton = await page.getByRole('button', { name: '2' })
     await nextPageButton.waitFor({ state: 'visible' }) // Ensure button is visible
     await nextPageButton.click()
-    await expect(page).toHaveURL(/page=2/) // More reliable URL check
+    await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on View Details button click', async ({ page }) => {
     const contributeButton = await page.getByRole('button', { name: 'View Details' })
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
-    await page.waitForLoadState('networkidle')
-    expect(await page.url()).toContain('chapters/chapter_1')
+    await expect(page).toHaveURL('chapters/chapter_1')
   })
 })

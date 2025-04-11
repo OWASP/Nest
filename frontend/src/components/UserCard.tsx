@@ -1,10 +1,19 @@
-import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Image from 'next/image'
 import { UserCardProps } from 'types/card'
 
-const UserCard = ({ avatar, name, company, email, location, button, className }: UserCardProps) => {
+const UserCard = ({
+  avatar,
+  name,
+  company,
+  email,
+  location,
+  button,
+  className,
+  followers_count,
+}: UserCardProps) => {
   return (
     <Button
       onPress={button.onclick}
@@ -31,6 +40,12 @@ const UserCard = ({ avatar, name, company, email, location, button, className }:
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email}
           </p>
+          {followers_count > 0 && (
+            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+              <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
+              {followers_count}
+            </p>
+          )}
         </div>
       </div>
 
