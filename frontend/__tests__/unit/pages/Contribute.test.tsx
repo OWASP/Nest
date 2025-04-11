@@ -3,7 +3,7 @@ import { mockContributeData } from '@unit/data/mockContributeData'
 import { useRouter } from 'next/navigation'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-import ContributePage from 'app/projects/contribute/page'
+import ContributePage from 'app/contribute/page'
 
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),

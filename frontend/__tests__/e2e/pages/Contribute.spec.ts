@@ -20,7 +20,7 @@ test.describe('Contribute Page', () => {
         path: '/',
       },
     ])
-    await page.goto('/projects/contribute')
+    await page.goto('/contribute')
   })
 
   test('renders issue data correctly', async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe('Contribute Page', () => {
         body: JSON.stringify({ hits: [], totalPages: 0 }),
       })
     })
-    await page.goto('/projects/contribute')
+    await page.goto('/contribute')
     await expect(page.getByText('No issues found')).toBeVisible()
   })
 

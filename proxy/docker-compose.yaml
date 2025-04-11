@@ -5,6 +5,7 @@ services:
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./redirects.conf:/etc/nginx/conf.d/redirects.conf
       - ./security.conf:/etc/nginx/conf.d/security.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
@@ -19,6 +20,7 @@ services:
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./redirects.conf:/etc/nginx/conf.d/redirects.conf
       - ./security.conf:/etc/nginx/conf.d/security.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot

@@ -18,7 +18,7 @@ export const headerLinks: Link[] = [
   },
   {
     text: 'Contribute',
-    href: '/projects/contribute',
+    href: '/contribute',
   },
   {
     text: 'About',
@@ -66,7 +66,7 @@ export const footerSections: Section[] = [
       { text: 'Chapters', href: '/chapters/' },
       {
         text: 'Contribute',
-        href: '/projects/contribute/',
+        href: '/contribute/',
       },
       { text: 'Committees', href: '/committees/' },
       { text: 'Projects', href: '/projects/' },

@@ -13,6 +13,12 @@
           dest: ~/staging.conf
           mode: '0644'
 
+      - name: Copy redirects.conf
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/proxy/redirects.conf'
+          dest: ~/redirects.conf
+          mode: '0644'
+
       - name: Copy security.conf
         ansible.builtin.copy:
           src: '{{ github_workspace }}/proxy/security.conf'
