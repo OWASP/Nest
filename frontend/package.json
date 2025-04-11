@@ -40,7 +40,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.5.0",
     "eslint-plugin-import": "^2.31.0",
     "framer-motion": "^12.6.3",
     "graphql": "^16.10.0",
