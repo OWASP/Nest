@@ -58,7 +58,7 @@ const CommitteesPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for OWASP committees..."
+      searchPlaceholder="Search for committees..."
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
