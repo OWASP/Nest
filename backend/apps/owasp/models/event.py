@@ -105,12 +105,12 @@ class Event(BulkSaveModel, TimestampedModel):
         if "-" in dates and "," in dates:
             try:
                 # Split the date range into parts
-                date_range, year = dates.split(", ")
-                month_day_range = date_range.split()
+                date_part, year = dates.rsplit(", ", 1)
+                parts = date_part.split()
 
                 # Extract month and day range
-                month = month_day_range[0]
-                day_range = month_day_range[1]
+                month = parts[0]
+                day_range = "".join(parts[1:])
 
                 # Extract end day from the range
                 end_day = int(day_range.split("-")[-1])
