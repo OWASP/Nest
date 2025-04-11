@@ -184,7 +184,7 @@ jobs:
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
       - name: Create custom docker-compose.fuzz.yaml
         run: |
           cat << EOF > docker-compose.fuzz.yaml
