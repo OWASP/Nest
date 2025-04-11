@@ -14,6 +14,6 @@ class Community(CommandBase):
         """Get the template context."""
         return {
             **super().get_template_context(command),
-            "url": "https://nest.owasp.dev/community/users/",
+            "url": "https://nest.owasp.dev/members/",
             "name": "OWASP community",
         }
