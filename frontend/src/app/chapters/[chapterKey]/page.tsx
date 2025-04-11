@@ -1,6 +1,5 @@
 'use client'
 import { useQuery } from '@apollo/client'
-import { addToast } from '@heroui/toast'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -26,14 +25,6 @@ export default function ChapterDetailsPage() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
       handleAppError(graphQLRequestError)
       setIsLoading(false)
     }

@@ -79,6 +79,8 @@ export const handleAppError = (error: unknown) => {
     title: errorConfig.title,
     description: appError.message || errorConfig.message,
     timeout: 5000,
+    variant: 'solid',
+    color: 'danger',
     shouldShowTimeoutProgress: true,
   })
 }

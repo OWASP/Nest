@@ -7,7 +7,6 @@ import {
   faFileCode,
   faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -50,14 +49,6 @@ const UserDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
       handleAppError(graphQLRequestError)
       setIsLoading(false)
     }

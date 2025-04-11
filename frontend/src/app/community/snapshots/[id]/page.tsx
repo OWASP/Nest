@@ -2,7 +2,6 @@
 import { useQuery } from '@apollo/client'
 import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
@@ -34,14 +33,6 @@ const SnapshotDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
       handleAppError(graphQLRequestError)
       setIsLoading(false)
     }

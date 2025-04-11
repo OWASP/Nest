@@ -8,7 +8,6 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -31,14 +30,6 @@ const RepositoryDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
       handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
