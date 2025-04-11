@@ -203,6 +203,17 @@ jobs:
                         start_period: 400s
           EOF
 
+      - name: Create .env file for fuzz tests
+        run: |
+          touch backend/fuzz_tests/.env
+          echo "DJANGO_DB_HOST=${{ secrets.DJANGO_DB_HOST }}" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_NAME=${{ secrets.DJANGO_DB_NAME }}" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> backend/fuzz_tests/.env
+          echo "DJANGO_SETTINGS_MODULE=settings.fuzz" >> backend/fuzz_tests/.env
+          echo "DJANGO_CONFIGURATION=Fuzz" >> backend/fuzz_tests/.env
+
       - name: Run fuzz tests
         run: docker compose -f docker-compose.fuzz.yaml up --abort-on-container-exit
 
