@@ -107,7 +107,9 @@ test.describe('Header - Mobile (iPhone 13)', () => {
     await expect(page.getByRole('banner').getByText('Community', { exact: true })).toBeVisible()
     await expect(page.getByRole('banner').getByRole('link', { name: 'Chapters' })).toBeVisible()
     await expect(page.getByRole('banner').getByRole('link', { name: 'Members' })).toBeVisible()
-    await expect(page.getByRole('banner').getByRole('link', { name: 'Organizations' })).toBeVisible()
+    await expect(
+      page.getByRole('banner').getByRole('link', { name: 'Organizations' })
+    ).toBeVisible()
     await expect(page.getByRole('banner').getByRole('link', { name: 'Snapshots' })).toBeVisible()
     await expect(page.getByRole('banner').getByRole('link', { name: 'Projects' })).toBeVisible()
     await expect(page.getByRole('banner').getByRole('link', { name: 'Contribute' })).toBeVisible()
