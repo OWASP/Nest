@@ -182,10 +182,6 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
-      - name: Copy docker-compose file
-        run: |
-          cp docker/docker-compose-fuzz.yaml docker-compose.yaml
-
       - name: Create .env file for fuzz tests
         run: |
           touch backend/fuzz_tests/.env
@@ -198,7 +194,7 @@ jobs:
           echo "DJANGO_CONFIGURATION=Fuzz" >> backend/fuzz_tests/.env
 
       - name: Run fuzz tests
-        run: docker compose -f docker-compose.yaml up --abort-on-container-exit
+        run: make fuzz-test-backend
 
   scan-code:
     name: Run Code Scan
