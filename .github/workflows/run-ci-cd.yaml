@@ -179,35 +179,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
-        with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
-      - name: Create custom docker-compose.fuzz.yaml
+      - name: Copy docker-compose file
         run: |
-          cat << EOF > docker-compose.fuzz.yaml
-                  services:
-                    graphql:
-                      container_name: nest-graphqler-test
-                      image: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-graphql:latest
-                      depends_on:
-                        backend:
-                          condition: service_healthy
-                    backend:
-                      container_name: nest-fuzz-test-backend
-                      image: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-backend:latest
-                      env_file: backend/fuzz_tests/.env
-                      ports:
-                        - 127.0.0.1:8000:8000
-                      healthcheck:
-                        test: sh -c 'wget -O- http://127.0.0.1:8000/api/v1'
-                        interval: 10s
-                        timeout: 5s
-                        retries: 20
-                        start_period: 400s
-          EOF
+          cp docker/docker-compose-fuzz.yaml docker-compose.yaml
 
       - name: Create .env file for fuzz tests
         run: |
@@ -221,7 +198,7 @@ jobs:
           echo "DJANGO_CONFIGURATION=Fuzz" >> backend/fuzz_tests/.env
 
       - name: Run fuzz tests
-        run: docker compose -f docker-compose.fuzz.yaml up --abort-on-container-exit
+        run: docker compose -f docker-compose-fuzz.yaml up --abort-on-container-exit
 
   scan-code:
     name: Run Code Scan
