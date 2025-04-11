@@ -2,7 +2,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
-import ChapterMap from 'components/ChapterMap'
 import InfoBlock from 'components/InfoBlock'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
@@ -11,6 +10,7 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/TopContributors'
+import ChapterMapWrapper from './ChapterMapWrapper'
 import LeadersList from './LeadersList'
 
 const DetailsCard = ({
@@ -75,7 +75,8 @@ const DetailsCard = ({
           {(type === 'project' ||
             type === 'repository' ||
             type === 'committee' ||
-            type === 'user') && (
+            type === 'user' ||
+            type === 'organization') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock
@@ -91,7 +92,7 @@ const DetailsCard = ({
           )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
-              <ChapterMap
+              <ChapterMapWrapper
                 geoLocData={geolocationData ? [geolocationData] : []}
                 showLocal={true}
                 style={{
@@ -120,10 +121,13 @@ const DetailsCard = ({
             type="contributor"
           />
         )}
-        {(type === 'project' || type === 'repository' || type === 'user') && (
+        {(type === 'project' ||
+          type === 'repository' ||
+          type === 'user' ||
+          type === 'organization') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ? (
+            {type === 'user' || type === 'organization' ? (
               <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             ) : (
               <RecentReleases
@@ -134,12 +138,15 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {type === 'user' && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
-        {(type === 'project' || type === 'user') && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
-            <RepositoriesCard repositories={repositories} />
-          </SecondaryCard>
+        {(type === 'user' || type === 'organization') && (
+          <RecentReleases data={recentReleases} showAvatar={showAvatar} />
         )}
+        {(type === 'project' || type === 'user' || type === 'organization') &&
+          repositories.length > 0 && (
+            <SecondaryCard title="Repositories" className="mt-6">
+              <RepositoriesCard repositories={repositories} />
+            </SecondaryCard>
+          )}
       </div>
     </div>
   )

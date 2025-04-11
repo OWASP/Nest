@@ -1,17 +1,23 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockUserData } from '@unit/data/mockUserData'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-import UsersPage from 'pages/Users'
+import UsersPage from 'app/community/members/page'
 
-jest.mock('api/fetchAlgoliaData', () => ({
-  fetchAlgoliaData: jest.fn(),
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useParams: () => ({ userKey: 'test-user' }),
+  useSearchParams: () => new URLSearchParams(),
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+jest.mock('server/fetchAlgoliaData', () => ({
+  fetchAlgoliaData: jest.fn(),
 }))
 
 jest.mock('components/Pagination', () =>
@@ -28,11 +34,15 @@ jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
 }))
 
 describe('UsersPage Component', () => {
+  let mockRouter: { push: jest.Mock }
+
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockUserData.users,
       totalPages: 2,
     })
+    mockRouter = { push: jest.fn() }
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -60,7 +70,7 @@ describe('UsersPage Component', () => {
 
     // Check loaded state
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for OWASP users...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search for members...')).toBeInTheDocument()
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -111,10 +121,7 @@ describe('UsersPage Component', () => {
     })
   })
 
-  test('navigates to user details on View Details button click', async () => {
-    const navigateMock = jest.fn()
-    ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
-
+  test('navigates to user details on View Profile button click', async () => {
     render(<UsersPage />)
 
     await waitFor(() => {
@@ -123,8 +130,9 @@ describe('UsersPage Component', () => {
       fireEvent.click(viewDetailsButtons[0])
     })
 
-    expect(navigateMock).toHaveBeenCalledWith('/community/users/user_1')
+    expect(mockRouter.push).toHaveBeenCalledWith('/community/members/user_1')
   })
+
   test('renders fallback username if user name is missing', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [

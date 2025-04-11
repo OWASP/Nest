@@ -1,30 +1,31 @@
 import { useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-import { ProjectDetailsPage } from 'pages'
-import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-import { toaster } from 'components/ui/toaster'
+import ProjectDetailsPage from 'app/projects/[projectKey]/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
 
-jest.mock('components/ui/toaster', () => ({
-  toaster: {
-    create: jest.fn(),
-  },
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
 }))
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ projectKey: 'test-project' }),
-  useNavigate: jest.fn(),
 }))
 
 const mockError = {
@@ -32,16 +33,12 @@ const mockError = {
 }
 
 describe('ProjectDetailsPage', () => {
-  let navigateMock: jest.Mock
-
   beforeEach(() => {
-    navigateMock = jest.fn()
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       loading: false,
       error: null,
     })
-    ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
   })
 
   afterEach(() => {
@@ -89,10 +86,13 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => screen.getByText('Project not found'))
     expect(screen.getByText('Project not found')).toBeInTheDocument()
-    expect(toaster.create).toHaveBeenCalledWith({
+    expect(addToast).toHaveBeenCalledWith({
       description: 'Unable to complete the requested operation.',
       title: 'GraphQL Request Failed',
-      type: 'error',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'danger',
+      variant: 'solid',
     })
   })
 
@@ -130,7 +130,7 @@ describe('ProjectDetailsPage', () => {
 
     screen.getByText('Contributor 1').closest('button')?.click()
 
-    expect(navigateMock).toHaveBeenCalledWith('/community/users/contributor1')
+    expect(mockRouter.push).toHaveBeenCalledWith('/community/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {

@@ -21,7 +21,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons'
 import { faGlobe } from '@fortawesome/free-solid-svg-icons'
 
-export const getSocialIcon = (url) => {
+export const getSocialIcon = (url: string) => {
   if (!/^https?:\/\//i.test(url)) {
     url = 'http://' + url
   }

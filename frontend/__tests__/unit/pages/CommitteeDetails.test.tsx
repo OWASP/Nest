@@ -1,8 +1,8 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
 import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
-import { CommitteeDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
+import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -13,11 +13,14 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    committeeKey: 'test-committee',
-  }),
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useParams: () => ({ committeeKey: 'test-committee' }),
 }))
 
 describe('CommitteeDetailsPage Component', () => {

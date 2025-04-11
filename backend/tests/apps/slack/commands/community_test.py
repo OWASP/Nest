@@ -103,4 +103,4 @@ class TestCommunityHandler:
         assert len(blocks) == 1
         assert blocks[0]["type"] == "section"
         assert blocks[0]["text"]["type"] == "mrkdwn"
-        assert "https://nest.owasp.dev/community/users/" in blocks[0]["text"]["text"]
+        assert "https://nest.owasp.dev/community/members/" in blocks[0]["text"]["text"]

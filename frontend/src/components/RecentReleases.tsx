@@ -1,9 +1,12 @@
-import { faCalendar, faFileCode } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import SecondaryCard from './SecondaryCard'
+import { TruncatedText } from './TruncatedText'
 
 interface RecentReleasesProps {
   data: ProjectReleaseType[]
@@ -17,36 +20,38 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
   showSingleColumn = false,
 }) => {
   return (
-    <SecondaryCard icon={faFileCode} title="Recent Releases">
+    <SecondaryCard icon={faTag} title="Recent Releases">
       {data && data.length > 0 ? (
         <div
-          className={`grid ${showSingleColumn ? 'grid-cols-1' : 'grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+          className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
         >
           {data.map((item, index) => (
             <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
                   {showAvatar && (
-                    <a
+                    <Link
                       className="flex-shrink-0 text-blue-400 hover:underline"
-                      href={`/community/users/${item?.author?.login}`}
+                      href={`/community/members/${item?.author?.login}`}
                     >
-                      <img
-                        src={item?.author?.avatarUrl}
-                        alt={item?.author?.name}
+                      <Image
+                        alt={item?.author?.name || 'author'}
                         className="mr-2 h-6 w-6 rounded-full"
+                        height={24}
+                        src={item?.author?.avatarUrl || ''}
+                        width={24}
                       />
-                    </a>
+                    </Link>
                   )}
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                    <a
+                    <Link
                       className="text-blue-400 hover:underline"
-                      href={item?.url}
+                      href={item?.url || '/'}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {item.name}
-                    </a>
+                      <TruncatedText text={item?.name} />
+                    </Link>
                   </h3>
                 </div>
                 <div className="ml-0.5 w-full">
@@ -54,7 +59,12 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(item.publishedAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{item.repositoryName}</span>
+                    <Link
+                      className="text-gray-600 hover:underline dark:text-gray-400"
+                      href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+                    >
+                      <span>{item.repositoryName}</span>
+                    </Link>
                   </div>
                 </div>
               </div>
