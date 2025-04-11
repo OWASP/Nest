@@ -186,7 +186,7 @@ describe('About Component', () => {
       expect(screen.getByText('Top Contributors')).toBeInTheDocument()
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
@@ -194,7 +194,7 @@ describe('About Component', () => {
     render(<About />)
     await waitFor(() => {
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
     const contributorsSection = screen
@@ -212,7 +212,7 @@ describe('About Component', () => {
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
