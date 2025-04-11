@@ -95,12 +95,9 @@ class CommandBase:
         template_name = self.get_template_file_name()
         try:
             return env.get_template(template_name)
-        except Exception as e:
-            logger.error(
-                "Failed to load template '%s' for command '%s': %s",
-                template_name,
-                self.get_command(),
-                str(e),
+        except Exception:
+            logger.exception(
+                "Failed to load template '%s' for command '%s'", template_name, self.get_command()
             )
             raise
 
