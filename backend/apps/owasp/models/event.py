@@ -188,7 +188,7 @@ class Event(BulkSaveModel, TimestampedModel):
     def generate_geo_location(self):
         """Add latitude and longitude data.
 
-        Returns
+        Returns:
             None
 
         """
@@ -263,3 +263,19 @@ class Event(BulkSaveModel, TimestampedModel):
             context,
             delimiter=NL,
         )
+
+    def save(self, *args, **kwargs):
+        """Save the event instance.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        if not self.suggested_location:
+            self.generate_suggested_location()
+
+        if not self.latitude or not self.longitude:
+            self.generate_geo_location()
+
+        super().save(*args, **kwargs)

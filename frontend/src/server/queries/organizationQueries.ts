@@ -38,7 +38,7 @@ export const GET_ORGANIZATION_DATA = gql`
         avatarUrl
       }
     }
-    recentReleases(limit: 6, organization: $login) {
+    recentReleases(limit: 6, organization: $login, distinct: true) {
       name
       tagName
       publishedAt
