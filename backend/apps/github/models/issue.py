@@ -43,6 +43,8 @@ class Issue(GenericIssueModel):
 
     comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
 
+    has_pull_request = models.BooleanField(default=False)
+
     # FKs.
     author = models.ForeignKey(
         "github.User",

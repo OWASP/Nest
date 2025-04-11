@@ -93,10 +93,14 @@ class IssueIndex(IndexBase):
             QuerySet: A queryset of Issue objects to be indexed.
 
         """
-        return Issue.open_issues.assignable.select_related(
-            "repository",
-        ).prefetch_related(
-            "assignees",
-            "labels",
-            "repository__project_set",
+        return (
+            Issue.open_issues.assignable.filter(has_pull_request=False)
+            .select_related(
+                "repository",
+            )
+            .prefetch_related(
+                "assignees",
+                "labels",
+                "repository__project_set",
+            )
         )
