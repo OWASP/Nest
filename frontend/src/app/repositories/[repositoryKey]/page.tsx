@@ -8,15 +8,14 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
 import { formatDate } from 'utils/dateFormatter'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey } = useParams()
@@ -31,14 +30,7 @@ const RepositoryDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, repositoryKey])

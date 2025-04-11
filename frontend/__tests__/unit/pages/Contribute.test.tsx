@@ -110,7 +110,7 @@ describe('Contribute Component', () => {
 
   test('handles pagination for first page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      ...mockContributeData,
+      hits: mockContributeData.issues,
       totalPages: 2,
       currentPage: 1,
     })

@@ -7,16 +7,15 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { GET_COMMITTEE_DATA } from 'server/queries/committeeQueries'
 import type { CommitteeDetailsTypeGraphQL } from 'types/committee'
 import { formatDate } from 'utils/dateFormatter'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
@@ -36,14 +35,7 @@ export default function CommitteeDetailsPage() {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, committeeKey])

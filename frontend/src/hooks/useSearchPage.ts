@@ -3,8 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { AlgoliaResponseType } from 'types/algolia'
-import { handleAppError } from 'wrappers/ErrorWrapper'
+import { handleAppError } from 'app/global-error'
 interface UseSearchPageOptions {
   indexName: string
   pageTitle: string
@@ -83,7 +82,7 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
-        const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
+        const response = await fetchAlgoliaData<T>(
           sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
             ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
             : indexName,
@@ -91,8 +90,13 @@ export function useSearchPage<T>({
           currentPage,
           hitsPerPage
         )
-        setItems(data.hits)
-        setTotalPages(data.totalPages as number)
+
+        if ('hits' in response) {
+          setItems(response.hits)
+          setTotalPages(response.totalPages as number)
+        } else {
+          handleAppError(response)
+        }
       } catch (error) {
         handleAppError(error)
       }

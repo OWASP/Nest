@@ -7,7 +7,6 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -15,9 +14,9 @@ import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { ProjectTypeGraphql } from 'types/project'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -33,14 +32,7 @@ const ProjectDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, projectKey])

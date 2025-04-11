@@ -1,7 +1,7 @@
 import { AlgoliaResponseType } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
-import { AppError } from 'wrappers/ErrorWrapper'
+import { AppError } from 'app/global-error'
 import { IndexedObject, removeIdxPrefix } from './utility'
 
 export const fetchAlgoliaData = async <T>(
@@ -56,6 +56,6 @@ export const fetchAlgoliaData = async <T>(
     if (error instanceof AppError) {
       throw error
     }
-    //logger.error('Error fetching Algolia data:', error)
+    throw new AppError(500, 'Search service error')
   }
 }
