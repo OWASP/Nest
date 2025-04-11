@@ -82,7 +82,7 @@ const About = () => {
         {project.topContributors && (
           <TopContributors
             contributors={project.topContributors}
-            maxInitialDisplay={6}
+            maxInitialDisplay={9}
             type="contributor"
           />
         )}
