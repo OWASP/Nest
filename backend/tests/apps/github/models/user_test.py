@@ -32,9 +32,10 @@ class TestUserModel:
         assert user.is_hireable
         assert user.twitter_username == "twitter"
 
+    @patch("apps.github.models.repository_contributor.RepositoryContributor.objects")
     @patch("apps.github.models.user.User.objects.get")
     @patch("apps.github.models.user.User.save")
-    def test_update_data(self, mock_save, mock_get):
+    def test_update_data(self, mock_save, mock_get, mock_repo_contributor):
         gh_user_mock = Mock()
         gh_user_mock.raw_data = {"node_id": "12345"}
         gh_user_mock.bio = "Bio"

@@ -6,6 +6,7 @@ import {
   faUser,
   faFileCode,
   faBookmark,
+  faCodeMerge,
 } from '@fortawesome/free-solid-svg-icons'
 import { addToast } from '@heroui/toast'
 import Image from 'next/image'
@@ -202,6 +203,7 @@ const UserDetailsPage: React.FC = () => {
     },
     { icon: faFileCode, value: user?.issuesCount || 0, unit: 'Issue' },
     { icon: faBookmark, value: user?.releasesCount || 0, unit: 'Release' },
+    { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
   const Heatmap = () => (

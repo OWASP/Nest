@@ -1,6 +1,7 @@
 """Github app user model."""
 
 from django.db import models
+from django.db.models import Sum
 
 from apps.common.models import TimestampedModel
 from apps.github.constants import GITHUB_GHOST_USER_LOGIN, OWASP_FOUNDATION_LOGIN
@@ -21,6 +22,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     twitter_username = models.CharField(verbose_name="Twitter username", max_length=50, default="")
 
     is_bot = models.BooleanField(verbose_name="Is bot", default=False)
+
+    contributions_count = models.IntegerField(verbose_name="Contributions count", default=0)
 
     def __str__(self):
         """Return a human-readable representation of the user.
@@ -101,13 +104,30 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         user_node_id = User.get_node_id(gh_user)
+        # We will use this because we will do filtering.
+        # If we tried to filter a user that is created but not saved yet,
+        # it would raise an exception.
+        does_exist = False
         try:
             user = User.objects.get(node_id=user_node_id)
+            does_exist = True
         except User.DoesNotExist:
             user = User(node_id=user_node_id)
 
         user.from_github(gh_user)
         if save:
+            if does_exist:
+                from apps.github.models.repository_contributor import RepositoryContributor
+
+                contributions_count = (
+                    RepositoryContributor.objects.by_humans()
+                    .filter(user=user)
+                    .aggregate(total_contributions=Sum("contributions_count"))[
+                        "total_contributions"
+                    ]
+                    or 0
+                )
+                user.contributions_count = contributions_count
             user.save()
 
         return user
