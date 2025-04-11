@@ -22,7 +22,13 @@ class PullRequestQuery(BaseQuery):
     )
 
     def resolve_recent_pull_requests(
-        root, info, limit: int, *, distinct: bool = False, login: str | None = None, organization=None
+        root,
+        info,
+        limit: int,
+        *,
+        distinct: bool = False,
+        login: str | None = None,
+        organization: str | None = None,
     ) -> QuerySet:
         """Resolve recent pull requests.
 

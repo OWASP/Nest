@@ -22,7 +22,13 @@ class IssueQuery(BaseQuery):
     )
 
     def resolve_recent_issues(
-        root, info, limit: int, *, distinct: bool = False, login: str | None = None, organization=None
+        root,
+        info,
+        limit: int,
+        *,
+        distinct: bool = False,
+        login: str | None = None,
+        organization: str | None = None,
     ) -> QuerySet:
         """Resolve recent issues with optional filtering.
 
