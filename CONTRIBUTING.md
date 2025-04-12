@@ -82,7 +82,7 @@ Before contributing, ensure you have the following installed:
 - **Example Value**: *(Empty by default)*
 - **Usage**: Enables integration with Sentry for logging and monitoring errors.
 
-## Backend
+### Backend
 
 #### `DJANGO_CONFIGURATION`
 - **Description**: Specifies the Django configuration to use.
