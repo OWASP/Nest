@@ -1,4 +1,4 @@
-FROM python:3.13-alpine AS builder
+FROM python:3.13.3-alpine AS builder
 
 RUN apk update && \
     addgroup -S owasp && \
@@ -22,7 +22,7 @@ COPY settings settings
 COPY static static
 COPY templates templates
 
-FROM python:3.13-alpine
+FROM python:3.13.3-alpine
 
 RUN apk update && \
     addgroup -S owasp && \

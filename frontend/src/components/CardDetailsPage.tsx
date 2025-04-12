@@ -58,7 +58,7 @@ const DetailsCard = ({
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
-                <div key={detail.label} className="pb-1">
+                <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
                   <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
@@ -75,7 +75,8 @@ const DetailsCard = ({
           {(type === 'project' ||
             type === 'repository' ||
             type === 'committee' ||
-            type === 'user') && (
+            type === 'user' ||
+            type === 'organization') && (
             <SecondaryCard title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock
@@ -116,14 +117,17 @@ const DetailsCard = ({
         {topContributors && (
           <TopContributors
             contributors={topContributors}
-            maxInitialDisplay={6}
+            maxInitialDisplay={9}
             type="contributor"
           />
         )}
-        {(type === 'project' || type === 'repository' || type === 'user') && (
+        {(type === 'project' ||
+          type === 'repository' ||
+          type === 'user' ||
+          type === 'organization') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ? (
+            {type === 'user' || type === 'organization' ? (
               <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             ) : (
               <RecentReleases
@@ -134,12 +138,15 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {type === 'user' && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
-        {(type === 'project' || type === 'user') && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
-            <RepositoriesCard repositories={repositories} />
-          </SecondaryCard>
+        {(type === 'user' || type === 'organization') && (
+          <RecentReleases data={recentReleases} showAvatar={showAvatar} />
         )}
+        {(type === 'project' || type === 'user' || type === 'organization') &&
+          repositories.length > 0 && (
+            <SecondaryCard title="Repositories" className="mt-6">
+              <RepositoriesCard repositories={repositories} />
+            </SecondaryCard>
+          )}
       </div>
     </div>
   )

@@ -47,6 +47,7 @@ test-nest-app: \
 	test-frontend
 
 update: \
+	clean \
 	update-docs-dependencies \
 	update-nest-app-dependencies \
 	update-pre-commit \
