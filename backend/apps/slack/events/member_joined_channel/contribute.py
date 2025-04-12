@@ -73,7 +73,7 @@ def contribute_handler(event, client, ack):
             "You can easily find opportunities for contributing right here in this chat using "
             "`/contribute --start` command. It's a quick and convenient way to get involved! "
             "Alternatively, you can check out "
-            f"<{get_absolute_url('projects/contribute')}|*OWASP Nest Issues*> where you'll "
+            f"<{get_absolute_url('/contribute')}|*OWASP Nest Issues*> where you'll "
             "find a comprehensive list of OWASP contribution opportunities and ways to make a "
             "difference. It also offers guidance on possible first steps to approach the "
             "issues within OWASP projects."

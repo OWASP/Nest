@@ -117,7 +117,7 @@ const DetailsCard = ({
         {topContributors && (
           <TopContributors
             contributors={topContributors}
-            maxInitialDisplay={6}
+            maxInitialDisplay={9}
             type="contributor"
           />
         )}
