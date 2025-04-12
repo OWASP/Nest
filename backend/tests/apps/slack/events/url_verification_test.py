@@ -6,14 +6,14 @@ from apps.slack.apps import SlackConfig
 from apps.slack.events.url_verification import url_verification_handler
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_slack_app():
     mock_app = MagicMock()
     mock_app.event = MagicMock()
     return mock_app
 
 
-@pytest.fixture()
+@pytest.fixture
 def slack_bot(mock_slack_app):
     SlackConfig.app = mock_slack_app
     return SlackConfig

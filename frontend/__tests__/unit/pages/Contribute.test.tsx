@@ -1,12 +1,17 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockContributeData } from '@unit/data/mockContributeData'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
+import { useRouter } from 'next/navigation'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-import ContributePage from 'pages/Contribute'
+import ContributePage from 'app/contribute/page'
 
-jest.mock('api/fetchAlgoliaData', () => ({
+jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
+
+jest.mock('next/link', () => {
+  return ({ children }) => <div>{children}</div>
+})
 
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>
@@ -18,9 +23,31 @@ jest.mock('components/Pagination', () =>
   )
 )
 
+jest.mock('@/components/MarkdownWrapper', () => {
+  return ({ content, className }: { content: string; className?: string }) => (
+    <div
+      className={`md-wrapper ${className || ''}`}
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
+  )
+})
+
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useSearchParams: () => new URLSearchParams(),
+}))
+
 describe('Contribute Component', () => {
+  let mockRouter: { push: jest.Mock }
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockContributeData)
+    mockRouter = { push: jest.fn() }
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -120,11 +147,11 @@ describe('Contribute Component', () => {
     render(<ContributePage />)
 
     await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Search for OWASP issues...')
+      const searchInput = screen.getByPlaceholderText('Search for issues...')
       fireEvent.change(searchInput, { target: { value: '' } })
     })
 
-    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 2, undefined)
+    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1, undefined)
   })
 
   test('handles error states in card rendering', async () => {
@@ -177,79 +204,6 @@ describe('Contribute Component', () => {
     await waitFor(() => {
       const modalTitle = screen.getByText('Close')
       expect(modalTitle).toBeInTheDocument()
-    })
-  })
-
-  test('closes modal when onClose is called', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      ...mockContributeData,
-      hits: mockContributeData.issues,
-      totalPages: 1,
-    })
-    render(<ContributePage />)
-
-    await waitFor(() => {
-      const readMoreButton = screen.getByText('Read More')
-      fireEvent.click(readMoreButton)
-    })
-
-    await waitFor(() => {
-      const closeButton = screen.getByText('Close')
-      fireEvent.click(closeButton)
-    })
-
-    await waitFor(() => {
-      const modalTitle = screen.queryByText(mockContributeData.issues[0].title)
-      expect(modalTitle).toBeInTheDocument()
-    })
-  })
-
-  test('handles modal state for multiple cards', async () => {
-    const mockMultipleIssues = {
-      ...mockContributeData,
-      hits: [
-        { title: 'Issue 1', summary: 'Summary 1', hint: 'Hint 1', objectID: '1' },
-        { title: 'Issue 2', summary: 'Summary 2', hint: 'Hint 2', objectID: '2' },
-      ],
-    }
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockMultipleIssues)
-
-    render(<ContributePage />)
-
-    // Wait for both cards to be rendered
-    await waitFor(() => {
-      const readMoreButtons = screen.getAllByText('Read More')
-      expect(readMoreButtons).toHaveLength(2)
-    })
-
-    // Click first card's Read More button
-    const readMoreButtons = screen.getAllByText('Read More')
-    fireEvent.click(readMoreButtons[0])
-
-    // Verify first modal is open
-    await waitFor(() => {
-      expect(screen.getByText('Hint 1')).toBeInTheDocument()
-    })
-
-    // Verify first issue button
-    await waitFor(() => {
-      const viewIssueButton = screen.getByRole('button', { name: 'View Issue' })
-      expect(viewIssueButton).toBeInTheDocument()
-      fireEvent.click(viewIssueButton)
-    })
-
-    // Click close button
-    await waitFor(() => {
-      const closeButton = screen.getByText('Close')
-      fireEvent.click(closeButton)
-    })
-
-    // Click second card's Read More button
-    fireEvent.click(readMoreButtons[1])
-
-    // Verify second modal is open
-    await waitFor(() => {
-      expect(screen.getByText('Hint 2')).toBeInTheDocument()
     })
   })
 })

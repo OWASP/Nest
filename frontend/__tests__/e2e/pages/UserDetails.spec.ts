@@ -9,7 +9,15 @@ test.describe('User Details Page', () => {
         json: { data: mockUserDetailsData },
       })
     })
-    await page.goto('community/users/test-user')
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
+    await page.goto('members/test-user')
   })
   test('should have a heading and summary', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible()

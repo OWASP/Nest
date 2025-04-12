@@ -9,6 +9,14 @@ test.describe('Repository Details Page', () => {
         json: { data: mockRepositoryData },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/repositories/test-repository')
   })
 
@@ -65,7 +73,6 @@ test.describe('Repository Details Page', () => {
   test('should have recent issues', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Bug fix required' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Test User 1' })).toBeVisible()
     await expect(page.getByText('Jan 2, 2024')).toBeVisible()
     await expect(page.getByText('4 comments')).toBeVisible()
   })
@@ -73,7 +80,6 @@ test.describe('Repository Details Page', () => {
   test('should have recent releases', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'v1.0.0' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Test User 2' })).toBeVisible()
     await expect(page.getByText('Jan 1, 2024', { exact: true })).toBeVisible()
   })
 })

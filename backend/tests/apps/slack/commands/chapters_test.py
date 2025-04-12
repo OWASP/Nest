@@ -9,7 +9,7 @@ from apps.slack.commands.chapters import chapters_handler
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
@@ -21,14 +21,14 @@ def mock_active_chapters_count():
 
 
 class TestChaptersHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -66,7 +66,7 @@ class TestChaptersHandler:
                 {
                     "idx_name": "Test Chapter",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com",
+                    "idx_url": "https://example.com",
                     "idx_leaders": ["Leader 1"],
                     "idx_country": "Test Country",
                     "idx_suggested_location": "Test Location",

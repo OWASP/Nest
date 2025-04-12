@@ -21,7 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 def contribute_handler(event, client, ack):
-    """Slack #contribute new member handler."""
+    """Slack #contribute new member handler.
+
+    Args:
+        event (dict): The event payload from Slack.
+        client (slack_sdk.WebClient): The Slack WebClient instance.
+        ack (Callable): The acknowledgment function to confirm event processing.
+
+    """
     from apps.github.models.issue import Issue
     from apps.owasp.models.project import Project
 
@@ -66,7 +73,7 @@ def contribute_handler(event, client, ack):
             "You can easily find opportunities for contributing right here in this chat using "
             "`/contribute --start` command. It's a quick and convenient way to get involved! "
             "Alternatively, you can check out "
-            f"<{get_absolute_url('projects/contribute')}|*OWASP Nest Issues*> where you'll "
+            f"<{get_absolute_url('/contribute')}|*OWASP Nest Issues*> where you'll "
             "find a comprehensive list of OWASP contribution opportunities and ways to make a "
             "difference. It also offers guidance on possible first steps to approach the "
             "issues within OWASP projects."

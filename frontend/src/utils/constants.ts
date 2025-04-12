@@ -1,25 +1,46 @@
+import { faGithub, faSlack, faBluesky } from '@fortawesome/free-brands-svg-icons'
 import { Link } from 'types/link'
 import { Section } from 'types/section'
 
 export const headerLinks: Link[] = [
+  {
+    text: 'Community',
+    submenu: [
+      { text: 'Chapters', href: '/chapters' },
+      { text: 'Members', href: '/members' },
+      { text: 'Organizations', href: '/organizations' },
+      { text: 'Snapshots', href: '/snapshots' },
+    ],
+  },
   {
     text: 'Projects',
     href: '/projects',
   },
   {
     text: 'Contribute',
-    href: '/projects/contribute',
+    href: '/contribute',
   },
   {
-    text: 'Community',
-    submenu: [
-      { text: 'Snapshots', href: '/community/snapshots' },
-      { text: 'Users', href: '/community/users' },
-    ],
+    text: 'About',
+    href: '/about',
+  },
+]
+
+export const footerIcons = [
+  {
+    icon: faBluesky,
+    href: 'https://bsky.app/profile/nest.owasp.org',
+    label: 'Bluesky',
   },
   {
-    text: 'Chapters',
-    href: '/chapters',
+    icon: faGithub,
+    href: 'https://github.com/owasp/nest',
+    label: 'GitHub',
+  },
+  {
+    icon: faSlack,
+    href: 'https://owasp.slack.com/archives/project-nest',
+    label: 'Slack',
   },
 ]
 
@@ -27,9 +48,12 @@ export const footerSections: Section[] = [
   {
     title: 'OWASP Nest',
     links: [
-      { text: 'About', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#owasp-nest' },
+      { text: 'About', href: '/about' },
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
-      { text: 'Leaders', href: 'https://github.com/OWASP/Nest?tab=readme-ov-file#leaders' },
+      {
+        text: 'GSoC 2025',
+        href: 'https://owasp.org/www-community/initiatives/gsoc/gsoc2025ideas#owasp-nest',
+      },
       {
         text: 'Sponsor',
         href: 'https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest',
@@ -42,7 +66,7 @@ export const footerSections: Section[] = [
       { text: 'Chapters', href: '/chapters/' },
       {
         text: 'Contribute',
-        href: '/projects/contribute/',
+        href: '/contribute/',
       },
       { text: 'Committees', href: '/committees/' },
       { text: 'Projects', href: '/projects/' },

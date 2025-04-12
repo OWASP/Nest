@@ -8,7 +8,15 @@ from django.apps import apps
 
 
 def get_params_for_index(index_name):
-    """Return search parameters based on the index name."""
+    """Return search parameters based on the index name.
+
+    Args:
+        index_name (str): The name of the index.
+
+    Returns:
+        dict: The search parameters for the index.
+
+    """
     params = {
         "attributesToHighlight": [],
         "removeWordsIfNoResults": "allOptional",
@@ -107,6 +115,19 @@ def get_params_for_index(index_name):
                 "idx_url",
             ]
 
+        case "organizations":
+            params["attributesToRetrieve"] = [
+                "idx_avatar_url",
+                "idx_collaborators_count",
+                "idx_created_at",
+                "idx_description",
+                "idx_followers_count",
+                "idx_location",
+                "idx_login",
+                "idx_name",
+                "idx_url",
+            ]
+
         case _:
             params["attributesToRetrieve"] = []
 
@@ -114,7 +135,12 @@ def get_params_for_index(index_name):
 
 
 def register_indexes(app_names=("github", "owasp")):
-    """Register indexes."""
+    """Register indexes.
+
+    Args:
+        app_names (tuple): A tuple of app names to register indexes for.
+
+    """
     for app_name in app_names:
         for model in apps.get_app_config(app_name).get_models():
             with contextlib.suppress(RegistrationError):
@@ -122,7 +148,12 @@ def register_indexes(app_names=("github", "owasp")):
 
 
 def unregister_indexes(app_names=("github", "owasp")):
-    """Unregister indexes."""
+    """Unregister indexes.
+
+    Args:
+        app_names (tuple): A tuple of app names to unregister indexes for.
+
+    """
     for app_name in app_names:
         for model in apps.get_app_config(app_name).get_models():
             with contextlib.suppress(RegistrationError):

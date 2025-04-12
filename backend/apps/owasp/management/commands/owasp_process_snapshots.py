@@ -20,6 +20,13 @@ class Command(BaseCommand):
     help = "Process pending snapshots and populate them with new data"
 
     def handle(self, *args, **options):
+        """Handle the command execution.
+
+        Args:
+            *args: Variable length argument list.
+            **options: Arbitrary keyword arguments.
+
+        """
         try:
             self.process_snapshots()
         except Exception as e:
@@ -27,6 +34,7 @@ class Command(BaseCommand):
             raise SnapshotProcessingError(error_msg) from e
 
     def process_snapshots(self):
+        """Process all pending snapshots."""
         pending_snapshots = Snapshot.objects.filter(status=Snapshot.Status.PENDING)
 
         if not pending_snapshots.exists():
@@ -45,6 +53,12 @@ class Command(BaseCommand):
                 snapshot.save()
 
     def process_snapshot(self, snapshot):
+        """Process a single snapshot.
+
+        Args:
+            snapshot (Snapshot): The snapshot instance to process.
+
+        """
         logger.info(
             "Processing snapshot %s (%s to %s)",
             snapshot.id,
@@ -58,13 +72,38 @@ class Command(BaseCommand):
 
         try:
             # Fetch new data for each model type
-            new_chapters = self.get_new_items(Chapter, snapshot.start_at, snapshot.end_at)
-            new_issues = self.get_new_items(Issue, snapshot.start_at, snapshot.end_at)
-            new_projects = self.get_new_items(Project, snapshot.start_at, snapshot.end_at)
-            new_releases = self.get_new_items(Release, snapshot.start_at, snapshot.end_at).filter(
-                is_draft=False, is_pre_release=False
+            new_chapters = self.get_new_items(
+                Chapter,
+                snapshot.start_at,
+                snapshot.end_at,
+            ).filter(
+                is_active=True,
             )
-            new_users = self.get_new_items(User, snapshot.start_at, snapshot.end_at)
+            new_issues = self.get_new_items(
+                Issue,
+                snapshot.start_at,
+                snapshot.end_at,
+            )
+            new_projects = self.get_new_items(
+                Project,
+                snapshot.start_at,
+                snapshot.end_at,
+            ).filter(
+                is_active=True,
+            )
+            new_releases = self.get_new_items(
+                Release,
+                snapshot.start_at,
+                snapshot.end_at,
+            ).filter(
+                is_draft=False,
+                is_pre_release=False,
+            )
+            new_users = self.get_new_items(
+                User,
+                snapshot.start_at,
+                snapshot.end_at,
+            )
 
             # Add items to snapshot
             snapshot.new_chapters.add(*new_chapters)

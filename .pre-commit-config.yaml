@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.35.1
+    rev: v1.37.0
     hooks:
       - id: yamllint
         args:
@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.7
+    rev: v0.11.5
     hooks:
       - id: ruff
         args:
@@ -18,7 +18,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: v1.35.2
+    rev: v1.36.4
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -35,7 +35,7 @@ repos:
           - --mapping=2
           - --offset=2
           - --sequence=4
-        exclude: (.github|frontend/pnpm-lock.yaml)
+        exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

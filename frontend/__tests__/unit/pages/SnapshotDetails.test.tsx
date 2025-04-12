@@ -1,43 +1,46 @@
 import { useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
-import { SnapshotDetailsPage } from 'pages'
-import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-import { toaster } from 'components/ui/toaster'
+import SnapshotDetailsPage from 'app/snapshots/[id]/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
 
-jest.mock('components/ui/toaster', () => ({
-  toaster: {
-    create: jest.fn(),
-  },
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ id: '2024-12' }),
-  useNavigate: jest.fn(),
 }))
 
 const mockError = {
   error: new Error('GraphQL error'),
 }
 
-describe('SnapshotDetailsPage', () => {
-  let navigateMock: jest.Mock
+jest.mock('@/components/MarkdownWrapper', () => {
+  return jest.fn(({ content, className }) => (
+    <div className={`md-wrapper ${className}`} dangerouslySetInnerHTML={{ __html: content }} />
+  ))
+})
 
+describe('SnapshotDetailsPage', () => {
   beforeEach(() => {
-    navigateMock = jest.fn()
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       loading: false,
       error: null,
     })
-    ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
   })
 
   afterEach(() => {
@@ -86,10 +89,13 @@ describe('SnapshotDetailsPage', () => {
 
     await waitFor(() => screen.getByText('Snapshot not found'))
     expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
-    expect(toaster.create).toHaveBeenCalledWith({
+    expect(addToast).toHaveBeenCalledWith({
       description: 'Unable to complete the requested operation.',
       title: 'GraphQL Request Failed',
-      type: 'error',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'danger',
+      variant: 'solid',
     })
   })
 
@@ -108,7 +114,7 @@ describe('SnapshotDetailsPage', () => {
     fireEvent.click(projectCardButton)
 
     await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledWith('/projects/nest')
+      expect(mockRouter.push).toHaveBeenCalledWith('/projects/nest')
     })
   })
 
@@ -127,7 +133,7 @@ describe('SnapshotDetailsPage', () => {
     fireEvent.click(chapterCardButton)
 
     await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledWith('/chapters/sivagangai')
+      expect(mockRouter.push).toHaveBeenCalledWith('/chapters/sivagangai')
     })
   })
 

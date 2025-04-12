@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import Pagination from 'components/Pagination'
-import SkeletonBase from 'components/SkeletonsBase'
+import Pagination from './Pagination'
 import SearchBar from './Search'
-
+import SkeletonBase from './SkeletonsBase'
 interface SearchPageLayoutProps {
   isLoaded: boolean
   totalPages: number
@@ -56,7 +55,7 @@ const SearchPageLayout = ({
         <>
           <div>
             {totalPages !== 0 && <div className="flex justify-end">{sortChildren}</div>}
-            {totalPages === 0 && <div className="text bg:text-white m-4 text-xl">{empty}</div>}
+            {totalPages === 0 && <div className="text m-4 text-xl dark:text-white">{empty}</div>}
             {children}
           </div>
           {totalPages > 1 && (
