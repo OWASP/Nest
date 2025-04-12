@@ -5,6 +5,7 @@ import React, { useEffect, useCallback } from 'react'
 interface AnchorTitleProps {
   href: string
   title: string
+  className?: string
 }
 
 const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {

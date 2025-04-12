@@ -15,10 +15,22 @@ interface RecentIssuesProps {
 const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) => {
   return (
     <ItemCardList
-      title={<AnchorTitle href="#recent-issues" title="Recent Issues" />}
+      title={
+        <div className="flex items-center gap-2">
+          <FontAwesomeIcon
+            icon={faTriangleExclamation}
+            className="relative -top-[8px] h-5 w-5"
+            style={{ verticalAlign: 'middle' }}
+          />
+          <AnchorTitle
+            href="#recent-issues"
+            title="Recent Issues"
+            className="flex items-center leading-none"
+          />
+        </div>
+      }
       data={data}
       showAvatar={showAvatar}
-      icon={faTriangleExclamation}
       renderDetails={(item) => (
         <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
           <div className="mr-4 flex items-center">

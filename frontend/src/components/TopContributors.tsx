@@ -1,10 +1,10 @@
-import { Button } from '@chakra-ui/react'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-
-import { useNavigate } from 'react-router-dom'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 import AnchorTitle from 'components/AnchorTitle'
@@ -23,7 +23,7 @@ const TopContributors = ({
   type: string
   icon?: IconProp
 }) => {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [showAllContributors, setShowAllContributors] = useState(false)
 
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
@@ -37,20 +37,37 @@ const TopContributors = ({
   }
   return (
     <div data-testid="top-contributors">
-      <SecondaryCard icon={icon} title={<AnchorTitle href="#top-contributors" title={label} />}>
+      <SecondaryCard
+        title={
+          <div className="flex items-center gap-2">
+            <FontAwesomeIcon
+              icon={icon}
+              className="relative -top-[8px] h-5 w-5"
+              style={{ verticalAlign: 'middle' }}
+            />
+            <AnchorTitle
+              href="#top-contributors"
+              title={label}
+              className="flex items-center leading-none"
+            />
+          </div>
+        }
+      >
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
           {displayContributors.map((item, index) => (
             <button
               key={index}
-              onClick={() => navigate(`/community/users/${item.login}`)}
+              onClick={() => router.push(`/community/members/${item.login}`)}
               className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
             >
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center gap-2">
-                  <img
-                    alt={item?.name}
-                    className="h-6 w-6 rounded-full"
+                  <Image
                     src={`${item?.avatarUrl}&s=60`}
+                    width={24}
+                    height={24}
+                    alt={item?.name || ''}
+                    className="rounded-full"
                   />
                   <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
                     {capitalize(item.name) || capitalize(item.login)}
@@ -71,8 +88,9 @@ const TopContributors = ({
         </div>
         {contributors.length > maxInitialDisplay && (
           <Button
-            onClick={toggleContributors}
-            className="mt-4 flex items-center text-blue-400 hover:underline"
+            disableAnimation
+            onPress={toggleContributors}
+            className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
           >
             {showAllContributors ? (
               <>

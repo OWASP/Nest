@@ -32,7 +32,7 @@ interface stats {
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
-  geolocationData?: GeoLocDataGraphQL
+  geolocationData?: GeoLocDataGraphQL | null
   heatmap?: JSX.Element
   is_active?: boolean
   languages?: string[]
@@ -54,9 +54,10 @@ export interface DetailsCardProps {
 export interface UserCardProps {
   avatar: string
   button: ButtonType
-  company: string
   className?: string
+  company: string
   email: string
+  followers_count?: number
   location: string
   name: string
 }
