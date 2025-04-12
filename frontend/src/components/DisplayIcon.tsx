@@ -1,9 +1,8 @@
+import { Tooltip } from '@heroui/tooltip'
 import { millify } from 'millify'
 import { IconType } from 'types/icon'
 import { IconKeys, Icons } from 'utils/data'
-import { TooltipRecipe } from 'utils/theme'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { Tooltip } from 'components/ui/tooltip'
 
 export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
   // className for the container
@@ -37,11 +36,10 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
   return icons[item] ? (
     <Tooltip
       content={`${Icons[item as keyof typeof Icons]?.label}`}
-      recipe={TooltipRecipe}
-      openDelay={150}
+      delay={150}
       closeDelay={100}
       showArrow
-      positioning={{ placement: 'top' }}
+      placement="top"
     >
       <div className={containerClassName}>
         {/* Display formatted number if the value is a number */}

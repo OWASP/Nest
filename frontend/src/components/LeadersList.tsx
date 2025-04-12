@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { LeadersListProps } from 'types/leaders'
+import { TruncatedText } from './TruncatedText'
 
 /**
  * Component that renders a list of project leaders as clickable links.
@@ -17,19 +18,20 @@ const LeadersList = ({ leaders }: LeadersListProps) => {
   const leadersArray = leaders.split(',').map((leader) => leader.trim())
 
   return (
-    <>
+    <TruncatedText>
       {leadersArray.map((leader, index) => (
         <span key={`${leader}-${index}`}>
           <Link
-            to={`/community/users?q=${encodeURIComponent(leader)}`}
+            href={`/members?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}
+            className="text-gray-600 hover:underline dark:text-gray-400"
           >
             {leader}
           </Link>
           {index < leadersArray.length - 1 && ', '}
         </span>
       ))}
-    </>
+    </TruncatedText>
   )
 }
 

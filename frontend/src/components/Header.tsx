@@ -1,23 +1,24 @@
-import { Button, Drawer, Portal } from '@chakra-ui/react'
-import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons' // Outline Heart
+'use client'
+import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
 import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
-
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
 
 export default function Header() {
+  const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const location = useLocation()
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
-
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= desktopViewMinWidth) {
@@ -25,10 +26,26 @@ export default function Header() {
       }
     }
 
+    const handleOutsideClick = (event: Event) => {
+      const navbar = document.getElementById('navbar-sticky')
+      const sidebar = document.querySelector('.fixed.inset-y-0')
+      if (
+        mobileMenuOpen &&
+        navbar &&
+        !navbar.contains(event.target as Node) &&
+        sidebar &&
+        !sidebar.contains(event.target as Node)
+      ) {
+        setMobileMenuOpen(false)
+      }
+    }
+
     window.addEventListener('resize', handleResize)
+    window.addEventListener('click', handleOutsideClick)
 
     return () => {
       window.removeEventListener('resize', handleResize)
+      window.removeEventListener('click', handleOutsideClick)
     }
   }, [mobileMenuOpen])
 
@@ -36,66 +53,70 @@ export default function Header() {
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
+        <Link href="/" onClick={() => setMobileMenuOpen(false)}>
           <div className="flex h-full items-center">
-            <img
+            <Image
+              width={64}
+              height={64}
               src={'/img/owasp_icon_white_sm.png'}
-              className="hidden h-16 dark:block"
+              className="hidden dark:block"
               alt="OWASP Logo"
-            ></img>
-            <img
+            />
+            <Image
+              width={64}
+              height={64}
               src={'/img/owasp_icon_black_sm.png'}
-              className="block h-16 dark:hidden"
+              className="block dark:hidden"
               alt="OWASP Logo"
-            ></img>
+            />
             <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
               Nest
             </div>
           </div>
-        </NavLink>
+        </Link>
         {/* Desktop Header Links */}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
           <div className="flex justify-start pl-6">
-            {headerLinks.map((link) => {
+            {headerLinks.map((link, i) => {
               return link.submenu ? (
                 <div
-                  key={link.text}
+                  key={i}
                   className={cn(
                     'dropdown navlink group px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                    link.submenu.map((sub) => sub.href).includes(location.pathname) &&
+                    link.submenu.map((sub) => sub.href).includes(pathname) &&
                       'font-bold text-blue-800 dark:text-white'
                   )}
                 >
                   {link.text}
                   <div className="dropdown-menu group-hover:visible group-hover:opacity-100">
-                    {link.submenu.map((sub) => (
-                      <NavLink
-                        key={link.text}
-                        to={sub.href}
+                    {link.submenu.map((sub, i) => (
+                      <Link
+                        key={i}
+                        href={sub.href || '/'}
                         className={cn(
-                          'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                          location.pathname === sub.href &&
-                            'font-bold text-blue-800 dark:text-white'
+                          'block w-full px-4 py-2 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                          pathname === sub.href &&
+                            'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
                         )}
                         aria-current="page"
                       >
                         {sub.text}
-                      </NavLink>
+                      </Link>
                     ))}
                   </div>
                 </div>
               ) : (
-                <NavLink
+                <Link
                   key={link.text}
-                  to={link.href}
+                  href={link.href || '/'}
                   className={cn(
                     'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                    location.pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                   )}
                   aria-current="page"
                 >
                   {link.text}
-                </NavLink>
+                </Link>
               )
             })}
           </div>
@@ -123,8 +144,8 @@ export default function Header() {
           <ModeToggle />
           <div className="md:hidden">
             <Button
-              onClick={toggleMobileMenu}
-              className="text-slate-300 hover:text-slate-100 focus:outline-none"
+              onPress={toggleMobileMenu}
+              className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-none"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
@@ -136,100 +157,95 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <Drawer.Root
-        size={'xs'}
-        placement={'start'}
-        open={mobileMenuOpen}
-        onInteractOutside={() => setMobileMenuOpen(false)}
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
       >
-        <Drawer.Backdrop />
-        <Portal>
-          <Drawer.Positioner>
-            <Drawer.Content>
-              <Drawer.Body className="bg-owasp-blue dark:bg-slate-800">
-                <div className="flex h-full flex-col justify-between space-y-1 px-2 pb-3 pt-2">
-                  <div className="flex flex-col justify-center gap-1">
-                    <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>
-                      <div className="flex h-full items-center">
-                        <img
-                          src={'/img/owasp_icon_white_sm.png'}
-                          className="hidden h-16 dark:block"
-                          alt="OWASP Logo"
-                        ></img>
-                        <img
-                          src={'/img/owasp_icon_black_sm.png'}
-                          className="block h-16 dark:hidden"
-                          alt="OWASP Logo"
-                        ></img>
-                        <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-                          Nest
-                        </div>
-                      </div>
-                    </NavLink>
-                    {headerLinks.map((link) =>
-                      link.submenu ? (
-                        <div key={link.text} className="flex flex-col">
-                          <div className="block px-3 py-2 font-medium text-slate-700 dark:text-slate-300">
-                            {link.text}
-                          </div>
-                          <div className="ml-4">
-                            {link.submenu.map((sub) => (
-                              <NavLink
-                                key={link.text}
-                                to={sub.href}
-                                className={cn(
-                                  'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                                  location.pathname === sub.href &&
-                                    'font-bold text-blue-800 dark:text-white'
-                                )}
-                                onClick={toggleMobileMenu}
-                              >
-                                {sub.text}
-                              </NavLink>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <NavLink
-                          key={link.text}
-                          to={link.href}
-                          className={cn(
-                            'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                            location.pathname === link.href &&
-                              'font-bold text-blue-800 dark:text-white'
-                          )}
-                          onClick={toggleMobileMenu}
-                        >
-                          {link.text}
-                        </NavLink>
-                      )
-                    )}
+        <div className="flex h-full flex-col justify-between space-y-1 px-2 pb-3 pt-2">
+          {/* Logo */}
+          <div className="flex flex-col justify-center gap-1">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+              <div className="flex h-full items-center">
+                <Image
+                  width={64}
+                  height={64}
+                  src={'/img/owasp_icon_white_sm.png'}
+                  className="hidden h-16 dark:block"
+                  alt="OWASP Logo"
+                />
+                <Image
+                  width={64}
+                  height={64}
+                  src={'/img/owasp_icon_black_sm.png'}
+                  className="block h-16 dark:hidden"
+                  alt="OWASP Logo"
+                />
+                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                  Nest
+                </div>
+              </div>
+            </Link>
+            {headerLinks.map((link) =>
+              link.submenu ? (
+                <div key={link.text} className="flex flex-col">
+                  <div className="block px-3 py-2 font-medium text-slate-700 dark:text-slate-300">
+                    {link.text}
                   </div>
-
-                  <div className="flex flex-col gap-y-2">
-                    <NavButton
-                      href="https://github.com/OWASP/Nest"
-                      defaultIcon={faRegularStar}
-                      hoverIcon={faSolidStar}
-                      defaultIconColor="#FDCE2D"
-                      hoverIconColor="text-yellow-400"
-                      text="Star On Github"
-                    />
-                    <NavButton
-                      href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-                      defaultIcon={faRegularHeart}
-                      hoverIcon={faSolidHeart}
-                      defaultIconColor="#b55f95"
-                      hoverIconColor="#d9156c"
-                      text="Sponsor Us"
-                    />
+                  <div className="ml-4">
+                    {link.submenu.map((sub, i) => (
+                      <Link
+                        key={i}
+                        href={sub.href || '/'}
+                        className={cn(
+                          'block w-full px-4 py-2 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                          pathname === sub.href &&
+                            'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
+                        )}
+                        onClick={toggleMobileMenu}
+                      >
+                        {sub.text}
+                      </Link>
+                    ))}
                   </div>
                 </div>
-              </Drawer.Body>
-            </Drawer.Content>
-          </Drawer.Positioner>
-        </Portal>
-      </Drawer.Root>
+              ) : (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  onClick={toggleMobileMenu}
+                >
+                  {link.text}
+                </Link>
+              )
+            )}
+          </div>
+
+          <div className="flex flex-col gap-y-2">
+            <NavButton
+              href="https://github.com/OWASP/Nest"
+              defaultIcon={faRegularStar}
+              hoverIcon={faSolidStar}
+              defaultIconColor="#FDCE2D"
+              hoverIconColor="text-yellow-400"
+              text="Star On Github"
+            />
+            <NavButton
+              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+              defaultIcon={faRegularHeart}
+              hoverIcon={faSolidHeart}
+              defaultIconColor="#b55f95"
+              hoverIconColor="#d9156c"
+              text="Sponsor Us"
+            />
+          </div>
+        </div>
+      </div>
     </header>
   )
 }

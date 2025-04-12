@@ -12,11 +12,11 @@ from apps.slack.constants import (
 
 
 class TestHomeActions:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         return MagicMock()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_body(self):
         return {
             "user": {"id": "U123456"},

@@ -11,16 +11,21 @@ COMMAND = "/community"
 
 
 def community_handler(ack, command, client):
-    """Slack /community command handler."""
+    """Handle the Slack /community command.
+
+    Args:
+        ack (function): Acknowledge the Slack command request.
+        command (dict): The Slack command payload.
+        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+
+    """
     ack()
 
     if not settings.SLACK_COMMANDS_ENABLED:
         return
 
     blocks = [
-        markdown(
-            f"Please visit <https://nest.owasp.dev/community/users/|OWASP community> page{NL}"
-        ),
+        markdown(f"Please visit <https://nest.owasp.dev/members/|OWASP community> page{NL}"),
     ]
 
     conversation = client.conversations_open(users=command["user_id"])

@@ -18,7 +18,7 @@ export interface HeatmapData {
   contributions: []
 }
 
-const getIntensity = (count) => {
+const getIntensity = (count: number) => {
   if (count === 0) return '0'
   if (count <= 4) return '1'
   if (count <= 8) return '2'
@@ -26,23 +26,37 @@ const getIntensity = (count) => {
   return '4'
 }
 
-export const fetchHeatmapData = async (username) => {
+interface HeatmapContribution {
+  date: string
+  count: number
+  intensity: string
+}
+
+interface HeatmapResponse {
+  years: { year: string }[]
+  contributions: HeatmapContribution[]
+}
+
+export const fetchHeatmapData = async (username: string): Promise<HeatmapResponse | string> => {
   try {
     const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}`)
-    const heatmapData = await response.json()
+    const heatmapData: { contributions: { date: string; count: number }[] } = await response.json()
     if (!heatmapData.contributions) {
-      return {}
+      return {
+        years: [],
+        contributions: [],
+      }
     }
     heatmapData.contributions = heatmapData.contributions.filter(
       (item) => new Date(item.date) <= endDate && new Date(item.date) >= startDate
     )
 
-    const allDates = []
+    const allDates: string[] = []
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       allDates.push(format(d, 'yyyy-MM-dd'))
     }
 
-    const transformedContributions = allDates.map((date) => {
+    const transformedContributions: HeatmapContribution[] = allDates.map((date) => {
       const contribution = heatmapData.contributions.find((c) => c.date === date)
       return contribution
         ? {
@@ -66,7 +80,7 @@ export const fetchHeatmapData = async (username) => {
       contributions: transformedContributions,
     }
   } catch (err) {
-    return err.message
+    return err instanceof Error ? err.message : 'An unknown error occurred'
   }
 }
 // The code below is a modified version of 'github-contributions-canvas'
@@ -208,8 +222,8 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       if (isAfter(cellDate, endDate) || !day.info) {
         continue
       }
-      // @ts-ignore
-      const color = theme[`grade${day.info.intensity}`]
+      const intensityKey = `grade${day.info.intensity}` as keyof Theme
+      const color = theme[intensityKey]
       ctx.fillStyle = color
       const cellX = offsetX + (boxWidth + boxMargin) * x
       const cellY = offsetY + textHeight + (boxWidth + boxMargin) * y

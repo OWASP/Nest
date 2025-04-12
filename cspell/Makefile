@@ -15,10 +15,10 @@ cspell-run:
 		--rm \
 		cspell -c cspell/cspell.json "$(CMD)"
 
-cspell-update-deps: cspell-install
+update-cspell-dependencies: cspell-install
 	@-docker run \
 		--mount type=bind,src="$(PWD)",dst=/nest \
 		--entrypoint=/bin/sh \
 		--workdir=/nest/cspell \
 		--rm \
-		cspell -c "npm install && npm upgrade && rm -rf ./node_modules"
+		cspell -c "pnpm install && pnpm upgrade && rm -rf ./node_modules"
