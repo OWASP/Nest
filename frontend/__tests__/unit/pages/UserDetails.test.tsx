@@ -5,7 +5,7 @@ import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
-import UserDetailsPage from 'app/community/users/[userKey]/page'
+import UserDetailsPage from 'app/members/[memberKey]/page'
 
 // Mock Apollo Client
 jest.mock('@apollo/client', () => ({

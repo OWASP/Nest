@@ -1,4 +1,4 @@
-import { faCalendar, faFileCode } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -20,7 +20,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
   showSingleColumn = false,
 }) => {
   return (
-    <SecondaryCard icon={faFileCode} title="Recent Releases">
+    <SecondaryCard icon={faTag} title="Recent Releases">
       {data && data.length > 0 ? (
         <div
           className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
@@ -32,7 +32,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   {showAvatar && (
                     <Link
                       className="flex-shrink-0 text-blue-400 hover:underline"
-                      href={`/community/users/${item?.author?.login}`}
+                      href={`/members/${item?.author?.login}`}
                     >
                       <Image
                         alt={item?.author?.name || 'author'}
@@ -59,7 +59,12 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(item.publishedAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <span>{item.repositoryName}</span>
+                    <Link
+                      className="text-gray-600 hover:underline dark:text-gray-400"
+                      href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+                    >
+                      <span>{item.repositoryName}</span>
+                    </Link>
                   </div>
                 </div>
               </div>

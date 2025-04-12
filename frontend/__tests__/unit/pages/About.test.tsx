@@ -186,7 +186,7 @@ describe('About Component', () => {
       expect(screen.getByText('Top Contributors')).toBeInTheDocument()
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
@@ -194,7 +194,7 @@ describe('About Component', () => {
     render(<About />)
     await waitFor(() => {
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
     const contributorsSection = screen
@@ -212,7 +212,7 @@ describe('About Component', () => {
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
@@ -406,7 +406,7 @@ describe('About Component', () => {
           avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
           company: 'OWASP',
           // name is missing
-          url: '/community/users/arkid15r',
+          url: '/members/arkid15r',
         },
       },
       loading: false,
