@@ -40,7 +40,7 @@ class IndexRegistry:
 
     def __init__(self) -> None:
         """Initialize index registry."""
-        self.excluded_local_index_names = set()
+        self.excluded_local_index_names: set = set()
         self.load_excluded_local_index_names()
 
     @classmethod

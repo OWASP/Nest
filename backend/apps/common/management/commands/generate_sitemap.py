@@ -1,6 +1,6 @@
 """Management command to generate OWASP Nest sitemap."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from django.conf import settings
@@ -172,7 +172,7 @@ class Command(BaseCommand):
 
         """
         urls = []
-        lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        lastmod = datetime.now(UTC).strftime("%Y-%m-%d")
 
         for route in routes:
             url_entry = {
@@ -196,7 +196,7 @@ class Command(BaseCommand):
 
         """
         sitemaps = []
-        lastmod = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        lastmod = datetime.now(UTC).strftime("%Y-%m-%d")
 
         for sitemap_file in sitemap_files:
             sitemap_entry = {"loc": f"{settings.SITE_URL}/{sitemap_file}", "lastmod": lastmod}

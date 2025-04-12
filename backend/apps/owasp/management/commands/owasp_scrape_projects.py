@@ -62,8 +62,8 @@ class Command(BaseCommand):
                 }
             )
 
-            invalid_urls = set()
-            related_urls = set()
+            invalid_urls: set[str] = set()
+            related_urls: set[str] = set()
             for scraped_url in scraped_urls:
                 verified_url = scraper.verify_url(scraped_url)
                 if not verified_url:

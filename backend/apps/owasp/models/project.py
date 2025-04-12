@@ -245,7 +245,7 @@ class Project(
         return IndexBase.get_total_count("projects", search_filters="idx_is_active:true")
 
     @staticmethod
-    def bulk_save(projects: list, fields: list | None = None) -> None:
+    def bulk_save(projects: list, fields: list | None = None) -> None:  # type: ignore[override]
         """Bulk save projects.
 
         Args:

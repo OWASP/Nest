@@ -94,7 +94,7 @@ class PullRequest(GenericIssueModel):
         super().save(*args, **kwargs)
 
     @staticmethod
-    def bulk_save(pull_requests, fields=None) -> None:
+    def bulk_save(pull_requests, fields=None) -> None:  # type: ignore[override]
         """Bulk save pull requests."""
         BulkSaveModel.bulk_save(PullRequest, pull_requests, fields=fields)
 

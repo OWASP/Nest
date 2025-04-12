@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from django.conf import settings
 from django.template.defaultfilters import pluralize
@@ -77,9 +77,9 @@ def natural_date(value: int | str) -> str:
 
     """
     if isinstance(value, str):
-        dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=UTC)
     elif isinstance(value, int):
-        dt = datetime.fromtimestamp(value, tz=timezone.utc)
+        dt = datetime.fromtimestamp(value, tz=UTC)
     else:
         dt = value
 

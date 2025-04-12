@@ -16,7 +16,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_companies(self) -> str:
         """Return companies for indexing."""
-        return join_values(fields=(o.company for o in self.organizations.all()))
+        return join_values(fields=[o.company for o in self.organizations.all()])
 
     @property
     def idx_contributors_count(self) -> int:
@@ -71,7 +71,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_organizations(self) -> str:
         """Return organizations for indexing."""
-        return join_values(fields=(o.name for o in self.organizations.all()))
+        return join_values(fields=[o.name for o in self.organizations.all()])
 
     @property
     def idx_repositories(self) -> list[dict]:
@@ -104,7 +104,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_top_contributors(self) -> list:
         """Return top contributors for indexing."""
-        return super().get_top_contributors(repositories=self.repositories.all())
+        return self.get_top_contributors(repositories=self.repositories.all())
 
     @property
     def idx_type(self) -> str:

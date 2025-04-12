@@ -51,9 +51,9 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
                 setattr(self, model_field, value)
 
     @staticmethod
-    def bulk_save(labels) -> None:
+    def bulk_save(labels, fields=None) -> None:  # type: ignore[override]
         """Bulk save labels."""
-        BulkSaveModel.bulk_save(Label, labels)
+        BulkSaveModel.bulk_save(Label, labels, fields=fields)
 
     @staticmethod
     def update_data(gh_label, *, save: bool = True) -> "Label":

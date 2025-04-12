@@ -73,12 +73,15 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         return self.SponsorType(self.sponsor_type).label
 
     @staticmethod
-    def bulk_save(sponsors: list[Sponsor], fields: list[str] | None = None) -> None:
+    def bulk_save(  # type: ignore[override]
+        sponsors: list[Sponsor],
+        fields: tuple[str, ...] | None = None,
+    ) -> None:
         """Bulk save sponsors.
 
         Args:
             sponsors (list[Sponsor]): List of Sponsor instances to save.
-            fields (list[str], optional): List of fields to update.
+            fields (tuple[str], optional): Tuple of fields to update.
 
         """
         BulkSaveModel.bulk_save(Sponsor, sponsors, fields=fields)

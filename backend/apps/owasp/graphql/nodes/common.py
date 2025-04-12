@@ -1,5 +1,7 @@
 """OWASP common GraphQL node."""
 
+from __future__ import annotations
+
 import graphene
 
 from apps.common.graphql.nodes import BaseNode

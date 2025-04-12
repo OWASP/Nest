@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 sort="created",
                 direction="desc",
             )
-            gh_repositories_count = gh_repositories.totalCount
+            gh_repositories_count = gh_repositories.totalCount  # type: ignore[attr-defined]
 
         for idx, gh_repository in enumerate(gh_repositories[offset:]):
             prefix = f"{idx + offset + 1} of {gh_repositories_count}"

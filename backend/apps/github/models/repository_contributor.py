@@ -68,7 +68,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 setattr(self, model_field, value)
 
     @staticmethod
-    def bulk_save(repository_contributors) -> None:
+    def bulk_save(repository_contributors) -> None:  # type: ignore[override]
         """Bulk save repository contributors."""
         BulkSaveModel.bulk_save(RepositoryContributor, repository_contributors)
 

@@ -66,7 +66,6 @@ format_css = true
 format_js = true
 indent = 4
 
-
 [tool.pytest.ini_options]
 DJANGO_CONFIGURATION = "Test"
 DJANGO_SETTINGS_MODULE = "settings.test"
@@ -89,20 +88,21 @@ filterwarnings = [
 log_level = "INFO"
 
 [tool.mypy]
-disable_error_code = [
-    "attr-defined",
-    "import-not-found",
-    "var-annotated",
-]
+explicit_package_bases = true
 ignore_missing_imports = true
 mypy_path = "backend"
 
 [[tool.mypy.overrides]]
-module = "backend.apps.*.migrations.*"
+disable_error_code = ["attr-defined"]
+module = ["apps.*.models.mixins.*", "apps.*.admin", "schema.tests.*"]
+
+[[tool.mypy.overrides]]
 disable_error_code = ["var-annotated"]
+module = ["apps.*.migrations.*"]
 
 [tool.ruff]
 line-length = 99
+target-version = "py313"
 
 [tool.ruff.lint]
 extend-select = ["I"]
@@ -141,7 +141,6 @@ select = ["ALL"]
 "**/models.py" = ["D106"]
 "**/models/*.py" = ["D106"]
 "**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
-
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

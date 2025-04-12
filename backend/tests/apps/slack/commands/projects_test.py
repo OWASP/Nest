@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -61,7 +61,7 @@ class TestProjectsHandler:
 
     def test_projects_handler_with_results(self, mock_get_projects, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
-        test_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
+        test_date = datetime(2024, 1, 1, tzinfo=UTC)
         mock_get_projects.return_value = {
             "hits": [
                 {

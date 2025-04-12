@@ -1,5 +1,7 @@
 """GitHub repository mixins."""
 
+from __future__ import annotations
+
 from typing import Any
 
 from apps.github.models.repository_contributor import (

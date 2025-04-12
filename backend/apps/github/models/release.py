@@ -96,9 +96,9 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         self.repository = repository
 
     @staticmethod
-    def bulk_save(releases) -> None:
+    def bulk_save(releases, fields=None) -> None:  # type: ignore[override]
         """Bulk save releases."""
-        BulkSaveModel.bulk_save(Release, releases)
+        BulkSaveModel.bulk_save(Release, releases, fields=fields)
 
     @staticmethod
     def update_data(gh_release, author=None, repository=None, *, save: bool = True) -> "Release":

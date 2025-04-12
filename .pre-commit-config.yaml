@@ -48,9 +48,6 @@ repos:
           - types-PyYAML
           - types-requests
         args:
-          - --exclude
-          - backend/tests
-          - --explicit-package-bases
           - --config-file
           - backend/pyproject.toml
 

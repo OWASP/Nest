@@ -66,7 +66,7 @@ class Committee(
         return IndexBase.get_total_count("committees")
 
     @staticmethod
-    def bulk_save(committees, fields=None) -> None:
+    def bulk_save(committees, fields=None) -> None:  # type: ignore[override]
         """Bulk save committees."""
         BulkSaveModel.bulk_save(Committee, committees, fields=fields)
 

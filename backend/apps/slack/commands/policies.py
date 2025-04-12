@@ -80,9 +80,9 @@ def policies_handler(ack, command: dict, client: WebClient) -> None:
         ),
     ]
 
-    policies = NL.join(f"  • <{url}|{title}>" for title, url in policies)
+    policies_block = NL.join(f"  • <{url}|{title}>" for title, url in policies)
     blocks = [
-        markdown(f"Important OWASP policies:{NL}{policies}"),
+        markdown(f"Important OWASP policies:{NL}{policies_block}"),
         divider(),
         markdown(
             "Please visit <https://owasp.org/www-policy/|OWASP policies> page for more "

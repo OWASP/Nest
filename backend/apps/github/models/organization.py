@@ -59,7 +59,7 @@ class Organization(
         return set(Organization.objects.values_list("login", flat=True))
 
     @staticmethod
-    def bulk_save(organizations) -> None:
+    def bulk_save(organizations) -> None:  # type: ignore[override]
         """Bulk save organizations."""
         BulkSaveModel.bulk_save(Organization, organizations)
 

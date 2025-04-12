@@ -60,7 +60,7 @@ def check_funding_policy_compliance(platform, target):
 def get_repository_file_content(
     url: str,
     timeout: None | float | tuple[float, None] | tuple[float, float] = 30,
-) -> str | None:
+) -> str:
     """Get the content of a file from a repository.
 
     Args:
@@ -75,7 +75,7 @@ def get_repository_file_content(
         return requests.get(url, timeout=timeout).text
     except RequestException as e:
         logger.exception("Failed to fetch file", extra={"URL": url, "error": str(e)})
-        return None
+        return ""
 
 
 def get_repository_path(url: str) -> str | None:

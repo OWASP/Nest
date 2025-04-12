@@ -163,7 +163,7 @@ class Issue(GenericIssueModel):
         super().save(*args, **kwargs)
 
     @staticmethod
-    def bulk_save(issues, fields=None) -> None:
+    def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
         """Bulk save issues."""
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
 

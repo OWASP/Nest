@@ -144,11 +144,11 @@ class Chapter(
 
         """
         return join_values(
-            (
+            [
                 self.name.replace("OWASP", "").strip() if include_name else "",
                 self.country,
                 self.postal_code,
-            ),
+            ],
             delimiter=", ",
         )
 
@@ -169,7 +169,10 @@ class Chapter(
         super().save(*args, **kwargs)
 
     @staticmethod
-    def bulk_save(chapters: list, fields: list | None = None) -> None:
+    def bulk_save(  # type: ignore[override]
+        chapters: list[Chapter],
+        fields: tuple[str, ...] | None = None,
+    ) -> None:
         """Bulk save chapters.
 
         Args:

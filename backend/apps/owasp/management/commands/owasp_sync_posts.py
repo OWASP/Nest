@@ -74,13 +74,12 @@ class Command(BaseCommand):
             if not post_content.startswith("---"):
                 continue
 
-            metadata = {}
             try:
                 if match := yaml_pattern.search(post_content):
                     metadata_yaml = match.group(1)
                     metadata = yaml.safe_load(metadata_yaml) or {}
             except yaml.scanner.ScannerError:
-                pass
+                metadata = {}
 
             data = {
                 "author_image_url": self.get_author_image_url(metadata.get("author_image", "")),

@@ -68,7 +68,7 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_top_contributors(self) -> list:
         """Return top contributors for indexing."""
-        return super().get_top_contributors(repositories=[self.owasp_repository])
+        return self.get_top_contributors(repositories=[self.owasp_repository])
 
     @property
     def idx_updated_at(self) -> float:

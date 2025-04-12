@@ -128,7 +128,7 @@ def get_staff_data(
         return None
 
 
-def get_events_data() -> QuerySet | None:
+def get_events_data() -> QuerySet:
     """Get events data.
 
     Returns
@@ -137,11 +137,7 @@ def get_events_data() -> QuerySet | None:
     """
     from apps.owasp.models.event import Event
 
-    try:
-        return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
-    except Exception as e:
-        logger.exception("Failed to fetch events data via database", extra={"error": str(e)})
-        return None
+    return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
 
 
 def get_sponsors_data(limit: int = 10) -> QuerySet | None:

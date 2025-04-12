@@ -52,7 +52,9 @@ class TestNewsHandler:
                 if mock_get_news_data.return_value:
                     assert blocks[0]["text"]["text"] == f"*:newspaper: Latest OWASP news:*{NL}"
                     news_blocks = blocks[1 : 1 + len(mock_get_news_data.return_value)]
-                    for item, block in zip(mock_get_news_data.return_value, news_blocks):
+                    for item, block in zip(
+                        mock_get_news_data.return_value, news_blocks, strict=False
+                    ):
                         expected = f"  • *<{item['url']}|{item['title']}>* by {item['author']}"
                         assert block["text"]["text"] == expected
                     assert blocks[-2]["type"] == "divider"

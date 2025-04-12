@@ -72,7 +72,10 @@ class Event(BulkSaveModel, TimestampedModel):
         )
 
     @staticmethod
-    def bulk_save(events: list, fields: list | None = None) -> None:
+    def bulk_save(  # type: ignore[override]
+        events: list,
+        fields: tuple[str, ...] | None = None,
+    ) -> None:
         """Bulk save events.
 
         Args:
