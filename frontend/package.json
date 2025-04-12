@@ -74,7 +74,7 @@
     "@types/leaflet.markercluster": "^1.5.5",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.17.30",
-    "@types/react": "^19.1.0",
+    "@types/react": "^19.1.1",
     "@types/react-dom": "^19.1.2",
     "@types/react-gtm-module": "^2.0.4",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
