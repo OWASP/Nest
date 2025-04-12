@@ -37,47 +37,47 @@ Before contributing, ensure you have the following installed:
 
 ### Frontend
 
-#### `VITE_API_URL`
+#### `NEXT_PUBLIC_API_URL`
 - **Description**: The base URL for the application's REST API.
 - **Example Value**: `http://localhost:8000/api/v1/`
 - **Usage**: Used to make API requests to the backend.
 
-#### `VITE_ENVIRONMENT`
+#### `NEXT_PUBLIC_ENVIRONMENT`
 - **Description**: Specifies the current environment in which the application is running.
 - **Example Value**: `local`, `staging`, `production`
 - **Usage**: Helps in differentiating between environments for debugging or feature toggling.
 
-#### `VITE_GRAPHQL_URL`
+#### `NEXT_PUBLIC_GRAPHQL_URL`
 - **Description**: The endpoint for the GraphQL API.
 - **Example Value**: `http://localhost:8000/graphql/`
 - **Usage**: Used for making GraphQL queries and mutations.
 
-#### `VITE_GTM_AUTH`
+#### `NEXT_PUBLIC_GTM_AUTH`
 - **Description**: Authentication token for Google Tag Manager (GTM).
 - **Example Value**: `your-google-tag-manager-auth`
 - **Usage**: Enables secure integration with GTM.
 
-#### `VITE_GTM_ID`
+#### `NEXT_PUBLIC_GTM_ID`
 - **Description**: The unique ID for the Google Tag Manager container.
 - **Example Value**: `your-google-tag-manager-id`
 - **Usage**: Identifies the GTM container for tracking and analytics.
 
-#### `VITE_GTM_PREVIEW`
+#### `NEXT_PUBLIC_GTM_PREVIEW`
 - **Description**: Used for previewing GTM configurations.
 - **Example Value**: *(Empty by default)*
 - **Usage**: Optional, used during GTM debugging or testing.
 
-#### `VITE_IDX_URL`
+#### `NEXT_PUBLIC_IDX_URL`
 - **Description**: The base URL for IDX (Indexing Service).
 - **Example Value**: `http://localhost:8000/idx/`
 - **Usage**: Used for accessing indexing-related services.
 
-#### `VITE_RELEASE_VERSION`
+#### `NEXT_PUBLIC_RELEASE_VERSION`
 - **Description**: The current release version of the application.
 - **Example Value**: *(Empty by default)*
 - **Usage**: Helps in tracking the deployed version for debugging or monitoring.
 
-#### `VITE_SENTRY_DSN`
+#### `NEXT_PUBLIC_SENTRY_DSN`
 - **Description**: The Data Source Name (DSN) for Sentry error tracking.
 - **Example Value**: *(Empty by default)*
 - **Usage**: Enables integration with Sentry for logging and monitoring errors.
