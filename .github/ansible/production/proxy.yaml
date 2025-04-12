@@ -13,10 +13,16 @@
           dest: ~/production.conf
           mode: '0644'
 
-      - name: Copy security.conf
+      - name: Copy headers.conf
         ansible.builtin.copy:
-          src: '{{ github_workspace }}/proxy/security.conf'
-          dest: ~/security.conf
+          src: '{{ github_workspace }}/proxy/headers.conf'
+          dest: ~/headers.conf
+          mode: '0644'
+
+      - name: Copy redirects.conf
+        ansible.builtin.copy:
+          src: '{{ github_workspace }}/proxy/redirects.conf'
+          dest: ~/redirects.conf
           mode: '0644'
 
       - name: Update Docker images

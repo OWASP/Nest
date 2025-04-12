@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next'
 
+const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -22,7 +24,7 @@ const nextConfig: NextConfig = {
     ],
   },
   devIndicators: false,
-  output: 'standalone',
+  ...(isLocal ? {} : { output: 'standalone' }),
 }
 
 export default nextConfig
