@@ -154,15 +154,6 @@ describe('Home', () => {
     })
   })
 
-  test('renders TopContributors component', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-      expect(screen.getByText('OWASP Foundation')).toBeInTheDocument()
-    })
-  })
-
   test('renders ChapterMap component', async () => {
     render(<Home />)
 

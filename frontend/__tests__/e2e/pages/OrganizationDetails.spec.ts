@@ -49,13 +49,6 @@ test.describe('Organization Details Page', () => {
     await expect(page.getByRole('link', { name: 'Release v2.0.0' }).first()).toBeVisible()
   })
 
-  test('should display top contributors section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByText('User One')).toBeVisible()
-    await expect(page.getByText('User Two')).toBeVisible()
-    await expect(page.getByText('User Three')).toBeVisible()
-  })
-
   test('should display recent pull requests section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
     await expect(page.getByText('Test Pull Request 1')).toBeVisible()

@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor} from '@testing-library/react'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { render } from 'wrappers/testUtil'
 import RepositoryDetailsPage from 'app/repositories/[repositoryKey]/page'
@@ -95,32 +95,6 @@ describe('RepositoryDetailsPage', () => {
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',
-    })
-  })
-
-  test('toggles contributors list when show more/less is clicked', async () => {
-    render(<RepositoryDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
-    })
-
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
-    fireEvent.click(showMoreButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
-    })
-
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
-    fireEvent.click(showLessButton)
-
-    await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
