@@ -24,7 +24,7 @@ const UsersPage = () => {
   const router = useRouter()
 
   const handleButtonClick = (user: User) => {
-    router.push(`/community/members/${user.key}`)
+    router.push(`/members/${user.key}`)
   }
 
   const renderUserCard = (user: User) => {

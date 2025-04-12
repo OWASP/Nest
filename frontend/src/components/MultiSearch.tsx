@@ -115,7 +115,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           router.push(`/projects/${suggestion.key}`)
           break
         case 'users':
-          router.push(`/community/members/${suggestion.key}`)
+          router.push(`/members/${suggestion.key}`)
           break
       }
     },

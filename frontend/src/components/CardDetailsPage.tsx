@@ -58,7 +58,7 @@ const DetailsCard = ({
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
-                <div key={detail.label} className="pb-1">
+                <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
                   <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
@@ -117,7 +117,7 @@ const DetailsCard = ({
         {topContributors && (
           <TopContributors
             contributors={topContributors}
-            maxInitialDisplay={6}
+            maxInitialDisplay={9}
             type="contributor"
           />
         )}

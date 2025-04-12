@@ -26,9 +26,7 @@ def community_handler(ack, command: dict, client: WebClient) -> None:
         return
 
     blocks = [
-        markdown(
-            f"Please visit <https://nest.owasp.dev/community/members/|OWASP community> page{NL}"
-        ),
+        markdown(f"Please visit <https://nest.owasp.dev/members/|OWASP community> page{NL}"),
     ]
 
     conversation = client.conversations_open(users=command["user_id"])

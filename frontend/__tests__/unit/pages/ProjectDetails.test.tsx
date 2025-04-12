@@ -99,8 +99,8 @@ describe('ProjectDetailsPage', () => {
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
     const contributorsSection = screen
@@ -118,7 +118,7 @@ describe('ProjectDetailsPage', () => {
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
@@ -130,7 +130,7 @@ describe('ProjectDetailsPage', () => {
 
     screen.getByText('Contributor 1').closest('button')?.click()
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/community/members/contributor1')
+    expect(mockRouter.push).toHaveBeenCalledWith('/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {
