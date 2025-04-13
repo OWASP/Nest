@@ -304,7 +304,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center">
                     <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                    <span>{post.authorName}</span>
+                    <LeadersList leaders={String(post.authorName)} />
                   </div>
                 </div>
               </div>
