@@ -1,5 +1,6 @@
 'use client'
 import { useQuery } from '@apollo/client'
+import { faMapSigns, faHistory, faUsers, faTools, faCrown } from '@fortawesome/free-solid-svg-icons'
 import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -63,31 +64,36 @@ const About = () => {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
-        <SecondaryCard title="History">
+        <SecondaryCard icon={faHistory} title="History">
           {aboutText.map((text) => (
             <div key={text} className="mb-4">
-              <Markdown key={text} content={text} />
+              <div key={text}>
+                <Markdown content={text} />
+              </div>
             </div>
           ))}
         </SecondaryCard>
 
-        <SecondaryCard title="Leaders">
+        <SecondaryCard icon={faCrown} title="Leaders">
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
             {leaders.map((username) => (
-              <LeaderData key={username} username={username} />
+              <div key={username}>
+                <LeaderData username={username} />
+              </div>
             ))}
           </div>
         </SecondaryCard>
 
         {project.topContributors && (
           <TopContributors
+            icon={faUsers}
             contributors={project.topContributors}
             maxInitialDisplay={9}
             type="contributor"
           />
         )}
 
-        <SecondaryCard title="Technologies & Tools">
+        <SecondaryCard icon={faTools} title="Technologies & Tools">
           <div className="w-full">
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
@@ -120,7 +126,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard title="Roadmap">
+        <SecondaryCard icon={faMapSigns} title="Roadmap">
           <ul>
             {roadmap.map((item) => (
               <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
@@ -144,12 +150,14 @@ const About = () => {
             { label: 'Contributors', value: project.contributorsCount },
             { label: 'Issues', value: project.issuesCount },
           ].map((stat, index) => (
-            <SecondaryCard key={index} className="text-center">
-              <div className="mb-2 text-3xl font-bold text-blue-400">
-                <AnimatedCounter end={Math.floor(stat.value / 5) * 5} duration={2} />+
-              </div>
-              <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
-            </SecondaryCard>
+            <div key={index}>
+              <SecondaryCard className="text-center">
+                <div className="mb-2 text-3xl font-bold text-blue-400">
+                  <AnimatedCounter end={Math.floor(stat.value / 5) * 5} duration={2} />+
+                </div>
+                <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
+              </SecondaryCard>
+            </div>
           ))}
         </div>
       </div>

@@ -1,3 +1,12 @@
+import {
+  faFileAlt,
+  faChartBar,
+  faChartPie,
+  faFolderOpen,
+  faCode,
+  faTags,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
@@ -43,16 +52,25 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard title="Summary">
+          <SecondaryCard icon={faFileAlt} title="Summary">
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
-        {userSummary && <SecondaryCard title="Summary">{userSummary}</SecondaryCard>}
+        {userSummary && (
+          <SecondaryCard icon={faFileAlt} title="Summary">
+            {userSummary}
+          </SecondaryCard>
+        )}
 
-        {heatmap && <SecondaryCard title="Contribution Heatmap">{heatmap}</SecondaryCard>}
+        {heatmap && (
+          <SecondaryCard icon={faChartBar} title="Contribution Heatmap">
+            {heatmap}
+          </SecondaryCard>
+        )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
+            icon={faFileAlt}
             title={`${capitalize(type)} Details`}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
@@ -77,7 +95,7 @@ const DetailsCard = ({
             type === 'committee' ||
             type === 'user' ||
             type === 'organization') && (
-            <SecondaryCard title="Statistics" className="md:col-span-2">
+            <SecondaryCard icon={faChartPie} title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock
                   className="pb-1"
@@ -110,12 +128,15 @@ const DetailsCard = ({
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages.length !== 0 && (
+              <ToggleableList items={languages} icon={faCode} label="Languages" />
+            )}
+            {topics.length !== 0 && <ToggleableList items={topics} icon={faTags} label="Topics" />}
           </div>
         )}
         {topContributors && (
           <TopContributors
+            icon={faUsers}
             contributors={topContributors}
             maxInitialDisplay={9}
             type="contributor"
@@ -143,7 +164,7 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard title="Repositories" className="mt-6">
+            <SecondaryCard icon={faFolderOpen} title="Repositories" className="mt-6">
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
