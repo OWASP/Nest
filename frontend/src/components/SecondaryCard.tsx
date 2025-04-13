@@ -8,7 +8,7 @@ const SecondaryCard = ({
   children = null,
   className = '',
 }: {
-  title?: string
+  title?: React.ReactNode
   icon?: IconProp
   children?: React.ReactNode
   className?: string

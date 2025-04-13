@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
+import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from './SecondaryCard'
 
 const TopContributors = ({
@@ -35,58 +36,75 @@ const TopContributors = ({
     return
   }
   return (
-    <SecondaryCard icon={icon} title={label}>
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
-        {displayContributors.map((item, index) => (
-          <button
-            key={index}
-            onClick={() => router.push(`/members/${item.login}`)}
-            className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-          >
-            <div className="flex w-full flex-col justify-between">
-              <div className="flex w-full items-center gap-2">
-                <Image
-                  src={`${item?.avatarUrl}&s=60`}
-                  width={24}
-                  height={24}
-                  alt={item?.name || ''}
-                  className="rounded-full"
-                />
-                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
-                  {capitalize(item.name) || capitalize(item.login)}
-                </h3>
-              </div>
-              <div className="ml-0.5 w-full">
-                <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-400">
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                    {type === 'contributor'
-                      ? `${item.contributionsCount ?? 0} contributions`
-                      : item.projectName}
-                  </span>
+    <div data-testid="top-contributors">
+      <SecondaryCard
+        title={
+          <div className="flex items-center gap-2">
+            <FontAwesomeIcon
+              icon={icon}
+              className="relative -top-[8px] h-5 w-5"
+              style={{ verticalAlign: 'middle' }}
+            />
+            <AnchorTitle
+              href="#top-contributors"
+              title={label}
+              className="flex items-center leading-none"
+            />
+          </div>
+        }
+      >
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
+          {displayContributors.map((item, index) => (
+            <button
+              key={index}
+              onClick={() => router.push(`/members/${item.login}`)}
+              className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+            >
+              <div className="flex w-full flex-col justify-between">
+                <div className="flex w-full items-center gap-2">
+                  <Image
+                    src={`${item?.avatarUrl}&s=60`}
+                    width={24}
+                    height={24}
+                    alt={item?.name || ''}
+                    className="rounded-full"
+                  />
+                  <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
+                    {capitalize(item.name) || capitalize(item.login)}
+                  </h3>
+                </div>
+                <div className="ml-0.5 w-full">
+                  <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-400">
+                    <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                      {type === 'contributor'
+                        ? `${item.contributionsCount ?? 0} contributions`
+                        : item.projectName}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </button>
-        ))}
-      </div>
-      {contributors.length > maxInitialDisplay && (
-        <Button
-          disableAnimation
-          onPress={toggleContributors}
-          className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
-        >
-          {showAllContributors ? (
-            <>
-              Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-            </>
-          ) : (
-            <>
-              Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-            </>
-          )}
-        </Button>
-      )}
-    </SecondaryCard>
+            </button>
+          ))}
+        </div>
+        {contributors.length > maxInitialDisplay && (
+          <Button
+            disableAnimation
+            onPress={toggleContributors}
+            className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
+          >
+            {showAllContributors ? (
+              <>
+                Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
+              </>
+            ) : (
+              <>
+                Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
+              </>
+            )}
+          </Button>
+        )}
+      </SecondaryCard>
+    </div>
   )
 }
 

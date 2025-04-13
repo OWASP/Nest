@@ -5,6 +5,7 @@ import Link from 'next/link'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
+import AnchorTitle from './AnchorTitle'
 import SecondaryCard from './SecondaryCard'
 import { TruncatedText } from './TruncatedText'
 
@@ -20,7 +21,22 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
   showSingleColumn = false,
 }) => {
   return (
-    <SecondaryCard icon={faTag} title="Recent Releases">
+    <SecondaryCard
+      title={
+        <div className="flex items-center gap-2">
+          <FontAwesomeIcon
+            icon={faTag}
+            className="relative -top-[8px] h-5 w-5"
+            style={{ verticalAlign: 'middle' }}
+          />
+          <AnchorTitle
+            href="#recent-releases"
+            title="Recent Releases"
+            className="flex items-center leading-none"
+          />
+        </div>
+      }
+    >
       {data && data.length > 0 ? (
         <div
           className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}

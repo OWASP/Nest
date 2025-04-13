@@ -39,25 +39,25 @@ test.describe('Organization Details Page', () => {
   })
 
   test('should display recent issues section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Issues' }).first()).toBeVisible()
     await expect(page.getByText('Test Issue 1')).toBeVisible()
     await expect(page.getByText('Test Issue 2')).toBeVisible()
   })
 
   test('should display recent releases section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Releases' }).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Release v2.0.0' }).first()).toBeVisible()
   })
 
   test('should display top contributors section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top Contributors' }).first()).toBeVisible()
     await expect(page.getByText('User One')).toBeVisible()
     await expect(page.getByText('User Two')).toBeVisible()
     await expect(page.getByText('User Three')).toBeVisible()
   })
 
   test('should display recent pull requests section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' }).first()).toBeVisible()
     await expect(page.getByText('Test Pull Request 1')).toBeVisible()
     await expect(page.getByText('Test Pull Request 2')).toBeVisible()
   })

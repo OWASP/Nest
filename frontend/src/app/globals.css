@@ -294,6 +294,24 @@ a {
   opacity: 0.6;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+.inherit-color {
+  color: inherit;
+}
+
+.custom-icon {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+section {
+  scroll-margin-top: 100px;
+}
+
 /* Dropdown container */
 .dropdown {
   @apply relative;
