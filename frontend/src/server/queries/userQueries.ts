@@ -5,11 +5,13 @@ export const GET_USER_DATA = gql`
     recentIssues(limit: 5, login: $key) {
       commentsCount
       createdAt
+      repositoryName
       title
       url
     }
     recentPullRequests(limit: 5, login: $key) {
       createdAt
+      repositoryName
       title
       url
     }

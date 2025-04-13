@@ -35,6 +35,7 @@ export const GET_MAIN_PAGE_DATA = gql`
     recentIssues(limit: 5, distinct: $distinct) {
       commentsCount
       createdAt
+      repositoryName
       title
       url
       author {
@@ -51,6 +52,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       }
       createdAt
       title
+      repositoryName
       url
     }
     recentReleases(limit: 9, distinct: $distinct) {

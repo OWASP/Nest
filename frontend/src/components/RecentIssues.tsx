@@ -1,9 +1,9 @@
 import { faCalendar, faFileCode, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Link from 'next/link'
 import React from 'react'
 import { ProjectIssuesType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
-import { pluralize } from 'utils/pluralize'
 import ItemCardList from './ItemCardList'
 
 interface RecentIssuesProps {
@@ -24,14 +24,17 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
             <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
             <span>{formatDate(item.createdAt)}</span>
           </div>
-          {item?.commentsCount ? (
-            <div className="flex items-center">
-              <FontAwesomeIcon icon={faFileCode} className="mr-2 h-4 w-4" />
-              <span>
-                {item.commentsCount} {pluralize(item.commentsCount, 'comment')}
-              </span>
+          {item?.repositoryName && (
+            <div className="item-center flex">
+              <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+              <Link
+                className="text-gray-600 hover:underline dark:text-gray-400"
+                href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+              >
+                <span>{item.repositoryName}</span>
+              </Link>{' '}
             </div>
-          ) : null}
+          )}
         </div>
       )}
     />

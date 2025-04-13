@@ -13,16 +13,17 @@ export const GET_PROJECT_DATA = gql`
       level
       name
       recentIssues {
-        title
-        commentsCount
-        createdAt
-        url
         author {
           avatarUrl
           login
           name
           url
         }
+        commentsCount
+        createdAt
+        title
+        repositoryName
+        url
       }
       recentReleases {
         author {

@@ -30,24 +30,25 @@ export const GET_ORGANIZATION_DATA = gql`
       avatarUrl
     }
     recentPullRequests(limit: 5, organization: $login, distinct: true) {
-      title
-      createdAt
-      url
       author {
         login
         avatarUrl
       }
+      createdAt
+      repositoryName
+      title
+      url
     }
     recentReleases(limit: 6, organization: $login, distinct: true) {
-      name
-      tagName
-      publishedAt
-      url
-      repositoryName
       author {
         login
         avatarUrl
       }
+      name
+      publishedAt
+      repositoryName
+      tagName
+      url
     }
     repositories(organization: $login, limit: 12) {
       name
@@ -65,6 +66,7 @@ export const GET_ORGANIZATION_DATA = gql`
       }
       commentsCount
       createdAt
+      repositoryName
       title
       url
     }
