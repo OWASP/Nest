@@ -107,7 +107,7 @@ target-version = "py313"
 [tool.ruff.lint]
 extend-select = ["I"]
 ignore = [
-    "ANN",
+    "ANN",  # TODO(arkid15r): remove when all annotations are added.
     "ARG002",
     "C901",
     "COM812",
