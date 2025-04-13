@@ -19,6 +19,7 @@ class TestIssueNode:
             "author",
             "comments_count",
             "created_at",
+            "repository_name",
             "state",
             "title",
             "url",
