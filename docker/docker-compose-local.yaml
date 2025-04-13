@@ -12,6 +12,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file: ../backend/.env
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
@@ -19,6 +21,7 @@ services:
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
       DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
+      # REDIS_URL: ${REDIS_URL:-redis://redis:6379/1}
     networks:
       - nest-network
     ports:
@@ -43,6 +46,26 @@ services:
       - nest-network
     volumes:
       - db-data:/var/lib/postgresql/data
+
+  redis:
+    container_name: nest-redis
+    image: redis:7.2-alpine
+    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - 6379:6379
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 100mb
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - nest-network
 
   docs:
     container_name: nest-docs
@@ -89,9 +112,11 @@ services:
 networks:
   nest-network:
 
+
 volumes:
   backend-venv:
   db-data:
+  redis-data:
   docs-venv:
   frontend-next:
   frontend-node-modules:
