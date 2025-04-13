@@ -7,12 +7,13 @@ import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { GET_USER_DATA } from 'server/queries/userQueries'
 import { ProjectTypeGraphql } from 'types/project'
-import { aboutText, roadmap, technologies } from 'utils/aboutData'
+import { aboutText, technologies } from 'utils/aboutData'
 import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
+import Roadmap from 'components/Roadmap'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import UserCard from 'components/UserCard'
@@ -120,22 +121,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard title="Roadmap">
-          <ul>
-            {roadmap.map((item) => (
-              <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
-                <div className="h-2 w-2 flex-shrink-0 rounded-full bg-gray-600 dark:bg-gray-300"></div>
-                <Link
-                  href={item.issueLink}
-                  target="_blank"
-                  className="text-gray-600 hover:underline dark:text-gray-300"
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </SecondaryCard>
+        <Roadmap />
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
