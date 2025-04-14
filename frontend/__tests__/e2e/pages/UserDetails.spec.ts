@@ -17,7 +17,7 @@ test.describe('User Details Page', () => {
         path: '/',
       },
     ])
-    await page.goto('community/users/test-user')
+    await page.goto('members/test-user')
   })
   test('should have a heading and summary', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible()

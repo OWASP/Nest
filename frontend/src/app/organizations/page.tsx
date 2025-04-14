@@ -1,47 +1,50 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import { User } from 'types/user'
+import { OrganizationTypeAlgolia } from 'types/organization'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
-const UsersPage = () => {
+const OrganizationPage = () => {
   const {
-    items: users,
+    items: organizations,
     isLoaded,
     currentPage,
     totalPages,
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<User>({
-    indexName: 'users',
-    pageTitle: 'OWASP Users',
+  } = useSearchPage<OrganizationTypeAlgolia>({
+    indexName: 'organizations',
+    pageTitle: 'GitHub Organizations',
     hitsPerPage: 24,
   })
 
   const router = useRouter()
 
-  const handleButtonClick = (user: User) => {
-    router.push(`/community/users/${user.key}`)
-  }
+  const renderOrganizationCard = (organization: OrganizationTypeAlgolia) => {
+    const handleButtonClick = () => {
+      router.push(`/organizations/${organization.login}`)
+    }
 
-  const renderUserCard = (user: User) => {
     const SubmitButton = {
-      label: 'View Details',
+      label: 'View Profile',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-      onclick: () => handleButtonClick(user),
+      onclick: handleButtonClick,
     }
 
     return (
       <UserCard
-        avatar={user.avatar_url}
+        avatar={organization.avatar_url}
         button={SubmitButton}
-        company={user?.company || ''}
-        email={user.email || ''}
-        location={user.location || ''}
-        name={user.name || `@${user.login}`}
+        company={organization.company || ''}
+        email={organization.email || ''}
+        followers_count={organization.followers_count}
+        key={organization.objectID}
+        location={organization.location || `@${organization.login}`}
+        name={organization.name}
+        repositories_count={organization.public_repositories_count}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       />
     )
@@ -50,20 +53,20 @@ const UsersPage = () => {
   return (
     <SearchPageLayout
       currentPage={currentPage}
-      empty="No Users found"
-      indexName="users"
+      empty="No organizations found"
+      indexName="organizations"
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for OWASP users..."
+      searchPlaceholder="Search for organizations..."
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {users && users.map((user) => <div key={user.key}>{renderUserCard(user)}</div>)}
+        {organizations && organizations.map(renderOrganizationCard)}
       </div>
     </SearchPageLayout>
   )
 }
 
-export default UsersPage
+export default OrganizationPage

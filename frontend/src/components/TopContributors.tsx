@@ -40,7 +40,7 @@ const TopContributors = ({
         {displayContributors.map((item, index) => (
           <button
             key={index}
-            onClick={() => router.push(`/community/users/${item.login}`)}
+            onClick={() => router.push(`/members/${item.login}`)}
             className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
           >
             <div className="flex w-full flex-col justify-between">

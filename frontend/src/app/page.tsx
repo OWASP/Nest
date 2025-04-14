@@ -142,7 +142,7 @@ export default function Home() {
               eventData={data?.upcomingEvents}
               isLoaded={true}
               placeholder="Search the OWASP community"
-              indexes={['chapters', 'projects', 'users']}
+              indexes={['chapters', 'organizations', 'projects', 'users']}
             />
           </div>
         </div>
@@ -304,7 +304,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center">
                     <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                    <span>{post.authorName}</span>
+                    <LeadersList leaders={post.authorName} />
                   </div>
                 </div>
               </div>

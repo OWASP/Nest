@@ -1,18 +1,20 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   fullyParallel: true,
   projects: [
     {
-      name: 'Chromium',
-      use: { browserName: 'chromium' },
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
     },
-    // {
-    //   name: 'Mobile Safari - iPhone 13',
-    //   use: {
-    //     ...devices['iPhone 13'],
-    //   },
-    // },
+    {
+      name: 'Mobile Safari - iPhone 13',
+      use: {
+        ...devices['iPhone 13'],
+      },
+    },
   ],
   reporter: [['list', { printSteps: true }]],
   retries: 2,

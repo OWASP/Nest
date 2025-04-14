@@ -1,6 +1,7 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
@@ -81,7 +82,7 @@ const About = () => {
         {project.topContributors && (
           <TopContributors
             contributors={project.topContributors}
-            maxInitialDisplay={6}
+            maxInitialDisplay={9}
             type="contributor"
           />
         )}
@@ -95,7 +96,13 @@ const About = () => {
                   <ul className="space-y-3">
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
-                        <i className={`${details.icon} text-xl`} style={{ color: '#9ca3af' }}></i>
+                        <Image
+                          alt={`${name} icon`}
+                          className="inline-block align-middle grayscale"
+                          height={24}
+                          src={details.icon}
+                          width={24}
+                        />
                         <Link
                           href={details.url}
                           className="text-gray-600 hover:underline dark:text-gray-300"
@@ -172,7 +179,7 @@ const LeaderData = ({ username }: { username: string }) => {
       button={{
         label: 'View Profile',
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        onclick: () => window.open(`/community/users/${username}`, '_blank', 'noopener,noreferrer'),
+        onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
       }}
       email={''}
       location=""
