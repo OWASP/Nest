@@ -115,6 +115,7 @@ export const mockHomeData = {
         commentsCount: 5,
         createdAt: '2025-03-20T14:03:10+00:00',
         title: 'Issue 1',
+        repositoryName: 'Dependency-Track',
         url: 'https://github.com/DependencyTrack/hyades/issues/1724',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/5693141?v=4',
@@ -128,6 +129,7 @@ export const mockHomeData = {
         commentsCount: 2,
         createdAt: '2025-03-20T10:30:33+00:00',
         title: 'Issue 2',
+        repositoryName: 'BLT',
         url: 'https://github.com/OWASP-BLT/BLT/issues/4013',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/24620264?v=4',
@@ -141,6 +143,7 @@ export const mockHomeData = {
         commentsCount: 3,
         createdAt: '2025-03-20T09:36:39+00:00',
         title: 'Troubleshooting the OWASP Dependency-Check Scanner',
+        repositoryName: 'Test repo 3',
         url: 'https://github.com/l3montree-dev/devguard/issues/336',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/38261809?v=4',
