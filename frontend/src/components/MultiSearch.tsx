@@ -284,9 +284,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                           icon={getIconForIndex(suggestion.indexName)}
                           className="mr-2 flex-shrink-0 text-gray-400"
                         />
-                        <span className="block max-w-full truncate">
-                          {'name' in hit ? hit.name : 'login' in hit ? hit.login : ''}
-                        </span>
+                        <span className="block max-w-full truncate">{hit.name || hit.login}</span>
                       </button>
                     </li>
                   ))}
