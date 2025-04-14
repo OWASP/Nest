@@ -30,6 +30,11 @@ class Chapter(
         db_table = "owasp_chapters"
         verbose_name_plural = "Chapters"
 
+        models.Index(
+            fields=["-created_at"],
+            name="created_at_idx",
+        )
+
     level = models.CharField(verbose_name="Level", max_length=5, default="", blank=True)
 
     country = models.CharField(verbose_name="Country", max_length=50, default="")
@@ -56,6 +61,11 @@ class Chapter(
     )  # AI suggested location.
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
+
+    created_at = models.DateTimeField(
+        verbose_name="Created at",
+        default=None,
+    )
 
     def __str__(self):
         """Chapter human readable representation."""

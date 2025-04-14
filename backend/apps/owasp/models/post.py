@@ -15,6 +15,11 @@ class Post(BulkSaveModel, TimestampedModel):
         db_table = "owasp_posts"
         verbose_name_plural = "Posts"
 
+        models.Index(
+            fields=["-published_at"],
+            name="published_at_idx",
+        )
+
     author_image_url = models.URLField(verbose_name="Author image URL", blank=True, default="")
     author_name = models.CharField(verbose_name="Author name", max_length=100)
     published_at = models.DateTimeField(verbose_name="Publication date")
