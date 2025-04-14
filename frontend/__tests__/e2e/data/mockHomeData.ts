@@ -143,7 +143,7 @@ export const mockHomeData = {
         commentsCount: 3,
         createdAt: '2025-03-20T09:36:39+00:00',
         title: 'Troubleshooting the OWASP Dependency-Check Scanner',
-        repositoryName: 'Test repo 3',
+        repositoryName: 'devguard',
         url: 'https://github.com/l3montree-dev/devguard/issues/336',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/38261809?v=4',
