@@ -22,7 +22,6 @@ export type RepositoryDetails = {
 }
 
 export type Issue = {
-  commentsCount: number
   createdAt: number
   number: number
   repository: RepositoryDetails

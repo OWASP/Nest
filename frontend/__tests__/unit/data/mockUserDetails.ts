@@ -17,7 +17,6 @@ export const mockUserDetailsData = {
     {
       title: 'Test Issue',
       createdAt: 1723002473,
-      commentsCount: 5,
       repositoryName: 'test-repo-1',
       url: 'https://github.com/OWASP/Nest/issues/798',
     },

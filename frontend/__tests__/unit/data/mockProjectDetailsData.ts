@@ -38,7 +38,6 @@ export const mockProjectDetailsData = {
     recentIssues: [
       {
         title: 'Fix authentication bug',
-        commentsCount: 5,
         createdAt: '2025-02-05T15:20:30Z',
         repositoryName: 'test-repo',
         author: {
