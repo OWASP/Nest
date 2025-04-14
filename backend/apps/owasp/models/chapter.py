@@ -30,10 +30,9 @@ class Chapter(
         db_table = "owasp_chapters"
         verbose_name_plural = "Chapters"
 
-        models.Index(
-            fields=["-created_at"],
-            name="created_at_idx",
-        )
+        indexes = [
+            models.Index(fields=["-created_at"], name="chapter_created_at_idx"),
+        ]
 
     level = models.CharField(verbose_name="Level", max_length=5, default="", blank=True)
 

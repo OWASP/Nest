@@ -19,10 +19,12 @@ class Event(BulkSaveModel, TimestampedModel):
         db_table = "owasp_events"
         verbose_name_plural = "Events"
 
-        models.Index(
-            fields=["-start_date"],
-            name="start_date_idx",
-        )
+        indexes = [
+            models.Index(
+                fields=["-start_date"],
+                name="event_start_date_idx",
+            )
+        ]
 
     class Category(models.TextChoices):
         """Event category."""
