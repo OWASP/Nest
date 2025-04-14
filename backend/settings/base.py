@@ -125,7 +125,7 @@ class Base(Configuration):
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://nest-redis:6379/1",
+            "LOCATION": values.SecretValue(environ_name="REDIS_URL"),
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
