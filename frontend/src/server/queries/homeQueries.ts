@@ -38,7 +38,6 @@ export const GET_MAIN_PAGE_DATA = gql`
         login
         name
       }
-      commentsCount
       createdAt
       repositoryName
       title

@@ -19,7 +19,6 @@ export const GET_PROJECT_DATA = gql`
           name
           url
         }
-        commentsCount
         createdAt
         title
         repositoryName

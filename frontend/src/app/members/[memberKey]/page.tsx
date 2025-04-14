@@ -119,7 +119,6 @@ const UserDetailsPage: React.FC = () => {
           login: user?.login || '',
           name: user?.name || user?.login || '',
         },
-        commentsCount: issue.commentsCount,
         createdAt: issue.createdAt,
         repositoryName: issue.repositoryName,
         title: issue.title,

@@ -16,7 +16,6 @@ export const GET_REPOSITORY_DATA = gql`
           name
         }
         repositoryName
-        commentsCount
         createdAt
         title
       }

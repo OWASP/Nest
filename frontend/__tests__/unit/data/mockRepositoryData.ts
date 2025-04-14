@@ -25,7 +25,7 @@ export const mockRepositoryData = {
         title: 'Bug fix required',
         commentsCount: 4,
         createdAt: '2024-01-02T10:00:00Z',
-        repositoryName: 'Test Repo 2',
+        repositoryName: 'TestRepo2',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar.jpg',
           name: 'Test User 1',

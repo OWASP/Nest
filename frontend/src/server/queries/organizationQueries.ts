@@ -67,7 +67,6 @@ export const GET_ORGANIZATION_DATA = gql`
         login
         name
       }
-      commentsCount
       createdAt
       repositoryName
       title
