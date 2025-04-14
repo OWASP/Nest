@@ -89,7 +89,6 @@ slideshare
 Sonarqube
 speakerdeck
 superfences
-Testrepo
 tiktok
 Truncator
 tsc
