@@ -126,6 +126,7 @@ export const mockGraphQLData = {
         name: 'John Doe',
         avatarUrl: 'https://avatars.githubusercontent.com/u/58754215?v=4',
       },
+      repositoryName: 'Test Repo 1',
       url: 'https://github.com/example/repo/pull/1',
     },
     {
@@ -135,6 +136,7 @@ export const mockGraphQLData = {
         login: 'jane-smith',
         avatarUrl: 'https://avatars.githubusercontent.com/u/58754221?v=4',
       },
+      repositoryName: 'Test Repo 2',
       url: 'https://github.com/example/repo/pull/2',
     },
   ],
