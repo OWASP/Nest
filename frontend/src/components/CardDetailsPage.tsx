@@ -6,6 +6,7 @@ import {
   faCode,
   faTags,
   faUsers,
+  faBookOpen,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
@@ -52,13 +53,13 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard icon={faFileAlt} title="Summary">
+          <SecondaryCard icon={faBookOpen} title="Summary">
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
         {userSummary && (
-          <SecondaryCard icon={faFileAlt} title="Summary">
+          <SecondaryCard icon={faBookOpen} title="Summary">
             {userSummary}
           </SecondaryCard>
         )}
