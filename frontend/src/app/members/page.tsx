@@ -40,8 +40,10 @@ const UsersPage = () => {
         button={SubmitButton}
         company={user?.company || ''}
         email={user.email || ''}
+        followers_count={user.followers_count}
         location={user.location || ''}
         name={user.name || `@${user.login}`}
+        repositories_count={user.public_repositories_count}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       />
     )
