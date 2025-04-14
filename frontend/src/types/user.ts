@@ -81,6 +81,7 @@ export interface UserDetailsProps {
 
 export interface PullRequestsType {
   createdAt: string
+  repositoryName?: string
   title: string
   url: string
 }

@@ -89,9 +89,9 @@ describe('RepositoryDetailsPage', () => {
     await waitFor(() => screen.getByText('Repository not found'))
     expect(screen.getByText('Repository not found')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',
@@ -143,8 +143,7 @@ describe('RepositoryDetailsPage', () => {
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
-
-        expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
+        expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
       })
     })
   })

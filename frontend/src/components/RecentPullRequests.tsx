@@ -1,5 +1,6 @@
-import { faCalendar, faCodePullRequest, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faCodePullRequest, faFileCode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Link from 'next/link'
 import React from 'react'
 import { PullRequestsType } from 'types/home'
 import { ItemCardPullRequests } from 'types/user'
@@ -9,14 +10,9 @@ import ItemCardList from './ItemCardList'
 interface RecentPullRequestsProps {
   data: ItemCardPullRequests[] | PullRequestsType[]
   showAvatar?: boolean
-  showAuthor?: boolean
 }
 
-const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
-  data,
-  showAvatar = true,
-  showAuthor = false,
-}) => {
+const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvatar = true }) => {
   return (
     <ItemCardList
       title="Recent Pull Requests"
@@ -30,13 +26,17 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
             <span>{formatDate(item.createdAt)}</span>
           </div>
 
-          {showAuthor &&
-            (item?.author?.name || item?.author?.login ? (
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                <span>{item.author.name || item.author.login}</span>
-              </div>
-            ) : null)}
+          {item?.repositoryName && (
+            <div className="item-center flex">
+              <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+              <Link
+                className="text-gray-600 hover:underline dark:text-gray-400"
+                href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+              >
+                <span>{item.repositoryName}</span>
+              </Link>{' '}
+            </div>
+          )}
         </div>
       )}
     />

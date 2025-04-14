@@ -40,6 +40,7 @@ export const mockProjectDetailsData = {
         title: 'Fix authentication bug',
         commentsCount: 5,
         createdAt: '2025-02-05T15:20:30Z',
+        repositoryName: 'test-repo',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar4.png',
           login: 'dave_debugger',
