@@ -21,7 +21,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
       icon={faCodePullRequest}
       renderDetails={(item) => (
         <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
-          <div className="mr-4 flex items-center">
+          <div className="flex items-center">
             <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
             <span>{formatDate(item.createdAt)}</span>
           </div>
