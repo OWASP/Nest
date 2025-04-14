@@ -3,14 +3,13 @@ import * as Sentry from '@sentry/nextjs'
 import { screen, fireEvent } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
-import {
-  ErrorDisplay,
-  handleAppError,
+import GlobalError, {
   AppError,
-  ErrorWrapper,
   ERROR_CONFIGS,
+  ErrorDisplay,
+  ErrorWrapper,
+  handleAppError,
 } from 'app/global-error'
-import GlobalError from 'app/global-error'
 
 // Mocks
 jest.mock('next/navigation', () => ({
