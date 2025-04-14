@@ -1,6 +1,9 @@
 """OWASP stats GraphQL queries."""
 
 import graphene
+from django.db.models import Count, FloatField, Value
+from django.db.models.expressions import ExpressionWrapper
+from django.db.models.functions import Floor
 
 from apps.github.models.user import User
 from apps.owasp.graphql.nodes.stats import StatsNode
@@ -25,21 +28,40 @@ class StatsQuery:
             StatsNode: A node containing aggregated statistics.
 
         """
-        active_projects_stats = Project.active_projects_count()
-        active_chapters_stats = Chapter.active_chapters_count()
-        contributors_stats = User.objects.count()
+        active_projects_stats = Project.active_projects.aggregate(
+            nearest=Floor(
+                ExpressionWrapper(Count("id") * 1.0 / Value(10), output_field=FloatField())
+            )
+            * Value(10)
+        )["nearest"]
+
+        active_chapters_stats = Chapter.active_chapters.aggregate(
+            nearest=Floor(
+                ExpressionWrapper(Count("id") * 1.0 / Value(10), output_field=FloatField())
+            )
+            * Value(10)
+        )["nearest"]
+
+        contributors_stats = User.objects.aggregate(
+            nearest=Floor(
+                ExpressionWrapper(Count("id") * 1.0 / Value(100), output_field=FloatField())
+            )
+            * Value(100)
+        )["nearest"]
+
         countries_stats = (
             Chapter.objects.filter(country__isnull=False)
             .exclude(country="")
-            .values("country")
-            .distinct()
-            .count()
+            .aggregate(
+                nearest=Floor(
+                    ExpressionWrapper(
+                        Count("country", distinct=True) * 1.0 / Value(10),
+                        output_field=FloatField(),
+                    )
+                )
+                * Value(10)
+            )["nearest"]
         )
-
-        active_projects_stats = (active_projects_stats // 10) * 10  # nearest 10
-        active_chapters_stats = (active_chapters_stats // 10) * 10
-        contributors_stats = (contributors_stats // 100) * 100  # nearest 100
-        countries_stats = (countries_stats // 10) * 10
 
         return StatsNode(
             active_projects_stats,
