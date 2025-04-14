@@ -11,6 +11,7 @@ export interface OrganizationTypeAlgolia {
   login: string
   name: string
   objectID: string
+  public_repositories_count: number
   updated_at: number
   url: string
 }
