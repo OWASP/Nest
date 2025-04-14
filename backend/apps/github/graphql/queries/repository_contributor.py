@@ -1,13 +1,12 @@
 """OWASP repository contributor GraphQL queries."""
 
 import graphene
-from django.db.models import F, OuterRef, Subquery, Window
+from django.db.models import F, Window
 from django.db.models.functions import Rank
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository_contributor import RepositoryContributor
-from apps.owasp.models.project import Project
 
 
 class RepositoryContributorQuery(BaseQuery):
@@ -36,6 +35,14 @@ class RepositoryContributorQuery(BaseQuery):
             RepositoryContributor.objects.by_humans()
             .to_community_repositories()
             .filter(repository__project__isnull=False)
+            .select_related("user", "repository")
+            .annotate(
+                rank=Window(
+                    expression=Rank(),
+                    order_by=F("contributions_count").desc(),
+                    partition_by=F("user__login"),
+                )
+            )
         )
 
         if organization:
@@ -46,30 +53,14 @@ class RepositoryContributorQuery(BaseQuery):
             )
 
         top_contributors = (
-            queryset.annotate(
-                project_id=Subquery(
-                    Project.repositories.through.objects.filter(
-                        repository=OuterRef("repository_id")
-                    )
-                    .values("project_id")
-                    .order_by("project_id")[:1]  # Select the first project ID per repository
-                ),
-                project_name=Subquery(
-                    Project.objects.filter(id=OuterRef("project_id")).values("name")[:1]
-                ),
-                project_url=Subquery(
-                    Project.objects.filter(id=OuterRef("project_id")).values("key")[:1]
-                ),
-                rank=Window(
-                    expression=Rank(),
-                    order_by=F("contributions_count").desc(),
-                    partition_by=F("user__login"),
-                ),
+            queryset.filter(rank=1)
+            .annotate(
+                project_name=F("repository__project__name"),
+                project_url=F("repository__project__key"),
             )
-            .filter(rank=1)  # Keep only the highest contribution per user
             .values(
-                "contributions_count",
                 "user__avatar_url",
+                "contributions_count",
                 "user__login",
                 "user__name",
                 "project_name",
