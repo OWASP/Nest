@@ -7,7 +7,6 @@ import {
   faFileCode,
   faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -17,9 +16,9 @@ import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()
@@ -50,14 +49,7 @@ const UserDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError, memberKey])
