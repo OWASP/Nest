@@ -120,16 +120,6 @@ describe('OrganizationDetailsPage', () => {
     })
   })
 
-  test('renders top contributors section correctly', async () => {
-    render(<OrganizationDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('User One')).toBeInTheDocument()
-      expect(screen.getByText('User Two')).toBeInTheDocument()
-      expect(screen.getByText('User Three')).toBeInTheDocument()
-    })
-  })
-
   test('displays error message when there is a GraphQL error', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: undefined,

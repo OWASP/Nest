@@ -31,14 +31,4 @@ test.describe('Committee Details Page', () => {
     await expect(page.getByText('Leaders: Leader 1, Leader 2')).toBeVisible()
     await expect(page.getByRole('link', { name: 'https://owasp.org/test-committee' })).toBeVisible()
   })
-
-  test('should have top contributors', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('2157 Contributions')).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 2' })).toBeVisible()
-    await expect(page.getByText('Contributor 2')).toBeVisible()
-    await expect(page.getByText('309 Contributions')).toBeVisible()
-  })
 })

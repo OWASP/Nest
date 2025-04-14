@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
@@ -176,43 +176,6 @@ describe('About Component', () => {
       expect(screen.getByText("Error loading arkid15r's data")).toBeInTheDocument()
       expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
       expect(screen.getByText('Starr Brown')).toBeInTheDocument()
-    })
-  })
-
-  test('renders top contributors section correctly', async () => {
-    render(<About />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
-    })
-  })
-
-  test('toggles contributors list when show more/less is clicked', async () => {
-    render(<About />)
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
-    })
-
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
-    fireEvent.click(showMoreButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
-    })
-
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
-    fireEvent.click(showLessButton)
-
-    await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 

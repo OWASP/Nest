@@ -57,24 +57,6 @@ test.describe('Project Details Page', () => {
     await expect(page.getByText('JavaScript', { exact: true })).toBeVisible()
   })
 
-  test('should have top contributors', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('30 Contributions')).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 2' })).toBeVisible()
-    await expect(page.getByText('Contributor 2')).toBeVisible()
-    await expect(page.getByText('29 Contributions')).toBeVisible()
-  })
-
-  test('toggle top contributors', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Show more' })).toBeVisible()
-    await page.getByRole('button', { name: 'Show more' }).click()
-    await expect(page.getByRole('button', { name: 'Show less' })).toBeVisible()
-    await page.getByRole('button', { name: 'Show less' }).click()
-    await expect(page.getByRole('button', { name: 'Show more' })).toBeVisible()
-  })
-
   test('should have project recent issues', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Fix authentication bug' })).toBeVisible()

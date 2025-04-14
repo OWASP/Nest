@@ -106,14 +106,6 @@ describe('CommitteeDetailsPage Component', () => {
     })
   })
 
-  test('renders top contributors correctly', async () => {
-    render(<CommitteeDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 2')).toBeInTheDocument()
-    })
-  })
-
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       loading: false,

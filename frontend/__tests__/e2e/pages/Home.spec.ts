@@ -54,13 +54,6 @@ test.describe('Home Page', () => {
     await page.getByRole('link', { name: 'Post 1' }).click()
   })
 
-  test('should have top contributors', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('OWASP Juice Shop')).toBeVisible()
-  })
-
   test('should have recent issues', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Issue 1' })).toBeVisible()

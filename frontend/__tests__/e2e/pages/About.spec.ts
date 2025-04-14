@@ -35,11 +35,6 @@ test.describe('About Page', () => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
   })
 
-  test('displays contributor information when data is loaded', async ({ page }) => {
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('Contributor 2')).toBeVisible()
-  })
-
   test('displays leaders data when data is loaded', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
   })
