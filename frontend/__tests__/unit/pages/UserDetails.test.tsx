@@ -111,7 +111,7 @@ describe('UserDetailsPage', () => {
       const issueTitle = screen.getByText('Test Issue')
       expect(issueTitle).toBeInTheDocument()
 
-      const issueComments = screen.getByText('5 comments')
+      const issueComments = screen.getByText('Test Repo')
       expect(issueComments).toBeInTheDocument()
     })
   })

@@ -8,8 +8,8 @@ export interface ProjectDataType {
 
 export interface ProjectIssuesType {
   author: { avatarUrl: string; key: string; name: string }
-  commentsCount: number
   createdAt: number
+  repositoryName?: string
   title: string
   url: string
 }

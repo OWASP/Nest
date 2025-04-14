@@ -79,7 +79,7 @@ test.describe('Project Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Fix authentication bug' })).toBeVisible()
     await expect(page.getByText('Feb 5, 2025')).toBeVisible()
-    await expect(page.getByText('5 comments')).toBeVisible()
+    await expect(page.getByText('test-repo')).toBeVisible()
   })
 
   test('should have project recent releases', async ({ page }) => {

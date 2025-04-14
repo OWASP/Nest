@@ -277,7 +277,7 @@ export default function Home() {
         />
         <div className="grid-cols-2 gap-4 lg:grid">
           <RecentIssues data={data?.recentIssues} />
-          <RecentPullRequests data={data?.recentPullRequests} showAuthor={true} />
+          <RecentPullRequests data={data?.recentPullRequests} />
         </div>
         <RecentReleases data={data?.recentReleases} />
         <SecondaryCard icon={faNewspaper} title="News & Opinions" className="overflow-hidden">

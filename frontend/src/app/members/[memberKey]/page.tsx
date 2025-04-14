@@ -105,15 +105,15 @@ const UserDetailsPage: React.FC = () => {
   const formattedIssues: ProjectIssuesType[] = useMemo(() => {
     return (
       issues?.map((issue) => ({
-        commentsCount: issue.commentsCount,
-        createdAt: issue.createdAt,
-        title: issue.title,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        createdAt: issue.createdAt,
+        repositoryName: issue.repositoryName,
+        title: issue.title,
         url: issue.url,
       })) || []
     )
@@ -122,14 +122,15 @@ const UserDetailsPage: React.FC = () => {
   const formattedPullRequest: ItemCardPullRequests[] = useMemo(() => {
     return (
       pullRequests?.map((pullRequest) => ({
-        createdAt: pullRequest.createdAt,
-        title: pullRequest.title,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        createdAt: pullRequest.createdAt,
+        repositoryName: pullRequest.repositoryName,
+        title: pullRequest.title,
         url: pullRequest.url,
       })) || []
     )
@@ -138,17 +139,17 @@ const UserDetailsPage: React.FC = () => {
   const formattedReleases: ProjectReleaseType[] = useMemo(() => {
     return (
       releases?.map((release) => ({
+        author: {
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          login: user?.login || '',
+          name: user?.name || user?.login || '',
+        },
         isPreRelease: release.isPreRelease,
         name: release.name,
         publishedAt: release.publishedAt,
-        tagName: release.tagName,
         repositoryName: release.repositoryName,
-        author: {
-          login: user?.login || '',
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
+        tagName: release.tagName,
         url: release.url,
       })) || []
     )
