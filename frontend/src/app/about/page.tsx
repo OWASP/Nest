@@ -83,7 +83,7 @@ const About = () => {
         {project.topContributors && (
           <TopContributors
             contributors={project.topContributors}
-            maxInitialDisplay={6}
+            maxInitialDisplay={9}
             type="contributor"
           />
         )}
@@ -180,8 +180,7 @@ const LeaderData = ({ username }: { username: string }) => {
       button={{
         label: 'View Profile',
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        onclick: () =>
-          window.open(`/community/members/${username}`, '_blank', 'noopener,noreferrer'),
+        onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
       }}
       email={''}
       location=""

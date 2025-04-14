@@ -21,7 +21,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const UserDetailsPage: React.FC = () => {
-  const { userKey } = useParams()
+  const { memberKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
@@ -36,7 +36,7 @@ const UserDetailsPage: React.FC = () => {
   const theme = 'blue'
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
-    variables: { key: userKey },
+    variables: { key: memberKey },
   })
 
   useEffect(() => {
@@ -52,23 +52,23 @@ const UserDetailsPage: React.FC = () => {
       handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, userKey])
+  }, [graphQLData, graphQLRequestError, memberKey])
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!userKey) {
+      if (!memberKey) {
         return
       }
-      const result = await fetchHeatmapData(userKey as string)
+      const result = await fetchHeatmapData(memberKey as string)
       if (typeof result !== 'string' && result.contributions) {
-        setUsername(userKey as string)
+        setUsername(memberKey as string)
         setData(result as HeatmapData)
       } else {
         setPrivateContributor(true)
       }
     }
     fetchData()
-  }, [userKey, user])
+  }, [memberKey, user])
 
   useEffect(() => {
     if (canvasRef.current && data && data.years && data.years.length > 0) {

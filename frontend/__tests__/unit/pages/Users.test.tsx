@@ -3,7 +3,7 @@ import { mockUserData } from '@unit/data/mockUserData'
 import { useRouter } from 'next/navigation'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-import UsersPage from 'app/community/members/page'
+import UsersPage from 'app/members/page'
 
 const mockRouter = {
   push: jest.fn(),
@@ -130,7 +130,7 @@ describe('UsersPage Component', () => {
       fireEvent.click(viewDetailsButtons[0])
     })
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/community/members/user_1')
+    expect(mockRouter.push).toHaveBeenCalledWith('/members/user_1')
   })
 
   test('renders fallback username if user name is missing', async () => {

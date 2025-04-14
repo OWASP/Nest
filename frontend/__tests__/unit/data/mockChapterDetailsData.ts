@@ -14,43 +14,12 @@ export const mockChapterDetailsData = {
     'https://meetup.com/test',
   ],
   summary: 'This is a test chapter summary.',
-  topContributors: [
-    {
-      avatarUrl: 'https://avatars.githubusercontent.com/avatar1.jpg',
-      name: 'Contributor 1',
-      contributionsCount: 10,
-    },
-    {
-      avatarUrl: 'https://avatars.githubusercontent.com/avatar2.jpg',
-      name: 'Contributor 2',
-      contributionsCount: 8,
-    },
-    {
-      avatarUrl: 'https://avatars.githubusercontent.com/avatar3.jpg',
-      name: 'Contributor 3',
-      contributionsCount: 6,
-    },
-    {
-      avatarUrl: 'https://avatars.githubusercontent.com/avatar4.jpg',
-      name: 'Contributor 4',
-      contributionsCount: 4,
-    },
-    {
-      avatarUrl: 'https://avatars.githubusercontent.com/avatar5.jpg',
-      name: 'Contributor 5',
-      contributionsCount: 2,
-    },
-    {
-      avatarUrl: 'https://avatars.githubusercontent.com/avatar6.jpg',
-      name: 'Contributor 6',
-      contributionsCount: 1,
-    },
-    {
-      avatarUrl: 'https://avatars.githubusercontent.com/avatar7.jpg',
-      name: 'Contributor 7',
-      contributionsCount: 1,
-    },
-  ],
+  topContributors: Array.from({ length: 15 }, (_, i) => ({
+    avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
+    contributionsCount: 30 - i,
+    login: `contributor${i + 1}`,
+    name: `Contributor ${i + 1}`,
+  })),
   geoLocation: {
     lat: 23.2584857,
     lng: 77.401989,

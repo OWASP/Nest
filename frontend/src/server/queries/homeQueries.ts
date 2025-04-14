@@ -2,7 +2,7 @@ import { gql } from '@apollo/client'
 
 export const GET_MAIN_PAGE_DATA = gql`
   query GetMainPageData($distinct: Boolean) {
-    recentProjects(limit: 5) {
+    recentProjects(limit: 3) {
       createdAt
       key
       leaders
@@ -18,7 +18,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       title
       url
     }
-    recentChapters(limit: 5) {
+    recentChapters(limit: 3) {
       createdAt
       key
       leaders
@@ -53,7 +53,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 6, distinct: $distinct) {
+    recentReleases(limit: 9, distinct: $distinct) {
       author {
         avatarUrl
         login
