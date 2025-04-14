@@ -35,4 +35,9 @@ test.describe('Organization Page', () => {
     await page.getByRole('button', { name: 'View Profile' }).first().click()
     expect(await page.url()).toContain('organizations')
   })
+
+  test('displays followers and repositories counts correctly', async ({ page }) => {
+    await expect(page.getByText('1k')).toBeVisible()
+    await expect(page.getByText('1.5k')).toBeVisible()
+  })
 })
