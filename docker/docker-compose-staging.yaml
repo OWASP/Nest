@@ -6,6 +6,8 @@ services:
     depends_on:
       staging-nest-db:
         condition: service_healthy
+      staging-nest-redis:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - nest-app-network
@@ -34,6 +36,22 @@ services:
       - ./volumes/db:/var/lib/postgresql/data
     networks:
       - nest-db-network
+
+    staging-nest-redis:
+      container_name: staging-nest-redis
+      image: redis:7.2-alpine
+      command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
+      volumes:
+        - redis-data:/data
+      ports:
+        - 6379:6379
+      healthcheck:
+        test: [CMD, redis-cli, ping]
+        interval: 5s
+        timeout: 3s
+        retries: 5
+      networks:
+        - nest-app-network
 
 networks:
   nest-app-network:

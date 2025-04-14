@@ -47,26 +47,6 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
-  redis:
-    container_name: nest-redis
-    image: redis:7.2-alpine
-    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis-data:/data
-    ports:
-      - 6379:6379
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 100mb
-    healthcheck:
-      test: [CMD, redis-cli, ping]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    networks:
-      - nest-network
-
   docs:
     container_name: nest-docs
     command: >
@@ -108,6 +88,22 @@ services:
       - ../frontend:/home/owasp
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
+
+  redis:
+    container_name: nest-redis
+    image: redis:7.2-alpine
+    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - nest-network
 
 networks:
   nest-network:
