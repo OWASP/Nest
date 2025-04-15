@@ -42,7 +42,7 @@
     "dompurify": "^3.2.5",
     "dotenv": "^16.5.0",
     "eslint-plugin-import": "^2.31.0",
-    "framer-motion": "^12.7.1",
+    "framer-motion": "^12.7.2",
     "graphql": "^16.10.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
