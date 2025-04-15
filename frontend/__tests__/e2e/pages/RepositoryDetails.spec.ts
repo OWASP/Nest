@@ -17,7 +17,7 @@ test.describe('Repository Details Page', () => {
         path: '/',
       },
     ])
-    await page.goto('/repositories/test-repository')
+    await page.goto('organizations/OWASP/repositories/test-repository')
   })
 
   test('should have a heading and summary', async ({ page }) => {

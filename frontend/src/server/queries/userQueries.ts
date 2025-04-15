@@ -28,6 +28,9 @@ export const GET_USER_DATA = gql`
       key
       name
       openIssuesCount
+      organization {
+        login
+      }
       starsCount
       subscribersCount
       url

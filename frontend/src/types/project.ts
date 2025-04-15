@@ -78,6 +78,9 @@ export interface RepositoryCardProps {
   key?: string
   name: string
   openIssuesCount: number
+  organization?: {
+    login: string
+  }
   starsCount: number
   subscribersCount: number
   url: string

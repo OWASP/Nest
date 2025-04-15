@@ -42,6 +42,9 @@ export const GET_PROJECT_DATA = gql`
         key
         name
         openIssuesCount
+        organization {
+          login
+        }
         starsCount
         subscribersCount
         url
