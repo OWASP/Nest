@@ -1,12 +1,12 @@
 import {
-  faFileAlt,
-  faChartBar,
+  faCircleInfo,
+  faSquarePollVertical,
   faChartPie,
   faFolderOpen,
   faCode,
   faTags,
   faUsers,
-  faBookOpen,
+  faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
@@ -53,25 +53,25 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard icon={faBookOpen} title="Summary">
+          <SecondaryCard icon={faRectangleList} title="Summary">
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
         {userSummary && (
-          <SecondaryCard icon={faBookOpen} title="Summary">
+          <SecondaryCard icon={faRectangleList} title="Summary">
             {userSummary}
           </SecondaryCard>
         )}
 
         {heatmap && (
-          <SecondaryCard icon={faChartBar} title="Contribution Heatmap">
+          <SecondaryCard icon={faSquarePollVertical} title="Contribution Heatmap">
             {heatmap}
           </SecondaryCard>
         )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            icon={faFileAlt}
+            icon={faCircleInfo}
             title={`${capitalize(type)} Details`}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >

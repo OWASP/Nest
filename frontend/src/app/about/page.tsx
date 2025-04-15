@@ -1,6 +1,12 @@
 'use client'
 import { useQuery } from '@apollo/client'
-import { faMapSigns, faHistory, faUsers, faTools, faCrown } from '@fortawesome/free-solid-svg-icons'
+import {
+  faMapSigns,
+  faScroll,
+  faUsers,
+  faTools,
+  faArrowUpRightFromSquare,
+} from '@fortawesome/free-solid-svg-icons'
 import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -65,7 +71,7 @@ const About = () => {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
-        <SecondaryCard icon={faHistory} title="History">
+        <SecondaryCard icon={faScroll} title="History">
           {aboutText.map((text) => (
             <div key={text} className="mb-4">
               <div key={text}>
@@ -75,7 +81,7 @@ const About = () => {
           ))}
         </SecondaryCard>
 
-        <SecondaryCard icon={faCrown} title="Leaders">
+        <SecondaryCard icon={faArrowUpRightFromSquare} title="Leaders">
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
             {leaders.map((username) => (
               <div key={username}>
