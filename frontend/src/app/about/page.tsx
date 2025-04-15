@@ -9,7 +9,6 @@ import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { GET_USER_DATA } from 'server/queries/userQueries'
 import { ProjectTypeGraphql } from 'types/project'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -17,6 +16,7 @@ import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import UserCard from 'components/UserCard'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 
 const leaders = ['arkid15r', 'kasya', 'mamicidal']
 
@@ -43,6 +43,7 @@ const About = () => {
         color: 'danger',
         variant: 'solid',
       })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [data, graphQLRequestError, projectKey])

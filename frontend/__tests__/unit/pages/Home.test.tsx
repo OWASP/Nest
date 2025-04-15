@@ -225,9 +225,7 @@ describe('Home', () => {
       expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
       mockGraphQLData.recentPullRequests.forEach((pullRequest) => {
         expect(screen.getByText(pullRequest.title)).toBeInTheDocument()
-        expect(
-          screen.getByText(pullRequest.author.name || pullRequest.author.login)
-        ).toBeInTheDocument()
+        expect(screen.getByText(pullRequest.repositoryName)).toBeInTheDocument()
       })
     })
   })
