@@ -1,4 +1,4 @@
-import { faCalendar, faFileCode, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFileCode, faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import React from 'react'
@@ -17,7 +17,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
       title="Recent Issues"
       data={data}
       showAvatar={showAvatar}
-      icon={faTriangleExclamation}
+      icon={faCircleExclamation}
       renderDetails={(item) => (
         <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
           <div className="flex items-center">

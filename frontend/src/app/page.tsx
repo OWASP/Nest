@@ -4,15 +4,16 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faBook,
   faCalendar,
+  faCalendarAlt,
   faCode,
   faFileCode,
-  faMapMarkerAlt,
-  faTag,
-  faUsers,
-  faUser,
   faFolder,
-  faNewspaper,
   faGlobe,
+  faMapMarkerAlt,
+  faNewspaper,
+  faTag,
+  faUser,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
@@ -146,7 +147,7 @@ export default function Home() {
             />
           </div>
         </div>
-        <SecondaryCard icon={faCalendar} title="Upcoming Events" className="overflow-hidden">
+        <SecondaryCard icon={faCalendarAlt} title="Upcoming Events" className="overflow-hidden">
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data?.upcomingEvents?.map((event: EventType, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
