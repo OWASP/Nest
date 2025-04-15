@@ -18,11 +18,11 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const RepositoryDetailsPage = () => {
-  const { repositoryKey } = useParams()
+  const { repositoryKey, organizationKey } = useParams()
   const [repository, setRepository] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
-    variables: { repositoryKey: repositoryKey },
+    variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
   useEffect(() => {
     if (data) {
