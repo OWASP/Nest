@@ -15,6 +15,7 @@ export const GET_REPOSITORY_DATA = gql`
           login
           name
         }
+        organizationName
         repositoryName
         createdAt
         title
@@ -34,6 +35,7 @@ export const GET_REPOSITORY_DATA = gql`
         }
         isPreRelease
         name
+        organizationName
         publishedAt
         repositoryName
         tagName

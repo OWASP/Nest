@@ -18,6 +18,7 @@ class TestIssueNode:
         expected_fields = {
             "author",
             "created_at",
+            "organization_name",
             "repository_name",
             "state",
             "title",

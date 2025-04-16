@@ -39,6 +39,7 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
       createdAt
+      organizationName
       repositoryName
       title
       url
@@ -50,8 +51,9 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
       createdAt
-      title
+      organizationName
       repositoryName
+      title
       url
     }
     recentReleases(limit: 9, distinct: $distinct) {
@@ -61,6 +63,7 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
       name
+      organizationName
       publishedAt
       repositoryName
       tagName

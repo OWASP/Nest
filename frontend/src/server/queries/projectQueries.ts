@@ -20,8 +20,9 @@ export const GET_PROJECT_DATA = gql`
           url
         }
         createdAt
-        title
+        organizationName
         repositoryName
+        title
         url
       }
       recentReleases {
@@ -31,6 +32,7 @@ export const GET_PROJECT_DATA = gql`
           name
         }
         name
+        organizationName
         publishedAt
         repositoryName
         tagName

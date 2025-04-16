@@ -9,6 +9,7 @@ export interface ProjectDataType {
 export interface ProjectIssuesType {
   author: { avatarUrl: string; key: string; name: string }
   createdAt: number
+  organizationName?: string
   repositoryName?: string
   title: string
   url: string
@@ -95,6 +96,7 @@ export type ProjectReleaseType = {
   }
   isPreRelease: boolean
   name: string
+  organizationName?: string
   publishedAt: number
   repositoryName: string
   tagName: string

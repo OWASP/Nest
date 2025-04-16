@@ -12,6 +12,7 @@ class ReleaseNode(BaseNode):
     """GitHub release node."""
 
     author = graphene.Field(UserNode)
+    organization_name = graphene.String()
     project_name = graphene.String()
     repository_name = graphene.String()
     url = graphene.String()
@@ -25,6 +26,12 @@ class ReleaseNode(BaseNode):
             "published_at",
             "tag_name",
         )
+
+    def resolve_organization_name(self, info):
+        """Return organization name."""
+        if self.repository.organization:
+            return self.repository.organization.login
+        return None
 
     def resolve_project_name(self, info):
         """Return project name."""

@@ -4,12 +4,14 @@ export const GET_USER_DATA = gql`
   query GetUser($key: String!) {
     recentIssues(limit: 5, login: $key) {
       createdAt
+      organizationName
       repositoryName
       title
       url
     }
     recentPullRequests(limit: 5, login: $key) {
       createdAt
+      organizationName
       repositoryName
       title
       url
@@ -18,6 +20,7 @@ export const GET_USER_DATA = gql`
       isPreRelease
       name
       publishedAt
+      organizationName
       repositoryName
       tagName
       url

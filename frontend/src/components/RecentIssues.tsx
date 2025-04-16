@@ -1,6 +1,6 @@
 import { faCalendar, faFileCode, faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 import { ProjectIssuesType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
@@ -12,6 +12,8 @@ interface RecentIssuesProps {
 }
 
 const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) => {
+  const router = useRouter()
+
   return (
     <ItemCardList
       title="Recent Issues"
@@ -27,12 +29,16 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
           {item?.repositoryName && (
             <div className="item-center flex">
               <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-              <Link
-                className="text-gray-600 hover:underline dark:text-gray-400"
-                href={`/repositories/${item?.repositoryName ? item.repositoryName : ''}`}
+              <button
+                className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
+                onClick={() =>
+                  router.push(
+                    `/organizations/${item.organizationName}/repositories/${item.repositoryName || ''}`
+                  )
+                }
               >
-                <span>{item.repositoryName}</span>
-              </Link>{' '}
+                {item.repositoryName}
+              </button>
             </div>
           )}
         </div>
