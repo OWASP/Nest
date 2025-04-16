@@ -40,7 +40,7 @@ test.describe('User Details Page', () => {
   test('should have user issues', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Issues' })).toBeVisible()
     await expect(page.getByText('Test Issue')).toBeVisible()
-    await expect(page.getByText('5 Comments')).toBeVisible()
+    await expect(page.getByText('test-repo-1')).toBeVisible()
   })
 
   test('should have user releases', async ({ page }) => {
@@ -55,6 +55,6 @@ test.describe('User Details Page', () => {
 
   test('should have top repositories', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
-    await expect(page.getByText('Test Repo')).toBeVisible()
+    await expect(page.getByText('test-repo-2')).toBeVisible()
   })
 })

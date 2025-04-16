@@ -22,7 +22,6 @@ export type RepositoryDetails = {
 }
 
 export type Issue = {
-  commentsCount: number
   createdAt: number
   number: number
   repository: RepositoryDetails
@@ -81,6 +80,7 @@ export interface UserDetailsProps {
 
 export interface PullRequestsType {
   createdAt: string
+  repositoryName?: string
   title: string
   url: string
 }
