@@ -12,8 +12,8 @@ class RepositoryQuery(BaseQuery):
 
     repository = graphene.Field(
         RepositoryNode,
-        repository_key=graphene.String(required=True),
         organization_key=graphene.String(required=True),
+        repository_key=graphene.String(required=True),
     )
 
     repositories = graphene.List(

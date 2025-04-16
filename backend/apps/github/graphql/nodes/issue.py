@@ -24,9 +24,7 @@ class IssueNode(BaseNode):
 
     def resolve_organization_name(self, info):
         """Return organization name."""
-        if self.repository.organization:
-            return self.repository.organization.login
-        return None
+        return self.repository.organization.login if self.repository.organization else None
 
     def resolve_repository_name(self, info):
         """Resolve the repository name."""
