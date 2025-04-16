@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
+import { pluralize } from 'utils/pluralize'
 import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
 import SecondaryCard from './SecondaryCard'
 
@@ -62,12 +63,12 @@ const TopContributors = ({
                   {isContributor ? (
                     <span className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 dark:text-gray-400">
                       {' '}
-                      {`${item.contributionsCount ?? 0} contributions`}
+                      {item.contributionsCount} {pluralize(item.contributionsCount, 'contribution')}
                     </span>
                   ) : (
                     <Link
                       className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
-                      href={getProjectUrl(item?.projectUrl)}
+                      href={getProjectUrl(item?.projectKey)}
                     >
                       {' '}
                       {item.projectName}

@@ -54,11 +54,11 @@ class RepositoryContributorQuery(BaseQuery):
                     .values("project_id")
                     .order_by("project_id")[:1]  # Select the first project ID per repository
                 ),
+                project_key=Subquery(
+                    Project.objects.filter(id=OuterRef("project_id")).values("key")[:1]
+                ),
                 project_name=Subquery(
                     Project.objects.filter(id=OuterRef("project_id")).values("name")[:1]
-                ),
-                project_url=Subquery(
-                    Project.objects.filter(id=OuterRef("project_id")).values("key")[:1]
                 ),
                 rank=Window(
                     expression=Rank(),
@@ -72,8 +72,8 @@ class RepositoryContributorQuery(BaseQuery):
                 "user__avatar_url",
                 "user__login",
                 "user__name",
+                "project_key",
                 "project_name",
-                "project_url",
             )
             .order_by("-contributions_count")[:limit]
         )
@@ -84,8 +84,8 @@ class RepositoryContributorQuery(BaseQuery):
                 contributions_count=trc["contributions_count"],
                 login=trc["user__login"],
                 name=trc["user__name"],
+                project_key=trc["project_key"].replace("www-project-", ""),
                 project_name=trc["project_name"],
-                project_url=trc["project_url"],
             )
             for trc in top_contributors
         ]
