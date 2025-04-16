@@ -65,7 +65,7 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Issue 1' })).toBeVisible()
     await expect(page.getByText('Mar 20, 2025').first()).toBeVisible()
-    await expect(page.getByText('5 comments')).toBeVisible()
+    await expect(page.getByText('Dependency-Track')).toBeVisible()
   })
 
   test('should have recent Releases', async ({ page }) => {

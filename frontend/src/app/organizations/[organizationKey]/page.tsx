@@ -7,16 +7,14 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
 import { formatDate } from 'utils/dateFormatter'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams()
   const [organization, setOrganization] = useState(null)
@@ -41,14 +39,7 @@ const OrganizationDetailsPage = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError, organizationKey])
