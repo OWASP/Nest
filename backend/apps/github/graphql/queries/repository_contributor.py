@@ -56,15 +56,15 @@ class RepositoryContributorQuery(BaseQuery):
             queryset.filter(rank=1)
             .annotate(
                 project_name=F("repository__project__name"),
-                project_url=F("repository__project__key"),
+                project_key=F("repository__project__key"),
             )
             .values(
                 "contributions_count",
                 "user__avatar_url",
                 "user__login",
                 "user__name",
+                "project_key",
                 "project_name",
-                "project_url",
             )
             .order_by("-contributions_count")[:limit]
         )
@@ -75,8 +75,8 @@ class RepositoryContributorQuery(BaseQuery):
                 contributions_count=trc["contributions_count"],
                 login=trc["user__login"],
                 name=trc["user__name"],
+                project_key=trc["project_key"].replace("www-project-", ""),
                 project_name=trc["project_name"],
-                project_url=trc["project_url"],
             )
             for trc in top_contributors
         ]
