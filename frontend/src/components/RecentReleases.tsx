@@ -1,5 +1,6 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -30,18 +31,27 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
                   {showAvatar && (
-                    <Link
-                      className="flex-shrink-0 text-blue-400 hover:underline"
-                      href={`/members/${item?.author?.login}`}
+                    <Tooltip
+                      closeDelay={100}
+                      content={item?.author?.name || item?.author?.login}
+                      id={`avatar-tooltip-${index}`}
+                      delay={100}
+                      placement="bottom"
+                      showArrow
                     >
-                      <Image
-                        alt={item?.author?.name || 'author'}
-                        className="mr-2 h-6 w-6 rounded-full"
-                        height={24}
-                        src={item?.author?.avatarUrl || ''}
-                        width={24}
-                      />
-                    </Link>
+                      <Link
+                        className="flex-shrink-0 text-blue-400 hover:underline"
+                        href={`/members/${item?.author?.login}`}
+                      >
+                        <Image
+                          alt={item?.author?.name || 'author'}
+                          className="mr-2 h-6 w-6 rounded-full"
+                          height={24}
+                          src={item?.author?.avatarUrl || ''}
+                          width={24}
+                        />
+                      </Link>
+                    </Tooltip>
                   )}
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                     <Link

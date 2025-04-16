@@ -132,14 +132,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.16.3"
+version = "4.16.4"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.16.3-py3-none-any.whl", hash = "sha256:996bdca3429722bc1bf5875a95d6770f3df577885219afd3a9c001c0cf4d0f1e"},
-    {file = "algoliasearch-4.16.3.tar.gz", hash = "sha256:afd091635c84e0915f2e14a2b540d55a42fce58a9ac27ff2bb6eb8099a2e9d23"},
+    {file = "algoliasearch-4.16.4-py3-none-any.whl", hash = "sha256:d0566bf2ebddfb86ab8a8e507dc4c623151fdd75fb6802c775a1bf7cffb8f744"},
+    {file = "algoliasearch-4.16.4.tar.gz", hash = "sha256:a02021de6de547796aa80a5cc3a9154b7eb4c2347ada9d9017d6638845d2c944"},
 ]
 
 [package.dependencies]
@@ -247,18 +247,18 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "boto3"
-version = "1.37.33"
+version = "1.37.34"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "boto3-1.37.33-py3-none-any.whl", hash = "sha256:7b1b1bc69762975824e5a5d570880abebf634f7594f88b3dc175e8800f35be1a"},
-    {file = "boto3-1.37.33.tar.gz", hash = "sha256:4390317a1578af73f1514651bd180ba25802dcbe0a23deafa13851d54d3c3203"},
+    {file = "boto3-1.37.34-py3-none-any.whl", hash = "sha256:586bfa72a00601c04067f9adcbb08ecaf63b05b7d731103f33cb2ce0d6950b1b"},
+    {file = "boto3-1.37.34.tar.gz", hash = "sha256:94ca07328474db3fa605eb99b011512caa73f7161740d365a1f00cfebfb6dd90"},
 ]
 
 [package.dependencies]
-botocore = ">=1.37.33,<1.38.0"
+botocore = ">=1.37.34,<1.38.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.11.0,<0.12.0"
 
@@ -267,14 +267,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.37.33"
+version = "1.37.34"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "botocore-1.37.33-py3-none-any.whl", hash = "sha256:4a167dfecae51e9140de24067de1c339acde5ade3dad524a4600ac2c72055e23"},
-    {file = "botocore-1.37.33.tar.gz", hash = "sha256:09b213b0d0500040f85c7daee912ea767c724e43ed61909e624c803ff6925222"},
+    {file = "botocore-1.37.34-py3-none-any.whl", hash = "sha256:bd9af0db1097befd2028ba8525e32cacc04f26ccb9dbd5d48d6ecd05bc16c27a"},
+    {file = "botocore-1.37.34.tar.gz", hash = "sha256:2909b6dbf9c90347c71a6fa0364acee522d6a7664f13d6f7996c9dd1b1f46fac"},
 ]
 
 [package.dependencies]
@@ -1710,14 +1710,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.73.0"
+version = "1.74.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "openai-1.73.0-py3-none-any.whl", hash = "sha256:f52d1f673fb4ce6069a40d544a80fcb062eba1b3f489004fac4f9923a074c425"},
-    {file = "openai-1.73.0.tar.gz", hash = "sha256:b58ea39ba589de07db85c9905557ac12d2fc77600dcd2b92a08b99c9a3dce9e0"},
+    {file = "openai-1.74.0-py3-none-any.whl", hash = "sha256:aff3e0f9fb209836382ec112778667027f4fd6ae38bdb2334bc9e173598b092a"},
+    {file = "openai-1.74.0.tar.gz", hash = "sha256:592c25b8747a7cad33a841958f5eb859a785caea9ee22b9e4f4a2ec062236526"},
 ]
 
 [package.dependencies]
@@ -2609,14 +2609,14 @@ crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "2.26.0"
+version = "2.26.1"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "sentry_sdk-2.26.0-py2.py3-none-any.whl", hash = "sha256:82496fc359296dac57ec923300b18cc1f14a1279c1e7108d46d35dbb4cf8f5f8"},
-    {file = "sentry_sdk-2.26.0.tar.gz", hash = "sha256:88643459716dd0c6e412e5141fcc94ce3b5725e4b6b312210b91332b3b46a0e2"},
+    {file = "sentry_sdk-2.26.1-py2.py3-none-any.whl", hash = "sha256:e99390e3f217d13ddcbaeaed08789f1ca614d663b345b9da42e35ad6b60d696a"},
+    {file = "sentry_sdk-2.26.1.tar.gz", hash = "sha256:759e019c41551a21519a95e6cef6d91fb4af1054761923dadaee2e6eca9c02c7"},
 ]
 
 [package.dependencies]

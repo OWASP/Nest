@@ -63,10 +63,25 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
       </button>
 
       <div className="space-y-2 text-sm">
-        <InfoItem icon={faStar} unit="Star" value={details.starsCount} />
-        <InfoItem icon={faCodeFork} unit="Fork" value={details.forksCount} />
-        <InfoItem icon={faUsers} unit="Contributor" value={details.contributorsCount} />
-        <InfoItem icon={faExclamationCircle} unit="Issue" value={details.openIssuesCount} />
+        <InfoItem icon={faStar} pluralizedName="Stars" unit="Stars" value={details.starsCount} />
+        <InfoItem
+          icon={faCodeFork}
+          pluralizedName="Forks"
+          unit="Forks"
+          value={details.forksCount}
+        />
+        <InfoItem
+          icon={faUsers}
+          pluralizedName="Contributors"
+          unit="Contributors"
+          value={details.contributorsCount}
+        />
+        <InfoItem
+          icon={faExclamationCircle}
+          pluralizedName="Issues"
+          unit="Issues"
+          value={details.openIssuesCount}
+        />
       </div>
     </div>
   )

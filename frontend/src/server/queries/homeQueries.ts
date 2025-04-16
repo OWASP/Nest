@@ -26,22 +26,22 @@ export const GET_MAIN_PAGE_DATA = gql`
       suggestedLocation
     }
     topContributors(limit: 18) {
-      name
-      login
       avatarUrl
+      login
+      name
+      projectKey
       projectName
-      projectUrl
     }
     recentIssues(limit: 5, distinct: $distinct) {
-      commentsCount
-      createdAt
-      title
-      url
       author {
         avatarUrl
         login
         name
       }
+      createdAt
+      repositoryName
+      title
+      url
     }
     recentPullRequests(limit: 5, distinct: $distinct) {
       author {
@@ -51,6 +51,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       }
       createdAt
       title
+      repositoryName
       url
     }
     recentReleases(limit: 9, distinct: $distinct) {

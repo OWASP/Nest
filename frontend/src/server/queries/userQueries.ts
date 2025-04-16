@@ -3,13 +3,14 @@ import { gql } from '@apollo/client'
 export const GET_USER_DATA = gql`
   query GetUser($key: String!) {
     recentIssues(limit: 5, login: $key) {
-      commentsCount
       createdAt
+      repositoryName
       title
       url
     }
     recentPullRequests(limit: 5, login: $key) {
       createdAt
+      repositoryName
       title
       url
     }
