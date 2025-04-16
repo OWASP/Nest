@@ -30,6 +30,9 @@ class Project(
 
     class Meta:
         db_table = "owasp_projects"
+        indexes = [
+            models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
+        ]
         verbose_name_plural = "Projects"
 
     class ProjectLevel(models.TextChoices):

@@ -15,7 +15,6 @@ class IssueNode(BaseNode):
         model = Issue
         fields = (
             "author",
-            "comments_count",
             "created_at",
             "state",
             "title",

@@ -23,7 +23,6 @@ export const mockRepositoryData = {
     issues: [
       {
         title: 'Bug fix required',
-        commentsCount: 4,
         createdAt: '2024-01-02T10:00:00Z',
         repositoryName: 'test-repo-2',
         author: {

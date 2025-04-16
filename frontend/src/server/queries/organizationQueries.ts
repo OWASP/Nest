@@ -40,7 +40,7 @@ export const GET_ORGANIZATION_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 6, organization: $login, distinct: true) {
+    recentReleases(limit: 9, organization: $login, distinct: true) {
       author {
         avatarUrl
         login

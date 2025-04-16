@@ -17,7 +17,6 @@ class TestIssueNode:
         assert IssueNode._meta.model == Issue
         expected_fields = {
             "author",
-            "comments_count",
             "created_at",
             "repository_name",
             "state",
