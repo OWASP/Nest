@@ -12,6 +12,7 @@ export const mockOrganizationData = {
       location: 'San Francisco, CA',
       login: 'test-org',
       name: 'Test Organization',
+      public_repositories_count: 2000,
       updated_at: 1727390473,
       url: 'https://github.com/test-org',
     },
@@ -27,6 +28,7 @@ export const mockOrganizationData = {
       location: 'New York, NY',
       login: 'another-org',
       name: 'Another Organization',
+      public_repositories_count: 1500,
       updated_at: 1727390473,
       url: 'https://github.com/another-org',
     },
@@ -144,7 +146,6 @@ export const mockOrganizationDetailsData = {
       title: 'Test Issue 1',
       createdAt: 1727390000,
       url: 'https://github.com/test-org/test-repo-1/issues/1',
-      commentsCount: 5,
       author: {
         login: 'user1',
         avatarUrl: 'https://avatars.githubusercontent.com/u/11111?v=4',
@@ -154,7 +155,6 @@ export const mockOrganizationDetailsData = {
       title: 'Test Issue 2',
       createdAt: 1727380000,
       url: 'https://github.com/test-org/test-repo-2/issues/2',
-      commentsCount: 3,
       author: {
         login: 'user2',
         avatarUrl: 'https://avatars.githubusercontent.com/u/22222?v=4',

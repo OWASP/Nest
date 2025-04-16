@@ -111,7 +111,7 @@ describe('UserDetailsPage', () => {
       const issueTitle = screen.getByText('Test Issue')
       expect(issueTitle).toBeInTheDocument()
 
-      const issueComments = screen.getByText('5 comments')
+      const issueComments = screen.getByText('Test Repo')
       expect(issueComments).toBeInTheDocument()
     })
   })
@@ -243,9 +243,9 @@ describe('UserDetailsPage', () => {
     })
 
     expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',

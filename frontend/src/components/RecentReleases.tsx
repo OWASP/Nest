@@ -1,7 +1,9 @@
 import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
@@ -19,6 +21,8 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
   showAvatar = true,
   showSingleColumn = false,
 }) => {
+  const router = useRouter()
+
   return (
     <SecondaryCard icon={faTag} title="Recent Releases">
       {data && data.length > 0 ? (
@@ -30,18 +34,27 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
                   {showAvatar && (
-                    <Link
-                      className="flex-shrink-0 text-blue-400 hover:underline"
-                      href={`/members/${item?.author?.login}`}
+                    <Tooltip
+                      closeDelay={100}
+                      content={item?.author?.name || item?.author?.login}
+                      id={`avatar-tooltip-${index}`}
+                      delay={100}
+                      placement="bottom"
+                      showArrow
                     >
-                      <Image
-                        alt={item?.author?.name || 'author'}
-                        className="mr-2 h-6 w-6 rounded-full"
-                        height={24}
-                        src={item?.author?.avatarUrl || ''}
-                        width={24}
-                      />
-                    </Link>
+                      <Link
+                        className="flex-shrink-0 text-blue-400 hover:underline"
+                        href={`/members/${item?.author?.login}`}
+                      >
+                        <Image
+                          alt={item?.author?.name || 'author'}
+                          className="mr-2 h-6 w-6 rounded-full"
+                          height={24}
+                          src={item?.author?.avatarUrl || ''}
+                          width={24}
+                        />
+                      </Link>
+                    </Tooltip>
                   )}
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                     <Link
@@ -59,12 +72,16 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(item.publishedAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <Link
-                      className="text-gray-600 hover:underline dark:text-gray-400"
-                      href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+                    <button
+                      className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
+                      onClick={() =>
+                        router.push(
+                          `/organizations/${item?.organizationName}/repositories/${item.repositoryName || ''}`
+                        )
+                      }
                     >
-                      <span>{item.repositoryName}</span>
-                    </Link>
+                      {item.repositoryName}
+                    </button>
                   </div>
                 </div>
               </div>
