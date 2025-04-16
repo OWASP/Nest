@@ -17,14 +17,10 @@ class Event(BulkSaveModel, TimestampedModel):
 
     class Meta:
         db_table = "owasp_events"
-        verbose_name_plural = "Events"
-
         indexes = [
-            models.Index(
-                fields=["-start_date"],
-                name="event_start_date_idx",
-            )
+            models.Index(fields=["-start_date"], name="event_start_date_desc_idx"),
         ]
+        verbose_name_plural = "Events"
 
     class Category(models.TextChoices):
         """Event category."""

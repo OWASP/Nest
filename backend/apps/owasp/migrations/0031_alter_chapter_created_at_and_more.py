@@ -17,18 +17,18 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="chapter",
-            index=models.Index(fields=["-created_at"], name="chapter_created_at_idx"),
+            index=models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
         ),
         migrations.AddIndex(
             model_name="event",
-            index=models.Index(fields=["-start_date"], name="event_start_date_idx"),
+            index=models.Index(fields=["-start_date"], name="event_start_date_desc_idx"),
         ),
         migrations.AddIndex(
             model_name="post",
-            index=models.Index(fields=["-published_at"], name="post_published_at_idx"),
+            index=models.Index(fields=["-published_at"], name="post_published_at_desc_idx"),
         ),
         migrations.AddIndex(
             model_name="project",
-            index=models.Index(fields=["-created_at"], name="project_created_at_idx"),
+            index=models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
         ),
     ]

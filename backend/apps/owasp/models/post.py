@@ -13,13 +13,10 @@ class Post(BulkSaveModel, TimestampedModel):
 
     class Meta:
         db_table = "owasp_posts"
-        verbose_name_plural = "Posts"
         indexes = [
-            models.Index(
-                fields=["-published_at"],
-                name="post_published_at_idx",
-            )
+            models.Index(fields=["-published_at"], name="post_published_at_desc_idx"),
         ]
+        verbose_name_plural = "Posts"
 
     author_image_url = models.URLField(verbose_name="Author image URL", blank=True, default="")
     author_name = models.CharField(verbose_name="Author name", max_length=100)

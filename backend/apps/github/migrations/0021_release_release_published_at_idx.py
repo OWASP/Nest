@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name="release",
-            index=models.Index(fields=["-published_at"], name="release_published_at_idx"),
+            index=models.Index(fields=["-published_at"], name="release_published_at_desc_idx"),
         ),
     ]

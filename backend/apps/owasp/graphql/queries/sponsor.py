@@ -1,7 +1,6 @@
 """OWASP sponsors GraphQL queries."""
 
 import graphene
-from django.db.models import Case, IntegerField, Value, When
 
 from apps.common.graphql.queries import BaseQuery
 from apps.owasp.graphql.nodes.sponsor import SponsorNode
@@ -15,13 +14,14 @@ class SponsorQuery(BaseQuery):
 
     def resolve_sponsors(root, info):
         """Resolve sponsors."""
-        priority_order = Case(
-            *[
-                When(sponsor_type=s_type, then=Value(index))
-                for index, s_type in enumerate(Sponsor.SponsorType)
-            ],
-            output_field=IntegerField(),
+        return sorted(
+            Sponsor.objects.all(),
+            key=lambda x: {
+                Sponsor.SponsorType.DIAMOND: 1,
+                Sponsor.SponsorType.PLATINUM: 2,
+                Sponsor.SponsorType.GOLD: 3,
+                Sponsor.SponsorType.SILVER: 4,
+                Sponsor.SponsorType.SUPPORTER: 5,
+                Sponsor.SponsorType.NOT_SPONSOR: 6,
+            }[x.sponsor_type],
         )
-        return Sponsor.objects.annotate(
-            priority_order=priority_order,
-        ).order_by("priority_order")

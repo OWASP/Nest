@@ -35,7 +35,7 @@ class RepositoryContributorQuery(BaseQuery):
             RepositoryContributor.objects.by_humans()
             .to_community_repositories()
             .filter(repository__project__isnull=False)
-            .select_related("user", "repository")
+            .select_related("repository__project", "user")
             .annotate(
                 rank=Window(
                     expression=Rank(),
@@ -59,8 +59,8 @@ class RepositoryContributorQuery(BaseQuery):
                 project_url=F("repository__project__key"),
             )
             .values(
-                "user__avatar_url",
                 "contributions_count",
+                "user__avatar_url",
                 "user__login",
                 "user__name",
                 "project_name",
