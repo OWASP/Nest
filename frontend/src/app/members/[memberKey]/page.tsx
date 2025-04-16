@@ -7,7 +7,6 @@ import {
   faFileCode,
   faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -17,9 +16,9 @@ import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()
@@ -50,14 +49,7 @@ const UserDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError, memberKey])
@@ -113,15 +105,16 @@ const UserDetailsPage: React.FC = () => {
   const formattedIssues: ProjectIssuesType[] = useMemo(() => {
     return (
       issues?.map((issue) => ({
-        commentsCount: issue.commentsCount,
-        createdAt: issue.createdAt,
-        title: issue.title,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        createdAt: issue.createdAt,
+        organizationName: issue.organizationName,
+        repositoryName: issue.repositoryName,
+        title: issue.title,
         url: issue.url,
       })) || []
     )
@@ -130,14 +123,16 @@ const UserDetailsPage: React.FC = () => {
   const formattedPullRequest: ItemCardPullRequests[] = useMemo(() => {
     return (
       pullRequests?.map((pullRequest) => ({
-        createdAt: pullRequest.createdAt,
-        title: pullRequest.title,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        createdAt: pullRequest.createdAt,
+        organizationName: pullRequest.organizationName,
+        repositoryName: pullRequest.repositoryName,
+        title: pullRequest.title,
         url: pullRequest.url,
       })) || []
     )
@@ -146,17 +141,18 @@ const UserDetailsPage: React.FC = () => {
   const formattedReleases: ProjectReleaseType[] = useMemo(() => {
     return (
       releases?.map((release) => ({
-        isPreRelease: release.isPreRelease,
-        name: release.name,
-        publishedAt: release.publishedAt,
-        tagName: release.tagName,
-        repositoryName: release.repositoryName,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        isPreRelease: release.isPreRelease,
+        name: release.name,
+        organizationName: release.organizationName,
+        publishedAt: release.publishedAt,
+        repositoryName: release.repositoryName,
+        tagName: release.tagName,
         url: release.url,
       })) || []
     )

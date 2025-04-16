@@ -175,6 +175,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick])
 
   useEffect(() => {
+    inputRef.current?.focus()
+
     const handleClickOutside = (event: MouseEvent) => {
       if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
         setShowSuggestions(false)

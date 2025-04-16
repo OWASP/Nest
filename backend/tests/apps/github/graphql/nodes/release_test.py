@@ -22,6 +22,7 @@ class TestReleaseNode:
             "author",
             "is_pre_release",
             "name",
+            "organization_name",
             "project_name",
             "published_at",
             "repository_name",
