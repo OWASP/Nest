@@ -3,10 +3,12 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useState } from 'react'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
+import { pluralize } from 'utils/pluralize'
+import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
 import SecondaryCard from './SecondaryCard'
 
 const TopContributors = ({
@@ -22,7 +24,6 @@ const TopContributors = ({
   type: string
   icon?: IconProp
 }) => {
-  const router = useRouter()
   const [showAllContributors, setShowAllContributors] = useState(false)
 
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
@@ -34,15 +35,13 @@ const TopContributors = ({
   if (contributors.length === 0) {
     return
   }
+  const isContributor = type === 'contributor'
+
   return (
     <SecondaryCard icon={icon} title={label}>
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
         {displayContributors.map((item, index) => (
-          <button
-            key={index}
-            onClick={() => router.push(`/members/${item.login}`)}
-            className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-          >
+          <div key={index} className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
                 <Image
@@ -52,21 +51,33 @@ const TopContributors = ({
                   alt={item?.name || ''}
                   className="rounded-full"
                 />
-                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
+                <Link
+                  className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400 hover:underline"
+                  href={getMemberUrl(item?.login)}
+                >
                   {capitalize(item.name) || capitalize(item.login)}
-                </h3>
+                </Link>
               </div>
               <div className="ml-0.5 w-full">
                 <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-400">
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                    {type === 'contributor'
-                      ? `${item.contributionsCount ?? 0} contributions`
-                      : item.projectName}
-                  </span>
+                  {isContributor ? (
+                    <span className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 dark:text-gray-400">
+                      {' '}
+                      {item.contributionsCount} {pluralize(item.contributionsCount, 'contribution')}
+                    </span>
+                  ) : (
+                    <Link
+                      className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+                      href={getProjectUrl(item?.projectKey)}
+                    >
+                      {' '}
+                      {item.projectName}
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
-          </button>
+          </div>
         ))}
       </div>
       {contributors.length > maxInitialDisplay && (

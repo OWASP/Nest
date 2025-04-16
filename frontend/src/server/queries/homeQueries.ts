@@ -29,8 +29,8 @@ export const GET_MAIN_PAGE_DATA = gql`
       avatarUrl
       login
       name
+      projectKey
       projectName
-      projectUrl
     }
     recentIssues(limit: 5, distinct: $distinct) {
       author {
