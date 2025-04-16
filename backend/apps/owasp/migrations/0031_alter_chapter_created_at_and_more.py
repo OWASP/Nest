@@ -10,11 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="chapter",
-            name="created_at",
-            field=models.DateTimeField(default=None, verbose_name="Created at"),
-        ),
         migrations.AddIndex(
             model_name="chapter",
             index=models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
