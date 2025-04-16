@@ -102,6 +102,6 @@ test.describe('Project Details Page', () => {
     await expect(page.getByText('Issues3', { exact: true })).toBeVisible()
 
     await page.getByText('Repo One').click()
-    await expect(page).toHaveURL('repositories/repo-1')
+    await expect(page).toHaveURL('organizations/OWASP/repositories/repo-1')
   })
 })

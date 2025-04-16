@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
@@ -20,6 +21,8 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
   showAvatar = true,
   showSingleColumn = false,
 }) => {
+  const router = useRouter()
+
   return (
     <SecondaryCard icon={faTag} title="Recent Releases">
       {data && data.length > 0 ? (
@@ -69,12 +72,16 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(item.publishedAt)}</span>
                     <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-                    <Link
-                      className="text-gray-600 hover:underline dark:text-gray-400"
-                      href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+                    <button
+                      className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
+                      onClick={() =>
+                        router.push(
+                          `/organizations/${item?.organizationName}/repositories/${item.repositoryName || ''}`
+                        )
+                      }
                     >
-                      <span>{item.repositoryName}</span>
-                    </Link>
+                      {item.repositoryName}
+                    </button>
                   </div>
                 </div>
               </div>

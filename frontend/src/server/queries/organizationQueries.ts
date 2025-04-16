@@ -36,6 +36,7 @@ export const GET_ORGANIZATION_DATA = gql`
         name
       }
       createdAt
+      organizationName
       repositoryName
       title
       url
@@ -47,6 +48,7 @@ export const GET_ORGANIZATION_DATA = gql`
         name
       }
       name
+      organizationName
       publishedAt
       repositoryName
       tagName
@@ -58,6 +60,9 @@ export const GET_ORGANIZATION_DATA = gql`
       key
       name
       openIssuesCount
+      organization {
+        login
+      }
       starsCount
       url
     }
@@ -68,6 +73,7 @@ export const GET_ORGANIZATION_DATA = gql`
         name
       }
       createdAt
+      organizationName
       repositoryName
       title
       url

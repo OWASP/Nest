@@ -53,6 +53,7 @@ export type PullRequestsType = {
     login: string
     name: string
   }
+  organizationName: string
   createdAt: string
   title: string
   url: string
