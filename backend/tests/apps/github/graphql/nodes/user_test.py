@@ -28,7 +28,6 @@ class TestUserNode:
             "location",
             "login",
             "name",
-            "organization",
             "public_repositories_count",
             "releases_count",
             "updated_at",

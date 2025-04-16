@@ -29,7 +29,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
               <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
               <Link
                 className="text-gray-600 hover:underline dark:text-gray-400"
-                href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+                href={`/repositories/${item?.repositoryName ? item.repositoryName : ''}`}
               >
                 <span>{item.repositoryName}</span>
               </Link>{' '}

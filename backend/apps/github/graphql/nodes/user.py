@@ -3,7 +3,6 @@
 import graphene
 
 from apps.common.graphql.nodes import BaseNode
-from apps.github.graphql.nodes.organization import OrganizationNode
 from apps.github.models.user import User
 
 
@@ -19,7 +18,6 @@ class UserNode(BaseNode):
 
     created_at = graphene.Float()
     issues_count = graphene.Int()
-    organization = graphene.Field(OrganizationNode)
     releases_count = graphene.Int()
     updated_at = graphene.Float()
     url = graphene.String()
@@ -47,10 +45,6 @@ class UserNode(BaseNode):
     def resolve_issues_count(self, info):
         """Resolve issues count."""
         return self.idx_issues_count
-
-    def resolve_organization(self, info):
-        """Resolve organization."""
-        return self.organization
 
     def resolve_releases_count(self, info):
         """Resolve releases count."""

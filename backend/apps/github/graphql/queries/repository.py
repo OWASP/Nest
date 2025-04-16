@@ -22,14 +22,14 @@ class RepositoryQuery(BaseQuery):
         limit=graphene.Int(default_value=12),
     )
 
-    def resolve_repository(root, info, repository_key, organization_key):
+    def resolve_repository(root, info, organization_key, repository_key):
         """Resolve repository by key.
 
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
-            repository_key (str): The unique key of the repository.
             organization_key (str): The login of the organization.
+            repository_key (str): The unique key of the repository.
 
         Returns:
             Repository or None: The repository object if found, otherwise None.

@@ -31,14 +31,17 @@ class TestRepositoryQuery:
             return_value=mock_queryset,
         ) as mock_select_related:
             result = RepositoryQuery.resolve_repository(
-                None, mock_info, repository_key="test-repo", organization_key="test-org"
+                None,
+                mock_info,
+                organization_key="test-org",
+                repository_key="test-repo",
             )
 
             assert result == mock_repository
             mock_select_related.assert_called_once_with("organization")
             mock_queryset.get.assert_called_once_with(
-                key__iexact="test-repo",
                 organization__login__iexact="test-org",
+                key__iexact="test-repo",
             )
 
     def test_resolve_repository_not_found(self, mock_info):
@@ -53,13 +56,13 @@ class TestRepositoryQuery:
             result = RepositoryQuery.resolve_repository(
                 None,
                 mock_info,
-                repository_key="non-existent-repo",
                 organization_key="non-existent-org",
+                repository_key="non-existent-repo",
             )
 
             assert result is None
             mock_select_related.assert_called_once_with("organization")
             mock_queryset.get.assert_called_once_with(
-                key__iexact="non-existent-repo",
                 organization__login__iexact="non-existent-org",
+                key__iexact="non-existent-repo",
             )
