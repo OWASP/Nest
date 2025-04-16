@@ -2,9 +2,9 @@
 
 import { useQuery } from '@apollo/client'
 import {
+  faCodeCommit,
   faCodeFork,
   faExclamationCircle,
-  faHistory,
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
@@ -95,7 +95,7 @@ const RepositoryDetailsPage = () => {
       unit: 'Issue',
     },
     {
-      icon: faHistory,
+      icon: faCodeCommit,
       value: repository.commitsCount,
       unit: 'Commit',
     },

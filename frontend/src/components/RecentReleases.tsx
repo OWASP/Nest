@@ -1,4 +1,4 @@
-import { faCalendar, faFileCode, faTag } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFolderOpen, faTag } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
@@ -71,7 +71,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(item.publishedAt)}</span>
-                    <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+                    <FontAwesomeIcon icon={faFolderOpen} className="ml-4 mr-2 h-4 w-4" />
                     <button
                       className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
                       onClick={() =>

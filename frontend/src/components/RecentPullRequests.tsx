@@ -1,4 +1,4 @@
-import { faCalendar, faCodePullRequest, faFileCode } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faCodePullRequest, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -30,7 +30,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
 
           {item?.repositoryName && (
             <div className="item-center flex">
-              <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
+              <FontAwesomeIcon icon={faFolderOpen} className="ml-4 mr-2 h-4 w-4" />
               <button
                 className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
                 onClick={() =>
