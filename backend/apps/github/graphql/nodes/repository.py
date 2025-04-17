@@ -8,8 +8,8 @@ from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository import Repository
 
-RECENT_ISSUES_LIMIT = 10
-RECENT_RELEASES_LIMIT = 10
+RECENT_ISSUES_LIMIT = 5
+RECENT_RELEASES_LIMIT = 5
 
 
 class RepositoryNode(BaseNode):
