@@ -22,6 +22,7 @@ const ItemCardList = ({
   renderDetails: (item: {
     createdAt: string
     commentsCount: number
+    organizationName: string
     publishedAt: string
     repositoryName: string
     tagName: string

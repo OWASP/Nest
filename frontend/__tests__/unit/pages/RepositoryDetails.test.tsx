@@ -3,7 +3,7 @@ import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { render } from 'wrappers/testUtil'
-import RepositoryDetailsPage from 'app/repositories/[repositoryKey]/page'
+import RepositoryDetailsPage from 'app/organizations/[organizationKey]/repositories/[repositoryKey]/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -130,9 +130,8 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('button')?.click()
-
-    expect(mockRouter.push).toHaveBeenCalledWith('/members/contributor1')
+    const contributorLink = screen.getByText('Contributor 1').closest('a')
+    expect(contributorLink).toHaveAttribute('href', '/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {

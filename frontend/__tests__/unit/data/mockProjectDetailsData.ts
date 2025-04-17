@@ -38,7 +38,6 @@ export const mockProjectDetailsData = {
     recentIssues: [
       {
         title: 'Fix authentication bug',
-        commentsCount: 5,
         createdAt: '2025-02-05T15:20:30Z',
         repositoryName: 'test-repo',
         author: {
@@ -56,6 +55,9 @@ export const mockProjectDetailsData = {
         key: 'repo-1',
         name: 'Repo One',
         openIssuesCount: 6,
+        organization: {
+          login: 'OWASP',
+        },
         starsCount: 95,
         subscribersCount: 15,
         url: 'https://github.com/example-project/repo-1',
@@ -66,6 +68,9 @@ export const mockProjectDetailsData = {
         key: 'repo-2',
         name: 'Repo Two',
         openIssuesCount: 3,
+        organization: {
+          login: 'OWASP',
+        },
         starsCount: 60,
         subscribersCount: 10,
         url: 'https://github.com/example-project/repo-2',

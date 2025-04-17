@@ -36,14 +36,9 @@ class StatsQuery:
             .count()
         )
 
-        active_projects_stats = (active_projects_stats // 10) * 10  # nearest 10
-        active_chapters_stats = (active_chapters_stats // 10) * 10
-        contributors_stats = (contributors_stats // 100) * 100  # nearest 100
-        countries_stats = (countries_stats // 10) * 10
-
         return StatsNode(
-            active_projects_stats,
-            active_chapters_stats,
-            contributors_stats,
-            countries_stats,
+            (active_projects_stats // 10) * 10,  # nearest 10
+            (active_chapters_stats // 10) * 10,  # nearest 10
+            (contributors_stats // 100) * 100,  # nearest 100
+            (countries_stats // 10) * 10,  # nearest 10
         )

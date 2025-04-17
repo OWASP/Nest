@@ -36,6 +36,7 @@ class RepositoryNode(BaseNode):
             "license",
             "name",
             "open_issues_count",
+            "organization",
             "size",
             "stars_count",
             "subscribers_count",
