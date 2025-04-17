@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0021_release_release_published_at_idx'),
-        ('github', '0021_user_contributions_count'),
+        ("github", "0021_release_release_published_at_idx"),
+        ("github", "0021_user_contributions_count"),
     ]
 
-    operations = [
-    ]
+    operations = []
