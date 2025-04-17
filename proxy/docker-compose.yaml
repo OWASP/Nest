@@ -3,9 +3,10 @@ services:
     container_name: nest-certbot
     image: certbot/certbot
     volumes:
+      - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
-      - ./security.conf:/etc/nginx/conf.d/security.conf
+      - ./redirects.conf:/etc/nginx/redirects.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
     entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
@@ -17,9 +18,10 @@ services:
       - 80:80
       - 443:443
     volumes:
+      - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
-      - ./security.conf:/etc/nginx/conf.d/security.conf
+      - ./redirects.conf:/etc/nginx/redirects.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
     networks:

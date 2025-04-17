@@ -49,10 +49,10 @@ test.describe('About Page', () => {
       'Ansible',
       'Docker',
       'Jest',
+      'Next.js',
       'PlayWright',
       'PostgreSQL',
       'Pytest',
-      'React',
       'Tailwind CSS',
       'Typescript',
     ]
@@ -82,6 +82,6 @@ test.describe('About Page', () => {
     await page.getByRole('button', { name: 'View Profile' }).first().click()
     const newPage = await pagePromise
     await newPage.waitForLoadState()
-    expect(newPage.url()).toContain('/community/users/')
+    expect(newPage.url()).toContain('/members/')
   })
 })

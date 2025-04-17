@@ -27,6 +27,7 @@ class TestRepositoryNode:
             "license",
             "name",
             "open_issues_count",
+            "organization",
             "owner_key",
             "latest_release",
             "releases",

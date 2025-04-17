@@ -22,9 +22,10 @@ const LeadersList = ({ leaders }: LeadersListProps) => {
       {leadersArray.map((leader, index) => (
         <span key={`${leader}-${index}`}>
           <Link
-            href={`/community/users?q=${encodeURIComponent(leader)}`}
+            href={`/members?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}
-            className="text-gray-400 hover:underline"
+            className="text-gray-600 hover:underline dark:text-gray-400"
+            title={leader}
           >
             {leader}
           </Link>

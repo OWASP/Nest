@@ -5,7 +5,6 @@ export interface IssuesDataType {
 }
 
 export interface IssueType {
-  comments_count: number
   created_at: number
   hint: string
   labels: string[]

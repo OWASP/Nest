@@ -18,7 +18,7 @@ export const mockUserDetailsData = {
     {
       title: 'Test Issue',
       createdAt: 1723002473,
-      commentsCount: 5,
+      repositoryName: 'test-repo-1',
       url: 'https://github.com/OWASP/Nest/issues/798',
     },
   ],
@@ -27,6 +27,7 @@ export const mockUserDetailsData = {
       isPreRelease: false,
       name: 'v1.0.0',
       publishedAt: 1723002473,
+      repositoryName: 'test-repo-2',
       tagName: '1.0.0',
       url: 'https://github.com/testuser/test-repo/releases/tag/1.0.0',
     },
@@ -34,6 +35,7 @@ export const mockUserDetailsData = {
   recentPullRequests: [
     {
       createdAt: 1723002473,
+      repositoryName: 'test-repo-3',
       title: 'Test Pull Request',
       url: 'https://github.com/testuser/test-repo/pull/1',
     },
