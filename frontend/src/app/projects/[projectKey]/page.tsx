@@ -1,9 +1,9 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
-  faCode,
   faCodeFork,
   faExclamationCircle,
+  faFolderOpen,
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
@@ -80,7 +80,7 @@ const ProjectDetailsPage = () => {
       unit: 'Issue',
     },
     {
-      icon: faCode,
+      icon: faFolderOpen,
       value: project.repositoriesCount,
       unit: 'Repository',
       pluralizedName: 'Repositories',

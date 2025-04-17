@@ -80,6 +80,7 @@ export interface UserDetailsProps {
 
 export interface PullRequestsType {
   createdAt: string
+  organizationName: string
   repositoryName?: string
   title: string
   url: string
@@ -94,5 +95,6 @@ export interface ItemCardPullRequests {
     key: string
     name: string
   }
+  organizationName: string
   url: string
 }

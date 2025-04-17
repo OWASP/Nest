@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 export const GET_REPOSITORY_DATA = gql`
-  query GetRepository($repositoryKey: String!) {
-    repository(repositoryKey: $repositoryKey) {
+  query GetRepository($repositoryKey: String!, $organizationKey: String!) {
+    repository(repositoryKey: $repositoryKey, organizationKey: $organizationKey) {
       commitsCount
       contributorsCount
       createdAt
@@ -15,6 +15,7 @@ export const GET_REPOSITORY_DATA = gql`
           login
           name
         }
+        organizationName
         repositoryName
         createdAt
         title
@@ -23,6 +24,9 @@ export const GET_REPOSITORY_DATA = gql`
       license
       name
       openIssuesCount
+      organization {
+        login
+      }
       releases {
         author {
           avatarUrl
@@ -31,6 +35,7 @@ export const GET_REPOSITORY_DATA = gql`
         }
         isPreRelease
         name
+        organizationName
         publishedAt
         repositoryName
         tagName

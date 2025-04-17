@@ -12,6 +12,7 @@ class RepositoryQuery(BaseQuery):
 
     repository = graphene.Field(
         RepositoryNode,
+        organization_key=graphene.String(required=True),
         repository_key=graphene.String(required=True),
     )
 
@@ -21,12 +22,13 @@ class RepositoryQuery(BaseQuery):
         limit=graphene.Int(default_value=12),
     )
 
-    def resolve_repository(root, info, repository_key):
+    def resolve_repository(root, info, organization_key, repository_key):
         """Resolve repository by key.
 
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
+            organization_key (str): The login of the organization.
             repository_key (str): The unique key of the repository.
 
         Returns:
@@ -34,7 +36,10 @@ class RepositoryQuery(BaseQuery):
 
         """
         try:
-            return Repository.objects.get(key=repository_key)
+            return Repository.objects.select_related("organization").get(
+                key__iexact=repository_key,
+                organization__login__iexact=organization_key,
+            )
         except Repository.DoesNotExist:
             return None
 
@@ -56,7 +61,7 @@ class RepositoryQuery(BaseQuery):
                 "organization",
             )
             .filter(
-                organization__login=organization,
+                organization__login__iexact=organization,
             )
             .order_by("-stars_count")[:limit]
         )
