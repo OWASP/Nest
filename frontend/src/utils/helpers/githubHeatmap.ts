@@ -83,19 +83,17 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
     return err instanceof Error ? err.message : 'An unknown error occurred'
   }
 }
-// The code below is a modified version of 'github-contributions-canvas'
-// https://www.npmjs.com/package/github-contributions-canvas?activeTab=code
 
 const themes = {
   blue: {
     background: '#10151C',
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#5F87A8',
-    grade3: '#46627B',
-    grade2: '#314257',
-    grade1: '#394d65',
-    grade0: '#202A37',
+    grade4: '#1d4ed8', // most contributions
+    grade3: '#2563eb',
+    grade2: '#3b82f6',
+    grade1: '#334155',
+    grade0: '#1e293b', // no contributions
   },
 }
 
@@ -215,6 +213,21 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
     ctx.font = `10px '${fontFace}'`
   }
 
+  const canvasRect = ctx.canvas.getBoundingClientRect()
+  const tooltip = document.createElement('div')
+  tooltip.style.position = 'fixed'
+  tooltip.style.padding = '4px 8px'
+  tooltip.style.background = '#333'
+  tooltip.style.color = '#fff'
+  tooltip.style.borderRadius = '4px'
+  tooltip.style.fontSize = '12px'
+  tooltip.style.pointerEvents = 'none'
+  tooltip.style.zIndex = '1000'
+  tooltip.style.display = 'none'
+  document.body.appendChild(tooltip)
+
+  const cellPositions: { x: number; y: number; width: number; height: number; text: string }[] = []
+
   for (let y = 0; y < graphEntries.length; y += 1) {
     for (let x = 0; x < graphEntries[y].length; x += 1) {
       const day = graphEntries[y][x]
@@ -227,7 +240,7 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       ctx.fillStyle = color
       const cellX = offsetX + (boxWidth + boxMargin) * x
       const cellY = offsetY + textHeight + (boxWidth + boxMargin) * y
-      const cellRadius = 2 // radius for rounded corners
+      const cellRadius = 2
 
       ctx.beginPath()
       ctx.moveTo(cellX + cellRadius, cellY)
@@ -238,8 +251,33 @@ function drawYear(ctx: CanvasRenderingContext2D, opts: DrawYearOptions) {
       ctx.closePath()
       ctx.fillStyle = color
       ctx.fill()
+
+      cellPositions.push({
+        x: cellX,
+        y: cellY,
+        width: boxWidth,
+        height: boxWidth,
+        text: `${day.date}: ${day.info.count} contribution${day.info.count !== 1 ? 's' : ''}`,
+      })
     }
   }
+
+  ctx.canvas.addEventListener('mousemove', (e) => {
+    const rect = ctx.canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const hovered = cellPositions.find(
+      (pos) => x >= pos.x && x <= pos.x + pos.width && y >= pos.y && y <= pos.y + pos.height
+    )
+    if (hovered) {
+      tooltip.style.left = `${e.clientX}px`
+      tooltip.style.top = `${e.clientY + 16}px`
+      tooltip.style.display = 'block'
+      tooltip.innerText = hovered.text
+    } else {
+      tooltip.style.display = 'none'
+    }
+  })
 
   // Draw Month Label
   let lastCountedMonth = 0
