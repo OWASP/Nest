@@ -1,6 +1,6 @@
-import { faCalendar, faCodePullRequest, faFileCode } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faCodePullRequest, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 import { PullRequestsType } from 'types/home'
 import { ItemCardPullRequests } from 'types/user'
@@ -13,6 +13,8 @@ interface RecentPullRequestsProps {
 }
 
 const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvatar = true }) => {
+  const router = useRouter()
+
   return (
     <ItemCardList
       title="Recent Pull Requests"
@@ -28,13 +30,17 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
 
           {item?.repositoryName && (
             <div className="item-center flex">
-              <FontAwesomeIcon icon={faFileCode} className="ml-4 mr-2 h-4 w-4" />
-              <Link
-                className="text-gray-600 hover:underline dark:text-gray-400"
-                href={`/repositories/${item?.repositoryName ? item.repositoryName.toLowerCase() : ''}`}
+              <FontAwesomeIcon icon={faFolderOpen} className="ml-4 mr-2 h-4 w-4" />
+              <button
+                className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
+                onClick={() =>
+                  router.push(
+                    `/organizations/${item.organizationName}/repositories/${item.repositoryName || ''}`
+                  )
+                }
               >
-                <span>{item.repositoryName}</span>
-              </Link>{' '}
+                {item.repositoryName}
+              </button>
             </div>
           )}
         </div>

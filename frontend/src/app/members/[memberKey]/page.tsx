@@ -1,11 +1,11 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
-  faCodeBranch,
+  faCircleExclamation,
+  faFolderOpen,
+  faPersonWalkingArrowRight,
+  faTag,
   faUserPlus,
-  faUser,
-  faFileCode,
-  faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -112,6 +112,7 @@ const UserDetailsPage: React.FC = () => {
           name: user?.name || user?.login || '',
         },
         createdAt: issue.createdAt,
+        organizationName: issue.organizationName,
         repositoryName: issue.repositoryName,
         title: issue.title,
         url: issue.url,
@@ -129,6 +130,7 @@ const UserDetailsPage: React.FC = () => {
           name: user?.name || user?.login || '',
         },
         createdAt: pullRequest.createdAt,
+        organizationName: pullRequest.organizationName,
         repositoryName: pullRequest.repositoryName,
         title: pullRequest.title,
         url: pullRequest.url,
@@ -147,6 +149,7 @@ const UserDetailsPage: React.FC = () => {
         },
         isPreRelease: release.isPreRelease,
         name: release.name,
+        organizationName: release.organizationName,
         publishedAt: release.publishedAt,
         repositoryName: release.repositoryName,
         tagName: release.tagName,
@@ -185,16 +188,16 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   const userStats = [
-    { icon: faUser, value: user?.followersCount || 0, unit: 'Follower' },
+    { icon: faPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
     { icon: faUserPlus, value: user?.followingCount || 0, unit: 'Following' },
     {
-      icon: faCodeBranch,
+      icon: faFolderOpen,
       pluralizedName: 'Repositories',
       unit: 'Repository',
       value: user?.publicRepositoriesCount ?? 0,
     },
-    { icon: faFileCode, value: user?.issuesCount || 0, unit: 'Issue' },
-    { icon: faBookmark, value: user?.releasesCount || 0, unit: 'Release' },
+    { icon: faCircleExclamation, value: user?.issuesCount || 0, unit: 'Issue' },
+    { icon: faTag, value: user?.releasesCount || 0, unit: 'Release' },
   ]
 
   const Heatmap = () => (

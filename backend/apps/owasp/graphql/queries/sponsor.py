@@ -14,12 +14,14 @@ class SponsorQuery(BaseQuery):
 
     def resolve_sponsors(root, info):
         """Resolve sponsors."""
-        priority_order = {
-            Sponsor.SponsorType.DIAMOND: 1,
-            Sponsor.SponsorType.PLATINUM: 2,
-            Sponsor.SponsorType.GOLD: 3,
-            Sponsor.SponsorType.SILVER: 4,
-            Sponsor.SponsorType.SUPPORTER: 5,
-            Sponsor.SponsorType.NOT_SPONSOR: 6,
-        }
-        return sorted(Sponsor.objects.all(), key=lambda x: priority_order[x.sponsor_type])
+        return sorted(
+            Sponsor.objects.all(),
+            key=lambda x: {
+                Sponsor.SponsorType.DIAMOND: 1,
+                Sponsor.SponsorType.PLATINUM: 2,
+                Sponsor.SponsorType.GOLD: 3,
+                Sponsor.SponsorType.SILVER: 4,
+                Sponsor.SponsorType.SUPPORTER: 5,
+                Sponsor.SponsorType.NOT_SPONSOR: 6,
+            }[x.sponsor_type],
+        )

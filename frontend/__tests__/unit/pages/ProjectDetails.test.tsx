@@ -128,9 +128,8 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('button')?.click()
-
-    expect(mockRouter.push).toHaveBeenCalledWith('/members/contributor1')
+    const contributorLink = screen.getByText('Contributor 1').closest('a')
+    expect(contributorLink).toHaveAttribute('href', '/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {
