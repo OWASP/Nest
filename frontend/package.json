@@ -63,7 +63,7 @@
     "@axe-core/react": "^4.10.1",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.24.0",
-    "@playwright/test": "^1.51.1",
+    "@playwright/test": "^1.52.0",
     "@swc/core": "^1.11.21",
     "@swc/jest": "^0.2.37",
     "@tailwindcss/postcss": "^4.1.4",
