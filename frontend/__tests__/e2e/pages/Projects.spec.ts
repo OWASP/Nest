@@ -1,3 +1,4 @@
+import { expectBreadcrumbVisible } from '@e2e/helpers/breadCrumbsHelper'
 import { test, expect } from '@playwright/test'
 import mockProjectData from '@unit/data/mockProjectData'
 
@@ -54,9 +55,6 @@ test.describe('Projects Page', () => {
     await expect(page).toHaveURL('projects/project_1')
   })
   test('breadcrumb renders correct segments on /projects', async ({ page }) => {
-    const breadcrumb = page.locator('[aria-label="breadcrumb"]')
-    await expect(breadcrumb).toBeVisible()
-    await expect(breadcrumb.getByText('Home')).toBeVisible()
-    await expect(breadcrumb.getByText('Projects')).toBeVisible()
+    await expectBreadcrumbVisible(page, ['Home', 'Projects'])
   })
 })

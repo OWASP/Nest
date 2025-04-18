@@ -1,3 +1,4 @@
+import { expectBreadcrumbVisible } from '@e2e/helpers/breadCrumbsHelper'
 import { test, expect } from '@playwright/test'
 import { mockAboutData } from '@unit/data/mockAboutData'
 
@@ -86,8 +87,6 @@ test.describe('About Page', () => {
   })
 
   test('breadcrumb renders correct segments on /about', async ({ page }) => {
-    const breadcrumb = page.locator('[aria-label="breadcrumb"]')
-    await expect(breadcrumb).toBeVisible()
-    await expect(breadcrumb.getByText('About')).toBeVisible()
+    await expectBreadcrumbVisible(page, ['Home', 'About'])
   })
 })
