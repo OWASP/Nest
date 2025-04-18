@@ -32,7 +32,7 @@ class PullRequestQuery(BaseQuery):
             distinct (bool): Whether to return unique pull requests per author and repository.
             login (str, optional): Filter pull requests by a specific author's login.
             organization (str, optional): Filter pull requests by a specific organization's login.
-            repository (str, optional): Filter pull reuest's by a specific repository's login.
+            repository (str, optional): Filter pull requests by a specific repository's login.
 
         Returns:
             QuerySet: Queryset containing the filtered list of pull requests.

@@ -241,5 +241,4 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
     })
   })
-
 })
