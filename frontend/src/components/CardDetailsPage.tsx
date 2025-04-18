@@ -53,13 +53,13 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard icon={faRectangleList} title="Summary">
+          <SecondaryCard icon={faCircleInfo} title="Summary">
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
         {userSummary && (
-          <SecondaryCard icon={faRectangleList} title="Summary">
+          <SecondaryCard icon={faCircleInfo} title="Summary">
             {userSummary}
           </SecondaryCard>
         )}
@@ -71,7 +71,7 @@ const DetailsCard = ({
         )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            icon={faCircleInfo}
+            icon={faRectangleList}
             title={`${capitalize(type)} Details`}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
