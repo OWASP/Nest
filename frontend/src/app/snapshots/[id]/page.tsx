@@ -117,6 +117,9 @@ const SnapshotDetailsPage: React.FC = () => {
             <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
               {snapshot?.title}
             </h1>
+            <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
+              {snapshot?.summary}
+            </h1>
             <div className="flex flex-wrap items-center gap-2 text-gray-600 dark:text-gray-300">
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faCalendar} className="mr-1 h-4 w-4" />

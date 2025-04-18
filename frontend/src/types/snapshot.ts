@@ -16,6 +16,7 @@ export interface SnapshotDetailsProps {
   newReleases: ReleaseType[]
   newProjects: ProjectTypeGraphql[]
   newChapters: ChapterTypeGraphQL[]
+  summary: string
 }
 
 export interface Snapshots {
@@ -23,5 +24,4 @@ export interface Snapshots {
   key: string
   startAt: string
   title: string
-  summary: string
 }
