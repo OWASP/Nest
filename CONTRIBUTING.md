@@ -33,38 +33,130 @@ Before contributing, ensure you have the following installed:
 
 [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
-## Environment Variables Documentation
+## Environment Variables
+
+### Backend
+
+#### `DJANGO_CONFIGURATION`
+
+- **Description**: Specifies the Django configuration to use.
+- **Example Value**: `Local`, `Production`, `Staging`
+
+#### `DJANGO_ALGOLIA_APPLICATION_ID`
+
+- **Description**: The application ID for Algolia.
+
+#### `DJANGO_ALGOLIA_APPLICATION_REGION`
+
+- **Description**: The region of the Algolia application.
+
+#### `DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES`
+
+- **Description**: Index names to exclude locally (if any).
+
+#### `DJANGO_ALGOLIA_WRITE_API_KEY`
+
+- **Description**: The write API key for Algolia.
+
+#### `DJANGO_AWS_ACCESS_KEY_ID`
+
+- **Description**: AWS access key ID
+
+#### `DJANGO_AWS_SECRET_ACCESS_KEY`
+
+- **Description**: AWS secret access key.
+
+#### `DJANGO_DB_HOST`
+
+- **Description**: The hostname of the database server.
+
+#### `DJANGO_DB_NAME`
+
+- **Description**: The name of the database.
+
+#### `DJANGO_DB_PASSWORD`
+
+- **Description**: The password for the database user.
+
+#### `DJANGO_DB_PORT`
+
+- **Description**: The port number for the database server.
+
+#### `DJANGO_DB_USER`
+
+- **Description**: The username for the database.
+
+#### `DJANGO_OPEN_AI_SECRET_KEY`
+
+- **Description**: The secret key for OpenAI API.
+
+#### `DJANGO_RELEASE_VERSION`
+
+- **Description**: The release version of the application.
+
+#### `DJANGO_SECRET_KEY`
+
+- **Description**: The secret key for Django (used for cryptographic signing).
+
+#### `DJANGO_SENTRY_DSN`
+
+- **Description**: The DSN for Sentry (used for error tracking).
+
+#### `DJANGO_SLACK_BOT_TOKEN`
+
+- **Description**: The token for the Slack bot.
+
+#### `DJANGO_SLACK_SIGNING_SECRET`
+
+- **Description**: The signing secret for Slack.
+
+#### `GITHUB_TOKEN`
+
+- **Description**: The token for accessing GitHub APIs.
+
+#### `DJANGO_ALLOWED_HOSTS`
+
+- **Description**: A comma-separated list of allowed hosts for the application.
 
 ### Frontend
 
 #### `NEXT_PUBLIC_API_URL`
+
 - **Description**: The base URL for the application's REST API.
 
 #### `NEXT_PUBLIC_CSRF_URL`
 - **Description**: The endpoint used to fetch CSRF tokens for secure API requests.
 
 #### `NEXT_PUBLIC_ENVIRONMENT`
+
 - **Description**: Specifies the current environment in which the application is running.
 
 #### `NEXT_PUBLIC_GRAPHQL_URL`
+
 - **Description**: The endpoint for the GraphQL API.
 
 #### `NEXT_PUBLIC_GTM_AUTH`
+
 - **Description**: Authentication token for Google Tag Manager (GTM).
 
 #### `NEXT_PUBLIC_GTM_ID`
+
 - **Description**: The unique ID for the Google Tag Manager container.
 
 #### `NEXT_PUBLIC_GTM_PREVIEW`
+
 - **Description**: Used for previewing GTM configurations.
 
 #### `NEXT_PUBLIC_IDX_URL`
+
 - **Description**: The base URL for IDX (Indexing Service).
 
 #### `NEXT_PUBLIC_RELEASE_VERSION`
+
 - **Description**: The current release version of the application.
 
 #### `NEXT_PUBLIC_SENTRY_DSN`
+
 - **Description**: The Data Source Name (DSN) for Sentry error tracking.
 
 ### Backend

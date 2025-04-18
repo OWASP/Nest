@@ -13,58 +13,68 @@ export const GET_ORGANIZATION_DATA = gql`
       location
       login
       name
-      updatedAt
-      url
       stats {
-        totalRepositories
         totalContributors
-        totalStars
         totalForks
         totalIssues
+        totalRepositories
+        totalStars
       }
+      updatedAt
+      url
     }
     topContributors(organization: $login) {
+      avatarUrl
       contributionsCount
       login
       name
-      avatarUrl
     }
     recentPullRequests(limit: 5, organization: $login, distinct: true) {
-      title
+      author {
+        avatarUrl
+        login
+        name
+      }
       createdAt
-      url
-      author {
-        login
-        avatarUrl
-      }
-    }
-    recentReleases(limit: 6, organization: $login, distinct: true) {
-      name
-      tagName
-      publishedAt
-      url
+      organizationName
       repositoryName
+      title
+      url
+    }
+    recentReleases(limit: 9, organization: $login, distinct: true) {
       author {
-        login
         avatarUrl
+        login
+        name
       }
+      name
+      organizationName
+      publishedAt
+      repositoryName
+      tagName
+      url
     }
     repositories(organization: $login, limit: 12) {
-      name
-      url
       contributorsCount
       forksCount
-      openIssuesCount
-      starsCount
       key
+      name
+      openIssuesCount
+      organization {
+        login
+      }
+      starsCount
+      url
     }
     recentIssues(limit: 5, organization: $login, distinct: true) {
       author {
         avatarUrl
         login
+        name
       }
-      commentsCount
       createdAt
+      organizationName
+      repositoryName
       title
       url
     }

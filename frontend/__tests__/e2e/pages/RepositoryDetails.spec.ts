@@ -17,7 +17,7 @@ test.describe('Repository Details Page', () => {
         path: '/',
       },
     ])
-    await page.goto('/repositories/test-repository')
+    await page.goto('organizations/OWASP/repositories/test-repository')
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -74,7 +74,7 @@ test.describe('Repository Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Bug fix required' })).toBeVisible()
     await expect(page.getByText('Jan 2, 2024')).toBeVisible()
-    await expect(page.getByText('4 comments')).toBeVisible()
+    await expect(page.getByText('test-repo-2')).toBeVisible()
   })
 
   test('should have recent releases', async ({ page }) => {

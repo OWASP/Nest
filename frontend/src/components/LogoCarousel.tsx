@@ -38,7 +38,12 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
               >
                 <div className="relative mb-4 flex h-16 w-full items-center justify-center">
                   {sponsor.imageUrl ? (
-                    <Image fill src={sponsor.imageUrl} alt={`${sponsor.name} logo`} />
+                    <Image
+                      fill
+                      alt={`${sponsor.name} logo`}
+                      src={sponsor.imageUrl}
+                      style={{ objectFit: 'contain' }}
+                    />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center"></div>
                   )}

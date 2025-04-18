@@ -2,13 +2,13 @@
   "devDependencies": {
     "@cspell/dict-aws": "^4.0.10",
     "@cspell/dict-data-science": "^2.0.8",
-    "@cspell/dict-en_us": "^4.4.0",
+    "@cspell/dict-en_us": "^4.4.2",
     "@cspell/dict-fullstack": "^3.2.6",
     "@cspell/dict-golang": "^6.0.20",
     "@cspell/dict-k8s": "^1.0.10",
     "@cspell/dict-people-names": "^1.1.8",
     "@cspell/dict-software-terms": "^4.2.5",
     "@cspell/dict-win32": "^2.0.7",
-    "cspell": "^8.18.1"
+    "cspell": "^8.19.0"
   }
 }
