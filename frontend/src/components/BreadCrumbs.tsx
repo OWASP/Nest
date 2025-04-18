@@ -5,14 +5,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { capitalize } from 'utils/capitalize'
+import { homeRoute } from 'utils/constants'
 
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, ' ')
+const capitalizeRoute = (str: string) => capitalize(str).replace(/-/g, ' ')
 
 export default function BreadCrumbs() {
   const pathname = usePathname()
-  const segments = pathname.split('/').filter(Boolean)
+  const segments = pathname.split(homeRoute).filter(Boolean)
 
-  if (pathname === '/') return null
+  if (pathname === homeRoute) return null
 
   return (
     <div className="absolute bottom-2 left-0 top-1 mt-16 w-full py-2">
@@ -39,8 +41,8 @@ export default function BreadCrumbs() {
           </BreadcrumbItem>
 
           {segments.map((segment, index) => {
-            const href = '/' + segments.slice(0, index + 1).join('/')
-            const label = capitalize(segment)
+            const href = homeRoute + segments.slice(0, index + 1).join(homeRoute)
+            const label = capitalizeRoute(segment)
             const isLast = index === segments.length - 1
 
             return (

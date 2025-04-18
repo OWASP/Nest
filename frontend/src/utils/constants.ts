@@ -112,3 +112,5 @@ export const themeToggleTooltip = {
 }
 
 export const desktopViewMinWidth = 768
+
+export const homeRoute = '/'
