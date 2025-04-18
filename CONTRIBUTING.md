@@ -121,42 +121,33 @@ Before contributing, ensure you have the following installed:
 ### Frontend
 
 #### `NEXT_PUBLIC_API_URL`
-
 - **Description**: The base URL for the application's REST API.
 
 #### `NEXT_PUBLIC_CSRF_URL`
 - **Description**: The endpoint used to fetch CSRF tokens for secure API requests.
 
 #### `NEXT_PUBLIC_ENVIRONMENT`
-
 - **Description**: Specifies the current environment in which the application is running.
 
 #### `NEXT_PUBLIC_GRAPHQL_URL`
-
 - **Description**: The endpoint for the GraphQL API.
 
 #### `NEXT_PUBLIC_GTM_AUTH`
-
 - **Description**: Authentication token for Google Tag Manager (GTM).
 
 #### `NEXT_PUBLIC_GTM_ID`
-
 - **Description**: The unique ID for the Google Tag Manager container.
 
 #### `NEXT_PUBLIC_GTM_PREVIEW`
-
 - **Description**: Used for previewing GTM configurations.
 
 #### `NEXT_PUBLIC_IDX_URL`
-
 - **Description**: The base URL for IDX (Indexing Service).
 
 #### `NEXT_PUBLIC_RELEASE_VERSION`
-
 - **Description**: The current release version of the application.
 
 #### `NEXT_PUBLIC_SENTRY_DSN`
-
 - **Description**: The Data Source Name (DSN) for Sentry error tracking.
 
 ### Backend
