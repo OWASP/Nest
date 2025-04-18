@@ -65,5 +65,17 @@ export const GET_PROJECT_DATA = gql`
       updatedAt
       url
     }
+    recentPullRequests(limit: 5, repository: $key) {
+      author {
+        avatarUrl
+        login
+        name
+      }
+      createdAt
+      organizationName
+      repositoryName
+      title
+      url
+    }
   }
 `

@@ -21,6 +21,7 @@ const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
+  const [recentPullRequests, setRecentPullRequests] = useState(null)
 
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
@@ -29,6 +30,7 @@ const ProjectDetailsPage = () => {
   useEffect(() => {
     if (data) {
       setProject(data?.project)
+      setRecentPullRequests(data?.recentPullRequests)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -91,6 +93,7 @@ const ProjectDetailsPage = () => {
       details={projectDetails}
       is_active={project.isActive}
       languages={project.languages}
+      pullRequests={recentPullRequests}
       recentIssues={project.recentIssues}
       recentReleases={project.recentReleases}
       repositories={project.repositories}

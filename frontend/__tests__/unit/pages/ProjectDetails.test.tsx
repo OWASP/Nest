@@ -215,20 +215,31 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('No Stars')).toBeInTheDocument()
     })
   })
-})
-test('renders project stats correctly', async () => {
-  ;(useQuery as jest.Mock).mockReturnValue({
-    data: mockProjectDetailsData,
-    error: null,
+
+  test('renders pull requests section correctly', async () => {
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Pull Request 1')).toBeInTheDocument()
+      expect(screen.getByText('Test Pull Request 2')).toBeInTheDocument()
+    })
   })
 
-  render(<ProjectDetailsPage />)
+  test('renders project stats correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
 
-  await waitFor(() => {
-    expect(screen.getByText(`2.2K Stars`)).toBeInTheDocument()
-    expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
-    expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
-    expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
-    expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`2.2K Stars`)).toBeInTheDocument()
+      expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
+      expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
+      expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
+      expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+    })
   })
+
 })

@@ -17,10 +17,11 @@ class PullRequestQuery(BaseQuery):
         distinct=graphene.Boolean(default_value=False),
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
+        repository=graphene.String(required=False),
     )
 
     def resolve_recent_pull_requests(
-        root, info, limit, distinct=False, login=None, organization=None
+        root, info, limit, distinct=False, login=None, organization=None, repository=None
     ):
         """Resolve recent pull requests.
 
@@ -31,6 +32,7 @@ class PullRequestQuery(BaseQuery):
             distinct (bool): Whether to return unique pull requests per author and repository.
             login (str, optional): Filter pull requests by a specific author's login.
             organization (str, optional): Filter pull requests by a specific organization's login.
+            repository (str, optional): Filter pull reuest's by a specific repository's login.
 
         Returns:
             QuerySet: Queryset containing the filtered list of pull requests.
@@ -38,6 +40,7 @@ class PullRequestQuery(BaseQuery):
         """
         queryset = PullRequest.objects.select_related(
             "author",
+            "repository",
         ).order_by(
             "-created_at",
         )
@@ -51,6 +54,9 @@ class PullRequestQuery(BaseQuery):
             ).filter(
                 repository__organization__login=organization,
             )
+
+        if repository:
+            queryset = queryset.filter(repository__key__iexact=repository)
 
         if distinct:
             latest_pull_request_per_author = (
