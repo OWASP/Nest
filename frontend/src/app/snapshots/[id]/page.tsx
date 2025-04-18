@@ -1,6 +1,13 @@
 'use client'
 import { useQuery } from '@apollo/client'
-import { faCalendar } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCalendar,
+  faUsers,
+  faFolder,
+  faBook,
+  faBug,
+  faTag,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
@@ -117,9 +124,6 @@ const SnapshotDetailsPage: React.FC = () => {
             <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
               {snapshot?.title}
             </h1>
-            <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
-              {snapshot?.summary}
-            </h1>
             <div className="flex flex-wrap items-center gap-2 text-gray-600 dark:text-gray-300">
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faCalendar} className="mr-1 h-4 w-4" />
@@ -127,6 +131,68 @@ const SnapshotDetailsPage: React.FC = () => {
                   {formatDate(snapshot?.startAt ?? '')} - {formatDate(snapshot?.endAt ?? '')}
                 </span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+          Snapshot Summary
+        </h2>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Users */}
+          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <FontAwesomeIcon icon={faUsers} className="mr-3 h-6 w-6 text-blue-500" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">10 Users</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                e.g., abhayymishraaaa, vithobasatish
+              </p>
+            </div>
+          </div>
+
+          {/* Projects */}
+          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <FontAwesomeIcon icon={faFolder} className="mr-3 h-6 w-6 text-green-500" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">3 Projects</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                e.g., OWASP Top 10, ProdSecMan
+              </p>
+            </div>
+          </div>
+
+          {/* Chapters */}
+          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <FontAwesomeIcon icon={faBook} className="mr-3 h-6 w-6 text-purple-500" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                14 Chapters
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                e.g., OWASP Oshawa, Juiz de Fora
+              </p>
+            </div>
+          </div>
+
+          {/* Issues */}
+          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <FontAwesomeIcon icon={faBug} className="mr-3 h-6 w-6 text-red-500" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">422 Issues</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">e.g., Duplicate Components</p>
+            </div>
+          </div>
+
+          {/* Releases */}
+          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <FontAwesomeIcon icon={faTag} className="mr-3 h-6 w-6 text-yellow-500" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                71 Releases
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">e.g., 2.0.1, v5.0.1</p>
             </div>
           </div>
         </div>
