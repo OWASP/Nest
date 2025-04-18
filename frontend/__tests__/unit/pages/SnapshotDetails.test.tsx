@@ -79,6 +79,54 @@ describe('SnapshotDetailsPage', () => {
     expect(screen.getByText('New Releases')).toBeInTheDocument()
   })
 
+  test('correctly parses and displays summary data', async () => {
+    // Create mock data with specific summary text
+    const summaryText =
+      'Snapshot Summary: 10 users (e.g., abhayymishraaaa, vithobasatish); 3 projects (e.g., OWASP Top 10 for Business Logic Abuse, OWASP ProdSecMan); 14 chapters (e.g., OWASP Oshawa, OWASP Juiz de Fora); 422 issues (e.g., Duplicate Components, Cyclonedx seems to ignore some configuration options); 71 releases (e.g., 2.0.1, v5.0.1)'
+
+    const mockDataWithSummary = {
+      snapshot: {
+        ...mockSnapshotDetailsData.snapshot,
+        summary: summaryText,
+      },
+    }
+
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockDataWithSummary,
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    // Wait for the page to render
+    await waitFor(() => {
+      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+    })
+
+    // Check that summary section exists
+    expect(screen.getByText('Snapshot Summary')).toBeInTheDocument()
+
+    // Check for correctly parsed user count
+    expect(screen.getByText('10 Users')).toBeInTheDocument()
+    expect(screen.getByText(/abhayymishraaaa/)).toBeInTheDocument()
+
+    // Check for correctly parsed project count
+    expect(screen.getByText('3 Projects')).toBeInTheDocument()
+    expect(screen.getByText(/OWASP Top 10 for Business Logic Abuse/)).toBeInTheDocument()
+
+    // Check for correctly parsed chapter count
+    expect(screen.getByText('14 Chapters')).toBeInTheDocument()
+    expect(screen.getByText(/OWASP Oshawa/)).toBeInTheDocument()
+
+    // Check for correctly parsed issues count
+    expect(screen.getByText('422 Issues')).toBeInTheDocument()
+    expect(screen.getByText(/Duplicate Components/)).toBeInTheDocument()
+
+    // Check for correctly parsed releases count
+    expect(screen.getByText('71 Releases')).toBeInTheDocument()
+    expect(screen.getByText(/2\.0\.1/)).toBeInTheDocument()
+  })
+
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: null,
@@ -97,25 +145,6 @@ describe('SnapshotDetailsPage', () => {
       color: 'danger',
       variant: 'solid',
     })
-  })
-
-  test('renders snapshot summary correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
-      data: mockSnapshotDetailsData,
-      error: null,
-    })
-
-    render(<SnapshotDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Snapshot Summary')).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('10 Users')).toBeInTheDocument()
-    expect(screen.getByText('3 Projects')).toBeInTheDocument()
-    expect(screen.getByText('14 Chapters')).toBeInTheDocument()
-    expect(screen.getByText('422 Issues')).toBeInTheDocument()
-    expect(screen.getByText('71 Releases')).toBeInTheDocument()
   })
 
   test('navigates to project page when project card is clicked', async () => {
