@@ -84,4 +84,10 @@ test.describe('About Page', () => {
     await newPage.waitForLoadState()
     expect(newPage.url()).toContain('/members/')
   })
+
+  test('breadcrumb renders correct segments on /about', async ({ page }) => {
+    const breadcrumb = page.locator('[aria-label="breadcrumb"]')
+    await expect(breadcrumb).toBeVisible()
+    await expect(breadcrumb.getByText('About')).toBeVisible()
+  })
 })

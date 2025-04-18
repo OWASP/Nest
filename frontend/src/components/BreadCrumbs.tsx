@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation'
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, ' ')
 
-export default function BreadCrumb() {
+export default function BreadCrumbs() {
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
 
@@ -18,6 +18,7 @@ export default function BreadCrumb() {
     <div className="absolute bottom-2 left-0 top-1 mt-16 w-full py-2">
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
         <Breadcrumbs
+          aria-label="breadcrumb"
           separator={
             <FontAwesomeIcon
               icon={faChevronRight}

@@ -71,4 +71,9 @@ test.describe('Contribute Page', () => {
     await CloseButton.click()
     await expect(contributeButton).toBeVisible()
   })
+  test('breadcrumb renders correct segments on /contribute', async ({ page }) => {
+    const breadcrumb = page.locator('[aria-label="breadcrumb"]')
+    await expect(breadcrumb).toBeVisible()
+    await expect(breadcrumb.getByText('Contribute')).toBeVisible()
+  })
 })

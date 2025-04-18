@@ -40,4 +40,13 @@ test.describe('Organization Page', () => {
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('1.5k')).toBeVisible()
   })
+
+  test('breadcrumb renders correct segments on /organizations', async ({ page }) => {
+    const breadcrumb = page.locator('[aria-label="breadcrumb"]')
+    await expect(breadcrumb).toBeVisible()
+    await expect(breadcrumb.getByText('Home')).toBeVisible()
+    await expect(breadcrumb.getByText('Organizations')).toBeVisible()
+    const homeLink = breadcrumb.locator('a', { hasText: 'Home' })
+    await expect(homeLink).toHaveAttribute('href', '/')
+  })
 })

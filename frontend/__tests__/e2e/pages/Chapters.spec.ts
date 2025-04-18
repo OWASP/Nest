@@ -54,4 +54,11 @@ test.describe('Chapters Page', () => {
     await contributeButton.click()
     await expect(page).toHaveURL('chapters/chapter_1')
   })
+
+  test('breadcrumb renders correct segments on /chapters', async ({ page }) => {
+    const breadcrumb = page.locator('[aria-label="breadcrumb"]')
+    await expect(breadcrumb).toBeVisible()
+    await expect(breadcrumb.getByText('Home')).toBeVisible()
+    await expect(breadcrumb.getByText('Chapters')).toBeVisible()
+  })
 })
