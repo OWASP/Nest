@@ -99,6 +99,25 @@ describe('SnapshotDetailsPage', () => {
     })
   })
 
+  test('renders snapshot summary correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockSnapshotDetailsData,
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Snapshot Summary')).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('10 Users')).toBeInTheDocument()
+    expect(screen.getByText('3 Projects')).toBeInTheDocument()
+    expect(screen.getByText('14 Chapters')).toBeInTheDocument()
+    expect(screen.getByText('422 Issues')).toBeInTheDocument()
+    expect(screen.getByText('71 Releases')).toBeInTheDocument()
+  })
+
   test('navigates to project page when project card is clicked', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
