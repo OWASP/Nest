@@ -39,54 +39,35 @@ Before contributing, ensure you have the following installed:
 
 #### `NEXT_PUBLIC_API_URL`
 - **Description**: The base URL for the application's REST API.
-- **Example Value**: `http://localhost:8000/api/v1/`
-- **Usage**: Used to make API requests to the backend.
+
+#### `NEXT_PUBLIC_CSRF_URL`
+- **Description**: The endpoint used to fetch CSRF tokens for secure API requests.
 
 #### `NEXT_PUBLIC_ENVIRONMENT`
 - **Description**: Specifies the current environment in which the application is running.
-- **Example Value**: `local`, `staging`, `production`
-- **Usage**: Helps in differentiating between environments for debugging or feature toggling.
 
 #### `NEXT_PUBLIC_GRAPHQL_URL`
 - **Description**: The endpoint for the GraphQL API.
-- **Example Value**: `http://localhost:8000/graphql/`
-- **Usage**: Used for making GraphQL queries and mutations.
 
 #### `NEXT_PUBLIC_GTM_AUTH`
 - **Description**: Authentication token for Google Tag Manager (GTM).
-- **Example Value**: `your-google-tag-manager-auth`
-- **Usage**: Enables secure integration with GTM.
 
 #### `NEXT_PUBLIC_GTM_ID`
 - **Description**: The unique ID for the Google Tag Manager container.
-- **Example Value**: `your-google-tag-manager-id`
-- **Usage**: Identifies the GTM container for tracking and analytics.
 
 #### `NEXT_PUBLIC_GTM_PREVIEW`
 - **Description**: Used for previewing GTM configurations.
-- **Example Value**: *(Empty by default)*
-- **Usage**: Optional, used during GTM debugging or testing.
 
 #### `NEXT_PUBLIC_IDX_URL`
 - **Description**: The base URL for IDX (Indexing Service).
-- **Example Value**: `http://localhost:8000/idx/`
-- **Usage**: Used for accessing indexing-related services.
 
 #### `NEXT_PUBLIC_RELEASE_VERSION`
 - **Description**: The current release version of the application.
-- **Example Value**: *(Empty by default)*
-- **Usage**: Helps in tracking the deployed version for debugging or monitoring.
 
 #### `NEXT_PUBLIC_SENTRY_DSN`
 - **Description**: The Data Source Name (DSN) for Sentry error tracking.
-- **Example Value**: *(Empty by default)*
-- **Usage**: Enables integration with Sentry for logging and monitoring errors.
 
 ### Backend
-
-#### `DJANGO_CONFIGURATION`
-- **Description**: Specifies the Django configuration to use.
-- **Example Value**: `Local`, `Production`, `Staging`
 
 #### `DJANGO_ALGOLIA_APPLICATION_ID`
 - **Description**: The application ID for Algolia.
@@ -100,11 +81,17 @@ Before contributing, ensure you have the following installed:
 #### `DJANGO_ALGOLIA_WRITE_API_KEY`
 - **Description**: The write API key for Algolia.
 
+#### `DJANGO_ALLOWED_HOSTS`
+- **Description**: A comma-separated list of allowed hosts for the application.
+
 #### `DJANGO_AWS_ACCESS_KEY_ID`
-- **Description**: AWS access key ID
+- **Description**: AWS access key ID.
 
 #### `DJANGO_AWS_SECRET_ACCESS_KEY`
 - **Description**: AWS secret access key.
+
+#### `DJANGO_CONFIGURATION`
+- **Description**: Specifies the Django configuration to use.
 
 #### `DJANGO_DB_HOST`
 - **Description**: The hostname of the database server.
@@ -141,9 +128,6 @@ Before contributing, ensure you have the following installed:
 
 #### `GITHUB_TOKEN`
 - **Description**: The token for accessing GitHub APIs.
-
-#### `DJANGO_ALLOWED_HOSTS`
-- **Description**: A comma-separated list of allowed hosts for the application.
 
 ## Setting up the Project
 
