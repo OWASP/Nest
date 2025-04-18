@@ -60,6 +60,7 @@ export interface UserCardProps {
   followers_count?: number
   location: string
   name: string
+  repositories_count?: number
 }
 
 export interface SnapshotCardProps {
