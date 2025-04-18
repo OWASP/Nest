@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 import { Providers } from 'wrappers/provider'
-import Breadcrumb from 'components/BreadCrumb'
+import BreadCrumb from 'components/BreadCrumb'
 import Footer from 'components/Footer'
 
 import Header from 'components/Header'
@@ -42,7 +42,7 @@ export default function RootLayout({
       >
         <Providers>
           <Header />
-          <Breadcrumb />
+          <BreadCrumb />
           {children}
           <Footer />
           <ScrollToTop />

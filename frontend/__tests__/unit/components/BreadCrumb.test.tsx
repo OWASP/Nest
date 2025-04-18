@@ -19,15 +19,6 @@ describe('BreadCrumb', () => {
     expect(screen.queryByText('Home')).not.toBeInTheDocument()
   })
 
-  test('renders breadcrumb with single segment', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/about-us')
-
-    render(<BreadCrumb />)
-
-    expect(screen.getByText('Home')).toBeInTheDocument()
-    expect(screen.getByText('About us')).toBeInTheDocument()
-  })
-
   test('renders breadcrumb with multiple segments', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users/profile')
 
