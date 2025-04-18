@@ -6,7 +6,7 @@ from apps.slack.management.commands.slack_sync_conversation_list import Command
 from apps.slack.models.conversation import Conversation
 
 
-@pytest.fixture()
+@pytest.fixture
 def command():
     return Command()
 
