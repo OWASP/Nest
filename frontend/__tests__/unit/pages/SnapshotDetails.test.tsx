@@ -80,19 +80,8 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('correctly parses and displays summary data', async () => {
-    // Create mock data with specific summary text
-    const summaryText =
-      'Snapshot Summary: 10 users (e.g., abhayymishraaaa, vithobasatish); 3 projects (e.g., OWASP Top 10 for Business Logic Abuse, OWASP ProdSecMan); 14 chapters (e.g., OWASP Oshawa, OWASP Juiz de Fora); 422 issues (e.g., Duplicate Components, Cyclonedx seems to ignore some configuration options); 71 releases (e.g., 2.0.1, v5.0.1)'
-
-    const mockDataWithSummary = {
-      snapshot: {
-        ...mockSnapshotDetailsData.snapshot,
-        summary: summaryText,
-      },
-    }
-
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: mockDataWithSummary,
+      data: mockSnapshotDetailsData,
       error: null,
     })
 
