@@ -1,4 +1,4 @@
-import { faChevronRight, faFileCode, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faFolderOpen, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import millify from 'millify'
@@ -51,7 +51,7 @@ const UserCard = ({
             )}
             {repositories_count > 0 && (
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-                <FontAwesomeIcon icon={faFileCode} className="mr-1 h-4 w-4" />
+                <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
                 {millify(repositories_count, { precision: 1 })}
               </p>
             )}
