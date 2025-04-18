@@ -1,3 +1,13 @@
+import {
+  faCircleInfo,
+  faSquarePollVertical,
+  faChartPie,
+  faFolderOpen,
+  faCode,
+  faTags,
+  faUsers,
+  faRectangleList,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
@@ -43,22 +53,31 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard title="Summary">
+          <SecondaryCard icon={faCircleInfo} title="Summary">
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
-        {userSummary && <SecondaryCard title="Summary">{userSummary}</SecondaryCard>}
+        {userSummary && (
+          <SecondaryCard icon={faCircleInfo} title="Summary">
+            {userSummary}
+          </SecondaryCard>
+        )}
 
-        {heatmap && <SecondaryCard title="Contribution Heatmap">{heatmap}</SecondaryCard>}
+        {heatmap && (
+          <SecondaryCard icon={faSquarePollVertical} title="Contribution Heatmap">
+            {heatmap}
+          </SecondaryCard>
+        )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
+            icon={faRectangleList}
             title={`${capitalize(type)} Details`}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
-                <div key={detail.label} className="pb-1">
+                <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
                   <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
@@ -75,8 +94,9 @@ const DetailsCard = ({
           {(type === 'project' ||
             type === 'repository' ||
             type === 'committee' ||
-            type === 'user') && (
-            <SecondaryCard title="Statistics" className="md:col-span-2">
+            type === 'user' ||
+            type === 'organization') && (
+            <SecondaryCard icon={faChartPie} title="Statistics" className="md:col-span-2">
               {stats.map((stat, index) => (
                 <InfoBlock
                   className="pb-1"
@@ -109,21 +129,27 @@ const DetailsCard = ({
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && <ToggleableList items={languages} label="Languages" />}
-            {topics.length !== 0 && <ToggleableList items={topics} label="Topics" />}
+            {languages.length !== 0 && (
+              <ToggleableList items={languages} icon={faCode} label="Languages" />
+            )}
+            {topics.length !== 0 && <ToggleableList items={topics} icon={faTags} label="Topics" />}
           </div>
         )}
         {topContributors && (
           <TopContributors
+            icon={faUsers}
             contributors={topContributors}
-            maxInitialDisplay={6}
+            maxInitialDisplay={9}
             type="contributor"
           />
         )}
-        {(type === 'project' || type === 'repository' || type === 'user') && (
+        {(type === 'project' ||
+          type === 'repository' ||
+          type === 'user' ||
+          type === 'organization') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ? (
+            {type === 'user' || type === 'organization' ? (
               <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             ) : (
               <RecentReleases
@@ -134,12 +160,15 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {type === 'user' && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
-        {(type === 'project' || type === 'user') && repositories.length > 0 && (
-          <SecondaryCard title="Repositories" className="mt-6">
-            <RepositoriesCard repositories={repositories} />
-          </SecondaryCard>
+        {(type === 'user' || type === 'organization') && (
+          <RecentReleases data={recentReleases} showAvatar={showAvatar} />
         )}
+        {(type === 'project' || type === 'user' || type === 'organization') &&
+          repositories.length > 0 && (
+            <SecondaryCard icon={faFolderOpen} title="Repositories" className="mt-6">
+              <RepositoriesCard repositories={repositories} />
+            </SecondaryCard>
+          )}
       </div>
     </div>
   )

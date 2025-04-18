@@ -115,6 +115,20 @@ def get_params_for_index(index_name):
                 "idx_url",
             ]
 
+        case "organizations":
+            params["attributesToRetrieve"] = [
+                "idx_avatar_url",
+                "idx_collaborators_count",
+                "idx_created_at",
+                "idx_description",
+                "idx_followers_count",
+                "idx_location",
+                "idx_login",
+                "idx_name",
+                "idx_public_repositories_count",
+                "idx_url",
+            ]
+
         case _:
             params["attributesToRetrieve"] = []
 

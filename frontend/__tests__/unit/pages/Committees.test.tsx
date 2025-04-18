@@ -72,7 +72,7 @@ describe('Committees Component', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for OWASP committees...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search for committees...')).toBeInTheDocument()
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

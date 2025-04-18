@@ -11,7 +11,7 @@ class TestContribute:
     @pytest.mark.parametrize(
         ("expected_project_issues_url", "expected_projects_url"),
         [
-            ("projects/contribute", "projects"),
+            ("/contribute", "projects"),
         ],
     )
     def test_urls(self, expected_project_issues_url, expected_projects_url):

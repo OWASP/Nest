@@ -89,32 +89,32 @@ export const mockHomeData = {
         name: 'Contributor 1',
         login: 'contributor_1',
         avatarUrl: 'https://avatars.githubusercontent.com/u/3531020?v=4',
+        projectKey: 'juice-shop',
         projectName: 'OWASP Juice Shop',
-        projectUrl: 'www-project-juice-shop',
         __typename: 'RepositoryContributorNode',
       },
       {
         name: 'Contributor 2',
         login: 'contributor_2',
         avatarUrl: 'https://avatars.githubusercontent.com/u/862914?v=4',
+        projectKey: 'dependency-check',
         projectName: 'OWASP Dependency-Check',
-        projectUrl: 'www-project-dependency-check',
         __typename: 'RepositoryContributorNode',
       },
       {
         name: 'Contributor 3',
         login: 'contributor_3',
         avatarUrl: 'https://avatars.githubusercontent.com/u/103866?v=4',
+        projectKey: 'project-o-saft',
         projectName: 'OWASP O-Saft',
-        projectUrl: 'www-project-o-saft',
         __typename: 'RepositoryContributorNode',
       },
     ],
     recentIssues: [
       {
-        commentsCount: 5,
         createdAt: '2025-03-20T14:03:10+00:00',
         title: 'Issue 1',
+        repositoryName: 'Dependency-Track',
         url: 'https://github.com/DependencyTrack/hyades/issues/1724',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/5693141?v=4',
@@ -125,9 +125,9 @@ export const mockHomeData = {
         __typename: 'IssueNode',
       },
       {
-        commentsCount: 2,
         createdAt: '2025-03-20T10:30:33+00:00',
         title: 'Issue 2',
+        repositoryName: 'BLT',
         url: 'https://github.com/OWASP-BLT/BLT/issues/4013',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/24620264?v=4',
@@ -138,9 +138,9 @@ export const mockHomeData = {
         __typename: 'IssueNode',
       },
       {
-        commentsCount: 3,
         createdAt: '2025-03-20T09:36:39+00:00',
         title: 'Troubleshooting the OWASP Dependency-Check Scanner',
+        repositoryName: 'devguard',
         url: 'https://github.com/l3montree-dev/devguard/issues/336',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/38261809?v=4',

@@ -2,8 +2,8 @@ secrets:
   paths:
     - id: jwt-token
       paths:
-        # Ignore false positive on PyJWT token example
-        - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/METADATA
+        # Ignore false positive on PyJWT token.
+        - '**/site-packages/PyJWT-*/METADATA'
 
 vulnerabilities:
   - id: CVE-2024-55549  # libxslt use-after-free

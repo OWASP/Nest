@@ -1,10 +1,21 @@
-import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faFolderOpen, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
+import millify from 'millify'
 import Image from 'next/image'
 import { UserCardProps } from 'types/card'
 
-const UserCard = ({ avatar, name, company, email, location, button, className }: UserCardProps) => {
+const UserCard = ({
+  avatar,
+  button,
+  className,
+  company,
+  email,
+  followers_count,
+  location,
+  name,
+  repositories_count,
+}: UserCardProps) => {
   return (
     <Button
       onPress={button.onclick}
@@ -31,6 +42,20 @@ const UserCard = ({ avatar, name, company, email, location, button, className }:
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email}
           </p>
+          <div className="flex justify-center gap-3">
+            {followers_count > 0 && (
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
+                {millify(followers_count, { precision: 1 })}
+              </p>
+            )}
+            {repositories_count > 0 && (
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
+                {millify(repositories_count, { precision: 1 })}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
