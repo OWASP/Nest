@@ -12,6 +12,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file: ../backend/.env
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
@@ -86,12 +88,30 @@ services:
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
 
+  redis:
+    container_name: nest-redis
+    image: redis:7.2-alpine
+    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - nest-network
+
 networks:
   nest-network:
+
 
 volumes:
   backend-venv:
   db-data:
+  redis-data:
   docs-venv:
   frontend-next:
   frontend-node-modules:

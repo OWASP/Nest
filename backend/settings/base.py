@@ -124,9 +124,14 @@ class Base(Configuration):
 
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": values.SecretValue(environ_name="REDIS_URL"),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
         }
     }
+
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
     DATABASES = {

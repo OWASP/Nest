@@ -3,7 +3,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 import requests
-from django.core.cache import cache
 
 from apps.core.api.algolia import algolia_search
 
@@ -18,15 +17,15 @@ MOCKED_SEARCH_RESULTS = {
 CLIENT_IP_ADDRESS = "127.0.0.1"
 
 
-@pytest.fixture
-def _clear_cache():
-    """Clear the cache before and after each test."""
-    cache.clear()
-    yield
-    cache.clear()
+@pytest.fixture(autouse=True)
+def mock_redis_cache():
+    """Mock Redis cache used in algolia.py."""
+    with patch("apps.core.api.algolia.cache") as mock_cache:
+        mock_cache.get.return_value = None
+        mock_cache.set.return_value = True
+        yield mock_cache
 
 
-@pytest.mark.usefixtures("_clear_cache")
 class TestAlgoliaSearch:
     @pytest.mark.parametrize(
         ("index_name", "query", "page", "hits_per_page", "facet_filters", "expected_result"),
@@ -92,7 +91,6 @@ class TestAlgoliaSearch:
     @pytest.mark.parametrize(
         ("index_name", "query", "page", "hits_per_page", "facet_filters", "error_message"),
         [
-            # Index name tests
             (
                 5,
                 "owasp",
@@ -101,14 +99,38 @@ class TestAlgoliaSearch:
                 ["idx_is_active:true"],
                 "indexName is required and must be a string.",
             ),
-            # Query tests
-            ("chapters", 5, 2, 20, ["idx_is_active:true"], "query must be a string."),
-            # Page tests
-            ("committees", "review", "0", 5, [], "page value must be an integer."),
-            # hitsPerPage tests
-            ("committees", "review", 1, "1001", [], "hitsPerPage must be an integer."),
-            # Facet filters tests
-            ("issues", "bug", 1, 10, "idx_is_active:true", "facetFilters must be a list."),
+            (
+                "chapters",
+                5,
+                2,
+                20,
+                ["idx_is_active:true"],
+                "query must be a string.",
+            ),
+            (
+                "committees",
+                "review",
+                "0",
+                5,
+                [],
+                "page value must be an integer.",
+            ),
+            (
+                "committees",
+                "review",
+                1,
+                "1001",
+                [],
+                "hitsPerPage must be an integer.",
+            ),
+            (
+                "issues",
+                "bug",
+                1,
+                10,
+                "idx_is_active:true",
+                "facetFilters must be a list.",
+            ),
         ],
     )
     def test_algolia_search_invalid_request(
