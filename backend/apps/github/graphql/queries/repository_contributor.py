@@ -1,8 +1,6 @@
 """OWASP repository contributor GraphQL queries."""
 
 import graphene
-from django.db.models import F, Window
-from django.db.models.functions import Rank
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
@@ -20,7 +18,7 @@ class RepositoryContributorQuery(BaseQuery):
     )
 
     def resolve_top_contributors(root, info, limit, organization=None, project=None):
-        """Resolve top contributors only for repositories with projects.
+        """Resolve top contributors.
 
         Args:
             root (Any): The root query object.
@@ -33,54 +31,17 @@ class RepositoryContributorQuery(BaseQuery):
             list: List of top contributors with their details.
 
         """
-        queryset = (
-            RepositoryContributor.objects.by_humans()
-            .to_community_repositories()
-            .filter(repository__project__isnull=False)
-            .select_related("repository__project", "user")
-            .annotate(
-                rank=Window(
-                    expression=Rank(),
-                    order_by=F("contributions_count").desc(),
-                    partition_by=F("user__login"),
-                )
-            )
-        )
-
-        if organization:
-            queryset = queryset.select_related(
-                "repository__organization",
-            ).filter(
-                repository__organization__login=organization,
-            )
-
-        if project:
-            queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
-
-        top_contributors = (
-            queryset.filter(rank=1)
-            .annotate(
-                project_name=F("repository__project__name"),
-                project_key=F("repository__project__key"),
-            )
-            .values(
-                "contributions_count",
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-                "project_key",
-                "project_name",
-            )
-            .order_by("-contributions_count")[:limit]
+        top_contributors = RepositoryContributor.get_top_contributors(
+            organization=organization, project=project, limit=limit
         )
 
         return [
             RepositoryContributorNode(
-                avatar_url=trc["user__avatar_url"],
+                avatar_url=trc["avatar_url"],
                 contributions_count=trc["contributions_count"],
-                login=trc["user__login"],
-                name=trc["user__name"],
-                project_key=trc["project_key"].replace("www-project-", ""),
+                login=trc["login"],
+                name=trc["name"],
+                project_key=trc["project_key"],
                 project_name=trc["project_name"],
             )
             for trc in top_contributors
