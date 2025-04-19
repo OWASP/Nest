@@ -20,6 +20,7 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()
   const [repository, setRepository] = useState(null)
+  const [recentPullRequests, setRecentPullRequests] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
@@ -27,6 +28,7 @@ const RepositoryDetailsPage = () => {
   useEffect(() => {
     if (data) {
       setRepository(data?.repository)
+      setRecentPullRequests(data?.recentPullRequests)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -104,6 +106,7 @@ const RepositoryDetailsPage = () => {
     <DetailsCard
       details={repositoryDetails}
       languages={repository.languages}
+      pullRequests={recentPullRequests}
       recentIssues={repository.issues}
       recentReleases={repository.releases}
       stats={RepositoryStats}

@@ -173,6 +173,15 @@ describe('RepositoryDetailsPage', () => {
     expect(setRecentIssuesMock).toHaveBeenCalledWith(undefined)
   })
 
+  test('renders pull requests section correctly', async () => {
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Pull Request 1')).toBeInTheDocument()
+      expect(screen.getByText('Test Pull Request 2')).toBeInTheDocument()
+    })
+  })
+
   test('handles missing repository stats gracefully', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: {
