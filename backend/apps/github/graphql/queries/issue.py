@@ -36,6 +36,8 @@ class IssueQuery(BaseQuery):
         """
         queryset = Issue.objects.select_related(
             "author",
+            "repository",
+            "repository__organization",
         ).order_by(
             "-created_at",
         )
@@ -46,9 +48,7 @@ class IssueQuery(BaseQuery):
             )
 
         if organization:
-            queryset = queryset.select_related(
-                "repository__organization",
-            ).filter(
+            queryset = queryset.filter(
                 repository__organization__login=organization,
             )
 
