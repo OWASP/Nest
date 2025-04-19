@@ -53,6 +53,7 @@ export const GET_USER_DATA = gql`
       publicRepositoriesCount
       releasesCount
       url
+      contributionsCount
     }
   }
 `

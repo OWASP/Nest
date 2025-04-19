@@ -6,6 +6,7 @@ import {
   faPersonWalkingArrowRight,
   faTag,
   faUserPlus,
+  faCodeMerge,
 } from '@fortawesome/free-solid-svg-icons'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -198,6 +199,7 @@ const UserDetailsPage: React.FC = () => {
     },
     { icon: faCircleExclamation, value: user?.issuesCount || 0, unit: 'Issue' },
     { icon: faTag, value: user?.releasesCount || 0, unit: 'Release' },
+    { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
   const Heatmap = () => (
