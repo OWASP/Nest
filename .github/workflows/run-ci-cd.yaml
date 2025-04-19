@@ -171,7 +171,7 @@ jobs:
             type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
-          cache-to: type=gha,mode=max
+          cache-to: type=gha
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
