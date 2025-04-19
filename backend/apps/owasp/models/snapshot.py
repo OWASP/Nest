@@ -51,3 +51,34 @@ class Snapshot(models.Model):
             self.key = now().strftime("%Y-%m")
 
         super().save(*args, **kwargs)
+
+    def generate_summary(self, max_examples=2):
+        """Generate a snapshot summary with counts and examples."""
+        summary_parts = []
+
+        def summarize(queryset, label, example_attr):
+            count = queryset.count()
+            if count == 0:
+                return None
+            examples = list(queryset.values_list(example_attr, flat=True)[:max_examples])
+            example_str = ", ".join(str(e) for e in examples)
+            return f"{count} {label}{'s' if count != 1 else ''} (e.g., {example_str})"
+
+        entities = [
+            (self.new_users, "user", "login"),
+            (self.new_projects, "project", "name"),
+            (self.new_chapters, "chapter", "name"),
+            (self.new_issues, "issue", "title"),
+            (self.new_releases, "release", "tag_name"),
+        ]
+
+        for queryset, label, attr in entities:
+            part = summarize(queryset, label, attr)
+            if part:
+                summary_parts.append(part)
+
+        return (
+            "Snapshot Summary: " + "; ".join(summary_parts)
+            if summary_parts
+            else "No new entities were added."
+        )

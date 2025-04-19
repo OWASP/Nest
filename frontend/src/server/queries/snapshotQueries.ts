@@ -7,6 +7,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
       key
       startAt
       title
+      summary
       newReleases {
         name
         publishedAt

@@ -1,9 +1,18 @@
 'use client'
+
 import { useQuery } from '@apollo/client'
-import { faCalendar } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCalendar,
+  faUsers,
+  faFolder,
+  faBook,
+  faBug,
+  faTag,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
+
 import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
 import { ChapterTypeGraphQL } from 'types/chapter'
 import { ProjectTypeGraphql } from 'types/project'
@@ -11,17 +20,59 @@ import { SnapshotDetailsProps } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIconsGraphql, handleSocialUrls } from 'utils/utility'
+
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
+type ParsedSummary = {
+  users: { count: number; examples: string[] }
+  projects: { count: number; examples: string[] }
+  chapters: { count: number; examples: string[] }
+  issues: { count: number; examples: string[] }
+  releases: { count: number; examples: string[] }
+}
+
+const parseSnapshotSummary = (summary: string): ParsedSummary => {
+  const result: ParsedSummary = {
+    users: { count: 0, examples: [] },
+    projects: { count: 0, examples: [] },
+    chapters: { count: 0, examples: [] },
+    issues: { count: 0, examples: [] },
+    releases: { count: 0, examples: [] },
+  }
+
+  if (!summary) return result
+
+  const sections = [
+    { key: 'users', pattern: /(\d+) users \(e\.g\.,\s*([^)]+)\)/i },
+    { key: 'projects', pattern: /(\d+) projects \(e\.g\.,\s*([^)]+)\)/i },
+    { key: 'chapters', pattern: /(\d+) chapters \(e\.g\.,\s*([^)]+)\)/i },
+    { key: 'issues', pattern: /(\d+) issues \(e\.g\.,\s*([^)]+)\)/i },
+    { key: 'releases', pattern: /(\d+) releases \(e\.g\.,\s*([^)]+)\)/i },
+  ]
+
+  sections.forEach((section) => {
+    const match = summary.match(section.pattern)
+    if (match && match.length >= 3) {
+      result[section.key as keyof ParsedSummary] = {
+        count: parseInt(match[1], 10),
+        examples: match[2].split(',').map((s) => s.trim()),
+      }
+    }
+  })
+
+  return result
+}
+
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams()
   const [snapshot, setSnapshot] = useState<SnapshotDetailsProps | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
+  const [summaryData, setSummaryData] = useState<ParsedSummary | null>(null)
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_SNAPSHOT_DETAILS, {
     variables: { key: snapshotKey },
@@ -30,6 +81,7 @@ const SnapshotDetailsPage: React.FC = () => {
   useEffect(() => {
     if (graphQLData) {
       setSnapshot(graphQLData.snapshot)
+      setSummaryData(parseSnapshotSummary(graphQLData.snapshot.summary))
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -128,6 +180,38 @@ const SnapshotDetailsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {summaryData && (
+        <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            Snapshot Summary
+          </h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { label: 'Users', data: summaryData.users, icon: faUsers },
+              { label: 'Projects', data: summaryData.projects, icon: faFolder },
+              { label: 'Chapters', data: summaryData.chapters, icon: faBook },
+              { label: 'Issues', data: summaryData.issues, icon: faBug },
+              { label: 'Releases', data: summaryData.releases, icon: faTag },
+            ].map(({ label, data, icon }) => (
+              <div
+                key={label}
+                className="flex items-start gap-4 rounded-lg border p-4 shadow-sm dark:border-gray-700"
+              >
+                <FontAwesomeIcon icon={icon} className="h-6 w-6 text-blue-500" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                    {data.count} {label}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    e.g., {data.examples.join(', ')}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {snapshot?.newChapters && snapshot?.newChapters.length > 0 && (
         <div className="mb-8">
