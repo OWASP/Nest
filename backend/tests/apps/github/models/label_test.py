@@ -8,7 +8,7 @@ class TestLabelModel:
         mock_labels = [Mock(id=None), Mock(id=1)]
         with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
             Label.bulk_save(mock_labels)
-            mock_bulk_save.assert_called_once_with(Label, mock_labels)
+            mock_bulk_save.assert_called_once_with(Label, mock_labels, fields=None)
 
     def test_update_data(self, mocker):
         gh_label_mock = mocker.Mock()

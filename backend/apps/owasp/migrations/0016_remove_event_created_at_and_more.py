@@ -71,9 +71,7 @@ class Migration(migrations.Migration):
             model_name="event",
             name="start_date",
             field=models.DateField(
-                default=datetime.datetime(
-                    2025, 2, 28, 7, 53, 17, 155842, tzinfo=datetime.timezone.utc
-                ),
+                default=datetime.datetime(2025, 2, 28, 7, 53, 17, 155842, tzinfo=datetime.UTC),
                 verbose_name="Start Date",
             ),
             preserve_default=False,

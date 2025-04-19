@@ -39,7 +39,7 @@ class Snapshot(models.Model):
         """Return a string representation of the snapshot."""
         return self.title
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """Save the snapshot instance.
 
         Args:

@@ -8,7 +8,7 @@ class TestReleaseModel:
         mock_releases = [mocker.Mock(id=None), mocker.Mock(id=1)]
         mock_bulk_save = mocker.patch("apps.common.models.BulkSaveModel.bulk_save")
         Release.bulk_save(mock_releases)
-        mock_bulk_save.assert_called_once_with(Release, mock_releases)
+        mock_bulk_save.assert_called_once_with(Release, mock_releases, fields=None)
 
     def test_update_data(self, mocker):
         gh_release_mock = mocker.Mock()

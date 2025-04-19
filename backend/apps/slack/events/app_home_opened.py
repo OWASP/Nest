@@ -3,16 +3,17 @@
 import logging
 
 from django.conf import settings
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from apps.common.constants import NL, TAB
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def app_home_opened_handler(event, client, ack):
+def app_home_opened_handler(event: dict, client: WebClient, ack) -> None:
     """Handle the app_home_opened event.
 
     Args:

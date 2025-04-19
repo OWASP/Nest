@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -39,8 +39,8 @@ class TestUtils:
         ("value", "expected_calls"),
         [
             ("2025-01-01", 1),
-            (datetime(2025, 1, 2, tzinfo=timezone.utc), 1),
-            (int(datetime(2025, 1, 2, tzinfo=timezone.utc).timestamp()), 1),
+            (datetime(2025, 1, 2, tzinfo=UTC), 1),
+            (int(datetime(2025, 1, 2, tzinfo=UTC).timestamp()), 1),
         ],
     )
     @patch("apps.common.utils.naturaltime")

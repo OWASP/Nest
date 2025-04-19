@@ -27,11 +27,11 @@ class Committee(
         db_table = "owasp_committees"
         verbose_name_plural = "Committees"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Committee human readable representation."""
         return f"{self.name}"
 
-    def from_github(self, repository):
+    def from_github(self, repository) -> None:
         """Update instance based on GitHub repository data."""
         self.owasp_repository = repository
 
@@ -47,7 +47,7 @@ class Committee(
         self.created_at = repository.created_at
         self.updated_at = repository.updated_at
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """Save committee."""
         if not self.summary and (prompt := Prompt.get_owasp_committee_summary()):
             self.generate_summary(prompt=prompt)
@@ -66,12 +66,12 @@ class Committee(
         return IndexBase.get_total_count("committees")
 
     @staticmethod
-    def bulk_save(committees, fields=None):
+    def bulk_save(committees, fields=None) -> None:  # type: ignore[override]
         """Bulk save committees."""
         BulkSaveModel.bulk_save(Committee, committees, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, save=True):
+    def update_data(gh_repository, repository, *, save: bool = True) -> "Committee":
         """Update committee data."""
         key = gh_repository.name.lower()
         try:

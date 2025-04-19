@@ -10,7 +10,7 @@ from apps.core.utils.index import register_indexes, unregister_indexes
 class Command(BaseCommand):
     help = "Load OWASP Nest data."
 
-    def handle(self, *_args, **_options):
+    def handle(self, *_args, **_options) -> None:
         """Load data into the OWASP Nest application.
 
         Args:

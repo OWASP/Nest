@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,7 +13,7 @@ def user_index_mixin_instance():
     instance.avatar_url = "https://example.com/avatar.png"
     instance.bio = "Developer bio"
     instance.company = "Test Company"
-    instance.created_at = datetime(2021, 1, 1, tzinfo=timezone.utc)
+    instance.created_at = datetime(2021, 1, 1, tzinfo=UTC)
     instance.email = "test@example.com"
     instance.login = "test_user"
     instance.followers_count = 100
@@ -23,12 +23,12 @@ def user_index_mixin_instance():
     instance.public_repositories_count = 10
     instance.title = "Developer"
     instance.url = "https://github.com/test_user"
-    instance.updated_at = datetime(2021, 1, 2, tzinfo=timezone.utc)
+    instance.updated_at = datetime(2021, 1, 2, tzinfo=UTC)
 
     instance.issues = MagicMock()
     instance.issues.select_related.return_value.order_by.return_value = [
         MagicMock(
-            created_at=datetime(2021, 1, 1, tzinfo=timezone.utc),
+            created_at=datetime(2021, 1, 1, tzinfo=UTC),
             comments_count=5,
             number=1,
             repository=MagicMock(
@@ -46,7 +46,7 @@ def user_index_mixin_instance():
         MagicMock(
             is_pre_release=False,
             name="Release Name",
-            published_at=datetime(2021, 1, 1, tzinfo=timezone.utc),
+            published_at=datetime(2021, 1, 1, tzinfo=UTC),
             repository=MagicMock(
                 key="repo_key",
                 owner=MagicMock(login="owner_login"),
@@ -80,7 +80,7 @@ class TestUserIndexMixin:
             ("idx_avatar_url", "https://example.com/avatar.png"),
             ("idx_bio", "Developer bio"),
             ("idx_company", "Test Company"),
-            ("idx_created_at", datetime(2021, 1, 1, tzinfo=timezone.utc).timestamp()),
+            ("idx_created_at", datetime(2021, 1, 1, tzinfo=UTC).timestamp()),
             ("idx_email", "test@example.com"),
             ("idx_key", "test_user"),
             ("idx_followers_count", 100),
@@ -91,12 +91,12 @@ class TestUserIndexMixin:
             ("idx_public_repositories_count", 10),
             ("idx_title", "Developer"),
             ("idx_url", "https://github.com/test_user"),
-            ("idx_updated_at", datetime(2021, 1, 2, tzinfo=timezone.utc).timestamp()),
+            ("idx_updated_at", datetime(2021, 1, 2, tzinfo=UTC).timestamp()),
             (
                 "idx_issues",
                 [
                     {
-                        "created_at": datetime(2021, 1, 1, tzinfo=timezone.utc).timestamp(),
+                        "created_at": datetime(2021, 1, 1, tzinfo=UTC).timestamp(),
                         "comments_count": 5,
                         "number": 1,
                         "repository": {"key": "repo_key", "owner_key": "owner_login"},

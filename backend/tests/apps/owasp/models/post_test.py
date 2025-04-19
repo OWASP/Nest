@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 import pytest
@@ -19,7 +19,7 @@ class TestPostModel:
         post = Post(
             title=title,
             url="https://example.com",
-            published_at=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            published_at=datetime(2025, 1, 1, tzinfo=UTC),
         )
         assert str(post) == expected_str
 
@@ -38,14 +38,14 @@ class TestPostModel:
                     "title": "New Post",
                     "url": "https://example.com",
                     "author_name": "John Doe",
-                    "published_at": datetime(2025, 1, 1, tzinfo=timezone.utc),
+                    "published_at": datetime(2025, 1, 1, tzinfo=UTC),
                     "author_image_url": "https://image.com",
                 },
                 {
                     "title": "New Post",
                     "url": "https://example.com",
                     "author_name": "John Doe",
-                    "published_at": datetime(2025, 1, 1, tzinfo=timezone.utc),
+                    "published_at": datetime(2025, 1, 1, tzinfo=UTC),
                     "author_image_url": "https://image.com",
                 },
             ),
@@ -54,14 +54,14 @@ class TestPostModel:
                     "title": "Another Post",
                     "url": "https://example.com",
                     "author_name": "Jane Doe",
-                    "published_at": datetime(2023, 1, 1, tzinfo=timezone.utc),
+                    "published_at": datetime(2023, 1, 1, tzinfo=UTC),
                     "author_image_url": "",
                 },
                 {
                     "title": "Another Post",
                     "url": "https://example.com",
                     "author_name": "Jane Doe",
-                    "published_at": datetime(2023, 1, 1, tzinfo=timezone.utc),
+                    "published_at": datetime(2023, 1, 1, tzinfo=UTC),
                     "author_image_url": "",
                 },
             ),
@@ -84,7 +84,7 @@ class TestPostModel:
             "title": "Updated Title",
             "author_name": "Updated Author",
             "author_image_url": "https://updatedimage.com",
-            "published_at": datetime(2023, 1, 1, tzinfo=timezone.utc),
+            "published_at": datetime(2023, 1, 1, tzinfo=UTC),
         }
 
         result = Post.update_data(data)

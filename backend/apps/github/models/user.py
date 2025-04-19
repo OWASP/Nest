@@ -22,7 +22,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     is_bot = models.BooleanField(verbose_name="Is bot", default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable representation of the user.
 
         Returns
@@ -51,7 +51,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """
         return self.created_releases.all()
 
-    def from_github(self, gh_user):
+    def from_github(self, gh_user) -> None:
         """Update the user instance based on GitHub user data.
 
         Args:
@@ -89,7 +89,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         }
 
     @staticmethod
-    def update_data(gh_user, save=True):
+    def update_data(gh_user, *, save: bool = True) -> "User":
         """Update GitHub user data.
 
         Args:

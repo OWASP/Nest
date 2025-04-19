@@ -1,11 +1,19 @@
 """OWASP app user search API."""
 
+from __future__ import annotations
+
 from algoliasearch_django import raw_search
 
 from apps.github.models.user import User
 
 
-def get_users(query, attributes=None, limit=25, page=1, searchable_attributes=None):
+def get_users(
+    query: str,
+    attributes: list | None = None,
+    limit: int = 25,
+    page: int = 1,
+    searchable_attributes: list | None = None,
+) -> dict:
     """Return users relevant to a search query.
 
     Args:

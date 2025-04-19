@@ -1,6 +1,7 @@
 """A command to add project custom tags."""
 
 import json
+from argparse import ArgumentParser
 from pathlib import Path
 
 from django.conf import settings
@@ -12,7 +13,7 @@ from apps.owasp.models.project import Project
 class Command(BaseCommand):
     help = "Add custom tags to OWASP projects."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -27,7 +28,7 @@ class Command(BaseCommand):
             "Example: gsoc-2024.json",
         )
 
-    def handle(self, *_args, **options):
+    def handle(self, *_args, **options) -> None:
         """Handle the command execution.
 
         Args:

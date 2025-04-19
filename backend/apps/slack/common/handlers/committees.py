@@ -15,8 +15,11 @@ from apps.slack.utils import escape
 
 
 def get_blocks(
-    page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
-):
+    page: int = 1,
+    search_query: str = "",
+    limit: int = 10,
+    presentation: EntityPresentation | None = None,
+) -> list:
     """Get committees blocks.
 
     Args:

@@ -1,6 +1,7 @@
 """Slack bot policies command."""
 
 from django.conf import settings
+from slack_sdk import WebClient
 
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
@@ -10,7 +11,7 @@ from apps.slack.utils import get_text
 COMMAND = "/policies"
 
 
-def policies_handler(ack, command, client):
+def policies_handler(ack, command: dict, client: WebClient) -> None:
     """Handle the Slack /policies command.
 
     Args:
@@ -79,9 +80,9 @@ def policies_handler(ack, command, client):
         ),
     ]
 
-    policies = NL.join(f"  • <{url}|{title}>" for title, url in policies)
+    policies_block = NL.join(f"  • <{url}|{title}>" for title, url in policies)
     blocks = [
-        markdown(f"Important OWASP policies:{NL}{policies}"),
+        markdown(f"Important OWASP policies:{NL}{policies_block}"),
         divider(),
         markdown(
             "Please visit <https://owasp.org/www-policy/|OWASP policies> page for more "

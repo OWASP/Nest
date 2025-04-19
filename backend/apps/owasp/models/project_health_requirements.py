@@ -52,6 +52,6 @@ class ProjectHealthRequirements(TimestampedModel):
         verbose_name="Unassigned issues", default=0
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Project health requirements human readable representation."""
         return f"Health Requirements for {self.get_level_display()} Projects"

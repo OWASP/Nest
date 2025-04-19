@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 
 
-def validate_index_name(index_name):
+def validate_index_name(index_name: str) -> None:
     """Validate index name.
 
     Args:
@@ -30,7 +30,7 @@ def validate_index_name(index_name):
         raise ValidationError(message) from None
 
 
-def validate_limit(limit):
+def validate_limit(limit: int) -> None:
     """Validate limit.
 
     Args:
@@ -51,7 +51,7 @@ def validate_limit(limit):
         raise ValidationError(message)
 
 
-def validate_page(page):
+def validate_page(page: int) -> None:
     """Validate page.
 
     Args:
@@ -70,7 +70,7 @@ def validate_page(page):
         raise ValidationError(message)
 
 
-def validate_query(query):
+def validate_query(query: str) -> None:
     """Validate query.
 
     Args:
@@ -95,7 +95,7 @@ def validate_query(query):
         raise ValidationError(message)
 
 
-def validate_facet_filters(facet_filters):
+def validate_facet_filters(facet_filters: list) -> None:
     """Validate facet filters.
 
     Args:
@@ -110,7 +110,7 @@ def validate_facet_filters(facet_filters):
         raise ValidationError(message)
 
 
-def validate_search_params(data):
+def validate_search_params(data: dict) -> None:
     """Validate search parameters.
 
     Args:
@@ -121,7 +121,7 @@ def validate_search_params(data):
 
     """
     validate_facet_filters(data.get("facetFilters", []))
-    validate_index_name(data.get("indexName"))
+    validate_index_name(data.get("indexName", ""))
     validate_limit(data.get("hitsPerPage", 25))
     validate_page(data.get("page", 1))
     validate_query(data.get("query", ""))

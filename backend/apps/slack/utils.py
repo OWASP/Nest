@@ -1,10 +1,16 @@
 """Slack app utils."""
 
+from __future__ import annotations
+
 import logging
 import re
 from functools import lru_cache
 from html import escape as escape_html
+from typing import TYPE_CHECKING
 from urllib.parse import urljoin
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 import requests
 import yaml
@@ -14,10 +20,10 @@ from requests.exceptions import RequestException
 
 from apps.common.constants import NL, OWASP_NEWS_URL
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def escape(content):
+def escape(content) -> str:
     """Escape HTML content.
 
     Args:
@@ -31,7 +37,7 @@ def escape(content):
 
 
 @lru_cache
-def get_gsoc_projects(year):
+def get_gsoc_projects(year: int) -> list:
     """Get GSoC projects.
 
     Args:
@@ -56,7 +62,9 @@ def get_gsoc_projects(year):
 
 
 @lru_cache
-def get_news_data(limit=10, timeout=30):
+def get_news_data(
+    limit: int = 10, timeout: None | float | tuple[float, None] | tuple[float, float] = 30
+) -> list[dict[str, str]]:
     """Get news data.
 
     Args:
@@ -92,7 +100,9 @@ def get_news_data(limit=10, timeout=30):
 
 
 @lru_cache
-def get_staff_data(timeout=30):
+def get_staff_data(
+    timeout: None | float | tuple[float, None] | tuple[float, float] = 30,
+) -> list | None:
     """Get staff data.
 
     Args:
@@ -115,9 +125,10 @@ def get_staff_data(timeout=30):
         )
     except (RequestException, yaml.scanner.ScannerError):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
+        return None
 
 
-def get_events_data():
+def get_events_data() -> QuerySet:
     """Get events data.
 
     Returns
@@ -126,14 +137,10 @@ def get_events_data():
     """
     from apps.owasp.models.event import Event
 
-    try:
-        return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
-    except Exception as e:
-        logger.exception("Failed to fetch events data via database", extra={"error": str(e)})
-        return None
+    return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
 
 
-def get_sponsors_data(limit=10):
+def get_sponsors_data(limit: int = 10) -> QuerySet | None:
     """Get sponsors data.
 
     Args:
@@ -153,7 +160,7 @@ def get_sponsors_data(limit=10):
 
 
 @lru_cache
-def get_posts_data(limit=5):
+def get_posts_data(limit: int = 5) -> QuerySet | None:
     """Get posts data.
 
     Args:
@@ -172,7 +179,7 @@ def get_posts_data(limit=5):
         return None
 
 
-def get_text(blocks):
+def get_text(blocks: list) -> str:
     """Convert blocks to plain text.
 
     Args:
@@ -225,7 +232,7 @@ def get_text(blocks):
     return NL.join(text).strip()
 
 
-def strip_markdown(text):
+def strip_markdown(text: str) -> str:
     """Strip markdown formatting.
 
     Args:

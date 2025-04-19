@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -19,8 +19,8 @@ def release_index_mixin_instance():
         path="mock/repository",
         project=MagicMock(nest_key="mock/project"),
     )
-    instance.created_at = datetime(2023, 1, 1, tzinfo=timezone.utc)
-    instance.published_at = datetime(2023, 6, 1, tzinfo=timezone.utc)
+    instance.created_at = datetime(2023, 1, 1, tzinfo=UTC)
+    instance.published_at = datetime(2023, 6, 1, tzinfo=UTC)
     instance.description = "This is a long description"
     instance.is_pre_release = True
     instance.name = "Release v1.0.0"
@@ -41,7 +41,7 @@ def release_index_mixin_instance():
                 }
             ],
         ),
-        ("idx_created_at", datetime(2023, 1, 1, tzinfo=timezone.utc).timestamp()),
+        ("idx_created_at", datetime(2023, 1, 1, tzinfo=UTC).timestamp()),
         (
             "idx_description",
             "This is a long description",
@@ -49,7 +49,7 @@ def release_index_mixin_instance():
         ("idx_is_pre_release", True),
         ("idx_name", "Release v1.0.0"),
         ("idx_project", "mock/project"),
-        ("idx_published_at", datetime(2023, 6, 1, tzinfo=timezone.utc).timestamp()),
+        ("idx_published_at", datetime(2023, 6, 1, tzinfo=UTC).timestamp()),
         ("idx_repository", "mock/repository"),
         ("idx_tag_name", "v1.0.0"),
         ("idx_author", []),

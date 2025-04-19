@@ -22,9 +22,9 @@ class CommitteeIndexMixin(RepositoryBasedEntityModelMixin):
         return self.related_urls
 
     @property
-    def idx_top_contributors(self):
+    def idx_top_contributors(self) -> list[str]:
         """Return top contributors for indexing."""
-        return super().get_top_contributors(repositories=[self.owasp_repository])
+        return self.get_top_contributors(repositories=[self.owasp_repository])
 
     @property
     def idx_updated_at(self):
