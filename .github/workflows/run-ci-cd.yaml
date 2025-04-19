@@ -167,10 +167,7 @@ jobs:
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: |
-            type=gha
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
+          cache-from: type=gha
           cache-to: type=gha
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
