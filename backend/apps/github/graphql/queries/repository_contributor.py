@@ -16,9 +16,10 @@ class RepositoryContributorQuery(BaseQuery):
         RepositoryContributorNode,
         limit=graphene.Int(default_value=15),
         organization=graphene.String(required=False),
+        project=graphene.String(required=False),
     )
 
-    def resolve_top_contributors(root, info, limit, organization=None):
+    def resolve_top_contributors(root, info, limit, organization=None, project=None):
         """Resolve top contributors only for repositories with projects.
 
         Args:
@@ -26,6 +27,7 @@ class RepositoryContributorQuery(BaseQuery):
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of contributors to return.
             organization (str, optional): Organization login to filter by.
+            project (str, optional): Project key to filter by.
 
         Returns:
             list: List of top contributors with their details.
@@ -51,6 +53,9 @@ class RepositoryContributorQuery(BaseQuery):
             ).filter(
                 repository__organization__login=organization,
             )
+
+        if project:
+            queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
 
         top_contributors = (
             queryset.filter(rank=1)
