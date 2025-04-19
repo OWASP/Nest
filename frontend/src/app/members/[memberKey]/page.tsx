@@ -1,13 +1,12 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
-  faCodeBranch,
+  faCircleExclamation,
+  faFolderOpen,
+  faPersonWalkingArrowRight,
+  faTag,
   faUserPlus,
-  faUser,
-  faFileCode,
-  faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -17,12 +16,12 @@ import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
-import { ErrorDisplay } from 'wrappers/ErrorWrapper'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const UserDetailsPage: React.FC = () => {
-  const { userKey } = useParams()
+  const { memberKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
@@ -37,7 +36,7 @@ const UserDetailsPage: React.FC = () => {
   const theme = 'blue'
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
-    variables: { key: userKey },
+    variables: { key: memberKey },
   })
 
   useEffect(() => {
@@ -50,33 +49,26 @@ const UserDetailsPage: React.FC = () => {
       setIsLoading(false)
     }
     if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, userKey])
+  }, [graphQLData, graphQLRequestError, memberKey])
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!userKey) {
+      if (!memberKey) {
         return
       }
-      const result = await fetchHeatmapData(userKey as string)
+      const result = await fetchHeatmapData(memberKey as string)
       if (typeof result !== 'string' && result.contributions) {
-        setUsername(userKey as string)
+        setUsername(memberKey as string)
         setData(result as HeatmapData)
       } else {
         setPrivateContributor(true)
       }
     }
     fetchData()
-  }, [userKey, user])
+  }, [memberKey, user])
 
   useEffect(() => {
     if (canvasRef.current && data && data.years && data.years.length > 0) {
@@ -113,15 +105,16 @@ const UserDetailsPage: React.FC = () => {
   const formattedIssues: ProjectIssuesType[] = useMemo(() => {
     return (
       issues?.map((issue) => ({
-        commentsCount: issue.commentsCount,
-        createdAt: issue.createdAt,
-        title: issue.title,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        createdAt: issue.createdAt,
+        organizationName: issue.organizationName,
+        repositoryName: issue.repositoryName,
+        title: issue.title,
         url: issue.url,
       })) || []
     )
@@ -130,14 +123,16 @@ const UserDetailsPage: React.FC = () => {
   const formattedPullRequest: ItemCardPullRequests[] = useMemo(() => {
     return (
       pullRequests?.map((pullRequest) => ({
-        createdAt: pullRequest.createdAt,
-        title: pullRequest.title,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        createdAt: pullRequest.createdAt,
+        organizationName: pullRequest.organizationName,
+        repositoryName: pullRequest.repositoryName,
+        title: pullRequest.title,
         url: pullRequest.url,
       })) || []
     )
@@ -146,17 +141,18 @@ const UserDetailsPage: React.FC = () => {
   const formattedReleases: ProjectReleaseType[] = useMemo(() => {
     return (
       releases?.map((release) => ({
-        isPreRelease: release.isPreRelease,
-        name: release.name,
-        publishedAt: release.publishedAt,
-        tagName: release.tagName,
-        repositoryName: release.repositoryName,
         author: {
-          login: user?.login || '',
           avatarUrl: user?.avatarUrl || '',
           key: user?.login || '',
+          login: user?.login || '',
           name: user?.name || user?.login || '',
         },
+        isPreRelease: release.isPreRelease,
+        name: release.name,
+        organizationName: release.organizationName,
+        publishedAt: release.publishedAt,
+        repositoryName: release.repositoryName,
+        tagName: release.tagName,
         url: release.url,
       })) || []
     )
@@ -192,16 +188,16 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   const userStats = [
-    { icon: faUser, value: user?.followersCount || 0, unit: 'Follower' },
+    { icon: faPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
     { icon: faUserPlus, value: user?.followingCount || 0, unit: 'Following' },
     {
-      icon: faCodeBranch,
+      icon: faFolderOpen,
       pluralizedName: 'Repositories',
       unit: 'Repository',
       value: user?.publicRepositoriesCount ?? 0,
     },
-    { icon: faFileCode, value: user?.issuesCount || 0, unit: 'Issue' },
-    { icon: faBookmark, value: user?.releasesCount || 0, unit: 'Release' },
+    { icon: faCircleExclamation, value: user?.issuesCount || 0, unit: 'Issue' },
+    { icon: faTag, value: user?.releasesCount || 0, unit: 'Release' },
   ]
 
   const Heatmap = () => (

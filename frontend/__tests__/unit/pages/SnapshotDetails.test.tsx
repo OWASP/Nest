@@ -3,7 +3,7 @@ import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
 import { render } from 'wrappers/testUtil'
-import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
+import SnapshotDetailsPage from 'app/snapshots/[id]/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -90,9 +90,9 @@ describe('SnapshotDetailsPage', () => {
     await waitFor(() => screen.getByText('Snapshot not found'))
     expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',

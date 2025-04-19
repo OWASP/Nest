@@ -26,19 +26,19 @@ export const mockAboutData = {
       avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
       company: 'OWASP',
       name: 'Arkadii Yakovets',
-      url: '/community/members/arkid15r',
+      url: '/members/arkid15r',
     },
     kasya: {
       avatarUrl: 'https://avatars.githubusercontent.com/u/5873153?v=4',
       company: 'skillstruck',
       name: 'Kate Golovanova',
-      url: '/community/members/kasya',
+      url: '/members/kasya',
     },
     mamicidal: {
       avatarUrl: 'https://avatars.githubusercontent.com/u/112129498?v=4',
       company: 'OWASP',
       name: 'Starr Brown',
-      url: '/community/members/mamicidal',
+      url: '/members/mamicidal',
     },
   },
 }

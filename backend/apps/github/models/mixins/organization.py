@@ -67,6 +67,11 @@ class OrganizationIndexMixin:
         return self.name or ""
 
     @property
+    def idx_public_repositories_count(self):
+        """Return public repositories count for indexing."""
+        return self.public_repositories_count
+
+    @property
     def idx_url(self):
         """Return URL for indexing."""
         return self.url

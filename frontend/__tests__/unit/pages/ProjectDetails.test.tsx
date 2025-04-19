@@ -87,9 +87,9 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => screen.getByText('Project not found'))
     expect(screen.getByText('Project not found')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',
@@ -99,8 +99,8 @@ describe('ProjectDetailsPage', () => {
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
     const contributorsSection = screen
@@ -118,7 +118,7 @@ describe('ProjectDetailsPage', () => {
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
@@ -128,9 +128,8 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('button')?.click()
-
-    expect(mockRouter.push).toHaveBeenCalledWith('/community/members/contributor1')
+    const contributorLink = screen.getByText('Contributor 1').closest('a')
+    expect(contributorLink).toHaveAttribute('href', '/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {
@@ -141,8 +140,7 @@ describe('ProjectDetailsPage', () => {
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
-
-        expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
+        expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
       })
     })
   })

@@ -5,7 +5,7 @@ import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
-import UserDetailsPage from 'app/community/members/[userKey]/page'
+import UserDetailsPage from 'app/members/[memberKey]/page'
 
 // Mock Apollo Client
 jest.mock('@apollo/client', () => ({
@@ -111,7 +111,7 @@ describe('UserDetailsPage', () => {
       const issueTitle = screen.getByText('Test Issue')
       expect(issueTitle).toBeInTheDocument()
 
-      const issueComments = screen.getByText('5 comments')
+      const issueComments = screen.getByText('Test Repo')
       expect(issueComments).toBeInTheDocument()
     })
   })
@@ -243,9 +243,9 @@ describe('UserDetailsPage', () => {
     })
 
     expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',

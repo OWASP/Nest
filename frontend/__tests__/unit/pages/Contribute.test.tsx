@@ -3,7 +3,7 @@ import { mockContributeData } from '@unit/data/mockContributeData'
 import { useRouter } from 'next/navigation'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-import ContributePage from 'app/projects/contribute/page'
+import ContributePage from 'app/contribute/page'
 
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
@@ -110,7 +110,7 @@ describe('Contribute Component', () => {
 
   test('handles pagination for first page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      ...mockContributeData,
+      hits: mockContributeData.issues,
       totalPages: 2,
       currentPage: 1,
     })
