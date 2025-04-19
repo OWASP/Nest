@@ -9,4 +9,8 @@ export async function expectBreadCrumbsToBeVisible(page: Page, breadcrumbs: stri
   for (const breadcrumb of breadcrumbs) {
     await expect(breadcrumbsContainer.getByText(breadcrumb)).toBeVisible()
   }
+
+  const allBreadcrumbs = await breadcrumbsContainer.locator('li').allTextContents()
+  const visibleBreadcrumbs = allBreadcrumbs.filter((text) => text.trim() !== '')
+  await expect(visibleBreadcrumbs).toEqual(breadcrumbs)
 }
