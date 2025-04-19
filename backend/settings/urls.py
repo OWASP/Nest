@@ -8,7 +8,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from graphene_django.views import GraphQLView
 from rest_framework import routers
 
@@ -22,10 +22,27 @@ router = routers.DefaultRouter()
 router.registry.extend(github_router.registry)
 router.registry.extend(owasp_router.registry)
 
+
+def csrf_decorator(view_func):
+    """Apply CSRF protection or exemption based on the environment.
+
+    Args:
+        view_func (function): The view function to decorate.
+
+    Returns:
+        function: The decorated view function with CSRF protection or exemption.
+
+    """
+    environment = settings.ENVIRONMENT
+    if environment == "Fuzz":
+        return csrf_exempt(view_func)
+    return csrf_protect(view_func)
+
+
 urlpatterns = [
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
-    path("graphql/", csrf_protect(GraphQLView.as_view(graphiql=settings.DEBUG))),
+    path("graphql/", csrf_decorator(GraphQLView.as_view(graphiql=settings.DEBUG))),
     path("api/v1/", include(router.urls)),
     path("a/", admin.site.urls),
 ]

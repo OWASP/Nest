@@ -1,0 +1,23 @@
+services:
+  graphql:
+    container_name: nest-graphqler-test
+    build:
+      context: ../backend
+      dockerfile: docker/Dockerfile.graphql_fuzz
+    depends_on:
+      backend:
+        condition: service_healthy
+  backend:
+    container_name: nest-fuzz-test-backend
+    build:
+      context: ../backend
+      dockerfile: docker/Dockerfile.fuzz_tests
+    env_file: ../backend/fuzz_tests/.env
+    ports:
+      - 127.0.0.1:8000:8000
+    healthcheck:
+      test: sh -c 'wget -O- http://127.0.0.1:8000/api/v1'
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 400s
