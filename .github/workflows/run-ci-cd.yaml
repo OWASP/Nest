@@ -171,8 +171,9 @@ jobs:
           cache-to: type=gha
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
-          load: true
           platforms: linux/amd64
+          pull: true
+          push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
 
       - name: Run frontend end-to-end tests
