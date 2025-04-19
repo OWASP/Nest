@@ -6,11 +6,9 @@ import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { capitalize } from 'utils/capitalize'
-import { homeRoute } from 'utils/constants'
-
-const capitalizeRoute = (str: string) => capitalize(str).replace(/-/g, ' ')
 
 export default function BreadCrumbs() {
+  const homeRoute = '/'
   const pathname = usePathname()
   const segments = pathname.split(homeRoute).filter(Boolean)
 
@@ -35,14 +33,17 @@ export default function BreadCrumbs() {
           }}
         >
           <BreadcrumbItem>
-            <Link href="/" className="hover:text-blue-700 hover:underline dark:text-blue-400">
+            <Link
+              href={homeRoute}
+              className="hover:text-blue-700 hover:underline dark:text-blue-400"
+            >
               Home
             </Link>
           </BreadcrumbItem>
 
           {segments.map((segment, index) => {
             const href = homeRoute + segments.slice(0, index + 1).join(homeRoute)
-            const label = capitalizeRoute(segment)
+            const label = capitalize(segment).replace(/-/g, ' ')
             const isLast = index === segments.length - 1
 
             return (
