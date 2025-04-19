@@ -1,11 +1,9 @@
-"""Test sponsors command handler."""
-
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.sponsors import sponsors_handler
+from apps.slack.commands.sponsors import Sponsors
 
 
 class MockSponsor:
@@ -33,8 +31,6 @@ mock_sponsors = [
 
 
 class TestSponsorsHandler:
-    """Test sponsors command handler."""
-
     @pytest.fixture
     def mock_slack_command(self):
         return {
@@ -65,11 +61,12 @@ class TestSponsorsHandler:
         mock_slack_client,
         mock_slack_command,
     ):
-        """Test handler responses."""
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_get_sponsors_data.return_value = mock_sponsors if has_sponsors_data else []
 
-        sponsors_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        sponsors_instance = Sponsors()
+        ack = MagicMock()
+        sponsors_instance.handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()
@@ -77,11 +74,14 @@ class TestSponsorsHandler:
             return
 
         if not has_sponsors_data:
+            mock_slack_client.conversations_open.assert_called_once_with(
+                users=mock_slack_command["user_id"]
+            )
             mock_slack_client.chat_postMessage.assert_called_once_with(
-                channel=mock_slack_command["user_id"],
+                blocks=ANY,
+                channel="C123456",
                 text="Failed to get OWASP sponsor data.",
             )
-            mock_slack_client.conversations_open.assert_not_called()
             return
 
         mock_slack_client.conversations_open.assert_called_once_with(
@@ -90,11 +90,10 @@ class TestSponsorsHandler:
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
 
-        assert blocks[0]["text"]["text"] == expected_header
+        assert expected_header in blocks[0]["text"]["text"]
 
         if has_sponsors_data:
             current_block = 1
-
             sponsor_block = blocks[current_block]["text"]["text"]
             assert "*1. <https://example.com/sponsor1|Example Sponsor 1>*" in sponsor_block
             assert "Member Type: Platinum" in sponsor_block

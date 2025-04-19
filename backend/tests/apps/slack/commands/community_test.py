@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.slack.commands.community import community_handler
+from apps.slack.commands.community import Community
 
 
 class TestCommunityHandler:
@@ -31,7 +31,8 @@ class TestCommunityHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
 
         ack = MagicMock()
-        community_handler(ack=ack, command=mock_command, client=mock_client)
+        community = Community()
+        community.handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
 
@@ -52,7 +53,8 @@ class TestCommunityHandler:
         settings.SLACK_COMMANDS_ENABLED = True
 
         ack = MagicMock()
-        community_handler(ack=ack, command=mock_command, client=mock_client)
+        community = Community()
+        community.handler(ack=ack, command=mock_command, client=mock_client)
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert len(blocks) == 1
