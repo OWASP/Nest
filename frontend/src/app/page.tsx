@@ -228,17 +228,17 @@ export default function Home() {
                       <TruncatedText text={project.name} />
                     </h3>
                   </Link>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
                     </div>
-                    <div className="mr-4 flex items-center">
+                    <div className="mr-4 flex flex-1 items-center overflow-hidden">
                       <FontAwesomeIcon
                         icon={getProjectIcon(project.type) as IconProp}
                         className="mr-2 h-4 w-4"
                       />
-                      <span>{capitalize(project.type)}</span>
+                      <TruncatedText text={capitalize(project.type)} />
                     </div>
                   </div>
 
