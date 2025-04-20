@@ -1,3 +1,4 @@
+import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import { mockChapterData } from '@unit/data/mockChapterData'
 
@@ -53,5 +54,9 @@ test.describe('Chapters Page', () => {
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
     await expect(page).toHaveURL('chapters/chapter_1')
+  })
+
+  test('breadcrumb renders correct segments on /chapters', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Chapters'])
   })
 })
