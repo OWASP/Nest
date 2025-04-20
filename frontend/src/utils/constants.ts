@@ -7,8 +7,9 @@ export const headerLinks: Link[] = [
     text: 'Community',
     submenu: [
       { text: 'Chapters', href: '/chapters' },
-      { text: 'Snapshots', href: '/community/snapshots' },
-      { text: 'Users', href: '/community/users' },
+      { text: 'Members', href: '/members' },
+      { text: 'Organizations', href: '/organizations' },
+      { text: 'Snapshots', href: '/snapshots' },
     ],
   },
   {
@@ -17,7 +18,7 @@ export const headerLinks: Link[] = [
   },
   {
     text: 'Contribute',
-    href: '/projects/contribute',
+    href: '/contribute',
   },
   {
     text: 'About',
@@ -65,7 +66,7 @@ export const footerSections: Section[] = [
       { text: 'Chapters', href: '/chapters/' },
       {
         text: 'Contribute',
-        href: '/projects/contribute/',
+        href: '/contribute/',
       },
       { text: 'Committees', href: '/committees/' },
       { text: 'Projects', href: '/projects/' },

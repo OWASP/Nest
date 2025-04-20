@@ -65,7 +65,7 @@ const ProjectsPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
-      searchPlaceholder="Search for OWASP projects..."
+      searchPlaceholder="Search for projects..."
       searchQuery={searchQuery}
       sortChildren={
         <SortBy

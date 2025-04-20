@@ -5,7 +5,7 @@ import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
-import UserDetailsPage from 'app/community/users/[userKey]/page'
+import UserDetailsPage from 'app/members/[memberKey]/page'
 
 // Mock Apollo Client
 jest.mock('@apollo/client', () => ({
@@ -111,7 +111,7 @@ describe('UserDetailsPage', () => {
       const issueTitle = screen.getByText('Test Issue')
       expect(issueTitle).toBeInTheDocument()
 
-      const issueComments = screen.getByText('5 comments')
+      const issueComments = screen.getByText('Test Repo')
       expect(issueComments).toBeInTheDocument()
     })
   })
@@ -179,6 +179,9 @@ describe('UserDetailsPage', () => {
 
       const repositoriesCount = screen.getByText('3 Repositories')
       expect(repositoriesCount).toBeInTheDocument()
+
+      const contributionsCount = screen.getByText('100 Contributions')
+      expect(contributionsCount).toBeInTheDocument()
     })
   })
 
@@ -243,9 +246,9 @@ describe('UserDetailsPage', () => {
     })
 
     expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',
@@ -330,11 +333,10 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       user: {
         ...mockUserDetailsData.user,
+        contributionsCount: 0,
         followersCount: 0,
         followingCount: 0,
         publicRepositoriesCount: 0,
-        issuesCount: 0,
-        releasesCount: 0,
       },
     }
     ;(useQuery as jest.Mock).mockReturnValue({
@@ -348,8 +350,7 @@ describe('UserDetailsPage', () => {
       expect(screen.getByText('No Followers')).toBeInTheDocument()
       expect(screen.getByText('No Followings')).toBeInTheDocument()
       expect(screen.getByText('No Repositories')).toBeInTheDocument()
-      expect(screen.getByText('No Issues')).toBeInTheDocument()
-      expect(screen.getByText('No Releases')).toBeInTheDocument()
+      expect(screen.getByText('No Contributions')).toBeInTheDocument()
     })
   })
 
@@ -371,7 +372,7 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getAllByText('Not provided').length).toBe(3)
+      expect(screen.getAllByText('N/A').length).toBe(3)
     })
   })
 })

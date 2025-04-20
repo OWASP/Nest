@@ -1,11 +1,11 @@
-FROM node:lts-alpine
+FROM node:23-alpine
 
 WORKDIR /opt/node
 
 COPY package.json pnpm-lock.yaml ./
 
 RUN npm install --ignore-scripts -g pnpm && \
-    pnpm install --ignore-scripts
+    pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /nest
 

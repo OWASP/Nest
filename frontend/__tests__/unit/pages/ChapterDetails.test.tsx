@@ -84,7 +84,7 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+    expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
   })
 
   test('renders chapter URL as clickable link', async () => {

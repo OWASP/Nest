@@ -16,9 +16,10 @@ class ReleaseQuery(BaseQuery):
         limit=graphene.Int(default_value=6),
         distinct=graphene.Boolean(default_value=False),
         login=graphene.String(required=False),
+        organization=graphene.String(required=False),
     )
 
-    def resolve_recent_releases(root, info, limit, distinct=False, login=None):
+    def resolve_recent_releases(root, info, limit, distinct=False, login=None, organization=None):
         """Resolve recent releases with optional distinct filtering.
 
         Args:
@@ -27,6 +28,7 @@ class ReleaseQuery(BaseQuery):
             limit (int): Maximum number of releases to return.
             distinct (bool): Whether to return unique releases per author and repository.
             login (str): Optional GitHub username for filtering releases.
+            organization (str): Optional GitHub organization for filtering releases.
 
         Returns:
             QuerySet: Queryset containing the filtered list of releases.
@@ -39,8 +41,17 @@ class ReleaseQuery(BaseQuery):
         ).order_by("-published_at")
 
         if login:
-            queryset = queryset.filter(
+            queryset = queryset.select_related(
+                "author",
+                "repository",
+                "repository__organization",
+            ).filter(
                 author__login=login,
+            )
+
+        if organization:
+            queryset = queryset.filter(
+                repository__organization__login=organization,
             )
 
         if distinct:
