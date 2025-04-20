@@ -25,6 +25,18 @@ export const GET_PROJECT_DATA = gql`
         title
         url
       }
+      recentPullRequests {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        createdAt
+        organizationName
+        repositoryName
+        title
+        url
+      }
       recentReleases {
         author {
           avatarUrl
@@ -63,18 +75,6 @@ export const GET_PROJECT_DATA = gql`
       topics
       type
       updatedAt
-      url
-    }
-    recentPullRequests(limit: 5, repository: $key) {
-      author {
-        avatarUrl
-        login
-        name
-      }
-      createdAt
-      organizationName
-      repositoryName
-      title
       url
     }
   }

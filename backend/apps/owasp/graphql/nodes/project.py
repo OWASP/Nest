@@ -3,6 +3,7 @@
 import graphene
 
 from apps.github.graphql.nodes.issue import IssueNode
+from apps.github.graphql.nodes.pull_request import PullRequestNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.common import GenericEntityNode
@@ -10,6 +11,7 @@ from apps.owasp.models.project import Project
 
 RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
+RECENT_PULL_REQUESTS_LIMIT = 5
 
 
 class ProjectNode(GenericEntityNode):
@@ -20,6 +22,7 @@ class ProjectNode(GenericEntityNode):
     languages = graphene.List(graphene.String)
     level = graphene.String()
     recent_issues = graphene.List(IssueNode)
+    recent_pull_requests = graphene.List(PullRequestNode)
     recent_releases = graphene.List(ReleaseNode)
     repositories = graphene.List(RepositoryNode)
     repositories_count = graphene.Int()
@@ -56,6 +59,12 @@ class ProjectNode(GenericEntityNode):
     def resolve_recent_issues(self, info):
         """Resolve recent issues."""
         return self.issues.select_related("author").order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+
+    def resolve_recent_pull_requests(self, info):
+        """Resolve recent pull requests."""
+        return self.pull_requests.select_related("author").order_by("-created_at")[
+            :RECENT_PULL_REQUESTS_LIMIT
+        ]
 
     def resolve_recent_releases(self, info):
         """Resolve recent releases."""
