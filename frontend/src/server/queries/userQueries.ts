@@ -42,6 +42,7 @@ export const GET_USER_DATA = gql`
       avatarUrl
       bio
       company
+      contributionsCount
       createdAt
       email
       followersCount
