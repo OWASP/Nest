@@ -76,7 +76,6 @@ Before contributing, ensure you have the following installed:
 #### `NEXT_PUBLIC_GTM_PREVIEW`
 
 - **Description**: Used for previewing GTM configurations.
-- **Example Value**: *(Empty by default)*
 - **Usage**: Optional, used during GTM debugging or testing.
 
 #### `NEXT_PUBLIC_IDX_URL`
@@ -110,31 +109,27 @@ Before contributing, ensure you have the following installed:
 #### `DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES`
 
 - **Description**: Index names to exclude locally (if any).
-- **Example Value**: `["TestModel_index"]`
 - **Usage**: Prevents specific indices from being created in local environments.
 
 #### `DJANGO_ALGOLIA_WRITE_API_KEY`
 
 - **Description**: The write API key for Algolia.
-- **Example Value**: `123456abcde`
 - **Usage**: Required for Django backend to write data into Algolia indices.
 
 #### `DJANGO_ALLOWED_HOSTS`
 
 - **Description**: A comma-separated list of allowed hosts for the application.
-- **Example Value**: `localhost,127.0.0.1,owaspnest.org`
+- **Example Value**: `localhost,127.0.0.1`
 - **Usage**: Restricts HTTP Host header to prevent host header attacks.
 
 #### `DJANGO_AWS_ACCESS_KEY_ID`
 
 - **Description**: AWS access key ID.
-- **Example Value**: `AKIAIOSFODNN7EXAMPLE`
 - **Usage**: Used for authenticating with AWS services (e.g., S3).
 
 #### `DJANGO_AWS_SECRET_ACCESS_KEY`
 
 - **Description**: AWS secret access key.
-- **Example Value**: `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
 - **Usage**: Used along with access key ID to authenticate AWS API requests.
 
 #### `DJANGO_CONFIGURATION`
@@ -152,13 +147,12 @@ Before contributing, ensure you have the following installed:
 #### `DJANGO_DB_NAME`
 
 - **Description**: The name of the database.
-- **Example Value**: `owaspnest`
+- **Example Value**: `nest`
 - **Usage**: Specifies the name of the PostgreSQL database used by Django.
 
 #### `DJANGO_DB_PASSWORD`
 
 - **Description**: The password for the database user.
-- **Example Value**: `supersecurepassword`
 - **Usage**: Authenticates the Django DB user.
 
 #### `DJANGO_DB_PORT`
@@ -176,8 +170,12 @@ Before contributing, ensure you have the following installed:
 #### `DJANGO_OPEN_AI_SECRET_KEY`
 
 - **Description**: The secret key for OpenAI API.
-- **Example Value**: `sk-xyz123...`
-- **Usage**: Used for integrating OpenAI models for features like chat, NLP.
+- **Usage**: Used for OpenAI integration.
+
+#### `DJANGO_PUBLIC_IP_ADDRESS`
+
+- **Description**: The IP address to use locally.
+- **Usage**: Geographic location related functionality.
 
 #### `DJANGO_RELEASE_VERSION`
 
@@ -188,7 +186,6 @@ Before contributing, ensure you have the following installed:
 #### `DJANGO_SECRET_KEY`
 
 - **Description**: The secret key for Django (used for cryptographic signing).
-- **Example Value**: `your-very-secret-key`
 - **Usage**: Required for session management, tokens, etc.
 
 #### `DJANGO_SENTRY_DSN`
@@ -200,19 +197,16 @@ Before contributing, ensure you have the following installed:
 #### `DJANGO_SLACK_BOT_TOKEN`
 
 - **Description**: The token for the Slack bot.
-- **Example Value**: `xoxb-1234567890-abcdef`
 - **Usage**: Authenticates the bot to send messages to Slack channels.
 
 #### `DJANGO_SLACK_SIGNING_SECRET`
 
 - **Description**: The signing secret for Slack.
-- **Example Value**: `abcd1234secret`
 - **Usage**: Used to verify Slack requests to webhooks.
 
 #### `GITHUB_TOKEN`
 
 - **Description**: The token for accessing GitHub APIs.
-- **Example Value**: `ghp_abc123xyz456...`
 - **Usage**: Used for making authenticated requests to GitHub (e.g., issues, releases).
 
 ## Setting up the Project
