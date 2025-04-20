@@ -42,6 +42,7 @@ export const GET_USER_DATA = gql`
       avatarUrl
       bio
       company
+      contributionsCount
       createdAt
       email
       followersCount
@@ -53,7 +54,6 @@ export const GET_USER_DATA = gql`
       publicRepositoriesCount
       releasesCount
       url
-      contributionsCount
     }
   }
 `

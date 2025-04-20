@@ -4,6 +4,7 @@ export type user = {
   avatar_url: string
   bio: string
   company: string
+  contributions_count: number
   created_at: number
   email: string
   followers_count: number
@@ -14,7 +15,6 @@ export type user = {
   name: string
   objectID: string
   public_repositories_count: number
-  contributions_count: number
 }
 
 export type RepositoryDetails = {

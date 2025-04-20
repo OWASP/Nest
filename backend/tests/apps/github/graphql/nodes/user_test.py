@@ -19,6 +19,7 @@ class TestUserNode:
             "avatar_url",
             "bio",
             "company",
+            "contributions_count",
             "created_at",
             "email",
             "followers_count",
@@ -32,6 +33,5 @@ class TestUserNode:
             "releases_count",
             "updated_at",
             "url",
-            "contributions_count",
         }
         assert set(UserNode._meta.fields) == expected_fields

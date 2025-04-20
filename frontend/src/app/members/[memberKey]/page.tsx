@@ -1,12 +1,10 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
-  faCircleExclamation,
+  faCodeMerge,
   faFolderOpen,
   faPersonWalkingArrowRight,
-  faTag,
   faUserPlus,
-  faCodeMerge,
 } from '@fortawesome/free-solid-svg-icons'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -174,18 +172,10 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const userDetails = [
-    {
-      label: 'GitHub Profile',
-      value: (
-        <Link href={user?.url || '#'} className="text-blue-400 hover:underline">
-          @{user?.login}
-        </Link>
-      ),
-    },
     { label: 'Joined', value: user?.createdAt ? formatDate(user.createdAt) : 'Not available' },
-    { label: 'Email', value: user?.email || 'Not provided' },
-    { label: 'Company', value: user?.company || 'Not provided' },
-    { label: 'Location', value: user?.location || 'Not provided' },
+    { label: 'Email', value: user?.email || 'N/A' },
+    { label: 'Company', value: user?.company || 'N/A' },
+    { label: 'Location', value: user?.location || 'N/A' },
   ]
 
   const userStats = [
@@ -197,8 +187,6 @@ const UserDetailsPage: React.FC = () => {
       unit: 'Repository',
       value: user?.publicRepositoriesCount ?? 0,
     },
-    { icon: faCircleExclamation, value: user?.issuesCount || 0, unit: 'Issue' },
-    { icon: faTag, value: user?.releasesCount || 0, unit: 'Release' },
     { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
