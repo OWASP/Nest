@@ -179,6 +179,9 @@ describe('UserDetailsPage', () => {
 
       const repositoriesCount = screen.getByText('3 Repositories')
       expect(repositoriesCount).toBeInTheDocument()
+
+      const contributionsCount = screen.getByText('100 Contributions')
+      expect(contributionsCount).toBeInTheDocument()
     })
   })
 
@@ -330,11 +333,10 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       user: {
         ...mockUserDetailsData.user,
+        contributionsCount: 0,
         followersCount: 0,
         followingCount: 0,
         publicRepositoriesCount: 0,
-        issuesCount: 0,
-        releasesCount: 0,
       },
     }
     ;(useQuery as jest.Mock).mockReturnValue({
@@ -348,8 +350,7 @@ describe('UserDetailsPage', () => {
       expect(screen.getByText('No Followers')).toBeInTheDocument()
       expect(screen.getByText('No Followings')).toBeInTheDocument()
       expect(screen.getByText('No Repositories')).toBeInTheDocument()
-      expect(screen.getByText('No Issues')).toBeInTheDocument()
-      expect(screen.getByText('No Releases')).toBeInTheDocument()
+      expect(screen.getByText('No Contributions')).toBeInTheDocument()
     })
   })
 
@@ -371,7 +372,7 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getAllByText('Not provided').length).toBe(3)
+      expect(screen.getAllByText('N/A').length).toBe(3)
     })
   })
 })

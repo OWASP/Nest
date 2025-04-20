@@ -9,7 +9,7 @@ WORKDIR /app
 
 RUN npm install --ignore-scripts -g pnpm
 COPY --chmod=444 package.json pnpm-lock.yaml ./
-RUN pnpm install --ignore-scripts
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --chmod=444 .env next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
 COPY --chmod=555 public public
