@@ -45,6 +45,10 @@ github-update-project-related-repositories:
 	@echo "Updating OWASP project related GitHub repositories"
 	@CMD="python manage.py github_update_project_related_repositories" $(MAKE) exec-backend-command
 
+github-update-users:
+	@echo "Updating GitHub users"
+	@CMD="python manage.py github_update_users" $(MAKE) exec-backend-command
+
 index-data:
 	@echo "Indexing Nest data"
 	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
@@ -155,6 +159,7 @@ update-data: \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
 	github-update-project-related-repositories \
+	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \
 	owasp-update-sponsors
