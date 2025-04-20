@@ -5,6 +5,7 @@ import logging
 from django.core.management.base import BaseCommand
 from django.db.models import Sum
 
+from apps.common.models import BATCH_SIZE
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 
@@ -31,27 +32,24 @@ class Command(BaseCommand):
             **options: Arbitrary keyword arguments containing command options.
 
         """
-        offset = options["offset"]
         active_users = User.objects.order_by("-created_at")
         active_users_count = active_users.count()
+        offset = options["offset"]
+        user_contributions = {
+            item["user_id"]: item["total_contributions"]
+            for item in RepositoryContributor.objects.values("user_id").annotate(
+                total_contributions=Sum("contributions_count")
+            )
+        }
         users = []
         for idx, user in enumerate(active_users[offset:]):
             prefix = f"{idx + offset + 1} of {active_users_count - offset}"
             print(f"{prefix:<10} {user.title}")
 
-            user.contributions_count = (
-                RepositoryContributor.objects.filter(
-                    user=user,
-                ).aggregate(
-                    total_contributions=Sum(
-                        "contributions_count",
-                    )
-                )["total_contributions"]
-                or 0
-            )
+            user.contributions_count = user_contributions.get(user.id, 0)
             users.append(user)
 
-            if not len(users) % 1000:
+            if not len(users) % BATCH_SIZE:
                 User.bulk_save(users, fields=("contributions_count",))
 
         User.bulk_save(users, fields=("contributions_count",))
