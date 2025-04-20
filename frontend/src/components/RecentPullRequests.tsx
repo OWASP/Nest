@@ -22,7 +22,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
       showAvatar={showAvatar}
       icon={faCodePullRequest}
       renderDetails={(item) => (
-        <div className="mt-2 flex flex-col flex-wrap gap-y-1 text-sm text-gray-600 dark:text-gray-400 md:flex-row md:items-center">
+        <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
           <div className="flex items-center mr-4">
             <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
             <span>{formatDate(item.createdAt)}</span>
@@ -30,7 +30,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
 
           {item?.repositoryName && (
             <div className="flex items-center">
-              <FontAwesomeIcon icon={faFolderOpen} className="mr-2 h-4 w-4" />
+              <FontAwesomeIcon icon={faFolderOpen} className="ml-0 md:ml-4 mr-2 h-4 w-4" />
               <button
                 className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
                 onClick={() =>

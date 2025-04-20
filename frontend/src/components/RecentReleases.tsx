@@ -38,8 +38,8 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
               key={index}
               className="mb-4 w-full rounded-xl bg-gray-200 p-4 shadow-sm dark:bg-gray-700"
             >
-              <div className="flex flex-col space-y-2">
-                <div className="flex items-center space-x-2">
+              <div className="flex w-full flex-col justify-between">
+                <div className="flex w-full items-center">
                   {showAvatar && (
                     <Tooltip
                       content={item?.author?.name || item?.author?.login}
@@ -53,12 +53,12 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                           alt={item?.author?.name || 'author'}
                           width={24}
                           height={24}
-                          className="h-6 w-6 rounded-full"
+                          className="mr-2 h-6 w-6 rounded-full"
                         />
                       </Link>
                     </Tooltip>
                   )}
-                  <h3 className="truncate font-semibold">
+                  <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                     <Link
                       href={item?.url || '/'}
                       target="_blank"
@@ -70,15 +70,15 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   </h3>
                 </div>
 
-                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
-                  <div className="flex items-center mr-4">
+                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
+                  <div className="flex items-center">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(item.publishedAt)}</span>
                   </div>
 
                   {item.repositoryName && (
-                    <div className="flex items-center">
-                      <FontAwesomeIcon icon={faFolderOpen} className="mr-2 h-4 w-4" />
+                    <div className="item-center flex">
+                      <FontAwesomeIcon icon={faFolderOpen} className="ml-4 mr-2 h-4 w-4" />
                       <button
                         className="cursor-pointer text-gray-600 hover:underline dark:text-gray-400"
                         onClick={() =>
