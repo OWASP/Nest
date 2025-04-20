@@ -38,6 +38,8 @@ class PullRequestQuery(BaseQuery):
         """
         queryset = PullRequest.objects.select_related(
             "author",
+            "repository",
+            "repository__organization",
         ).order_by(
             "-created_at",
         )
@@ -46,9 +48,7 @@ class PullRequestQuery(BaseQuery):
             queryset = queryset.filter(author__login=login)
 
         if organization:
-            queryset = queryset.select_related(
-                "repository__organization",
-            ).filter(
+            queryset = queryset.filter(
                 repository__organization__login=organization,
             )
 

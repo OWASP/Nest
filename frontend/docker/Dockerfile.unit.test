@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
-    pnpm install --ignore-scripts && \
+    pnpm install --frozen-lockfile --ignore-scripts && \
     chown node:node /app
 
 COPY __tests__/unit __tests__/unit
