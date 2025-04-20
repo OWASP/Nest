@@ -111,7 +111,7 @@ jobs:
             type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
-          cache-to: type=gha,mode=max
+          cache-to: type=gha
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
@@ -141,7 +141,7 @@ jobs:
             type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
-          cache-to: type=gha,mode=max
+          cache-to: type=gha
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
@@ -244,7 +244,7 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: |
-            type=gha,mode=max
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile
@@ -420,7 +420,7 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           cache-to: |
-            type=gha,mode=max
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile
