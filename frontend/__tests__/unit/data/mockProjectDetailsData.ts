@@ -22,26 +22,6 @@ export const mockProjectDetailsData = {
         title: 'Fix authentication bug',
       },
     ],
-    recentPullRequests: [
-      {
-        author: {
-          avatarUrl: 'https://avatars.githubusercontent.com/u/11111?v=4',
-          login: 'user1',
-        },
-        createdAt: 1727390000,
-        title: 'Test Pull Request 1',
-        url: 'https://github.com/test-org/test-repo-1/pull/1',
-      },
-      {
-        author: {
-          avatarUrl: 'https://avatars.githubusercontent.com/u/22222?v=4',
-          login: 'user2',
-        },
-        createdAt: 1727380000,
-        title: 'Test Pull Request 2',
-        url: 'https://github.com/test-org/test-repo-2/pull/2',
-      },
-    ],
     recentReleases: [
       {
         author: {
@@ -97,4 +77,24 @@ export const mockProjectDetailsData = {
     updatedAt: '2025-02-07T12:34:56Z',
     url: 'https://github.com/example-project',
   },
+  recentPullRequests: [
+    {
+      author: {
+        avatarUrl: 'https://avatars.githubusercontent.com/u/11111?v=4',
+        login: 'user1',
+      },
+      createdAt: 1727390000,
+      title: 'Test Pull Request 1',
+      url: 'https://github.com/test-org/test-repo-1/pull/1',
+    },
+    {
+      author: {
+        avatarUrl: 'https://avatars.githubusercontent.com/u/22222?v=4',
+        login: 'user2',
+      },
+      createdAt: 1727380000,
+      title: 'Test Pull Request 2',
+      url: 'https://github.com/test-org/test-repo-2/pull/2',
+    },
+  ],
 }

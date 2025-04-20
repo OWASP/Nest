@@ -6,6 +6,7 @@ from django.db.models import OuterRef, Subquery
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.pull_request import PullRequestNode
 from apps.github.models.pull_request import PullRequest
+from apps.owasp.models.project import Project
 
 
 class PullRequestQuery(BaseQuery):
@@ -18,10 +19,18 @@ class PullRequestQuery(BaseQuery):
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
         repository=graphene.String(required=False),
+        project=graphene.String(required=False),
     )
 
     def resolve_recent_pull_requests(
-        root, info, limit, distinct=False, login=None, organization=None, repository=None
+        root,
+        info,
+        limit,
+        distinct=False,
+        login=None,
+        organization=None,
+        repository=None,
+        project=None,
     ):
         """Resolve recent pull requests.
 
@@ -33,6 +42,7 @@ class PullRequestQuery(BaseQuery):
             login (str, optional): Filter pull requests by a specific author's login.
             organization (str, optional): Filter pull requests by a specific organization's login.
             repository (str, optional): Filter pull requests by a specific repository's login.
+            project (str, optional):  Filter pull requests by a specific project.
 
         Returns:
             QuerySet: Queryset containing the filtered list of pull requests.
@@ -53,6 +63,11 @@ class PullRequestQuery(BaseQuery):
             queryset = queryset.filter(
                 repository__organization__login=organization,
             )
+
+        if project:
+            project_instance = Project.objects.get(key__iexact=f"www-project-{project}")
+            repository_ids = project_instance.repositories.values_list("id", flat=True)
+            queryset = queryset.filter(repository_id__in=repository_ids)
 
         if repository:
             queryset = queryset.filter(repository__key__iexact=repository)

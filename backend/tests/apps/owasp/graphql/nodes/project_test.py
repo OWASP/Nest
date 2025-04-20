@@ -7,11 +7,9 @@ from graphene import Field, List
 
 from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.issue import IssueNode
-from apps.github.graphql.nodes.pull_request import PullRequestNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.owasp.graphql.nodes.project import (
     RECENT_ISSUES_LIMIT,
-    RECENT_PULL_REQUESTS_LIMIT,
     RECENT_RELEASES_LIMIT,
     ProjectNode,
 )
@@ -26,25 +24,17 @@ class TestProjectNode:
         """Create a mock project with issues and releases."""
         project = Mock(spec=Project)
         mock_issues = MagicMock()
-        mock_pull_requests = MagicMock()
         mock_releases = MagicMock()
 
         mock_ordered_issues = MagicMock()
         mock_ordered_issues.__getitem__.return_value = []
         mock_issues.select_related.return_value.order_by.return_value = mock_ordered_issues
 
-        mock_ordered_pull_requests = MagicMock()
-        mock_ordered_pull_requests.__getitem__.return_value = []
-        mock_pull_requests.select_related.return_value.order_by.return_value = (
-            mock_ordered_pull_requests
-        )
-
         mock_ordered_releases = MagicMock()
         mock_ordered_releases.__getitem__.return_value = []
         mock_releases.order_by.return_value = mock_ordered_releases
 
         project.issues = mock_issues
-        project.pull_requests = mock_pull_requests
         project.published_releases = mock_releases
         project.nest_url = "https://example.com/project"
         return project
@@ -63,12 +53,6 @@ class TestProjectNode:
         recent_issues_field = ProjectNode._meta.fields.get("recent_issues")
         assert isinstance(recent_issues_field, Field)
         assert recent_issues_field.type == List(IssueNode)
-
-    def test_recent_pull_requests_field(self):
-        """Test if recent_pull_requests field is properly configured."""
-        recent_pull_requests_field = ProjectNode._meta.fields.get("recent_pull_requests")
-        assert isinstance(recent_pull_requests_field, Field)
-        assert recent_pull_requests_field.type == List(PullRequestNode)
 
     def test_recent_releases_field(self):
         """Test if recent_releases field is properly configured."""
@@ -89,22 +73,6 @@ class TestProjectNode:
         )
         mock_project.issues.select_related.return_value.order_by.return_value.__getitem__.assert_called_once_with(
             slice(None, RECENT_ISSUES_LIMIT)
-        )
-        assert result == []
-
-    def test_resolve_recent_pull_requests(self, mock_project):
-        """Test resolution of recent pull requests."""
-        node = ProjectNode()
-        node.pull_requests = mock_project.pull_requests
-
-        result = node.resolve_recent_pull_requests(None)
-
-        mock_project.pull_requests.select_related.assert_called_once_with("author")
-        mock_project.pull_requests.select_related.return_value.order_by.assert_called_once_with(
-            "-created_at"
-        )
-        mock_project.pull_requests.select_related.return_value.order_by.return_value.__getitem__.assert_called_once_with(
-            slice(None, RECENT_PULL_REQUESTS_LIMIT)
         )
         assert result == []
 
@@ -132,7 +100,6 @@ class TestProjectNode:
             "languages",
             "leaders",
             "recent_issues",
-            "recent_pull_requests",
             "recent_releases",
             "repositories_count",
             "repositories",
