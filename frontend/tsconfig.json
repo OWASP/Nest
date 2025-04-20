@@ -2,25 +2,38 @@
   "compilerOptions": {
     "target": "ES2023",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "module": "esnext",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
+    "incremental": true,
     "sourceMap": true,
     "inlineSources": true,
     "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
       "@e2e/*": ["__tests__/e2e/*"],
       "@unit/*": ["__tests__/unit/*"],
-      "*": ["src/*"]
-    }
+      "*": ["./src/*"],
+      "api/*": ["src/api/*"],
+      "components/*": ["src/components/*"],
+      "hooks/*": ["src/hooks/*"],
+      "types/*": ["src/types/*"],
+      "utils/*": ["src/utils/*"],
+      "wrappers/*": ["src/wrappers/*"]
+    },
+    "strict": false
   },
-  "include": ["__tests__", "src"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src"],
+  "exclude": ["node_modules"]
 }

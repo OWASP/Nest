@@ -1,3 +1,4 @@
+import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import mockProjectData from '@unit/data/mockProjectData'
 
@@ -12,6 +13,14 @@ test.describe('Projects Page', () => {
         }),
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/projects')
   })
 
@@ -34,13 +43,18 @@ test.describe('Projects Page', () => {
 
   test('handles page change correctly', async ({ page }) => {
     const nextPageButton = await page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
-    expect(await page.url()).toContain('page=2')
+    await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on View Details button click', async ({ page }) => {
     const contributeButton = await page.getByRole('button', { name: 'View Details' })
+    await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
-    expect(await page.url()).toContain('projects/project_1')
+    await expect(page).toHaveURL('projects/project_1')
+  })
+  test('breadcrumb renders correct segments on /projects', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Projects'])
   })
 })

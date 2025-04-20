@@ -21,10 +21,10 @@ class Command(BaseCommand):
         "committees": [{"path": "/committees", "changefreq": "monthly", "priority": 0.8}],
         "projects": [
             {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
-            {"path": "/projects/contribute", "changefreq": "daily", "priority": 0.6},
+            {"path": "/contribute", "changefreq": "daily", "priority": 0.6},
         ],
         "users": [
-            {"path": "/community/users", "changefreq": "daily", "priority": 0.7},
+            {"path": "/members", "changefreq": "daily", "priority": 0.7},
         ],
     }
 
@@ -149,7 +149,11 @@ class Command(BaseCommand):
 
         routes.extend(
             [
-                {"path": f"/community/users/{user.login}", "changefreq": "weekly", "priority": 0.7}
+                {
+                    "path": f"/members/{user.login}",
+                    "changefreq": "weekly",
+                    "priority": 0.7,
+                }
                 for user in indexable_users
             ]
         )
@@ -245,7 +249,7 @@ class Command(BaseCommand):
         """
         return (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">\n'
             f"{NL.join(urls)}\n"
             "</urlset>"
         )
@@ -262,7 +266,7 @@ class Command(BaseCommand):
         """
         return (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            '<sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">\n'
             f"{NL.join(sitemaps)}\n"
             "</sitemapindex>"
         )

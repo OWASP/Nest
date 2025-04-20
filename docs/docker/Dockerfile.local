@@ -1,12 +1,11 @@
-FROM python:3.13-slim AS builder
+FROM python:3.13.3-alpine AS builder
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd --system owasp && \
-    useradd --system --create-home --home-dir /home/owasp -g owasp owasp && \
+RUN addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
+    mkdir -p /home/owasp && \
+    chown owasp:owasp /home/owasp && \
     python -m pip install --no-cache-dir poetry
 
 ENV FORCE_COLOR=1 \
@@ -20,15 +19,14 @@ COPY --chmod=444 --chown=owasp:owasp docs/poetry.lock docs/pyproject.toml mkdocs
 RUN poetry install --no-root && \
     rm -rf docs/poetry.lock docs/pyproject.toml
 
-FROM python:3.13-slim
+FROM python:3.13.3-alpine
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd --system owasp && \
-    useradd --system --create-home --home-dir /home/owasp -g owasp owasp
+RUN addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
+    mkdir -p /home/owasp && \
+    chown owasp:owasp /home/owasp
 
 ENV PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1

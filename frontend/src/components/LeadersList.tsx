@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { LeadersListProps } from 'types/leaders'
 import { TruncatedText } from './TruncatedText'
 
@@ -22,9 +22,10 @@ const LeadersList = ({ leaders }: LeadersListProps) => {
       {leadersArray.map((leader, index) => (
         <span key={`${leader}-${index}`}>
           <Link
-            to={`/community/users?q=${encodeURIComponent(leader)}`}
+            href={`/members?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}
-            className="text-blue-400 hover:underline"
+            className="text-gray-600 hover:underline dark:text-gray-400"
+            title={leader}
           >
             {leader}
           </Link>

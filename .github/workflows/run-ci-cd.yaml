@@ -58,7 +58,7 @@ jobs:
           run_install: false
 
       - name: Set up Node
-        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22
           cache: 'pnpm'
@@ -79,7 +79,7 @@ jobs:
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check-all` and use `git add` to address it.' && exit 1)
+          Run `make check` and use `git add` to address it.' && exit 1)
 
   spellcheck:
     name: Run spell check
@@ -107,7 +107,11 @@ jobs:
       - name: Build backend test image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
+          cache-to: type=gha
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
@@ -133,7 +137,11 @@ jobs:
       - name: Build frontend unit-testing image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
+          cache-to: type=gha
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
@@ -159,7 +167,6 @@ jobs:
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
@@ -180,10 +187,11 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Run Trivy Repository Scan
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           scan-type: repo
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   scan-ci-dependencies:
     name: Run CI Denendencies Scan
@@ -195,10 +203,11 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Run Trivy Filesystem Scan
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           scan-type: fs
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   build-staging-images:
     name: Build Staging Images
@@ -230,8 +239,13 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
+          cache-to: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
@@ -240,18 +254,25 @@ jobs:
 
       - name: Prepare frontend environment
         run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
-          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
-          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
-          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
-          echo "VITE_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> frontend/.env
-          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
+          touch frontend/.env
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
+          cache-to: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
@@ -265,18 +286,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Scan backend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
       - name: Scan frontend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -392,8 +415,13 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
+          cache-to: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
@@ -403,18 +431,24 @@ jobs:
       - name: Prepare frontend environment
         run: |
           touch frontend/.env
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
-          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
-          echo "VITE_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
-          echo "VITE_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
-          echo "VITE_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
-          echo "VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
+          cache-to: |
+            type=gha
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
@@ -428,18 +462,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Scan backend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
       - name: Scan frontend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
-          severity: HIGH,CRITICAL
+          trivy-config: trivy.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production

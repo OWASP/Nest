@@ -13,7 +13,7 @@ export const mockProjectDetailsData = {
     starsCount: 2200,
     summary: 'An example project showcasing GraphQL and Django integration.',
     topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatarUrl: `https://example.com/avatar${i + 1}.jpg`,
+      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
       contributionsCount: 30 - i,
       login: `contributor${i + 1}`,
       name: `Contributor ${i + 1}`,
@@ -29,7 +29,7 @@ export const mockProjectDetailsData = {
         isPreRelease: false,
         publishedAt: '2025-01-20T10:00:00Z',
         author: {
-          avatarUrl: 'https://example.com/avatar3.png',
+          avatarUrl: 'https://avatars.githubusercontent.com/avatar3.png',
           login: 'charlie_dev',
           name: 'Charlie Dev',
         },
@@ -38,10 +38,10 @@ export const mockProjectDetailsData = {
     recentIssues: [
       {
         title: 'Fix authentication bug',
-        commentsCount: 5,
         createdAt: '2025-02-05T15:20:30Z',
+        repositoryName: 'test-repo',
         author: {
-          avatarUrl: 'https://example.com/avatar4.png',
+          avatarUrl: 'https://avatars.githubusercontent.com/avatar4.png',
           login: 'dave_debugger',
           url: 'https://github.com/arkid15r',
           name: 'Dave Debugger',
@@ -55,6 +55,9 @@ export const mockProjectDetailsData = {
         key: 'repo-1',
         name: 'Repo One',
         openIssuesCount: 6,
+        organization: {
+          login: 'OWASP',
+        },
         starsCount: 95,
         subscribersCount: 15,
         url: 'https://github.com/example-project/repo-1',
@@ -65,6 +68,9 @@ export const mockProjectDetailsData = {
         key: 'repo-2',
         name: 'Repo Two',
         openIssuesCount: 3,
+        organization: {
+          login: 'OWASP',
+        },
         starsCount: 60,
         subscribersCount: 10,
         url: 'https://github.com/example-project/repo-2',

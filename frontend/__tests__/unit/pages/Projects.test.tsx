@@ -1,18 +1,23 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react'
-
+import { waitFor, screen, fireEvent } from '@testing-library/react'
 import mockProjectData from '@unit/data/mockProjectData'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
+import ProjectsPage from 'app/projects/page'
 
-import ProjectsPage from 'pages/Projects'
+const mockRouter = {
+  push: jest.fn(),
+}
 
-jest.mock('api/fetchAlgoliaData', () => ({
-  fetchAlgoliaData: jest.fn(),
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useParams: () => ({ userKey: 'test-user' }),
+  useSearchParams: () => new URLSearchParams(),
 }))
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+
+jest.mock('server/fetchAlgoliaData', () => ({
+  fetchAlgoliaData: jest.fn(),
 }))
 
 jest.mock('components/Pagination', () =>
@@ -22,13 +27,29 @@ jest.mock('components/Pagination', () =>
     </div>
   ))
 )
+jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
+  __esModule: true,
+  default: () => <span data-testid="mock-icon" />,
+}))
+
+jest.mock('@/components/MarkdownWrapper', () => {
+  return ({ content, className }: { content: string; className?: string }) => (
+    <div
+      className={`md-wrapper ${className || ''}`}
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
+  )
+})
 
 describe('ProjectPage Component', () => {
+  let mockRouter: { push: jest.Mock }
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockProjectData.projects,
       totalPages: 2,
     })
+    mockRouter = { push: jest.fn() }
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -58,7 +79,7 @@ describe('ProjectPage Component', () => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for OWASP projects...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search for projects...')).toBeInTheDocument()
       expect(screen.getByText('Project 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -107,18 +128,15 @@ describe('ProjectPage Component', () => {
   })
 
   test('opens  window on View Details button click', async () => {
-    const navigateMock = jest.fn()
-    ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
-
     render(<ProjectsPage />)
 
     await waitFor(() => {
-      const contributeButton = screen.getByText('View Details')
+      const contributeButton = screen.getByRole('button', { name: 'View Details' })
       expect(contributeButton).toBeInTheDocument()
       fireEvent.click(contributeButton)
     })
     //suppose index_key is project_1
-    expect(navigateMock).toHaveBeenCalledWith('/projects/project_1')
+    expect(mockRouter.push).toHaveBeenCalledWith('/projects/project_1')
 
     // Clean up the mock
     jest.restoreAllMocks()

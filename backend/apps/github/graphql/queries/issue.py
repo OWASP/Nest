@@ -13,12 +13,13 @@ class IssueQuery(BaseQuery):
 
     recent_issues = graphene.List(
         IssueNode,
-        limit=graphene.Int(default_value=15),
+        limit=graphene.Int(default_value=5),
         distinct=graphene.Boolean(default_value=False),
         login=graphene.String(required=False),
+        organization=graphene.String(required=False),
     )
 
-    def resolve_recent_issues(root, info, limit=15, distinct=False, login=None):
+    def resolve_recent_issues(root, info, limit, distinct=False, login=None, organization=None):
         """Resolve recent issues with optional filtering.
 
         Args:
@@ -27,6 +28,7 @@ class IssueQuery(BaseQuery):
             limit (int): Maximum number of issues to return.
             distinct (bool): Whether to return unique issues per author and repository.
             login (str, optional): Filter issues by a specific author's login.
+            organization (str, optional): Filter issues by a specific organization's login.
 
         Returns:
             QuerySet: Queryset containing the filtered list of issues.
@@ -34,12 +36,21 @@ class IssueQuery(BaseQuery):
         """
         queryset = Issue.objects.select_related(
             "author",
+            "repository",
+            "repository__organization",
         ).order_by(
             "-created_at",
         )
 
         if login:
-            queryset = queryset.filter(author__login=login)
+            queryset = queryset.filter(
+                author__login=login,
+            )
+
+        if organization:
+            queryset = queryset.filter(
+                repository__organization__login=organization,
+            )
 
         if distinct:
             latest_issue_per_author = (

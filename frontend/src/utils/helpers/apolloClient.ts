@@ -2,7 +2,7 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { GRAPHQL_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
-import { AppError, handleAppError } from 'wrappers/ErrorWrapper'
+import { AppError, handleAppError } from 'app/global-error'
 
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
@@ -16,11 +16,11 @@ const createApolloClient = () => {
     uri: GRAPHQL_URL,
   })
 
-  const authLink = setContext((_, { headers }) => {
+  const authLink = setContext(async (_, { headers }) => {
     return {
       headers: {
         ...headers,
-        'X-CSRFToken': getCsrfToken() || '',
+        'X-CSRFToken': (await getCsrfToken()) || '',
       },
     }
   })

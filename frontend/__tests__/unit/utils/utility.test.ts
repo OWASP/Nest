@@ -1,5 +1,9 @@
 import { getCsrfToken } from 'utils/utility'
 
+jest.mock('server/fetchCsrfToken', () => ({
+  fetchCsrfToken: jest.fn(() => Promise.resolve('abc123')),
+}))
+
 describe('utility tests', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -9,33 +13,39 @@ describe('utility tests', () => {
     })
   })
 
-  test('returns CSRF token when it exists in cookies', () => {
+  test('returns CSRF token when it exists in cookies', async () => {
     document.cookie = 'csrftoken=abc123; otherkey=xyz789'
-    expect(getCsrfToken()).toBe('abc123')
+    const result = await getCsrfToken()
+    expect(result).toBe('abc123')
   })
 
-  test('returns undefined when no cookies are present', () => {
+  test('returns new token when no cookies are present', async () => {
     document.cookie = ''
-    expect(getCsrfToken()).toBeUndefined()
+    const result = await getCsrfToken()
+    expect(result).toBe('abc123')
   })
 
-  test('returns undefined when csrftoken cookie is not present', () => {
+  test('returns new csrftoken when csrftoken cookie is not present', async () => {
     document.cookie = 'someid=xyz789; othercookie=123'
-    expect(getCsrfToken()).toBeUndefined()
+    const result = await getCsrfToken()
+    expect(result).toBe('abc123')
   })
 
-  test('returns first csrftoken value when multiple cookies exist', () => {
+  test('returns first csrftoken value when multiple cookies exist', async () => {
     document.cookie = 'csrftoken=first; csrftoken=second; otherid=xyz789'
-    expect(getCsrfToken()).toBe('first')
+    const result = await getCsrfToken()
+    expect(result).toBe('first')
   })
 
-  test('handles cookie with no value', () => {
+  test('handles cookie with no value', async () => {
     document.cookie = 'csrftoken=; otherid=xyz789'
-    expect(getCsrfToken()).toBe('')
+    const result = await getCsrfToken()
+    expect(result).toBe('abc123')
   })
 
-  test('handles malformed cookie string', () => {
+  test('handles malformed cookie string', async () => {
     document.cookie = 'csrftoken; otherid=xyz789'
-    expect(getCsrfToken()).toBeUndefined()
+    const result = await getCsrfToken()
+    expect(result).toBe('abc123')
   })
 })

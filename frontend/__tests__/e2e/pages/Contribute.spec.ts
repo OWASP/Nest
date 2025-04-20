@@ -1,3 +1,4 @@
+import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import { mockContributeData } from '@unit/data/mockContributeData'
 
@@ -12,7 +13,15 @@ test.describe('Contribute Page', () => {
         }),
       })
     })
-    await page.goto('/projects/contribute')
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
+    await page.goto('/contribute')
   })
 
   test('renders issue data correctly', async ({ page }) => {
@@ -30,14 +39,15 @@ test.describe('Contribute Page', () => {
         body: JSON.stringify({ hits: [], totalPages: 0 }),
       })
     })
-    await page.goto('/projects/contribute')
+    await page.goto('/contribute')
     await expect(page.getByText('No issues found')).toBeVisible()
   })
 
   test('handles page change correctly', async ({ page }) => {
     const nextPageButton = await page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
-    expect(await page.url()).toContain('page=2')
+    await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens dialog on View Details button click', async ({ page }) => {
@@ -61,5 +71,8 @@ test.describe('Contribute Page', () => {
     await expect(CloseButton).toBeVisible()
     await CloseButton.click()
     await expect(contributeButton).toBeVisible()
+  })
+  test('breadcrumb renders correct segments on /contribute', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Contribute'])
   })
 })

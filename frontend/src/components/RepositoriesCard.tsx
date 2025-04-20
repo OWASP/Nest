@@ -7,10 +7,10 @@ import {
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { RepositoriesCardProps } from 'types/project'
+import { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
 import InfoItem from './InfoItem'
 import { TruncatedText } from './TruncatedText'
 
@@ -48,11 +48,12 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   )
 }
 
-const RepositoryItem = ({ details }) => {
-  const navigate = useNavigate()
+const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
+  const router = useRouter()
   const handleClick = () => {
-    navigate('/repositories/' + details?.key)
+    router.push(`/organizations/${details.organization.login}/repositories/${details.key}`)
   }
+
   return (
     <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
@@ -63,10 +64,25 @@ const RepositoryItem = ({ details }) => {
       </button>
 
       <div className="space-y-2 text-sm">
-        <InfoItem icon={faStar} unit="Star" value={details.starsCount} />
-        <InfoItem icon={faCodeFork} unit="Fork" value={details.forksCount} />
-        <InfoItem icon={faUsers} unit="Contributor" value={details.contributorsCount} />
-        <InfoItem icon={faExclamationCircle} unit="Issue" value={details.openIssuesCount} />
+        <InfoItem icon={faStar} pluralizedName="Stars" unit="Stars" value={details.starsCount} />
+        <InfoItem
+          icon={faCodeFork}
+          pluralizedName="Forks"
+          unit="Forks"
+          value={details.forksCount}
+        />
+        <InfoItem
+          icon={faUsers}
+          pluralizedName="Contributors"
+          unit="Contributors"
+          value={details.contributorsCount}
+        />
+        <InfoItem
+          icon={faExclamationCircle}
+          pluralizedName="Issues"
+          unit="Issues"
+          value={details.openIssuesCount}
+        />
       </div>
     </div>
   )

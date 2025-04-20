@@ -21,4 +21,4 @@ update-cspell-dependencies: cspell-install
 		--entrypoint=/bin/sh \
 		--workdir=/nest/cspell \
 		--rm \
-		cspell -c "npm install && npm upgrade && rm -rf ./node_modules"
+		cspell -c "pnpm install && pnpm upgrade && rm -rf ./node_modules"

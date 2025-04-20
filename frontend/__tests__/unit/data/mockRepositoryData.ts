@@ -11,7 +11,7 @@ export const mockRepositoryData = {
     openIssuesCount: 2,
     starsCount: 50000,
     topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatarUrl: `https://example.com/avatar${i + 1}.jpg`,
+      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
       contributionsCount: 30 - i,
       login: `contributor${i + 1}`,
       name: `Contributor ${i + 1}`,
@@ -23,10 +23,10 @@ export const mockRepositoryData = {
     issues: [
       {
         title: 'Bug fix required',
-        commentsCount: 4,
         createdAt: '2024-01-02T10:00:00Z',
+        repositoryName: 'test-repo-2',
         author: {
-          avatarUrl: 'https://example.com/avatar.jpg',
+          avatarUrl: 'https://avatars.githubusercontent.com/avatar.jpg',
           name: 'Test User 1',
           login: 'user1',
         },
@@ -39,7 +39,7 @@ export const mockRepositoryData = {
         isPreRelease: false,
         publishedAt: '2024-01-01T12:00:00Z',
         author: {
-          avatarUrl: 'https://example.com/avatar.jpg',
+          avatarUrl: 'https://avatars.githubusercontent.com/avatar.jpg',
           name: 'Test User 2',
           login: 'user2',
         },

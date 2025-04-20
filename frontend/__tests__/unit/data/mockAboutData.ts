@@ -6,8 +6,8 @@ export const mockAboutData = {
     starsCount: 890,
     key: 'nest',
     topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatar_url: `https://example.com/avatar${i + 1}.jpg`,
-      contributions_count: 30 - i,
+      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
+      contributionsCount: 30 - i,
       login: `contributor${i + 1}`,
       name: `Contributor ${i + 1}`,
     })),
@@ -26,19 +26,19 @@ export const mockAboutData = {
       avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
       company: 'OWASP',
       name: 'Arkadii Yakovets',
-      url: '/community/users/arkid15r',
+      url: '/members/arkid15r',
     },
     kasya: {
       avatarUrl: 'https://avatars.githubusercontent.com/u/5873153?v=4',
       company: 'skillstruck',
       name: 'Kate Golovanova',
-      url: '/community/users/kasya',
+      url: '/members/kasya',
     },
     mamicidal: {
       avatarUrl: 'https://avatars.githubusercontent.com/u/112129498?v=4',
       company: 'OWASP',
       name: 'Starr Brown',
-      url: '/community/users/mamicidal',
+      url: '/members/mamicidal',
     },
   },
 }

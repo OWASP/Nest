@@ -4,6 +4,7 @@ Aichi
 Aissue
 algoliasearch
 ansa
+apk
 arithmatex
 arkid15r
 askowasp
@@ -11,7 +12,6 @@ Aupdated
 bsky
 CCSP
 certbot
-Chakra
 CISSP
 collectstatic
 coraza
@@ -34,6 +34,7 @@ graphiql
 GSOC
 GTM
 gunicorn
+heroui
 hsl
 igoat
 inlinehilite
@@ -41,6 +42,7 @@ isanori
 jumpstart
 kasya
 Kateryna
+libexpat
 linkify
 lxml
 mamicidal
@@ -59,6 +61,7 @@ NETTACKER
 noinput
 Nominatim
 nosniff
+openstreetmap
 owasppcitoolkit
 owtf
 pentest

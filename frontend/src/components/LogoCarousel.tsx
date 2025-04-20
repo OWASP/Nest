@@ -1,3 +1,5 @@
+import Image from 'next/image'
+import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { SponsorType } from 'types/home'
 
@@ -28,7 +30,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
               key={`${sponsor.name}-${index}`}
               className="flex min-w-[220px] flex-shrink-0 flex-col items-center rounded-lg p-5"
             >
-              <a
+              <Link
                 href={sponsor.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -36,17 +38,17 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
               >
                 <div className="relative mb-4 flex h-16 w-full items-center justify-center">
                   {sponsor.imageUrl ? (
-                    <img
-                      src={sponsor.imageUrl}
+                    <Image
+                      fill
                       alt={`${sponsor.name} logo`}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
+                      src={sponsor.imageUrl}
+                      style={{ objectFit: 'contain' }}
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center"></div>
                   )}
                 </div>
-              </a>
+              </Link>
             </div>
           ))}
         </div>
@@ -55,26 +57,26 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
         <p>
           These logos represent the corporate supporters, whose contributions fuel OWASP Foundation
           security initiatives. Visit{' '}
-          <a
+          <Link
             href="https://owasp.org/supporters/"
             className="font-medium text-primary hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
             this page
-          </a>{' '}
+          </Link>{' '}
           to become a corporate supporter.
         </p>
         <p>
           If you're interested in sponsoring the OWASP Nest project ❤️{' '}
-          <a
+          <Link
             href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
             className="font-medium text-primary hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
             click here
-          </a>
+          </Link>
           .
         </p>
       </div>

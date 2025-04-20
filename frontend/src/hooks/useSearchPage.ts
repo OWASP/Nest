@@ -1,9 +1,9 @@
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { AlgoliaResponseType } from 'types/algolia'
-import { handleAppError } from 'wrappers/ErrorWrapper'
+'use client'
 
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import { handleAppError } from 'app/global-error'
 interface UseSearchPageOptions {
   indexName: string
   pageTitle: string
@@ -33,8 +33,9 @@ export function useSearchPage<T>({
   defaultOrder = '',
   hitsPerPage,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
-  const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [items, setItems] = useState<T[]>([])
   const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1'))
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
@@ -43,6 +44,7 @@ export function useSearchPage<T>({
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
+  // Sync state with URL changes
   useEffect(() => {
     if (searchParams) {
       const searchQueryParam = searchParams.get('q') || ''
@@ -57,8 +59,8 @@ export function useSearchPage<T>({
         setCurrentPage(1)
       }
     }
-  }, [searchQuery, sortBy, order, searchParams, indexName])
-
+  }, [searchParams, order, searchQuery, sortBy, indexName])
+  // Sync URL with state changes
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
@@ -72,15 +74,15 @@ export function useSearchPage<T>({
       params.set('order', order)
     }
 
-    setSearchParams(params)
-  }, [searchQuery, order, currentPage, sortBy, setSearchParams])
-
+    router.push(`?${params.toString()}`)
+  }, [searchQuery, order, currentPage, sortBy, router])
+  // Update URL when state changes
   useEffect(() => {
     setIsLoaded(false)
 
     const fetchData = async () => {
       try {
-        const data: AlgoliaResponseType<T> = await fetchAlgoliaData<T>(
+        const response = await fetchAlgoliaData<T>(
           sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
             ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
             : indexName,
@@ -88,8 +90,13 @@ export function useSearchPage<T>({
           currentPage,
           hitsPerPage
         )
-        setItems(data.hits)
-        setTotalPages(data.totalPages)
+
+        if ('hits' in response) {
+          setItems(response.hits)
+          setTotalPages(response.totalPages as number)
+        } else {
+          handleAppError(response)
+        }
       } catch (error) {
         handleAppError(error)
       }
@@ -97,7 +104,7 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle, navigate])
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -105,10 +112,7 @@ export function useSearchPage<T>({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    window.scrollTo({
-      top: 0,
-      behavior: 'auto',
-    })
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }
 
   const handleSortChange = (sort: string) => {

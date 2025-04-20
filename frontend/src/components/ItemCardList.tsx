@@ -1,4 +1,7 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { Tooltip } from '@heroui/tooltip'
+import Image from 'next/image'
+import Link from 'next/link'
 import { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
@@ -9,8 +12,8 @@ const ItemCardList = ({
   title,
   data,
   icon,
-  showAvatar = true,
   renderDetails,
+  showAvatar = true,
 }: {
   title: string
   data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[]
@@ -19,7 +22,9 @@ const ItemCardList = ({
   renderDetails: (item: {
     createdAt: string
     commentsCount: number
+    organizationName: string
     publishedAt: string
+    repositoryName: string
     tagName: string
     author: {
       avatarUrl: string
@@ -36,21 +41,36 @@ const ItemCardList = ({
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center">
                 {showAvatar && (
-                  <a
-                    className="flex-shrink-0 text-blue-400 hover:underline"
-                    href={`/community/users/${item?.author?.login}`}
+                  <Tooltip
+                    closeDelay={100}
+                    content={item?.author?.name || item?.author?.login}
+                    id={`avatar-tooltip-${index}`}
+                    delay={100}
+                    placement="bottom"
+                    showArrow
                   >
-                    <img
-                      src={item?.author?.avatarUrl}
-                      alt={item?.author?.name}
-                      className="mr-2 h-6 w-6 rounded-full"
-                    />
-                  </a>
+                    <Link
+                      className="flex-shrink-0 text-blue-400 hover:underline"
+                      href={`/members/${item?.author?.login}`}
+                    >
+                      <Image
+                        height={24}
+                        width={24}
+                        src={item?.author?.avatarUrl}
+                        alt={item?.author?.name || ''}
+                        className="mr-2 rounded-full"
+                      />
+                    </Link>
+                  </Tooltip>
                 )}
                 <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
-                  <a className="text-blue-400 hover:underline" href={item?.url} target="_blank">
+                  <Link
+                    className="text-blue-400 hover:underline"
+                    href={item?.url || ''}
+                    target="_blank"
+                  >
                     <TruncatedText text={item.title || item.name} />
-                  </a>
+                  </Link>
                 </h3>
               </div>
               <div className="ml-0.5 w-full">{renderDetails(item)}</div>

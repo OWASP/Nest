@@ -1,8 +1,8 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
 import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
-import { ChapterDetailsPage } from 'pages'
 import { render } from 'wrappers/testUtil'
+import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -18,6 +18,16 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({
     chapterKey: 'test-chapter',
   }),
+}))
+
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+  useParams: () => ({ chapterKey: 'test-chapter' }),
 }))
 
 describe('chapterDetailsPage Component', () => {
@@ -60,6 +70,7 @@ describe('chapterDetailsPage Component', () => {
 
   test('displays "No chapters found" when there are no chapters', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
+      data: { chapter: null },
       error: true,
     })
     render(<ChapterDetailsPage />)
@@ -73,7 +84,7 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+    expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
   })
 
   test('renders chapter URL as clickable link', async () => {

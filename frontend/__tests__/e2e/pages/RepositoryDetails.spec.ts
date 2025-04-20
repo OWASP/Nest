@@ -9,7 +9,15 @@ test.describe('Repository Details Page', () => {
         json: { data: mockRepositoryData },
       })
     })
-    await page.goto('/repositories/test-repository')
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
+    await page.goto('organizations/OWASP/repositories/test-repository')
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -65,15 +73,13 @@ test.describe('Repository Details Page', () => {
   test('should have recent issues', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Bug fix required' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Test User 1' })).toBeVisible()
     await expect(page.getByText('Jan 2, 2024')).toBeVisible()
-    await expect(page.getByText('4 comments')).toBeVisible()
+    await expect(page.getByText('test-repo-2')).toBeVisible()
   })
 
   test('should have recent releases', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'v1.0.0' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Test User 2' })).toBeVisible()
     await expect(page.getByText('Jan 1, 2024', { exact: true })).toBeVisible()
   })
 })

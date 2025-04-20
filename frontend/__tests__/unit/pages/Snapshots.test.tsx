@@ -1,25 +1,26 @@
 import { useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { act } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-import { toaster } from 'components/ui/toaster'
-import SnapshotsPage from 'pages/Snapshots'
+import SnapshotsPage from 'app/snapshots/page'
 
-jest.mock('components/ui/toaster', () => ({
-  toaster: {
-    create: jest.fn(),
-  },
-}))
+const mockRouter = {
+  push: jest.fn(),
+}
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
 }))
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
+}))
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
 }))
 
 const mockSnapshots = [
@@ -94,31 +95,29 @@ describe('SnapshotsPage', () => {
     render(<SnapshotsPage />)
 
     await waitFor(() => {
-      expect(toaster.create).toHaveBeenCalledWith({
+      expect(addToast).toHaveBeenCalledWith({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        type: 'error',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
       })
     })
   })
 
   it('navigates to the correct URL when "View Snapshot" button is clicked', async () => {
-    const navigateMock = jest.fn()
-    ;(useNavigate as jest.Mock).mockReturnValue(navigateMock)
     render(<SnapshotsPage />)
 
-    // Wait for the "View Snapshot" button to appear
     const viewSnapshotButton = await screen.findAllByRole('button', { name: /view snapshot/i })
 
-    // Click the button
     await act(async () => {
       fireEvent.click(viewSnapshotButton[0])
     })
 
     // Check if navigate was called with the correct argument
     await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledTimes(1)
-      expect(navigateMock).toHaveBeenCalledWith('/community/snapshots/2024-12')
+      expect(mockRouter.push).toHaveBeenCalledWith('/snapshots/2024-12')
     })
   })
 })
