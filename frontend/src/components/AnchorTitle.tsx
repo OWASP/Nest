@@ -9,12 +9,13 @@ interface AnchorTitleProps {
 }
 
 const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
-  const id = href.replace('#', '')
+  const id = href.replace('#', '') // TODO(arkid15r): refactor get href from title automatically.
 
   const scrollToElement = useCallback(() => {
     const element = document.getElementById(id)
     if (element) {
-      const headingHeight = element.querySelector('h2')?.offsetHeight || 0
+      const headingHeight =
+        (element.querySelector('div#anchor-title') as HTMLElement)?.offsetHeight || 0
       const yOffset = -headingHeight - 50
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset
       window.scrollTo({ top: y, behavior: 'smooth' })
@@ -48,7 +49,9 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
   return (
     <div id={id} className="relative">
       <div className="group relative flex items-center">
-        <h2 className="flex items-center text-2xl font-semibold">{title}</h2>
+        <div className="flex items-center text-2xl font-semibold" id="anchor-title">
+          {title}
+        </div>
         <a
           href={href}
           className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
