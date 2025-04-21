@@ -149,13 +149,9 @@ export default function Home() {
           </div>
         </div>
         <SecondaryCard
+          icon={faCalendarAlt}
           title={
             <div className="flex items-center gap-2">
-              <FontAwesomeIcon
-                icon={faCalendar}
-                className="relative -top-[8px] h-5 w-5"
-                style={{ verticalAlign: 'middle' }}
-              />
               <AnchorTitle
                 href="#upcoming-events"
                 title="Upcoming Events"
@@ -203,13 +199,9 @@ export default function Home() {
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
           <SecondaryCard
+            icon={faMapMarkerAlt}
             title={
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon
-                  icon={faMapMarkerAlt}
-                  className="relative -top-[8px] h-5 w-5"
-                  style={{ verticalAlign: 'middle' }}
-                />
                 <AnchorTitle
                   href="#new-chapters"
                   title="New Chapters"
@@ -253,13 +245,9 @@ export default function Home() {
             </div>
           </SecondaryCard>
           <SecondaryCard
+            icon={faFolder}
             title={
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon
-                  icon={faFolder}
-                  className="relative -top-[8px] h-5 w-5"
-                  style={{ verticalAlign: 'middle' }}
-                />
                 <AnchorTitle
                   href="#new-projects"
                   title="New Projects"
@@ -303,10 +291,10 @@ export default function Home() {
           </SecondaryCard>
         </div>
         <div className="mb-20">
-          <div className="flex items-center gap-2">
+          <div className="mb-4 flex items-center gap-2">
             <FontAwesomeIcon
               icon={faGlobe}
-              className="relative -top-[8px] h-5 w-5"
+              className="h-5 w-5"
               style={{ verticalAlign: 'middle' }}
             />
             <AnchorTitle
@@ -339,13 +327,9 @@ export default function Home() {
         </div>
         <RecentReleases data={data?.recentReleases} />
         <SecondaryCard
+          icon={faNewspaper}
           title={
             <div className="flex items-center gap-2">
-              <FontAwesomeIcon
-                icon={faNewspaper}
-                className="relative -top-[8px] h-5 w-5"
-                style={{ verticalAlign: 'middle' }}
-              />
               <AnchorTitle
                 href="#news-&-opinions"
                 title="News & Opinions"

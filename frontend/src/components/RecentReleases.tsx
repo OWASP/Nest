@@ -26,13 +26,9 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
 
   return (
     <SecondaryCard
+      icon={faTag}
       title={
         <div className="flex items-center gap-2">
-          <FontAwesomeIcon
-            icon={faTag}
-            className="relative -top-[8px] h-5 w-5"
-            style={{ verticalAlign: 'middle' }}
-          />
           <AnchorTitle
             href="#recent-releases"
             title="Recent Releases"

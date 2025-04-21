@@ -20,11 +20,6 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
     <ItemCardList
       title={
         <div className="flex items-center gap-2">
-          <FontAwesomeIcon
-            icon={faCodePullRequest}
-            className="relative -top-[8px] h-5 w-5"
-            style={{ verticalAlign: 'middle' }}
-          />
           <AnchorTitle
             href="#recent-pull-requests"
             title="Recent Pull Requests"
@@ -33,6 +28,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
         </div>
       }
       data={data}
+      icon={faCodePullRequest}
       showAvatar={showAvatar}
       renderDetails={(item) => (
         <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">

@@ -7,9 +7,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
-import AnchorTitle from 'components/AnchorTitle'
 import { pluralize } from 'utils/pluralize'
 import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
+import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from './SecondaryCard'
 
 const TopContributors = ({
@@ -41,26 +41,17 @@ const TopContributors = ({
   return (
     <div data-testid="top-contributors">
       <SecondaryCard
+        icon={icon}
         title={
           <div className="flex items-center gap-2">
-            <FontAwesomeIcon
-              icon={icon}
-              className="relative -top-[8px] h-5 w-5"
-              style={{ verticalAlign: 'middle' }}
-            />
-            <AnchorTitle
-              href="#top-contributors"
-              title={label}
-              className="flex items-center leading-none"
-            />
+            <AnchorTitle href="#top-contributors" title={label} className="flex items-center" />
           </div>
         }
       >
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
           {displayContributors.map((item, index) => (
-            <button
+            <div
               key={index}
-              onClick={() => router.push(`/members/${item.login}`)}
               className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
             >
               <div className="flex w-full flex-col justify-between">
@@ -72,21 +63,34 @@ const TopContributors = ({
                     alt={item?.name || ''}
                     className="rounded-full"
                   />
-                  <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400">
+                  <Link
+                    className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400 hover:underline"
+                    href={getMemberUrl(item?.login)}
+                  >
                     {capitalize(item.name) || capitalize(item.login)}
-                  </h3>
+                  </Link>
                 </div>
                 <div className="ml-0.5 w-full">
                   <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-400">
-                    <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                      {type === 'contributor'
-                        ? `${item.contributionsCount ?? 0} contributions`
-                        : item.projectName}
-                    </span>
+                    {isContributor ? (
+                      <span className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 dark:text-gray-400">
+                        {' '}
+                        {item.contributionsCount}{' '}
+                        {pluralize(item.contributionsCount, 'contribution')}
+                      </span>
+                    ) : (
+                      <Link
+                        className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+                        href={getProjectUrl(item?.projectKey)}
+                      >
+                        {' '}
+                        {item.projectName}
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
-            </button>
+            </div>
           ))}
         </div>
         {contributors.length > maxInitialDisplay && (
