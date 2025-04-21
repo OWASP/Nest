@@ -9,6 +9,6 @@
     "@cspell/dict-people-names": "^1.1.8",
     "@cspell/dict-software-terms": "^4.2.5",
     "@cspell/dict-win32": "^2.0.7",
-    "cspell": "^8.19.0"
+    "cspell": "^8.19.1"
   }
 }
