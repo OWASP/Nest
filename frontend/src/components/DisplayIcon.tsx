@@ -34,27 +34,27 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     .join(' ')
 
   return icons[item] ? (
-    <Tooltip
-      content={`${Icons[item as keyof typeof Icons]?.label}`}
-      delay={150}
-      closeDelay={100}
-      showArrow
-      placement="bottom"
-    >
-      <div className={containerClassName}>
-        <span className="text-gray-600 dark:text-gray-300">
-          {typeof icons[item] === 'number'
-            ? millify(icons[item], { precision: 1 })
-            : icons[item]}
-        </span>
+    <div className={containerClassName}>
+      <span className="text-gray-600 dark:text-gray-300">
+        {typeof icons[item] === 'number'
+          ? millify(icons[item], { precision: 1 })
+          : icons[item]}
+      </span>
+      <Tooltip
+        content={`${Icons[item as keyof typeof Icons]?.label}`}
+        delay={150}
+        closeDelay={100}
+        showArrow
+        placement="bottom"
+      >
         <span>
           <FontAwesomeIconWrapper
             className={iconClassName}
             icon={Icons[item as IconKeys]?.icon}
           />
         </span>
-      </div>
-    </Tooltip>
+      </Tooltip>
+    </div>
   ) : null
 }
 
