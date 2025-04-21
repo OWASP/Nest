@@ -158,15 +158,15 @@ export default function Home() {
                   >
                     <TruncatedText text={event.name} />
                   </button>
-                  <div className="flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
+                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDateRange(event.startDate, event.endDate)}</span>
                     </div>
                     {event.suggestedLocation && (
-                      <div className="flex items-center">
+                      <div className="mr-2 flex flex-1 items-center overflow-hidden">
                         <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 h-4 w-4" />
-                        <span>{event.suggestedLocation}</span>
+                        <TruncatedText text={event.suggestedLocation} />
                       </div>
                     )}
                   </div>
@@ -241,7 +241,6 @@ export default function Home() {
                       <TruncatedText text={capitalize(project.type)} />
                     </div>
                   </div>
-
                   {project.leaders.length > 0 && (
                     <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
@@ -298,12 +297,12 @@ export default function Home() {
                     <TruncatedText text={post.title} />
                   </Link>
                 </h3>
-                <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                   <div className="mr-4 flex items-center">
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
-                  <div className="flex items-center">
+                  <div className="mr-4 flex flex-1 items-center overflow-hidden">
                     <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
                     <LeadersList leaders={post.authorName} />
                   </div>
