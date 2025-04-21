@@ -4,7 +4,7 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel
 from apps.github.models.generic_issue_model import GenericIssueModel
-from apps.github.models.managers.milestone import OpenMilestoneManager
+from apps.github.models.managers.milestone import ClosedMilestoneManager, OpenMilestoneManager
 
 
 class Milestone(GenericIssueModel):
@@ -12,6 +12,7 @@ class Milestone(GenericIssueModel):
 
     objects = models.Manager()
     open_milestones = OpenMilestoneManager()
+    closed_milestones = ClosedMilestoneManager()
 
     class Meta:
         db_table = "github_milestone"
