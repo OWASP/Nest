@@ -1,3 +1,4 @@
+import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import { mockContributeData } from '@unit/data/mockContributeData'
 
@@ -70,5 +71,8 @@ test.describe('Contribute Page', () => {
     await expect(CloseButton).toBeVisible()
     await CloseButton.click()
     await expect(contributeButton).toBeVisible()
+  })
+  test('breadcrumb renders correct segments on /contribute', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Contribute'])
   })
 })

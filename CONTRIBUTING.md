@@ -33,6 +33,182 @@ Before contributing, ensure you have the following installed:
 
 [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
+## Environment Variables
+
+### Frontend
+
+#### `NEXT_PUBLIC_API_URL`
+
+- **Description**: The base URL for the application's REST API.
+- **Example Value**: `https://nest.owasp.org/api/`
+- **Usage**: Used by frontend components to make REST API calls.
+
+#### `NEXT_PUBLIC_CSRF_URL`
+
+- **Description**: The endpoint used to fetch CSRF tokens for secure API requests.
+- **Example Value**: `https://nest.owasp.org/csrf/`
+- **Usage**: Required for protecting POST/PUT/DELETE requests from CSRF attacks.
+
+#### `NEXT_PUBLIC_ENVIRONMENT`
+
+- **Description**: Specifies the current environment in which the application is running.
+- **Example Value**: `production`
+- **Usage**: Used for toggling features or logging based on environment (`development`, `production`, etc).
+
+#### `NEXT_PUBLIC_GRAPHQL_URL`
+
+- **Description**: The endpoint for the GraphQL API.
+- **Example Value**: `https://nest.owasp.org/graphql/`
+- **Usage**: Used to send GraphQL queries and mutations from the frontend.
+
+#### `NEXT_PUBLIC_GTM_AUTH`
+
+- **Description**: Authentication token for Google Tag Manager (GTM).
+- **Example Value**: `XYZabc123`
+- **Usage**: Optional; used when previewing or testing GTM in different environments.
+
+#### `NEXT_PUBLIC_GTM_ID`
+
+- **Description**: The unique ID for the Google Tag Manager container.
+- **Example Value**: `GTM-XXXXXXX`
+- **Usage**: Required for integrating Google Tag Manager on the frontend.
+
+#### `NEXT_PUBLIC_GTM_PREVIEW`
+
+- **Description**: Used for previewing GTM configurations.
+- **Usage**: Optional, used during GTM debugging or testing.
+
+#### `NEXT_PUBLIC_IDX_URL`
+
+- **Description**: The base URL for IDX (Indexing Service).
+- **Example Value**: `https://nest.owasp.org/idx/`
+- **Usage**: Used for services interacting with indexing/search features.
+
+#### `NEXT_PUBLIC_RELEASE_VERSION`
+
+- **Description**: The current release version of the application.
+- **Example Value**: `1.0.5`
+- **Usage**: Displayed in the app UI or logs for tracking deployments.
+
+#### `NEXT_PUBLIC_SENTRY_DSN`
+
+- **Description**: The Data Source Name (DSN) for Sentry error tracking.
+- **Example Value**: `https://xyz@sentry.io/123456`
+- **Usage**: Enables real-time error tracking and reporting in the frontend.
+
+---
+
+### Backend
+
+#### `DJANGO_ALGOLIA_APPLICATION_ID`
+
+- **Description**: The application ID for Algolia.
+- **Example Value**: `APPID123`
+- **Usage**: Used by Django to initialize Algolia client for indexing/search.
+
+#### `DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES`
+
+- **Description**: Index names to exclude locally (if any).
+- **Usage**: Prevents specific indices from being created in local environments.
+
+#### `DJANGO_ALGOLIA_WRITE_API_KEY`
+
+- **Description**: The write API key for Algolia.
+- **Usage**: Required for Django backend to write data into Algolia indices.
+
+#### `DJANGO_ALLOWED_HOSTS`
+
+- **Description**: A comma-separated list of allowed hosts for the application.
+- **Example Value**: `localhost,127.0.0.1`
+- **Usage**: Restricts HTTP Host header to prevent host header attacks.
+
+#### `DJANGO_AWS_ACCESS_KEY_ID`
+
+- **Description**: AWS access key ID.
+- **Usage**: Used for authenticating with AWS services (e.g., S3).
+
+#### `DJANGO_AWS_SECRET_ACCESS_KEY`
+
+- **Description**: AWS secret access key.
+- **Usage**: Used along with access key ID to authenticate AWS API requests.
+
+#### `DJANGO_CONFIGURATION`
+
+- **Description**: Specifies the Django configuration to use.
+- **Example Value**: `Production`
+- **Usage**: Determines which Django settings class to load.
+
+#### `DJANGO_DB_HOST`
+
+- **Description**: The hostname of the database server.
+- **Example Value**: `db`
+- **Usage**: Used to connect Django to the correct PostgreSQL server.
+
+#### `DJANGO_DB_NAME`
+
+- **Description**: The name of the database.
+- **Example Value**: `nest`
+- **Usage**: Specifies the name of the PostgreSQL database used by Django.
+
+#### `DJANGO_DB_PASSWORD`
+
+- **Description**: The password for the database user.
+- **Usage**: Authenticates the Django DB user.
+
+#### `DJANGO_DB_PORT`
+
+- **Description**: The port number for the database server.
+- **Example Value**: `5432`
+- **Usage**: Specifies the port for connecting to PostgreSQL.
+
+#### `DJANGO_DB_USER`
+
+- **Description**: The username for the database.
+- **Example Value**: `postgres`
+- **Usage**: Authenticates with the database.
+
+#### `DJANGO_OPEN_AI_SECRET_KEY`
+
+- **Description**: The secret key for OpenAI API.
+- **Usage**: Used for OpenAI integration.
+
+#### `DJANGO_PUBLIC_IP_ADDRESS`
+
+- **Description**: The IP address to use locally.
+- **Usage**: Geographic location related functionality.
+
+#### `DJANGO_RELEASE_VERSION`
+
+- **Description**: The release version of the application.
+- **Example Value**: `1.0.5`
+- **Usage**: Identifies the current backend deployment version.
+
+#### `DJANGO_SECRET_KEY`
+
+- **Description**: The secret key for Django (used for cryptographic signing).
+- **Usage**: Required for session management, tokens, etc.
+
+#### `DJANGO_SENTRY_DSN`
+
+- **Description**: The DSN for Sentry (used for error tracking).
+- **Example Value**: `https://xyz@sentry.io/654321`
+- **Usage**: Enables backend error tracking through Sentry.
+
+#### `DJANGO_SLACK_BOT_TOKEN`
+
+- **Description**: The token for the Slack bot.
+- **Usage**: Authenticates the bot to send messages to Slack channels.
+
+#### `DJANGO_SLACK_SIGNING_SECRET`
+
+- **Description**: The signing secret for Slack.
+- **Usage**: Used to verify Slack requests to webhooks.
+
+#### `GITHUB_TOKEN`
+
+- **Description**: The token for accessing GitHub APIs.
+- **Usage**: Used for making authenticated requests to GitHub (e.g., issues, releases).
+
 ## Setting up the Project
 
 Follow these steps to set up the OWASP Nest application:

@@ -3,11 +3,13 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useState } from 'react'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 import AnchorTitle from 'components/AnchorTitle'
+import { pluralize } from 'utils/pluralize'
+import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
 import SecondaryCard from './SecondaryCard'
 
 const TopContributors = ({
@@ -23,7 +25,6 @@ const TopContributors = ({
   type: string
   icon?: IconProp
 }) => {
-  const router = useRouter()
   const [showAllContributors, setShowAllContributors] = useState(false)
 
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
@@ -35,6 +36,8 @@ const TopContributors = ({
   if (contributors.length === 0) {
     return
   }
+  const isContributor = type === 'contributor'
+
   return (
     <div data-testid="top-contributors">
       <SecondaryCard

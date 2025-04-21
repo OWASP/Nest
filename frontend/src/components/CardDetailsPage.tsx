@@ -1,3 +1,13 @@
+import {
+  faCircleInfo,
+  faSquarePollVertical,
+  faChartPie,
+  faFolderOpen,
+  faCode,
+  faTags,
+  faUsers,
+  faRectangleList,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
@@ -44,26 +54,35 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
+          <SecondaryCard title={<AnchorTitle href="#summary" icon={faCircleInfo} title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
         {userSummary && (
-          <SecondaryCard title={<AnchorTitle href="#summary" title="Summary" />}>
+          (
+          <SecondaryCard title={<AnchorTitle href="#summary" icon={faCircleInfo} title="Summary" />}>
+            
             {userSummary}
+          
           </SecondaryCard>
+        )
         )}
 
         {heatmap && (
+          (
           <SecondaryCard
-            title={<AnchorTitle href="#contribution-heatmap" title="Contribution Heatmap" />}
+            title={<AnchorTitle href="#contribution-heatmap" icon={faSquarePollVertical} title="Contribution Heatmap" />}
           >
+            
             {heatmap}
+          
           </SecondaryCard>
+        )
         )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
+            icon={faRectangleList}
             title={<AnchorTitle href={`#${type}-details`} title={`${capitalize(type)} Details`} />}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
@@ -89,7 +108,7 @@ const DetailsCard = ({
             type === 'user' ||
             type === 'organization') && (
             <SecondaryCard
-              title={<AnchorTitle href="#statistics" title="Statistics" />}
+              title={<AnchorTitle href="#statistics" icon={faChartPie} title="Statistics" />}
               className="md:col-span-2"
             >
               {stats.map((stat, index) => (
@@ -125,22 +144,24 @@ const DetailsCard = ({
           <div
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && (
+            {languages.length !== 0 && 
+              (
               <ToggleableList
                 items={languages}
-                label={<AnchorTitle href="#languages" title="Languages" />}
+                icon={faCode} label={<AnchorTitle href="#languages" title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
               <ToggleableList
                 items={topics}
-                label={<AnchorTitle href="#topics" title="Topics" />}
+                icon={faTags} label={<AnchorTitle href="#topics" title="Topics" />}
               />
             )}
           </div>
         )}
         {topContributors && (
           <TopContributors
+            icon={faUsers}
             contributors={topContributors}
             maxInitialDisplay={9}
             type="contributor"
@@ -169,7 +190,7 @@ const DetailsCard = ({
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard
-              title={<AnchorTitle href="#repositories" title="Repositories" />}
+              title={<AnchorTitle href="#repositories" icon={faFolderOpen} title="Repositories" />}
               className="mt-6"
             >
               <RepositoriesCard repositories={repositories} />

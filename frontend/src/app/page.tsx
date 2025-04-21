@@ -4,15 +4,16 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faBook,
   faCalendar,
+  faCalendarAlt,
   faCode,
   faFileCode,
-  faMapMarkerAlt,
-  faTag,
-  faUsers,
-  faUser,
   faFolder,
-  faNewspaper,
   faGlobe,
+  faMapMarkerAlt,
+  faNewspaper,
+  faTag,
+  faUser,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
@@ -334,7 +335,7 @@ export default function Home() {
         />
         <div className="grid-cols-2 gap-4 lg:grid">
           <RecentIssues data={data?.recentIssues} />
-          <RecentPullRequests data={data?.recentPullRequests} showAuthor={true} />
+          <RecentPullRequests data={data?.recentPullRequests} />
         </div>
         <RecentReleases data={data?.recentReleases} />
         <SecondaryCard
@@ -377,7 +378,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center">
                     <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                    <span>{post.authorName}</span>
+                    <LeadersList leaders={post.authorName} />
                   </div>
                 </div>
               </div>

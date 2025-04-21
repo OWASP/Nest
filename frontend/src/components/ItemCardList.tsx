@@ -1,4 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
@@ -21,7 +22,9 @@ const ItemCardList = ({
   renderDetails: (item: {
     createdAt: string
     commentsCount: number
+    organizationName: string
     publishedAt: string
+    repositoryName: string
     tagName: string
     author: {
       avatarUrl: string
@@ -38,18 +41,27 @@ const ItemCardList = ({
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center">
                 {showAvatar && (
-                  <Link
-                    className="flex-shrink-0 text-blue-400 hover:underline"
-                    href={`/members/${item?.author?.login}`}
+                  <Tooltip
+                    closeDelay={100}
+                    content={item?.author?.name || item?.author?.login}
+                    id={`avatar-tooltip-${index}`}
+                    delay={100}
+                    placement="bottom"
+                    showArrow
                   >
-                    <Image
-                      height={24}
-                      width={24}
-                      src={item?.author?.avatarUrl}
-                      alt={item?.author?.name || ''}
-                      className="mr-2 rounded-full"
-                    />
-                  </Link>
+                    <Link
+                      className="flex-shrink-0 text-blue-400 hover:underline"
+                      href={`/members/${item?.author?.login}`}
+                    >
+                      <Image
+                        height={24}
+                        width={24}
+                        src={item?.author?.avatarUrl}
+                        alt={item?.author?.name || ''}
+                        className="mr-2 rounded-full"
+                      />
+                    </Link>
+                  </Tooltip>
                 )}
                 <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                   <Link

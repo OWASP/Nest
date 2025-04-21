@@ -87,9 +87,9 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => screen.getByText('Project not found'))
     expect(screen.getByText('Project not found')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
       shouldShowTimeoutProgress: true,
       color: 'danger',
       variant: 'solid',
@@ -127,9 +127,8 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('button')?.click()
-
-    expect(mockRouter.push).toHaveBeenCalledWith('/members/contributor1')
+    const contributorLink = screen.getByText('Contributor 1').closest('a')
+    expect(contributorLink).toHaveAttribute('href', '/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {
@@ -140,8 +139,7 @@ describe('ProjectDetailsPage', () => {
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
-
-        expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
+        expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
       })
     })
   })
