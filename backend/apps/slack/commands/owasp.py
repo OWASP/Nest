@@ -19,7 +19,6 @@ class Owasp(CommandBase):
 
     def handler(self, ack, command, client):
         """Handle the command."""
-        ack()
         command_tokens = command["text"].split()
         cmd = self.find_command(command_tokens[0].strip().lower() if command_tokens else "")
         if cmd:

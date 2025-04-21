@@ -73,7 +73,7 @@ class CommandBase:
         """
         blocks = []
         for section in self.get_render_text(command).split("{{ SECTION_BREAK }}"):
-            if section == "{{ DIVIDER }}":
+            if section.strip() == "{{ DIVIDER }}":
                 blocks.append({"type": "divider"})
             elif section:
                 blocks.append(markdown(section))
