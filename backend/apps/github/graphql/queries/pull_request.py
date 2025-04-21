@@ -65,9 +65,11 @@ class PullRequestQuery(BaseQuery):
             )
 
         if project:
-            project_instance = Project.objects.get(key__iexact=f"www-project-{project}")
-            repository_ids = project_instance.repositories.values_list("id", flat=True)
-            queryset = queryset.filter(repository_id__in=repository_ids)
+            queryset = queryset.filter(
+                repository_id__in=Project.objects.filter(key__iexact=f"www-project-{project}")
+                .first()
+                .repositories.values_list("id", flat=True)
+            )
 
         if repository:
             queryset = queryset.filter(repository__key__iexact=repository)

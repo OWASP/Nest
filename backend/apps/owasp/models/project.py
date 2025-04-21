@@ -9,7 +9,6 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
-from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
@@ -176,15 +175,6 @@ class Project(
         return Release.objects.filter(
             is_draft=False,
             published_at__isnull=False,
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
-        )
-
-    @property
-    def pull_requests(self):
-        """Return pull requests."""
-        return PullRequest.objects.filter(
             repository__in=self.repositories.all(),
         ).select_related(
             "repository",

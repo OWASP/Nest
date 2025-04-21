@@ -52,7 +52,7 @@ export const GET_REPOSITORY_DATA = gql`
       updatedAt
       url
     }
-    recentPullRequests(limit: 5, repository: $repositoryKey) {
+    recentPullRequests(limit: 5, organization: $organizationKey, repository: $repositoryKey) {
       author {
         avatarUrl
         login
