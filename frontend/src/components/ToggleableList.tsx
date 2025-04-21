@@ -3,7 +3,8 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import React, { useState } from 'react'
+
 const ToggleableList = ({
   items,
   label,
@@ -11,7 +12,7 @@ const ToggleableList = ({
   limit = 10,
 }: {
   items: string[]
-  label: string
+  label: React.ReactNode
   limit?: number
   icon?: IconDefinition
 }) => {
