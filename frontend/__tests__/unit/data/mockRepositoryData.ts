@@ -46,4 +46,24 @@ export const mockRepositoryData = {
       },
     ],
   },
+  recentPullRequests: [
+    {
+      title: 'Test Pull Request 1',
+      createdAt: 1727390000,
+      url: 'https://github.com/test-org/test-repo-1/pull/1',
+      author: {
+        login: 'user1',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/11111?v=4',
+      },
+    },
+    {
+      title: 'Test Pull Request 2',
+      createdAt: 1727380000,
+      url: 'https://github.com/test-org/test-repo-2/pull/2',
+      author: {
+        login: 'user2',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/22222?v=4',
+      },
+    },
+  ],
 }
