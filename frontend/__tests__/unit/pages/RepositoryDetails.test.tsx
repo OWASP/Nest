@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { render } from 'wrappers/testUtil'
 import RepositoryDetailsPage from 'app/organizations/[organizationKey]/repositories/[repositoryKey]/page'
@@ -105,10 +105,7 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
@@ -116,7 +113,7 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('Contributor 8')).toBeInTheDocument()
     })
 
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {

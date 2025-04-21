@@ -1,0 +1,14 @@
+{% if items %}
+OWASP Foundation Staff:{{ NL }}
+{{ SECTION_BREAK }}
+{% for item in items %}
+*{{ loop.index }}. {{ item.name }}, {{ item.title }}*
+_{{ item.location }}_
+{{ item.description | default('', true) }}{{ NL }}
+{{ SECTION_BREAK }}
+{%- endfor -%}
+{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
+Please visit <{{ website_url }}/corporate/|OWASP staff> page for more information.{{ NL }}
+{%- else -%}
+Failed to get OWASP Foundation staff data.
+{%- endif -%}

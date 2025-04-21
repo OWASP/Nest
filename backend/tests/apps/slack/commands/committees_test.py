@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.committees import committees_handler
+from apps.slack.commands.committees import Committees
 
 
 @pytest.fixture(autouse=True)
@@ -54,8 +54,10 @@ class TestCommitteesHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = search_query
 
-        committees_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Committees().handler(ack=ack, command=mock_command, client=mock_client)
 
+        ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_committees_handler_with_results(self, mock_get_committees, mock_client, mock_command):
@@ -72,7 +74,10 @@ class TestCommitteesHandler:
             "nbPages": 1,
         }
 
-        committees_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Committees().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Committee" in str(block) for block in blocks)

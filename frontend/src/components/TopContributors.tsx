@@ -9,6 +9,7 @@ import { TopContributorsTypeGraphql } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 import { pluralize } from 'utils/pluralize'
 import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
+import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from './SecondaryCard'
 
 const TopContributors = ({
@@ -38,7 +39,14 @@ const TopContributors = ({
   const isContributor = type === 'contributor'
 
   return (
-    <SecondaryCard icon={icon} title={label}>
+    <SecondaryCard
+      icon={icon}
+      title={
+        <div className="flex items-center gap-2">
+          <AnchorTitle href="#top-contributors" title={label} className="flex items-center" />
+        </div>
+      }
+    >
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
         {displayContributors.map((item, index) => (
           <div key={index} className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
