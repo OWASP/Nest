@@ -76,6 +76,10 @@ class Milestone(GenericIssueModel):
         self.author = author
         self.repository = repository
 
+    def save(self, *args, **kwargs):
+        """Save Milestone."""
+        super().save(*args, **kwargs)
+
     @staticmethod
     def bulk_save(milestones, fields=None):
         """Bulk save milestones."""
