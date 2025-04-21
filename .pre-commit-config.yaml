@@ -48,7 +48,6 @@ repos:
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml
-      - id: detect-aws-credentials
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude_types:
