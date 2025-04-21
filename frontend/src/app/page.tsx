@@ -177,7 +177,7 @@ export default function Home() {
                       <span>{formatDateRange(event.startDate, event.endDate)}</span>
                     </div>
                     {event.suggestedLocation && (
-                      <div className="mr-2 flex flex-1 items-center overflow-hidden">
+                      <div className="flex flex-1 items-center overflow-hidden">
                         <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 h-4 w-4" />
                         <TruncatedText text={event.suggestedLocation} />
                       </div>
@@ -227,14 +227,14 @@ export default function Home() {
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
-                    <div className="mr-4 flex flex-1 items-center overflow-hidden">
+                    <div className="flex flex-1 items-center overflow-hidden">
                       <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
                       <TruncatedText text={chapter.suggestedLocation} />
                     </div>
                   </div>
 
                   {chapter.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       {' '}
                       <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
                       <LeadersList leaders={String(chapter.leaders)} />
@@ -279,7 +279,7 @@ export default function Home() {
                     </div>
                   </div>
                   {project.leaders.length > 0 && (
-                    <div className="mr-4 mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
                       <LeadersList leaders={String(project.leaders)} />
                     </div>
@@ -359,7 +359,7 @@ export default function Home() {
                     <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
-                  <div className="mr-4 flex flex-1 items-center overflow-hidden">
+                  <div className="flex flex-1 items-center overflow-hidden">
                     <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
                     <LeadersList leaders={post.authorName} />
                   </div>
