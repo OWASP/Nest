@@ -6,6 +6,8 @@ export const mockSnapshotDetailsData = {
     createdAt: '2025-03-01T22:00:34.361937+00:00',
     startAt: '2024-12-01T00:00:00+00:00',
     endAt: '2024-12-31T22:00:30+00:00',
+    summary:
+      'Snapshot Summary: 10 users (e.g., abhayymishraaaa, vithobasatish); 3 projects (e.g., OWASP Top 10 for Business Logic Abuse, OWASP ProdSecMan); 14 chapters (e.g., OWASP Oshawa, OWASP Juiz de Fora); 422 issues (e.g., Duplicate Components, Cyclonedx seems to ignore some configuration options); 71 releases (e.g., 2.0.1, v5.0.1)',
     status: 'completed',
     errorMessage: '',
     newReleases: [
