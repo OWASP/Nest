@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 import { ProjectIssuesType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
+import AnchorTitle from './AnchorTitle'
 import ItemCardList from './ItemCardList'
 
 interface RecentIssuesProps {
@@ -16,7 +17,15 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
 
   return (
     <ItemCardList
-      title="Recent Issues"
+      title={
+        <div className="flex items-center gap-2">
+          <AnchorTitle
+            href="#recent-issues"
+            title="Recent Issues"
+            className="flex items-center leading-none"
+          />
+        </div>
+      }
       data={data}
       showAvatar={showAvatar}
       icon={faCircleExclamation}

@@ -2,7 +2,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
-import { JSX } from 'react'
+import React, { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
 import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
@@ -15,7 +15,7 @@ const ItemCardList = ({
   renderDetails,
   showAvatar = true,
 }: {
-  title: string
+  title: React.ReactNode
   data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[]
   icon?: IconProp
   showAvatar?: boolean
@@ -79,7 +79,7 @@ const ItemCardList = ({
         ))}
       </div>
     ) : (
-      <p>No {title.toLowerCase()}.</p>
+      <p>Nothing to display.</p>
     )}
   </SecondaryCard>
 )
