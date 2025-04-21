@@ -64,10 +64,10 @@ class TestLeadersHandler:
         mock_get_chapters.return_value = {"hits": [mock_chapter] if has_results else []}
         mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
 
-        leaders_instance = Leaders()
-        leaders_instance.handler(
-            ack=MagicMock(), command=mock_slack_command, client=mock_slack_client
-        )
+        ack = MagicMock()
+        Leaders().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()
@@ -104,8 +104,10 @@ class TestLeadersHandler:
         mock_get_chapters.return_value = {"hits": []}
         mock_get_projects.return_value = {"hits": []}
 
-        leaders_instance = Leaders()
-        leaders_instance.handler(ack=MagicMock(), command=command, client=mock_slack_client)
+        ack = MagicMock()
+        Leaders().handler(ack=ack, command=command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         assert any(expected_escaped in str(block) for block in blocks)
@@ -143,10 +145,10 @@ class TestLeadersHandler:
         mock_get_chapters.return_value = {"hits": [mock_chapter]}
         mock_get_projects.return_value = {"hits": [mock_project]}
 
-        leaders_instance = Leaders()
-        leaders_instance.handler(
-            ack=MagicMock(), command=mock_slack_command, client=mock_slack_client
-        )
+        ack = MagicMock()
+        Leaders().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         block_texts = [

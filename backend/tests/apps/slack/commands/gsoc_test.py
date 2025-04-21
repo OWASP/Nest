@@ -45,9 +45,11 @@ class TestGsocCommand:
             "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
             new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
         ):
-            handler_instance = Gsoc()
             ack = MagicMock()
-            handler_instance.handler(ack=ack, command=command, client=mock_slack_client)
+            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+            ack.assert_called_once()
+
             if not commands_enabled:
                 mock_slack_client.conversations_open.assert_not_called()
                 mock_slack_client.chat_postMessage.assert_not_called()
@@ -78,10 +80,14 @@ class TestGsocCommand:
             "apps.slack.commands.gsoc.get_gsoc_projects",
             return_value=mock_projects,
         ):
-            handler_instance = Gsoc()
             ack = MagicMock()
-            handler_instance.handler(ack=ack, command=command, client=mock_slack_client)
+            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+            ack.assert_called_once()
+
             blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
             project_block = str(blocks[0])
-            expected_link = "<https://owasp.org/www-project-bug-logging-tool/|Test Project>"
-            assert expected_link in project_block
+
+            assert (
+                "<https://owasp.org/www-project-bug-logging-tool/|Test Project>" in project_block
+            )

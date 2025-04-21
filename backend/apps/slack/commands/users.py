@@ -10,9 +10,8 @@ class Users(CommandBase):
 
     def get_render_blocks(self, command):
         """Get the rendered blocks."""
-        search_query = command["text"].strip()
         return get_blocks(
-            search_query=search_query,
+            search_query=command["text"].strip(),
             limit=10,
             presentation=EntityPresentation(
                 include_feedback=True,

@@ -54,9 +54,8 @@ class TestCommitteesHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = search_query
 
-        committees = Committees()
         ack = MagicMock()
-        committees.handler(ack=ack, command=mock_command, client=mock_client)
+        Committees().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
@@ -75,9 +74,10 @@ class TestCommitteesHandler:
             "nbPages": 1,
         }
 
-        committees = Committees()
         ack = MagicMock()
-        committees.handler(ack=ack, command=mock_command, client=mock_client)
+        Committees().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Committee" in str(block) for block in blocks)

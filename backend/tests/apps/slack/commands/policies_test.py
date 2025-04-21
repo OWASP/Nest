@@ -24,10 +24,11 @@ class TestPoliciesHandler:
     def test_policies_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         ack = MagicMock()
-        policies_instance = Policies()
-        policies_instance.handler(ack=ack, command=mock_command, client=mock_client)
+        Policies().handler(ack=ack, command=mock_command, client=mock_client)
+
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
+
         if commands_enabled:
             mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]

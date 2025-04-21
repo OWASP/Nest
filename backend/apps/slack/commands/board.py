@@ -14,6 +14,6 @@ class Board(CommandBase):
         """Get the template context."""
         return {
             **super().get_template_context(command),
-            "url": "https://owasp.org/www-board/",
             "name": "Global board",
+            "url": "https://owasp.org/www-board/",
         }

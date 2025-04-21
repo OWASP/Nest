@@ -15,7 +15,7 @@ class Jobs(CommandBase):
         """Get the template context."""
         return {
             **super().get_template_context(command),
-            "jobs_channel": OWASP_JOBS_CHANNEL_ID,
             "feedback_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
+            "jobs_channel": OWASP_JOBS_CHANNEL_ID,
             "nest_bot_name": NEST_BOT_NAME,
         }

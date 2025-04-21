@@ -29,9 +29,8 @@ class TestContactHandler:
     )
     def test_contact_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        contact = Contact()
         ack = MagicMock()
-        contact.handler(ack=ack, command=mock_command, client=mock_client)
+        Contact().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
@@ -46,9 +45,10 @@ class TestContactHandler:
 
     def test_contact_handler_block_structure(self, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
-        contact = Contact()
         ack = MagicMock()
-        contact.handler(ack=ack, command=mock_command, client=mock_client)
+        Contact().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert len(blocks) == 1

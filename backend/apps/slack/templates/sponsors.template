@@ -1,4 +1,4 @@
-{%- if has_sponsors %}
+{%- if sponsors %}
   *OWASP Sponsors:*{{ NL }}{{ NL }}{{ SECTION_BREAK }}
 {% for sponsor in sponsors -%}
   {%- if sponsor.url -%}

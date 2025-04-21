@@ -8,7 +8,7 @@ class Policies(CommandBase):
 
     def get_template_context(self, command):
         """Get the template context."""
-        policies_list = [
+        policies = (
             ("Chapters Policy", "https://owasp.org/www-policy/operational/chapters"),
             ("Code of Conduct", "https://owasp.org/www-policy/operational/code-of-conduct"),
             ("Committees Policy", "https://owasp.org/www-policy/operational/committees"),
@@ -31,9 +31,9 @@ class Policies(CommandBase):
                 "Whistleblower & Anti-Retaliation Policy",
                 "https://owasp.org/www-policy/operational/whistleblower",
             ),
-        ]
+        )
 
         return {
             **super().get_template_context(command),
-            "policies": policies_list,
+            "policies": policies,
         }

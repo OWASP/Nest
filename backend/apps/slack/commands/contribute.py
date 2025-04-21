@@ -14,9 +14,9 @@ class Contribute(CommandBase):
         command_text = command["text"].strip()
         if command_text in COMMAND_HELP:
             return super().get_render_blocks(command)
-        search_query = "" if command_text in COMMAND_START else command_text
+
         return get_blocks(
-            search_query=search_query,
+            search_query="" if command_text in COMMAND_START else command_text,
             limit=10,
             presentation=EntityPresentation(
                 include_feedback=True,

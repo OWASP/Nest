@@ -1,5 +1,6 @@
 """Slack bot community command."""
 
+from apps.common.utils import get_absolute_url
 from apps.slack.commands.command import CommandBase
 
 
@@ -14,6 +15,6 @@ class Community(CommandBase):
         """Get the template context."""
         return {
             **super().get_template_context(command),
-            "url": "https://nest.owasp.dev/members/",
             "name": "OWASP community",
+            "url": get_absolute_url("members"),
         }

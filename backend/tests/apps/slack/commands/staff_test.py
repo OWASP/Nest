@@ -62,9 +62,10 @@ class TestStaffHandler:
 
         mock_get_staff_data.return_value = mock_staff if has_staff_data else []
 
-        staff_instance = Staff()
         ack = MagicMock()
-        staff_instance.handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+        Staff().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()

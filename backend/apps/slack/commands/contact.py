@@ -14,6 +14,6 @@ class Contact(CommandBase):
         """Get the template context."""
         return {
             **super().get_template_context(command),
-            "url": "https://owasp.org/contact/",
             "name": "OWASP contact",
+            "url": "https://owasp.org/contact/",
         }

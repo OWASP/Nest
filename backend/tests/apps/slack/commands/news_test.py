@@ -47,10 +47,11 @@ class TestNewsCommand:
                 else []
             )
             ack = MagicMock()
-            news_instance = News()
-            news_instance.handler(ack=ack, command=mock_command, client=mock_client)
+            News().handler(ack=ack, command=mock_command, client=mock_client)
+
             ack.assert_called_once()
             assert mock_client.chat_postMessage.call_count == expected_calls
+
             if commands_enabled:
                 mock_client.conversations_open.assert_called_once_with(
                     users=mock_command["user_id"]
@@ -79,12 +80,16 @@ class TestNewsCommand:
     def test_news_handler_no_items(self, mock_get_news_data, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
         mock_get_news_data.return_value = []
-        news_instance = News()
         ack = MagicMock()
-        news_instance.handler(ack=ack, command=mock_command, client=mock_client)
+        News().handler(ack=ack, command=mock_command, client=mock_client)
+
         ack.assert_called_once()
+
         mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+
         assert len(blocks) == 1
-        expected_warning = ":warning: *Failed to fetch OWASP news. Please try again later.*"
-        assert blocks[0]["text"]["text"] == expected_warning
+        assert (
+            blocks[0]["text"]["text"]
+            == ":warning: *Failed to fetch OWASP news. Please try again later.*"
+        )

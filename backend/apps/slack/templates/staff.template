@@ -1,4 +1,4 @@
-{% if has_staff %}
+{% if items %}
 OWASP Foundation Staff:{{ NL }}
 {{ SECTION_BREAK }}
 {% for item in items %}

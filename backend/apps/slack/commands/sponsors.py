@@ -14,9 +14,8 @@ class Sponsors(CommandBase):
         sponsors = get_sponsors_data()
         return {
             **super().get_template_context(command),
-            "has_sponsors": bool(sponsors),
-            "sponsors": sponsors,
-            "website_url": OWASP_WEBSITE_URL,
             "feedback_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
             "nest_bot_name": NEST_BOT_NAME,
+            "sponsors": sponsors,
+            "website_url": OWASP_WEBSITE_URL,
         }

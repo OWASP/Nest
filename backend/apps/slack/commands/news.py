@@ -13,7 +13,6 @@ class News(CommandBase):
         items = get_news_data()
         return {
             **super().get_template_context(command),
-            "has_news": bool(items),
             "news_items": items,
             "news_url": OWASP_NEWS_URL,
         }

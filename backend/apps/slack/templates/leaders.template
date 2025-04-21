@@ -1,4 +1,4 @@
-{%- if has_results %}
+{%- if chapters or projects %}
 {%- if chapters|length > 0 %}
 *Chapters*{{ NL }}
 {%- for chapter in chapters %}

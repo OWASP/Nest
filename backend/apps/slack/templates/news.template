@@ -1,4 +1,4 @@
-{% if has_news %}
+{% if news_items %}
 *:newspaper: Latest OWASP news:*{{ NL }}
 {%- for item in news_items %}
   • *<{{ item.url }}|{{ item.title }}>* by {{ item.author }}{{ NL }}

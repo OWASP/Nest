@@ -64,9 +64,10 @@ class TestSponsorsHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_get_sponsors_data.return_value = mock_sponsors if has_sponsors_data else []
 
-        sponsors_instance = Sponsors()
         ack = MagicMock()
-        sponsors_instance.handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+        Sponsors().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()

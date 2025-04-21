@@ -13,7 +13,6 @@ class Staff(CommandBase):
         items = get_staff_data()
         return {
             **super().get_template_context(command),
-            "has_staff": bool(items),
             "items": items,
             "website_url": OWASP_WEBSITE_URL,
         }

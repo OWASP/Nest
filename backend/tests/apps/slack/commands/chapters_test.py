@@ -54,9 +54,9 @@ class TestChaptersHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
-        chapters = Chapters()
+
         ack = MagicMock()
-        chapters.handler(ack=ack, command=mock_command, client=mock_client)
+        Chapters().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
@@ -78,9 +78,10 @@ class TestChaptersHandler:
             ],
             "nbPages": 1,
         }
-        chapters = Chapters()
         ack = MagicMock()
-        chapters.handler(ack=ack, command=mock_command, client=mock_client)
+        Chapters().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Chapter" in str(block) for block in blocks)

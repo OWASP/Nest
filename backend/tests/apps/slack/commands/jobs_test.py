@@ -30,9 +30,8 @@ class TestJobsHandler:
     )
     def test_jobs_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        jobs_instance = Jobs()
         ack = MagicMock()
-        jobs_instance.handler(ack=ack, command=mock_command, client=mock_client)
+        Jobs().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls

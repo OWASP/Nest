@@ -56,9 +56,8 @@ class TestContributeHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
 
-        contribute = Contribute()
         ack = MagicMock()
-        contribute.handler(ack=ack, command=mock_command, client=mock_client)
+        Contribute().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
@@ -80,9 +79,10 @@ class TestContributeHandler:
             "nbPages": 1,
         }
 
-        contribute = Contribute()
         ack = MagicMock()
-        contribute.handler(ack=ack, command=mock_command, client=mock_client)
+        Contribute().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Contribution" in str(block) for block in blocks)

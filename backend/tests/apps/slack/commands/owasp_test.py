@@ -34,9 +34,7 @@ class TestOwaspHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
-        ack = MagicMock()
-        owasp = Owasp()
-        owasp.handler(ack=ack, command=mock_command, client=mock_client)
+        Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
         if commands_enabled:
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             if expected_help:
@@ -67,9 +65,6 @@ class TestOwaspHandler:
                 )
             )
 
-            ack = MagicMock()
-            owasp = Owasp()
-            owasp.handler(ack=ack, command=mock_command, client=mock_client)
-
+            Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             assert blocks[0]["text"]["text"] == f"{subcommand} called"

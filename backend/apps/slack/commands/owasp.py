@@ -12,13 +12,14 @@ class Owasp(CommandBase):
         if not command_name:
             return None
 
-        for cmd_class in [cls for cls in CommandBase.get_all_commands() if cls is not Owasp]:
+        for cmd_class in (cls for cls in CommandBase.get_commands() if cls is not Owasp):
             if cmd_class.__name__.lower() == command_name.lower():
                 return cmd_class()
         return None
 
     def handler(self, ack, command, client):
         """Handle the command."""
+        ack()
         command_tokens = command["text"].split()
         cmd = self.find_command(command_tokens[0].strip().lower() if command_tokens else "")
         if cmd:
@@ -32,9 +33,11 @@ class Owasp(CommandBase):
         command_tokens = command["text"].split()
         if not command_tokens or command_tokens[0] in COMMAND_HELP:
             return {
+                "command": self.get_command_name(),
                 "help": True,
             }
         return {
-            "help": False,
+            "command": self.get_command_name(),
             "handler": command_tokens[0].strip().lower(),
+            "help": False,
         }

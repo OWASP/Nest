@@ -24,4 +24,4 @@ from . import (
 )
 
 if SlackConfig.app:
-    CommandBase.config_all_commands()
+    CommandBase.configure_commands()

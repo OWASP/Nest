@@ -69,13 +69,16 @@ class TestEventsHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_get_events_data.return_value = mock_events if has_events_data else []
-        events = Events()
         ack = MagicMock()
-        events.handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+        Events().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
+
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()
             mock_slack_client.chat_postMessage.assert_not_called()
             return
+
         mock_slack_client.conversations_open.assert_called_once_with(
             users=mock_slack_command["user_id"]
         )

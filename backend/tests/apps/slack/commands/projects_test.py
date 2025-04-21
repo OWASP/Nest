@@ -51,8 +51,11 @@ class TestProjectsHandler:
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = search_query
-        projects_instance = Projects()
-        projects_instance.handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Projects().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
+
         if commands_enabled:
             mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
             assert mock_client.chat_postMessage.call_count == expected_calls
@@ -79,8 +82,11 @@ class TestProjectsHandler:
             ],
             "nbPages": 1,
         }
-        projects_instance = Projects()
-        projects_instance.handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Projects().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
+
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Project" in str(block) for block in blocks)
         assert any("Test Summary" in str(block) for block in blocks)

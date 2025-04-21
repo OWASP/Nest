@@ -7,7 +7,7 @@ from django.conf import settings
 from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
-from apps.slack.template_system.loader import env
+from apps.slack.template_loader import env
 from apps.slack.utils import get_text
 
 logger = logging.getLogger(__name__)
@@ -22,15 +22,15 @@ class CommandBase:
     """
 
     @staticmethod
-    def get_all_commands():
+    def get_commands():
         """Get all commands."""
-        return list(CommandBase.__subclasses__())
+        yield from CommandBase.__subclasses__()
 
     @staticmethod
-    def config_all_commands():
-        """Configure all commands."""
-        for cmd_class in CommandBase.get_all_commands():
-            cmd_class().config_command()
+    def configure_commands():
+        """Configure commands."""
+        for cmd_class in CommandBase.get_commands():
+            cmd_class().configure_command()
 
     def get_render_text(self, command):
         """Get the rendered text.
@@ -42,8 +42,7 @@ class CommandBase:
             str: The rendered text.
 
         """
-        template = self.get_template_file()
-        return template.render(**self.get_template_context(command))
+        return self.get_template_file().render(**self.get_template_context(command))
 
     def get_template_context(self, command):
         """Get the template context.
@@ -56,10 +55,10 @@ class CommandBase:
 
         """
         return {
-            "command": self.get_command(),
+            "command": self.get_command_name(),
+            "DIVIDER": "{{ DIVIDER }}",
             "NL": NL,
             "SECTION_BREAK": "{{ SECTION_BREAK }}",
-            "DIVIDER": "{{ DIVIDER }}",
         }
 
     def get_render_blocks(self, command):
@@ -72,16 +71,16 @@ class CommandBase:
             list: The rendered blocks.
 
         """
-        rendered_text = self.get_render_text(command)
         blocks = []
-        for section in rendered_text.split("{{ SECTION_BREAK }}"):
+        for section in self.get_render_text(command).split("{{ SECTION_BREAK }}"):
             if section == "{{ DIVIDER }}":
                 blocks.append({"type": "divider"})
             elif section:
                 blocks.append(markdown(section))
+
         return blocks
 
-    def get_command(self):
+    def get_command_name(self):
         """Get the command name."""
         return f"/{self.__class__.__name__.lower()}"
 
@@ -97,7 +96,9 @@ class CommandBase:
             return env.get_template(template_name)
         except Exception:
             logger.exception(
-                "Failed to load template '%s' for command '%s'", template_name, self.get_command()
+                "Failed to load template '%s' for command '%s'",
+                template_name,
+                self.get_command_name(),
             )
             raise
 
@@ -105,13 +106,13 @@ class CommandBase:
         """Get the template file name."""
         return f"{self.__class__.__name__.lower()}.template"
 
-    def config_command(self):
-        """Command configuration."""
+    def configure_command(self):
+        """Configure command."""
         if SlackConfig.app is not None:
-            SlackConfig.app.command(self.get_command())(self.handler)
+            SlackConfig.app.command(self.get_command_name())(self.handler)
         else:
             logger.warning(
-                "SlackConfig.app is None. Command '%s' not registered.", self.get_command()
+                "SlackConfig.app is None. Command '%s' not registered.", self.get_command_name()
             )
 
     def handler(self, ack, command, client):
@@ -137,7 +138,7 @@ class CommandBase:
                 text=get_text(blocks),
             )
         except Exception:
-            logger.exception("Failed to handle command '%s'", self.get_command())
+            logger.exception("Failed to handle command '%s'", self.get_command_name())
             conversation = client.conversations_open(users=command["user_id"])
             client.chat_postMessage(
                 blocks=[markdown(":warning: An error occurred. Please try again later.")],
