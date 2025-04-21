@@ -37,6 +37,7 @@ test.describe('Home Page', () => {
     await page.getByRole('link', { name: 'Chapter 1' }).click()
     await expect(page).toHaveURL('chapters/chapter_1')
   })
+
   test('should have new projects', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Projects' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project 1', exact: true })).toBeVisible()

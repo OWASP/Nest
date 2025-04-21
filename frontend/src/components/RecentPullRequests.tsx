@@ -5,6 +5,7 @@ import React from 'react'
 import { PullRequestsType } from 'types/home'
 import { ItemCardPullRequests } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
+import AnchorTitle from './AnchorTitle'
 import ItemCardList from './ItemCardList'
 
 interface RecentPullRequestsProps {
@@ -17,10 +18,18 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
 
   return (
     <ItemCardList
-      title="Recent Pull Requests"
+      title={
+        <div className="flex items-center gap-2">
+          <AnchorTitle
+            href="#recent-pull-requests"
+            title="Recent Pull Requests"
+            className="flex items-center leading-none"
+          />
+        </div>
+      }
       data={data}
-      showAvatar={showAvatar}
       icon={faCodePullRequest}
+      showAvatar={showAvatar}
       renderDetails={(item) => (
         <div className="mt-2 flex flex-col flex-wrap items-start text-sm text-gray-600 dark:text-gray-400 md:flex-row">
           <div className="flex items-center">
