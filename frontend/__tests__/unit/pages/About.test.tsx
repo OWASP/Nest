@@ -197,10 +197,7 @@ describe('About Component', () => {
       expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
@@ -208,7 +205,7 @@ describe('About Component', () => {
       expect(screen.getByText('Contributor 8')).toBeInTheDocument()
     })
 
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
