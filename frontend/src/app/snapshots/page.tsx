@@ -53,6 +53,7 @@ const SnapshotsPage: React.FC = () => {
         button={SubmitButton}
         startAt={snapshot.startAt}
         endAt={snapshot.endAt}
+        topContributors={snapshot.topContributors}
       />
     )
   }

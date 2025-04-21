@@ -1,6 +1,13 @@
 import { ChapterTypeGraphQL } from 'types/chapter'
 import { ProjectTypeGraphql } from 'types/project'
 
+export interface TopContributorTypeGraphql {
+  avatarUrl: string
+  contributionsCount: number
+  login: string
+  name: string
+}
+
 export interface ReleaseType {
   name: string
   publishedAt: string
@@ -16,6 +23,7 @@ export interface SnapshotDetailsProps {
   newReleases: ReleaseType[]
   newProjects: ProjectTypeGraphql[]
   newChapters: ChapterTypeGraphQL[]
+  topContributors: TopContributorTypeGraphql[]
 }
 
 export interface Snapshots {

@@ -69,4 +69,5 @@ export interface SnapshotCardProps {
   endAt: string
   title: string
   button: ButtonType
+  topContributors?: TopContributorsTypeGraphql[]
 }

@@ -7,12 +7,21 @@ export const GET_SNAPSHOT_DETAILS = gql`
       key
       startAt
       title
+
+      topContributors {
+        avatarUrl
+        contributionsCount
+        login
+        name
+      }
+
       newReleases {
         name
         publishedAt
         tagName
         projectName
       }
+
       newProjects {
         key
         name
@@ -30,6 +39,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
           name
         }
       }
+
       newChapters {
         key
         name
@@ -37,12 +47,6 @@ export const GET_SNAPSHOT_DETAILS = gql`
         suggestedLocation
         region
         summary
-        topContributors {
-          avatarUrl
-          contributionsCount
-          login
-          name
-        }
         updatedAt
         url
         relatedUrls
@@ -51,6 +55,12 @@ export const GET_SNAPSHOT_DETAILS = gql`
           lng
         }
         isActive
+        topContributors {
+          avatarUrl
+          contributionsCount
+          login
+          name
+        }
       }
     }
   }
