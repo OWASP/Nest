@@ -1,3 +1,4 @@
+import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import { mockOrganizationData } from '@unit/data/mockOrganizationData'
 
@@ -39,5 +40,9 @@ test.describe('Organization Page', () => {
   test('displays followers and repositories counts correctly', async ({ page }) => {
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('1.5k')).toBeVisible()
+  })
+
+  test('breadcrumb renders correct segments on /organizations', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Organizations'])
   })
 })

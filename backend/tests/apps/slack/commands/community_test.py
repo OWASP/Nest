@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.slack.commands.community import community_handler
+from apps.slack.commands.community import Community
 
 
 class TestCommunityHandler:
@@ -31,7 +31,7 @@ class TestCommunityHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
 
         ack = MagicMock()
-        community_handler(ack=ack, command=mock_command, client=mock_client)
+        Community().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
 
@@ -41,9 +41,7 @@ class TestCommunityHandler:
             mock_client.conversations_open.assert_called_once_with(users="U123456")
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             block_text = blocks[0]["text"]["text"]
-            expected_text = (
-                f"Please visit <https://nest.owasp.dev/members/|OWASP community> page{NL}"
-            )
+            expected_text = f"Please visit <{settings.SITE_URL}/members|OWASP community> page{NL}"
             assert block_text == expected_text
             assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
 
@@ -52,10 +50,12 @@ class TestCommunityHandler:
         settings.SLACK_COMMANDS_ENABLED = True
 
         ack = MagicMock()
-        community_handler(ack=ack, command=mock_command, client=mock_client)
+        Community().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert len(blocks) == 1
         assert blocks[0]["type"] == "section"
         assert blocks[0]["text"]["type"] == "mrkdwn"
-        assert "https://nest.owasp.dev/members/" in blocks[0]["text"]["text"]
+        assert f"{settings.SITE_URL}/members" in blocks[0]["text"]["text"]
