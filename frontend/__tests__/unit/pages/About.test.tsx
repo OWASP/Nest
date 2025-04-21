@@ -197,7 +197,6 @@ describe('About Component', () => {
       expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
-
     const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 

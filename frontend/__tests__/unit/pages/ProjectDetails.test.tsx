@@ -103,9 +103,7 @@ describe('ProjectDetailsPage', () => {
       expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
-    const contributorsSection = screen.getByTestId('top-contributors')
-
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
@@ -113,7 +111,7 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 8')).toBeInTheDocument()
     })
 
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {

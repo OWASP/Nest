@@ -47,7 +47,7 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
 
   return (
     <div id={id} className="relative">
-      <div className="items-center group relative flex">
+      <div className="group relative flex items-center">
         <h2 className="flex items-center text-2xl font-semibold">{title}</h2>
         <a
           href={href}

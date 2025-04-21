@@ -49,10 +49,7 @@ const TopContributors = ({
     >
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
         {displayContributors.map((item, index) => (
-          <div
-            key={index}
-            className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-          >
+          <div key={index} className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center gap-2">
                 <Image
@@ -74,8 +71,7 @@ const TopContributors = ({
                   {isContributor ? (
                     <span className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 dark:text-gray-400">
                       {' '}
-                      {item.contributionsCount}{' '}
-                      {pluralize(item.contributionsCount, 'contribution')}
+                      {item.contributionsCount} {pluralize(item.contributionsCount, 'contribution')}
                     </span>
                   ) : (
                     <Link
