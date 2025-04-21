@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.constants import GITHUB_GHOST_USER_LOGIN, OWASP_FOUNDATION_LOGIN
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
@@ -21,6 +21,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     twitter_username = models.CharField(verbose_name="Twitter username", max_length=50, default="")
 
     is_bot = models.BooleanField(verbose_name="Is bot", default=False)
+
+    contributions_count = models.PositiveIntegerField(
+        verbose_name="Contributions count", default=0
+    )
 
     def __str__(self) -> str:
         """Return a human-readable representation of the user.
@@ -73,6 +77,11 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
                 setattr(self, model_field, value)
 
         self.is_bot = gh_user.type == "Bot"
+
+    @staticmethod
+    def bulk_save(users, fields=None):
+        """Bulk save users."""
+        BulkSaveModel.bulk_save(User, users, fields=fields)
 
     @staticmethod
     def get_non_indexable_logins():

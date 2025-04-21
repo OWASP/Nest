@@ -53,14 +53,14 @@ class ReleaseQuery(BaseQuery):
         if login:
             queryset = queryset.select_related(
                 "author",
+                "repository",
+                "repository__organization",
             ).filter(
                 author__login=login,
             )
 
         if organization:
-            queryset = queryset.select_related(
-                "repository__organization",
-            ).filter(
+            queryset = queryset.filter(
                 repository__organization__login=organization,
             )
 

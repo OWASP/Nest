@@ -1,126 +1,50 @@
 """Slack bot owasp command."""
 
-from django.conf import settings
-from slack_sdk import WebClient
-
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP
-from apps.slack.utils import escape, get_text
-
-COMMAND = "/owasp"
 
 
-def owasp_handler(ack, command: dict, client: WebClient) -> None:
-    """Handle the Slack /owasp command.
+class Owasp(CommandBase):
+    """Slack bot /owasp command."""
 
-    Args:
-        ack (function): Acknowledge the Slack command request.
-        command (dict): The Slack command payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    def find_command(self, command_name: str):
+        """Find the command class by name."""
+        if not command_name:
+            return None
 
-    """
-    from apps.slack.commands import (
-        board,
-        chapters,
-        committees,
-        community,
-        contact,
-        contribute,
-        donate,
-        events,
-        gsoc,
-        jobs,
-        leaders,
-        news,
-        projects,
-        sponsor,
-        sponsors,
-        staff,
-        users,
-    )
+        for cmd_class in (cls for cls in CommandBase.get_commands() if cls is not Owasp):
+            if cmd_class.__name__.lower() == command_name.lower():
+                return cmd_class()
+        return None
 
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+    def handler(self, ack, command, client):
+        """Handle the command."""
+        command_tokens = command["text"].split()
+        cmd = self.find_command(command_tokens[0].strip().lower() if command_tokens else "")
+        if cmd:
+            command["text"] = " ".join(command_tokens[1:]).strip()
+            return cmd.handler(ack, command, client)
 
-    command_tokens = command["text"].split()
-    if not command_tokens or command_tokens[0] in COMMAND_HELP:
-        blocks = [
-            markdown(
-                f"• `{COMMAND} board` -- OWASP Global Board information{NL}"
-                f"• `{COMMAND} chapters` -- Explore OWASP chapters{NL}"
-                f"• `{COMMAND} committees` -- Explore OWASP committees{NL}"
-                f"• `{COMMAND} community` -- Explore OWASP community{NL}"
-                f"• `{COMMAND} contact` -- Contact OWASP{NL}"
-                f"• `{COMMAND} contribute` -- OWASP projects contribution opportunities{NL}"
-                f"• `{COMMAND} donate` -- Support OWASP with a donation{NL}"
-                f"• `{COMMAND} events` -- Browse OWASP events{NL}"
-                f"• `{COMMAND} gsoc` -- Google Summer of Code participants information{NL}"
-                f"• `{COMMAND} jobs` -- Check out available job opportunities{NL}"
-                f"• `{COMMAND} leaders` -- Chapter and project leaders search{NL}"
-                f"• `{COMMAND} news` -- OWASP news{NL}"
-                f"• `{COMMAND} projects` -- Explore OWASP projects{NL}"
-                f"• `{COMMAND} sponsor` -- Coming soon{NL}"
-                f"• `{COMMAND} sponsors` -- Get a list of OWASP sponsors{NL}"
-                f"• `{COMMAND} staff` -- OWASP corporate structure{NL}"
-                f"• `{COMMAND} users` -- OWASP contributors{NL}"
-            ),
-        ]
-        conversation = client.conversations_open(users=command["user_id"])
-        client.chat_postMessage(
-            channel=conversation["channel"]["id"], blocks=blocks, text=get_text(blocks)
-        )
-    else:
-        handler = command_tokens[0].strip().lower()
-        command["text"] = " ".join(command_tokens[1:]).strip()
-        match handler:
-            case "board":
-                board.board_handler(ack, command, client)
-            case "chapters":
-                chapters.chapters_handler(ack, command, client)
-            case "committees":
-                committees.committees_handler(ack, command, client)
-            case "community":
-                community.community_handler(ack, command, client)
-            case "contact":
-                contact.contact_handler(ack, command, client)
-            case "contribute":
-                contribute.contribute_handler(ack, command, client)
-            case "donate":
-                donate.donate_handler(ack, command, client)
-            case "events":
-                events.events_handler(ack, command, client)
-            case "gsoc":
-                gsoc.gsoc_handler(ack, command, client)
-            case "jobs":
-                jobs.jobs_handler(ack, command, client)
-            case "leaders":
-                leaders.leaders_handler(ack, command, client)
-            case "news":
-                news.news_handler(ack, command, client)
-            case "projects":
-                projects.projects_handler(ack, command, client)
-            case "sponsor":
-                sponsor.sponsor_handler(ack, command, client)
-            case "sponsors":
-                sponsors.sponsors_handler(ack, command, client)
-            case "staff":
-                staff.staff_handler(ack, command, client)
-            case "users":
-                users.users_handler(ack, command, client)
-            case _:
-                blocks = [
-                    markdown(f"*`{COMMAND} {escape(handler)}` is not supported*{NL}"),
-                ]
-                conversation = client.conversations_open(users=command["user_id"])
-                client.chat_postMessage(
-                    blocks=blocks,
-                    channel=conversation["channel"]["id"],
-                    text=get_text(blocks),
-                )
+        return super().handler(ack, command, client)
 
+    def get_template_context(self, command: dict):
+        """Get the template context.
 
-if SlackConfig.app:
-    owasp_handler = SlackConfig.app.command(COMMAND)(owasp_handler)
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
+        command_tokens = command["text"].split()
+        if not command_tokens or command_tokens[0] in COMMAND_HELP:
+            return {
+                "command": self.get_command_name(),
+                "help": True,
+            }
+        return {
+            "command": self.get_command_name(),
+            "handler": command_tokens[0].strip().lower(),
+            "help": False,
+        }

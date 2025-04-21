@@ -35,7 +35,10 @@ class UserQuery(BaseQuery):
         """
         return [
             rc.repository
-            for rc in RepositoryContributor.objects.select_related("repository")
+            for rc in RepositoryContributor.objects.select_related(
+                "repository",
+                "repository__organization",
+            )
             .filter(user__login=login)
             .order_by("-contributions_count")
         ]

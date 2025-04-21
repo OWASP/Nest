@@ -4,6 +4,7 @@ export type user = {
   avatar_url: string
   bio: string
   company: string
+  contributions_count: number
   created_at: number
   email: string
   followers_count: number
@@ -56,6 +57,7 @@ export type User = {
   releases?: Release[]
   releases_count?: number
   url: string
+  contributions_count: number
 }
 
 export interface UserDetailsProps {
@@ -76,6 +78,7 @@ export interface UserDetailsProps {
   releasesCount: number
   topRepositories: RepositoryCardProps[]
   url: string
+  contributionsCount: number
 }
 
 export interface PullRequestsType {

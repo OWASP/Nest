@@ -107,7 +107,9 @@ jobs:
       - name: Build backend test image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
@@ -133,7 +135,9 @@ jobs:
       - name: Build frontend unit-testing image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
@@ -159,7 +163,9 @@ jobs:
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
@@ -232,8 +238,11 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
+          cache-to: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
@@ -254,8 +263,11 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
+          cache-to: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
@@ -398,8 +410,11 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
+          cache-to: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
@@ -420,8 +435,11 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
+          cache-to: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64

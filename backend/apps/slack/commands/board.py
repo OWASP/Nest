@@ -1,41 +1,27 @@
 """Slack bot board command."""
 
-from django.conf import settings
-from slack_sdk import WebClient
-
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
-from apps.slack.utils import get_text
-
-COMMAND = "/board"
+from apps.slack.commands.command import CommandBase
 
 
-def board_handler(ack, command: dict, client: WebClient) -> None:
-    """Handle the Slack /board command.
+class Board(CommandBase):
+    """Slack bot /board command."""
 
-    Args:
-        ack (function): Acknowledge the Slack command request.
-        command (dict): The Slack command payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    def get_template_file_name(self):
+        """Get the template file name."""
+        return "navigate.template"
 
-    """
-    ack()
+    def get_template_context(self, command: dict):
+        """Get the template context.
 
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+        Args:
+            command (dict): The Slack command payload.
 
-    blocks = [
-        markdown(f"Please visit <https://owasp.org/www-board/|Global board> page{NL}"),
-    ]
+        Returns:
+            string: The rendered text.
 
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    board_handler = SlackConfig.app.command(COMMAND)(board_handler)
+        """
+        return {
+            **super().get_template_context(command),
+            "name": "Global board",
+            "url": "https://owasp.org/www-board/",
+        }

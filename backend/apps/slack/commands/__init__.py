@@ -1,3 +1,6 @@
+from apps.slack.apps import SlackConfig
+from apps.slack.commands.command import CommandBase
+
 from . import (
     board,
     chapters,
@@ -19,3 +22,6 @@ from . import (
     staff,
     users,
 )
+
+if SlackConfig.app:
+    CommandBase.configure_commands()

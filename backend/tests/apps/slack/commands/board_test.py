@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.slack.commands.board import board_handler
+from apps.slack.commands.board import Board
 
 
 class TestBoardHandler:
@@ -29,12 +29,10 @@ class TestBoardHandler:
     )
     def test_board_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-
         ack = MagicMock()
-        board_handler(ack=ack, command=mock_command, client=mock_client)
+        Board().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
-
         assert mock_client.chat_postMessage.call_count == expected_calls
 
         if commands_enabled:
@@ -47,9 +45,10 @@ class TestBoardHandler:
 
     def test_board_handler_block_structure(self, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
-
         ack = MagicMock()
-        board_handler(ack=ack, command=mock_command, client=mock_client)
+        Board().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert len(blocks) == 1
