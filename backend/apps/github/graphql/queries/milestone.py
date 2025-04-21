@@ -32,7 +32,7 @@ class MilestoneQuery(BaseQuery):
         Args:
             root (object): The root object.
             info (ResolveInfo): The GraphQL execution context.
-            limit (int): The maimum number of milestones to return.
+            limit (int): The maximum number of milestones to return.
             login (str, optional): Filter milestones by author login.
             organization (str, optional): Filter milestones by organization login.
             distinct (bool, optional): Whether to return distinct milestones.
@@ -62,7 +62,7 @@ class MilestoneQuery(BaseQuery):
         Args:
             root (object): The root object.
             info (ResolveInfo): The GraphQL execution context.
-            limit (int): The maimum number of milestones to return.
+            limit (int): The maximum number of milestones to return.
             login (str, optional): Filter milestones by author login.
             organization (str, optional): Filter milestones by organization login.
             distinct (bool, optional): Whether to return distinct milestones.

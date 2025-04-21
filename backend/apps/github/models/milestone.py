@@ -1,4 +1,4 @@
-"""Gitub app Milestone model."""
+"""Github app Milestone model."""
 
 from django.db import models
 
