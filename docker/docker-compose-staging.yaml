@@ -37,21 +37,22 @@ services:
     networks:
       - nest-db-network
 
-    staging-nest-redis:
-      container_name: staging-nest-redis
-      image: redis:7.2-alpine
-      command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
-      volumes:
-        - redis-data:/data
-      ports:
-        - 6379:6379
-      healthcheck:
-        test: [CMD, redis-cli, ping]
-        interval: 5s
-        timeout: 3s
-        retries: 5
-      networks:
-        - nest-app-network
+  staging-nest-redis:
+    container_name: staging-nest-redis
+    image: redis:7.2.7-alpine3.21
+    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    volumes:
+      - ./volumes/cache:/data
+    networks:
+      - nest-app-network
 
 networks:
   nest-app-network:
