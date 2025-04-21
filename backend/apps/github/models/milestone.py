@@ -24,7 +24,7 @@ class Milestone(GenericIssueModel):
     due_on = models.DateTimeField(blank=True, null=True)
 
     repository = models.ForeignKey(
-        "Repository",
+        "github.Repository",
         on_delete=models.CASCADE,
         related_name="milestones",
         blank=True,
@@ -32,7 +32,7 @@ class Milestone(GenericIssueModel):
     )
 
     author = models.ForeignKey(
-        "User",
+        "github.User",
         on_delete=models.CASCADE,
         related_name="milestones",
         blank=True,
@@ -40,20 +40,16 @@ class Milestone(GenericIssueModel):
     )
 
     labels = models.ManyToManyField(
-        "Label",
+        "github.Label",
         related_name="milestones",
         blank=True,
     )
 
-    def __str__(self) -> str:
-        """Return string representation of Milestone."""
-        return f"Milestone #{self.number} - {self.title}"
-
-    def from_github(self, gh_milestone: dict, author=None, repository=None) -> None:
+    def from_github(self, gh_milestone, author=None, repository=None) -> None:
         """Populate Milestone from GitHub API response.
 
         Args:
-            gh_milestone (dict): GitHub milestone data.
+            gh_milestone (github.Milestone.Milestone): GitHub milestone object.
             author (User, optional): Author of the milestone. Defaults to None.
             repository (Repository, optional): Repository of the milestone. Defaults to None.
 
