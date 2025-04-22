@@ -48,6 +48,7 @@ geocoders
 geoloc
 geopy
 graphiql
+graphqler
 gunicorn
 heroui
 hsl
@@ -103,4 +104,3 @@ xdg
 xdist
 xsser
 zsc
-graphqler
