@@ -5,14 +5,14 @@ import {
   faExclamationCircle,
   faChevronDown,
   faChevronUp,
-  IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import millify from 'millify'
+import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { RepositoriesCardProps } from 'types/project'
+import { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
+import InfoItem from './InfoItem'
+import { TruncatedText } from './TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
@@ -30,7 +30,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
         <div className="mt-6 flex items-center justify-center text-center">
           <button
             onClick={() => setShowAllRepositories(!showAllRepositories)}
-            className="mt-4 flex items-center justify-center text-[#1d7bd7] hover:underline dark:text-sky-600"
+            className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
           >
             {showAllRepositories ? (
               <>
@@ -48,58 +48,44 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
   )
 }
 
-const RepositoryItem = ({ details }) => {
-  const navigate = useNavigate()
+const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
+  const router = useRouter()
   const handleClick = () => {
-    navigate('/repositories/' + details?.key)
+    router.push(`/organizations/${details.organization.login}/repositories/${details.key}`)
   }
+
   return (
     <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
-        className="text-start font-semibold text-blue-500 hover:underline dark:text-blue-400"
+        className="text-start font-semibold text-blue-400 hover:underline"
       >
-        {details?.name}
+        <TruncatedText text={details?.name} />
       </button>
 
       <div className="space-y-2 text-sm">
-        <InfoItem
-          icon={faStar}
-          label="Stars"
-          value={millify(details.starsCount, { precision: 1 })}
-        />
+        <InfoItem icon={faStar} pluralizedName="Stars" unit="Stars" value={details.starsCount} />
         <InfoItem
           icon={faCodeFork}
-          label="Forks"
-          value={millify(details.forksCount, { precision: 1 })}
+          pluralizedName="Forks"
+          unit="Forks"
+          value={details.forksCount}
         />
         <InfoItem
           icon={faUsers}
-          label="Contributors"
-          value={millify(details.contributorsCount, { precision: 1 })}
+          pluralizedName="Contributors"
+          unit="Contributors"
+          value={details.contributorsCount}
         />
         <InfoItem
           icon={faExclamationCircle}
-          label="Issues"
-          value={millify(details.openIssuesCount, { precision: 1 })}
+          pluralizedName="Issues"
+          unit="Issues"
+          value={details.openIssuesCount}
         />
       </div>
     </div>
   )
 }
-
-const InfoItem: React.FC<{ icon: IconDefinition; label: string; value: string }> = ({
-  icon,
-  label,
-  value,
-}) => (
-  <div className="flex items-center justify-between">
-    <span className="flex items-center">
-      <FontAwesomeIcon icon={icon} className="mr-2 h-4 w-4" />
-      {label}
-    </span>
-    <span className="font-medium">{value.toLocaleString()}</span>
-  </div>
-)
 
 export default RepositoriesCard

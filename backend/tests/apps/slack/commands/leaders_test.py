@@ -4,24 +4,24 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import NL
-from apps.slack.commands.leaders import leaders_handler
+from apps.slack.commands.leaders import Leaders
 
 
 class TestLeadersHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "text": "web application",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_chapter(self):
         return {
             "idx_key": "test-chapter",
@@ -29,7 +29,7 @@ class TestLeadersHandler:
             "idx_name": "Test Chapter",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_project(self):
         return {
             "idx_key": "test-project",
@@ -61,11 +61,13 @@ class TestLeadersHandler:
         mock_project,
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-
         mock_get_chapters.return_value = {"hits": [mock_chapter] if has_results else []}
         mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
 
-        leaders_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        ack = MagicMock()
+        Leaders().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()
@@ -97,17 +99,17 @@ class TestLeadersHandler:
         mock_slack_client,
     ):
         command = {"text": search_text, "user_id": "U123456"}
-
         mock_escape.return_value = expected_escaped
-
         settings.SLACK_COMMANDS_ENABLED = True
         mock_get_chapters.return_value = {"hits": []}
         mock_get_projects.return_value = {"hits": []}
 
-        leaders_handler(ack=MagicMock(), command=command, client=mock_slack_client)
+        ack = MagicMock()
+        Leaders().handler(ack=ack, command=command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-
         assert any(expected_escaped in str(block) for block in blocks)
 
     @pytest.mark.parametrize(
@@ -130,23 +132,23 @@ class TestLeadersHandler:
         mock_slack_command,
     ):
         settings.SLACK_COMMANDS_ENABLED = True
-
         mock_chapter = {
             "idx_key": "test-chapter",
             "idx_leaders": leaders_list,
             "idx_name": "Test Chapter",
         }
-
         mock_project = {
             "idx_key": "test-project",
             "idx_leaders": ["Leader D"],
             "idx_name": "Test Project",
         }
-
         mock_get_chapters.return_value = {"hits": [mock_chapter]}
         mock_get_projects.return_value = {"hits": [mock_project]}
 
-        leaders_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        ack = MagicMock()
+        Leaders().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         block_texts = [

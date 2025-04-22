@@ -7,7 +7,7 @@ from apps.slack.common.presentation import EntityPresentation
 
 
 class TestChapterHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_chapter_data(self):
         return {
             "hits": [
@@ -23,7 +23,7 @@ class TestChapterHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_empty_chapter_data(self):
         return {
             "hits": [],
@@ -32,9 +32,10 @@ class TestChapterHandler:
 
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
-        with patch("apps.owasp.api.search.chapter.get_chapters") as mock_get_chapters, patch(
-            "apps.owasp.models.chapter.Chapter"
-        ) as mock_chapter_model:
+        with (
+            patch("apps.owasp.api.search.chapter.get_chapters") as mock_get_chapters,
+            patch("apps.owasp.models.chapter.Chapter") as mock_chapter_model,
+        ):
             mock_chapter_model.active_chapters_count.return_value = 42
             yield {"get_chapters": mock_get_chapters, "chapter_model": mock_chapter_model}
 

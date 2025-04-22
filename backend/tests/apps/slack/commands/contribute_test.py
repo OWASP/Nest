@@ -3,25 +3,25 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.contribute import contribute_handler
+from apps.slack.commands.contribute import Contribute
 
 
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
 class TestContributeHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -38,7 +38,7 @@ class TestContributeHandler:
         with patch(
             "apps.github.models.issue.Issue.open_issues_count", new_callable=MagicMock
         ) as mock:
-            mock.return_value = 10  # Example value
+            mock.return_value = 10
             yield mock
 
     @pytest.mark.parametrize(
@@ -56,8 +56,10 @@ class TestContributeHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
 
-        contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Contribute().handler(ack=ack, command=mock_command, client=mock_client)
 
+        ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_contribute_handler_with_results(
@@ -69,15 +71,18 @@ class TestContributeHandler:
                 {
                     "idx_title": "Test Contribution",
                     "idx_project_name": "Test Project",
-                    "idx_project_url": "http://example.com/project",
+                    "idx_project_url": "https://example.com/project",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com/contribution",
+                    "idx_url": "https://example.com/contribution",
                 }
             ],
             "nbPages": 1,
         }
 
-        contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Contribute().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Contribution" in str(block) for block in blocks)

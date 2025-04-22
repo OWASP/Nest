@@ -15,18 +15,25 @@ class SnapshotQuery(BaseQuery):
         key=graphene.String(required=True),
     )
 
-    recent_snapshots = graphene.List(
+    snapshots = graphene.List(
         SnapshotNode,
-        limit=graphene.Int(default_value=8),
+        limit=graphene.Int(default_value=12),
     )
 
     def resolve_snapshot(root, info, key):
         """Resolve snapshot by key."""
         try:
-            return Snapshot.objects.get(key=key)
+            return Snapshot.objects.get(
+                key=key,
+                status=Snapshot.Status.COMPLETED,
+            )
         except Snapshot.DoesNotExist:
             return None
 
-    def resolve_recent_snapshots(root, info, limit):
-        """Resolve recent snapshots."""
-        return Snapshot.objects.order_by("-created_at")[:limit]
+    def resolve_snapshots(root, info, limit):
+        """Resolve snapshots."""
+        return Snapshot.objects.filter(
+            status=Snapshot.Status.COMPLETED,
+        ).order_by(
+            "-created_at",
+        )[:limit]

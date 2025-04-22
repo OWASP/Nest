@@ -1,26 +1,31 @@
 import { useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
-import { ProjectDetailsPage } from 'pages'
-import { useNavigate } from 'react-router-dom'
 import { render } from 'wrappers/testUtil'
-import { toaster } from 'components/ui/toaster'
+import ProjectDetailsPage from 'app/projects/[projectKey]/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
 
-jest.mock('components/ui/toaster', () => ({
-  toaster: {
-    create: jest.fn(),
-  },
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+}))
+
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ projectKey: 'test-project' }),
-  useNavigate: jest.fn(),
 }))
 
 const mockError = {
@@ -28,16 +33,12 @@ const mockError = {
 }
 
 describe('ProjectDetailsPage', () => {
-  let navigateMock: jest.Mock
-
   beforeEach(() => {
-    navigateMock = jest.fn()
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       loading: false,
       error: null,
     })
-    ;(useNavigate as jest.Mock).mockImplementation(() => navigateMock)
   })
 
   afterEach(() => {
@@ -85,24 +86,24 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => screen.getByText('Project not found'))
     expect(screen.getByText('Project not found')).toBeInTheDocument()
-    expect(toaster.create).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      type: 'error',
+    expect(addToast).toHaveBeenCalledWith({
+      description: 'An unexpected server error occurred.',
+      title: 'Server Error',
+      timeout: 5000,
+      shouldShowTimeoutProgress: true,
+      color: 'danger',
+      variant: 'solid',
     })
   })
 
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
 
-    const contributorsSection = screen
-      .getByRole('heading', { name: /Top Contributors/i })
-      .closest('div')
-    const showMoreButton = within(contributorsSection!).getByRole('button', { name: /Show more/i })
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
@@ -110,11 +111,11 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 8')).toBeInTheDocument()
     })
 
-    const showLessButton = within(contributorsSection!).getByRole('button', { name: /Show less/i })
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
     })
   })
 
@@ -124,9 +125,8 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
 
-    screen.getByText('Contributor 1').closest('button')?.click()
-
-    expect(navigateMock).toHaveBeenCalledWith('/community/users/contributor1')
+    const contributorLink = screen.getByText('Contributor 1').closest('a')
+    expect(contributorLink).toHaveAttribute('href', '/members/contributor1')
   })
 
   test('Recent issues are rendered correctly', async () => {
@@ -137,8 +137,7 @@ describe('ProjectDetailsPage', () => {
 
       issues.forEach((issue) => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
-
-        expect(screen.getByText(`${issue.commentsCount} comments`)).toBeInTheDocument()
+        expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
       })
     })
   })
@@ -213,20 +212,30 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('No Stars')).toBeInTheDocument()
     })
   })
-})
-test('renders project stats correctly', async () => {
-  ;(useQuery as jest.Mock).mockReturnValue({
-    data: mockProjectDetailsData,
-    error: null,
+
+  test('renders pull requests section correctly', async () => {
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Pull Request 1')).toBeInTheDocument()
+      expect(screen.getByText('Test Pull Request 2')).toBeInTheDocument()
+    })
   })
 
-  render(<ProjectDetailsPage />)
+  test('renders project stats correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
 
-  await waitFor(() => {
-    expect(screen.getByText(`2.2K Stars`)).toBeInTheDocument()
-    expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
-    expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
-    expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
-    expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`2.2K Stars`)).toBeInTheDocument()
+      expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
+      expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
+      expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
+      expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+    })
   })
 })

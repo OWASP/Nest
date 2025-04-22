@@ -1,42 +1,24 @@
 """Slack bot projects command."""
 
-from django.conf import settings
-
-from apps.slack.apps import SlackConfig
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.handlers.projects import get_blocks
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.utils import get_text
-
-COMMAND = "/projects"
 
 
-def projects_handler(ack, command, client):
-    """Slack /projects command handler."""
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+class Projects(CommandBase):
+    """Slack bot /projects command."""
 
-    search_query = command["text"].strip()
-    blocks = get_blocks(
-        search_query=search_query,
-        limit=10,
-        presentation=EntityPresentation(
-            include_feedback=True,
-            include_metadata=True,
-            include_pagination=False,
-            include_timestamps=True,
-            name_truncation=80,
-            summary_truncation=300,
-        ),
-    )
-
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    projects_handler = SlackConfig.app.command(COMMAND)(projects_handler)
+    def get_render_blocks(self, command):
+        """Get the rendered blocks."""
+        return get_blocks(
+            search_query=command["text"].strip(),
+            limit=10,
+            presentation=EntityPresentation(
+                include_feedback=True,
+                include_metadata=True,
+                include_pagination=False,
+                include_timestamps=True,
+                name_truncation=80,
+                summary_truncation=300,
+            ),
+        )

@@ -32,12 +32,12 @@ class TestProjectQuery:
     class TestProjectResolution:
         """Test cases for project resolution."""
 
-        @pytest.fixture()
+        @pytest.fixture
         def mock_project(self):
             """Project mock fixture."""
             return Mock(spec=Project)
 
-        @pytest.fixture()
+        @pytest.fixture
         def mock_info(self):
             """GraphQL info mock fixture."""
             return Mock()

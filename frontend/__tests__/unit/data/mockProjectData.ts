@@ -3,11 +3,20 @@ export const mockProjectData = {
     {
       objectID: '1',
       name: 'Project 1',
-      url: 'https://example.com/project1',
+      url: 'https://avatars.githubusercontent.com/project1',
       summary: 'This is a summary of Project 1.',
       level: '1',
       leaders: ['Leader 1'],
-      top_contributors: ['Contributor 1'],
+      top_contributors: [
+        {
+          avatarUrl: 'https://avatars.githubusercontent.com/avatar1.png',
+          contributionsCount: 10,
+          login: 'contributor1',
+          name: 'Contributor 1',
+          projectKey: 'project1',
+          projectName: 'Project 1',
+        },
+      ],
       topics: ['Topic 1'],
       updated_at: '2023-10-01',
       forks_count: 10,

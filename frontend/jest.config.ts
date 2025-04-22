@@ -1,19 +1,23 @@
-export default {
+import type { Config } from 'jest'
+
+const config: Config = {
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/components/**',
-    '!src/**/index.ts',
-    '!src/main.tsx',
-    '!src/reportWebVitals.ts',
-    '!src/setupTests.ts',
-    '!src/utils/**',
-    '!src/sentry.config.ts',
-    '!src/hooks/**',
-    '!src/wrappers/**',
-    '!src/types/**',
     '!src/api/**',
+    '!src/app/layout.tsx',
+    '!src/components/**',
+    '!src/hooks/**',
+    '!src/instrumentation.ts',
+    '!src/instrumentation-client.ts',
+    '!src/reportWebVitals.ts',
+    '!src/sentry.server.config.ts',
+    '!src/server/**',
+    '!src/setupTests.ts',
+    '!src/types/**',
+    '!src/utils/**',
+    '!src/wrappers/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
@@ -25,7 +29,7 @@ export default {
       statements: 75,
     },
   },
-  preset: 'ts-jest',
+  globals: {},
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: ['<rootDir>/__tests__/unit/data/', '<rootDir>/__tests__/e2e/'],
@@ -40,3 +44,5 @@ export default {
   moduleDirectories: ['node_modules', 'src'],
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!@zag-js)'],
 }
+
+export default config

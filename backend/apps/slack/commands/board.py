@@ -1,33 +1,19 @@
 """Slack bot board command."""
 
-from django.conf import settings
-
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
-from apps.slack.utils import get_text
-
-COMMAND = "/board"
+from apps.slack.commands.command import CommandBase
 
 
-def board_handler(ack, command, client):
-    """Slack /board command handler."""
-    ack()
+class Board(CommandBase):
+    """Slack bot /board command."""
 
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+    def get_template_file_name(self):
+        """Get the template file name."""
+        return "navigate.jinja"
 
-    blocks = [
-        markdown(f"Please visit <https://owasp.org/www-board/|Global board> page{NL}"),
-    ]
-
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    board_handler = SlackConfig.app.command(COMMAND)(board_handler)
+    def get_template_context(self, command):
+        """Get the template context."""
+        return {
+            **super().get_template_context(command),
+            "name": "Global board",
+            "url": "https://owasp.org/www-board/",
+        }

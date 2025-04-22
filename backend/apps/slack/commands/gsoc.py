@@ -1,89 +1,76 @@
 """Slack bot gsoc command."""
 
-from django.conf import settings
+from django.utils import timezone
 
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.common.utils import get_absolute_url
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_START
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
-from apps.slack.utils import get_text
-
-COMMAND = "/gsoc"
+from apps.slack.constants import (
+    NEST_BOT_NAME,
+    OWASP_CONTRIBUTE_CHANNEL_ID,
+    OWASP_GSOC_CHANNEL_ID,
+    OWASP_PROJECT_NEST_CHANNEL_ID,
+)
+from apps.slack.utils import get_gsoc_projects
 
 SUPPORTED_YEAR_START = 2012
 SUPPORTED_YEAR_END = 2025
 SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
 
+MARCH = 3
 
-def gsoc_handler(ack, command, client):
-    """Slack /gsoc command handler."""
-    from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
-    from apps.slack.utils import get_gsoc_projects
 
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+class Gsoc(CommandBase):
+    """Slack bot /gsoc command."""
 
-    command_text = command["text"].strip()
+    def get_template_context(self, command):
+        """Get the template context."""
+        now = timezone.now()
+        gsoc_year = now.year if now.month > MARCH else now.year - 1
+        command_text = command["text"].strip()
+        context = super().get_template_context(command)
+        template_context = {"mode": "", "command": self.get_command_name()}
 
-    if not command_text or command_text in COMMAND_START:
-        blocks = [
-            *GSOC_GENERAL_INFORMATION_BLOCKS,
-            markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-        ]
-    elif command_text.isnumeric():
-        year = int(command_text)
-        if year in SUPPORTED_YEARS:
-            gsoc_projects = get_gsoc_projects(year)
-            gsoc_projects_markdown = f"{NL}".join(
-                f"  • <{gp['idx_url']}|{gp['idx_name']}>"
-                for gp in sorted(gsoc_projects, key=lambda p: p["idx_name"])
+        if not command_text or command_text in COMMAND_START:
+            template_context.update(
+                {
+                    "contribute_channel": OWASP_CONTRIBUTE_CHANNEL_ID,
+                    "feedback_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
+                    "gsoc_channel": OWASP_GSOC_CHANNEL_ID,
+                    "mode": "general",
+                    "nest_bot_name": NEST_BOT_NAME,
+                    "previous_year": gsoc_year,
+                    "projects_url": get_absolute_url("projects"),
+                }
             )
-            additional_info = []
-            blocks = [
-                markdown(f"*GSoC {year} projects:*{2*NL}{gsoc_projects_markdown}"),
-            ]
-            if year in SUPPORTED_ANNOUNCEMENT_YEARS:
-                additional_info.append(
-                    f"  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{year}|"
-                    f"GSoC {year} announcement>{NL}"
+        elif command_text.isnumeric():
+            year = int(command_text)
+            if year in SUPPORTED_YEARS:
+                template_context.update(
+                    {
+                        "has_announcement": year in SUPPORTED_ANNOUNCEMENT_YEARS,
+                        "mode": "year",
+                        "projects": sorted(get_gsoc_projects(year), key=lambda p: p["idx_name"]),
+                        "year": year,
+                    }
                 )
-
-            additional_info.append(
-                f"  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{year}ideas|"
-                f"GSoC {year} ideas>"
-            )
-            blocks.append(
-                markdown(
-                    f"Additional information:{NL}{''.join(additional_info)}",
-                ),
-            )
+            else:
+                template_context.update(
+                    {
+                        "mode": "unsupported_year",
+                        "supported_end": SUPPORTED_YEAR_END,
+                        "supported_start": SUPPORTED_YEAR_START,
+                        "year": year,
+                    }
+                )
         else:
-            blocks = [
-                markdown(
-                    f"Year {year} is not supported. Supported years: "
-                    f"{SUPPORTED_YEAR_START}-{SUPPORTED_YEAR_END}, "
-                    f"e.g. `{COMMAND} {SUPPORTED_YEAR_END}`"
-                )
-            ]
-    else:
-        blocks = [
-            markdown(
-                f"*`{COMMAND} {command_text}` is not supported*{NL}"
-                if command_text
-                else f"*`{COMMAND}` is not supported*{NL}"
-            ),
-        ]
+            template_context.update(
+                {
+                    "command_text": command_text,
+                    "mode": "invalid",
+                }
+            )
 
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    gsoc_handler = SlackConfig.app.command(COMMAND)(gsoc_handler)
+        context.update(template_context)
+        return context

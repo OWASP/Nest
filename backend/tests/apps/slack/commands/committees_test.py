@@ -3,13 +3,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.committees import committees_handler
+from apps.slack.commands.committees import Committees
 
 
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
@@ -21,14 +21,14 @@ def mock_active_committees_count():
 
 
 class TestCommitteesHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -54,8 +54,10 @@ class TestCommitteesHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = search_query
 
-        committees_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Committees().handler(ack=ack, command=mock_command, client=mock_client)
 
+        ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_committees_handler_with_results(self, mock_get_committees, mock_client, mock_command):
@@ -65,14 +67,17 @@ class TestCommitteesHandler:
                 {
                     "idx_name": "Test Committee",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com",
+                    "idx_url": "https://example.com",
                     "idx_leaders": ["Leader 1"],
                 }
             ],
             "nbPages": 1,
         }
 
-        committees_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Committees().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Committee" in str(block) for block in blocks)

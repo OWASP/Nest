@@ -1,18 +1,30 @@
-import { Button } from '@chakra-ui/react'
-import { faChevronRight, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faFolderOpen, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import millify from 'millify'
+import Image from 'next/image'
 import { UserCardProps } from 'types/card'
 
-const UserCard = ({ avatar, name, company, email, location, button }: UserCardProps) => {
+const UserCard = ({
+  avatar,
+  button,
+  className,
+  company,
+  email,
+  followers_count,
+  location,
+  name,
+  repositories_count,
+}: UserCardProps) => {
   return (
     <Button
-      onClick={button.onclick}
-      className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+      onPress={button.onclick}
+      className={`group flex flex-col items-center rounded-lg p-6 ${className}`}
     >
       <div className="flex w-full flex-col items-center space-y-4">
-        <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-500 dark:ring-gray-700">
+        <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-400 dark:ring-gray-700">
           {avatar ? (
-            <img src={`${avatar}&s=160`} alt={name} className="h-full w-full object-cover" />
+            <Image fill src={`${avatar}&s=160`} alt={name || 'user'} objectFit="cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
               <FontAwesomeIcon
@@ -24,16 +36,30 @@ const UserCard = ({ avatar, name, company, email, location, button }: UserCardPr
         </div>
 
         <div className="text-center">
-          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 group-hover:text-blue-500 dark:text-white sm:text-xl">
+          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
             {name}
           </h3>
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email}
           </p>
+          <div className="flex justify-center gap-3">
+            {followers_count > 0 && (
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
+                {millify(followers_count, { precision: 1 })}
+              </p>
+            )}
+            {repositories_count > 0 && (
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
+                {millify(repositories_count, { precision: 1 })}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="mt-auto inline-flex items-center text-sm font-medium text-blue-500 dark:text-blue-400">
+      <div className="mt-auto inline-flex items-center text-sm font-medium text-blue-400">
         View Profile
         <FontAwesomeIcon
           icon={faChevronRight}

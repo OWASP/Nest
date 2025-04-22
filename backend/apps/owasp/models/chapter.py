@@ -28,6 +28,9 @@ class Chapter(
 
     class Meta:
         db_table = "owasp_chapters"
+        indexes = [
+            models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
+        ]
         verbose_name_plural = "Chapters"
 
     level = models.CharField(verbose_name="Level", max_length=5, default="", blank=True)
@@ -73,7 +76,12 @@ class Chapter(
         return IndexBase.get_total_count("chapters", search_filters="idx_is_active:true")
 
     def from_github(self, repository):
-        """Update instance based on GitHub repository data."""
+        """Update instance based on GitHub repository data.
+
+        Args:
+            repository (github.Repository): The GitHub repository instance.
+
+        """
         self.owasp_repository = repository
 
         RepositoryBasedEntityModel.from_github(
@@ -94,7 +102,7 @@ class Chapter(
         self.updated_at = repository.updated_at
 
     def generate_geo_location(self):
-        """Add latitude and longitude data."""
+        """Add latitude and longitude data based on suggested location or geo string."""
         location = None
         if self.suggested_location and self.suggested_location != "None":
             location = get_location_coordinates(self.suggested_location)
@@ -106,7 +114,13 @@ class Chapter(
             self.longitude = location.longitude
 
     def generate_suggested_location(self, open_ai=None, max_tokens=100):
-        """Generate project summary."""
+        """Generate a suggested location using OpenAI.
+
+        Args:
+            open_ai (OpenAi, optional): An instance of OpenAi.
+            max_tokens (int, optional): Maximum tokens for the OpenAI prompt.
+
+        """
         if not (prompt := Prompt.get_owasp_chapter_suggested_location()):
             return
 
@@ -119,7 +133,15 @@ class Chapter(
         )
 
     def get_geo_string(self, include_name=True):
-        """Return geo string."""
+        """Return a geo string for the chapter.
+
+        Args:
+            include_name (bool, optional): Whether to include the chapter name.
+
+        Returns:
+            str: The geo string.
+
+        """
         return join_values(
             (
                 self.name.replace("OWASP", "").strip() if include_name else "",
@@ -130,7 +152,13 @@ class Chapter(
         )
 
     def save(self, *args, **kwargs):
-        """Save chapter."""
+        """Save the chapter instance.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         if not self.suggested_location:
             self.generate_suggested_location()
 
@@ -141,12 +169,28 @@ class Chapter(
 
     @staticmethod
     def bulk_save(chapters, fields=None):
-        """Bulk save chapters."""
+        """Bulk save chapters.
+
+        Args:
+            chapters (list[Chapter]): List of Chapter instances to save.
+            fields (list[str], optional): List of fields to update.
+
+        """
         BulkSaveModel.bulk_save(Chapter, chapters, fields=fields)
 
     @staticmethod
     def update_data(gh_repository, repository, save=True):
-        """Update chapter data."""
+        """Update chapter data from GitHub repository.
+
+        Args:
+            gh_repository (github.Repository): The GitHub repository instance.
+            repository (github.Repository): The repository data to update from.
+            save (bool, optional): Whether to save the instance.
+
+        Returns:
+            Chapter: The updated Chapter instance.
+
+        """
         key = gh_repository.name.lower()
         try:
             chapter = Chapter.objects.get(key=key)

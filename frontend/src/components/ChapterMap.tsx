@@ -1,10 +1,12 @@
-import L from 'leaflet'
+'use client'
+import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useMemo, useRef } from 'react'
+import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
+import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
-import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
 
 const ChapterMap = ({
   geoLocData,
@@ -16,7 +18,7 @@ const ChapterMap = ({
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
-  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null)
+  const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
 
   const chapters = useMemo(() => {
     return geoLocData.map((chapter) => ({
@@ -28,6 +30,7 @@ const ChapterMap = ({
   }, [geoLocData])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
@@ -45,18 +48,17 @@ const ChapterMap = ({
     }
 
     const map = mapRef.current
-    // Remove previous markers
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.LayerGroup) {
-        map.removeLayer(layer)
-      }
-    })
 
-    // Create a new marker cluster group
-    const markerClusterGroup = L.markerClusterGroup()
-    const bounds: [number, number][] = []
-    markerClusterRef.current = markerClusterGroup
-    chapters.forEach((chapter) => {
+    if (!markerClusterRef.current) {
+      markerClusterRef.current = L.markerClusterGroup()
+      map.addLayer(markerClusterRef.current)
+    } else {
+      markerClusterRef.current.clearLayers()
+    }
+
+    const markerClusterGroup = markerClusterRef.current
+
+    const markers = chapters.map((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
@@ -66,6 +68,7 @@ const ChapterMap = ({
         shadowSize: [41, 41],
         shadowUrl: '/img/marker-shadow.png',
       })
+
       const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
       const popup = L.popup()
       const popupContent = document.createElement('div')
@@ -76,11 +79,10 @@ const ChapterMap = ({
       })
       popup.setContent(popupContent)
       marker.bindPopup(popup)
-      markerClusterGroup.addLayer(marker)
-      bounds.push([chapter.lat, chapter.lng])
+      return marker
     })
 
-    map.addLayer(markerClusterGroup)
+    markerClusterGroup.addLayers(markers)
 
     if (showLocal && chapters.length > 0) {
       const maxNearestChapters = 5

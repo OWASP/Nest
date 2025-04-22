@@ -1,28 +1,28 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 from django.conf import settings
 
 from apps.common.constants import OWASP_WEBSITE_URL
-from apps.slack.commands.staff import staff_handler
+from apps.slack.commands.staff import Staff
 
 FAILED_STAFF_DATA_ERROR_MESSAGE = "Failed to get OWASP Foundation staff data."
 
 
 class TestStaffHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_staff(self):
         return [
             {
@@ -62,7 +62,10 @@ class TestStaffHandler:
 
         mock_get_staff_data.return_value = mock_staff if has_staff_data else []
 
-        staff_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)
+        ack = MagicMock()
+        Staff().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
 
         if not commands_enabled:
             mock_slack_client.conversations_open.assert_not_called()
@@ -72,15 +75,19 @@ class TestStaffHandler:
                 users=mock_slack_command["user_id"]
             )
             blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-            assert blocks[0]["text"]["text"] == expected_message
+            assert expected_message in blocks[0]["text"]["text"]
             for idx, staff in enumerate(mock_staff, start=1):
                 staff_block = blocks[idx]["text"]["text"]
                 assert f"*{idx}. {staff['name']}, {staff['title']}*" in staff_block
                 assert f"_{staff['location']}_" in staff_block
-                assert f"{staff['description']}" in staff_block
+                assert staff["description"] in staff_block
             assert OWASP_WEBSITE_URL in blocks[-1]["text"]["text"]
         else:
+            mock_slack_client.conversations_open.assert_called_once_with(
+                users=mock_slack_command["user_id"]
+            )
             mock_slack_client.chat_postMessage.assert_called_once_with(
-                channel=mock_slack_command["user_id"],
+                blocks=ANY,
+                channel="C123456",
                 text=FAILED_STAFF_DATA_ERROR_MESSAGE,
             )

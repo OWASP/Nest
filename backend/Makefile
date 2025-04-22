@@ -1,3 +1,8 @@
+clean-backend:
+	@rm -rf backend/.cache
+	@rm -rf backend/.local
+	@rm -rf backend/.venv
+
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
 
@@ -42,6 +47,10 @@ github-update-owasp-organization:
 github-update-project-related-repositories:
 	@echo "Updating OWASP project related GitHub repositories"
 	@CMD="python manage.py github_update_project_related_repositories" $(MAKE) exec-backend-command
+
+github-update-users:
+	@echo "Updating GitHub users"
+	@CMD="python manage.py github_update_users" $(MAKE) exec-backend-command
 
 index-data:
 	@echo "Indexing Nest data"
@@ -134,7 +143,7 @@ setup:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 shell-backend:
-	@CMD="/bin/bash" $(MAKE) exec-backend-command-it
+	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
 sync-data: \
 	update-data \
@@ -146,7 +155,7 @@ test-backend:
 		--cache-from nest-test-backend \
 		-f backend/docker/Dockerfile.test backend \
 		-t nest-test-backend
-	@docker run -e DJANGO_CONFIGURATION=Test nest-test-backend pytest
+	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest
 
 update-backend-dependencies:
 	@CMD="poetry update" $(MAKE) exec-backend-command
@@ -157,6 +166,7 @@ update-data: \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
 	github-update-project-related-repositories \
+	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \
 	owasp-update-sponsors

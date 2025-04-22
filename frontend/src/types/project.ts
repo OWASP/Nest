@@ -8,8 +8,23 @@ export interface ProjectDataType {
 
 export interface ProjectIssuesType {
   author: { avatarUrl: string; key: string; name: string }
-  commentsCount: number
   createdAt: number
+  organizationName?: string
+  repositoryName?: string
+  title: string
+  url: string
+}
+
+export interface ProjectPullRequestsType {
+  author: {
+    avatarUrl: string
+    key: string
+    name: string
+    login: string
+  }
+  createdAt: string
+  organizationName: string
+  repositoryName?: string
   title: string
   url: string
 }
@@ -27,6 +42,7 @@ export interface ProjectTypeAlgolia {
   description: string
   forks_count: number
   is_active: boolean
+  issues_count: number
   key: string
   languages: string[]
   leaders: string[]
@@ -62,6 +78,7 @@ export interface ProjectTypeGraphql {
   updatedAt: number
   url: string
   recentIssues: ProjectIssuesType[]
+  recentPullRequests: ProjectPullRequestsType[]
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
   topContributors: TopContributorsTypeGraphql[]
@@ -74,8 +91,12 @@ export interface RepositoriesCardProps {
 export interface RepositoryCardProps {
   contributorsCount: number
   forksCount: number
+  key?: string
   name: string
   openIssuesCount: number
+  organization?: {
+    login: string
+  }
   starsCount: number
   subscribersCount: number
   url: string
@@ -90,7 +111,9 @@ export type ProjectReleaseType = {
   }
   isPreRelease: boolean
   name: string
+  organizationName?: string
   publishedAt: number
+  repositoryName: string
   tagName: string
   url: string
 }

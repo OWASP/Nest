@@ -1,33 +1,11 @@
 """Slack bot sponsors command."""
 
-from django.conf import settings
-
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
-from apps.slack.utils import get_text
-
-COMMAND = "/sponsor"
+from apps.slack.commands.command import CommandBase
 
 
-def sponsor_handler(ack, command, client):
-    """Slack /sponsor command handler."""
-    ack()
+class Sponsor(CommandBase):
+    """Slack bot /sponsor command."""
 
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
-
-    blocks = [
-        markdown(f"Coming soon...{NL}"),
-    ]
-
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    sponsor_handler = SlackConfig.app.command(COMMAND)(sponsor_handler)
+    def get_render_text(self, command):
+        """Get the rendered text."""
+        return "Coming soon..."

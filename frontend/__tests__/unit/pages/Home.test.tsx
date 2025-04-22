@@ -1,27 +1,73 @@
 import { useQuery } from '@apollo/client'
-import { screen, waitFor } from '@testing-library/react'
+import { addToast } from '@heroui/toast'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
-import { fetchAlgoliaData } from 'api/fetchAlgoliaData'
-import { Home } from 'pages'
+import { useRouter } from 'next/navigation'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
-import { toaster } from 'components/ui/toaster'
+import Home from 'app/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
   useQuery: jest.fn(),
 }))
 
-jest.mock('components/ui/toaster', () => ({
-  toaster: {
-    create: jest.fn(),
-  },
-}))
-
-jest.mock('api/fetchAlgoliaData', () => ({
+jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
+jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
+  __esModule: true,
+  default: () => <span data-testid="mock-icon" />,
+}))
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
+
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => mockRouter),
+}))
+
+jest.mock('@/components/MarkdownWrapper', () => {
+  return ({ content, className }: { content: string; className?: string }) => (
+    <div
+      className={`md-wrapper ${className || ''}`}
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
+  )
+})
+
+jest.mock('components/Modal', () => {
+  const ModalMock = jest.fn(({ isOpen, onClose, title, summary, button, description }) => {
+    if (!isOpen) return null
+    return (
+      <div role="dialog">
+        <h2>{title}</h2>
+        <p>{summary}</p>
+        <p>{description}</p>
+        <button onClick={onClose} aria-label="Close modal">
+          Close
+        </button>
+        <a href={button.url}>{button.label}</a>
+      </div>
+    )
+  })
+  return ModalMock
+})
+
+jest.mock('next/link', () => {
+  return ({ children }) => children
+})
+
 describe('Home', () => {
+  let mockRouter: { push: jest.Mock }
+
   beforeEach(() => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
@@ -29,6 +75,8 @@ describe('Home', () => {
       error: null,
     })
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockAlgoliaData)
+    mockRouter = { push: jest.fn() }
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -56,7 +104,7 @@ describe('Home', () => {
     await waitFor(() => {
       expect(screen.getByText('Welcome to OWASP Nest')).toBeInTheDocument()
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
-      expect(screen.getByText('Documentation')).toBeInTheDocument()
+      expect(screen.getByText('Tool')).toBeInTheDocument()
     })
   })
 
@@ -69,10 +117,13 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(toaster.create).toHaveBeenCalledWith({
+      expect(addToast).toHaveBeenCalledWith({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
-        type: 'error',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
       })
     })
   })
@@ -116,7 +167,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByText('OWASP Chapters Worldwide')).toBeInTheDocument()
+      expect(screen.getByText('Chapters Worldwide')).toBeInTheDocument()
     })
   })
 
@@ -152,7 +203,7 @@ describe('Home', () => {
     await waitFor(() => {
       expect(screen.getByText('Welcome to OWASP Nest')).toBeInTheDocument()
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
-      expect(screen.getByText('Documentation')).toBeInTheDocument()
+      expect(screen.getByText('Tool')).toBeInTheDocument()
     })
   })
 
@@ -164,6 +215,100 @@ describe('Home', () => {
         expect(screen.getByText(event.name)).toBeInTheDocument()
         expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
       })
+    })
+  })
+
+  test('renders Recent Pull Requests section', async () => {
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+      mockGraphQLData.recentPullRequests.forEach((pullRequest) => {
+        expect(screen.getByText(pullRequest.title)).toBeInTheDocument()
+        expect(screen.getByText(pullRequest.repositoryName)).toBeInTheDocument()
+      })
+    })
+  })
+
+  test('renders when no recent releases', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: {
+        ...mockGraphQLData,
+        recentReleases: [],
+      },
+      error: null,
+    })
+    render(<Home />)
+    await waitFor(() => {
+      expect(screen.getByText('No recent releases.')).toBeInTheDocument()
+    })
+  })
+
+  test('renders event details including date range and location', async () => {
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
+      expect(screen.getByText('Event 1')).toBeInTheDocument()
+      expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
+      expect(screen.getByText('Location 1')).toBeInTheDocument()
+    })
+  })
+
+  test('opens and closes modal for Upcoming Events and triggers onClose', async () => {
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
+      expect(screen.getByText('Event 1')).toBeInTheDocument()
+    })
+
+    const eventButton = screen.getByText('Event 1')
+    fireEvent.click(eventButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Event Summary')).toBeInTheDocument()
+    })
+  })
+
+  test('displays modal content correctly after clicking Event 1', async () => {
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
+      expect(screen.getByText('Event 1')).toBeInTheDocument()
+    })
+
+    const eventButton = screen.getByText('Event 1')
+    fireEvent.click(eventButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Event Summary')).toBeInTheDocument()
+      expect(screen.getByText('View Event')).toBeInTheDocument()
+      expect(screen.getByText('The event summary has been generated by AI')).toBeInTheDocument()
+    })
+  })
+
+  test('closes modal when close button is clicked', async () => {
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
+      expect(screen.getByText('Event 1')).toBeInTheDocument()
+    })
+
+    const eventButton = screen.getByText('Event 1')
+    fireEvent.click(eventButton)
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    const closeButton = screen.getByLabelText('Close modal')
+    fireEvent.click(closeButton)
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
   })
 })

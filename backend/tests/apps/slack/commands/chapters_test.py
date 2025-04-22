@@ -3,13 +3,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.chapters import chapters_handler
+from apps.slack.commands.chapters import Chapters
 
 
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
     with patch("apps.common.utils.get_absolute_url") as mock:
-        mock.return_value = "http://example.com"
+        mock.return_value = "https://example.com"
         yield mock
 
 
@@ -21,14 +21,14 @@ def mock_active_chapters_count():
 
 
 class TestChaptersHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -55,8 +55,10 @@ class TestChaptersHandler:
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_command["text"] = command_text
 
-        chapters_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack = MagicMock()
+        Chapters().handler(ack=ack, command=mock_command, client=mock_client)
 
+        ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_chapters_handler_with_results(self, mock_get_chapters, mock_client, mock_command):
@@ -66,7 +68,7 @@ class TestChaptersHandler:
                 {
                     "idx_name": "Test Chapter",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com",
+                    "idx_url": "https://example.com",
                     "idx_leaders": ["Leader 1"],
                     "idx_country": "Test Country",
                     "idx_suggested_location": "Test Location",
@@ -76,8 +78,10 @@ class TestChaptersHandler:
             ],
             "nbPages": 1,
         }
+        ack = MagicMock()
+        Chapters().handler(ack=ack, command=mock_command, client=mock_client)
 
-        chapters_handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         assert any("Test Chapter" in str(block) for block in blocks)

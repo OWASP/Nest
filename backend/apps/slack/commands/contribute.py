@@ -1,38 +1,22 @@
 """Slack bot contribute command."""
 
-from django.conf import settings
-
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.contribute import get_blocks
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.utils import get_text
-
-COMMAND = "/contribute"
 
 
-def contribute_handler(ack, command, client):
-    """Slack /contribute command handler."""
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+class Contribute(CommandBase):
+    """Slack bot /contribute command."""
 
-    command_text = command["text"].strip()
+    def get_render_blocks(self, command):
+        """Get the rendered blocks."""
+        command_text = command["text"].strip()
+        if command_text in COMMAND_HELP:
+            return super().get_render_blocks(command)
 
-    if command_text in COMMAND_HELP:
-        blocks = [
-            markdown(
-                f"*Available Commands for Contributing:*{NL}"
-                f"•`/contribute` - View all available issues.{NL}"
-                f"•`/contribute <search term>` - Search for contribution opportunities.{NL}"
-            ),
-        ]
-    else:
-        search_query = "" if command_text in COMMAND_START else command_text
-        blocks = get_blocks(
-            search_query=search_query,
+        return get_blocks(
+            search_query="" if command_text in COMMAND_START else command_text,
             limit=10,
             presentation=EntityPresentation(
                 include_feedback=True,
@@ -44,13 +28,8 @@ def contribute_handler(ack, command, client):
             ),
         )
 
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        channel=conversation["channel"]["id"],
-        blocks=blocks,
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    contribute_handler = SlackConfig.app.command(COMMAND)(contribute_handler)
+    def get_template_context(self, command):
+        """Get the template context."""
+        return {
+            **super().get_template_context(command),
+        }

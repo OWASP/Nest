@@ -3,7 +3,9 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.slack.commands.owasp import COMMAND as OWASP_COMMAND
+from apps.slack.commands.owasp import Owasp
+
+OWASP_COMMAND = Owasp().get_command_name()
 
 
 class Event(TimestampedModel):
@@ -21,11 +23,22 @@ class Event(TimestampedModel):
     user_name = models.CharField(verbose_name="User name", max_length=100, default="")
 
     def __str__(self):
-        """Event human readable representation."""
+        """Event human readable representation.
+
+        Returns
+            str: A string representation of the event.
+
+        """
         return f"Event from {self.user_name or self.user_id} triggered by {self.trigger}"
 
     def from_slack(self, context, payload):
-        """Create instance based on Slack data."""
+        """Create instance based on Slack data.
+
+        Args:
+            context (dict): Context data from Slack, including user and channel information.
+            payload (dict): Payload data from Slack, including command and text information.
+
+        """
         self.channel_id = context.get("channel_id", "")
         self.channel_name = payload.get("channel_name", "")
 
@@ -47,7 +60,17 @@ class Event(TimestampedModel):
 
     @staticmethod
     def create(context, payload, save=True):
-        """Create event."""
+        """Create event.
+
+        Args:
+            context (dict): Context data from Slack, including user and channel information.
+            payload (dict): Payload data from Slack, including command and text information.
+            save (bool, optional): Whether to save the event to the database.
+
+        Returns:
+            Event: The created Event instance.
+
+        """
         event = Event()
         event.from_slack(context, payload)
         if save:
