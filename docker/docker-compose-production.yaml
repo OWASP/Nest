@@ -19,12 +19,12 @@ services:
   production-nest-cache:
     container_name: production-nest-cache
     image: redis:7.2.7-alpine3.21
-    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
+    command: redis-server --requirepass nest_redis_production --maxmemory 25mb --maxmemory-policy allkeys-lru
     healthcheck:
       interval: 5s
       retries: 5
-      test: [CMD, redis-cli, ping]
-      timeout: 3s
+      test: [CMD, redis-cli, -a, nest_redis_production, ping]
+      timeout: 5s
     restart: unless-stopped
     volumes:
       - ./volumes/cache:/data

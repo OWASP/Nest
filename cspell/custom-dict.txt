@@ -83,6 +83,7 @@ pygoat
 pymdownx
 pyyaml
 repositorycontributor
+requirepass
 rsc
 saft
 sakanashi
