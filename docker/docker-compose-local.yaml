@@ -10,9 +10,9 @@ services:
       context: ../backend
       dockerfile: docker/Dockerfile.local
     depends_on:
-      db:
+      cache:
         condition: service_healthy
-      redis:
+      db:
         condition: service_healthy
     env_file: ../backend/.env
     environment:
@@ -28,6 +28,22 @@ services:
     volumes:
       - ../backend:/home/owasp
       - backend-venv:/home/owasp/.venv
+
+  cache:
+    container_name: nest-cache
+    image: redis:7.2.7-alpine3.21
+    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, ping]
+      timeout: 3s
+    networks:
+      - nest-network
+    ports:
+      - 6379:6379
+    volumes:
+      - cache-data:/data
 
   db:
     container_name: nest-db
@@ -88,25 +104,8 @@ services:
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
 
-  redis:
-    container_name: nest-redis
-    image: redis:7.2.7-alpine3.21
-    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: [CMD, redis-cli, ping]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    networks:
-      - nest-network
-    ports:
-      - 6379:6379
-    volumes:
-      - cache-data:/data
-
 networks:
   nest-network:
-
 
 volumes:
   backend-venv:

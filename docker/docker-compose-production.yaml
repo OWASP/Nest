@@ -4,16 +4,47 @@ services:
     image: arkid15r/owasp-nest-backend:production
     env_file: .env.backend
     depends_on:
-      production-nest-db:
+      production-nest-cache:
         condition: service_healthy
-      production-nest-redis:
+      production-nest-db:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - nest-app-network
+      - nest-cache-network
       - nest-db-network
     volumes:
       - ./data:/home/owasp/data
+
+  production-nest-cache:
+    container_name: production-nest-cache
+    image: redis:7.2.7-alpine3.21
+    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, ping]
+      timeout: 3s
+    restart: unless-stopped
+    volumes:
+      - ./volumes/cache:/data
+    networks:
+      - nest-cache-network
+
+  production-nest-db:
+    container_name: production-nest-db
+    image: postgres:16.4
+    env_file: .env.db
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, pg_isready, -U, nest_user_production, -d, nest_db_production]
+      timeout: 5s
+    restart: unless-stopped
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
+    networks:
+      - nest-db-network
 
   production-nest-frontend:
     container_name: production-nest-frontend
@@ -22,38 +53,7 @@ services:
     networks:
       - nest-app-network
 
-  production-nest-db:
-    container_name: production-nest-db
-    image: postgres:16.4
-    env_file: .env.db
-    healthcheck:
-      test: [CMD, pg_isready, -U, nest_user_production, -d, nest_db_production]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-    volumes:
-      - ./volumes/db:/var/lib/postgresql/data
-    networks:
-      - nest-db-network
-
-  production-nest-redis:
-    container_name: production-nest-redis
-    image: redis:7.2.7-alpine3.21
-    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: [CMD, redis-cli, ping]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    ports:
-      - 6379:6379
-    restart: unless-stopped
-    volumes:
-      - ./volumes/cache:/data
-    networks:
-      - nest-app-network
-
 networks:
   nest-app-network:
+  nest-cache-network:
   nest-db-network:

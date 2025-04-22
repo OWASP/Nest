@@ -4,16 +4,47 @@ services:
     image: arkid15r/owasp-nest-backend:staging
     env_file: .env.backend
     depends_on:
-      staging-nest-db:
+      staging-nest-cache:
         condition: service_healthy
-      staging-nest-redis:
+      staging-nest-db:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - nest-app-network
+      - nest-cache-network
       - nest-db-network
     volumes:
       - ./data:/home/owasp/data
+
+  staging-nest-cache:
+    container_name: staging-nest-cache
+    image: redis:7.2.7-alpine3.21
+    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, ping]
+      timeout: 3s
+    restart: unless-stopped
+    volumes:
+      - ./volumes/cache:/data
+    networks:
+      - nest-cache-network
+
+  staging-nest-db:
+    container_name: staging-nest-db
+    image: postgres:16.4
+    env_file: .env.db
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, pg_isready, -U, nest_user_staging, -d, nest_db_staging]
+      timeout: 5s
+    restart: unless-stopped
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
+    networks:
+      - nest-db-network
 
   staging-nest-frontend:
     container_name: staging-nest-frontend
@@ -22,38 +53,7 @@ services:
     networks:
       - nest-app-network
 
-  staging-nest-db:
-    container_name: staging-nest-db
-    image: postgres:16.4
-    env_file: .env.db
-    healthcheck:
-      test: [CMD, pg_isready, -U, nest_user_staging, -d, nest_db_staging]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-    volumes:
-      - ./volumes/db:/var/lib/postgresql/data
-    networks:
-      - nest-db-network
-
-  staging-nest-redis:
-    container_name: staging-nest-redis
-    image: redis:7.2.7-alpine3.21
-    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: [CMD, redis-cli, ping]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    ports:
-      - 6379:6379
-    restart: unless-stopped
-    volumes:
-      - ./volumes/cache:/data
-    networks:
-      - nest-app-network
-
 networks:
   nest-app-network:
+  nest-cache-network:
   nest-db-network:
