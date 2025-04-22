@@ -104,7 +104,7 @@ class CommandBase:
 
     def get_template_file_name(self):
         """Get the template file name."""
-        return f"{self.__class__.__name__.lower()}.template"
+        return f"{self.__class__.__name__.lower()}.jinja"
 
     def configure_command(self):
         """Configure command."""
