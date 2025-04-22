@@ -18,7 +18,9 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     bio = models.TextField(verbose_name="Bio", max_length=1000, default="")
     is_hireable = models.BooleanField(verbose_name="Is hireable", default=False)
-    twitter_username = models.CharField(verbose_name="Twitter username", max_length=50, default="")
+    twitter_username = models.CharField(
+        verbose_name="Twitter username", max_length=50, default="", blank=True
+    )
 
     is_bot = models.BooleanField(verbose_name="Is bot", default=False)
 

@@ -174,7 +174,10 @@ const DetailsCard = ({
           type === 'organization') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' || type === 'organization' ? (
+            {type === 'user' ||
+            type === 'organization' ||
+            type === 'repository' ||
+            type === 'project' ? (
               <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             ) : (
               <RecentReleases
@@ -185,9 +188,10 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {(type === 'user' || type === 'organization') && (
-          <RecentReleases data={recentReleases} showAvatar={showAvatar} />
-        )}
+        {(type === 'user' ||
+          type === 'organization' ||
+          type === 'repository' ||
+          type === 'project') && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard

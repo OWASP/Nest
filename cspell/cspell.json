@@ -45,7 +45,7 @@
     "pnpm-lock.yaml"
   ],
   "ignoreRegExpList": [
-    "#\\w+" // Slack channel names
+    "#\\w+"
   ],
   "import": [
     "@cspell/dict-aws/cspell-ext.json",
