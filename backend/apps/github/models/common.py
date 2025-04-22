@@ -11,11 +11,11 @@ class GenericUserModel(models.Model):
 
     name = models.CharField(verbose_name="Name", max_length=200)
     login = models.CharField(verbose_name="Login", max_length=100, unique=True)
-    email = models.EmailField(verbose_name="Email", max_length=100, default="")
+    email = models.EmailField(verbose_name="Email", max_length=100, default="", blank=True)
 
     avatar_url = models.URLField(verbose_name="Avatar URL", max_length=200, default="")
     company = models.CharField(verbose_name="Company", max_length=200, default="")
-    location = models.CharField(verbose_name="Location", max_length=200, default="")
+    location = models.CharField(verbose_name="Location", max_length=200, default="", blank=True)
 
     collaborators_count = models.PositiveIntegerField(
         verbose_name="Collaborators count", default=0

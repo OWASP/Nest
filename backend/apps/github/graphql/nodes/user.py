@@ -28,6 +28,7 @@ class UserNode(BaseNode):
             "avatar_url",
             "bio",
             "company",
+            "contributions_count",
             "email",
             "followers_count",
             "following_count",
