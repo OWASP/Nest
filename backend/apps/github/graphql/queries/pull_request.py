@@ -34,9 +34,7 @@ class PullRequestQuery(BaseQuery):
         organization: str | None = None,
         repository: str | None = None,
         project: str | None = None,
-      
     ) -> QuerySet:
-      
         """Resolve recent pull requests.
 
         Args:
