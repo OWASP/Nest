@@ -9,23 +9,27 @@ export async function generateMetadata({
 }: {
   params: Promise<{ memberKey: string }>
 }): Promise<Metadata> {
-  const { memberKey } = await params
-  const { data } = await apolloServerClient.query({
-    query: GET_USER_DATA,
-    variables: {
-      key: memberKey,
-    },
-  })
-  const user = data?.user
-  if (!user) {
+  try {
+    const { memberKey } = await params
+    const { data } = await apolloServerClient.query({
+      query: GET_USER_DATA,
+      variables: {
+        key: memberKey,
+      },
+    })
+    const user = data?.user
+    if (!user) {
+      return
+    }
+    return generateSeoMetadata({
+      title: user.name || user.login,
+      description: user.bio || 'Discover details about this OWASP community member.',
+      canonicalPath: `/members/${memberKey}`,
+      keywords: [user.login, user.name, 'owasp', 'owasp community member'],
+    })
+  } catch {
     return
   }
-  return generateSeoMetadata({
-    title: user.name || user.login,
-    description: user.bio || 'Discover details about this OWASP community member.',
-    canonicalPath: `/members/${memberKey}`,
-    keywords: [user.login, user.name, 'owasp', 'owasp community member'],
-  })
 }
 
 export default function UserDetailsLayout({ children }: { children: React.ReactNode }) {

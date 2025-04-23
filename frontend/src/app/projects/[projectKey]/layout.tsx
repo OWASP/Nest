@@ -11,23 +11,27 @@ export async function generateMetadata({
     projectKey: string
   }>
 }): Promise<Metadata> {
-  const { projectKey } = await params
-  const { data } = await apolloServerClient.query({
-    query: GET_PROJECT_DATA,
-    variables: {
-      key: projectKey,
-    },
-  })
-  const project = data?.project
-  if (!project) {
+  try {
+    const { projectKey } = await params
+    const { data } = await apolloServerClient.query({
+      query: GET_PROJECT_DATA,
+      variables: {
+        key: projectKey,
+      },
+    })
+    const project = data?.project
+    if (!project) {
+      return
+    }
+    return generateSeoMetadata({
+      title: project.name,
+      description: project.summary || 'Discover details about this OWASP project.',
+      canonicalPath: `/projects/${projectKey}`,
+      keywords: ['owasp', 'project', projectKey, project.name],
+    })
+  } catch {
     return
   }
-  return generateSeoMetadata({
-    title: project.name,
-    description: project.summary || 'Discover details about this OWASP project.',
-    canonicalPath: `/projects/${projectKey}`,
-    keywords: ['owasp', 'project', projectKey, project.name],
-  })
 }
 
 export default function ProjectDetailsLayout({ children }: { children: React.ReactNode }) {
