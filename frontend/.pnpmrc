@@ -1,0 +1,4 @@
+legacy-peer-deps=true
+public-hoist-pattern[]=*import-in-the-middle*
+public-hoist-pattern[]=*require-in-the-middle*
+save-exact=true
