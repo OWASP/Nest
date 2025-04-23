@@ -58,6 +58,7 @@ export default function Header() {
             <Image
               width={64}
               height={64}
+              priority={true}
               src={'/img/owasp_icon_white_sm.png'}
               className="hidden dark:block"
               alt="OWASP Logo"
@@ -65,6 +66,7 @@ export default function Header() {
             <Image
               width={64}
               height={64}
+              priority={true}
               src={'/img/owasp_icon_black_sm.png'}
               className="block dark:hidden"
               alt="OWASP Logo"

@@ -3,6 +3,7 @@ services:
     container_name: nest-backend
     command: >
       sh -c '
+        pip install jinja2 &&
         python manage.py migrate &&
         python manage.py runserver 0.0.0.0:8000
       '
