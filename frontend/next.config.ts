@@ -4,6 +4,13 @@ import type { NextConfig } from 'next'
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    resolveExtensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.yaml'],
+  },
+  serverExternalPackages: [
+    'import-in-the-middle',
+    'require-in-the-middle',
+  ],
   images: {
     // This is a list of remote patterns that Next.js will use to determine
     // if an image is allowed to be loaded from a remote source.

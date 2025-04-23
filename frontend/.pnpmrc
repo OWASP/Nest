@@ -1,0 +1,4 @@
+save-exact=true
+legacy-peer-deps=true
+public-hoist-pattern[]=*require-in-the-middle*
+public-hoist-pattern[]=*require-in-the-middle*
