@@ -8,7 +8,7 @@ class Board(CommandBase):
 
     def get_template_file_name(self):
         """Get the template file name."""
-        return "navigate.template"
+        return "navigate.jinja"
 
     def get_template_context(self, command):
         """Get the template context."""
