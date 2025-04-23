@@ -11,7 +11,7 @@ RUN npm install --ignore-scripts -g pnpm
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --chmod=444 .env next.config.ts postcss.config.js tailwind.config.js tsconfig.json .pnpmrc ./
+COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 

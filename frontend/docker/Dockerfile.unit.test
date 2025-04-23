@@ -10,7 +10,7 @@ RUN npm install --ignore-scripts -g pnpm && \
     chown node:node /app
 
 COPY __tests__/unit __tests__/unit
-COPY jest.config.ts jest.setup.ts tsconfig.json .pnpmrc ./
+COPY .pnpmrc jest.config.ts jest.setup.ts tsconfig.json ./
 COPY public public
 COPY src src
 
