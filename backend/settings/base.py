@@ -124,11 +124,10 @@ class Base(Configuration):
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
-    REDIS_PORT = values.SecretValue(environ_name="REDIS_PORT")
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}",
+            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379",
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
