@@ -5,7 +5,7 @@ import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 import { ENVIRONMENT, GRAPHQL_URL, GRAPHQL_URL_DOCKER } from 'utils/credentials'
 
 async function createApolloServerClient() {
-  const url = (ENVIRONMENT == 'docker') ? GRAPHQL_URL_DOCKER : GRAPHQL_URL
+  const url = ENVIRONMENT == 'docker' ? GRAPHQL_URL_DOCKER : GRAPHQL_URL
 
   const httpLink = createHttpLink({
     uri: url,

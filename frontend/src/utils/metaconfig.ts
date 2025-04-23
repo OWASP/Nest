@@ -6,7 +6,6 @@ interface SeoMetadataProps {
   description: string
   canonicalPath?: string
   ogImage?: string
-  noIndex?: boolean
   keywords?: string[]
   type?: 'website' | 'article' | 'profile'
   locale?: string
@@ -19,7 +18,6 @@ export function generateSeoMetadata({
   description,
   canonicalPath,
   ogImage = 'https://nest.owasp.org/img/owasp_icon_white_background.png',
-  noIndex = false,
   keywords = [],
   type = 'website',
   locale = 'en_US',
