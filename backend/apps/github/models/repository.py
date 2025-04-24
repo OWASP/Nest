@@ -137,6 +137,11 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.pull_requests.order_by("-updated_at").first()
 
     @property
+    def latest_updated_milestone(self):
+        """Repository latest updated milestone (most recently modified)."""
+        return self.milestones.order_by("-updated_at").first()
+
+    @property
     def nest_key(self):
         """Return repository Nest key."""
         return f"{self.owner.login}-{self.name}"
