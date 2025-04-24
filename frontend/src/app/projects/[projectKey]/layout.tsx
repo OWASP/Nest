@@ -25,7 +25,7 @@ export async function generateMetadata({
     }
     return generateSeoMetadata({
       title: project.name,
-      description: project.summary || 'Discover details about this OWASP project.',
+      description: project.summary ?? 'Discover details about this OWASP project.',
       canonicalPath: `/projects/${projectKey}`,
       keywords: ['owasp', 'project', projectKey, project.name],
     })

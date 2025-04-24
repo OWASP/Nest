@@ -19,14 +19,14 @@ async function createApolloServerClient() {
     return {
       headers: {
         ...headers,
-        'X-CSRFToken': csrfToken || '',
+        'X-CSRFToken': csrfToken ?? '',
         Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
       },
     }
   })
 
   return new ApolloClient({
-    cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ || {}),
+    cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ ?? {}),
     link: authLink.concat(httpLink),
     ssrMode: true,
   })

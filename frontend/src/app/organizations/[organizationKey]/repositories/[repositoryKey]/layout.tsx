@@ -24,7 +24,7 @@ export async function generateMetadata({
     }
     return generateSeoMetadata({
       title: repository.name,
-      description: repository.description || 'Discover details about this OWASP repository.',
+      description: repository.description ?? 'Discover details about this OWASP repository.',
       canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
       keywords: ['owasp', 'repository', repositoryKey, repository.name],
     })

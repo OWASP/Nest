@@ -22,8 +22,8 @@ export async function generateMetadata({
       return
     }
     return generateSeoMetadata({
-      title: organization?.name || organization?.login,
-      description: organization?.description || 'Discover details about this OWASP organization.',
+      title: organization?.name ?? organization?.login,
+      description: organization?.description ?? 'Discover details about this OWASP organization.',
       canonicalPath: `/organizations/${organizationKey}`,
     })
   } catch {

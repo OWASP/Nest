@@ -24,7 +24,7 @@ export function generateSeoMetadata({
   siteName = 'OWASP Nest',
   twitterHandle = '@owasp',
 }: SeoMetadataProps): Metadata {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nest.owasp.org'
+  const baseUrl = 'https://nest.owasp.org'
 
   const formattedTitle = title.includes('OWASP Nest') ? title : `${title} – OWASP Nest`
 

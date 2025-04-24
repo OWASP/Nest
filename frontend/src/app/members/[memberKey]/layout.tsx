@@ -22,8 +22,8 @@ export async function generateMetadata({
       return
     }
     return generateSeoMetadata({
-      title: user.name || user.login,
-      description: user.bio || 'Discover details about this OWASP community member.',
+      title: user.name ?? user.login,
+      description: user.bio ?? 'Discover details about this OWASP community member.',
       canonicalPath: `/members/${memberKey}`,
       keywords: [user.login, user.name, 'owasp', 'owasp community member'],
     })

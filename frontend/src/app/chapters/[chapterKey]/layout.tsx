@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     }
     return generateSeoMetadata({
       title: chapter.name,
-      description: chapter.summary || 'Discover details about this OWASP chapter.',
+      description: chapter.summary ?? 'Discover details about this OWASP chapter.',
       canonicalPath: `/chapter/${chapterKey}`,
       keywords: ['owasp', 'security', 'chapter', chapterKey, chapter.name],
     })
@@ -30,6 +30,10 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
 }
 
-export default function ChapterDetailsLayout({ children }: { children: React.ReactNode }) {
+export default function ChapterDetailsLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return <div className="chapter-layout">{children}</div>
 }

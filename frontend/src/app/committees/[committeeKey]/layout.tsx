@@ -23,7 +23,7 @@ export async function generateMetadata({
     }
     return generateSeoMetadata({
       title: committee.name,
-      description: committee.summary || 'Discover details about this OWASP committee.',
+      description: committee.summary ?? 'Discover details about this OWASP committee.',
       canonicalPath: `/committees/${committeeKey}`,
       keywords: ['owasp', 'security', 'committee', committeeKey, committee.name],
     })
@@ -32,6 +32,10 @@ export async function generateMetadata({
   }
 }
 
-export default function CommitteeDetailsLayout({ children }: { children: React.ReactNode }) {
+export default function CommitteeDetailsLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return <div className="committee-layout">{children}</div>
 }
