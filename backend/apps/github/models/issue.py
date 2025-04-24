@@ -59,6 +59,13 @@ class Issue(GenericIssueModel):
         null=True,
         related_name="issues",
     )
+    milestone = models.ForeignKey(
+        "github.Milestone",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="issues",
+    )
 
     # M2Ms.
     assignees = models.ManyToManyField(
@@ -74,13 +81,14 @@ class Issue(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_issue, author=None, repository=None):
+    def from_github(self, gh_issue, author=None, repository=None, milestone=None):
         """Update the instance based on GitHub issue data.
 
         Args:
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
             repository (Repository, optional): The repository instance.
+            milestone (Milestone, optional): The milestone related to the issue.
 
         """
         field_mapping = {
@@ -110,6 +118,9 @@ class Issue(GenericIssueModel):
 
         # Repository.
         self.repository = repository
+
+        # Milestone.
+        self.milestone = milestone
 
     def generate_hint(self, open_ai=None, max_tokens=1000):
         """Generate a hint for the issue using AI.
@@ -172,13 +183,14 @@ class Issue(GenericIssueModel):
         return IndexBase.get_total_count("issues")
 
     @staticmethod
-    def update_data(gh_issue, author=None, repository=None, save=True):
+    def update_data(gh_issue, author=None, repository=None, milestone=None, save=True):
         """Update issue data.
 
         Args:
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
             repository (Repository, optional): The repository instance.
+            milestone (Milestone, optional): The milestone related to the issue.
             save (bool, optional): Whether to save the instance.
 
         Returns:
@@ -191,7 +203,7 @@ class Issue(GenericIssueModel):
         except Issue.DoesNotExist:
             issue = Issue(node_id=issue_node_id)
 
-        issue.from_github(gh_issue, author=author, repository=repository)
+        issue.from_github(gh_issue, author=author, repository=repository, milestone=milestone)
         if save:
             issue.save()
 
