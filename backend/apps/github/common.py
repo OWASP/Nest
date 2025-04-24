@@ -8,6 +8,7 @@ from github.GithubException import UnknownObjectException
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
+from apps.github.models.milestone import Milestone
 from apps.github.models.organization import Organization
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
@@ -59,6 +60,26 @@ def sync_repository(gh_repository, organization=None, user=None):
     )
 
     if not repository.is_archived:
+        # GitHub repository milestones.
+        kwargs = {
+            "direction": "desc",
+            "sort": "updated",
+            "state": "all",
+        }
+
+        until = (
+            latest_updated_milestone.updated_at
+            if (latest_updated_milestone := repository.latest_updated_milestone)
+            else timezone.now() - td(days=30)
+        )
+
+        for gh_milestone in gh_repository.get_milestones(**kwargs):
+            if gh_milestone.updated_at < until:
+                break
+
+            author = User.update_data(gh_milestone.user)
+            Milestone.update_data(gh_milestone, author=author, repository=repository)
+
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
         month_ago = timezone.now() - td(days=30)
@@ -82,7 +103,16 @@ def sync_repository(gh_repository, organization=None, user=None):
                     break
 
                 author = User.update_data(gh_issue.user)
-                issue = Issue.update_data(gh_issue, author=author, repository=repository)
+
+                # Milestone
+                milestone = None
+                if gh_issue.milestone:
+                    milestone = Milestone.update_data(
+                        gh_issue.milestone, repository=repository, author=author
+                    )
+                issue = Issue.update_data(
+                    gh_issue, author=author, repository=repository, milestone=milestone
+                )
 
                 # Assignees.
                 issue.assignees.clear()
@@ -115,8 +145,15 @@ def sync_repository(gh_repository, organization=None, user=None):
                 break
 
             author = User.update_data(gh_pull_request.user)
+
+            # Milestone
+            milestone = None
+            if gh_pull_request.milestone:
+                milestone = Milestone.update_data(
+                    gh_pull_request.milestone, repository=repository, author=author
+                )
             pull_request = PullRequest.update_data(
-                gh_pull_request, author=author, repository=repository
+                gh_pull_request, author=author, repository=repository, milestone=milestone
             )
 
             # Assignees.
