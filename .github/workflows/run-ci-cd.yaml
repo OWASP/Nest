@@ -42,7 +42,7 @@ jobs:
         run: pipx install poetry
 
       - name: Set up Python
-        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           cache: 'poetry'
           cache-dependency-path: backend/poetry.lock
