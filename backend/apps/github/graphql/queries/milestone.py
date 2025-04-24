@@ -2,8 +2,8 @@
 
 import graphene
 
+from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.milestone import MilestoneNode
-from apps.github.graphql.queries import BaseQuery
 from apps.github.models.milestone import Milestone
 
 
