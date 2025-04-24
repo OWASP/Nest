@@ -58,7 +58,7 @@ importers:
         version: 15.3.1
       '@sentry/nextjs':
         specifier: ^9.13.0
-        version: 9.13.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.1(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(webpack@5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17)))
+        version: 9.13.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.1(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(webpack@5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17)))
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.1(@testing-library/dom@10.4.0)
@@ -158,7 +158,7 @@ importers:
         version: 1.11.21(@swc/helpers@0.5.17)
       '@swc/jest':
         specifier: ^0.2.37
-        version: 0.2.37(@swc/core@1.11.21(@swc/helpers@0.5.17))
+        version: 0.2.38(@swc/core@1.11.21(@swc/helpers@0.5.17))
       '@tailwindcss/postcss':
         specifier: ^4.1.4
         version: 4.1.4
@@ -231,6 +231,9 @@ importers:
       identity-obj-proxy:
         specifier: ^3.0.0
         version: 3.0.0
+      import-in-the-middle:
+        specifier: ^1.13.1
+        version: 1.13.1
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.14.1)(ts-node@10.9.2(@swc/core@1.11.21(@swc/helpers@0.5.17))(@types/node@22.14.1)(typescript@5.8.3))
@@ -252,6 +255,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.6.11
         version: 0.6.11(prettier@3.5.3)
+      require-in-the-middle:
+        specifier: ^7.5.2
+        version: 7.5.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@swc/core@1.11.21(@swc/helpers@0.5.17))(@types/node@22.14.1)(typescript@5.8.3))
@@ -2592,8 +2598,8 @@ packages:
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
 
-  '@swc/jest@0.2.37':
-    resolution: {integrity: sha512-CR2BHhmXKGxTiFr21DYPRHQunLkX3mNIFGFkxBGji6r9uyIR5zftTOVYj1e0sFNMV2H7mf/+vpaglqaryBtqfQ==}
+  '@swc/jest@0.2.38':
+    resolution: {integrity: sha512-HMoZgXWMqChJwffdDjvplH53g9G2ALQes3HKXDEdliB/b85OQ0CTSbxG8VSeCwiAn7cOaDVEt4mwmZvbHcS52w==}
     engines: {npm: '>= 7.0.0'}
     peerDependencies:
       '@swc/core': '*'
@@ -5918,8 +5924,8 @@ packages:
   webpack-virtual-modules@0.5.0:
     resolution: {integrity: sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==}
 
-  webpack@5.99.5:
-    resolution: {integrity: sha512-q+vHBa6H9qwBLUlHL4Y7L0L1/LlyBKZtS9FHNCQmtayxjI5RKC9yD8gpvLeqGv5lCQp1Re04yi0MF40pf30Pvg==}
+  webpack@5.99.6:
+    resolution: {integrity: sha512-TJOLrJ6oeccsGWPl7ujCYuc0pIq2cNsuD6GZDma8i5o5Npvcco/z+NKvZSFsP0/x6SShVb0+X2JK/JHUjKY9dQ==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     peerDependencies:
@@ -8374,8 +8380,8 @@ snapshots:
   '@react-aria/listbox@3.14.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@react-aria/interactions': 3.24.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/label': 3.7.17(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/selection': 3.24.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/label': 3.7.16(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/selection': 3.23.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/utils': 3.28.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-stately/collections': 3.12.3(react@19.1.0)
       '@react-stately/list': 3.12.0(react@19.1.0)
@@ -8406,17 +8412,17 @@ snapshots:
   '@react-aria/menu@3.18.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@react-aria/focus': 3.20.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/i18n': 3.12.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/i18n': 3.12.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/interactions': 3.24.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/overlays': 3.27.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/selection': 3.24.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/overlays': 3.26.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/selection': 3.23.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/utils': 3.28.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-stately/collections': 3.12.3(react@19.1.0)
       '@react-stately/menu': 3.9.2(react@19.1.0)
       '@react-stately/selection': 3.20.1(react@19.1.0)
-      '@react-stately/tree': 3.8.8(react@19.1.0)
-      '@react-types/button': 3.12.0(react@19.1.0)
-      '@react-types/menu': 3.9.15(react@19.1.0)
+      '@react-stately/tree': 3.8.9(react@19.1.0)
+      '@react-types/button': 3.11.0(react@19.1.0)
+      '@react-types/menu': 3.10.0(react@19.1.0)
       '@react-types/shared': 3.28.0(react@19.1.0)
       '@swc/helpers': 0.5.17
       react: 19.1.0
@@ -8830,7 +8836,7 @@ snapshots:
   '@react-stately/menu@3.9.2(react@19.1.0)':
     dependencies:
       '@react-stately/overlays': 3.6.15(react@19.1.0)
-      '@react-types/menu': 3.9.15(react@19.1.0)
+      '@react-types/menu': 3.10.0(react@19.1.0)
       '@react-types/shared': 3.28.0(react@19.1.0)
       '@swc/helpers': 0.5.17
       react: 19.1.0
@@ -8930,9 +8936,9 @@ snapshots:
 
   '@react-stately/toggle@3.8.2(react@19.1.0)':
     dependencies:
-      '@react-stately/utils': 3.10.5(react@19.1.0)
+      '@react-stately/utils': 3.10.6(react@19.1.0)
       '@react-types/checkbox': 3.9.3(react@19.1.0)
-      '@react-types/shared': 3.29.0(react@19.1.0)
+      '@react-types/shared': 3.28.0(react@19.1.0)
       '@swc/helpers': 0.5.17
       react: 19.1.0
 
@@ -9157,7 +9163,7 @@ snapshots:
 
   '@react-types/textfield@3.12.0(react@19.1.0)':
     dependencies:
-      '@react-types/shared': 3.28.0(react@19.1.0)
+      '@react-types/shared': 3.29.0(react@19.1.0)
       react: 19.1.0
 
   '@react-types/textfield@3.12.1(react@19.1.0)':
@@ -9336,7 +9342,7 @@ snapshots:
 
   '@sentry/core@9.13.0': {}
 
-  '@sentry/nextjs@9.13.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.1(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(webpack@5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17)))':
+  '@sentry/nextjs@9.13.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.1(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(webpack@5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17)))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.32.0
@@ -9347,7 +9353,7 @@ snapshots:
       '@sentry/opentelemetry': 9.13.0(@opentelemetry/api@1.9.0)(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.32.0)
       '@sentry/react': 9.13.0(react@19.1.0)
       '@sentry/vercel-edge': 9.13.0
-      '@sentry/webpack-plugin': 3.3.1(webpack@5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17)))
+      '@sentry/webpack-plugin': 3.3.1(webpack@5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17)))
       chalk: 3.0.0
       next: 15.3.1(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       resolve: 1.22.8
@@ -9424,12 +9430,12 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@sentry/core': 9.13.0
 
-  '@sentry/webpack-plugin@3.3.1(webpack@5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17)))':
+  '@sentry/webpack-plugin@3.3.1(webpack@5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17)))':
     dependencies:
       '@sentry/bundler-plugin-core': 3.3.1
       unplugin: 1.0.1
       uuid: 9.0.1
-      webpack: 5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17))
+      webpack: 5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17))
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -9501,7 +9507,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@swc/jest@0.2.37(@swc/core@1.11.21(@swc/helpers@0.5.17))':
+  '@swc/jest@0.2.38(@swc/core@1.11.21(@swc/helpers@0.5.17))':
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
       '@swc/core': 1.11.21(@swc/helpers@0.5.17)
@@ -12517,7 +12523,7 @@ snapshots:
     dependencies:
       debug: 4.4.0
       module-details-from-path: 1.0.3
-      resolve: 1.22.8
+      resolve: 1.22.10
     transitivePeerDependencies:
       - supports-color
 
@@ -12929,14 +12935,14 @@ snapshots:
 
   tapable@2.2.1: {}
 
-  terser-webpack-plugin@5.3.14(@swc/core@1.11.21(@swc/helpers@0.5.17))(webpack@5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17))):
+  terser-webpack-plugin@5.3.14(@swc/core@1.11.21(@swc/helpers@0.5.17))(webpack@5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17))):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.39.0
-      webpack: 5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17))
+      webpack: 5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17))
     optionalDependencies:
       '@swc/core': 1.11.21(@swc/helpers@0.5.17)
 
@@ -13223,7 +13229,7 @@ snapshots:
 
   webpack-virtual-modules@0.5.0: {}
 
-  webpack@5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17)):
+  webpack@5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17)):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.7
@@ -13245,7 +13251,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.2
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.14(@swc/core@1.11.21(@swc/helpers@0.5.17))(webpack@5.99.5(@swc/core@1.11.21(@swc/helpers@0.5.17)))
+      terser-webpack-plugin: 5.3.14(@swc/core@1.11.21(@swc/helpers@0.5.17))(webpack@5.99.6(@swc/core@1.11.21(@swc/helpers@0.5.17)))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:
