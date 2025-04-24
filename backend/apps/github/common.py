@@ -77,7 +77,7 @@ def sync_repository(gh_repository, organization=None, user=None):
             if gh_milestone.updated_at < until:
                 break
 
-            author = User.update_data(gh_milestone.user)
+            author = User.update_data(gh_milestone.creator)
 
             milestone = Milestone.update_data(gh_milestone, author=author, repository=repository)
 
