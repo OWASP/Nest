@@ -11,7 +11,7 @@ RUN npm install --ignore-scripts -g pnpm
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --chmod=444 .env next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
+COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 
@@ -28,7 +28,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs && \
-adduser --system --uid 1001 -G nodejs nextjs
+    adduser --system --uid 1001 -G nodejs nextjs
 # Copying files with root as owner, so that executing user cannot change the container.
 COPY --from=builder --chown=root:root --chmod=555 /app/public public
 
