@@ -1,7 +1,7 @@
 import { CSRF_URL, CSRF_URL_DOCKER, ENVIRONMENT } from 'utils/credentials'
 
 export const fetchCsrfTokenServer = async (): Promise<string> => {
-  const csrfUrl = ENVIRONMENT == 'docker' ? CSRF_URL : CSRF_URL_DOCKER
+  const csrfUrl = ENVIRONMENT === 'docker' ? CSRF_URL_DOCKER : CSRF_URL
   try {
     const response = await fetch(csrfUrl, {
       credentials: 'include',
@@ -9,7 +9,7 @@ export const fetchCsrfTokenServer = async (): Promise<string> => {
     })
 
     if (!response.ok) {
-      return
+      throw new Error(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
