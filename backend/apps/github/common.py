@@ -116,8 +116,9 @@ def sync_repository(gh_repository, organization=None, user=None):
                 # Milestone
                 milestone = None
                 if gh_issue.milestone:
+                    milestone_author = User.update_data(gh_issue.milestone.creator)
                     milestone = Milestone.update_data(
-                        gh_issue.milestone, repository=repository, author=author
+                        gh_issue.milestone, repository=repository, author=milestone_author
                     )
                 issue = Issue.update_data(
                     gh_issue, author=author, repository=repository, milestone=milestone
@@ -158,8 +159,9 @@ def sync_repository(gh_repository, organization=None, user=None):
             # Milestone
             milestone = None
             if gh_pull_request.milestone:
+                milestone_author = User.update_data(gh_pull_request.milestone.creator)
                 milestone = Milestone.update_data(
-                    gh_pull_request.milestone, repository=repository, author=author
+                    gh_pull_request.milestone, repository=repository, author=milestone_author
                 )
             pull_request = PullRequest.update_data(
                 gh_pull_request, author=author, repository=repository, milestone=milestone
