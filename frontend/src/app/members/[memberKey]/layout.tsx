@@ -33,5 +33,5 @@ export async function generateMetadata({
 }
 
 export default function UserDetailsLayout({ children }: { children: React.ReactNode }) {
-  return <div className="user-details-layout">{children}</div>
+  return children
 }
