@@ -37,5 +37,5 @@ export default function CommitteeDetailsLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return <div className="committee-layout">{children}</div>
-}
+  return children
+}g
