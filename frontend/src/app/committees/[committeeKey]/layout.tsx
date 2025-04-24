@@ -38,4 +38,4 @@ export default function CommitteeDetailsLayout({
   children: React.ReactNode
 }>) {
   return children
-}g
+}
