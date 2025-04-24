@@ -78,7 +78,16 @@ def sync_repository(gh_repository, organization=None, user=None):
                 break
 
             author = User.update_data(gh_milestone.user)
-            Milestone.update_data(gh_milestone, author=author, repository=repository)
+
+            milestone = Milestone.update_data(gh_milestone, author=author, repository=repository)
+
+            # Labels
+            milestone.labels.clear()
+            for gh_milestone_label in gh_milestone.get_labels():
+                try:
+                    milestone.labels.add(Label.update_data(gh_milestone_label))
+                except UnknownObjectException:
+                    logger.info("Couldn't get GitHub milestone label %s", milestone.url)
 
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
