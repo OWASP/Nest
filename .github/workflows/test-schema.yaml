@@ -37,7 +37,7 @@ jobs:
         run: pipx install poetry
 
       - name: Set up Python
-        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           cache: poetry
           cache-dependency-path: schema/poetry.lock
@@ -65,12 +65,12 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@45775bd8235c68ba998cffa5171334d58593da47
+        uses: github/codeql-action/init@28deaeda66b76a05916b6923827895f2b14ab387
         with:
           languages: ${{ matrix.language }}
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@45775bd8235c68ba998cffa5171334d58593da47
+        uses: github/codeql-action/analyze@28deaeda66b76a05916b6923827895f2b14ab387
         with:
           category: /language:${{ matrix.language }}
 
