@@ -64,6 +64,18 @@ export const GET_PROJECT_DATA = gql`
       type
       updatedAt
       url
+      openMilestones {
+        title
+        body
+        openIssuesCount
+        closedIssuesCount
+      }
+      closedMilestones {
+        title
+        body
+        openIssuesCount
+        closedIssuesCount
+      }
     }
     recentPullRequests(project: $key) {
       author {

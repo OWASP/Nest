@@ -91,5 +91,17 @@ export const GET_MAIN_PAGE_DATA = gql`
       suggestedLocation
       url
     }
+    openMilestones(limit: 5) {
+      title
+      body
+      openIssuesCount
+      closedIssuesCount
+    }
+    closedMilestones(limit: 5) {
+      title
+      body
+      openIssuesCount
+      closedIssuesCount
+    }
   }
 `
