@@ -42,7 +42,7 @@ jobs:
         run: pipx install poetry
 
       - name: Set up Python
-        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           cache: 'poetry'
           cache-dependency-path: backend/poetry.lock
@@ -105,7 +105,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build backend test image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
@@ -133,7 +133,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend unit-testing image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
@@ -161,7 +161,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend end-to-end testing image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
@@ -236,7 +236,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
@@ -261,7 +261,7 @@ jobs:
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
@@ -408,7 +408,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
@@ -433,7 +433,7 @@ jobs:
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production

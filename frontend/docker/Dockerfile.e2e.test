@@ -10,6 +10,6 @@ RUN npm install --ignore-scripts -g pnpm && \
 
 COPY __tests__/e2e __tests__/e2e
 COPY __tests__/unit/data __tests__/unit/data
-COPY next.config.ts postcss.config.js playwright.config.ts tailwind.config.js tsconfig.json ./
+COPY .pnpmrc next.config.ts postcss.config.js playwright.config.ts tailwind.config.js tsconfig.json ./
 COPY public public
 COPY src src
