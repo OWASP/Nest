@@ -1,6 +1,7 @@
 """Github Milestone Queries."""
 
 import graphene
+from django.db.models import OuterRef, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.milestone import MilestoneNode
@@ -15,7 +16,6 @@ class MilestoneQuery(BaseQuery):
         limit=graphene.Int(default_value=5),
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
-        project=graphene.String(required=False),
         repository=graphene.String(required=False),
         distinct=graphene.Boolean(default_value=False),
     )
@@ -24,7 +24,6 @@ class MilestoneQuery(BaseQuery):
         MilestoneNode,
         limit=graphene.Int(default_value=5),
         login=graphene.String(required=False),
-        project=graphene.String(required=False),
         repository=graphene.String(required=False),
         organization=graphene.String(required=False),
         distinct=graphene.Boolean(default_value=False),
@@ -36,7 +35,6 @@ class MilestoneQuery(BaseQuery):
         limit,
         login=None,
         organization=None,
-        project=None,
         repository=None,
         distinct=False,
     ):
@@ -48,7 +46,6 @@ class MilestoneQuery(BaseQuery):
             limit (int): The maximum number of milestones to return.
             login (str, optional): Filter milestones by author login.
             organization (str, optional): Filter milestones by organization login.
-            project (str, optional): Filter milestones by project name.
             repository (str, optional): Filter milestones by repository name.
             distinct (bool, optional): Whether to return distinct milestones.
 
@@ -72,10 +69,16 @@ class MilestoneQuery(BaseQuery):
             open_milestones = open_milestones.filter(repository__name=repository)
         if organization:
             open_milestones = open_milestones.filter(repository__organization__login=organization)
-        # if project:
-        #     open_milestones = open_milestones.filter(repository__project__name=project)
+
         if distinct:
-            open_milestones = open_milestones.distinct()
+            latest_milestone_per_author = (
+                open_milestones.filter(author_id=OuterRef("author_id"))
+                .order_by("-created_at")
+                .values("id")[:1]
+            )
+            open_milestones = open_milestones.filter(
+                id__in=Subquery(latest_milestone_per_author),
+            ).order_by("-created_at")
 
         return open_milestones[:limit]
 
@@ -85,7 +88,6 @@ class MilestoneQuery(BaseQuery):
         limit,
         login=None,
         organization=None,
-        project=None,
         repository=None,
         distinct=False,
     ):
@@ -97,7 +99,6 @@ class MilestoneQuery(BaseQuery):
             limit (int): The maximum number of milestones to return.
             login (str, optional): Filter milestones by author login.
             organization (str, optional): Filter milestones by organization login.
-            project (str, optional): Filter milestones by project name.
             repository (str, optional): Filter milestones by repository name.
             distinct (bool, optional): Whether to return distinct milestones.
 
@@ -119,8 +120,6 @@ class MilestoneQuery(BaseQuery):
             closed_milestones = closed_milestones.filter(author__login=login)
         if repository:
             closed_milestones = closed_milestones.filter(repository__name=repository)
-        # if project:
-        #     closed_milestones = closed_milestones.filter(repository__project__name=project)
 
         if organization:
             closed_milestones = closed_milestones.filter(
@@ -128,6 +127,13 @@ class MilestoneQuery(BaseQuery):
             )
 
         if distinct:
-            closed_milestones = closed_milestones.distinct()
+            latest_milestone_per_author = (
+                closed_milestones.filter(author_id=OuterRef("author_id"))
+                .order_by("-created_at")
+                .values("id")[:1]
+            )
+            closed_milestones = closed_milestones.filter(
+                id__in=Subquery(latest_milestone_per_author),
+            ).order_by("-created_at")
 
         return closed_milestones[:limit]

@@ -3,11 +3,9 @@
 import graphene
 
 from apps.common.graphql.nodes import BaseNode
-from apps.github.models.milestone import Milestone
 from apps.github.graphql.nodes.issue import IssueNode
 from apps.github.graphql.nodes.pull_request import PullRequestNode
-
-
+from apps.github.models.milestone import Milestone
 
 
 class MilestoneNode(BaseNode):
@@ -15,7 +13,7 @@ class MilestoneNode(BaseNode):
 
     issues = graphene.List(IssueNode)
     pull_requests = graphene.List(PullRequestNode)
-    
+
     class Meta:
         model = Milestone
 
@@ -32,11 +30,10 @@ class MilestoneNode(BaseNode):
             "pull_requests",
         )
 
-    
     def resolve_issues(self, info):
         """Resolve issues."""
         return self.issues.all()
-    
+
     def resolve_pull_requests(self, info):
         """Resolve pull requests."""
         return self.pull_requests.all()

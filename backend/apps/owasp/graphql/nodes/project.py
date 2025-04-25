@@ -3,6 +3,7 @@
 import graphene
 
 from apps.github.graphql.nodes.issue import IssueNode
+from apps.github.graphql.nodes.milestone import MilestoneNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.common import GenericEntityNode
@@ -21,6 +22,8 @@ class ProjectNode(GenericEntityNode):
     level = graphene.String()
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
+    open_milestones = graphene.List(MilestoneNode)
+    closed_milestones = graphene.List(MilestoneNode)
     repositories = graphene.List(RepositoryNode)
     repositories_count = graphene.Int()
     topics = graphene.List(graphene.String)
@@ -60,6 +63,14 @@ class ProjectNode(GenericEntityNode):
     def resolve_recent_releases(self, info):
         """Resolve recent releases."""
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+
+    def resolve_open_milestones(self, info):
+        """Resolve open milestones."""
+        return self.open_milestones.select_related("author").order_by("-created_at")
+
+    def resolve_closed_milestones(self, info):
+        """Resolve closed milestones."""
+        return self.closed_milestones.select_related("author").order_by("-created_at")
 
     def resolve_repositories(self, info):
         """Resolve repositories."""
