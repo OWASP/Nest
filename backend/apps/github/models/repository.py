@@ -179,6 +179,16 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Return repository URL."""
         return f"https://github.com/{self.path}"
 
+    @property
+    def open_milestones(self):
+        """Repository open milestones."""
+        return self.milestones.filter(state="OPEN").order_by("-due_on")
+
+    @property
+    def closed_milestones(self):
+        """Repository closed milestones."""
+        return self.milestones.filter(state="CLOSED").order_by("-due_on")
+
     def from_github(
         self,
         gh_repository,
