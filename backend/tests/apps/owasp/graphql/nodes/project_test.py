@@ -101,6 +101,8 @@ class TestProjectNode:
             "leaders",
             "recent_issues",
             "recent_releases",
+            "open_milestones",
+            "closed_milestones",
             "repositories_count",
             "repositories",
             "top_contributors",
