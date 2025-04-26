@@ -147,15 +147,27 @@ const DetailsCard = ({
             {languages.length !== 0 && (
               <ToggleableList
                 items={languages}
-                icon={faCode}
-                label={<AnchorTitle href="#languages" title="Languages" />}
+                label={
+                  <div className="flex items-center">
+                    <div className="flex items-center space-x-2">
+                      <FontAwesomeIcon icon={faCode} className="mr-2" />
+                    </div>
+                    <AnchorTitle href="#languages" title="Languages" />
+                  </div>
+                }
               />
             )}
             {topics.length !== 0 && (
               <ToggleableList
                 items={topics}
-                icon={faTags}
-                label={<AnchorTitle href="#topics" title="Topics" />}
+                label={
+                  <div className="flex items-center">
+                    <div className="flex items-center space-x-2">
+                      <FontAwesomeIcon icon={faTags} className="mr-2" />
+                    </div>
+                    <AnchorTitle href="#topics" title="Topics" />
+                  </div>
+                }
               />
             )}
           </div>

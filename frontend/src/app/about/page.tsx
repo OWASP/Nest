@@ -16,6 +16,7 @@ import { GET_USER_DATA } from 'server/queries/userQueries'
 import { ProjectTypeGraphql } from 'types/project'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
@@ -71,7 +72,7 @@ const About = () => {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
-        <SecondaryCard icon={faScroll} title="History">
+        <SecondaryCard icon={faScroll} title={<AnchorTitle href="#history" title="History" />}>
           {aboutText.map((text) => (
             <div key={text} className="mb-4">
               <div key={text}>
@@ -81,7 +82,10 @@ const About = () => {
           ))}
         </SecondaryCard>
 
-        <SecondaryCard icon={faArrowUpRightFromSquare} title="Leaders">
+        <SecondaryCard
+          icon={faArrowUpRightFromSquare}
+          title={<AnchorTitle href="#leaders" title="Leaders" />}
+        >
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
             {leaders.map((username) => (
               <div key={username}>
@@ -100,7 +104,10 @@ const About = () => {
           />
         )}
 
-        <SecondaryCard icon={faTools} title="Technologies & Tools">
+        <SecondaryCard
+          icon={faTools}
+          title={<AnchorTitle href="#technologies-tools" title="Technologies & Tools" />}
+        >
           <div className="w-full">
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
@@ -133,7 +140,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faMapSigns} title="Roadmap">
+        <SecondaryCard icon={faMapSigns} title={<AnchorTitle href="#roadmap" title="Roadmap" />}>
           <ul>
             {roadmap.map((item) => (
               <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
