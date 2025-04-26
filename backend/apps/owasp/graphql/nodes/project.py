@@ -22,8 +22,8 @@ class ProjectNode(GenericEntityNode):
     level = graphene.String()
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
-    open_milestones = graphene.List(MilestoneNode)
-    closed_milestones = graphene.List(MilestoneNode)
+    open_milestones = graphene.List(MilestoneNode, limit=graphene.Int(default_value=5))
+    closed_milestones = graphene.List(MilestoneNode, limit=graphene.Int(default_value=5))
     repositories = graphene.List(RepositoryNode)
     repositories_count = graphene.Int()
     topics = graphene.List(graphene.String)
@@ -64,13 +64,13 @@ class ProjectNode(GenericEntityNode):
         """Resolve recent releases."""
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
-    def resolve_open_milestones(self, info):
+    def resolve_open_milestones(self, info, limit):
         """Resolve open milestones."""
-        return self.open_milestones.select_related("author").order_by("-created_at")
+        return self.open_milestones.select_related("author").order_by("-created_at")[:limit]
 
-    def resolve_closed_milestones(self, info):
+    def resolve_closed_milestones(self, info, limit):
         """Resolve closed milestones."""
-        return self.closed_milestones.select_related("author").order_by("-created_at")
+        return self.closed_milestones.select_related("author").order_by("-created_at")[:limit]
 
     def resolve_repositories(self, info):
         """Resolve repositories."""

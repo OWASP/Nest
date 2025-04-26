@@ -114,6 +114,8 @@ const RepositoryDetailsPage = () => {
       title={repository.name}
       topContributors={repository.topContributors}
       topics={repository.topics}
+      openMilestones={repository.openMilestones}
+      closedMilestones={repository.closedMilestones}
       type="repository"
     />
   )

@@ -97,6 +97,8 @@ export interface ProjectTypeGraphql {
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
   topContributors: TopContributorsTypeGraphql[]
+  openMilestones: ProjectMilestonesType[]
+  closedMilestones: ProjectMilestonesType[]
 }
 
 export interface RepositoriesCardProps {

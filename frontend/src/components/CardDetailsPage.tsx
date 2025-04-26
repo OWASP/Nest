@@ -14,6 +14,7 @@ import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import InfoBlock from 'components/InfoBlock'
+import Milestones from 'components/Milestones'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -40,6 +41,8 @@ const DetailsCard = ({
   topics,
   recentIssues,
   recentReleases,
+  openMilestones,
+  closedMilestones,
   showAvatar = true,
   userSummary,
   geolocationData = null,
@@ -192,6 +195,12 @@ const DetailsCard = ({
           type === 'organization' ||
           type === 'repository' ||
           type === 'project') && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
+        {(type === 'project' || type === 'repository') && (
+          <div className="grid-cols-2 gap-4 lg:grid">
+            <Milestones data={openMilestones} showAvatar={showAvatar} openMilestones={true} />
+            <Milestones data={closedMilestones} showAvatar={showAvatar} openMilestones={false} />
+          </div>
+        )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard
