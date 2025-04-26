@@ -69,14 +69,14 @@ describe('Home', () => {
   let mockRouter: { push: jest.Mock }
 
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       loading: false,
       error: null,
     })
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockAlgoliaData)
+      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue(mockAlgoliaData)
     mockRouter = { push: jest.fn() }
-    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+      ; (useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -84,7 +84,7 @@ describe('Home', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -109,7 +109,7 @@ describe('Home', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: { message: 'GraphQL error' },
     })
@@ -192,11 +192,11 @@ describe('Home', () => {
   })
 
   test('handles missing data gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       error: null,
     })
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [] })
+      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [] })
 
     render(<Home />)
 
@@ -230,8 +230,30 @@ describe('Home', () => {
     })
   })
 
+  test('renders milestones section correctly', async () => {
+    render(<Home />)
+    await waitFor(() => {
+      const openMilestones = mockGraphQLData.openMilestones
+      const closedMilestones = mockGraphQLData.closedMilestones
+
+      openMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(milestone.openIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.closedIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.createdAt)).toBeInTheDocument()
+      })
+      closedMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(milestone.openIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.closedIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.createdAt)).toBeInTheDocument()
+      })
+    })
+  })
   test('renders when no recent releases', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: {
         ...mockGraphQLData,
         recentReleases: [],

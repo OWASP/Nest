@@ -34,7 +34,7 @@ const mockError = {
 
 describe('ProjectDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       loading: false,
       error: null,
@@ -46,7 +46,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -60,7 +60,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders project details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
     })
@@ -77,7 +77,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: mockError,
     })
@@ -143,7 +143,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('Handles case when no data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: null,
     })
@@ -169,7 +169,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders project details with correct capitalization', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
     })
@@ -190,7 +190,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('handles missing project stats gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: {
         project: {
           ...mockProjectDetailsData.project,
@@ -222,8 +222,30 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
+  test('renders milestones section correctly', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      const openMilestones = mockProjectDetailsData.project.openMilestones
+      const closedMilestones = mockProjectDetailsData.project.closedMilestones
+
+      openMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(milestone.openIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.closedIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.createdAt)).toBeInTheDocument()
+      })
+      closedMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(milestone.openIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.closedIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.createdAt)).toBeInTheDocument()
+      })
+    })
+  })
   test('renders project stats correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
     })

@@ -34,7 +34,7 @@ const mockError = {
 
 describe('RepositoryDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
       loading: false,
       error: null,
@@ -46,7 +46,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -60,7 +60,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders repository details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
       error: null,
     })
@@ -79,7 +79,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: mockError,
     })
@@ -145,7 +145,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('Handles case when no data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: null,
     })
@@ -179,8 +179,31 @@ describe('RepositoryDetailsPage', () => {
     })
   })
 
+  test('renders milestones section correctly', async () => {
+    render(<RepositoryDetailsPage />)
+    await waitFor(() => {
+      const openMilestones = mockRepositoryData.repository.openMilestones
+      const closedMilestones = mockRepositoryData.repository.closedMilestones
+
+      openMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(milestone.openIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.closedIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.createdAt)).toBeInTheDocument()
+      })
+      closedMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(milestone.openIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.closedIssuesCount)).toBeInTheDocument()
+        expect(screen.getByText(milestone.createdAt)).toBeInTheDocument()
+      })
+    })
+  })
+
   test('handles missing repository stats gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ; (useQuery as jest.Mock).mockReturnValue({
       data: {
         repository: {
           ...mockRepositoryData.repository,
