@@ -64,17 +64,33 @@ export const GET_PROJECT_DATA = gql`
       type
       updatedAt
       url
-      openMilestones {
+      openMilestones(limit: 5) {
+        author {
+          avatarUrl
+          login
+          name
+        }
         title
-        body
         openIssuesCount
         closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
       }
-      closedMilestones {
+      closedMilestones(limit: 5) {
+        author {
+          avatarUrl
+          login
+          name
+        }
         title
-        body
         openIssuesCount
         closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
       }
     }
     recentPullRequests(project: $key) {

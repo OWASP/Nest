@@ -98,12 +98,12 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
       title
-      body
       openIssuesCount
       closedIssuesCount
       repositoryName
       organizationName
       createdAt
+      url
     }
     closedMilestones(limit: 5) {
       author {
@@ -112,12 +112,12 @@ export const GET_MAIN_PAGE_DATA = gql`
         name
       }
       title
-      body
       openIssuesCount
       closedIssuesCount
       repositoryName
       organizationName
       createdAt
+      url
     }
   }
 `

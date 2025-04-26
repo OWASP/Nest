@@ -1,4 +1,10 @@
-import { faCalendar, faFolderOpen, faFire, faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCalendar,
+  faFolderOpen,
+  faFire,
+  faCircleCheck,
+  faCircleExclamation,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import React from 'react'

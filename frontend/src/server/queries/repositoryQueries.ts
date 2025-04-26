@@ -52,16 +52,32 @@ export const GET_REPOSITORY_DATA = gql`
       updatedAt
       url
       openMilestones {
+        author {
+          avatarUrl
+          login
+          name
+        }
         title
-        body
         openIssuesCount
         closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
       }
       closedMilestones {
+        author {
+          avatarUrl
+          login
+          name
+        }
         title
-        body
         openIssuesCount
         closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
       }
     }
     recentPullRequests(limit: 5, organization: $organizationKey, repository: $repositoryKey) {

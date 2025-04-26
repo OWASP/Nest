@@ -21,8 +21,7 @@ class MilestoneNode(BaseNode):
             "title",
             "open_issues_count",
             "closed_issues_count",
-            "due_on",
-            "body",
+            "url",
         )
 
     def resolve_repository_name(self, info):
