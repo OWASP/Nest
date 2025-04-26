@@ -26,6 +26,8 @@ const ItemCardList = ({
     publishedAt: string
     repositoryName: string
     tagName: string
+    openIssuesCount: number
+    closedIssuesCount: number
     author: {
       avatarUrl: string
       login: string

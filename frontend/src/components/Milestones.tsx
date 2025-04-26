@@ -1,4 +1,4 @@
-import { faCalendar, faFolderOpen, faFire } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faFolderOpen, faFire, faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -40,6 +40,14 @@ const Milestones: React.FC<ProjectMilestonesProps> = ({
           <div className="mr-4 flex items-center">
             <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
             <span>{formatDate(item.createdAt)}</span>
+          </div>
+          <div className="mr-4 flex items-center">
+            <FontAwesomeIcon icon={faCircleCheck} className="mr-2 h-4 w-4 text-green-500" />
+            <span>{item.closedIssuesCount} closed</span>
+          </div>
+          <div className="mr-4 flex items-center">
+            <FontAwesomeIcon icon={faCircleExclamation} className="mr-2 h-4 w-4 text-yellow-500" />
+            <span>{item.openIssuesCount} open</span>
           </div>
           {item?.repositoryName && (
             <div className="flex flex-1 items-center overflow-hidden">
