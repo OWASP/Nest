@@ -44,7 +44,7 @@
     "dotenv": "^16.5.0",
     "eslint-plugin-import": "^2.31.0",
     "framer-motion": "^12.9.2",
-    "graphql": "^16.10.0",
+    "graphql": "^16.11.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.21",
