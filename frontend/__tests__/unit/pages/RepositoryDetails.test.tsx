@@ -34,7 +34,7 @@ const mockError = {
 
 describe('RepositoryDetailsPage', () => {
   beforeEach(() => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
       loading: false,
       error: null,
@@ -46,7 +46,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -60,7 +60,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders repository details when data is available', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
       error: null,
     })
@@ -79,7 +79,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: mockError,
     })
@@ -145,7 +145,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('Handles case when no data is available', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: null,
     })
@@ -203,7 +203,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('handles missing repository stats gracefully', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: {
         repository: {
           ...mockRepositoryData.repository,
