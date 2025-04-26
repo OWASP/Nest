@@ -60,36 +60,8 @@ export const mockRepositoryData = {
         createdAt: '2025-03-01T10:00:00Z',
         url: 'https://github.com/OWASP/repo-one/milestone/1',
       },
-      {
-        author: {
-          avatarUrl: 'https://avatars.githubusercontent.com/u/44444?v=4',
-          login: 'milestone-author2',
-          name: 'Milestone Author 2',
-        },
-        title: 'Documentation Update',
-        openIssuesCount: 3,
-        closedIssuesCount: 7,
-        repositoryName: 'Repo Two',
-        organizationName: 'OWASP',
-        createdAt: '2025-02-15T14:30:00Z',
-        url: 'https://github.com/OWASP/repo-two/milestone/2',
-      },
     ],
     closedMilestones: [
-      {
-        author: {
-          avatarUrl: 'https://avatars.githubusercontent.com/u/55555?v=4',
-          login: 'milestone-author3',
-          name: 'Milestone Author 3',
-        },
-        title: 'v1.0.0 Release',
-        openIssuesCount: 0,
-        closedIssuesCount: 25,
-        repositoryName: 'Repo One',
-        organizationName: 'OWASP',
-        createdAt: '2024-12-01T09:00:00Z',
-        url: 'https://github.com/OWASP/repo-one/milestone/3',
-      },
       {
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/66666?v=4',
