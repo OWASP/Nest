@@ -29,6 +29,21 @@ export interface ProjectPullRequestsType {
   url: string
 }
 
+export interface ProjectMilestonesType {
+  author: {
+    avatarUrl: string
+    key: string
+    name: string
+    login: string
+  }
+  title: string
+  body: string
+  openIssuesCount: number
+  closedIssuesCount: number
+  repositoryName: string
+  organizationName?: string
+}
+
 export interface ProjectStatsType {
   contributors: number
   forks: number

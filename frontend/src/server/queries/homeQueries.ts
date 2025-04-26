@@ -92,16 +92,32 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     openMilestones(limit: 5) {
+      author {
+        avatarUrl
+        login
+        name
+      }
       title
       body
       openIssuesCount
       closedIssuesCount
+      repositoryName
+      organizationName
+      createdAt
     }
     closedMilestones(limit: 5) {
+      author {
+        avatarUrl
+        login
+        name
+      }
       title
       body
       openIssuesCount
       closedIssuesCount
+      repositoryName
+      organizationName
+      createdAt
     }
   }
 `

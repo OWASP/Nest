@@ -3,7 +3,7 @@ import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
-import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
+import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
 import { PullRequestsType } from 'types/user'
 import SecondaryCard from './SecondaryCard'
 import { TruncatedText } from './TruncatedText'
@@ -16,7 +16,7 @@ const ItemCardList = ({
   showAvatar = true,
 }: {
   title: React.ReactNode
-  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[]
+  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[] | ProjectMilestonesType[]
   icon?: IconProp
   showAvatar?: boolean
   renderDetails: (item: {

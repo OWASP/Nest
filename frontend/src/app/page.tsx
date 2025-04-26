@@ -33,6 +33,7 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
+import Milestones from 'components/Milestones'
 import DialogComp from 'components/Modal'
 import MultiSearchBar from 'components/MultiSearch'
 import RecentIssues from 'components/RecentIssues'
@@ -325,6 +326,10 @@ export default function Home() {
           <RecentPullRequests data={data?.recentPullRequests} />
         </div>
         <RecentReleases data={data?.recentReleases} />
+        <div className="grid-cols-2 gap-4 lg:grid">
+          <Milestones data={data?.openMilestones} openMilestones={true} />
+          <Milestones data={data?.closedMilestones} openMilestones={false} />
+        </div>
         <SecondaryCard
           icon={faNewspaper}
           title={
