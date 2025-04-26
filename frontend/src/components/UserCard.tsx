@@ -10,6 +10,7 @@ const UserCard = ({
   button,
   className,
   company,
+  description,
   email,
   followers_count,
   location,
@@ -42,6 +43,11 @@ const UserCard = ({
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email}
           </p>
+          {description && (
+            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+              {description}
+            </p>
+          )}
           <div className="flex justify-center gap-3">
             {followers_count > 0 && (
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
@@ -59,7 +65,7 @@ const UserCard = ({
         </div>
       </div>
 
-      <div className="mt-auto inline-flex items-center text-sm font-medium text-blue-400">
+      <div className="inline-flex items-center text-sm font-medium text-blue-400">
         View Profile
         <FontAwesomeIcon
           icon={faChevronRight}
