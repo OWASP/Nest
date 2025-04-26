@@ -153,7 +153,6 @@ export default function Home() {
           title={
             <div className="flex items-center gap-2">
               <AnchorTitle
-                href="#upcoming-events"
                 title="Upcoming Events"
                 className="flex items-center leading-none"
               />
@@ -203,7 +202,6 @@ export default function Home() {
             title={
               <div className="flex items-center gap-2">
                 <AnchorTitle
-                  href="#new-chapters"
                   title="New Chapters"
                   className="flex items-center leading-none"
                 />
@@ -249,7 +247,6 @@ export default function Home() {
             title={
               <div className="flex items-center gap-2">
                 <AnchorTitle
-                  href="#new-projects"
                   title="New Projects"
                   className="flex items-center leading-none"
                 />
@@ -297,7 +294,6 @@ export default function Home() {
               style={{ verticalAlign: 'middle' }}
             />
             <AnchorTitle
-              href="#chapters-worldwide"
               title="Chapters Worldwide"
               className="flex items-center leading-none"
             />
@@ -330,7 +326,6 @@ export default function Home() {
           title={
             <div className="flex items-center gap-2">
               <AnchorTitle
-                href="#news-&-opinions"
                 title="News & Opinions"
                 className="flex items-center leading-none"
               />

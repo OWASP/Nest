@@ -2,14 +2,21 @@ import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useCallback } from 'react'
 
+const slugify = (text: string) => 
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') 
+    .replace(/^-+|-+$/g, '') 
+    
 interface AnchorTitleProps {
-  href: string
   title: string
   className?: string
 }
 
-const AnchorTitle: React.FC<AnchorTitleProps> = ({ href, title }) => {
-  const id = href.replace('#', '') // TODO(arkid15r): refactor get href from title automatically.
+const AnchorTitle: React.FC<AnchorTitleProps> = ({title }) => {
+// TODO(arkid15r): refactor get href from title automatically.
+ const id = slugify(title) 
+  const href = `#${id}`
 
   const scrollToElement = useCallback(() => {
     const element = document.getElementById(id)

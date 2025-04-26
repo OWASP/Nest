@@ -30,7 +30,6 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
       title={
         <div className="flex items-center gap-2">
           <AnchorTitle
-            href="#recent-releases"
             title="Recent Releases"
             className="flex items-center leading-none"
           />

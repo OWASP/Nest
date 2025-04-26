@@ -21,7 +21,6 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
       title={
         <div className="flex items-center gap-2">
           <AnchorTitle
-            href="#recent-issues"
             title="Recent Issues"
             className="flex items-center leading-none"
           />
