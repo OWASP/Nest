@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,8 +10,16 @@ from apps.slack.commands.events import Events
 class MockEvent:
     def __init__(self, name, start_date, end_date, suggested_location, url, description):
         self.name = name
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start_date = (
+            datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc).date()
+            if start_date
+            else None
+        )
+        self.end_date = (
+            datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc).date()
+            if end_date
+            else None
+        )
         self.suggested_location = suggested_location
         self.url = url
         self.description = description
@@ -21,7 +30,7 @@ mock_events = sorted(
         MockEvent(
             name="OWASP Snow 2025",
             start_date="2025-03-14",
-            end_date="March 14, 2025",
+            end_date="2025-03-14",
             suggested_location="Denver, CO",
             url="https://example.com/snow",
             description="Regional conference",
@@ -29,7 +38,7 @@ mock_events = sorted(
         MockEvent(
             name="OWASP Global AppSec EU 2025",
             start_date="2025-05-26",
-            end_date="May 26-30, 2025",
+            end_date="2025-05-30",
             suggested_location="Amsterdam, Netherlands",
             url="https://example.com/eu",
             description="Premier conference",
@@ -100,9 +109,8 @@ class TestEventsHandler:
                     block_text = block["text"]["text"]
                     if (
                         f"*1. <{event1.url}|{event1.name}>*" in block_text
-                        and f"Start Date: {event1.start_date}" in block_text
-                        and f"End Date: {event1.end_date}" in block_text
-                        and f"Location: {event1.suggested_location}" in block_text
+                        and "March 14, 2025" in block_text
+                        and "Denver, CO" in block_text
                         and f"_{event1.description}_" in block_text
                     ):
                         event1_text_found = True
@@ -116,9 +124,8 @@ class TestEventsHandler:
                     block_text = block["text"]["text"]
                     if (
                         f"*2. <{event2.url}|{event2.name}>*" in block_text
-                        and f"Start Date: {event2.start_date}" in block_text
-                        and f"End Date: {event2.end_date}" in block_text
-                        and f"Location: {event2.suggested_location}" in block_text
+                        and "May 26 - 30, 2025" in block_text
+                        and "Amsterdam, Netherlands" in block_text
                         and f"_{event2.description}_" in block_text
                     ):
                         event2_text_found = True
