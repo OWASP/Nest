@@ -55,11 +55,12 @@ export interface UserCardProps {
   avatar: string
   button: ButtonType
   className?: string
-  company: string
-  email: string
+  company?: string
+  description?: string
+  email?: string
   followers_count?: number
-  location: string
-  name: string
+  location?: string
+  name?: string
   repositories_count?: number
 }
 
