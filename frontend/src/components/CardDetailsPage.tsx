@@ -54,19 +54,13 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard
-            icon={faCircleInfo}
-            title={<AnchorTitle title="Summary" />}
-          >
+          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
         {userSummary && (
-          <SecondaryCard
-            icon={faCircleInfo}
-            title={<AnchorTitle title="Summary" />}
-          >
+          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             {userSummary}
           </SecondaryCard>
         )}
@@ -152,11 +146,7 @@ const DetailsCard = ({
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList
-                items={topics}
-                icon={faTags}
-                label={<AnchorTitle title="Topics" />}
-              />
+              <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
         )}
