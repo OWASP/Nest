@@ -9,36 +9,22 @@ class Events(CommandBase):
     """Slack bot /events command."""
 
     def get_template_context(self, command):
-        """Get the template context.
 
-        Args:
-            command (dict): The Slack command payload.
-
-        Returns:
-            dict: The template context.
-
-        """
-        events_data = get_events_data() or []
-        valid_events = [event for event in events_data if event.start_date]
-        sorted_events = sorted(valid_events, key=lambda x: x.start_date)
-
-        categorized_events = {}
-        for event in sorted_events:
-            category = event.category or "Other"
-            if category not in categorized_events:
-                categorized_events[category] = {"events": []}
-            categorized_events[category]["events"].append(
-                {
-                    "name": event.name,
-                    "url": event.url,
-                    "start_date": event.start_date,
-                    "end_date": event.end_date,
-                    "description": event.description,
-                }
-            )
+        """Get the template context."""
+        upcoming_events = [
+            {
+                "description": event.description,
+                "end_date": event.end_date,
+                "location": event.suggested_location,
+                "name": event.name,
+                "start_date": event.start_date,
+                "url": event.url,
+            }
+            for event in sorted(get_events_data(), key=lambda e: e.start_date)
+        ]
 
         return {
             **super().get_template_context(command),
-            "categorized_events": categorized_events,
+            "upcoming_events": upcoming_events,
             "website_url": OWASP_WEBSITE_URL,
         }

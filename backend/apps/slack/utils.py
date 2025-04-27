@@ -128,7 +128,7 @@ def get_staff_data(
         return None
 
 
-def get_events_data() -> QuerySet:
+def get_events_data(limit=9) -> QuerySet:
     """Get events data.
 
     Returns
@@ -137,7 +137,11 @@ def get_events_data() -> QuerySet:
     """
     from apps.owasp.models.event import Event
 
-    return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
+    return Event.objects.filter(
+        start_date__gte=timezone.now(),
+    ).order_by(
+        "start_date",
+    )[:limit]
 
 
 def get_sponsors_data(limit: int = 10) -> QuerySet | None:

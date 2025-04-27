@@ -151,8 +151,10 @@ describe('About Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Arkadii Yakovets')).toBeInTheDocument()
+      expect(screen.getByText('CCSP, CISSP, CSSLP')).toBeInTheDocument()
       expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
-      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
+      expect(screen.getByText('CC')).toBeInTheDocument()
+      expect(screen.getByText('CISSP')).toBeInTheDocument()
     })
   })
 
