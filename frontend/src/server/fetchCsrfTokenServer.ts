@@ -1,9 +1,8 @@
-import { CSRF_URL, CSRF_URL_DOCKER, ENVIRONMENT } from 'utils/credentials'
+import { CSRF_URL } from 'utils/credentials'
 
 export const fetchCsrfTokenServer = async (): Promise<string> => {
-  const csrfUrl = ENVIRONMENT === 'docker' ? CSRF_URL_DOCKER : CSRF_URL
   try {
-    const response = await fetch(csrfUrl, {
+    const response = await fetch(CSRF_URL, {
       credentials: 'include',
       method: 'GET',
     })

@@ -2,13 +2,11 @@ import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
-import { ENVIRONMENT, GRAPHQL_URL, GRAPHQL_URL_DOCKER } from 'utils/credentials'
+import { GRAPHQL_URL } from 'utils/credentials'
 
 async function createApolloServerClient() {
-  const url = ENVIRONMENT == 'docker' ? GRAPHQL_URL_DOCKER : GRAPHQL_URL
-
   const httpLink = createHttpLink({
-    uri: url,
+    uri: GRAPHQL_URL,
     credentials: 'same-origin',
   })
 
