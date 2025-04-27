@@ -23,6 +23,7 @@ import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/TopContributors'
 import ChapterMapWrapper from './ChapterMapWrapper'
 import LeadersList from './LeadersList'
+import ProjectLeaders from './ProjectLeaders'
 
 const DetailsCard = ({
   title,
@@ -45,6 +46,7 @@ const DetailsCard = ({
   geolocationData = null,
   repositories = [],
 }: DetailsCardProps) => {
+  console.log(details.find((detail)=>detail.label === 'Leaders').value.split(","))
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -160,6 +162,19 @@ const DetailsCard = ({
             )}
           </div>
         )}
+        <ProjectLeaders
+  leaders={
+    details
+      .find(detail => detail.label === 'Leaders')
+      .value
+      .split(",")
+      .reduce((acc, name) => {
+        acc[name.trim()] = true;
+        return acc;
+      }, {})
+  }
+/>
+
         {topContributors && (
           <TopContributors
             icon={faUsers}

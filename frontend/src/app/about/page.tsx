@@ -5,24 +5,21 @@ import {
   faScroll,
   faUsers,
   faTools,
-  faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
 import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { ProjectTypeGraphql } from 'types/project'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
-import UserCard from 'components/UserCard'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
+import ProjectLeaders from 'components/ProjectLeaders'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
@@ -85,7 +82,7 @@ const About = () => {
           ))}
         </SecondaryCard>
 
-        <SecondaryCard icon={faArrowUpRightFromSquare} title="Leaders">
+        {/* <SecondaryCard icon={faArrowUpRightFromSquare} title="Leaders">
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
             {Object.keys(leaders).map((username) => (
               <div key={username}>
@@ -93,7 +90,8 @@ const About = () => {
               </div>
             ))}
           </div>
-        </SecondaryCard>
+        </SecondaryCard> */}
+        <ProjectLeaders leaders={leaders} />
 
         {project.topContributors && (
           <TopContributors
@@ -173,37 +171,6 @@ const About = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GET_LEADER_DATA, {
-    variables: { key: username },
-  })
-
-  if (loading) return <p>Loading {username}...</p>
-  if (error) return <p>Error loading {username}'s data</p>
-
-  const user = data?.user
-
-  if (!user) {
-    return <p>No data available for {username}</p>
-  }
-
-  return (
-    <UserCard
-      avatar={user.avatarUrl}
-      button={{
-        icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        label: 'View Profile',
-        onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
-      }}
-      className="h-64 w-40 bg-inherit"
-      company={user.company}
-      description={leaders[user.login]}
-      location={user.location}
-      name={user.name || username}
-    />
   )
 }
 
