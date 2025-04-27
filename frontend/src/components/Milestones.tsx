@@ -31,9 +31,7 @@ const Milestones: React.FC<ProjectMilestonesProps> = ({
     <ItemCardList
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle
-            href={`#${openMilestones ? 'open-milestones' : 'closed-milestones'}`}
-            title={openMilestones ? 'Open Milestones' : 'Closed Milestones'}
+          <AnchorTitle title={openMilestones ? 'Open Milestones' : 'Closed Milestones'}
             className="flex items-center leading-none"
           />
         </div>
