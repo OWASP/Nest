@@ -43,7 +43,7 @@ const TopContributors = ({
       icon={icon}
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle href="#top-contributors" title={label} className="flex items-center" />
+          <AnchorTitle title={label} className="flex items-center" />
         </div>
       }
     >
