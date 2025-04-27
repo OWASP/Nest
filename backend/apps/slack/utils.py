@@ -126,11 +126,11 @@ def get_events_data(limit=9):
     """
     from apps.owasp.models.event import Event
 
-    try:
-        return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")[:limit]
-    except Exception as e:
-        logger.exception("Failed to fetch events data via database", extra={"error": str(e)})
-        return None
+    return Event.objects.filter(
+        start_date__gte=timezone.now(),
+    ).order_by(
+        "start_date",
+    )[:limit]
 
 
 def get_sponsors_data(limit=10):

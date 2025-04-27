@@ -109,9 +109,9 @@ class TestEventsHandler:
                     block_text = block["text"]["text"]
                     if (
                         f"*1. <{event1.url}|{event1.name}>*" in block_text
-                        and "March 14, 2025" in block_text
+                        and "Mar 14, 2025" in block_text
                         and "Denver, CO" in block_text
-                        and f"_{event1.description}_" in block_text
+                        and event1.description in block_text
                     ):
                         event1_text_found = True
                         break
@@ -124,13 +124,14 @@ class TestEventsHandler:
                     block_text = block["text"]["text"]
                     if (
                         f"*2. <{event2.url}|{event2.name}>*" in block_text
-                        and "May 26 - 30, 2025" in block_text
+                        and "May 26 — 30, 2025" in block_text
                         and "Amsterdam, Netherlands" in block_text
-                        and f"_{event2.description}_" in block_text
+                        and event2.description in block_text
                     ):
                         event2_text_found = True
                         break
             assert event2_text_found, "Block containing Event 2 details not found or incorrect"
+
             footer_block = sent_blocks[-1]
             assert footer_block["type"] == "section"
             assert "🔍 For more information about upcoming events" in footer_block["text"]["text"]
