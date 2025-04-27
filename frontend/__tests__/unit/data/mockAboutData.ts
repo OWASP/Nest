@@ -24,21 +24,18 @@ export const mockAboutData = {
   users: {
     arkid15r: {
       avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
-      company: 'OWASP',
+      login: 'arkid15r',
       name: 'Arkadii Yakovets',
-      url: '/members/arkid15r',
     },
     kasya: {
       avatarUrl: 'https://avatars.githubusercontent.com/u/5873153?v=4',
-      company: 'skillstruck',
+      login: 'kasya',
       name: 'Kate Golovanova',
-      url: '/members/kasya',
     },
     mamicidal: {
       avatarUrl: 'https://avatars.githubusercontent.com/u/112129498?v=4',
-      company: 'OWASP',
+      login: 'mamicidal',
       name: 'Starr Brown',
-      url: '/members/mamicidal',
     },
   },
 }

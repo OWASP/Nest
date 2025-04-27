@@ -12,7 +12,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { GET_USER_DATA } from 'server/queries/userQueries'
+import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { ProjectTypeGraphql } from 'types/project'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
@@ -25,7 +25,11 @@ import TopContributors from 'components/TopContributors'
 import UserCard from 'components/UserCard'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 
-const leaders = ['arkid15r', 'kasya', 'mamicidal']
+const leaders = {
+  arkid15r: 'CCSP, CISSP, CSSLP',
+  kasya: 'CC',
+  mamicidal: 'CISSP',
+}
 
 const About = () => {
   const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
@@ -72,7 +76,7 @@ const About = () => {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
-        <SecondaryCard icon={faScroll} title={<AnchorTitle href="#history" title="History" />}>
+        <SecondaryCard icon={faScroll} title={<AnchorTitle title="History" />}>
           {aboutText.map((text) => (
             <div key={text} className="mb-4">
               <div key={text}>
@@ -82,12 +86,9 @@ const About = () => {
           ))}
         </SecondaryCard>
 
-        <SecondaryCard
-          icon={faArrowUpRightFromSquare}
-          title={<AnchorTitle href="#leaders" title="Leaders" />}
-        >
+        <SecondaryCard icon={faArrowUpRightFromSquare} title={<AnchorTitle title="Leaders" />}>
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-            {leaders.map((username) => (
+            {Object.keys(leaders).map((username) => (
               <div key={username}>
                 <LeaderData username={username} />
               </div>
@@ -104,10 +105,7 @@ const About = () => {
           />
         )}
 
-        <SecondaryCard
-          icon={faTools}
-          title={<AnchorTitle href="#technologies-tools" title="Technologies & Tools" />}
-        >
+        <SecondaryCard icon={faTools} title={<AnchorTitle title="Technologies & Tools" />}>
           <div className="w-full">
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
@@ -140,7 +138,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faMapSigns} title={<AnchorTitle href="#roadmap" title="Roadmap" />}>
+        <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
           <ul>
             {roadmap.map((item) => (
               <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
@@ -180,7 +178,7 @@ const About = () => {
 }
 
 const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GET_USER_DATA, {
+  const { data, loading, error } = useQuery(GET_LEADER_DATA, {
     variables: { key: username },
   })
 
@@ -196,16 +194,16 @@ const LeaderData = ({ username }: { username: string }) => {
   return (
     <UserCard
       avatar={user.avatarUrl}
-      company={user.company || user.location}
-      name={user.name || username}
       button={{
-        label: 'View Profile',
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+        label: 'View Profile',
         onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
       }}
-      email={''}
-      location=""
       className="h-64 w-40 bg-inherit"
+      company={user.company}
+      description={leaders[user.login]}
+      location={user.location}
+      name={user.name || username}
     />
   )
 }

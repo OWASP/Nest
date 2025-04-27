@@ -54,19 +54,13 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard
-            icon={faCircleInfo}
-            title={<AnchorTitle href="#summary" title="Summary" />}
-          >
+          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
         {userSummary && (
-          <SecondaryCard
-            icon={faCircleInfo}
-            title={<AnchorTitle href="#summary" title="Summary" />}
-          >
+          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             {userSummary}
           </SecondaryCard>
         )}
@@ -74,7 +68,7 @@ const DetailsCard = ({
         {heatmap && (
           <SecondaryCard
             icon={faSquarePollVertical}
-            title={<AnchorTitle href="#contribution-heatmap" title="Contribution Heatmap" />}
+            title={<AnchorTitle title="Contribution Heatmap" />}
           >
             {heatmap}
           </SecondaryCard>
@@ -82,7 +76,7 @@ const DetailsCard = ({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             icon={faRectangleList}
-            title={<AnchorTitle href={`#${type}-details`} title={`${capitalize(type)} Details`} />}
+            title={<AnchorTitle title={`${capitalize(type)} Details`} />}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details?.map((detail) =>
@@ -108,7 +102,7 @@ const DetailsCard = ({
             type === 'organization') && (
             <SecondaryCard
               icon={faChartPie}
-              title={<AnchorTitle href="#statistics" title="Statistics" />}
+              title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
               {stats.map((stat, index) => (
@@ -147,28 +141,12 @@ const DetailsCard = ({
             {languages.length !== 0 && (
               <ToggleableList
                 items={languages}
-                label={
-                  <div className="flex items-center">
-                    <div className="flex items-center space-x-2">
-                      <FontAwesomeIcon icon={faCode} className="mr-2" />
-                    </div>
-                    <AnchorTitle href="#languages" title="Languages" />
-                  </div>
-                }
+                icon={faCode}
+                label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList
-                items={topics}
-                label={
-                  <div className="flex items-center">
-                    <div className="flex items-center space-x-2">
-                      <FontAwesomeIcon icon={faTags} className="mr-2" />
-                    </div>
-                    <AnchorTitle href="#topics" title="Topics" />
-                  </div>
-                }
-              />
+              <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
         )}
@@ -208,7 +186,7 @@ const DetailsCard = ({
           repositories.length > 0 && (
             <SecondaryCard
               icon={faFolderOpen}
-              title={<AnchorTitle href="#repositories" title="Repositories" />}
+              title={<AnchorTitle title="Repositories" />}
               className="mt-6"
             >
               <RepositoriesCard repositories={repositories} />
