@@ -9,7 +9,6 @@ class Events(CommandBase):
     """Slack bot /events command."""
 
     def get_template_context(self, command):
-
         """Get the template context."""
         upcoming_events = [
             {
