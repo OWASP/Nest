@@ -57,4 +57,11 @@ test.describe('Projects Page', () => {
   test('breadcrumb renders correct segments on /projects', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Projects'])
   })
+
+  test('details page is clickable and navigates correctly', async ({ page }) => {
+    const detailsButton = await page.getByRole('button', { name: 'View Details' })
+    await detailsButton.waitFor({ state: 'visible' }) // Ensure the link is visible
+    await detailsButton.click()
+    await expect(page).toHaveURL('projects/project_1')
+  })
 })
