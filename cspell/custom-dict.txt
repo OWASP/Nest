@@ -4,10 +4,12 @@ Aissue
 Aupdated
 CCSP
 CISSP
+Cañón
 DRF
 GBP
 GSOC
 GTM
+Héllo
 Kateryna
 NETTACKER
 Nadu
@@ -23,6 +25,7 @@ Truncator
 Twitterbot
 WSL
 Whistleblower
+Wörld
 a2eeef
 algoliasearch
 ansa
@@ -105,3 +108,4 @@ xdg
 xdist
 xsser
 zsc
+éàëîôû

@@ -152,11 +152,7 @@ export default function Home() {
           icon={faCalendarAlt}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle
-                href="#upcoming-events"
-                title="Upcoming Events"
-                className="flex items-center leading-none"
-              />
+              <AnchorTitle title="Upcoming Events" className="flex items-center leading-none" />
             </div>
           }
           className="overflow-hidden"
@@ -202,11 +198,7 @@ export default function Home() {
             icon={faMapMarkerAlt}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle
-                  href="#new-chapters"
-                  title="New Chapters"
-                  className="flex items-center leading-none"
-                />
+                <AnchorTitle title="New Chapters" className="flex items-center leading-none" />
               </div>
             }
             className="overflow-hidden"
@@ -248,11 +240,7 @@ export default function Home() {
             icon={faFolder}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle
-                  href="#new-projects"
-                  title="New Projects"
-                  className="flex items-center leading-none"
-                />
+                <AnchorTitle title="New Projects" className="flex items-center leading-none" />
               </div>
             }
             className="overflow-hidden"
@@ -296,11 +284,7 @@ export default function Home() {
               className="h-5 w-5"
               style={{ verticalAlign: 'middle' }}
             />
-            <AnchorTitle
-              href="#chapters-worldwide"
-              title="Chapters Worldwide"
-              className="flex items-center leading-none"
-            />
+            <AnchorTitle title="Chapters Worldwide" className="flex items-center leading-none" />
           </div>
           <ChapterMapWrapper
             geoLocData={geoLocData}
@@ -329,11 +313,7 @@ export default function Home() {
           icon={faNewspaper}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle
-                href="#news-&-opinions"
-                title="News & Opinions"
-                className="flex items-center leading-none"
-              />
+              <AnchorTitle title="News & Opinions" className="flex items-center leading-none" />
             </div>
           }
           className="overflow-hidden"
