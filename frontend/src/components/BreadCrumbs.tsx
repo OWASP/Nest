@@ -15,7 +15,7 @@ export default function BreadCrumbs() {
   if (pathname === homeRoute) return null
 
   return (
-    <div className="absolute bottom-2 left-0 top-1 mt-16 w-full py-2">
+    <div className="mt-16 w-full pt-4">
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
         <Breadcrumbs
           aria-label="breadcrumb"
