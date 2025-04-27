@@ -21,11 +21,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
     <ItemCardList
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle
-            href="#recent-pull-requests"
-            title="Recent Pull Requests"
-            className="flex items-center leading-none"
-          />
+          <AnchorTitle title="Recent Pull Requests" className="flex items-center leading-none" />
         </div>
       }
       data={data}
