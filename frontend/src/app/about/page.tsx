@@ -12,7 +12,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { GET_USER_DATA } from 'server/queries/userQueries'
+import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { ProjectTypeGraphql } from 'types/project'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
@@ -24,7 +24,11 @@ import TopContributors from 'components/TopContributors'
 import UserCard from 'components/UserCard'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 
-const leaders = ['arkid15r', 'kasya', 'mamicidal']
+const leaders = {
+  arkid15r: 'CCSP, CISSP, CSSLP',
+  kasya: 'CC',
+  mamicidal: 'CISSP',
+}
 
 const About = () => {
   const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
@@ -68,7 +72,7 @@ const About = () => {
   }
 
   return (
-    <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
         <SecondaryCard icon={faScroll} title="History">
@@ -83,7 +87,7 @@ const About = () => {
 
         <SecondaryCard icon={faArrowUpRightFromSquare} title="Leaders">
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-            {leaders.map((username) => (
+            {Object.keys(leaders).map((username) => (
               <div key={username}>
                 <LeaderData username={username} />
               </div>
@@ -173,7 +177,7 @@ const About = () => {
 }
 
 const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GET_USER_DATA, {
+  const { data, loading, error } = useQuery(GET_LEADER_DATA, {
     variables: { key: username },
   })
 
@@ -189,16 +193,16 @@ const LeaderData = ({ username }: { username: string }) => {
   return (
     <UserCard
       avatar={user.avatarUrl}
-      company={user.company || user.location}
-      name={user.name || username}
       button={{
-        label: 'View Profile',
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+        label: 'View Profile',
         onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
       }}
-      email={''}
-      location=""
       className="h-64 w-40 bg-inherit"
+      company={user.company}
+      description={leaders[user.login]}
+      location={user.location}
+      name={user.name || username}
     />
   )
 }

@@ -25,10 +25,10 @@
           dest: ~/redirects.conf
           mode: '0644'
 
-      - name: Update Docker images
+      - name: Retart services
         shell:
-          cmd: docker compose pull
+          cmd: docker compose up -d --pull always
 
-      - name: Retart proxy server
+      - name: Prune docker images
         shell:
-          cmd: docker compose restart
+          cmd: docker image prune -f
