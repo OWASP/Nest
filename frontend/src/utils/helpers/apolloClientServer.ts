@@ -2,11 +2,10 @@ import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
-import { GRAPHQL_URL } from 'utils/credentials'
 
 async function createApolloServerClient() {
   const httpLink = createHttpLink({
-    uri: GRAPHQL_URL,
+    uri: process.env.NEXT_SERVER_GRAPHQL_URL,
     credentials: 'same-origin',
   })
 

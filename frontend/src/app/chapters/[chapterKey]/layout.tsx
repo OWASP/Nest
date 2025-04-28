@@ -7,27 +7,23 @@ import { generateSeoMetadata } from 'utils/metaconfig'
 type Params = Promise<{ chapterKey: string }>
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  try {
-    const { chapterKey } = await params
-    const { data } = await apolloServerClient.query({
-      query: GET_CHAPTER_DATA,
-      variables: {
-        key: chapterKey,
-      },
-    })
-    const chapter = data?.chapter
-    if (!chapter) {
-      return
-    }
-    return generateSeoMetadata({
-      title: chapter.name,
-      description: chapter.summary ?? 'Discover details about this OWASP chapter.',
-      canonicalPath: `/chapters/${chapterKey}`,
-      keywords: ['owasp', 'security', 'chapter', chapterKey, chapter.name],
-    })
-  } catch {
+  const { chapterKey } = await params
+  const { data } = await apolloServerClient.query({
+    query: GET_CHAPTER_DATA,
+    variables: {
+      key: chapterKey,
+    },
+  })
+  const chapter = data?.chapter
+  if (!chapter) {
     return
   }
+  return generateSeoMetadata({
+    title: chapter.name,
+    description: chapter.summary ?? 'Discover details about this OWASP chapter.',
+    canonicalPath: `/chapters/${chapterKey}`,
+    keywords: ['owasp', 'security', 'chapter', chapterKey, chapter.name],
+  })
 }
 
 export default function ChapterDetailsLayout({

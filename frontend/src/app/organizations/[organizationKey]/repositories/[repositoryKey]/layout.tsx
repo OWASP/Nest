@@ -12,25 +12,21 @@ export async function generateMetadata({
     organizationKey: string
   }>
 }): Promise<Metadata> {
-  try {
-    const { repositoryKey, organizationKey } = await params
-    const { data } = await apolloServerClient.query({
-      query: GET_REPOSITORY_DATA,
-      variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
-    })
-    const repository = data?.repository
-    if (!repository) {
-      return
-    }
-    return generateSeoMetadata({
-      title: repository.name,
-      description: repository.description ?? 'Discover details about this OWASP repository.',
-      canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
-      keywords: ['owasp', 'repository', repositoryKey, repository.name],
-    })
-  } catch {
+  const { repositoryKey, organizationKey } = await params
+  const { data } = await apolloServerClient.query({
+    query: GET_REPOSITORY_DATA,
+    variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
+  })
+  const repository = data?.repository
+  if (!repository) {
     return
   }
+  return generateSeoMetadata({
+    title: repository.name,
+    description: repository.description ?? 'Discover details about this OWASP repository.',
+    canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
+    keywords: ['owasp', 'repository', repositoryKey, repository.name],
+  })
 }
 
 export default function RepositoryDetailsLayout({ children }: { children: React.ReactNode }) {

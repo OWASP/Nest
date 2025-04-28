@@ -1,9 +1,8 @@
-import { CSRF_URL } from 'utils/credentials'
 import { AppError } from 'app/global-error'
 
 export const fetchCsrfToken = async (): Promise<string> => {
   try {
-    const response = await fetch(CSRF_URL, {
+    const response = await fetch(process.env.NEXT_SERVER_CSRF_URL, {
       credentials: 'include',
       method: 'GET',
     })

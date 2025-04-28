@@ -9,25 +9,21 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
-  try {
-    const { id: snapshotKey } = await params
-    const { data } = await apolloServerClient.query({
-      query: GET_SNAPSHOT_DETAILS,
-      variables: { key: snapshotKey },
-    })
-    const snapshot = data?.snapshot
-    if (!snapshot) {
-      return
-    }
-    return generateSeoMetadata({
-      title: snapshot?.title,
-      description: `Discover details about ${snapshot?.title} OWASP snapshot.`,
-      canonicalPath: `/snapshots/${snapshotKey}`,
-      keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
-    })
-  } catch {
+  const { id: snapshotKey } = await params
+  const { data } = await apolloServerClient.query({
+    query: GET_SNAPSHOT_DETAILS,
+    variables: { key: snapshotKey },
+  })
+  const snapshot = data?.snapshot
+  if (!snapshot) {
     return
   }
+  return generateSeoMetadata({
+    title: snapshot?.title,
+    description: `Discover details about ${snapshot?.title} OWASP snapshot.`,
+    canonicalPath: `/snapshots/${snapshotKey}`,
+    keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
+  })
 }
 export default function SnapshotDetailsLayout({ children }: { children: React.ReactNode }) {
   return children

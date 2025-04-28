@@ -9,26 +9,22 @@ export async function generateMetadata({
 }: {
   params: Promise<{ organizationKey: string }>
 }): Promise<Metadata> {
-  try {
-    const { organizationKey } = await params
-    const { data } = await apolloServerClient.query({
-      query: GET_ORGANIZATION_DATA,
-      variables: {
-        login: organizationKey,
-      },
-    })
-    const organization = data?.organization
-    if (!organization) {
-      return
-    }
-    return generateSeoMetadata({
-      title: organization?.name ?? organization?.login,
-      description: organization?.description ?? 'Discover details about this OWASP organization.',
-      canonicalPath: `/organizations/${organizationKey}`,
-    })
-  } catch {
+  const { organizationKey } = await params
+  const { data } = await apolloServerClient.query({
+    query: GET_ORGANIZATION_DATA,
+    variables: {
+      login: organizationKey,
+    },
+  })
+  const organization = data?.organization
+  if (!organization) {
     return
   }
+  return generateSeoMetadata({
+    title: organization?.name ?? organization?.login,
+    description: organization?.description ?? 'Discover details about this OWASP organization.',
+    canonicalPath: `/organizations/${organizationKey}`,
+  })
 }
 
 export default function OrganizationDetailsLayout({ children }: { children: React.ReactNode }) {
