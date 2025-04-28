@@ -46,7 +46,11 @@ const DetailsCard = ({
   geolocationData = null,
   repositories = [],
 }: DetailsCardProps) => {
-  console.log(details.find((detail)=>detail.label === 'Leaders').value.split(","))
+  const isLeaderData = details?.some((detail) => detail?.label === 'Leaders')
+  const leaders = details.find((detail) => detail.label === 'Leaders')?.value || ''
+  const leadersArray = leaders.split(',').map((leader) => leader.trim());
+
+  console.log('Leaders:', leadersArray)
   return (
     <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -152,18 +156,19 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        <ProjectLeaders
-  leaders={
-    details
-      .find(detail => detail.label === 'Leaders')
-      .value
-      .split(",")
-      .reduce((acc, name) => {
-        acc[name.trim()] = true;
-        return acc;
-      }, {})
-  }
-/>
+        {
+          isLeaderData && (
+            <ProjectLeaders
+            leaders={
+              leadersArray.reduce((acc, leader) => {
+                acc[leader] = leader
+                return acc
+              }, {} as Record<string, string>)
+            }
+          />
+          )
+        }
+
 
         {topContributors && (
           <TopContributors

@@ -19,6 +19,7 @@ const LeaderData = ({ username }: { username: string; description: string }) => 
   const { data, loading, error } = useQuery(GET_LEADER_DATA, {
     variables: { key: username },
   })
+  console.log('LeaderData:', data)
 
   if (loading) return <p>Loading {username}...</p>
   if (error) return <p>Error loading {username}'s data</p>
@@ -39,6 +40,7 @@ const LeaderData = ({ username }: { username: string; description: string }) => 
       }}
       className="h-64 w-40 bg-inherit"
       company={user.company}
+      description='description'
       location={user.location}
       name={user.name || username}
     />

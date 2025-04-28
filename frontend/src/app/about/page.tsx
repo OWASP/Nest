@@ -82,15 +82,6 @@ const About = () => {
           ))}
         </SecondaryCard>
 
-        {/* <SecondaryCard icon={faArrowUpRightFromSquare} title="Leaders">
-          <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-            {Object.keys(leaders).map((username) => (
-              <div key={username}>
-                <LeaderData username={username} />
-              </div>
-            ))}
-          </div>
-        </SecondaryCard> */}
         <ProjectLeaders leaders={leaders} />
 
         {project.topContributors && (
