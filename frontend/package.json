@@ -25,7 +25,7 @@
     "@heroui/modal": "^2.2.14",
     "@heroui/react": "^2.7.6",
     "@heroui/select": "^2.4.17",
-    "@heroui/skeleton": "^2.2.10",
+    "@heroui/skeleton": "^2.2.12",
     "@heroui/system": "^2.4.13",
     "@heroui/theme": "^2.4.13",
     "@heroui/toast": "^2.0.7",
