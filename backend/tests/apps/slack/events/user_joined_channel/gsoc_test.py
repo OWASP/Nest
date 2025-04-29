@@ -63,7 +63,7 @@ class TestGsocEventHandler:
                 users=mock_slack_event["user"]
             )
 
-            args, kwargs = mock_slack_client.chat_postMessage.call_args
+            _, kwargs = mock_slack_client.chat_postMessage.call_args
             blocks = kwargs["blocks"]
             block_texts = []
             for block in blocks:

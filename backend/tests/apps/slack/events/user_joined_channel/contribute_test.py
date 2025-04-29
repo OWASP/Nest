@@ -77,7 +77,7 @@ class TestContributeEventHandler:
 
             mock_slack_client.conversations_open.assert_called_once_with(users="U123456")
 
-            args, kwargs = mock_slack_client.chat_postMessage.call_args
+            _, kwargs = mock_slack_client.chat_postMessage.call_args
             blocks = kwargs["blocks"]
             block_texts = []
             for block in blocks:
