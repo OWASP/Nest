@@ -351,6 +351,10 @@ jobs:
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
 
+          # Redis
+          touch .env.redis
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.redis
+
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
@@ -511,7 +515,6 @@ jobs:
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
           echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
-          echo "DJANGO_REDIS_PORT=${{ secrets.DJANGO_REDIS_PORT }}" >> .env.backend
           echo "DJANGO_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
@@ -525,6 +528,10 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
+
+          # Redis
+          touch .env.redis
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.redis
 
       - name: Run Nest deploy
         working-directory: .github/ansible
