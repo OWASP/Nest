@@ -4,9 +4,11 @@ import { apolloServerClient } from 'server/apolloClientServer'
 import { GET_CHAPTER_METADATA } from 'server/queries/chapterQueries'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
-type Params = Promise<{ chapterKey: string }>
-
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ chapterKey: string }>
+}): Promise<Metadata> {
   const { chapterKey } = await params
   const { data } = await apolloServerClient.query({
     query: GET_CHAPTER_METADATA,
