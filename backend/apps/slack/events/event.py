@@ -1,16 +1,17 @@
 """Base class and common functionality for Slack events."""
 
 import logging
-from typing import Optional
 
 from django.conf import settings
 from slack_sdk.errors import SlackApiError
-from apps.slack.template_loader import env
-from apps.slack.blocks import markdown
-from apps.slack.apps import SlackConfig
+
 from apps.common.constants import NL
+from apps.slack.apps import SlackConfig
+from apps.slack.blocks import markdown
+from apps.slack.template_loader import env
 
 logger = logging.getLogger(__name__)
+
 
 class EventBase:
     """Base class for Slack events with common functionality.
@@ -20,7 +21,7 @@ class EventBase:
     - Use "{{ DIVIDER }}" to insert a horizontal divider
     """
 
-    event_type: Optional[str] = None
+    event_type = None
     matchers = None
 
     @staticmethod
@@ -49,9 +50,10 @@ class EventBase:
         """Handle the Slack event.
 
         Args:
-            event (dict): The Slack event payload.
-            client (WebClient): The Slack WebClient instance.
-            ack (function): Acknowledge function.
+          event (dict): The Slack event payload.
+          client (WebClient): The Slack WebClient instance.
+          ack (function): Acknowledge function.
+
         """
         ack()
 
@@ -71,12 +73,12 @@ class EventBase:
             self.handle_error(event, client, e)
 
     def handle_event(self, event, client):
-        """Main event handling logic to be implemented by subclasses."""
-        raise NotImplementedError("Subclasses must implement handle_event")
+        """Implement event handling logic in subclasses."""
+        error_message = "Subclasses must implement handle_event"
+        raise NotImplementedError(error_message)
 
     def handle_error(self, event, client, error):
         """Handle errors during event processing."""
-
         try:
             if "user" in event or "user_id" in event:
                 user_id = event.get("user") or event.get("user_id")
@@ -84,13 +86,13 @@ class EventBase:
                 if conv:
                     client.chat_postMessage(
                         channel=conv["channel"]["id"],
-                        text=":warning: An error occurred processing your request."
+                        text=":warning: An error occurred processing your request.",
                     )
         except Exception:
             logger.exception("Failed to send error notification")
 
     def open_conversation(self, client, user_id):
-        """Helper to open DM conversation."""
+        """Open a DM conversation."""
         try:
             return client.conversations_open(users=user_id)
         except SlackApiError as e:
@@ -118,7 +120,7 @@ class EventBase:
             "NL": NL,
             "DIVIDER": "{{ DIVIDER }}",
             "SECTION_BREAK": "{{ SECTION_BREAK }}",
-            **context
+            **context,
         }
 
     def get_template_file(self):
