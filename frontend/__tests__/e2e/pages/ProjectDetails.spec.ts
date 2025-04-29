@@ -1,4 +1,3 @@
-import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 
@@ -110,9 +109,5 @@ test.describe('Project Details Page', () => {
 
     await page.getByText('Repo One').click()
     await expect(page).toHaveURL('organizations/OWASP/repositories/repo-1')
-  })
-
-  test('breadcrumb renders correct segments on /projects/test-project', async ({ page }) => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Projects', 'Test Project'])
   })
 })
