@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import React from 'react'
-import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
-import { apolloServerClient } from 'utils/helpers/apolloClientServer'
+import { apolloServerClient } from 'server/apolloClientServer'
+import { GET_SNAPSHOT_DETAILS_METADATA } from 'server/queries/snapshotQueries'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
@@ -11,7 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id: snapshotKey } = await params
   const { data } = await apolloServerClient.query({
-    query: GET_SNAPSHOT_DETAILS,
+    query: GET_SNAPSHOT_DETAILS_METADATA,
     variables: { key: snapshotKey },
   })
   const snapshot = data?.snapshot

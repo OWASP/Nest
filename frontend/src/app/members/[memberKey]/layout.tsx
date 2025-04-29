@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import React from 'react'
+import { apolloServerClient } from 'server/apolloClientServer'
 import { GET_USER_DATA } from 'server/queries/userQueries'
-import { apolloServerClient } from 'utils/helpers/apolloClientServer'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({

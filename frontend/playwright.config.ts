@@ -26,7 +26,7 @@ export default defineConfig({
     trace: 'off',
   },
   webServer: {
-    command: 'pnpm run build:turbo && pnpm run start',
+    command: 'pnpm run build:turbo && IS_E2E=true pnpm run start',
     timeout: 120_000,
     url: 'http://localhost:3000',
   },

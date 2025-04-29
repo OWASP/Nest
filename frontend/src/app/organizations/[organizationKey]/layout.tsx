@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import React from 'react'
-import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
-import { apolloServerClient } from 'utils/helpers/apolloClientServer'
+import { apolloServerClient } from 'server/apolloClientServer'
+import { GET_ORGANIZATION_METADATA } from 'server/queries/organizationQueries'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
@@ -11,7 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { organizationKey } = await params
   const { data } = await apolloServerClient.query({
-    query: GET_ORGANIZATION_DATA,
+    query: GET_ORGANIZATION_METADATA,
     variables: {
       login: organizationKey,
     },

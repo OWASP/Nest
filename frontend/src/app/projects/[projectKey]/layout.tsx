@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import React from 'react'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { apolloServerClient } from 'utils/helpers/apolloClientServer'
+import { apolloServerClient } from 'server/apolloClientServer'
+import { GET_PROJECT_METADATA } from 'server/queries/projectQueries'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
@@ -13,7 +13,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { projectKey } = await params
   const { data } = await apolloServerClient.query({
-    query: GET_PROJECT_DATA,
+    query: GET_PROJECT_METADATA,
     variables: {
       key: projectKey,
     },
