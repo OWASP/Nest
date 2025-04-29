@@ -1,3 +1,4 @@
+import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 
@@ -57,5 +58,9 @@ test.describe('User Details Page', () => {
   test('should have top repositories', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
     await expect(page.getByText('test-repo-2')).toBeVisible()
+  })
+
+  test('breadcrumb renders correct segments on /members/test-user', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Members', 'Test User'])
   })
 })

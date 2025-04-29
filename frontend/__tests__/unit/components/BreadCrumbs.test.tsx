@@ -1,28 +1,37 @@
+import { MockedProvider } from '@apollo/client/testing'
 import { render, screen } from '@testing-library/react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useParams } from 'next/navigation'
 import BreadCrumbs from 'components/BreadCrumbs'
 import '@testing-library/jest-dom'
 
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
+  useParams: jest.fn(),
 }))
 
-describe('BreadCrumb', () => {
-  afterEach(() => {
+describe('BreadCrumbs', () => {
+  beforeEach(() => {
     jest.clearAllMocks()
+    ;(usePathname as jest.Mock).mockReturnValue('/')
+    ;(useParams as jest.Mock).mockReturnValue({})
   })
 
   test('does not render on root path "/"', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/')
-
-    render(<BreadCrumbs />)
+    render(
+      <MockedProvider>
+        <BreadCrumbs />
+      </MockedProvider>
+    )
     expect(screen.queryByText('Home')).not.toBeInTheDocument()
   })
 
   test('renders breadcrumb with multiple segments', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users/profile')
-
-    render(<BreadCrumbs />)
+    render(
+      <MockedProvider>
+        <BreadCrumbs />
+      </MockedProvider>
+    )
 
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
@@ -32,8 +41,11 @@ describe('BreadCrumb', () => {
 
   test('disables the last segment (non-clickable)', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/settings/account')
-
-    render(<BreadCrumbs />)
+    render(
+      <MockedProvider>
+        <BreadCrumbs />
+      </MockedProvider>
+    )
 
     const lastSegment = screen.getByText('Account')
     expect(lastSegment).toBeInTheDocument()
@@ -43,7 +55,11 @@ describe('BreadCrumb', () => {
   test('links have correct href attributes', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users/profile')
 
-    render(<BreadCrumbs />)
+    render(
+      <MockedProvider>
+        <BreadCrumbs />
+      </MockedProvider>
+    )
 
     const homeLink = screen.getByText('Home').closest('a')
     const dashboardLink = screen.getByText('Dashboard').closest('a')
@@ -57,7 +73,11 @@ describe('BreadCrumb', () => {
   test('links have hover styles', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users')
 
-    render(<BreadCrumbs />)
+    render(
+      <MockedProvider>
+        <BreadCrumbs />
+      </MockedProvider>
+    )
 
     const homeLink = screen.getByText('Home').closest('a')
     const dashboardLink = screen.getByText('Dashboard').closest('a')
