@@ -35,8 +35,13 @@ check-test-frontend: \
 pre-commit:
 	@pre-commit run -a
 
+prune:
+	@docker builder prune --filter 'until=24h' -a -f
+	@docker image prune -f
+
 run:
-	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
 
 test: \
 	test-nest-app \
