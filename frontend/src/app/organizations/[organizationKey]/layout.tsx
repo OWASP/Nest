@@ -17,14 +17,15 @@ export async function generateMetadata({
     },
   })
   const organization = data?.organization
-  if (!organization) {
-    return
-  }
-  return generateSeoMetadata({
-    title: organization?.name ?? organization?.login,
-    description: organization?.description ?? 'Discover details about this OWASP organization.',
-    canonicalPath: `/organizations/${organizationKey}`,
-  })
+  const title = organization?.name ?? organization?.login
+
+  return organization
+    ? generateSeoMetadata({
+        canonicalPath: `/organizations/${organizationKey}`,
+        description: organization?.description ?? `${title} organization details`,
+        title: title,
+      })
+    : null
 }
 
 export default function OrganizationDetailsLayout({ children }: { children: React.ReactNode }) {

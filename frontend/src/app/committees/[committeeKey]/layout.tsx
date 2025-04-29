@@ -17,15 +17,15 @@ export async function generateMetadata({
     },
   })
   const committee = data?.committee
-  if (!committee) {
-    return
-  }
-  return generateSeoMetadata({
-    title: committee.name,
-    description: committee.summary ?? 'Discover details about this OWASP committee.',
-    canonicalPath: `/committees/${committeeKey}`,
-    keywords: ['owasp', 'security', 'committee', committeeKey, committee.name],
-  })
+
+  return committee
+    ? generateSeoMetadata({
+        canonicalPath: `/committees/${committeeKey}`,
+        description: committee.summary ?? `${committee.name} details`,
+        keywords: ['owasp', 'security', 'committee', committeeKey, committee.name],
+        title: committee.name,
+      })
+    : null
 }
 
 export default function CommitteeDetailsLayout({

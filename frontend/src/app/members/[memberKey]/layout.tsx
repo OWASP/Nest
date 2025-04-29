@@ -17,15 +17,16 @@ export async function generateMetadata({
     },
   })
   const user = data?.user
-  if (!user) {
-    return
-  }
-  return generateSeoMetadata({
-    title: user.name ?? user.login,
-    description: user.bio ?? 'Discover details about this OWASP community member.',
-    canonicalPath: `/members/${memberKey}`,
-    keywords: [user.login, user.name, 'owasp', 'owasp community member'],
-  })
+  const title = user?.name ?? user?.login
+
+  return user
+    ? generateSeoMetadata({
+        canonicalPath: `/members/${memberKey}`,
+        description: user.bio ?? `${title} OWASP community member details.`,
+        keywords: [user.login, user.name, 'owasp', 'owasp community member'],
+        title: title,
+      })
+    : null
 }
 
 export default function UserDetailsLayout({ children }: { children: React.ReactNode }) {

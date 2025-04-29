@@ -17,21 +17,19 @@ export async function generateMetadata({
     },
   })
   const chapter = data?.chapter
-  if (!chapter) {
-    return
-  }
-  return generateSeoMetadata({
-    title: chapter.name,
-    description: chapter.summary ?? 'Discover details about this OWASP chapter.',
-    canonicalPath: `/chapters/${chapterKey}`,
-    keywords: ['owasp', 'security', 'chapter', chapterKey, chapter.name],
-  })
+
+  return chapter
+    ? generateSeoMetadata({
+        canonicalPath: `/chapters/${chapterKey}`,
+        description: chapter.summary ?? `${chapter.name} chapter details`,
+        keywords: ['owasp', 'security', 'chapter', chapterKey, chapter.name],
+        title: chapter.name,
+      })
+    : null
 }
 
 export default function ChapterDetailsLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return children
 }

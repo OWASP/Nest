@@ -19,15 +19,15 @@ export async function generateMetadata({
     },
   })
   const project = data?.project
-  if (!project) {
-    return
-  }
-  return generateSeoMetadata({
-    title: project.name,
-    description: project.summary ?? 'Discover details about this OWASP project.',
-    canonicalPath: `/projects/${projectKey}`,
-    keywords: ['owasp', 'project', projectKey, project.name],
-  })
+
+  return project
+    ? generateSeoMetadata({
+        canonicalPath: `/projects/${projectKey}`,
+        description: project.summary ?? `${project.name} project details`,
+        keywords: ['owasp', 'project', projectKey, project.name],
+        title: project.name,
+      })
+    : null
 }
 
 export default function ProjectDetailsLayout({ children }: { children: React.ReactNode }) {

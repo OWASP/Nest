@@ -25,9 +25,7 @@ export function generateSeoMetadata({
   twitterHandle = '@owasp',
 }: SeoMetadataProps): Metadata {
   const baseUrl = 'https://nest.owasp.org'
-
   const formattedTitle = title.includes('OWASP Nest') ? title : `${title} – OWASP Nest`
-
   const canonicalUrl = canonicalPath ? `${baseUrl}${canonicalPath}` : undefined
 
   return {
@@ -71,14 +69,13 @@ export function getStaticMetadata(pageKey, canonicalPath?: string): Metadata {
   if (!METADATA_CONFIG[pageKey]) {
     throw new Error(`No metadata configuration found for key: ${pageKey}`)
   }
-
   const config = METADATA_CONFIG[pageKey]
 
   return generateSeoMetadata({
-    title: config.pageTitle,
+    canonicalPath: canonicalPath || `/${pageKey.toLowerCase()}`,
     description: config.description,
     keywords: config.keywords,
+    title: config.pageTitle,
     type: config.type,
-    canonicalPath: canonicalPath || `/${pageKey.toLowerCase()}`,
   })
 }

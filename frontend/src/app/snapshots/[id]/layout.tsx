@@ -15,15 +15,15 @@ export async function generateMetadata({
     variables: { key: snapshotKey },
   })
   const snapshot = data?.snapshot
-  if (!snapshot) {
-    return
-  }
-  return generateSeoMetadata({
-    title: snapshot?.title,
-    description: `Discover details about ${snapshot?.title} OWASP snapshot.`,
-    canonicalPath: `/snapshots/${snapshotKey}`,
-    keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
-  })
+
+  return snapshot
+    ? generateSeoMetadata({
+        canonicalPath: `/snapshots/${snapshotKey}`,
+        description: `${snapshot?.title} details.`,
+        keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
+        title: snapshot?.title,
+      })
+    : null
 }
 export default function SnapshotDetailsLayout({ children }: { children: React.ReactNode }) {
   return children

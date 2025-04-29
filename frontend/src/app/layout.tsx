@@ -20,13 +20,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Home – OWASP Nest',
-  description:
-    'OWASP Nest is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community.',
+  title: 'OWASP Nest',
+  description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
   openGraph: {
-    title: 'Home – OWASP Nest',
-    description:
-      'OWASP Nest is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community.',
+    title: 'OWASP Nest',
+    description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
     url: 'https://nest.owasp.org/',
     siteName: 'OWASP Nest',
     images: [
@@ -43,8 +41,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Home – OWASP Nest',
-    description:
-      'OWASP Nest is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community.',
+    description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
     images: ['https://nest.owasp.org/img/owasp_icon_white_background.png'],
     creator: '@owasp',
     site: '@owasp',

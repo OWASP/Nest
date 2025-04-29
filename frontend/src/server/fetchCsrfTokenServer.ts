@@ -7,7 +7,7 @@ export const fetchCsrfTokenServer = async (): Promise<string> => {
   if (!response.ok) {
     throw new Error(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`)
   }
-
   const data = await response.json()
+
   return data.csrftoken
 }
