@@ -1,6 +1,5 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
-import { mockApolloClient } from '@e2e/data/mockApolloServerClient'
 import { cookies } from 'next/headers'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 
@@ -30,8 +29,22 @@ async function createApolloServerClient() {
   })
 }
 
+const testApolloClient = {
+  query: async () => ({
+    data: {
+      chapter: null,
+      project: null,
+      committee: null,
+      organization: null,
+      snapshot: null,
+      user: null,
+      repository: null,
+    },
+  }),
+}
+
 export const apolloServerClient =
-  process.env.IS_E2E === 'true' ? mockApolloClient : await createApolloServerClient()
+  process.env.IS_E2E === 'true' ? testApolloClient : await createApolloServerClient()
 
 export const getCsrfTokenOnServer = async () => {
   const cookieStore = await cookies()
