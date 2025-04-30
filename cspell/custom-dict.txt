@@ -101,6 +101,8 @@ tiktok
 tsc
 turbopack
 usefixtures
+USLACKBOT
+Whistleblower
 winsrdf
 wsgi
 xapp

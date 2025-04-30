@@ -173,6 +173,20 @@ class RepositoryBasedEntityModel(models.Model):
                 extra={"repository": getattr(self.owasp_repository, "name", None)},
             )
 
+    # M2M
+    suggested_leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Matched Users",
+        related_name="matched_%(class)s",
+        blank=True,
+    )
+    leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Assigned leaders",
+        related_name="assigned_%(class)s",
+        blank=True,
+    )
+
     def get_related_url(self, url, exclude_domains=(), include_domains=()):
         """Get OWASP entity related URL."""
         if (
