@@ -75,8 +75,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       core-js:
-        specifier: ^3.41.0
-        version: 3.41.0
+        specifier: ^3.42.0
+        version: 3.42.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -3256,8 +3256,8 @@ packages:
     resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
     engines: {node: '>=18'}
 
-  core-js@3.41.0:
-    resolution: {integrity: sha512-SJ4/EHwS36QMJd6h/Rg+GyR4A5xE0FSI3eZ+iBVpfqf1x0eTSg1smWLHrA+2jQThZSh97fmSgFSU8B61nxosxA==}
+  core-js@3.42.0:
+    resolution: {integrity: sha512-Sz4PP4ZA+Rq4II21qkNqOEDTDrCvcANId3xpIgB34NDkWc3UduWj2dqEtN9yZIq8Dk3HyPI33x9sqqU5C8sr0g==}
 
   create-jest@29.7.0:
     resolution: {integrity: sha512-Adz2bdH0Vq3F53KEMJOoftQFutWCukm6J24wbPWRO4k1kMY7gS7ds/uoJkNuV8wDCtWWnuwGcJwpWcih+zEW1Q==}
@@ -9957,7 +9957,7 @@ snapshots:
 
   cookie@1.0.2: {}
 
-  core-js@3.41.0: {}
+  core-js@3.42.0: {}
 
   create-jest@29.7.0(@types/node@22.15.3)(ts-node@10.9.2(@swc/core@1.11.22(@swc/helpers@0.5.17))(@types/node@22.15.3)(typescript@5.8.3)):
     dependencies:

@@ -37,7 +37,7 @@
     "@types/lodash": "^4.17.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "core-js": "^3.41.0",
+    "core-js": "^3.42.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.5",
