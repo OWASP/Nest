@@ -80,3 +80,13 @@ export const GET_ORGANIZATION_DATA = gql`
     }
   }
 `
+
+export const GET_ORGANIZATION_METADATA = gql`
+  query GetOrganization($login: String!) {
+    organization(login: $login) {
+      description
+      login
+      name
+    }
+  }
+`

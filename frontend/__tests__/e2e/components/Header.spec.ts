@@ -48,14 +48,14 @@ test.describe('Header - Desktop (Chrome)', () => {
     await expect(navbar.getByRole('link', { name: 'About' })).toBeVisible()
     await expect(navbar.getByRole('link', { name: 'Contribute' })).toBeVisible()
     await expect(navbar.getByRole('link', { name: 'Projects' })).toBeVisible()
-    await expect(navbar.getByText('Community')).toBeVisible()
+    await expect(navbar.getByRole('button', { name: 'Community' })).toBeVisible()
 
-    const communityLink = navbar.getByText('Community')
-    await communityLink.hover()
+    const communityButton = navbar.getByRole('button', { name: 'Community' })
+    await communityButton.click()
 
-    // Assert dropdown options appear
     await expect(navbar.getByRole('link', { name: 'Chapters' })).toBeVisible()
     await expect(navbar.getByRole('link', { name: 'Members' })).toBeVisible()
+    await expect(navbar.getByRole('link', { name: 'Organizations' })).toBeVisible()
     await expect(navbar.getByRole('link', { name: 'Snapshots' })).toBeVisible()
   })
 })
@@ -104,7 +104,6 @@ test.describe('Header - Mobile (iPhone 13)', () => {
     const menuButton = page.getByRole('button', { name: /menu/i })
     await menuButton.click()
 
-    await expect(page.getByRole('banner').getByText('Community', { exact: true })).toBeVisible()
     await expect(page.getByRole('banner').getByRole('link', { name: 'Chapters' })).toBeVisible()
     await expect(page.getByRole('banner').getByRole('link', { name: 'Members' })).toBeVisible()
     await expect(
