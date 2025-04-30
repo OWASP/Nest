@@ -14,6 +14,7 @@ import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from './ModeToggle'
 import NavButton from './NavButton'
+import NavDropdown from './NavDropDown'
 
 export default function Header() {
   const pathname = usePathname()
@@ -81,32 +82,7 @@ export default function Header() {
           <div className="flex justify-start pl-6">
             {headerLinks.map((link, i) => {
               return link.submenu ? (
-                <div
-                  key={i}
-                  className={cn(
-                    'dropdown navlink group px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                    link.submenu.map((sub) => sub.href).includes(pathname) &&
-                      'font-bold text-blue-800 dark:text-white'
-                  )}
-                >
-                  {link.text}
-                  <div className="dropdown-menu group-hover:visible group-hover:opacity-100">
-                    {link.submenu.map((sub, i) => (
-                      <Link
-                        key={i}
-                        href={sub.href || '/'}
-                        className={cn(
-                          'block w-full px-4 py-2 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
-                          pathname === sub.href &&
-                            'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
-                        )}
-                        aria-current="page"
-                      >
-                        {sub.text}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                <NavDropdown link={link} pathname={pathname} key={i} />
               ) : (
                 <Link
                   key={link.text}
