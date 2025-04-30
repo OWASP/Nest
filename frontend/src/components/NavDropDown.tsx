@@ -24,6 +24,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
     }
 
     document.addEventListener('mousedown', handleClickOutside)
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
@@ -59,7 +60,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
           aria-hidden="true"
           style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
-          <FontAwesomeIcon icon={faChevronDown} className="h-4 w-4" />
+          <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" />
         </span>
       </button>
       {isOpen && (
@@ -67,13 +68,13 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
           id={dropdownId}
           className="absolute left-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
-          {link.submenu.map((sub, idx) => (
+          {link.submenu.map((submenu, idx) => (
             <Link
               key={idx}
-              href={sub.href || '/'}
+              href={submenu.href || '/'}
               className={cn(
                 'block w-full px-4 py-2 text-left text-sm transition-colors',
-                pathname === sub.href
+                pathname === submenu.href
                   ? 'dark:bg-slate-650 bg-slate-500 font-bold text-white dark:text-white'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
               )}
@@ -87,7 +88,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
                 }
               }}
             >
-              {sub.text}
+              {submenu.text}
             </Link>
           ))}
         </div>
