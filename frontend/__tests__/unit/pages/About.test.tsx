@@ -252,7 +252,7 @@ describe('About Component', () => {
   test('renders roadmap correctly', async () => {
     render(<About />)
 
-    const roadmapSection = screen.getByRole('heading', { name: /roadmap/i }).closest('div')
+    const roadmapSection = screen.getByRole('heading', { name: 'Roadmap' }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
 
     const roadmapItems = within(roadmapSection).getAllByRole('listitem')
