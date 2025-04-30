@@ -141,4 +141,20 @@ describe('ProjectPage Component', () => {
     // Clean up the mock
     jest.restoreAllMocks()
   })
+
+  test('detail links are clickable and navigate correctly', async () => {
+    render(<ProjectsPage />)
+
+    await waitFor(() => {
+      const detailLinks = screen.getAllByRole('button', { name: /View Details/i })
+      expect(detailLinks.length).toBeGreaterThan(0)
+
+      detailLinks.forEach((link, index) => {
+        fireEvent.click(link)
+        expect(mockRouter.push).toHaveBeenCalledWith(`/projects/project_${index + 1}`)
+      })
+    })
+
+    jest.restoreAllMocks()
+  })
 })

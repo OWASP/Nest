@@ -81,3 +81,12 @@ export const GET_PROJECT_DATA = gql`
     }
   }
 `
+
+export const GET_PROJECT_METADATA = gql`
+  query GetProject($key: String!) {
+    project(key: $key) {
+      name
+      summary
+    }
+  }
+`
