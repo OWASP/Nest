@@ -26,7 +26,7 @@ export default defineConfig({
     trace: 'off',
   },
   webServer: {
-    command: 'pnpm run build:turbo && pnpm run start',
+    command: 'pnpm run build:turbo && NEXT_SERVER_DISABLE_SSR=true pnpm run start',
     timeout: 120_000,
     url: 'http://localhost:3000',
   },
