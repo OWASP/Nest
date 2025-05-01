@@ -16,7 +16,7 @@ WORKDIR /home/owasp
 USER owasp
 
 COPY --chmod=444 --chown=owasp:owasp docs/poetry.lock docs/pyproject.toml mkdocs.yaml ./
-RUN --mount=type=cache,target=/root/.cache/pypotery \
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
     poetry install --no-root && \
     rm -rf docs/poetry.lock docs/pyproject.toml
 
