@@ -347,15 +347,15 @@ jobs:
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
 
+          # Cache
+          touch .env.cache
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.cache
+
           # Database
           touch .env.db
           echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
-
-          # Redis
-          touch .env.redis
-          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.redis
 
       - name: Run Nest deploy
         working-directory: .github/ansible
@@ -527,15 +527,15 @@ jobs:
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
 
+          # Cache
+          touch .env.cache
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.cache
+
           # Database
           touch .env.db
           echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
-
-          # Redis
-          touch .env.redis
-          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.redis
 
       - name: Run Nest deploy
         working-directory: .github/ansible

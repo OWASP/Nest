@@ -19,8 +19,11 @@ services:
   production-nest-cache:
     container_name: production-nest-cache
     image: redis:7.2.7-alpine3.21
-    command: redis-server --requirepass "$REDIS_PASSWORD" --maxmemory 100mb --maxmemory-policy allkeys-lru
-    env_file: .env.redis
+    command: >
+      sh -c '
+        redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
+      '
+    env_file: .env.cache
     healthcheck:
       interval: 5s
       retries: 5
