@@ -5,8 +5,8 @@ ENV FORCE_COLOR=1
 WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
-RUN npm install --ignore-scripts -g pnpm && \
-    --mount=type=cache,target=/root/.pnpm-store \
+RUN npm install --ignore-scripts -g pnpm
+RUN --mount=type=cache,target=/root/.pnpm-store \
     --mount=type=cache,target=/app/node_modules \
     pnpm install --frozen-lockfile --ignore-scripts
 
