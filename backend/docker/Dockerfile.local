@@ -20,7 +20,7 @@ FROM python:3.13.3-alpine
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
-    apk add postgresql-client && \
+    apk add postgresql-client redis && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \
     python -m pip install --no-cache-dir poetry
