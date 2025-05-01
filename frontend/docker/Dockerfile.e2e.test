@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN npm install --ignore-scripts -g pnpm && \
+    --mount=type=cache,target=/root/.pnpm-store && \
+    --mount=type=cache,target=/app/node_modules && \
     pnpm install --frozen-lockfile --ignore-scripts
 
 COPY __tests__/e2e __tests__/e2e
