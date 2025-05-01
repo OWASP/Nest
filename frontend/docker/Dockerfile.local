@@ -10,8 +10,7 @@ RUN apk update && \
 WORKDIR /home/owasp
 
 COPY --chmod=444 --chown=node:node package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,target=/root/.pnpm-store \
-    --mount=type=cache,target=/home/owasp/node_modules \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
 FROM node:22-alpine
@@ -24,6 +23,8 @@ RUN apk update && \
     npm install --ignore-scripts -g pnpm
 
 EXPOSE 3000
+
+COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
 
 USER node
 

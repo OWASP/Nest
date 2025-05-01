@@ -9,8 +9,7 @@ WORKDIR /app
 
 RUN npm install --ignore-scripts -g pnpm
 COPY --chmod=444 package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,target=/root/.pnpm-store \
-    --mount=type=cache,target=/home/owasp/node_modules \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
