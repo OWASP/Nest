@@ -67,3 +67,12 @@ export const GET_USER_DATA = gql`
     }
   }
 `
+export const GET_USER_METADATA = gql`
+  query GetUser($key: String!) {
+    user(login: $key) {
+      bio
+      login
+      name
+    }
+  }
+`

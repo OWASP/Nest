@@ -24,3 +24,12 @@ export const GET_COMMITTEE_DATA = gql`
     }
   }
 `
+
+export const GET_COMMITTEE_METADATA = gql`
+  query GetCommittee($key: String!) {
+    committee(key: $key) {
+      name
+      summary
+    }
+  }
+`
