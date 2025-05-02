@@ -337,6 +337,8 @@ jobs:
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
+          echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
           echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
@@ -344,6 +346,10 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+
+          # Cache
+          touch .env.cache
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.cache
 
           # Database
           touch .env.db
@@ -511,6 +517,8 @@ jobs:
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
+          echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
           echo "DJANGO_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
@@ -518,6 +526,10 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+
+          # Cache
+          touch .env.cache
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.cache
 
           # Database
           touch .env.db
