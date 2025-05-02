@@ -4,10 +4,12 @@ Aissue
 Aupdated
 CCSP
 CISSP
+Cañón
 DRF
 GBP
 GSOC
 GTM
+Héllo
 Kateryna
 NETTACKER
 Nadu
@@ -23,6 +25,7 @@ Truncator
 Twitterbot
 WSL
 Whistleblower
+Wörld
 a2eeef
 algoliasearch
 ansa
@@ -78,12 +81,14 @@ owasppcitoolkit
 owtf
 pentest
 pentesting
+pnpmrc
 psycopg
 pygithub
 pygoat
 pymdownx
 pyyaml
 repositorycontributor
+requirepass
 rsc
 saft
 sakanashi
@@ -96,6 +101,7 @@ speakerdeck
 superfences
 tiktok
 tsc
+turbopack
 usefixtures
 winsrdf
 wsgi
@@ -104,3 +110,4 @@ xdg
 xdist
 xsser
 zsc
+éàëîôû

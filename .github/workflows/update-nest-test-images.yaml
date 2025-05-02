@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Update backend test image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache,mode=max
@@ -41,7 +41,7 @@ jobs:
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
       - name: Update frontend unit test image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache,mode=max
@@ -52,7 +52,7 @@ jobs:
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
 
       - name: Update frontend end-to-end test image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache,mode=max
@@ -63,7 +63,7 @@ jobs:
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
 
       - name: Update schema test image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache,mode=max

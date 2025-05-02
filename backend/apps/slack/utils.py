@@ -117,7 +117,7 @@ def get_staff_data(timeout=30):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
 
 
-def get_events_data():
+def get_events_data(limit=9):
     """Get events data.
 
     Returns
@@ -126,11 +126,11 @@ def get_events_data():
     """
     from apps.owasp.models.event import Event
 
-    try:
-        return Event.objects.filter(start_date__gte=timezone.now()).order_by("start_date")
-    except Exception as e:
-        logger.exception("Failed to fetch events data via database", extra={"error": str(e)})
-        return None
+    return Event.objects.filter(
+        start_date__gte=timezone.now(),
+    ).order_by(
+        "start_date",
+    )[:limit]
 
 
 def get_sponsors_data(limit=10):

@@ -163,4 +163,5 @@ update-data: \
 	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \
+	owasp-sync-posts \
 	owasp-update-sponsors
