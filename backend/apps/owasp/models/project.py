@@ -10,6 +10,7 @@ from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
 from apps.github.models.release import Release
+from apps.github.models.user import User
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
@@ -77,6 +78,11 @@ class Project(
     # These are synthetic fields generated based on related repositories data.
     commits_count = models.PositiveIntegerField(verbose_name="Commits", default=0)
     contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
+    leaders = models.ManyToManyField(
+        to=User,
+        related_name="led_projects",  # Optional: helps with reverse lookup
+        blank=True,  # recommended instead of default=""
+    )
     forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
     open_issues_count = models.PositiveIntegerField(verbose_name="Open issues", default=0)
     releases_count = models.PositiveIntegerField(verbose_name="Releases", default=0)

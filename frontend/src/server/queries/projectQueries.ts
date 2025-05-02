@@ -9,7 +9,8 @@ export const GET_PROJECT_DATA = gql`
       isActive
       key
       languages
-      leaders {
+      leaders{
+
       login
       }
       level
