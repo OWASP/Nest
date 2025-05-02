@@ -212,6 +212,8 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=None" >> backend/fuzz_tests/.env
           echo "DJANGO_SLACK_SIGNING_SECRET=None" >> backend/fuzz_tests/.env
           echo "GITHUB_TOKEN=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_REDIS_HOST=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_REDIS_PASSWORD=None" >> backend/fuzz_tests/.env
 
       - name: Run fuzz tests
         run: make fuzz-test-backend
