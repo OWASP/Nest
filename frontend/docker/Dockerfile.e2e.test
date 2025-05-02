@@ -1,6 +1,10 @@
 FROM mcr.microsoft.com/playwright:v1.52.0-jammy
 
-ENV FORCE_COLOR=1
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH" \
+    NPM_CONFIG_RETRY=5 \
+    NPM_CONFIG_TIMEOUT=30000
+
 
 WORKDIR /app
 
