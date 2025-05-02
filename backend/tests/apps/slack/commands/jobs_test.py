@@ -8,14 +8,14 @@ from apps.slack.constants import OWASP_JOBS_CHANNEL_ID
 
 
 class TestJobsHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}

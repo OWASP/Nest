@@ -5,9 +5,12 @@ import pytest
 from apps.slack.common.handlers.committees import get_blocks
 from apps.slack.common.presentation import EntityPresentation
 
+PAGINATION_BUTTONS_PATH = "apps.slack.common.handlers.committees.get_pagination_buttons"
+JOHN_DOE = "John Doe"
+
 
 class TestCommitteeHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_committee_data(self):
         return {
             "hits": [
@@ -15,13 +18,13 @@ class TestCommitteeHandler:
                     "idx_name": "Test Committee",
                     "idx_summary": "This is a test committee summary",
                     "idx_url": "https://example.com/committee",
-                    "idx_leaders": ["John Doe", "Jane Smith"],
+                    "idx_leaders": [JOHN_DOE, "Jane Smith"],
                 }
             ],
             "nbPages": 2,
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_empty_committee_data(self):
         return {
             "hits": [],
@@ -30,9 +33,10 @@ class TestCommitteeHandler:
 
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
-        with patch("apps.owasp.api.search.committee.get_committees") as mock_get_committees, patch(
-            "apps.owasp.models.committee.Committee"
-        ) as mock_committee_model:
+        with (
+            patch("apps.owasp.api.search.committee.get_committees") as mock_get_committees,
+            patch("apps.owasp.models.committee.Committee") as mock_committee_model,
+        ):
             mock_committee_model.active_committees_count.return_value = 42
             yield {"get_committees": mock_get_committees, "committee_model": mock_committee_model}
 
@@ -59,6 +63,7 @@ class TestCommitteeHandler:
         blocks = get_blocks()
 
         assert "OWASP committees:" in blocks[0]["text"]["text"]
+        assert "OWASP committees:" in blocks[0]["text"]["text"]
 
     def test_feedback_message(self, setup_mocks, mock_committee_data):
         setup_mocks["get_committees"].return_value = mock_committee_data
@@ -67,15 +72,14 @@ class TestCommitteeHandler:
         blocks = get_blocks(presentation=presentation)
 
         assert "Extended search over 42 OWASP committees" in blocks[-1]["text"]["text"]
+        assert "Extended search over 42 OWASP committees" in blocks[-1]["text"]["text"]
 
     def test_pagination(self, setup_mocks, mock_committee_data):
         mock_committee_data["nbPages"] = 3
         setup_mocks["get_committees"].return_value = mock_committee_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch(
-            "apps.slack.common.handlers.committees.get_pagination_buttons"
-        ) as mock_pagination:
+        with patch(PAGINATION_BUTTONS_PATH) as mock_pagination:
             mock_pagination.return_value = [
                 {"type": "button", "text": {"type": "plain_text", "text": "Next"}}
             ]
@@ -101,20 +105,18 @@ class TestCommitteeHandler:
         assert blocks[-1]["type"] != "actions"
 
     def test_leaders_singular_plural(self, setup_mocks, mock_committee_data):
-        with patch(
-            "apps.slack.common.handlers.committees.get_pagination_buttons", return_value=[]
-        ):
+        with patch(PAGINATION_BUTTONS_PATH, return_value=[]):
             setup_mocks["get_committees"].return_value = mock_committee_data
             presentation = EntityPresentation(include_metadata=True)
 
             blocks = get_blocks(presentation=presentation)
             assert "Leaders: John Doe, Jane Smith" in blocks[1]["text"]["text"]
 
-            mock_committee_data["hits"][0]["idx_leaders"] = ["John Doe"]
+            mock_committee_data["hits"][0]["idx_leaders"] = [JOHN_DOE]
             setup_mocks["get_committees"].return_value = mock_committee_data
 
             blocks = get_blocks(presentation=presentation)
-            assert "Leader: John Doe" in blocks[1]["text"]["text"]
+            assert f"Leader: {JOHN_DOE}" in blocks[1]["text"]["text"]
 
             mock_committee_data["hits"][0]["idx_leaders"] = []
             setup_mocks["get_committees"].return_value = mock_committee_data
@@ -124,23 +126,25 @@ class TestCommitteeHandler:
 
     def test_pagination_empty(self, setup_mocks, mock_committee_data):
         mock_committee_data["nbPages"] = 1
+        mock_committee_data["hits"][0]["idx_leaders"] = [JOHN_DOE]
         setup_mocks["get_committees"].return_value = mock_committee_data
-        presentation = EntityPresentation(include_pagination=True)
+        presentation = EntityPresentation(include_metadata=True)
 
-        with patch(
-            "apps.slack.common.handlers.committees.get_pagination_buttons", return_value=[]
-        ):
-            blocks = get_blocks(page=1, presentation=presentation)
-            assert all(block["type"] != "actions" for block in blocks)
+        blocks = get_blocks(presentation=presentation)
+        assert f"Leader: {JOHN_DOE}" in blocks[1]["text"]["text"]
+
+        mock_committee_data["hits"][0]["idx_leaders"] = []
+        setup_mocks["get_committees"].return_value = mock_committee_data
+
+        blocks = get_blocks(presentation=presentation)
+        assert "Leader" not in blocks[1]["text"]["text"]
 
     def test_pagination_edge_case(self, setup_mocks, mock_committee_data):
         mock_committee_data["nbPages"] = 2
         setup_mocks["get_committees"].return_value = mock_committee_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch(
-            "apps.slack.common.handlers.committees.get_pagination_buttons"
-        ) as mock_pagination:
+        with patch(PAGINATION_BUTTONS_PATH) as mock_pagination:
             mock_pagination.return_value = None
             blocks = get_blocks(page=2, presentation=presentation)
             assert all(block["type"] != "actions" for block in blocks)

@@ -14,12 +14,12 @@ builtins_print = "builtins.print"
 class TestGitHubEnrichIssuesCommand:
     """Test suite for GitHub enrich issues command."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def command(self):
         """Return a command instance for testing."""
         return Command()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_issue(self):
         """Return a mock issue instance."""
         issue = mock.Mock(spec=Issue)
@@ -246,6 +246,7 @@ class TestGitHubEnrichIssuesCommand:
 
     @mock.patch.object(OpenAi, "__init__", return_value=None)
     def test_handle_no_issues_found(self, mock_openai_init, command):
+        """Test handling when no issues are found."""
         mock_open_issues = mock.MagicMock()
         mock_open_issues.count.return_value = 0
         mock_open_issues.order_by.return_value = mock_open_issues

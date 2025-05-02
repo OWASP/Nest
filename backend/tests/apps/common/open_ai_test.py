@@ -18,13 +18,15 @@ ERROR_MESSAGE = "An error occurred during OpenAI API request."
 
 
 class TestOpenAi:
-    @pytest.fixture()
+    SETTINGS_PATH = "apps.common.open_ai.settings"
+
+    @pytest.fixture
     def openai_instance(self, monkeypatch):
         mock_settings = type("obj", (object,), {"OPEN_AI_SECRET_KEY": DEFAULT_API_KEY})
-        monkeypatch.setattr("apps.common.open_ai.settings", mock_settings)
+        monkeypatch.setattr(self.SETTINGS_PATH, mock_settings)
         return OpenAi()
 
-    @patch("apps.common.open_ai.settings")
+    @patch(SETTINGS_PATH)
     @patch("openai.OpenAI")
     def test_init(self, mock_openai, mock_settings):
         mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
@@ -39,7 +41,7 @@ class TestOpenAi:
     @patch("openai.OpenAI")
     def test_init_direct_call(self, mock_openai):
         """Test direct initialization with actual client creation."""
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
             instance = OpenAi()
             assert isinstance(instance.client, MagicMock)
@@ -50,6 +52,8 @@ class TestOpenAi:
     @pytest.mark.parametrize(
         ("input_content", "expected_input"),
         [("Test input content", "Test input content"), ("", "")],
+        ("input_content", "expected_input"),
+        [("Test input content", "Test input content"), ("", "")],
     )
     def test_set_input(self, openai_instance, input_content, expected_input):
         result = openai_instance.set_input(input_content)
@@ -58,13 +62,15 @@ class TestOpenAi:
 
     def test_set_input_direct(self):
         """Directly test set_input to ensure full coverage."""
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
             instance = OpenAi()
             instance.set_input("Test")
             assert instance.input == "Test"
 
     @pytest.mark.parametrize(
+        ("max_tokens", "expected_max_tokens"),
+        [(DEFAULT_MAX_TOKENS_SET, DEFAULT_MAX_TOKENS_SET), (0, 0), (None, None)],
         ("max_tokens", "expected_max_tokens"),
         [(DEFAULT_MAX_TOKENS_SET, DEFAULT_MAX_TOKENS_SET), (0, 0), (None, None)],
     )
@@ -75,7 +81,7 @@ class TestOpenAi:
 
     def test_set_max_tokens_direct(self):
         """Directly test set_max_tokens to ensure full coverage."""
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
             instance = OpenAi()
             instance.set_max_tokens(500)
@@ -83,6 +89,8 @@ class TestOpenAi:
             assert instance.max_tokens == token_count
 
     @pytest.mark.parametrize(
+        ("prompt_content", "expected_prompt"),
+        [("Test prompt content", "Test prompt content"), ("", ""), (None, None)],
         ("prompt_content", "expected_prompt"),
         [("Test prompt content", "Test prompt content"), ("", ""), (None, None)],
     )
@@ -93,11 +101,11 @@ class TestOpenAi:
 
     def test_set_prompt_direct(self):
         """Directly test set_prompt to ensure full coverage."""
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
             instance = OpenAi()
-            instance.set_prompt("Test prompt")
-            assert instance.prompt == "Test prompt"
+            instance.set_prompt(TEST_PROMPT)
+            assert instance.prompt == TEST_PROMPT
 
     def test_method_chaining(self, openai_instance):
         result = (
@@ -129,8 +137,10 @@ class TestOpenAi:
     @patch("openai.OpenAI")
     def test_complete_general_exception(self, mock_openai, mock_logger, openai_instance):
         openai_instance.client = mock_openai.return_value
+        openai_instance.client = mock_openai.return_value
         mock_openai.return_value.chat.completions.create.side_effect = Exception()
 
+        openai_instance.set_prompt(TEST_PROMPT).set_input(TEST_INPUT)
         openai_instance.set_prompt(TEST_PROMPT).set_input(TEST_INPUT)
         response = openai_instance.complete()
 
@@ -163,7 +173,7 @@ class TestOpenAi:
     @patch("openai.OpenAI")
     def test_complete_with_actual_input(self, mock_openai):
         """Test complete method with actual inputs and execution."""
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
             instance = OpenAi()
 
@@ -198,7 +208,7 @@ class TestOpenAi:
     @patch("apps.common.open_ai.logger")
     def test_complete_api_connection_error_direct(self, mock_logger):
         """Direct test for APIConnectionError in complete method."""
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
 
             instance = OpenAi()
@@ -220,7 +230,7 @@ class TestOpenAi:
     @patch("apps.common.open_ai.logger")
     def test_complete_general_exception_direct(self, mock_logger):
         """Direct test for general Exception in complete method."""
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
 
             instance = OpenAi()
@@ -246,7 +256,7 @@ class TestOpenAi:
         ],
     )
     def test_constructor_with_parameters(self, model, max_tokens, temperature):
-        with patch("apps.common.open_ai.settings") as mock_settings:
+        with patch(self.SETTINGS_PATH) as mock_settings:
             mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
 
             instance = OpenAi(model=model, max_tokens=max_tokens, temperature=temperature)

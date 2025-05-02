@@ -14,12 +14,12 @@ from apps.owasp.models.sponsor import Sponsor
 class TestOWASPUpdateSponsorsCommand:
     """Test suite for the OWASP update sponsors command."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_stdout(self):
         """Return a StringIO instance to capture command output."""
         return io.StringIO()
 
-    @pytest.fixture()
+    @pytest.fixture
     def sample_sponsors_data(self):
         """Return sample sponsors data for testing."""
         return [
@@ -103,9 +103,12 @@ class TestOWASPUpdateSponsorsCommand:
         content_mock = Mock()
         mock_get_repo_content.return_value = content_mock
 
-        with patch(
-            "apps.owasp.management.commands.owasp_update_sponsors.yaml.safe_load"
-        ) as mock_yaml_safe_load, patch.object(Sponsor, "bulk_save"):
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_update_sponsors.yaml.safe_load"
+            ) as mock_yaml_safe_load,
+            patch.object(Sponsor, "bulk_save"),
+        ):
             command = Command()
             command.handle()
 

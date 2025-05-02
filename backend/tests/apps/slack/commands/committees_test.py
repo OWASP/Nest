@@ -5,12 +5,15 @@ from django.conf import settings
 
 from apps.slack.commands.committees import COMMAND, committees_handler
 
+EXAMPLE_URL = "http://example.com"
+GET_BLOCKS_PATH = "apps.slack.common.handlers.committees.get_blocks"
+
 
 class TestCommitteesHandler:
     @pytest.fixture(autouse=True)
     def mock_get_absolute_url(self):
         with patch("apps.common.utils.get_absolute_url") as mock:
-            mock.return_value = "http://example.com"
+            mock.return_value = EXAMPLE_URL
             yield mock
 
     @pytest.fixture(autouse=True)
@@ -19,11 +22,11 @@ class TestCommitteesHandler:
             mock.return_value = 100
             yield mock
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {"text": "", "user_id": "U123456"}
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -31,7 +34,7 @@ class TestCommitteesHandler:
 
     @pytest.fixture(autouse=True)
     def mock_get_blocks(self):
-        with patch("apps.slack.common.handlers.committees.get_blocks", autospec=True) as mock:
+        with patch(GET_BLOCKS_PATH, autospec=True) as mock:
             mock.return_value = [
                 {"type": "section", "text": {"type": "mrkdwn", "text": "Test Committee"}}
             ]
@@ -68,7 +71,7 @@ class TestCommitteesHandler:
                 {
                     "idx_name": "Test Committee",
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com",
+                    "idx_url": EXAMPLE_URL,
                     "idx_leaders": ["Leader 1"],
                 }
             ],
@@ -90,7 +93,7 @@ class TestCommitteesHandler:
         mock_command["text"] = command_text
 
         with patch(
-            "apps.slack.common.handlers.committees.get_blocks",
+            GET_BLOCKS_PATH,
             return_value=mock_get_blocks.return_value,
         ):
             committees_handler(ack=MagicMock(), command=mock_command, client=mock_client)

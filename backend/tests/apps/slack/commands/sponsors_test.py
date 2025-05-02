@@ -36,19 +36,19 @@ mock_sponsors = [
 class TestSponsorsHandler:
     """Test sponsors command handler."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_sponsors(self):
         class MockSponsor:
             def __init__(self, name, url, member_type, description):
@@ -85,6 +85,7 @@ class TestSponsorsHandler:
     ):
         """Test handler responses."""
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        mock_get_sponsors_data.return_value = mock_sponsors if has_sponsors else []
         mock_get_sponsors_data.return_value = mock_sponsors if has_sponsors else []
 
         sponsors_handler(ack=MagicMock(), command=mock_slack_command, client=mock_slack_client)

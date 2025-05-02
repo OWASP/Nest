@@ -6,12 +6,16 @@ from django.conf import settings
 from apps.slack.commands.chapters import COMMAND, chapters_handler
 from apps.slack.common.constants import COMMAND_HELP
 
+EXAMPLE_URL = "http://example.com"
+TEST_CHAPTER_TEXT = "Test Chapter"
+GET_BLOCKS_PATH = "apps.slack.common.handlers.chapters.get_blocks"
+
 
 class TestChaptersHandler:
     @pytest.fixture(autouse=True)
     def mock_get_absolute_url(self):
         with patch("apps.common.utils.get_absolute_url") as mock:
-            mock.return_value = "http://example.com"
+            mock.return_value = EXAMPLE_URL
             yield mock
 
     @pytest.fixture(autouse=True)
@@ -20,11 +24,11 @@ class TestChaptersHandler:
             mock.return_value = 100
             yield mock
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {"text": "", "user_id": "U123456"}
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -32,9 +36,9 @@ class TestChaptersHandler:
 
     @pytest.fixture(autouse=True)
     def mock_get_blocks(self):
-        with patch("apps.slack.common.handlers.chapters.get_blocks", autospec=True) as mock:
+        with patch(GET_BLOCKS_PATH, autospec=True) as mock:
             mock.return_value = [
-                {"type": "section", "text": {"type": "mrkdwn", "text": "Test Chapter"}}
+                {"type": "section", "text": {"type": "mrkdwn", "text": TEST_CHAPTER_TEXT}}
             ]
             yield mock
 
@@ -69,9 +73,9 @@ class TestChaptersHandler:
         mock_get_chapters.return_value = {
             "hits": [
                 {
-                    "idx_name": "Test Chapter",
+                    "idx_name": TEST_CHAPTER_TEXT,
                     "idx_summary": "Test Summary",
-                    "idx_url": "http://example.com",
+                    "idx_url": EXAMPLE_URL,
                     "idx_leaders": ["Leader 1"],
                     "idx_country": "Test Country",
                     "idx_suggested_location": "Test Location",
@@ -108,7 +112,7 @@ class TestChaptersHandler:
         mock_command["text"] = command_text
 
         with patch(
-            "apps.slack.common.handlers.chapters.get_blocks",
+            GET_BLOCKS_PATH,
             return_value=mock_get_blocks.return_value,
         ):
             chapters_handler(ack=MagicMock(), command=mock_command, client=mock_client)

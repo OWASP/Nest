@@ -6,19 +6,23 @@ import pytest
 from django.http import HttpResponse
 from django.test import RequestFactory
 
-with patch("apps.slack.apps.SlackConfig.app") as mock_app, patch(
-    "slack_bolt.adapter.django.SlackRequestHandler"
-) as MockSlackRequestHandler:
+with (
+    patch("apps.slack.apps.SlackConfig.app") as mock_app,
+    patch("slack_bolt.adapter.django.SlackRequestHandler") as MockSlackRequestHandler,
+):
     mock_handler = MagicMock()
     mock_handler.handle.return_value = HttpResponse(status=200)
     MockSlackRequestHandler.return_value = mock_handler
     from apps.slack.views import slack_handler, slack_request_handler
 
 
+SLACK_EVENTS_URL = "/slack/events"
+
+
 class TestSlackViews:
     """Test suite for Slack views."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def request_factory(self):
         """Request factory fixture."""
         return RequestFactory()
@@ -36,7 +40,7 @@ class TestSlackViews:
         with patch("apps.slack.views.slack_handler") as mocked_handler:
             mocked_handler.handle.return_value = HttpResponse(status=200)
             request = request_factory.post(
-                "/slack/events", data="{}", content_type="application/json"
+                SLACK_EVENTS_URL, data="{}", content_type="application/json"
             )
             response = slack_request_handler(request)
             mocked_handler.handle.assert_called_once_with(request)
@@ -46,12 +50,12 @@ class TestSlackViews:
         """Test slack_request_handler with different HTTP methods."""
         with patch("apps.slack.views.slack_handler") as mocked_handler:
             mocked_handler.handle.return_value = HttpResponse(status=200)
-            get_request = request_factory.get("/slack/events")
+            get_request = request_factory.get(SLACK_EVENTS_URL)
             slack_request_handler(get_request)
             mocked_handler.handle.assert_called_with(get_request)
             mocked_handler.handle.reset_mock()
             put_request = request_factory.put(
-                "/slack/events", data="{}", content_type="application/json"
+                SLACK_EVENTS_URL, data="{}", content_type="application/json"
             )
             slack_request_handler(put_request)
             mocked_handler.handle.assert_called_with(put_request)

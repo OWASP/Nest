@@ -10,14 +10,17 @@ from apps.owasp.management.commands.owasp_update_events import Command
 from apps.owasp.models.event import Event
 
 EXPECTED_EVENT_COUNT = 3
+GLOBAL_EVENTS = "Global Events"
+REGIONAL_EVENTS = "Regional Events"
+DJANGO_DB_CONNECTION = "django.db.connection"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_yaml_data():
     """Return mock YAML data for events."""
     return [
         {
-            "category": "Global Events",
+            "category": GLOBAL_EVENTS,
             "events": [
                 {
                     "name": "Global AppSec Dublin",
@@ -32,7 +35,7 @@ def mock_yaml_data():
             ],
         },
         {
-            "category": "Regional Events",
+            "category": REGIONAL_EVENTS,
             "events": [
                 {
                     "name": "OWASP Virtual AppSec Indonesia",
@@ -60,7 +63,7 @@ class TestOwaspUpdateEvents:
             "data": event_data,
         }
 
-        with patch("django.db.connection"):
+        with patch(DJANGO_DB_CONNECTION):
             call_command("owasp_update_events")
 
         mock_get_content.assert_called_once_with(
@@ -68,14 +71,14 @@ class TestOwaspUpdateEvents:
         )
 
         assert mock_update_data.call_count == EXPECTED_EVENT_COUNT
-        mock_update_data.assert_any_call("Global Events", mock_yaml_data[0]["events"][0])
-        mock_update_data.assert_any_call("Global Events", mock_yaml_data[0]["events"][1])
-        mock_update_data.assert_any_call("Regional Events", mock_yaml_data[1]["events"][0])
+        mock_update_data.assert_any_call(GLOBAL_EVENTS, mock_yaml_data[0]["events"][0])
+        mock_update_data.assert_any_call(GLOBAL_EVENTS, mock_yaml_data[0]["events"][1])
+        mock_update_data.assert_any_call(REGIONAL_EVENTS, mock_yaml_data[1]["events"][0])
 
         expected_data = [
-            {"category": "Global Events", "data": mock_yaml_data[0]["events"][0]},
-            {"category": "Global Events", "data": mock_yaml_data[0]["events"][1]},
-            {"category": "Regional Events", "data": mock_yaml_data[1]["events"][0]},
+            {"category": GLOBAL_EVENTS, "data": mock_yaml_data[0]["events"][0]},
+            {"category": GLOBAL_EVENTS, "data": mock_yaml_data[0]["events"][1]},
+            {"category": REGIONAL_EVENTS, "data": mock_yaml_data[1]["events"][0]},
         ]
         mock_bulk_save.assert_called_once_with(expected_data)
 
@@ -85,7 +88,7 @@ class TestOwaspUpdateEvents:
         """Test command execution with empty data."""
         mock_get_content.return_value = yaml.dump([])
 
-        with patch("django.db.connection"):
+        with patch(DJANGO_DB_CONNECTION):
             call_command("owasp_update_events")
 
         mock_bulk_save.assert_called_once_with([])
@@ -97,7 +100,7 @@ class TestOwaspUpdateEvents:
         mock_data = [{"category": "Test Category", "events": []}]
         mock_get_content.return_value = yaml.dump(mock_data)
 
-        with patch("django.db.connection"):
+        with patch(DJANGO_DB_CONNECTION):
             call_command("owasp_update_events")
 
         mock_bulk_save.assert_called_once_with([])
@@ -110,7 +113,7 @@ class TestOwaspUpdateEvents:
         mock_get_content.return_value = "invalid: yaml: content:"
         mock_yaml_load.side_effect = yaml.YAMLError("Invalid YAML")
 
-        with pytest.raises(yaml.YAMLError, match="Invalid YAML"), patch("django.db.connection"):
+        with pytest.raises(yaml.YAMLError, match="Invalid YAML"), patch(DJANGO_DB_CONNECTION):
             call_command("owasp_update_events")
 
         mock_bulk_save.assert_not_called()

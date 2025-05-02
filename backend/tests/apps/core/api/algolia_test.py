@@ -4,9 +4,10 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 from algoliasearch.http.exceptions import AlgoliaException
-from django.core.cache import cache
 
 from apps.core.api.algolia import algolia_search, get_search_results
+
+ALGOLIA_GET_SEARCH_RESULTS_PATH = "apps.core.api.algolia.get_search_results"
 
 MOCKED_SEARCH_RESULTS = {
     "hits": [
@@ -52,7 +53,7 @@ class TestAlgoliaSearch:
     ):
         """Test valid requests for the algolia_search."""
         with patch(
-            "apps.core.api.algolia.get_search_results", return_value=expected_result
+            ALGOLIA_GET_SEARCH_RESULTS_PATH, return_value=expected_result
         ) as mock_get_search_results:
             mock_request = Mock()
             mock_request.META = {"HTTP_X_FORWARDED_FOR": CLIENT_IP_ADDRESS}
@@ -95,7 +96,7 @@ class TestAlgoliaSearch:
     def test_algolia_search_uses_cache(self):
         """Test that results are cached and retrieved from cache."""
         with patch(
-            "apps.core.api.algolia.get_search_results", return_value=MOCKED_SEARCH_RESULTS
+            ALGOLIA_GET_SEARCH_RESULTS_PATH, return_value=MOCKED_SEARCH_RESULTS
         ) as mock_get_search_results:
             mock_request = Mock()
             mock_request.META = {"HTTP_X_FORWARDED_FOR": CLIENT_IP_ADDRESS}
@@ -134,7 +135,7 @@ class TestAlgoliaSearch:
     def test_algolia_search_algolia_exception(self):
         """Test the scenario where Algolia throws an exception."""
         with patch(
-            "apps.core.api.algolia.get_search_results",
+            ALGOLIA_GET_SEARCH_RESULTS_PATH,
             side_effect=AlgoliaException("Algolia error"),
         ):
             mock_request = Mock()
@@ -165,8 +166,9 @@ class TestAlgoliaSearch:
         mock_response.results = [mock_result]
         mock_client.search.return_value = mock_response
 
-        with patch("apps.core.api.algolia.IndexBase.get_client", return_value=mock_client), patch(
-            "apps.core.api.algolia.get_params_for_index", return_value={"some": "param"}
+        with (
+            patch("apps.core.api.algolia.IndexBase.get_client", return_value=mock_client),
+            patch("apps.core.api.algolia.get_params_for_index", return_value={"some": "param"}),
         ):
             result = get_search_results(
                 index_name="projects",

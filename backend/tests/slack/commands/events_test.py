@@ -42,20 +42,20 @@ mock_events = [
 class TestEventsHandler:
     """Test events command handler."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_event(self):
         event = MagicMock()
         event.name = "Test Event"
@@ -66,7 +66,7 @@ class TestEventsHandler:
         event.category = "conference"
         return event
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_event_no_url(self):
         event = MagicMock()
         event.name = "Test Event No URL"
@@ -106,8 +106,9 @@ class TestEventsHandler:
         settings.SLACK_COMMANDS_ENABLED = True
         mock_get_events.return_value = None
 
-        with patch("apps.slack.commands.events.events_handler", side_effect=events_handler), patch(
-            "builtins.list", lambda x: [] if x is None else list(x)
+        with (
+            patch("apps.slack.commands.events.events_handler", side_effect=events_handler),
+            patch("builtins.list", lambda x: [] if x is None else list(x)),
         ):
             events_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 

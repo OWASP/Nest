@@ -22,17 +22,20 @@ from apps.slack.constants import (
 PAGE_NUMBER = 2
 MIN_ACTION_CALLS = 12
 
+PAGE_NUMBER = 2
+MIN_ACTION_CALLS = 12
+
 
 class TestHomeActions:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         return MagicMock()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_ack(self):
         return MagicMock()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_body_template(self):
         return {
             "user": {"id": "U12345"},
@@ -40,6 +43,21 @@ class TestHomeActions:
         }
 
     @pytest.mark.parametrize(
+        ("action_id", "expected_handler"),
+        [
+            (VIEW_CHAPTERS_ACTION, "apps.slack.common.handlers.chapters.get_blocks"),
+            (VIEW_CHAPTERS_ACTION_NEXT, "apps.slack.common.handlers.chapters.get_blocks"),
+            (VIEW_CHAPTERS_ACTION_PREV, "apps.slack.common.handlers.chapters.get_blocks"),
+            (VIEW_COMMITTEES_ACTION, "apps.slack.common.handlers.committees.get_blocks"),
+            (VIEW_COMMITTEES_ACTION_NEXT, "apps.slack.common.handlers.committees.get_blocks"),
+            (VIEW_COMMITTEES_ACTION_PREV, "apps.slack.common.handlers.committees.get_blocks"),
+            (VIEW_PROJECTS_ACTION, "apps.slack.common.handlers.projects.get_blocks"),
+            (VIEW_PROJECTS_ACTION_NEXT, "apps.slack.common.handlers.projects.get_blocks"),
+            (VIEW_PROJECTS_ACTION_PREV, "apps.slack.common.handlers.projects.get_blocks"),
+            (VIEW_CONTRIBUTE_ACTION, "apps.slack.common.handlers.contribute.get_blocks"),
+            (VIEW_CONTRIBUTE_ACTION_NEXT, "apps.slack.common.handlers.contribute.get_blocks"),
+            (VIEW_CONTRIBUTE_ACTION_PREV, "apps.slack.common.handlers.contribute.get_blocks"),
+        ],
         ("action_id", "expected_handler"),
         [
             (VIEW_CHAPTERS_ACTION, "apps.slack.common.handlers.chapters.get_blocks"),
@@ -69,10 +87,10 @@ class TestHomeActions:
             mock_get_blocks.assert_called_once()
             mock_client.views_publish.assert_called_once()
 
-            args, kwargs = mock_get_blocks.call_args
+            _, kwargs = mock_get_blocks.call_args
             assert kwargs.get("page") == PAGE_NUMBER
 
-            publish_args, publish_kwargs = mock_client.views_publish.call_args
+            _, publish_kwargs = mock_client.views_publish.call_args
             assert publish_kwargs["user_id"] == "U12345"
             assert "blocks" in publish_kwargs["view"]
 
@@ -86,7 +104,7 @@ class TestHomeActions:
             handle_home_actions(ack=mock_ack, body=mock_body, client=mock_client)
 
             mock_get_blocks.assert_called_once()
-            args, kwargs = mock_get_blocks.call_args
+            _, kwargs = mock_get_blocks.call_args
             assert kwargs.get("page") == 1
 
     def test_handle_home_actions_unknown_action(self, mock_ack, mock_client, mock_body_template):
@@ -100,14 +118,22 @@ class TestHomeActions:
 
         error_block = next(block for block in blocks if block.get("type") == "section")
         assert "Invalid action" in error_block["text"]["text"]
+        blocks = mock_client.views_publish.call_args[1]["view"]["blocks"]
+
+        error_block = next(block for block in blocks if block.get("type") == "section")
+        assert "Invalid action" in error_block["text"]["text"]
 
     def test_handle_home_actions_api_error(self, mock_ack, mock_client, mock_body_template):
         mock_body = dict(mock_body_template)
         mock_client.views_publish.side_effect = SlackApiError("Error", {"error": "test_error"})
 
-        with patch(
-            "apps.slack.common.handlers.chapters.get_blocks", return_value=[{"type": "section"}]
-        ), patch("apps.slack.actions.home.logger") as mock_logger:
+        with (
+            patch(
+                "apps.slack.common.handlers.chapters.get_blocks",
+                return_value=[{"type": "section"}],
+            ),
+            patch("apps.slack.actions.home.logger") as mock_logger,
+        ):
             handle_home_actions(ack=mock_ack, body=mock_body, client=mock_client)
             mock_logger.exception.assert_called_once()
 

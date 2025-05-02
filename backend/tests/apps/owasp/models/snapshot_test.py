@@ -9,7 +9,7 @@ from apps.owasp.models.snapshot import Snapshot
 
 
 class TestSnapshot:
-    @pytest.fixture()
+    @pytest.fixture
     def snapshot_data(self):
         return {
             "title": "Test Snapshot",
@@ -42,8 +42,9 @@ class TestSnapshot:
         snapshot = MagicMock(spec=Snapshot)
         snapshot.key = ""
 
-        with patch("django.utils.timezone.now", return_value=mock_date), patch.object(
-            Snapshot, "save", autospec=True, side_effect=mock_snapshot_save
+        with (
+            patch("django.utils.timezone.now", return_value=mock_date),
+            patch.object(Snapshot, "save", autospec=True, side_effect=mock_snapshot_save),
         ):
             Snapshot.save(snapshot)
             assert snapshot.key == "2023-05"

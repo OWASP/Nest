@@ -12,7 +12,7 @@ test_command = "/test"
 test_command_text = "test command"
 
 
-@pytest.fixture()
+@pytest.fixture
 def event_model():
     return Event()
 

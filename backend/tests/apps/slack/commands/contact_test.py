@@ -1,21 +1,21 @@
+import re
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
 
-from apps.common.constants import OWASP_WEBSITE_URL
 from apps.slack.commands.contact import COMMAND, contact_handler
 
 
 class TestContactHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -40,7 +40,7 @@ class TestContactHandler:
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         text = "".join(str(block) for block in blocks)
 
-        assert OWASP_WEBSITE_URL in text or "owasp.org" in text
+        assert re.search(r"https?://(?:www\.)?owasp\.org(/|$|\s)", text) is not None
         assert "contact" in text.lower()
         assert "feedback" in text.lower() or "owasp.org/contact" in text.lower()
 

@@ -9,13 +9,13 @@ EXPECTED_BLOCK_COUNT = 3
 
 
 class TestPoliciesHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}

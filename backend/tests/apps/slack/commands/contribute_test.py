@@ -5,6 +5,9 @@ from django.conf import settings
 
 from apps.slack.commands.contribute import COMMAND, contribute_handler
 
+GET_BLOCKS_PATH = "apps.slack.commands.contribute.get_blocks"
+NO_ISSUES_TEXT = "*No issues found*"
+
 
 @pytest.fixture(autouse=True)
 def mock_get_absolute_url():
@@ -14,24 +17,24 @@ def mock_get_absolute_url():
 
 
 class TestContributeHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_contribute_blocks(self):
-        with patch("apps.slack.commands.contribute.get_blocks") as mock:
+        with patch(GET_BLOCKS_PATH) as mock:
             mock.return_value = [
-                {"type": "section", "text": {"type": "mrkdwn", "text": "*No issues found*"}}
+                {"type": "section", "text": {"type": "mrkdwn", "text": NO_ISSUES_TEXT}}
             ]
             yield mock
 
@@ -56,7 +59,7 @@ class TestContributeHandler:
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         text = "".join(str(block) for block in blocks)
-        assert "No issues found" in text
+        assert NO_ISSUES_TEXT in text
 
     def test_handler_with_search_term(self, mock_command, mock_client, mock_contribute_blocks):
         settings.SLACK_COMMANDS_ENABLED = True
@@ -74,9 +77,9 @@ class TestContributeHandler:
         settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = "--start"
 
-        with patch("apps.slack.commands.contribute.get_blocks") as mock_blocks:
+        with patch(GET_BLOCKS_PATH) as mock_blocks:
             mock_blocks.return_value = [
-                {"type": "section", "text": {"type": "mrkdwn", "text": "*No issues found*"}}
+                {"type": "section", "text": {"type": "mrkdwn", "text": NO_ISSUES_TEXT}}
             ]
             contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
@@ -85,15 +88,15 @@ class TestContributeHandler:
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         text = "".join(str(block) for block in blocks)
-        assert "No issues found" in text
+        assert NO_ISSUES_TEXT in text
 
     def test_handler_with_advanced_flag(self, mock_command, mock_client):
         settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = "--advanced"
 
-        with patch("apps.slack.commands.contribute.get_blocks") as mock_blocks:
+        with patch(GET_BLOCKS_PATH) as mock_blocks:
             mock_blocks.return_value = [
-                {"type": "section", "text": {"type": "mrkdwn", "text": "*No issues found*"}}
+                {"type": "section", "text": {"type": "mrkdwn", "text": NO_ISSUES_TEXT}}
             ]
             contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
@@ -104,9 +107,9 @@ class TestContributeHandler:
         settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = "--invalid"
 
-        with patch("apps.slack.commands.contribute.get_blocks") as mock_blocks:
+        with patch(GET_BLOCKS_PATH) as mock_blocks:
             mock_blocks.return_value = [
-                {"type": "section", "text": {"type": "mrkdwn", "text": "*No issues found*"}}
+                {"type": "section", "text": {"type": "mrkdwn", "text": NO_ISSUES_TEXT}}
             ]
             contribute_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
@@ -117,7 +120,7 @@ class TestContributeHandler:
         settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = "-h"
 
-        with patch("apps.slack.commands.contribute.get_blocks") as mock_blocks:
+        with patch(GET_BLOCKS_PATH) as mock_blocks:
             mock_blocks.return_value = [
                 {"type": "section", "text": {"type": "mrkdwn", "text": "Help information"}}
             ]

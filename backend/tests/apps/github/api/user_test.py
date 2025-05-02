@@ -8,6 +8,9 @@ from apps.github.models.user import User
 http_status_ok = 200
 http_status_not_found = 404
 
+http_status_ok = 200
+http_status_not_found = 404
+
 
 class TestUserSerializer:
     @pytest.mark.parametrize(
@@ -66,7 +69,7 @@ class TestUserSerializer:
 
 
 class TestUserViewSet:
-    @pytest.fixture()
+    @pytest.fixture
     def user_viewset(self):
         viewset = UserViewSet()
         viewset.request = None

@@ -7,26 +7,33 @@ from apps.slack.commands.leaders import COMMAND, leaders_handler
 
 
 class TestLeadersHandler:
-    @pytest.fixture()
+    TEST_CHAPTER = "Test Chapter"
+    TEST_PROJECT = "Test Project"
+    CHAPTER_LEADER_1 = "Chapter Leader 1"
+    CHAPTER_LEADER_2 = "Test Chapter Leader 2"
+    PROJECT_LEADER_1 = "Project Leader 1"
+    PROJECT_LEADER_2 = "Test Project Leader 2"
+
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_get_chapters(self):
         with patch("apps.owasp.api.search.chapter.get_chapters") as mock:
             mock.return_value = {"hits": []}
             yield mock
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_get_projects(self):
         with patch("apps.owasp.api.search.project.get_projects") as mock:
             mock.return_value = {"hits": []}
@@ -74,7 +81,7 @@ class TestLeadersHandler:
             "hits": [
                 {
                     "idx_key": "test-chapter",
-                    "idx_name": "Test Chapter",
+                    "idx_name": self.TEST_CHAPTER,
                     "idx_leaders": ["Leader 1", "Test Leader 2"],
                 }
             ]
@@ -86,7 +93,7 @@ class TestLeadersHandler:
         text = "".join(str(block) for block in blocks)
 
         assert "Chapters" in text
-        assert "Test Chapter" in text
+        assert self.TEST_CHAPTER in text
         assert "Leader 1" in text
         assert "`Test Leader 2`" in text
 
@@ -100,21 +107,22 @@ class TestLeadersHandler:
             "hits": [
                 {
                     "idx_key": "test-project",
-                    "idx_name": "Test Project",
-                    "idx_leaders": ["Project Leader 1", "Test Project Leader 2"],
+                    "idx_name": self.TEST_PROJECT,
+                    "idx_leaders": [self.PROJECT_LEADER_1, self.PROJECT_LEADER_2],
                 }
             ]
         }
 
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
         leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         text = "".join(str(block) for block in blocks)
 
         assert "Projects" in text
-        assert "Test Project" in text
-        assert "Project Leader 1" in text
-        assert "`Test Project Leader 2`" in text
+        assert self.TEST_PROJECT in text
+        assert self.PROJECT_LEADER_1 in text
+        assert f"`{self.PROJECT_LEADER_2}`" in text
 
     def test_handler_with_both_results(
         self, mock_command, mock_client, mock_get_chapters, mock_get_projects
@@ -126,8 +134,8 @@ class TestLeadersHandler:
             "hits": [
                 {
                     "idx_key": "test-chapter",
-                    "idx_name": "Test Chapter",
-                    "idx_leaders": ["Chapter Leader 1", "Test Chapter Leader 2"],
+                    "idx_name": self.TEST_CHAPTER,
+                    "idx_leaders": [self.CHAPTER_LEADER_1, self.CHAPTER_LEADER_2],
                 }
             ]
         }
@@ -136,26 +144,27 @@ class TestLeadersHandler:
             "hits": [
                 {
                     "idx_key": "test-project",
-                    "idx_name": "Test Project",
-                    "idx_leaders": ["Project Leader 1", "Test Project Leader 2"],
+                    "idx_name": self.TEST_PROJECT,
+                    "idx_leaders": [self.PROJECT_LEADER_1, self.PROJECT_LEADER_2],
                 }
             ]
         }
 
+        leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
         leaders_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
         text = "".join(str(block) for block in blocks)
 
         assert "Chapters" in text
-        assert "Test Chapter" in text
-        assert "Chapter Leader 1" in text
-        assert "`Test Chapter Leader 2`" in text
+        assert self.TEST_CHAPTER in text
+        assert self.CHAPTER_LEADER_1 in text
+        assert f"`{self.CHAPTER_LEADER_2}`" in text
 
         assert "Projects" in text
-        assert "Test Project" in text
-        assert "Project Leader 1" in text
-        assert "`Test Project Leader 2`" in text
+        assert self.TEST_PROJECT in text
+        assert self.PROJECT_LEADER_1 in text
+        assert f"`{self.PROJECT_LEADER_2}`" in text
 
     def test_handler_with_no_leaders(
         self, mock_command, mock_client, mock_get_chapters, mock_get_projects
@@ -167,7 +176,7 @@ class TestLeadersHandler:
             "hits": [
                 {
                     "idx_key": "test-chapter",
-                    "idx_name": "Test Chapter",
+                    "idx_name": self.TEST_CHAPTER,
                     "idx_leaders": [],
                 }
             ]
@@ -177,7 +186,7 @@ class TestLeadersHandler:
             "hits": [
                 {
                     "idx_key": "test-project",
-                    "idx_name": "Test Project",
+                    "idx_name": self.TEST_PROJECT,
                     "idx_leaders": None,
                 }
             ]
@@ -194,8 +203,8 @@ class TestLeadersHandler:
         assert "Chapters" in headers_text
         assert "Projects" in headers_text
 
-        assert "Test Chapter" not in headers_text
-        assert "Test Project" not in headers_text
+        assert self.TEST_CHAPTER not in headers_text
+        assert self.TEST_PROJECT not in headers_text
 
     def test_handler_with_empty_query(
         self, mock_command, mock_client, mock_get_chapters, mock_get_projects

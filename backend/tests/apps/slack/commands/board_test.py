@@ -7,11 +7,11 @@ from apps.slack.commands.board import COMMAND, board_handler
 
 
 class TestBoardHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {"text": "", "user_id": "U123456"}
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -27,6 +27,7 @@ class TestBoardHandler:
     def test_board_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
 
+        board_handler(ack=MagicMock(), command=mock_command, client=mock_client)
         board_handler(ack=MagicMock(), command=mock_command, client=mock_client)
 
         assert mock_client.chat_postMessage.call_count == expected_calls

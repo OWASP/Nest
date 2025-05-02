@@ -8,11 +8,11 @@ from apps.github.models.managers.issue import OpenIssueManager
 
 
 class TestOpenIssueManager:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_queryset(self):
         return MagicMock()
 
-    @pytest.fixture()
+    @pytest.fixture
     def open_issue_manager(self, mock_queryset):
         manager = OpenIssueManager()
         manager.get_queryset = MagicMock(return_value=mock_queryset)

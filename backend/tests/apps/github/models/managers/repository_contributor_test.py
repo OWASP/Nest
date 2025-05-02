@@ -10,7 +10,7 @@ from apps.github.models.user import User
 
 
 class TestRepositoryContributorQuerySet:
-    @pytest.fixture()
+    @pytest.fixture
     def repo_contributor_qs(self):
         return MagicMock(spec=RepositoryContributorQuerySet)
 
@@ -30,7 +30,7 @@ class TestRepositoryContributorQuerySet:
 
 
 class TestRepositoryContributorManager:
-    @pytest.fixture()
+    @pytest.fixture
     def repo_contributor_manager(self):
         manager = MagicMock(spec=RepositoryContributorManager)
         manager.model = MagicMock()

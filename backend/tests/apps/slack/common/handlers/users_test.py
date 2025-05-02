@@ -12,7 +12,7 @@ dangerous_query = "test & <script>"
 
 
 class TestUsersHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_user_data(self):
         return {
             "hits": [
@@ -35,14 +35,14 @@ class TestUsersHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_empty_user_data(self):
         return {
             "hits": [],
             "nbPages": 0,
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_minimal_user_data(self):
         return {
             "hits": [

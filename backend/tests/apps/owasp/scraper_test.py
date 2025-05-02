@@ -8,23 +8,29 @@ from apps.owasp.scraper import TIMEOUT, OwaspScraper
 
 
 class TestOwaspScraper:
-    @pytest.fixture()
+    TEST_URL = "https://example.com"
+    TEST_URL_GITHUB_REPO1 = "https://github.com/repo1"
+    TEST_URL_TEST_DOMAIN = "https://test.com"
+    TEST_DOMAIN = "test.com"
+    LOGGER_PATH = "apps.owasp.scraper.logger"
+
+    @pytest.fixture
     def mock_session(self):
         session_mock = MagicMock()
         with patch("requests.Session", return_value=session_mock):
             yield session_mock
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_urlparse(self):
         with patch("urllib.parse.urlparse") as mock_parse:
             yield mock_parse
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_fromstring(self):
         with patch("lxml.html.fromstring") as mock:
             yield mock
 
-    @pytest.fixture()
+    @pytest.fixture
     def sample_html(self):
         return b"""
             <div class="sidebar">
@@ -49,16 +55,16 @@ class TestOwaspScraper:
         tree_mock = MagicMock()
         mock_fromstring.return_value = tree_mock
 
-        scraper = OwaspScraper("https://example.com")
+        scraper = OwaspScraper(self.TEST_URL)
 
-        mock_session.get.assert_called_once_with("https://example.com", timeout=TIMEOUT)
+        mock_session.get.assert_called_once_with(self.TEST_URL, timeout=TIMEOUT)
         assert scraper.page_tree == tree_mock
 
     def test_init_request_exception(self, mock_session):
         mock_session.get.side_effect = requests.exceptions.RequestException()
 
-        with patch("apps.owasp.scraper.logger") as mock_logger:
-            scraper = OwaspScraper("https://example.com")
+        with patch(self.LOGGER_PATH) as mock_logger:
+            scraper = OwaspScraper(self.TEST_URL)
             mock_logger.exception.assert_called_once()
             assert scraper.page_tree is None
 
@@ -67,7 +73,7 @@ class TestOwaspScraper:
         mock_response.status_code = 404
         mock_session.get.return_value = mock_response
 
-        scraper = OwaspScraper("https://example.com")
+        scraper = OwaspScraper(self.TEST_URL)
 
         assert scraper.page_tree is None
 
@@ -79,14 +85,14 @@ class TestOwaspScraper:
 
         mock_fromstring.side_effect = etree.ParserError("Parser error")
 
-        scraper = OwaspScraper("https://example.com")
+        scraper = OwaspScraper(self.TEST_URL)
         assert scraper.page_tree is None
 
     def test_get_urls_with_domain(self):
         scraper = OwaspScraper.__new__(OwaspScraper)
 
         mock_tree = MagicMock()
-        mock_tree.xpath.return_value = ["https://github.com/repo1", "https://github.com/repo2"]
+        mock_tree.xpath.return_value = [self.TEST_URL_GITHUB_REPO1, "https://github.com/repo2"]
         scraper.page_tree = mock_tree
 
         urls = scraper.get_urls(domain="github.com")
@@ -94,19 +100,19 @@ class TestOwaspScraper:
         mock_tree.xpath.assert_called_once_with(
             "//div[@class='sidebar']//a[contains(@href, 'github.com')]/@href"
         )
-        assert urls == {"https://github.com/repo1", "https://github.com/repo2"}
+        assert urls == {self.TEST_URL_GITHUB_REPO1, "https://github.com/repo2"}
 
     def test_get_urls_without_domain(self):
         scraper = OwaspScraper.__new__(OwaspScraper)
 
         mock_tree = MagicMock()
-        mock_tree.xpath.return_value = ["https://github.com/repo1", "https://example.com/other"]
+        mock_tree.xpath.return_value = [self.TEST_URL_GITHUB_REPO1, "https://example.com/other"]
         scraper.page_tree = mock_tree
 
         urls = scraper.get_urls()
 
         mock_tree.xpath.assert_called_once_with("//div[@class='sidebar']//a/@href")
-        assert urls == {"https://github.com/repo1", "https://example.com/other"}
+        assert urls == {self.TEST_URL_GITHUB_REPO1, "https://example.com/other"}
 
     def test_get_leaders(self):
         scraper = OwaspScraper.__new__(OwaspScraper)
@@ -199,25 +205,24 @@ class TestOwaspScraper:
         scraper = OwaspScraper.__new__(OwaspScraper)
         scraper.session = mock_session
 
-        url = "https://test.com"
         parsed_url = MagicMock()
-        parsed_url.netloc = "test.com"
+        parsed_url.netloc = self.TEST_DOMAIN
         mock_urlparse.return_value = parsed_url
 
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_session.get.return_value = mock_response
 
-        result = scraper.verify_url(url)
+        result = scraper.verify_url(self.TEST_URL_TEST_DOMAIN)
 
-        mock_session.get.assert_called_once_with(url, allow_redirects=False, timeout=TIMEOUT)
-        assert result == url
+        mock_session.get.assert_called_once_with(
+            self.TEST_URL_TEST_DOMAIN, allow_redirects=False, timeout=TIMEOUT
+        )
+        assert result == self.TEST_URL_TEST_DOMAIN
 
     def test_verify_url_redirect(self, mock_urlparse, mock_session):
         scraper = OwaspScraper.__new__(OwaspScraper)
         scraper.session = mock_session
-
-        url = "https://test.com"
 
         def mock_urlparse_side_effect(input_url):
             parsed = MagicMock()
@@ -236,7 +241,7 @@ class TestOwaspScraper:
         mock_session.get.side_effect = [response1, response2]
 
         with patch.object(scraper, "verify_url", wraps=scraper.verify_url):
-            result = scraper.verify_url(url)
+            result = scraper.verify_url(self.TEST_URL_TEST_DOMAIN)
             assert result == "https://redirect.com"
 
     def test_verify_url_request_exception(self, mock_urlparse, mock_session):
@@ -246,11 +251,11 @@ class TestOwaspScraper:
         mock_session.get.side_effect = requests.exceptions.RequestException()
 
         parsed_url = MagicMock()
-        parsed_url.netloc = "test.com"
+        parsed_url.netloc = self.TEST_DOMAIN
         mock_urlparse.return_value = parsed_url
 
-        with patch("apps.owasp.scraper.logger") as mock_logger:
-            result = scraper.verify_url("https://test.com")
+        with patch(self.LOGGER_PATH) as mock_logger:
+            result = scraper.verify_url(self.TEST_URL_TEST_DOMAIN)
             mock_logger.exception.assert_called_once()
             assert result is None
 
@@ -259,14 +264,14 @@ class TestOwaspScraper:
         scraper.session = mock_session
 
         parsed_url = MagicMock()
-        parsed_url.netloc = "test.com"
+        parsed_url.netloc = self.TEST_DOMAIN
         mock_urlparse.return_value = parsed_url
 
         mock_response = MagicMock()
         mock_response.status_code = 500
         mock_session.get.return_value = mock_response
 
-        with patch("apps.owasp.scraper.logger") as mock_logger:
-            result = scraper.verify_url("https://test.com")
+        with patch(self.LOGGER_PATH) as mock_logger:
+            result = scraper.verify_url(self.TEST_URL_TEST_DOMAIN)
             mock_logger.warning.assert_called_once()
             assert result is None

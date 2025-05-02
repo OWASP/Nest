@@ -22,14 +22,14 @@ def mock_active_projects_count():
 
 
 class TestProjectsHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
@@ -85,17 +85,17 @@ class TestProjectsHandler:
         assert any("Test Project" in str(block) for block in blocks)
         assert any("Test Summary" in str(block) for block in blocks)
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "user_id": "U123456",
             "text": "test query",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
-        client.conversations_open.return_value = {"channel": {"id": "C123456"}}
+        client.conversations_open.return_value = {"channel": {"id": "C654321"}}
         return client
 
     @pytest.mark.parametrize(
@@ -146,7 +146,7 @@ class TestProjectsHandler:
         projects_handler(ack=MagicMock(), command=mock_command, client=mock_slack_client)
 
         mock_get_blocks.assert_called_once()
-        args, kwargs = mock_get_blocks.call_args
+        _, kwargs = mock_get_blocks.call_args
         assert kwargs["search_query"] == ""
 
     @patch("apps.slack.apps.SlackConfig.app")

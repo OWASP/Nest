@@ -13,22 +13,24 @@ from apps.slack.commands.gsoc import (
 )
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
 
+GSOC_START_TEXT = "Getting Started with OWASP GSoC"
+
 
 class TestGsocHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "text": "",
             "user_id": "U123456",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_gsoc_projects(self):
         with patch("apps.slack.utils.get_gsoc_projects") as mock:
             mock.return_value = [
@@ -125,7 +127,7 @@ class TestGsocHandler:
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         text = "".join(str(block) for block in blocks)
 
-        assert "Getting Started with OWASP GSoC" in text
+        assert GSOC_START_TEXT in text
         assert "feedback" in text.lower()
 
     def test_handler_start_command(self, mock_slack_command, mock_slack_client):
@@ -137,7 +139,7 @@ class TestGsocHandler:
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         text = "".join(str(block) for block in blocks)
 
-        assert "Getting Started with OWASP GSoC" in text
+        assert GSOC_START_TEXT in text
 
     @pytest.mark.parametrize("year", [max(SUPPORTED_YEARS), min(SUPPORTED_YEARS), 2023])
     def test_handler_valid_year(

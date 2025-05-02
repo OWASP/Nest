@@ -7,14 +7,14 @@ from apps.slack.commands.users import COMMAND, users_handler
 
 
 class TestUsersHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_command(self):
         return {
             "user_id": "U123456",
             "text": "test query",
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_client(self):
         client = MagicMock()
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}

@@ -9,7 +9,9 @@ EXPECTED_BUTTON_COUNT = 2
 
 
 class TestContributeHandler:
-    @pytest.fixture()
+    GET_PAGINATION_BUTTONS_PATH = "apps.slack.common.handlers.contribute.get_pagination_buttons"
+
+    @pytest.fixture
     def mock_issue_data(self):
         return {
             "hits": [
@@ -24,7 +26,7 @@ class TestContributeHandler:
             "nbPages": 2,
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_empty_issue_data(self):
         return {
             "hits": [],
@@ -33,9 +35,10 @@ class TestContributeHandler:
 
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
-        with patch("apps.owasp.api.search.issue.get_issues") as mock_get_issues, patch(
-            "apps.github.models.issue.Issue"
-        ) as mock_issue_model:
+        with (
+            patch("apps.owasp.api.search.issue.get_issues") as mock_get_issues,
+            patch("apps.github.models.issue.Issue") as mock_issue_model,
+        ):
             mock_issue_model.open_issues_count.return_value = 42
             yield {"get_issues": mock_get_issues, "issue_model": mock_issue_model}
 
@@ -78,9 +81,7 @@ class TestContributeHandler:
         setup_mocks["get_issues"].return_value = mock_issue_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch(
-            "apps.slack.common.handlers.contribute.get_pagination_buttons"
-        ) as mock_pagination:
+        with patch(self.GET_PAGINATION_BUTTONS_PATH) as mock_pagination:
             mock_pagination.return_value = [
                 {"type": "button", "text": {"type": "plain_text", "text": "Next"}}
             ]
@@ -110,9 +111,7 @@ class TestContributeHandler:
         setup_mocks["get_issues"].return_value = mock_issue_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch(
-            "apps.slack.common.handlers.contribute.get_pagination_buttons", return_value=[]
-        ):
+        with patch(self.GET_PAGINATION_BUTTONS_PATH, return_value=[]):
             blocks = get_blocks(page=1, presentation=presentation)
             assert all(block["type"] != "actions" for block in blocks)
 
@@ -121,9 +120,7 @@ class TestContributeHandler:
         setup_mocks["get_issues"].return_value = mock_issue_data
         presentation = EntityPresentation(include_pagination=True)
 
-        with patch(
-            "apps.slack.common.handlers.contribute.get_pagination_buttons"
-        ) as mock_pagination:
+        with patch(self.GET_PAGINATION_BUTTONS_PATH) as mock_pagination:
             mock_pagination.return_value = None
             blocks = get_blocks(page=2, presentation=presentation)
             assert all(block["type"] != "actions" for block in blocks)

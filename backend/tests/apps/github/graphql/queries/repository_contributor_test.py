@@ -21,7 +21,7 @@ user2_project_url = "beta"
 user1_project_url = "alpha"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_contributor_data():
     return [
         {

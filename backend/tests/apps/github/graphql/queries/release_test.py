@@ -10,7 +10,7 @@ custom_limit = 3
 graphql_limit = 2
 
 
-@pytest.fixture()
+@pytest.fixture
 def releases_setup():
     dates = [
         datetime(2023, 5, 1, tzinfo=timezone.utc),
@@ -23,7 +23,7 @@ def releases_setup():
     mock_releases = []
     for i, date in enumerate(dates):
         mock_release = MagicMock()
-        mock_release.name = f"Release {i+1}"
+        mock_release.name = f"Release {i + 1}"
         mock_release.tag_name = f"v1.{i}"
         mock_release.created_at = date
         mock_releases.append(mock_release)

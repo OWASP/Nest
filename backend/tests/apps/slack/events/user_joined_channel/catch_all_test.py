@@ -8,7 +8,7 @@ from apps.slack.events.member_joined_channel.catch_all import catch_all_handler
 
 
 class TestCatchAllEventHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def mock_slack_event(self):
         return {"user": "U123456", "channel": "C123456"}
 

@@ -15,6 +15,17 @@ from apps.common.index import (
     register,
 )
 
+# Define constants for duplicated literals
+MOCK_SETTINGS_PATH = "apps.common.index.settings"
+MOCK_OS_GETENV_PATH = "os.getenv"
+MOCK_IS_LOCAL_BUILD_PATH = "apps.common.index.IS_LOCAL_BUILD"
+MOCK_IS_INDEXABLE_PATH = "apps.common.index.is_indexable"
+MOCK_PATH_OPEN_PATH = "pathlib.Path.open"
+TEST_TXT_PATH = "test.txt"
+NONEXISTENT_TXT_PATH = "nonexistent.txt"
+API_ERROR_MSG = "API Error"
+CATEGORY_BOOKS_FILTER = "category:books"
+
 ENV = settings.ENVIRONMENT.lower()
 TOTAL_COUNT = 42
 EXPECTED_SYNONYMS_COUNT = 3
@@ -52,7 +63,7 @@ class TestIndexRegistry:
     )
     def test_is_indexable(self, is_local, index_name, excluded_index_names, expected):
         with (
-            patch("apps.common.index.IS_LOCAL_BUILD", is_local),
+            patch(MOCK_IS_LOCAL_BUILD_PATH, is_local),
             override_settings(ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES=excluded_index_names),
         ):
             IndexRegistry.get_instance().load_excluded_local_index_names()
@@ -78,7 +89,7 @@ class TestConditionalRegister:
         model._meta.model_name = "test_model"
         return model
 
-    @pytest.fixture()
+    @pytest.fixture
     def _mock_db_settings(self):
         """Mock database settings to prevent connection errors during tests."""
         with patch.dict(
@@ -94,8 +105,8 @@ class TestConditionalRegister:
             yield
 
     @pytest.mark.usefixtures("_mock_db_settings")
-    @patch("apps.common.index.settings")
-    @patch("apps.common.index.is_indexable")
+    @patch(MOCK_SETTINGS_PATH)
+    @patch(MOCK_IS_INDEXABLE_PATH)
     def test_conditional_register_included(self, mock_is_indexable, mock_settings, mock_model):
         mock_is_indexable.return_value = True
         mock_settings.ENVIRONMENT = "test"
@@ -103,7 +114,7 @@ class TestConditionalRegister:
         class TestIndex(AlgoliaIndex):
             index_name = "test_index"
 
-        with patch("os.getenv") as mock_getenv:
+        with patch(MOCK_OS_GETENV_PATH) as mock_getenv:
             mock_getenv.return_value = ""
 
             decorated = register(mock_model)(TestIndex)
@@ -111,8 +122,8 @@ class TestConditionalRegister:
             assert issubclass(decorated, AlgoliaIndex)
 
     @pytest.mark.usefixtures("_mock_db_settings")
-    @patch("apps.common.index.settings")
-    @patch("apps.common.index.is_indexable")
+    @patch(MOCK_SETTINGS_PATH)
+    @patch(MOCK_IS_INDEXABLE_PATH)
     def test_conditional_register_excluded(self, mock_is_indexable, mock_settings, mock_model):
         mock_is_indexable.return_value = False
         mock_settings.ENVIRONMENT = "test"
@@ -120,14 +131,14 @@ class TestConditionalRegister:
         class TestIndex(AlgoliaIndex):
             index_name = "test_index"
 
-        with patch("os.getenv") as mock_getenv:
+        with patch(MOCK_OS_GETENV_PATH) as mock_getenv:
             mock_getenv.return_value = "test_app/test_model"
 
             decorated = register(mock_model)(TestIndex)
             assert decorated is TestIndex
 
-    @patch("apps.common.index.settings")
-    @patch("apps.common.index.is_indexable")
+    @patch(MOCK_SETTINGS_PATH)
+    @patch(MOCK_IS_INDEXABLE_PATH)
     def test_conditional_register_with_db_env_vars(
         self, mock_is_indexable, mock_settings, mock_model
     ):
@@ -138,16 +149,19 @@ class TestConditionalRegister:
         class TestIndex(AlgoliaIndex):
             index_name = "test_index"
 
-        with patch.dict(
-            "os.environ",
-            {
-                "DJANGO_DB_HOST": "test-db-host",
-                "DJANGO_DB_NAME": "test-db-name",
-                "DJANGO_DB_PASSWORD": "test-db-password",
-                "DJANGO_DB_USER": "test-db-user",
-                "DJANGO_DB_PORT": "5432",
-            },
-        ), patch("os.getenv") as mock_getenv:
+        with (
+            patch.dict(
+                "os.environ",
+                {
+                    "DJANGO_DB_HOST": "test-db-host",
+                    "DJANGO_DB_NAME": "test-db-name",
+                    "DJANGO_DB_PASSWORD": "test-db-password",
+                    "DJANGO_DB_USER": "test-db-user",
+                    "DJANGO_DB_PORT": "5432",
+                },
+            ),
+            patch(MOCK_OS_GETENV_PATH) as mock_getenv,
+        ):
             mock_getenv.return_value = ""
 
             decorated = register(mock_model)(TestIndex)
@@ -159,7 +173,7 @@ class TestIndexBase:
     @pytest.fixture(autouse=True)
     def _setup(self):
         with (
-            patch("apps.common.index.settings") as self.mock_settings,
+            patch(MOCK_SETTINGS_PATH) as self.mock_settings,
             patch("apps.common.index.SearchClientSync") as self.mock_search_client,
             patch("apps.common.index.logger") as self.mock_logger,
         ):
@@ -204,8 +218,8 @@ class TestIndexBase:
         index_name = "index_name"
 
         with (
-            patch("apps.common.index.IS_LOCAL_BUILD", is_local),
-            patch("apps.common.index.is_indexable") as mock_is_indexable,
+            patch(MOCK_IS_LOCAL_BUILD_PATH, is_local),
+            patch(MOCK_IS_INDEXABLE_PATH) as mock_is_indexable,
         ):
 
             def mock_is_indexable_func(name):
@@ -229,15 +243,15 @@ class TestIndexBase:
         index_name = "not_indexable_index"
         replicas = {"attr_asc": ["asc"]}
 
-        with patch("apps.common.index.is_indexable", return_value=False):
+        with patch(MOCK_IS_INDEXABLE_PATH, return_value=False):
             result = IndexBase.configure_replicas(index_name, replicas)
 
             assert result is None
             self.mock_client.set_settings.assert_not_called()
 
     def test_parse_synonyms_file_empty(self):
-        with patch("pathlib.Path.open", mock_open(read_data="\n  \n")):
-            result = IndexBase._parse_synonyms_file("test.txt")
+        with patch(MOCK_PATH_OPEN_PATH, mock_open(read_data="\n  \n")):
+            result = IndexBase._parse_synonyms_file(TEST_TXT_PATH)
             assert result == []
 
     def test_parse_synonyms_file(self):
@@ -253,8 +267,8 @@ class TestIndexBase:
         dog: puppy, pup
         """
 
-        with patch("pathlib.Path.open", mock_open(read_data=mock_file_content)):
-            result = IndexBase._parse_synonyms_file("test.txt")
+        with patch(MOCK_PATH_OPEN_PATH, mock_open(read_data=mock_file_content)):
+            result = IndexBase._parse_synonyms_file(TEST_TXT_PATH)
 
         assert len(result) == EXPECTED_SYNONYMS_COUNT
 
@@ -274,18 +288,18 @@ class TestIndexBase:
 
     def test_parse_synonyms_file_not_found(self):
         """Test _parse_synonyms_file when file is not found."""
-        with patch("pathlib.Path.open", side_effect=FileNotFoundError):
-            result = IndexBase._parse_synonyms_file("nonexistent.txt")
+        with patch(MOCK_PATH_OPEN_PATH, side_effect=FileNotFoundError):
+            result = IndexBase._parse_synonyms_file(NONEXISTENT_TXT_PATH)
             assert result is None
             self.mock_logger.exception.assert_called_once_with(
-                "Synonyms file not found", extra={"file_path": "nonexistent.txt"}
+                "Synonyms file not found", extra={"file_path": NONEXISTENT_TXT_PATH}
             )
 
     def test_get_total_count_error(self):
-        index_name = "test_index"
+        test_index_name = "test_index"
 
         with (
-            patch("apps.common.index.settings") as mock_settings,
+            patch(MOCK_SETTINGS_PATH) as mock_settings,
             patch("apps.common.index.logger") as mock_logger,
             patch("apps.common.index.SearchClientSync") as mock_search_client,
         ):
@@ -294,27 +308,27 @@ class TestIndexBase:
             mock_settings.ALGOLIA_WRITE_API_KEY = "test_api_key"
 
             mock_client = MagicMock()
-            mock_client.search_single_index.side_effect = AlgoliaException("API Error")
+            mock_client.search_single_index.side_effect = AlgoliaException(API_ERROR_MSG)
             mock_search_client.return_value = mock_client
 
-            result = IndexBase.get_total_count(index_name)
+            result = IndexBase.get_total_count(test_index_name)
             assert result == 0
             mock_logger.exception.assert_called_once()
 
     def test_get_total_count_with_filters(self):
         """Test get_total_count with search filters."""
-        index_name = "test_index"
-        search_filters = "category:books"
+        test_index_name = "test_index"
+        test_search_filters = CATEGORY_BOOKS_FILTER
 
         mock_response = MagicMock()
         mock_response.nb_hits = TOTAL_COUNT
         self.mock_client.search_single_index.return_value = mock_response
 
-        with patch("apps.common.index.settings") as mock_settings:
+        with patch(MOCK_SETTINGS_PATH) as mock_settings:
             mock_settings.ENVIRONMENT = "testenv"
 
             IndexBase.get_total_count.cache_clear()
-            result = IndexBase.get_total_count(index_name, search_filters)
+            result = IndexBase.get_total_count(test_index_name, test_search_filters)
 
             assert result == TOTAL_COUNT
             self.mock_client.search_single_index.assert_called_once_with(
@@ -323,7 +337,7 @@ class TestIndexBase:
                     "analytics": False,
                     "hitsPerPage": 0,
                     "query": "",
-                    "filters": "category:books",
+                    "filters": CATEGORY_BOOKS_FILTER,
                 },
             )
 
@@ -369,7 +383,7 @@ class TestIndexBase:
         app_name = "test"
         index_name = "test_index"
 
-        self.mock_client.clear_synonyms.side_effect = AlgoliaException("API Error")
+        self.mock_client.clear_synonyms.side_effect = AlgoliaException(API_ERROR_MSG)
 
         with patch.object(
             IndexBase,
@@ -387,7 +401,7 @@ class TestIndexBase:
 class TestIndexBaseGetQueryset:
     def test_get_queryset_local_build(self):
         with (
-            patch("apps.common.index.IS_LOCAL_BUILD", new=True),
+            patch(MOCK_IS_LOCAL_BUILD_PATH, new=True),
             patch.object(AlgoliaIndex, "__init__", return_value=None),
             patch.object(AlgoliaIndex, "get_entities", create=True),
         ):
@@ -398,7 +412,7 @@ class TestIndexBaseGetQueryset:
 
     def test_get_queryset_local_build_empty_queryset(self):
         with (
-            patch("apps.common.index.IS_LOCAL_BUILD", new=True),
+            patch(MOCK_IS_LOCAL_BUILD_PATH, new=True),
             patch.object(AlgoliaIndex, "__init__", return_value=None),
             patch.object(AlgoliaIndex, "get_entities", create=True),
         ):
@@ -409,7 +423,7 @@ class TestIndexBaseGetQueryset:
 
     def test_get_queryset_non_local_build(self):
         with (
-            patch("apps.common.index.IS_LOCAL_BUILD", new=False),
+            patch(MOCK_IS_LOCAL_BUILD_PATH, new=False),
             patch.object(AlgoliaIndex, "__init__", return_value=None),
             patch.object(AlgoliaIndex, "get_entities", create=True),
         ):

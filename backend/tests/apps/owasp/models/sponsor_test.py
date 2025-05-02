@@ -13,7 +13,7 @@ normalize_url_path = "apps.github.utils.normalize_url"
 
 
 class TestSponsor:
-    @pytest.fixture()
+    @pytest.fixture
     def sponsor_data(self):
         return {
             "name": test_sponsor_name,
@@ -81,9 +81,10 @@ class TestSponsor:
     def test_update_data_existing_sponsor(self, sponsor_data):
         mock_sponsor = MagicMock(spec=Sponsor)
 
-        with patch(sponsor_objects_get, return_value=mock_sponsor) as mock_get, patch(
-            sponsor_slugify, return_value="test-sponsor"
-        ) as mock_slugify:
+        with (
+            patch(sponsor_objects_get, return_value=mock_sponsor) as mock_get,
+            patch(sponsor_slugify, return_value="test-sponsor") as mock_slugify,
+        ):
             result = Sponsor.update_data(sponsor_data)
 
             mock_slugify.assert_called_once_with(sponsor_data["name"])
@@ -95,9 +96,11 @@ class TestSponsor:
     def test_update_data_new_sponsor(self, sponsor_data):
         mock_sponsor = MagicMock(spec=Sponsor)
 
-        with patch(sponsor_objects_get, side_effect=Sponsor.DoesNotExist) as mock_get, patch(
-            sponsor_slugify, return_value="test-sponsor"
-        ) as mock_slugify, patch.object(Sponsor, "__new__", return_value=mock_sponsor):
+        with (
+            patch(sponsor_objects_get, side_effect=Sponsor.DoesNotExist) as mock_get,
+            patch(sponsor_slugify, return_value="test-sponsor") as mock_slugify,
+            patch.object(Sponsor, "__new__", return_value=mock_sponsor),
+        ):
             result = Sponsor.update_data(sponsor_data)
 
             mock_slugify.assert_called_once_with(sponsor_data["name"])
@@ -109,9 +112,11 @@ class TestSponsor:
     def test_update_data_without_save(self, sponsor_data):
         mock_sponsor = MagicMock(spec=Sponsor)
 
-        with patch(sponsor_objects_get, side_effect=Sponsor.DoesNotExist) as mock_get, patch(
-            sponsor_slugify, return_value="test-sponsor"
-        ) as mock_slugify, patch.object(Sponsor, "__new__", return_value=mock_sponsor):
+        with (
+            patch(sponsor_objects_get, side_effect=Sponsor.DoesNotExist) as mock_get,
+            patch(sponsor_slugify, return_value="test-sponsor") as mock_slugify,
+            patch.object(Sponsor, "__new__", return_value=mock_sponsor),
+        ):
             result = Sponsor.update_data(sponsor_data, save=False)
 
             mock_slugify.assert_called_once_with(sponsor_data["name"])

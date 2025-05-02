@@ -27,7 +27,7 @@ sitemap_content = "SITEMAP CONTENT"
 index_content = "INDEX CONTENT"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_file_open(monkeypatch):
     """Mock file open operations."""
     mock_file = MagicMock()
@@ -36,7 +36,7 @@ def mock_file_open(monkeypatch):
     return mock_open
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_models(monkeypatch):
     """Mock database models."""
     project1 = MagicMock(nest_key="project1", is_indexable=True)
@@ -78,7 +78,7 @@ def mock_models(monkeypatch):
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def temp_dir(tmp_path):
     """Create a temporary directory for test outputs."""
     return tmp_path
@@ -161,9 +161,10 @@ class TestSitemapCommand(SimpleTestCase):
 
         command = Command()
 
-        with patch.object(
-            command, "generate_sitemap_content"
-        ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
+        with (
+            patch.object(command, "generate_sitemap_content") as mock_generate_content,
+            patch.object(command, "save_sitemap") as mock_save,
+        ):
             mock_generate_content.return_value = project_sitemap_content
 
             command.generate_project_sitemap(self.temp_dir)
@@ -181,9 +182,9 @@ class TestSitemapCommand(SimpleTestCase):
                 assert route in actual_routes, f"Base route {route} not found in actual routes"
 
             for route in additional_routes:
-                assert (
-                    route in actual_routes
-                ), f"Additional route {route} not found in actual routes"
+                assert route in actual_routes, (
+                    f"Additional route {route} not found in actual routes"
+                )
 
             mock_save.assert_called_once_with(
                 project_sitemap_content, self.temp_dir / "sitemap-project.xml"
@@ -195,9 +196,10 @@ class TestSitemapCommand(SimpleTestCase):
 
         command = Command()
 
-        with patch.object(
-            command, "generate_sitemap_content"
-        ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
+        with (
+            patch.object(command, "generate_sitemap_content") as mock_generate_content,
+            patch.object(command, "save_sitemap") as mock_save,
+        ):
             mock_generate_content.return_value = chapter_sitemap_content
 
             command.generate_chapter_sitemap(self.temp_dir)
@@ -215,9 +217,9 @@ class TestSitemapCommand(SimpleTestCase):
                 assert route in actual_routes, f"Base route {route} not found in actual routes"
 
             for route in additional_routes:
-                assert (
-                    route in actual_routes
-                ), f"Additional route {route} not found in actual routes"
+                assert route in actual_routes, (
+                    f"Additional route {route} not found in actual routes"
+                )
 
             mock_save.assert_called_once_with(
                 chapter_sitemap_content, self.temp_dir / sitemap_chapters_file
@@ -229,9 +231,10 @@ class TestSitemapCommand(SimpleTestCase):
 
         command = Command()
 
-        with patch.object(
-            command, "generate_sitemap_content"
-        ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
+        with (
+            patch.object(command, "generate_sitemap_content") as mock_generate_content,
+            patch.object(command, "save_sitemap") as mock_save,
+        ):
             mock_generate_content.return_value = committee_sitemap_content
 
             command.generate_committee_sitemap(self.temp_dir)
@@ -249,9 +252,9 @@ class TestSitemapCommand(SimpleTestCase):
                 assert route in actual_routes, f"Base route {route} not found in actual routes"
 
             for route in additional_routes:
-                assert (
-                    route in actual_routes
-                ), f"Additional route {route} not found in actual routes"
+                assert route in actual_routes, (
+                    f"Additional route {route} not found in actual routes"
+                )
 
             mock_save.assert_called_once_with(
                 committee_sitemap_content, self.temp_dir / sitemap_committees_file
@@ -263,9 +266,10 @@ class TestSitemapCommand(SimpleTestCase):
 
         command = Command()
 
-        with patch.object(
-            command, "generate_sitemap_content"
-        ) as mock_generate_content, patch.object(command, "save_sitemap") as mock_save:
+        with (
+            patch.object(command, "generate_sitemap_content") as mock_generate_content,
+            patch.object(command, "save_sitemap") as mock_save,
+        ):
             mock_generate_content.return_value = user_sitemap_content
 
             command.generate_user_sitemap(self.temp_dir)
@@ -283,9 +287,9 @@ class TestSitemapCommand(SimpleTestCase):
                 assert route in actual_routes, f"Base route {route} not found in actual routes"
 
             for route in additional_routes:
-                assert (
-                    route in actual_routes
-                ), f"Additional route {route} not found in actual routes"
+                assert route in actual_routes, (
+                    f"Additional route {route} not found in actual routes"
+                )
 
             mock_save.assert_called_once_with(
                 user_sitemap_content, self.temp_dir / sitemap_users_file
@@ -298,9 +302,10 @@ class TestSitemapCommand(SimpleTestCase):
 
         command = Command()
 
-        with patch.object(command, "create_url_entry") as mock_create_url, patch.object(
-            command, "create_sitemap"
-        ) as mock_create_sitemap:
+        with (
+            patch.object(command, "create_url_entry") as mock_create_url,
+            patch.object(command, "create_sitemap") as mock_create_sitemap,
+        ):
             mock_create_url.side_effect = lambda data: f"URL:{data['loc']}"
             mock_create_sitemap.return_value = sitemap_content
 
@@ -342,9 +347,10 @@ class TestSitemapCommand(SimpleTestCase):
 
         command = Command()
 
-        with patch.object(
-            command, "create_sitemap_index_entry"
-        ) as mock_create_entry, patch.object(command, "create_sitemap_index") as mock_create_index:
+        with (
+            patch.object(command, "create_sitemap_index_entry") as mock_create_entry,
+            patch.object(command, "create_sitemap_index") as mock_create_index,
+        ):
             mock_create_entry.side_effect = lambda data: f"ENTRY:{data['loc']}"
             mock_create_index.return_value = index_content
 

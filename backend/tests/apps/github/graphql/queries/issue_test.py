@@ -11,13 +11,13 @@ from apps.github.graphql.queries.issue import IssueQuery
 from apps.github.models.issue import Issue
 
 
-@pytest.fixture()
+@pytest.fixture
 def issue_query():
     """Fixture for IssueQuery instance."""
     return IssueQuery()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_issues():
     """Fixture for mock issues."""
     return [
@@ -27,7 +27,7 @@ def mock_issues():
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def schema():
     """Create a test schema with IssueQuery."""
 
@@ -37,7 +37,7 @@ def schema():
     return Schema(query=Query)
 
 
-@pytest.fixture()
+@pytest.fixture
 def client(schema):
     """GraphQL test client."""
     return Client(schema)
