@@ -49,6 +49,8 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     autocomplete_fields = ("owasp_repository",)
     list_display = (
         "name",
+        "created_at",
+        "updated_at",
         "region",
         "custom_field_owasp_url",
         "custom_field_github_urls",
