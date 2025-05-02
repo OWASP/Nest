@@ -8,9 +8,9 @@ RUN apk update && \
     npm install --ignore-scripts -g pnpm
 
 ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH" \
-    NPM_CONFIG_RETRY=5 \
-    NPM_CONFIG_TIMEOUT=30000
+ENV NPM_CONFIG_RETRY=5 \
+    NPM_CONFIG_TIMEOUT=30000 \
+    PATH="$PNPM_HOME:$PATH"
 
 WORKDIR /home/owasp
 
@@ -27,9 +27,9 @@ RUN apk update && \
     chown -R node:node /home/owasp && \
     npm install --ignore-scripts -g pnpm
 
-EXPOSE 3000
-
 COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
+
+EXPOSE 3000
 
 USER node
 

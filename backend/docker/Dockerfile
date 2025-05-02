@@ -1,10 +1,10 @@
 FROM python:3.13.3-alpine AS builder
 
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
-    PYTHONUNBUFFERED=1 \
+ENV OWASP_GID=1000 \
     OWASP_UID=1000 \
-    OWASP_GID=1000 \
-    POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry"
+    POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    PYTHONUNBUFFERED=1
 
 RUN apk update && apk upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
@@ -39,7 +39,6 @@ ENV PATH="/home/owasp/.venv/bin:$PATH" \
 
 WORKDIR /home/owasp
 
-COPY --from=builder --chmod=755 --chown=owasp:owasp /home/owasp/.venv /home/owasp/.venv
 COPY --from=builder --chmod=555 --chown=owasp:owasp /home/owasp /home/owasp
 RUN chmod +x /home/owasp/entrypoint.sh
 
