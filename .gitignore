@@ -22,6 +22,7 @@ venv/
 *.log
 backend/.venv
 backend/staticfiles
+cspell/node_modules
 frontend/blob-report/
 frontend/coverage
 frontend/dist
@@ -33,6 +34,6 @@ frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
-schema/.venv
 logs
+schema/.venv
 TODO
