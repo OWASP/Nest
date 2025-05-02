@@ -22,7 +22,9 @@ class RepositoryQuery(BaseQuery):
         limit=graphene.Int(default_value=12),
     )
 
-    def resolve_repository(root, info, organization_key, repository_key):
+    def resolve_repository(
+        root, info, organization_key: str, repository_key: str
+    ) -> Repository | None:
         """Resolve repository by key.
 
         Args:
@@ -43,7 +45,7 @@ class RepositoryQuery(BaseQuery):
         except Repository.DoesNotExist:
             return None
 
-    def resolve_repositories(root, info, organization, limit):
+    def resolve_repositories(root, info, organization: str, limit: int) -> list[Repository]:
         """Resolve repositories.
 
         Args:

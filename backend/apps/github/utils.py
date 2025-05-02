@@ -13,7 +13,7 @@ from apps.github.constants import GITHUB_REPOSITORY_RE
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def check_owasp_site_repository(key):
+def check_owasp_site_repository(key: str) -> bool:
     """Check if the repository is an OWASP site repository.
 
     Args:
@@ -33,7 +33,7 @@ def check_owasp_site_repository(key):
     )
 
 
-def check_funding_policy_compliance(platform, target):
+def check_funding_policy_compliance(platform: str, target: str) -> bool:
     """Check OWASP funding policy compliance.
 
     Args:

@@ -81,12 +81,12 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         self.is_bot = gh_user.type == "Bot"
 
     @staticmethod
-    def bulk_save(users, fields=None):
+    def bulk_save(users, fields=None) -> None:
         """Bulk save users."""
         BulkSaveModel.bulk_save(User, users, fields=fields)
 
     @staticmethod
-    def get_non_indexable_logins():
+    def get_non_indexable_logins() -> set:
         """Get logins that should not be indexed.
 
         Returns

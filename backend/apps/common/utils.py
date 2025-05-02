@@ -86,7 +86,7 @@ def natural_date(value: int | str) -> str:
     return naturaltime(dt)
 
 
-def natural_number(value, unit=None):
+def natural_number(value: int, unit=None) -> str:
     """Convert a number into a human-readable format.
 
     Args:
