@@ -333,7 +333,7 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache-new,mode=max
+            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
           context: frontend
           file: frontend/docker/Dockerfile
