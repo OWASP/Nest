@@ -13,13 +13,13 @@ from apps.github.utils import normalize_url
 from apps.owasp.models.project import Project
 from apps.owasp.scraper import OwaspScraper
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Scrape owasp.org pages and update relevant projects."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         """Handle the command execution.
 
         Args:
@@ -62,8 +62,8 @@ class Command(BaseCommand):
                 }
             )
 
-            invalid_urls = set()
-            related_urls = set()
+            invalid_urls: set[str] = set()
+            related_urls: set[str] = set()
             for scraped_url in scraped_urls:
                 verified_url = scraper.verify_url(scraped_url)
                 if not verified_url:

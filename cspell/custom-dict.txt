@@ -86,6 +86,7 @@ psycopg
 pygithub
 pygoat
 pymdownx
+pypoetry
 pyyaml
 repositorycontributor
 requirepass

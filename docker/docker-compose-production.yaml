@@ -27,7 +27,7 @@ services:
     healthcheck:
       interval: 5s
       retries: 5
-      test: [CMD, redis-cli, -a, $REDIS_PASSWORD, ping]
+      test: [CMD, redis-cli, -a, $$REDIS_PASSWORD, ping]
       timeout: 5s
     restart: unless-stopped
     volumes:

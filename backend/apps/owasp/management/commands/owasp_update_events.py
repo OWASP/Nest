@@ -10,14 +10,8 @@ from apps.owasp.models.event import Event
 class Command(BaseCommand):
     help = "Import events from the provided YAML file"
 
-    def handle(self, *args, **kwargs):
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+    def handle(self, *args, **kwargs) -> None:
+        """Handle the command execution."""
         data = yaml.safe_load(
             get_repository_file_content(
                 "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/events.yml"

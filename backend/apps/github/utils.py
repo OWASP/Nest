@@ -1,5 +1,7 @@
 """GitHub app utils."""
 
+from __future__ import annotations
+
 import logging
 from urllib.parse import urlparse
 
@@ -8,10 +10,10 @@ from requests.exceptions import RequestException
 
 from apps.github.constants import GITHUB_REPOSITORY_RE
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def check_owasp_site_repository(key):
+def check_owasp_site_repository(key: str) -> bool:
     """Check if the repository is an OWASP site repository.
 
     Args:
@@ -31,7 +33,7 @@ def check_owasp_site_repository(key):
     )
 
 
-def check_funding_policy_compliance(platform, target):
+def check_funding_policy_compliance(platform: str, target: str) -> bool:
     """Check OWASP funding policy compliance.
 
     Args:
@@ -55,7 +57,11 @@ def check_funding_policy_compliance(platform, target):
     return False
 
 
-def get_repository_file_content(url, timeout=30):
+def get_repository_file_content(
+    url: str,
+    *,
+    timeout: float | None = 30,
+) -> str:
     """Get the content of a file from a repository.
 
     Args:
@@ -70,9 +76,10 @@ def get_repository_file_content(url, timeout=30):
         return requests.get(url, timeout=timeout).text
     except RequestException as e:
         logger.exception("Failed to fetch file", extra={"URL": url, "error": str(e)})
+        return ""
 
 
-def get_repository_path(url):
+def get_repository_path(url: str) -> str | None:
     """Parse a repository URL to extract the owner and repository name.
 
     Args:
@@ -86,7 +93,7 @@ def get_repository_path(url):
     return "/".join((match.group(1), match.group(2))) if match else None
 
 
-def normalize_url(url, check_path=False):
+def normalize_url(url: str, *, check_path: bool = False) -> str | None:
     """Normalize a URL.
 
     Args:
