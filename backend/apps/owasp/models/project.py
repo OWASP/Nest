@@ -1,5 +1,7 @@
 """OWASP app project models."""
 
+from __future__ import annotations
+
 from functools import lru_cache
 
 from django.db import models
@@ -123,22 +125,22 @@ class Project(
         blank=True,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Project human readable representation."""
         return f"{self.name or self.key}"
 
     @property
-    def is_code_type(self):
+    def is_code_type(self) -> bool:
         """Indicate whether project has CODE type."""
         return self.type == self.ProjectType.CODE
 
     @property
-    def is_documentation_type(self):
+    def is_documentation_type(self) -> bool:
         """Indicate whether project has DOCUMENTATION type."""
         return self.type == self.ProjectType.DOCUMENTATION
 
     @property
-    def is_tool_type(self):
+    def is_tool_type(self) -> bool:
         """Indicate whether project has TOOL type."""
         return self.type == self.ProjectType.TOOL
 
@@ -169,13 +171,12 @@ class Project(
             "repository",
         )
 
-    @property
-    def nest_key(self):
+    def nest_key(self) -> str:
         """Get Nest key."""
         return self.key.replace("www-project-", "")
 
     @property
-    def nest_url(self):
+    def nest_url(self) -> str:
         """Get Nest URL for project."""
         return get_absolute_url(f"projects/{self.nest_key}")
 
@@ -199,12 +200,12 @@ class Project(
             "repository",
         )
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         """Deactivate project."""
         self.is_active = False
         self.save(update_fields=("is_active",))
 
-    def from_github(self, repository):
+    def from_github(self, repository) -> None:
         """Update instance based on GitHub repository data.
 
         Args:
@@ -245,14 +246,8 @@ class Project(
         self.created_at = repository.created_at
         self.updated_at = repository.updated_at
 
-    def save(self, *args, **kwargs):
-        """Save the project instance.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+    def save(self, *args, **kwargs) -> None:
+        """Save the project instance."""
         if self.is_active and not self.summary and (prompt := Prompt.get_owasp_project_summary()):
             self.generate_summary(prompt=prompt)
 
@@ -265,7 +260,7 @@ class Project(
         return IndexBase.get_total_count("projects", search_filters="idx_is_active:true")
 
     @staticmethod
-    def bulk_save(projects, fields=None):
+    def bulk_save(projects: list, fields: list | None = None) -> None:  # type: ignore[override]
         """Bulk save projects.
 
         Args:
@@ -276,7 +271,7 @@ class Project(
         BulkSaveModel.bulk_save(Project, projects, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, save=True):
+    def update_data(gh_repository, repository, *, save: bool = True) -> Project:
         """Update project data from GitHub repository.
 
         Args:

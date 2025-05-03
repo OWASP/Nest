@@ -62,7 +62,7 @@ class PullRequest(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_pull_request, author=None, repository=None, milestone=None):
+    def from_github(self, gh_pull_request, *, author=None, repository=None, milestone=None):
         """Update the instance based on GitHub pull request data.
 
         Args:
@@ -100,17 +100,24 @@ class PullRequest(GenericIssueModel):
         # Milestone.
         self.milestone = milestone
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """Save Pull Request."""
         super().save(*args, **kwargs)
 
     @staticmethod
-    def bulk_save(pull_requests, fields=None):
+    def bulk_save(pull_requests, fields=None) -> None:  # type: ignore[override]
         """Bulk save pull requests."""
         BulkSaveModel.bulk_save(PullRequest, pull_requests, fields=fields)
 
     @staticmethod
-    def update_data(gh_pull_request, author=None, repository=None, milestone=None, save=True):
+    def update_data(
+        gh_pull_request,
+        *,
+        author=None,
+        repository=None,
+        milestone=None,
+        save: bool = True,
+    ) -> "PullRequest":
         """Update pull request data.
 
         Args:

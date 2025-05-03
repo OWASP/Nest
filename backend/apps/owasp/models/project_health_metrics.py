@@ -62,6 +62,6 @@ class ProjectHealthMetrics(TimestampedModel):
         verbose_name="Unassigned issues", default=0
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Project health metrics human readable representation."""
         return f"Health Metrics for {self.project.name}"

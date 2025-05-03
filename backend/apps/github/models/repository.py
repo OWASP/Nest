@@ -1,5 +1,7 @@
 """Github app repository model."""
 
+from __future__ import annotations
+
 from base64 import b64decode
 
 import yaml
@@ -142,13 +144,13 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Repository latest updated milestone (most recently modified)."""
         return self.milestones.order_by("-updated_at").first()
 
-    @property
-    def nest_key(self):
+    def nest_key(self) -> str:
+
         """Return repository Nest key."""
         return f"{self.owner.login}-{self.name}"
 
     @property
-    def path(self):
+    def path(self) -> str:
         """Return repository path."""
         return f"{self.owner.login}/{self.name}"
 
@@ -167,7 +169,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         )
 
     @property
-    def top_languages(self):
+    def top_languages(self) -> list[str]:
         """Return a list of top used languages."""
         return sorted(
             k
@@ -176,7 +178,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         )
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Return repository URL."""
         return f"https://github.com/{self.path}"
 
@@ -202,7 +204,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         languages=None,
         organization=None,
         user=None,
-    ):
+    ) -> None:
         """Update the repository instance based on GitHub repository data.
 
         Args:
@@ -310,13 +312,14 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @staticmethod
     def update_data(
         gh_repository,
+        *,
         commits=None,
         contributors=None,
         languages=None,
         organization=None,
+        save: bool = True,
         user=None,
-        save=True,
-    ):
+    ) -> Repository:
         """Update repository data.
 
         Args:

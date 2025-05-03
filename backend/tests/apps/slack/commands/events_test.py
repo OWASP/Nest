@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,12 +11,12 @@ class MockEvent:
     def __init__(self, name, start_date, end_date, suggested_location, url, description):
         self.name = name
         self.start_date = (
-            datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc).date()
+            datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=UTC).date()
             if start_date
             else None
         )
         self.end_date = (
-            datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc).date()
+            datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=UTC).date()
             if end_date
             else None
         )
