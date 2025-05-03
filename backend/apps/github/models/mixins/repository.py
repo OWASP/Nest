@@ -1,10 +1,8 @@
 """GitHub repository mixins."""
 
 from apps.github.models.repository_contributor import (
-    TOP_CONTRIBUTORS_LIMIT,
     RepositoryContributor,
 )
-from apps.github.models.user import User
 
 
 class RepositoryIndexMixin:
@@ -103,23 +101,7 @@ class RepositoryIndexMixin:
     @property
     def idx_top_contributors(self):
         """Return top contributors for indexing."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["contributions_count"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.filter(repository=self)
-            .exclude(user__login__in=User.get_non_indexable_logins())
-            .values(
-                "contributions_count",
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-            )
-            .order_by("-contributions_count")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
+        return RepositoryContributor.get_top_contributors(repositories=[self])
 
     @property
     def idx_topics(self):

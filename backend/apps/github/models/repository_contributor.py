@@ -1,6 +1,8 @@
 """Github app label model."""
 
 from django.db import models
+from django.db.models import F, Sum, Window
+from django.db.models.functions import Rank
 from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -102,3 +104,88 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             repository_contributor.save()
 
         return repository_contributor
+
+    @classmethod
+    def get_top_contributors(
+        cls, repositories=None, organization=None, project=None, limit=TOP_CONTRIBUTORS_LIMIT
+    ):
+        """Get top contributors across repositories, organization, or project.
+
+        Args:
+            repositories (QuerySet or list, optional): Repositories to filter by.
+            organization (str, optional): Organization login to filter by.
+            project (str, optional): Project key to filter by.
+            limit (int, optional): Maximum number of contributors to return.
+
+        Returns:
+            list: List of dictionaries containing contributor information.
+
+        """
+        queryset = (
+            cls.objects.by_humans()
+            .to_community_repositories()
+            .select_related("repository__project", "user")
+        )
+
+        if repositories:
+            queryset = queryset.filter(repository__in=repositories)
+
+        if organization:
+            queryset = queryset.select_related(
+                "repository__organization",
+            ).filter(
+                repository__organization__login=organization,
+            )
+
+        if project:
+            queryset = queryset.filter(
+                repository__project__key__iexact=f"www-project-{project}" if project else None
+            )
+
+        if not repositories:
+            # Only apply project filter when not filtering by repositories
+            queryset = queryset.filter(repository__project__isnull=False)
+
+            # Rank by contributions when looking across repositories
+            queryset = queryset.annotate(
+                rank=Window(
+                    expression=Rank(),
+                    order_by=F("contributions_count").desc(),
+                    partition_by=F("user__login"),
+                )
+            )
+
+            # Get top contributor per user
+            queryset = queryset.filter(rank=1)
+
+        # Aggregate total contributions for users
+        result = queryset.values(
+            "user__avatar_url",
+            "user__login",
+            "user__name",
+        ).annotate(total_contributions=Sum("contributions_count"))
+
+        # Add project information if we're not querying by project or organization
+        if not project and not organization and not repositories:
+            result = result.annotate(
+                project_name=F("repository__project__name"),
+                project_key=F("repository__project__key"),
+            )
+
+        # Order and limit
+        result = result.order_by("-total_contributions")[:limit]
+
+        # Format the result
+        return [
+            {
+                "avatar_url": item["user__avatar_url"],
+                "contributions_count": item["total_contributions"],
+                "login": item["user__login"],
+                "name": item["user__name"],
+                "project_key": item.get("project_key", "").replace("www-project-", "")
+                if item.get("project_key")
+                else None,
+                "project_name": item.get("project_name"),
+            }
+            for item in result
+        ]
