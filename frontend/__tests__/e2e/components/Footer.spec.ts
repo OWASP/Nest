@@ -32,6 +32,7 @@ test.describe('Footer - Desktop (Chrome)', () => {
   test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
   })
 })
