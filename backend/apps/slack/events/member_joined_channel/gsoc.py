@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from apps.common.constants import NL
@@ -12,10 +13,10 @@ from apps.slack.common.gsoc import GSOC_2025_MILESTONES
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
 from apps.slack.utils import get_text
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def gsoc_handler(event, client, ack):
+def gsoc_handler(event: dict, client: WebClient, ack) -> None:
     """Slack #gsoc new member handler.
 
     Args:
@@ -46,7 +47,7 @@ def gsoc_handler(event, client, ack):
         user=user_id,
     )
 
-    blocks = [
+    blocks = (
         markdown(
             f"Hello <@{user_id}> and welcome to <{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
             "Here's how you can start your journey toward contributing to OWASP projects and "
@@ -59,7 +60,7 @@ def gsoc_handler(event, client, ack):
             "journey!"
         ),
         markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    ]
+    )
     client.chat_postMessage(
         blocks=blocks,
         channel=conversation["channel"]["id"],

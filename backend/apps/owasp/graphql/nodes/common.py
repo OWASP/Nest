@@ -1,5 +1,7 @@
 """OWASP common GraphQL node."""
 
+from __future__ import annotations
+
 import graphene
 
 from apps.common.graphql.nodes import BaseNode
@@ -18,22 +20,22 @@ class GenericEntityNode(BaseNode):
     class Meta:
         abstract = True
 
-    def resolve_url(self, info):
+    def resolve_url(self, info) -> str:
         """Resolve URL."""
         return self.idx_url
 
-    def resolve_updated_at(self, info):
+    def resolve_updated_at(self, info) -> str:
         """Resolve updated at."""
         return self.idx_updated_at
 
-    def resolve_related_urls(self, info):
+    def resolve_related_urls(self, info) -> list[str]:
         """Resolve related URLs."""
         return self.idx_related_urls
 
-    def resolve_leaders(self, info):
+    def resolve_leaders(self, info) -> list[str]:
         """Resolve leaders."""
         return self.idx_leaders
 
-    def resolve_top_contributors(self, info):
+    def resolve_top_contributors(self, info) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
         return [RepositoryContributorNode(**tc) for tc in self.idx_top_contributors]

@@ -1,17 +1,21 @@
 """Open AI API module."""
 
+from __future__ import annotations
+
 import logging
 
 import openai
 from django.conf import settings
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class OpenAi:
     """Open AI communication class."""
 
-    def __init__(self, model="gpt-4o-mini", max_tokens=1000, temperature=0.7):
+    def __init__(
+        self, model: str = "gpt-4o-mini", max_tokens: int = 1000, temperature: float = 0.7
+    ) -> None:
         """OpenAi constructor.
 
         Args:
@@ -29,7 +33,7 @@ class OpenAi:
         self.model = model
         self.temperature = temperature
 
-    def set_input(self, content):
+    def set_input(self, content: str) -> OpenAi:
         """Set system role content.
 
         Args:
@@ -43,7 +47,7 @@ class OpenAi:
 
         return self
 
-    def set_max_tokens(self, max_tokens):
+    def set_max_tokens(self, max_tokens: int) -> OpenAi:
         """Set max tokens.
 
         Args:
@@ -57,7 +61,7 @@ class OpenAi:
 
         return self
 
-    def set_prompt(self, content):
+    def set_prompt(self, content: str) -> OpenAi:
         """Set system role content.
 
         Args:
@@ -71,7 +75,7 @@ class OpenAi:
 
         return self
 
-    def complete(self):
+    def complete(self) -> str | None:
         """Get API response.
 
         Returns
@@ -98,3 +102,4 @@ class OpenAi:
             logger.exception("A connection error occurred during OpenAI API request.")
         except Exception:
             logger.exception("An error occurred during OpenAI API request.")
+        return None

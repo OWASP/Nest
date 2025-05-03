@@ -1,5 +1,7 @@
 """GitHub release GraphQL node."""
 
+from __future__ import annotations
+
 import graphene
 
 from apps.common.graphql.nodes import BaseNode
@@ -27,18 +29,18 @@ class ReleaseNode(BaseNode):
             "tag_name",
         )
 
-    def resolve_organization_name(self, info):
+    def resolve_organization_name(self, info) -> str | None:
         """Return organization name."""
         return self.repository.organization.login if self.repository.organization else None
 
-    def resolve_project_name(self, info):
+    def resolve_project_name(self, info) -> str:
         """Return project name."""
         return self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
 
-    def resolve_repository_name(self, info):
+    def resolve_repository_name(self, info) -> str:
         """Return repository name."""
         return self.repository.name
 
-    def resolve_url(self, info):
+    def resolve_url(self, info) -> str:
         """Return release URL."""
         return self.url

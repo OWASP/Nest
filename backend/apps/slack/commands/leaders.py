@@ -7,8 +7,16 @@ from apps.slack.commands.command import CommandBase
 class Leaders(CommandBase):
     """Slack bot /leaders command."""
 
-    def get_template_context(self, command):
-        """Get the template context."""
+    def get_template_context(self, command: dict):
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
         from apps.owasp.api.search.chapter import get_chapters
         from apps.owasp.api.search.project import get_projects
 
