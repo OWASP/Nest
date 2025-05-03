@@ -1,5 +1,7 @@
 """GitHub repository Algolia index configuration."""
 
+from django.db.models import QuerySet
+
 from apps.common.index import IndexBase, register
 from apps.github.models.repository import Repository
 
@@ -57,14 +59,14 @@ class RepositoryIndex(IndexBase):
     should_index = "is_indexable"
 
     @staticmethod
-    def update_synonyms():
+    def update_synonyms() -> None:
         """Update synonyms for the repository index."""
         RepositoryIndex.reindex_synonyms("github", "repositories")
 
-    def get_entities(self):
+    def get_entities(self) -> QuerySet:
         """Get entities for indexing.
 
-        Returns
+        Returns:
             QuerySet: A queryset of Repository objects to be indexed.
 
         """

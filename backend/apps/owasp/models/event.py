@@ -1,5 +1,12 @@
 """OWASP app event model."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import date
+
 from dateutil import parser
 from django.db import models
 from django.utils import timezone
@@ -49,7 +56,7 @@ class Event(BulkSaveModel, TimestampedModel):
     latitude = models.FloatField(verbose_name="Latitude", null=True, blank=True)
     longitude = models.FloatField(verbose_name="Longitude", null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Event human readable representation."""
         return f"{self.name or self.key}"
 
@@ -68,7 +75,10 @@ class Event(BulkSaveModel, TimestampedModel):
         )
 
     @staticmethod
-    def bulk_save(events, fields=None):
+    def bulk_save(  # type: ignore[override]
+        events: list,
+        fields: tuple[str, ...] | None = None,
+    ) -> None:
         """Bulk save events.
 
         Args:
@@ -83,7 +93,7 @@ class Event(BulkSaveModel, TimestampedModel):
 
     # TODO(arkid15r): refactor this when there is a chance.
     @staticmethod
-    def parse_dates(dates, start_date):
+    def parse_dates(dates: str, start_date: date) -> date | None:
         """Parse event dates.
 
         Args:
@@ -108,7 +118,7 @@ class Event(BulkSaveModel, TimestampedModel):
         if "-" in dates and "," in dates:
             try:
                 # Split the date range into parts
-                date_part, year = dates.rsplit(", ", 1)
+                date_part, year_part = dates.rsplit(", ", 1)
                 parts = date_part.split()
 
                 # Extract month and day range
@@ -119,7 +129,7 @@ class Event(BulkSaveModel, TimestampedModel):
                 end_day = int(day_range.split("-")[-1])
 
                 # Parse the year
-                year = int(year.strip())
+                year = int(year_part.strip())
 
                 # Use the start_date to determine the month if provided
                 if start_date:
@@ -127,15 +137,14 @@ class Event(BulkSaveModel, TimestampedModel):
                     month = start_date_parsed.strftime("%B")  # Full month name (e.g., "May")
 
                 # Parse the full end date string
-                end_date_str = f"{month} {end_day}, {year}"
-                return parser.parse(end_date_str).date()
+                return parser.parse(f"{month} {end_day}, {year}").date()
             except (ValueError, IndexError, AttributeError):
                 return None
 
         return None
 
     @staticmethod
-    def update_data(category, data, save=True):
+    def update_data(category, data, *, save: bool = True) -> Event:
         """Update event data.
 
         Args:
@@ -159,7 +168,7 @@ class Event(BulkSaveModel, TimestampedModel):
 
         return event
 
-    def from_dict(self, category, data):
+    def from_dict(self, category: str, data: dict) -> None:
         """Update instance based on the dict data.
 
         Args:
@@ -177,7 +186,7 @@ class Event(BulkSaveModel, TimestampedModel):
                 "Partner": Event.Category.PARTNER,
             }.get(category, Event.Category.OTHER),
             "description": data.get("optional-text", ""),
-            "end_date": Event.parse_dates(data.get("dates", ""), data.get("start-date")),
+            "end_date": Event.parse_dates(data.get("dates", ""), data["start-date"]),
             "name": data["name"],
             "start_date": parser.parse(data["start-date"]).date()
             if isinstance(data["start-date"], str)
@@ -188,7 +197,7 @@ class Event(BulkSaveModel, TimestampedModel):
         for key, value in fields.items():
             setattr(self, key, value)
 
-    def generate_geo_location(self):
+    def generate_geo_location(self) -> None:
         """Add latitude and longitude data.
 
         Returns:
@@ -204,7 +213,7 @@ class Event(BulkSaveModel, TimestampedModel):
             self.latitude = location.latitude
             self.longitude = location.longitude
 
-    def generate_suggested_location(self, prompt):
+    def generate_suggested_location(self, prompt) -> None:
         """Generate a suggested location for the event.
 
         Args:
@@ -225,7 +234,7 @@ class Event(BulkSaveModel, TimestampedModel):
         except (ValueError, TypeError):
             self.suggested_location = ""
 
-    def generate_summary(self, prompt):
+    def generate_summary(self, prompt) -> None:
         """Generate a summary for the event.
 
         Args:
@@ -244,7 +253,7 @@ class Event(BulkSaveModel, TimestampedModel):
         except (ValueError, TypeError):
             self.summary = ""
 
-    def get_context(self, include_dates=False):
+    def get_context(self, *, include_dates: bool = False) -> str:
         """Return geo string.
 
         Args:

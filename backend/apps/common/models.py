@@ -12,7 +12,7 @@ class BulkSaveModel(models.Model):
         abstract = True
 
     @staticmethod
-    def bulk_save(model, objects, fields=None):
+    def bulk_save(model, objects, fields=None) -> None:
         """Bulk save objects.
 
         Args:

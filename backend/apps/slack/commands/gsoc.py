@@ -24,8 +24,16 @@ MARCH = 3
 class Gsoc(CommandBase):
     """Slack bot /gsoc command."""
 
-    def get_template_context(self, command):
-        """Get the template context."""
+    def get_template_context(self, command: dict):
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
         now = timezone.now()
         gsoc_year = now.year if now.month > MARCH else now.year - 1
         command_text = command["text"].strip()

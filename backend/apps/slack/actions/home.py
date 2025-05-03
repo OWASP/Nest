@@ -2,6 +2,7 @@
 
 import logging
 
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
@@ -23,10 +24,10 @@ from apps.slack.constants import (
     VIEW_PROJECTS_ACTION_PREV,
 )
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def handle_home_actions(ack, body, client):
+def handle_home_actions(ack, body, client: WebClient) -> None:
     """Handle actions triggered in the home view."""
     ack()
 

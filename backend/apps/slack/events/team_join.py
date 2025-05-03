@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from apps.common.constants import NL
@@ -28,10 +29,10 @@ from apps.slack.constants import (
 )
 from apps.slack.utils import get_text
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def team_join_handler(event, client, ack):
+def team_join_handler(event: dict, client: WebClient, ack) -> None:
     """Handle the Slack team_join event.
 
     Args:
@@ -54,7 +55,7 @@ def team_join_handler(event, client, ack):
         logger.exception(client.users_info(user=user_id))
         raise
 
-    blocks = [
+    blocks = (
         markdown(
             f"*Welcome to the OWASP Slack Community, <@{user_id}>!*{NL}"
             "We're excited to have you join us! Whether you're a newcomer to OWASP or "
@@ -104,7 +105,7 @@ def team_join_handler(event, client, ack):
             "need help? Don't hesitate to ask -- this community thrives on collaboration!"
         ),
         markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    ]
+    )
 
     client.chat_postMessage(
         blocks=blocks,

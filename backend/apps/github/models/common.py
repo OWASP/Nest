@@ -31,16 +31,16 @@ class GenericUserModel(models.Model):
     updated_at = models.DateTimeField(verbose_name="Updated at")
 
     @property
-    def title(self):
+    def title(self) -> str:
         """Entity title."""
         return f"{self.name or self.login}"
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Entity URL."""
         return f"https://github.com/{self.login.lower()}"
 
-    def from_github(self, data):
+    def from_github(self, data) -> None:
         """Update instance based on GitHub data."""
         field_mapping = {
             "avatar_url": "avatar_url",

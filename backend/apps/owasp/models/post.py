@@ -1,6 +1,6 @@
 """OWASP app post model."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from django.db import models
 from django.utils.dateparse import parse_datetime
@@ -29,7 +29,7 @@ class Post(BulkSaveModel, TimestampedModel):
         return self.title
 
     @staticmethod
-    def bulk_save(posts, fields=None):
+    def bulk_save(posts, fields=None) -> None:  # type: ignore[override]
         """Bulk save posts."""
         BulkSaveModel.bulk_save(Post, posts, fields=fields)
 
@@ -39,7 +39,7 @@ class Post(BulkSaveModel, TimestampedModel):
         return Post.objects.order_by("-published_at")
 
     @staticmethod
-    def update_data(data, save=True):
+    def update_data(data, *, save: bool = True) -> "Post":
         """Update post data."""
         url = data.get("url")
 
@@ -54,7 +54,7 @@ class Post(BulkSaveModel, TimestampedModel):
 
         return post
 
-    def from_dict(self, data):
+    def from_dict(self, data) -> None:
         """Update instance based on dict data."""
         published_at = data["published_at"]
         published_at = (
@@ -64,7 +64,7 @@ class Post(BulkSaveModel, TimestampedModel):
                 published_at.year,
                 published_at.month,
                 published_at.day,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             )
         )
 

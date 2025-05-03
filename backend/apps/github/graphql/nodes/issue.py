@@ -22,7 +22,7 @@ class IssueNode(BaseNode):
             "url",
         )
 
-    def resolve_organization_name(self, info):
+    def resolve_organization_name(self, info) -> str | None:
         """Return organization name."""
         return self.repository.organization.login if self.repository.organization else None
 
