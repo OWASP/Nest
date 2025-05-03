@@ -145,7 +145,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.milestones.order_by("-updated_at").first()
 
     def nest_key(self) -> str:
-
         """Return repository Nest key."""
         return f"{self.owner.login}-{self.name}"
 
