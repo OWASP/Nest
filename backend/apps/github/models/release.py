@@ -48,7 +48,7 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     def __str__(self) -> str:
         """Return a human-readable representation of the release.
 
-        Returns
+        Returns:
             str: The name of the release along with the author's name.
 
         """
@@ -102,7 +102,13 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         BulkSaveModel.bulk_save(Release, releases, fields=fields)
 
     @staticmethod
-    def update_data(gh_release, author=None, repository=None, *, save: bool = True) -> "Release":
+    def update_data(
+        gh_release,
+        *,
+        author=None,
+        repository=None,
+        save: bool = True,
+    ) -> "Release":
         """Update release data.
 
         Args:

@@ -66,7 +66,7 @@ class RepositoryIndex(IndexBase):
     def get_entities(self) -> QuerySet:
         """Get entities for indexing.
 
-        Returns
+        Returns:
             QuerySet: A queryset of Repository objects to be indexed.
 
         """

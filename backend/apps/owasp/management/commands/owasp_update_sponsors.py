@@ -11,13 +11,7 @@ class Command(BaseCommand):
     help = "Import sponsors from the provided YAML file"
 
     def handle(self, *args, **kwargs) -> None:
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+        """Handle the command execution."""
         sponsors = yaml.safe_load(
             get_repository_file_content(
                 "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/corp_members.yml"

@@ -229,13 +229,7 @@ class Project(
         self.updated_at = repository.updated_at
 
     def save(self, *args, **kwargs) -> None:
-        """Save the project instance.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+        """Save the project instance."""
         if self.is_active and not self.summary and (prompt := Prompt.get_owasp_project_summary()):
             self.generate_summary(prompt=prompt)
 

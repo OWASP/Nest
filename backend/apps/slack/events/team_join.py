@@ -55,7 +55,7 @@ def team_join_handler(event: dict, client: WebClient, ack) -> None:
         logger.exception(client.users_info(user=user_id))
         raise
 
-    blocks = [
+    blocks = (
         markdown(
             f"*Welcome to the OWASP Slack Community, <@{user_id}>!*{NL}"
             "We're excited to have you join us! Whether you're a newcomer to OWASP or "
@@ -105,7 +105,7 @@ def team_join_handler(event: dict, client: WebClient, ack) -> None:
             "need help? Don't hesitate to ask -- this community thrives on collaboration!"
         ),
         markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    ]
+    )
 
     client.chat_postMessage(
         blocks=blocks,

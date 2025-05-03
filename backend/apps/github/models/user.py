@@ -1,5 +1,7 @@
 """Github app user model."""
 
+from __future__ import annotations
+
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -41,7 +43,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def issues(self):
         """Get issues created by the user.
 
-        Returns
+        Returns:
             QuerySet: A queryset of issues created by the user.
 
         """
@@ -100,7 +102,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         }
 
     @staticmethod
-    def update_data(gh_user, *, save: bool = True) -> "User":
+    def update_data(gh_user, *, save: bool = True) -> User:
         """Update GitHub user data.
 
         Args:

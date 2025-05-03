@@ -55,7 +55,7 @@ class PullRequest(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_pull_request, author=None, repository=None) -> None:
+    def from_github(self, gh_pull_request, *, author=None, repository=None) -> None:
         """Update the instance based on GitHub pull request data.
 
         Args:
@@ -100,7 +100,11 @@ class PullRequest(GenericIssueModel):
 
     @staticmethod
     def update_data(
-        gh_pull_request, author=None, repository=None, *, save: bool = True
+        gh_pull_request,
+        *,
+        author=None,
+        repository=None,
+        save: bool = True,
     ) -> "PullRequest":
         """Update pull request data.
 

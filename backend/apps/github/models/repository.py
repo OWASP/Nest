@@ -1,5 +1,7 @@
 """Github app repository model."""
 
+from __future__ import annotations
+
 from base64 import b64decode
 
 import yaml
@@ -290,14 +292,14 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @staticmethod
     def update_data(
         gh_repository,
+        *,
         commits=None,
         contributors=None,
         languages=None,
         organization=None,
-        user=None,
-        *,
         save: bool = True,
-    ) -> "Repository":
+        user=None,
+    ) -> Repository:
         """Update repository data.
 
         Args:

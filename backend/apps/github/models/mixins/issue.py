@@ -1,5 +1,7 @@
 """GitHub issue mixins."""
 
+from __future__ import annotations
+
 
 class IssueIndexMixin:
     """Issue index mixin."""

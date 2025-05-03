@@ -24,13 +24,7 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options) -> None:
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing command options.
-
-        """
+        """Handle the command execution."""
         active_chapters = Chapter.active_chapters.without_geo_data.order_by("id")
         active_chapters_count = active_chapters.count()
 

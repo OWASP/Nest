@@ -28,16 +28,7 @@ class Command(BaseCommand):
         parser.add_argument("--update-summary", default=True, required=False, action="store_true")
 
     def handle(self, *args, **options) -> None:
-        """Execute the enrichment process for OWASP projects.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing:
-                offset (int): The starting index for processing.
-                force_update_summary (bool): Whether to force updating summaries.
-                update_summary (bool): Whether to update summaries.
-
-        """
+        """Execute the enrichment process for OWASP projects."""
         open_ai = OpenAi()
 
         force_update_summary = options["force_update_summary"]

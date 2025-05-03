@@ -25,14 +25,7 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *args, **options) -> None:
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing command options.
-                offset (int): The starting index for processing.
-
-        """
+        """Handle the command execution."""
         active_committees = Committee.active_committees.order_by("-created_at")
         active_committees_count = active_committees.count()
         offset = options["offset"]

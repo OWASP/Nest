@@ -20,13 +20,7 @@ class Command(BaseCommand):
     help = "Process pending snapshots and populate them with new data"
 
     def handle(self, *args, **options) -> None:
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments.
-
-        """
+        """Handle the command execution."""
         try:
             self.process_snapshots()
         except Exception as e:

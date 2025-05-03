@@ -72,7 +72,7 @@ class UserIndex(IndexBase):
     def get_entities(self) -> QuerySet:
         """Get entities for indexing.
 
-        Returns
+        Returns:
             QuerySet: A queryset of User objects to be indexed.
 
         """

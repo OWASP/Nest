@@ -11,8 +11,8 @@ ISSUE_CACHE_PREFIX = "issue:"
 
 def get_issues(
     query: str,
-    attributes: list | None = None,
     *,
+    attributes: list | None = None,
     distinct: bool = False,
     limit: int = 25,
     page: int = 1,

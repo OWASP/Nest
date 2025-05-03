@@ -116,7 +116,9 @@ class Chapter(
             self.longitude = location.longitude
 
     def generate_suggested_location(
-        self, open_ai: OpenAi | None = None, max_tokens: int = 100
+        self,
+        open_ai: OpenAi | None = None,
+        max_tokens: int = 100,
     ) -> None:
         """Generate a suggested location using OpenAI.
 
@@ -156,13 +158,7 @@ class Chapter(
         )
 
     def save(self, *args, **kwargs) -> None:
-        """Save the chapter instance.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+        """Save the chapter instance."""
         if not self.suggested_location:
             self.generate_suggested_location()
 

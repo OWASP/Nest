@@ -8,7 +8,11 @@ from apps.owasp.models.committee import Committee
 
 
 def get_committees(
-    query: str, attributes: list | None = None, limit: int = 25, page: int = 1
+    query: str,
+    *,
+    attributes: list | None = None,
+    limit: int = 25,
+    page: int = 1,
 ) -> dict:
     """Return committees relevant to a search query.
 

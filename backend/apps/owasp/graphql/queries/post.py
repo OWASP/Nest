@@ -1,5 +1,7 @@
 """OWASP event GraphQL queries."""
 
+from __future__ import annotations
+
 import graphene
 
 from apps.common.graphql.queries import BaseQuery

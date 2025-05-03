@@ -60,7 +60,7 @@ class ReleaseIndex(IndexBase):
     def get_entities(self) -> QuerySet:
         """Get entities for indexing.
 
-        Returns
+        Returns:
             QuerySet: A queryset of Release objects to be indexed.
 
         """

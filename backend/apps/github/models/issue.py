@@ -76,7 +76,7 @@ class Issue(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_issue, author=None, repository=None) -> None:
+    def from_github(self, gh_issue, *, author=None, repository=None) -> None:
         """Update the instance based on GitHub issue data.
 
         Args:
@@ -174,7 +174,7 @@ class Issue(GenericIssueModel):
         return IndexBase.get_total_count("issues")
 
     @staticmethod
-    def update_data(gh_issue, author=None, repository=None, *, save: bool = True):
+    def update_data(gh_issue, *, author=None, repository=None, save: bool = True):
         """Update issue data.
 
         Args:

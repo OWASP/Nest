@@ -18,13 +18,7 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *_args, **options) -> None:
-        """Handle the command execution.
-
-        Args:
-            *_args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing command options.
-
-        """
+        """Handle the command execution."""
         active_projects = Project.active_projects.order_by("-created_at")
         active_projects_count = active_projects.count()
 

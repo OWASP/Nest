@@ -47,7 +47,7 @@ def gsoc_handler(event: dict, client: WebClient, ack) -> None:
         user=user_id,
     )
 
-    blocks = [
+    blocks = (
         markdown(
             f"Hello <@{user_id}> and welcome to <{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
             "Here's how you can start your journey toward contributing to OWASP projects and "
@@ -60,7 +60,7 @@ def gsoc_handler(event: dict, client: WebClient, ack) -> None:
             "journey!"
         ),
         markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    ]
+    )
     client.chat_postMessage(
         blocks=blocks,
         channel=conversation["channel"]["id"],

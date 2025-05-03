@@ -1,5 +1,7 @@
 """GitHub organization mixins."""
 
+from __future__ import annotations
+
 
 class OrganizationIndexMixin:
     """Organization index mixin."""

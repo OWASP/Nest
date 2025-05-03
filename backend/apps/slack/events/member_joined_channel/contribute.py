@@ -54,7 +54,7 @@ def contribute_handler(event, client: WebClient, ack) -> None:
         user=user_id,
     )
 
-    blocks = [
+    blocks = (
         markdown(
             f"Hello <@{user_id}> and welcome to <{OWASP_CONTRIBUTE_CHANNEL_ID}> channel!{NL}"
             "We're happy to have you here as part of the OWASP community! "
@@ -84,7 +84,7 @@ def contribute_handler(event, client: WebClient, ack) -> None:
             "contributions you'll make! "
         ),
         markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    ]
+    )
     client.chat_postMessage(
         blocks=blocks,
         channel=conversation["channel"]["id"],

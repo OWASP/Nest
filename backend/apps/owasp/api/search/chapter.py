@@ -9,6 +9,7 @@ from apps.owasp.models.chapter import Chapter
 
 def get_chapters(
     query: str,
+    *,
     attributes: list | None = None,
     limit: int = 25,
     page: int = 1,

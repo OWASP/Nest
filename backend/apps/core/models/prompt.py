@@ -27,13 +27,7 @@ class Prompt(TimestampedModel):
         return self.name
 
     def save(self, *args, **kwargs) -> None:
-        """Save prompt.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+        """Save prompt."""
         self.key = slugify(self.name)
 
         super().save(*args, **kwargs)

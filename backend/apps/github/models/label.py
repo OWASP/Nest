@@ -51,7 +51,7 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
                 setattr(self, model_field, value)
 
     @staticmethod
-    def bulk_save(labels, fields=None) -> None:  # type: ignore[override]
+    def bulk_save(labels, *, fields=None) -> None:  # type: ignore[override]
         """Bulk save labels."""
         BulkSaveModel.bulk_save(Label, labels, fields=fields)
 

@@ -15,8 +15,8 @@ class ReleaseQuery(BaseQuery):
 
     recent_releases = graphene.List(
         ReleaseNode,
-        limit=graphene.Int(default_value=6),
         distinct=graphene.Boolean(default_value=False),
+        limit=graphene.Int(default_value=6),
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
     )
@@ -24,9 +24,9 @@ class ReleaseQuery(BaseQuery):
     def resolve_recent_releases(
         root,
         info,
-        limit: int,
         *,
         distinct: bool = False,
+        limit: int = 6,
         login=None,
         organization: str | None = None,
     ) -> QuerySet:
@@ -35,8 +35,8 @@ class ReleaseQuery(BaseQuery):
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
-            limit (int): Maximum number of releases to return.
             distinct (bool): Whether to return unique releases per author and repository.
+            limit (int): Maximum number of releases to return.
             login (str): Optional GitHub username for filtering releases.
             organization (str): Optional GitHub organization for filtering releases.
 

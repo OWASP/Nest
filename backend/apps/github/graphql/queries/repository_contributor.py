@@ -21,7 +21,11 @@ class RepositoryContributorQuery(BaseQuery):
     )
 
     def resolve_top_contributors(
-        root, info, limit: int, organization: str | None = None
+        root,
+        info,
+        *,
+        limit: int = 15,
+        organization: str | None = None,
     ) -> list[RepositoryContributorNode]:
         """Resolve top contributors only for repositories with projects.
 

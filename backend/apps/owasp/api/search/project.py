@@ -9,6 +9,7 @@ from apps.owasp.models.project import Project
 
 def get_projects(
     query: str,
+    *,
     attributes: list | None = None,
     limit: int = 25,
     page: int = 1,

@@ -9,13 +9,7 @@ class Command(BaseCommand):
     help = "Purge OWASP Nest data."
 
     def handle(self, *_args, **options) -> None:
-        """Purge data from specified OWASP Nest applications.
-
-        Args:
-            *_args: Positional arguments (not used).
-            **options: Keyword arguments (not used).
-
-        """
+        """Purge data from specified OWASP Nest applications."""
         nest_apps = ("github", "owasp")
 
         with connection.cursor() as cursor:

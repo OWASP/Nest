@@ -59,7 +59,8 @@ def check_funding_policy_compliance(platform: str, target: str) -> bool:
 
 def get_repository_file_content(
     url: str,
-    timeout: None | float | tuple[float, None] | tuple[float, float] = 30,
+    *,
+    timeout: float | None = 30,
 ) -> str:
     """Get the content of a file from a repository.
 

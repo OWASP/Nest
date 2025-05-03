@@ -116,6 +116,7 @@ class Command(BaseCommand):
         return self.LEVEL_REQUIREMENTS.get(level, defaults)
 
     def handle(self, *args, **options) -> None:
+        """Handle the command execution."""
         level = options.get("level")
 
         if level:

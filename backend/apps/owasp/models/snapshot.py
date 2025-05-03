@@ -40,13 +40,7 @@ class Snapshot(models.Model):
         return self.title
 
     def save(self, *args, **kwargs) -> None:
-        """Save the snapshot instance.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+        """Save the snapshot instance."""
         if not self.key:  # automatically set the key
             self.key = now().strftime("%Y-%m")
 

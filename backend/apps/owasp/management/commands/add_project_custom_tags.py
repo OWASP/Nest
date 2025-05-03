@@ -29,13 +29,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *_args, **options) -> None:
-        """Handle the command execution.
-
-        Args:
-            *_args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing command options.
-
-        """
+        """Handle the command execution."""
         file_path = Path(settings.BASE_DIR / f"data/project-custom-tags/{options['file-name']}")
         if not file_path.exists():
             self.stderr.write(f"File not found: {file_path}")

@@ -62,9 +62,7 @@ def get_gsoc_projects(year: int) -> list:
 
 
 @lru_cache
-def get_news_data(
-    limit: int = 10, timeout: None | float | tuple[float, None] | tuple[float, float] = 30
-) -> list[dict[str, str]]:
+def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str, str]]:
     """Get news data.
 
     Args:
@@ -100,9 +98,7 @@ def get_news_data(
 
 
 @lru_cache
-def get_staff_data(
-    timeout: None | float | tuple[float, None] | tuple[float, float] = 30,
-) -> list | None:
+def get_staff_data(timeout: float | None = 30) -> list | None:
     """Get staff data.
 
     Args:
@@ -183,11 +179,11 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         return None
 
 
-def get_text(blocks: list) -> str:
+def get_text(blocks: tuple) -> str:
     """Convert blocks to plain text.
 
     Args:
-        blocks (list): A list of Slack block elements.
+        blocks (tuple): A tuple of Slack block elements.
 
     Returns:
         str: The plain text representation of the blocks.

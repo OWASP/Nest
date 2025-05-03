@@ -15,8 +15,8 @@ class IssueQuery(BaseQuery):
 
     recent_issues = graphene.List(
         IssueNode,
-        limit=graphene.Int(default_value=5),
         distinct=graphene.Boolean(default_value=False),
+        limit=graphene.Int(default_value=5),
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
     )
@@ -24,9 +24,9 @@ class IssueQuery(BaseQuery):
     def resolve_recent_issues(
         root,
         info,
-        limit: int,
         *,
         distinct: bool = False,
+        limit: int = 5,
         login: str | None = None,
         organization: str | None = None,
     ) -> QuerySet:
@@ -35,8 +35,8 @@ class IssueQuery(BaseQuery):
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
-            limit (int): Maximum number of issues to return.
             distinct (bool): Whether to return unique issues per author and repository.
+            limit (int): Maximum number of issues to return.
             login (str, optional): Filter issues by a specific author's login.
             organization (str, optional): Filter issues by a specific organization's login.
 

@@ -36,7 +36,7 @@ GSOC_2025_MILESTONES_URL = (
     "q=is%3Aissue%20state%3Aopen%20label%3Agsoc2025%20%20sort%3Aupdated-desc"
 )
 
-GSOC_2025_MILESTONES = [
+GSOC_2025_MILESTONES = (
     markdown(
         f":exclamation: *<{settings.SITE_URL}|OWASP Nest>* is focused on solving real-world "
         "challenges that will help take the OWASP organization to the next level. Each milestone "
@@ -67,4 +67,4 @@ GSOC_2025_MILESTONES = [
         f"Join the effort at <{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> and help shape "
         "the future :rocket:"
     ),
-]
+)

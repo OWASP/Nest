@@ -1,5 +1,7 @@
 """OWASP app committee mixins."""
 
+from __future__ import annotations
+
 from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 

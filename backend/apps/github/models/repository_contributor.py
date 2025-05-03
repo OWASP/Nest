@@ -41,7 +41,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     def __str__(self) -> str:
         """Return a human-readable representation of the repository contributor.
 
-        Returns
+        Returns:
             str: A string describing the user's contributions to the repository.
 
         """
@@ -74,7 +74,11 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
     @staticmethod
     def update_data(
-        gh_contributor, repository, user, *, save: bool = True
+        gh_contributor,
+        repository,
+        user,
+        *,
+        save: bool = True,
     ) -> "RepositoryContributor":
         """Update repository contributor data.
 
