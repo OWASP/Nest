@@ -142,30 +142,30 @@ const Card = ({
               {/* Render social links if available */}
               {social && social.length > 0 && (
                 <div id="social" className="mt-2 flex flex-row gap-1">
-                {social.map((item) => (
-                  <Tooltip
-                    key={`${item.title}-${item.url}`}
-                    content={item.title}
-                    id={`social-tooltip-${item.title}`}
-                    placement="top"
-                    delay={100}
-                    closeDelay={100}
-                    showArrow
-                  >
-                    <Link
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2"
+                  {social.map((item) => (
+                    <Tooltip
+                      key={`${item.title}-${item.url}`}
+                      content={item.title}
+                      id={`social-tooltip-${item.title}`}
+                      placement="bottom"
+                      delay={100}
+                      closeDelay={100}
+                      showArrow
                     >
-                      <FontAwesomeIcon
-                        icon={getSocialIcon(item.url)}
-                        className="h-5 w-5 transition-transform duration-300 hover:scale-110 hover:text-blue-400"
-                      />
-                    </Link>
-                  </Tooltip>
-                ))}
-              </div>
+                      <Link
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2"
+                      >
+                        <FontAwesomeIcon
+                          icon={getSocialIcon(item.url)}
+                          className="h-5 w-5 transition-transform duration-300 hover:scale-110 hover:text-blue-400"
+                        />
+                      </Link>
+                    </Tooltip>
+                  ))}
+                </div>
               )}
               {/* Action Button */}
               <div className="flex items-center">
