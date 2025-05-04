@@ -1,4 +1,4 @@
-import { faGithub, faSlack, faBluesky } from '@fortawesome/free-brands-svg-icons'
+import { faGithub, faSlack, faBluesky, faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import { Link } from 'types/link'
 import { Section } from 'types/section'
 
@@ -36,6 +36,11 @@ export const footerIcons = [
     icon: faGithub,
     href: 'https://github.com/owasp/nest',
     label: 'GitHub',
+  },
+  {
+    icon: faLinkedin,
+    href: 'https://www.linkedin.com/groups/14656108/',
+    label: 'LinkedIn',
   },
   {
     icon: faSlack,

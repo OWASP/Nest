@@ -1,13 +1,16 @@
 """OWASP app Algolia search proxy API."""
 
+from __future__ import annotations
+
 import json
+from typing import Any
 
 import requests
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.http import JsonResponse
+from django.http import HttpRequest, HttpResponseNotAllowed, JsonResponse
 
 from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
@@ -18,7 +21,14 @@ CACHE_PREFIX = "algolia_proxy"
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 
 
-def get_search_results(index_name, query, page, hits_per_page, facet_filters, ip_address=None):
+def get_search_results(
+    index_name: str,
+    query: str,
+    page: int,
+    hits_per_page: int,
+    facet_filters: list,
+    ip_address=None,
+) -> dict[str, Any]:
     """Return search results for the given parameters.
 
     Args:
@@ -54,7 +64,7 @@ def get_search_results(index_name, query, page, hits_per_page, facet_filters, ip
     }
 
 
-def algolia_search(request):
+def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowed:
     """Search Algolia API endpoint.
 
     Args:

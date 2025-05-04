@@ -1,5 +1,7 @@
 """OWASP repository contributor GraphQL queries."""
 
+from __future__ import annotations
+
 import graphene
 from django.db.models import F, Window
 from django.db.models.functions import Rank
@@ -19,7 +21,14 @@ class RepositoryContributorQuery(BaseQuery):
         excluded_usernames=graphene.List(graphene.String, required=False),
     )
 
-    def resolve_top_contributors(root, info, limit, organization=None, excluded_usernames=None):
+    def resolve_top_contributors(
+        root,
+        info,
+        *,
+        limit: int = 15,
+        organization: str | None = None,
+        excluded_usernames=None,
+    ) -> list[RepositoryContributorNode]:
         """Resolve top contributors only for repositories with projects.
 
         Args:
