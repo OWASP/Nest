@@ -72,6 +72,11 @@ const About = () => {
     )
   }
 
+  const excludedUsernames = Object.keys(leaders)
+  const filteredContributors = project.topContributors?.filter(
+    (contributor) => !excludedUsernames.includes(contributor.login)
+  )
+
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -96,10 +101,10 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        {project.topContributors && (
+        {filteredContributors && (
           <TopContributors
             icon={faUsers}
-            contributors={project.topContributors}
+            contributors={filteredContributors}
             maxInitialDisplay={9}
             type="contributor"
           />
