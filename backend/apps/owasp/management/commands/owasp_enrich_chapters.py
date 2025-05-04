@@ -8,13 +8,13 @@ from django.core.management.base import BaseCommand
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.chapter import Chapter
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Enrich OWASP chapters with extra data."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -23,14 +23,8 @@ class Command(BaseCommand):
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *args, **options):
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing command options.
-
-        """
+    def handle(self, *args, **options) -> None:
+        """Handle the command execution."""
         active_chapters = Chapter.active_chapters.without_geo_data.order_by("id")
         active_chapters_count = active_chapters.count()
 

@@ -26,7 +26,7 @@ from apps.slack.constants import (
 from apps.slack.events.event import EventBase
 from apps.slack.utils import get_text
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class TeamJoin(EventBase):

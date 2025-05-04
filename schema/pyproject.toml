@@ -28,7 +28,7 @@ ignore = [
 ]
 select = ["ALL"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["D104"]
 "**/*.py" = ["S101"]
 

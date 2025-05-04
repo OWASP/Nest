@@ -14,67 +14,67 @@ class UserIndexMixin:
         return not self.is_bot and self.login not in self.get_non_indexable_logins()
 
     @property
-    def idx_avatar_url(self):
+    def idx_avatar_url(self) -> str:
         """Return avatar URL for indexing."""
         return self.avatar_url
 
     @property
-    def idx_bio(self):
+    def idx_bio(self) -> str:
         """Return bio for indexing."""
         return self.bio
 
     @property
-    def idx_company(self):
+    def idx_company(self) -> str:
         """Return company for indexing."""
         return self.company
 
     @property
-    def idx_created_at(self):
+    def idx_created_at(self) -> float:
         """Return created at timestamp for indexing."""
         return self.created_at.timestamp()
 
     @property
-    def idx_email(self):
+    def idx_email(self) -> str:
         """Return email for indexing."""
         return self.email
 
     @property
-    def idx_key(self):
+    def idx_key(self) -> str:
         """Return key for indexing."""
         return self.login
 
     @property
-    def idx_followers_count(self):
+    def idx_followers_count(self) -> int:
         """Return followers count for indexing."""
         return self.followers_count
 
     @property
-    def idx_following_count(self):
+    def idx_following_count(self) -> int:
         """Return following count for indexing."""
         return self.following_count
 
     @property
-    def idx_location(self):
+    def idx_location(self) -> str:
         """Return location for indexing."""
         return self.location
 
     @property
-    def idx_login(self):
+    def idx_login(self) -> str:
         """Return login for indexing."""
         return self.login
 
     @property
-    def idx_name(self):
+    def idx_name(self) -> str:
         """Return name for indexing."""
         return self.name
 
     @property
-    def idx_public_repositories_count(self):
+    def idx_public_repositories_count(self) -> int:
         """Return public repositories count for indexing."""
         return self.public_repositories_count
 
     @property
-    def idx_title(self):
+    def idx_title(self) -> str:
         """Return title for indexing."""
         return self.title
 
@@ -104,12 +104,12 @@ class UserIndexMixin:
         ]
 
     @property
-    def idx_contributions_count(self):
+    def idx_contributions_count(self) -> int:
         """Return contributions count for indexing."""
         return self.contributions_count
 
     @property
-    def idx_issues(self):
+    def idx_issues(self) -> list[dict]:
         """Return issues for indexing."""
         return [
             {
@@ -130,12 +130,12 @@ class UserIndexMixin:
         ]
 
     @property
-    def idx_issues_count(self):
+    def idx_issues_count(self) -> int:
         """Return issues count for indexing."""
         return self.issues.count()
 
     @property
-    def idx_releases(self):
+    def idx_releases(self) -> list[dict]:
         """Return releases for indexing."""
         return [
             {
@@ -156,16 +156,16 @@ class UserIndexMixin:
         ]
 
     @property
-    def idx_releases_count(self):
+    def idx_releases_count(self) -> int:
         """Return releases count for indexing."""
         return self.releases.count()
 
     @property
-    def idx_updated_at(self):
+    def idx_updated_at(self) -> float:
         """Return updated at timestamp for indexing."""
         return self.updated_at.timestamp()
 
     @property
-    def idx_url(self):
+    def idx_url(self) -> str:
         """Return GitHub profile URL for indexing."""
         return self.url

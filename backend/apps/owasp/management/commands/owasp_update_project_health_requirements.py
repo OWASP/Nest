@@ -84,7 +84,7 @@ class Command(BaseCommand):
         },
     }
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         parser.add_argument(
             "--level",
             type=str,
@@ -115,7 +115,8 @@ class Command(BaseCommand):
 
         return self.LEVEL_REQUIREMENTS.get(level, defaults)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
+        """Handle the command execution."""
         level = options.get("level")
 
         if level:

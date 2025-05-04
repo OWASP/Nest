@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 
 from apps.common.models import TimestampedModel
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Prompt(TimestampedModel):
@@ -26,20 +26,14 @@ class Prompt(TimestampedModel):
         """Prompt human readable representation."""
         return self.name
 
-    def save(self, *args, **kwargs):
-        """Save prompt.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
+    def save(self, *args, **kwargs) -> None:
+        """Save prompt."""
         self.key = slugify(self.name)
 
         super().save(*args, **kwargs)
 
     @staticmethod
-    def get_text(key):
+    def get_text(key: str) -> str:
         """Return prompt by key.
 
         Args:
@@ -54,9 +48,10 @@ class Prompt(TimestampedModel):
         except Prompt.DoesNotExist:
             if settings.OPEN_AI_SECRET_KEY != "None":  # noqa: S105
                 logger.warning("Prompt with key '%s' does not exist.", key)
+            return ""
 
     @staticmethod
-    def get_github_issue_hint():
+    def get_github_issue_hint() -> str:
         """Return GitHub issue hint prompt.
 
         Returns
@@ -66,7 +61,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("github-issue-hint")
 
     @staticmethod
-    def get_github_issue_documentation_project_summary():
+    def get_github_issue_documentation_project_summary() -> str:
         """Return GitHub issue documentation project summary prompt.
 
         Returns
@@ -76,7 +71,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("github-issue-documentation-project-summary")
 
     @staticmethod
-    def get_github_issue_project_summary():
+    def get_github_issue_project_summary() -> str:
         """Return GitHub issue project summary prompt.
 
         Returns
@@ -86,7 +81,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("github-issue-project-summary")
 
     @staticmethod
-    def get_owasp_chapter_suggested_location():
+    def get_owasp_chapter_suggested_location() -> str:
         """Return OWASP chapter suggested location prompt.
 
         Returns
@@ -96,7 +91,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("owasp-chapter-suggested-location")
 
     @staticmethod
-    def get_owasp_chapter_summary():
+    def get_owasp_chapter_summary() -> str:
         """Return OWASP chapter summary prompt.
 
         Returns
@@ -106,7 +101,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("owasp-chapter-summary")
 
     @staticmethod
-    def get_owasp_committee_summary():
+    def get_owasp_committee_summary() -> str:
         """Return OWASP committee summary prompt.
 
         Returns
@@ -116,7 +111,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("owasp-committee-summary")
 
     @staticmethod
-    def get_owasp_event_suggested_location():
+    def get_owasp_event_suggested_location() -> str:
         """Return OWASP event suggested location prompt.
 
         Returns
@@ -126,7 +121,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("owasp-event-suggested-location")
 
     @staticmethod
-    def get_owasp_event_summary():
+    def get_owasp_event_summary() -> str:
         """Return OWASP event summary prompt.
 
         Returns
@@ -136,7 +131,7 @@ class Prompt(TimestampedModel):
         return Prompt.get_text("owasp-event-summary")
 
     @staticmethod
-    def get_owasp_project_summary():
+    def get_owasp_project_summary() -> str:
         """Return OWASP project summary prompt.
 
         Returns

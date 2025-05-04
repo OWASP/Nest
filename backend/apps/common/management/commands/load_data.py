@@ -10,14 +10,8 @@ from apps.core.utils.index import register_indexes, unregister_indexes
 class Command(BaseCommand):
     help = "Load OWASP Nest data."
 
-    def handle(self, *_args, **_options):
-        """Load data into the OWASP Nest application.
-
-        Args:
-            *_args: Positional arguments (not used).
-            **_options: Keyword arguments (not used).
-
-        """
+    def handle(self, *_args, **_options) -> None:
+        """Load data into the OWASP Nest application."""
         # Disable indexing
         unregister_indexes()
 
