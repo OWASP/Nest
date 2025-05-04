@@ -49,6 +49,8 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     autocomplete_fields = ("owasp_repository",)
     list_display = (
         "name",
+        "created_at",
+        "updated_at",
         "region",
         "custom_field_owasp_url",
         "custom_field_github_urls",
@@ -128,7 +130,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "topics",
     )
 
-    def custom_field_name(self, obj):
+    def custom_field_name(self, obj) -> str:
         """Project custom name."""
         return f"{obj.name or obj.key}"
 

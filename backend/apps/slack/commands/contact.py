@@ -10,8 +10,16 @@ class Contact(CommandBase):
         """Get the template file name."""
         return "navigate.jinja"
 
-    def get_template_context(self, command):
-        """Get the template context."""
+    def get_template_context(self, command: dict):
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
         return {
             **super().get_template_context(command),
             "name": "OWASP contact",

@@ -8,13 +8,13 @@ from django.core.management.base import BaseCommand
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.event import Event
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Enrich events with extra data."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -23,15 +23,8 @@ class Command(BaseCommand):
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *args, **options):
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing command options.
-                offset (int): The starting index for processing.
-
-        """
+    def handle(self, *args, **options) -> None:
+        """Handle the command execution."""
         events = Event.objects.order_by("id")
         all_events = []
         offset = options["offset"]

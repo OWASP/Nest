@@ -85,8 +85,10 @@ psycopg
 pygithub
 pygoat
 pymdownx
+pypoetry
 pyyaml
 repositorycontributor
+requirepass
 rsc
 saft
 sakanashi
