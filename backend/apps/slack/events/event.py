@@ -21,7 +21,7 @@ class EventBase:
     - Use "{{ DIVIDER }}" to insert a horizontal divider
     """
 
-    event_type = None
+    event_type: str | None = None
     matchers = None
 
     @staticmethod
