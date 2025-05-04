@@ -134,19 +134,11 @@ jobs:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
-          cache-to: |
-            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
-
-      - name: Update buildx backend poetry cache
-        run: |
-          rm -rf /tmp/buildx-backend-poetry-cache
-          mv /tmp/buildx-backend-poetry-cache-new /tmp/buildx-backend-poetry-cache
 
       - name: Run backend tests
         run: |
@@ -179,19 +171,11 @@ jobs:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
-          cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
-
-      - name: Update buildx frontend pnpm cache
-        run: |
-          rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend=pnpm-cache
 
       - name: Run frontend unit tests
         run: |
@@ -224,19 +208,11 @@ jobs:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
-          cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
-
-      - name: Update buildx frontend pnpm cache
-        run: |
-          rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend-pnpm-cache
 
       - name: Run frontend end-to-end tests
         run: |
@@ -314,21 +290,14 @@ jobs:
         with:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: |
-            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
-
-      - name: Update buildx backend poetry cache
-        run: |
-          rm -rf /tmp/buildx-backend-poetry-cache
-          mv /tmp/buildx-backend-poetry-cache-new /tmp/buildx-backend-poetry-cache
 
       - name: Prepare frontend environment
         run: |
@@ -348,21 +317,14 @@ jobs:
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
-
-      - name: Update buildx frontend pnpm cache
-        run: |
-          rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend-pnpm-cache
 
   scan-staging-images:
     name: Scan Staging Images
@@ -516,21 +478,14 @@ jobs:
         with:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           cache-to: |
-            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
-
-      - name: Update buildx backend poetry cache
-        run: |
-          rm -rf /tmp/buildx-backend-poetry-cache
-          mv /tmp/buildx-backend-poetry-cache-new /tmp/buildx-backend-poetry-cache
 
       - name: Prepare frontend environment
         run: |
@@ -550,21 +505,14 @@ jobs:
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
           cache-to: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
-
-      - name: Update buildx frontend pnpm cache
-        run: |
-          rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend-pnpm-cache
 
   scan-production-images:
     name: Scan Production Images
