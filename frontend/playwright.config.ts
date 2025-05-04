@@ -1,3 +1,4 @@
+import os from 'os'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
@@ -30,4 +31,5 @@ export default defineConfig({
     timeout: 120_000,
     url: 'http://localhost:3000',
   },
+  workers: os.cpus().length,
 })

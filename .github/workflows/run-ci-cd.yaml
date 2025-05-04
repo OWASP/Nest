@@ -32,7 +32,7 @@ env:
 
 jobs:
   pre-commit:
-    name: Check code quality
+    name: Run pre-commit checks
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -48,14 +48,34 @@ jobs:
           cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
+      - name: Set up pre-commit cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
       - name: Run pre-commit
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || (echo 'Unstaged changes detected. \
+          Run `make check` and use `git add` to address it.' && exit 1)
+
+  check-frontend:
+    name: Run frontend checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
         with:
           version: 10
-          run_install: false
+          run_install: true
 
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -63,10 +83,6 @@ jobs:
           node-version: 22
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
 
       - name: Run pnpm format
         working-directory: frontend
@@ -123,7 +139,7 @@ jobs:
             type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
           context: backend
           file: backend/docker/Dockerfile.test
-          push: false
+          load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
@@ -139,6 +155,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
+      - check-frontend
       - pre-commit
     runs-on: ubuntu-latest
     steps:
@@ -167,7 +184,7 @@ jobs:
             type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
-          push: false
+          load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
 
@@ -183,6 +200,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
+      - check-frontend
       - pre-commit
     runs-on: ubuntu-latest
     steps:
@@ -211,7 +229,7 @@ jobs:
             type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
-          push: false
+          load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
 
