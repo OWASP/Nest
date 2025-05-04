@@ -23,4 +23,4 @@ class Local(Base):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
 
-    INSTALLED_APPS = (*Base.INSTALLED_APPS, "django_extensions")
+    INSTALLED_APPS = (*Base.INSTALLED_APPS, "django_extensions")  # type: ignore[assignment]
