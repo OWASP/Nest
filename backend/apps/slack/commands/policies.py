@@ -7,7 +7,15 @@ class Policies(CommandBase):
     """Slack bot /policies command."""
 
     def get_template_context(self, command):
-        """Get the template context."""
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
         policies = (
             ("Chapters Policy", "https://owasp.org/www-policy/operational/chapters"),
             ("Code of Conduct", "https://owasp.org/www-policy/operational/code-of-conduct"),

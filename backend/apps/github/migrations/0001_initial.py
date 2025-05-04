@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
                     "original_created_at",
                     models.DateTimeField(
                         default=datetime.datetime(
-                            2024, 8, 20, 19, 14, 44, 920859, tzinfo=datetime.timezone.utc
+                            2024, 8, 20, 19, 14, 44, 920859, tzinfo=datetime.UTC
                         ),
                         verbose_name="Original created_at",
                     ),
@@ -149,7 +149,7 @@ class Migration(migrations.Migration):
                     "original_updated_at",
                     models.DateTimeField(
                         default=datetime.datetime(
-                            2024, 8, 20, 19, 14, 50, 238981, tzinfo=datetime.timezone.utc
+                            2024, 8, 20, 19, 14, 50, 238981, tzinfo=datetime.UTC
                         ),
                         verbose_name="Original updated_at",
                     ),
@@ -355,9 +355,7 @@ class Migration(migrations.Migration):
             model_name="organization",
             name="created_at",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2024, 8, 21, 21, 8, 41, 7158, tzinfo=datetime.timezone.utc
-                ),
+                default=datetime.datetime(2024, 8, 21, 21, 8, 41, 7158, tzinfo=datetime.UTC),
                 verbose_name="Created at",
             ),
             preserve_default=False,
@@ -366,9 +364,7 @@ class Migration(migrations.Migration):
             model_name="organization",
             name="updated_at",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2024, 8, 21, 21, 8, 47, 175920, tzinfo=datetime.timezone.utc
-                ),
+                default=datetime.datetime(2024, 8, 21, 21, 8, 47, 175920, tzinfo=datetime.UTC),
                 verbose_name="Updated at",
             ),
             preserve_default=False,
@@ -387,9 +383,7 @@ class Migration(migrations.Migration):
             model_name="user",
             name="created_at",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2024, 8, 21, 21, 8, 55, 980536, tzinfo=datetime.timezone.utc
-                ),
+                default=datetime.datetime(2024, 8, 21, 21, 8, 55, 980536, tzinfo=datetime.UTC),
                 verbose_name="Created at",
             ),
             preserve_default=False,
@@ -398,9 +392,7 @@ class Migration(migrations.Migration):
             model_name="user",
             name="updated_at",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2024, 8, 21, 21, 8, 57, 168111, tzinfo=datetime.timezone.utc
-                ),
+                default=datetime.datetime(2024, 8, 21, 21, 8, 57, 168111, tzinfo=datetime.UTC),
                 verbose_name="Updated at",
             ),
             preserve_default=False,

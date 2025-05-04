@@ -10,7 +10,15 @@ class Sponsors(CommandBase):
     """Slack bot /sponsors command."""
 
     def get_template_context(self, command):
-        """Get the template context."""
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
         sponsors = get_sponsors_data()
         return {
             **super().get_template_context(command),

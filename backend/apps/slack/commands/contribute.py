@@ -10,7 +10,15 @@ class Contribute(CommandBase):
     """Slack bot /contribute command."""
 
     def get_render_blocks(self, command):
-        """Get the rendered blocks."""
+        """Get the rendered blocks.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            list: A list of Slack blocks representing the projects.
+
+        """
         command_text = command["text"].strip()
         if command_text in COMMAND_HELP:
             return super().get_render_blocks(command)
@@ -28,8 +36,16 @@ class Contribute(CommandBase):
             ),
         )
 
-    def get_template_context(self, command):
-        """Get the template context."""
+    def get_template_context(self, command: dict):
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
         return {
             **super().get_template_context(command),
         }

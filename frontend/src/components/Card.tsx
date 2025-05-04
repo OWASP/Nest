@@ -135,7 +135,6 @@ const Card = ({
               {button.label}
             </ActionButton>
           </div>
-        </div>
       </div>
     </div>
   )
