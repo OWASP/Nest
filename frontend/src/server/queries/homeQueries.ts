@@ -91,7 +91,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       suggestedLocation
       url
     }
-    openMilestones: milestones(limit: 5, close: false) {
+    openMilestones: milestones(limit: 5, state: "open") {
       author {
         avatarUrl
         login
@@ -105,7 +105,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       createdAt
       url
     }
-    closedMilestones: milestones(limit: 5, close: true) {
+    closedMilestones: milestones(limit: 5, state: "closed") {
       author {
         avatarUrl
         login
