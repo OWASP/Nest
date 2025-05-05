@@ -44,7 +44,7 @@ jobs:
             type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: |
-            type=local,src=/tmp/buildx-backend-poetry-cache-new,mode=max
+            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache,mode=max
           context: backend
           file: backend/docker/Dockerfile.test
@@ -112,7 +112,7 @@ jobs:
             type=local,src=/tmp/buildx-schema-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
           cache-to: |
-            type=local,src=/tmp/buildx-schema-poetry-cache-new
+            type=local,dest=/tmp/buildx-schema-poetry-cache-new,mode=max
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache,mode=max
           context: schema
           file: schema/docker/Dockerfile.test
