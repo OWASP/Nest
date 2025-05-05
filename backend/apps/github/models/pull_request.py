@@ -114,8 +114,8 @@ class PullRequest(GenericIssueModel):
         gh_pull_request,
         *,
         author=None,
-        repository=None,
         milestone=None,
+        repository=None,
         save: bool = True,
     ) -> "PullRequest":
         """Update pull request data.
@@ -123,8 +123,8 @@ class PullRequest(GenericIssueModel):
         Args:
             gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
             author (User, optional): The author of the pull request.
-            repository (Repository, optional): The repository instance.
             milestone (Milestone, optional): The milestone related to the pull request.
+            repository (Repository, optional): The repository instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:

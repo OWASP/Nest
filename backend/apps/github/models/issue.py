@@ -83,14 +83,14 @@ class Issue(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_issue, *, author=None, repository=None, milestone=None):
+    def from_github(self, gh_issue, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub issue data.
 
         Args:
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
-            repository (Repository, optional): The repository instance.
             milestone (Milestone, optional): The milestone related to the issue.
+            repository (Repository, optional): The repository instance.
 
         """
         field_mapping = {
