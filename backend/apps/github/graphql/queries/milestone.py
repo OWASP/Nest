@@ -1,7 +1,7 @@
 """Github Milestone Queries."""
 
 import graphene
-from django.db.models import OuterRef, Subquery
+from django.core.exceptions import ValidationError
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.milestone import MilestoneNode
@@ -17,8 +17,7 @@ class MilestoneQuery(BaseQuery):
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
         repository=graphene.String(required=False),
-        distinct=graphene.Boolean(default_value=False),
-        close=graphene.Boolean(default_value=True),
+        state=graphene.String(default_value="open"),
     )
 
     def resolve_milestones(
@@ -28,8 +27,7 @@ class MilestoneQuery(BaseQuery):
         login=None,
         organization=None,
         repository=None,
-        distinct=False,
-        close=True,
+        state="open",
     ):
         """Resolve milestones.
 
@@ -40,14 +38,22 @@ class MilestoneQuery(BaseQuery):
             login (str, optional): Filter milestones by author login.
             organization (str, optional): Filter milestones by organization login.
             repository (str, optional): Filter milestones by repository name.
-            distinct (bool, optional): Whether to return distinct milestones.
-            close (bool, optional): Whether to return open or closed milestones.
+            state (str, optional): The state of the milestones to return.
 
         Returns:
             list: A list of milestones.
 
         """
-        milestones = Milestone.closed_milestones if close else Milestone.open_milestones
+        lower_state = state.lower()
+        if lower_state == "open":
+            milestones = Milestone.open_milestones.all()
+        elif lower_state == "closed":
+            milestones = Milestone.closed_milestones.all()
+        elif lower_state == "all":
+            milestones = Milestone.objects.all()
+        else:
+            message = f"Invalid state: {state}. Valid states are 'open', 'closed', or 'all'."
+            raise ValidationError(message)
         milestones = milestones.select_related(
             "author",
             "repository",
@@ -64,15 +70,4 @@ class MilestoneQuery(BaseQuery):
             milestones = milestones.filter(repository__name=repository)
         if organization:
             milestones = milestones.filter(repository__organization__login=organization)
-
-        if distinct:
-            latest_milestone_per_author = (
-                milestones.filter(author_id=OuterRef("author_id"))
-                .order_by("-created_at")
-                .values("id")[:1]
-            )
-            milestones = milestones.filter(
-                id__in=Subquery(latest_milestone_per_author),
-            ).order_by("-created_at")
-
         return milestones[:limit]

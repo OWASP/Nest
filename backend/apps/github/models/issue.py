@@ -185,7 +185,7 @@ class Issue(GenericIssueModel):
         return IndexBase.get_total_count("issues")
 
     @staticmethod
-    def update_data(gh_issue, *, author=None, repository=None, milestone=None, save: bool = True):
+    def update_data(gh_issue, *, author=None, milestone=None, repository=None, save: bool = True):
         """Update issue data.
 
         Args:
