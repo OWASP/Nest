@@ -1,7 +1,11 @@
 """Slack blocks."""
 
+from __future__ import annotations
 
-def divider():
+from typing import Any
+
+
+def divider() -> dict[str, str]:
     """Return a divider block.
 
     Returns
@@ -11,7 +15,7 @@ def divider():
     return {"type": "divider"}
 
 
-def markdown(text):
+def markdown(text: str) -> dict:
     """Return a markdown block.
 
     Args:
@@ -27,7 +31,7 @@ def markdown(text):
     }
 
 
-def get_header():
+def get_header() -> list[dict[str, Any]]:
     """Return the header block.
 
     Returns
@@ -83,7 +87,7 @@ def get_header():
     ]
 
 
-def get_pagination_buttons(entity_type, page, total_pages):
+def get_pagination_buttons(entity_type: str, page: int, total_pages: int) -> list[dict[str, Any]]:
     """Get pagination buttons for Slack blocks.
 
     Args:

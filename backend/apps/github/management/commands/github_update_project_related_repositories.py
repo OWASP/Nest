@@ -12,7 +12,7 @@ from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.utils import get_repository_path
 from apps.owasp.models.project import Project
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     help = "Updates OWASP project related repositories."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -29,7 +29,7 @@ class Command(BaseCommand):
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         """Handle the command execution.
 
         Args:

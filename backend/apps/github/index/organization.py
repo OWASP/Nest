@@ -1,5 +1,7 @@
 """GitHub OWASP related organizations Algolia index configuration."""
 
+from django.db.models import QuerySet
+
 from apps.common.index import IndexBase, register
 from apps.github.models.organization import Organization
 
@@ -48,11 +50,11 @@ class OrganizationIndex(IndexBase):
     should_index = "is_indexable"
 
     @staticmethod
-    def update_synonyms():
+    def update_synonyms() -> None:
         """Update synonyms for the organizations index."""
         OrganizationIndex.reindex_synonyms("github", "organizations")
 
-    def get_entities(self):
+    def get_entities(self) -> QuerySet:
         """Get the queryset of Organization objects to be indexed.
 
         Returns:

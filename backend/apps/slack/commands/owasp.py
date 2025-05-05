@@ -7,7 +7,7 @@ from apps.slack.common.constants import COMMAND_HELP
 class Owasp(CommandBase):
     """Slack bot /owasp command."""
 
-    def find_command(self, command_name):
+    def find_command(self, command_name: str):
         """Find the command class by name."""
         if not command_name:
             return None
@@ -27,8 +27,16 @@ class Owasp(CommandBase):
 
         return super().handler(ack, command, client)
 
-    def get_template_context(self, command):
-        """Get the template context."""
+    def get_template_context(self, command: dict):
+        """Get the template context.
+
+        Args:
+            command (dict): The Slack command payload.
+
+        Returns:
+            dict: The template context.
+
+        """
         command_tokens = command["text"].split()
         if not command_tokens or command_tokens[0] in COMMAND_HELP:
             return {

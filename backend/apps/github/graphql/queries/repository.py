@@ -1,5 +1,7 @@
 """OWASP repository GraphQL queries."""
 
+from __future__ import annotations
+
 import graphene
 
 from apps.common.graphql.queries import BaseQuery
@@ -18,11 +20,16 @@ class RepositoryQuery(BaseQuery):
 
     repositories = graphene.List(
         RepositoryNode,
-        organization=graphene.String(required=True),
         limit=graphene.Int(default_value=12),
+        organization=graphene.String(required=True),
     )
 
-    def resolve_repository(root, info, organization_key, repository_key):
+    def resolve_repository(
+        root,
+        info,
+        organization_key: str,
+        repository_key: str,
+    ) -> Repository | None:
         """Resolve repository by key.
 
         Args:
@@ -43,14 +50,20 @@ class RepositoryQuery(BaseQuery):
         except Repository.DoesNotExist:
             return None
 
-    def resolve_repositories(root, info, organization, limit):
+    def resolve_repositories(
+        root,
+        info,
+        organization: str,
+        *,
+        limit: int = 12,
+    ) -> list[Repository]:
         """Resolve repositories.
 
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
-            organization (str): The login of the organization.
             limit (int): Maximum number of repositories to return.
+            organization (str): The login of the organization.
 
         Returns:
             QuerySet: Queryset containing the repositories for the organization.

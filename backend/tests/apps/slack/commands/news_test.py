@@ -60,7 +60,9 @@ class TestNewsCommand:
                 if mock_get_news_data.return_value:
                     assert "*:newspaper: Latest OWASP news:*" in blocks[0]["text"]["text"]
                     news_blocks = blocks[1:-2]
-                    for item, block in zip(mock_get_news_data.return_value, news_blocks):
+                    for item, block in zip(
+                        mock_get_news_data.return_value, news_blocks, strict=False
+                    ):
                         expected = f"  • *<{item['url']}|{item['title']}>* by {item['author']}"
                         assert block["text"]["text"] == expected
                     assert blocks[-2]["type"] == "divider"
