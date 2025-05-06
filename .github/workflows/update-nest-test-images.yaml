@@ -119,6 +119,7 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest
+
       - name: Update buildx schema poetry cache
         run: |
           rm -rf /tmp/buildx-schema-poetry-cache
@@ -143,4 +144,3 @@ jobs:
           file: backend/docker/Dockerfile.graphql_fuzz
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-graphql:latest
-
