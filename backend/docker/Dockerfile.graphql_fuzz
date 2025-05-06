@@ -7,8 +7,7 @@ ENV APK_CACHE_DIR="/var/cache/apk" \
     SYMLINK_CACHE_DIR="/etc/apk/cache"
 
 RUN mkdir -p ${APK_CACHE_DIR} ${PIP_CACHE_DIR} && \
-    ln -s ${APK_CACHE_DIR} ${SYMLINK_CACHE_DIR} && \
-    chmod 777 ${APK_CACHE_DIR} ${PIP_CACHE_DIR}
+    ln -s ${APK_CACHE_DIR} ${SYMLINK_CACHE_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     apk update && apk upgrade && \
