@@ -1,11 +1,26 @@
 FROM python:3.12-alpine
 
-RUN apk update && apk upgrade && \
-    addgroup -S owasp && \
-    adduser -S -h /home/owasp -G owasp owasp
+ENV APK_CACHE_DIR="/var/cache/apk" \
+    OWASP_GID=1000 \
+    OWASP_UID=1000 \
+    PIP_CACHE_DIR="/var/cache/pip" \
+    SYMLINK_CACHE_DIR="/etc/apk/cache"
 
-RUN apk add --no-cache curl jq gcc musl-dev libffi-dev linux-headers
-RUN pip install --no-cache-dir graphqler
+RUN mkdir -p ${APK_CACHE_DIR} ${PIP_CACHE_DIR} && \
+    ln -s ${APK_CACHE_DIR} ${SYMLINK_CACHE_DIR} && \
+    chmod 777 ${APK_CACHE_DIR} ${PIP_CACHE_DIR}
+
+RUN --mount=type=cache,target=${APK_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
+    apk update && apk upgrade && \
+    addgroup -S -g ${OWASP_GID} owasp && \
+    adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
+    chown -R owasp:owasp /home/owasp
+
+RUN --mount=type=cache,target=${APK_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
+    apk add curl jq gcc musl-dev libffi-dev linux-headers
+
+RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+    pip install graphqler --cache-dir ${PIP_CACHE_DIR}
 
 WORKDIR /home/owasp
 
@@ -18,7 +33,7 @@ RUN touch /home/owasp/config.toml && \
 # Create the graphql output dir and give permissions to the owasp user
 RUN mkdir -p /home/owasp/fuzzing_results && \
     chmod +x /home/owasp/fuzzing_results /home/owasp/entrypoint.sh && \
-    chown owasp:owasp /home/owasp/fuzzing_results
+    chown owasp:owasp /home/owasp/fuzzing_results /home/owasp/entrypoint.sh
 
 USER owasp
 
