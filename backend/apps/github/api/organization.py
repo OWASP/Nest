@@ -25,5 +25,5 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
 class OrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     """Organization view set."""
 
-    queryset = Organization.objects.all()
+    queryset = Organization.objects.filter(is_owasp_organization=True)
     serializer_class = OrganizationSerializer
