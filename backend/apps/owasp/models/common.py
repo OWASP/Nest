@@ -33,7 +33,9 @@ class RepositoryBasedEntityModel(models.Model):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
-    description = models.CharField(verbose_name="Description", max_length=500, default="")
+    description = models.CharField(
+        verbose_name="Description", max_length=500, blank=True, default=""
+    )
     summary = models.TextField(
         verbose_name="Summary", default="", blank=True
     )  # AI generated summary
