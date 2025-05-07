@@ -12,6 +12,9 @@ exec-backend-command-it:
 exec-db-command:
 	@docker exec -it nest-db $(CMD)
 
+clear-cache:
+	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
+
 collect-static:
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
