@@ -59,7 +59,7 @@ const Card = ({
             </h1>
           </Link>
         </div>
-        
+
         {/* Icons associated with the project */}
         {icons && Object.keys(Icons).some((key) => icons[key]) && (
           <div className="mt-3 flex flex-wrap">
@@ -78,10 +78,10 @@ const Card = ({
 
       {/* Project name link (if provided) */}
       {projectName && (
-        <Link 
-          href={projectLink || ''} 
+        <Link
+          href={projectLink || ''}
           target="_blank"
-          rel="noopener noreferrer" 
+          rel="noopener noreferrer"
           className="mt-3 font-medium text-gray-700 hover:text-blue-500 dark:text-gray-300"
         >
           {projectName}
@@ -90,7 +90,7 @@ const Card = ({
 
       {/* Project summary */}
       <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
-      
+
       {/* Bottom section with social links, contributors and action button */}
       <div className="mt-4 w-full">
         {/* Social icons section */}
@@ -105,8 +105,8 @@ const Card = ({
                   rel="noopener noreferrer"
                   className="transition-colors"
                 >
-                  <FontAwesomeIcon 
-                    icon={getSocialIcon(item.url)} 
+                  <FontAwesomeIcon
+                    icon={getSocialIcon(item.url)}
                     className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:dark:text-gray-400"
                   />
                 </Link>
@@ -114,7 +114,7 @@ const Card = ({
             </div>
           </div>
         )}
-        
+
         {/* Flexible bottom row with contributors and action button */}
         <div className="flex w-full flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           {/* Contributors section */}
@@ -127,7 +127,7 @@ const Card = ({
               />
             ))}
           </div>
-          
+
           {/* Action Button */}
           <div className="flex sm:justify-end">
             <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
@@ -135,6 +135,7 @@ const Card = ({
               {button.label}
             </ActionButton>
           </div>
+        </div>
       </div>
     </div>
   )
