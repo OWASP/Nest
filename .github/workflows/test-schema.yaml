@@ -65,12 +65,12 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@28deaeda66b76a05916b6923827895f2b14ab387
+        uses: github/codeql-action/init@60168efe1c415ce0f5521ea06d5c2062adbeed1b
         with:
           languages: ${{ matrix.language }}
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@28deaeda66b76a05916b6923827895f2b14ab387
+        uses: github/codeql-action/analyze@60168efe1c415ce0f5521ea06d5c2062adbeed1b
         with:
           category: /language:${{ matrix.language }}
 
@@ -94,18 +94,34 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Restore buildx schema poetry cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-schema-poetry-cache
+          key: buildx-schema-poetry-cache-${{ runner.os }}-${{ hashFiles('schema/poetry.lock') }}
+          restore-keys: |
+            buildx-schema-poetry-cache-${{ runner.os }}-
+
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build schema test image
         uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
+          cache-from: |
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
+          cache-to: |
+            type=local,dest=/tmp/buildx-schema-poetry-cache-new
           context: schema
           file: schema/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest
+
+      - name: Update buildx schema poetry cache
+        run: |
+          rm -rf /tmp/buildx-schema-poetry-cache
+          mv /tmp/buildx-schema-poetry-cache-new /tmp/buildx-schema-poetry-cache
 
       - name: Run schema tests
         run: |

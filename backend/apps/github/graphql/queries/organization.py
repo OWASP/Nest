@@ -28,6 +28,6 @@ class OrganizationQuery(BaseQuery):
 
         """
         try:
-            return Organization.objects.get(login=login)
+            return Organization.objects.get(is_owasp_organization=True, login=login)
         except Organization.DoesNotExist:
             return None
