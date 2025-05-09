@@ -8,13 +8,13 @@ from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.project import Project
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Enrich OWASP projects with AI generated data."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -27,17 +27,8 @@ class Command(BaseCommand):
         )
         parser.add_argument("--update-summary", default=True, required=False, action="store_true")
 
-    def handle(self, *args, **options):
-        """Execute the enrichment process for OWASP projects.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing:
-                offset (int): The starting index for processing.
-                force_update_summary (bool): Whether to force updating summaries.
-                update_summary (bool): Whether to update summaries.
-
-        """
+    def handle(self, *args, **options) -> None:
+        """Execute the enrichment process for OWASP projects."""
         open_ai = OpenAi()
 
         force_update_summary = options["force_update_summary"]

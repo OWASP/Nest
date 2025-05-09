@@ -39,4 +39,30 @@ describe('BreadCrumb', () => {
     expect(lastSegment).toBeInTheDocument()
     expect(lastSegment).not.toHaveAttribute('href')
   })
+
+  test('links have correct href attributes', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users/profile')
+
+    render(<BreadCrumbs />)
+
+    const homeLink = screen.getByText('Home').closest('a')
+    const dashboardLink = screen.getByText('Dashboard').closest('a')
+    const usersLink = screen.getByText('Users').closest('a')
+
+    expect(homeLink).toHaveAttribute('href', '/')
+    expect(dashboardLink).toHaveAttribute('href', '/dashboard')
+    expect(usersLink).toHaveAttribute('href', '/dashboard/users')
+  })
+
+  test('links have hover styles', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users')
+
+    render(<BreadCrumbs />)
+
+    const homeLink = screen.getByText('Home').closest('a')
+    const dashboardLink = screen.getByText('Dashboard').closest('a')
+
+    expect(homeLink).toHaveClass('hover:text-blue-700', 'hover:underline')
+    expect(dashboardLink).toHaveClass('hover:text-blue-700', 'hover:underline')
+  })
 })

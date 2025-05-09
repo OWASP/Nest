@@ -34,14 +34,14 @@ class ChapterNode(GenericEntityNode):
             "tags",
         )
 
-    def resolve_geo_location(self, info):
+    def resolve_geo_location(self, info) -> GeoLocationType:
         """Resolve geographic location."""
         return GeoLocationType(lat=self.latitude, lng=self.longitude)
 
-    def resolve_key(self, info):
+    def resolve_key(self, info) -> str:
         """Resolve key."""
         return self.idx_key
 
-    def resolve_suggested_location(self, info):
+    def resolve_suggested_location(self, info) -> str:
         """Resolve suggested location."""
         return self.idx_suggested_location

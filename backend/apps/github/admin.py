@@ -42,7 +42,7 @@ class PullRequestAdmin(admin.ModelAdmin):
         "title",
     )
 
-    def custom_field_github_url(self, obj):
+    def custom_field_github_url(self, obj: PullRequest) -> str:
         """Pull Request GitHub URL.
 
         Args:
@@ -75,7 +75,7 @@ class IssueAdmin(admin.ModelAdmin):
     )
     search_fields = ("title",)
 
-    def custom_field_github_url(self, obj):
+    def custom_field_github_url(self, obj) -> str:
         """Issue GitHub URL.
 
         Args:
@@ -118,7 +118,7 @@ class RepositoryAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
     search_fields = ("name", "node_id")
 
-    def custom_field_github_url(self, obj):
+    def custom_field_github_url(self, obj) -> str:
         """Repository GitHub URL.
 
         Args:
@@ -132,7 +132,7 @@ class RepositoryAdmin(admin.ModelAdmin):
             f"<a href='https://github.com/{obj.owner.login}/{obj.name}' target='_blank'>↗️</a>"
         )
 
-    def custom_field_title(self, obj):
+    def custom_field_title(self, obj: Repository) -> str:
         """Repository title.
 
         Args:
@@ -163,6 +163,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         "updated_at",
         "followers_count",
     )
+    list_filter = ("is_owasp_organization",)
     search_fields = ("name",)
 
 

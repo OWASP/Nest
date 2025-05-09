@@ -66,3 +66,12 @@ export const GET_REPOSITORY_DATA = gql`
     }
   }
 `
+
+export const GET_REPOSITORY_METADATA = gql`
+  query GetRepository($repositoryKey: String!, $organizationKey: String!) {
+    repository(repositoryKey: $repositoryKey, organizationKey: $organizationKey) {
+      description
+      name
+    }
+  }
+`

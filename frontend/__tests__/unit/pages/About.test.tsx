@@ -151,8 +151,10 @@ describe('About Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Arkadii Yakovets')).toBeInTheDocument()
+      expect(screen.getByText('CCSP, CISSP, CSSLP')).toBeInTheDocument()
       expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
-      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
+      expect(screen.getByText('CC')).toBeInTheDocument()
+      expect(screen.getByText('CISSP')).toBeInTheDocument()
     })
   })
 
@@ -250,7 +252,7 @@ describe('About Component', () => {
   test('renders roadmap correctly', async () => {
     render(<About />)
 
-    const roadmapSection = screen.getByText('Roadmap').closest('div')
+    const roadmapSection = screen.getByRole('heading', { name: 'Roadmap' }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
 
     const roadmapItems = within(roadmapSection).getAllByRole('listitem')
@@ -260,7 +262,9 @@ describe('About Component', () => {
     expect(screen.getByText('Feature 2')).toBeInTheDocument()
     expect(screen.getByText('Feature 3')).toBeInTheDocument()
 
-    const links = within(roadmapSection).getAllByRole('link')
+    const links = within(roadmapSection)
+      .getAllByRole('link')
+      .filter((link) => link.getAttribute('href') !== '#roadmap')
     expect(links[0].getAttribute('href')).toBe('https://github.com/owasp/test/issues/1')
   })
 

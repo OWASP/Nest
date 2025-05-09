@@ -32,7 +32,7 @@ env:
 
 jobs:
   pre-commit:
-    name: Check code quality
+    name: Run pre-commit checks
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -42,20 +42,40 @@ jobs:
         run: pipx install poetry
 
       - name: Set up Python
-        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           cache: 'poetry'
           cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
+      - name: Set up pre-commit cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
       - name: Run pre-commit
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || (echo 'Unstaged changes detected. \
+          Run `make check` and use `git add` to address it.' && exit 1)
+
+  check-frontend:
+    name: Run frontend checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
         with:
           version: 10
-          run_install: false
+          run_install: true
 
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -63,10 +83,6 @@ jobs:
           node-version: 22
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
 
       - name: Run pnpm format
         working-directory: frontend
@@ -101,20 +117,35 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Restore buildx backend poetry cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-backend-poetry-cache
+          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          restore-keys: |
+            buildx-backend-poetry-cache-${{ runner.os }}-
+
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build backend test image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
+            type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
+          cache-to: |
+            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
+
+      - name: Update buildx backend poetry cache
+        run: |
+          rm -rf /tmp/buildx-backend-poetry-cache
+          mv /tmp/buildx-backend-poetry-cache-new /tmp/buildx-backend-poetry-cache
 
       - name: Run backend tests
         run: |
@@ -123,26 +154,42 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
+      - check-frontend
       - pre-commit
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Restore buildx frontend pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-frontend-pnpm-cache
+          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            buildx-frontend-pnpm-cache-${{ runner.os }}-
+
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend unit-testing image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
+            type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
+          cache-to: |
+            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
+
+      - name: Update buildx frontend pnpm cache
+        run: |
+          rm -rf /tmp/buildx-frontend-pnpm-cache
+          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend=pnpm-cache
 
       - name: Run frontend unit tests
         run: |
@@ -151,21 +198,29 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - pre-commit
+      - run-frontend-unit-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Restore buildx frontend pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-frontend-pnpm-cache
+          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            buildx-frontend-pnpm-cache-${{ runner.os }}-
+
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend end-to-end testing image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
+            type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
@@ -223,6 +278,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Restore buildx backend poetry cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-backend-poetry-cache
+          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          restore-keys: |
+            buildx-backend-poetry-cache-${{ runner.os }}-
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
@@ -236,13 +299,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+            type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
@@ -259,15 +322,25 @@ jobs:
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
+          echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
+          echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
+
+      - name: Restore buildx frontend pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-frontend-pnpm-cache
+          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            buildx-frontend-pnpm-cache-${{ runner.os }}-
 
       - name: Build frontend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+            type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
@@ -335,6 +408,8 @@ jobs:
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
+          echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
           echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
@@ -342,6 +417,10 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+
+          # Cache
+          touch .env.cache
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.cache
 
           # Database
           touch .env.db
@@ -395,6 +474,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Restore buildx backend poetry cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-backend-poetry-cache
+          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          restore-keys: |
+            buildx-backend-poetry-cache-${{ runner.os }}-
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
@@ -408,13 +495,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+            type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
@@ -431,15 +519,26 @@ jobs:
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
+          echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
+          echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
+
+      - name: Restore buildx frontend pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-frontend-pnpm-cache
+          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            buildx-frontend-pnpm-cache-${{ runner.os }}-
 
       - name: Build frontend image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+            type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache,mode=max
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
@@ -507,6 +606,8 @@ jobs:
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
+          echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
+          echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
           echo "DJANGO_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
@@ -514,6 +615,10 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+
+          # Cache
+          touch .env.cache
+          echo "REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.cache
 
           # Database
           touch .env.db

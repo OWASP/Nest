@@ -1,5 +1,7 @@
 """OWASP app common models."""
 
+from __future__ import annotations
+
 import itertools
 import logging
 import re
@@ -31,7 +33,9 @@ class RepositoryBasedEntityModel(models.Model):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
-    description = models.CharField(verbose_name="Description", max_length=500, default="")
+    description = models.CharField(
+        verbose_name="Description", max_length=500, blank=True, default=""
+    )
     summary = models.TextField(
         verbose_name="Summary", default="", blank=True
     )  # AI generated summary
@@ -72,12 +76,12 @@ class RepositoryBasedEntityModel(models.Model):
     )
 
     @property
-    def github_url(self):
+    def github_url(self) -> str:
         """Get GitHub URL."""
         return f"https://github.com/owasp/{self.key}"
 
     @property
-    def index_md_url(self):
+    def index_md_url(self) -> str | None:
         """Return project's raw index.md GitHub URL."""
         return (
             "https://raw.githubusercontent.com/OWASP/"
@@ -87,7 +91,7 @@ class RepositoryBasedEntityModel(models.Model):
         )
 
     @property
-    def leaders_md_url(self):
+    def leaders_md_url(self) -> str | None:
         """Return entity's raw leaders.md GitHub URL."""
         return (
             "https://raw.githubusercontent.com/OWASP/"
@@ -97,12 +101,12 @@ class RepositoryBasedEntityModel(models.Model):
         )
 
     @property
-    def owasp_name(self):
+    def owasp_name(self) -> str:
         """Get OWASP name."""
         return self.name if self.name.startswith("OWASP ") else f"OWASP {self.name}"
 
     @property
-    def owasp_url(self):
+    def owasp_url(self) -> str:
         """Get OWASP URL."""
         return f"https://owasp.org/{self.key}"
 
@@ -187,7 +191,7 @@ class RepositoryBasedEntityModel(models.Model):
         blank=True,
     )
 
-    def get_related_url(self, url, exclude_domains=(), include_domains=()):
+    def get_related_url(self, url, exclude_domains=(), include_domains=()) -> str | None:
         """Get OWASP entity related URL."""
         if (
             not url
@@ -209,7 +213,7 @@ class RepositoryBasedEntityModel(models.Model):
 
         return url
 
-    def get_top_contributors(self, repositories=()):
+    def get_top_contributors(self, repositories=()) -> list[dict]:
         """Get top contributors."""
         return [
             {
@@ -229,7 +233,7 @@ class RepositoryBasedEntityModel(models.Model):
             .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
         ]
 
-    def parse_tags(self, tags):
+    def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""
         if not tags:
             return []

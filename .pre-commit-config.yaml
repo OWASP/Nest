@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.0
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args:
@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.6
+    rev: v0.11.8
     hooks:
       - id: ruff
         args:
@@ -36,6 +36,20 @@ repos:
           - --offset=2
           - --sequence=4
         exclude: (.github|pnpm-lock.yaml)
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-jsonschema
+          - types-lxml
+          - types-python-dateutil
+          - types-PyYAML
+          - types-requests
+        args:
+          - --config-file
+          - backend/pyproject.toml
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

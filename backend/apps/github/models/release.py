@@ -45,26 +45,26 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         related_name="releases",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable representation of the release.
 
-        Returns
+        Returns:
             str: The name of the release along with the author's name.
 
         """
         return f"{self.name} by {self.author}"
 
     @property
-    def summary(self):
+    def summary(self) -> str:
         """Return release summary."""
         return f"{self.tag_name} on {self.published_at.strftime('%b %d, %Y')}"
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Return release URL."""
         return f"{self.repository.url}/releases/tag/{self.tag_name}"
 
-    def from_github(self, gh_release, author=None, repository=None):
+    def from_github(self, gh_release, author=None, repository=None) -> None:
         """Update the instance based on GitHub release data.
 
         Args:
@@ -97,12 +97,18 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
         self.repository = repository
 
     @staticmethod
-    def bulk_save(releases):
+    def bulk_save(releases, fields=None) -> None:  # type: ignore[override]
         """Bulk save releases."""
-        BulkSaveModel.bulk_save(Release, releases)
+        BulkSaveModel.bulk_save(Release, releases, fields=fields)
 
     @staticmethod
-    def update_data(gh_release, author=None, repository=None, save=True):
+    def update_data(
+        gh_release,
+        *,
+        author=None,
+        repository=None,
+        save: bool = True,
+    ) -> "Release":
         """Update release data.
 
         Args:

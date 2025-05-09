@@ -12,6 +12,9 @@ exec-backend-command-it:
 exec-db-command:
 	@docker exec -it nest-db $(CMD)
 
+clear-cache:
+	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
+
 collect-static:
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
@@ -120,7 +123,7 @@ owasp-scrape-projects:
 	@CMD="python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
 
 owasp-sync-posts:
-	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command-it
+	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command
 
 owasp-update-events:
 	@echo "Getting OWASP events data"
@@ -169,4 +172,5 @@ update-data: \
 	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \
+	owasp-sync-posts \
 	owasp-update-sponsors

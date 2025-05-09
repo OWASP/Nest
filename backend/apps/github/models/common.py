@@ -14,7 +14,7 @@ class GenericUserModel(models.Model):
     email = models.EmailField(verbose_name="Email", max_length=100, default="", blank=True)
 
     avatar_url = models.URLField(verbose_name="Avatar URL", max_length=200, default="")
-    company = models.CharField(verbose_name="Company", max_length=200, default="")
+    company = models.CharField(verbose_name="Company", max_length=200, blank=True, default="")
     location = models.CharField(verbose_name="Location", max_length=200, default="", blank=True)
 
     collaborators_count = models.PositiveIntegerField(
@@ -31,16 +31,16 @@ class GenericUserModel(models.Model):
     updated_at = models.DateTimeField(verbose_name="Updated at")
 
     @property
-    def title(self):
+    def title(self) -> str:
         """Entity title."""
         return f"{self.name or self.login}"
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Entity URL."""
         return f"https://github.com/{self.login.lower()}"
 
-    def from_github(self, data):
+    def from_github(self, data) -> None:
         """Update instance based on GitHub data."""
         field_mapping = {
             "avatar_url": "avatar_url",
