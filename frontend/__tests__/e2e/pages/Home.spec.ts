@@ -76,6 +76,20 @@ test.describe('Home Page', () => {
     await expect(page.getByText('repo-1')).toBeVisible()
   })
 
+  test('should have open milestones', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Open Milestones' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
+    await expect(page.getByText('Mar 1, 2025')).toBeVisible()
+    await expect(page.getByText('Home Repo One')).toBeVisible()
+  })
+
+  test('should have closed milestones', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Closed Milestones' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Security Updates' })).toBeVisible()
+    await expect(page.getByText('Nov 15, 2024')).toBeVisible()
+    await expect(page.getByText('Home Repo Two')).toBeVisible()
+  })
+
   test('should be able to join OWASP', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Ready to Make a Difference?' })).toBeVisible()
     await expect(page.getByText('Join OWASP and be part of the')).toBeVisible()

@@ -51,6 +51,34 @@ export const GET_REPOSITORY_DATA = gql`
       topics
       updatedAt
       url
+      openMilestones {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        title
+        openIssuesCount
+        closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
+      }
+      closedMilestones {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        title
+        openIssuesCount
+        closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
+      }
     }
     recentPullRequests(limit: 5, organization: $organizationKey, repository: $repositoryKey) {
       author {

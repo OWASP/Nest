@@ -11,6 +11,7 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
+from apps.github.models.milestone import Milestone
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
@@ -153,6 +154,23 @@ class Project(
         )
 
     @property
+    def open_milestones(self):
+        """Return milestones."""
+        return Milestone.open_milestones.filter(
+            repository__in=self.repositories.all(),
+        ).select_related(
+            "repository",
+        )
+
+    @property
+    def closed_milestones(self):
+        """Return milestones."""
+        return Milestone.closed_milestones.filter(
+            repository__in=self.repositories.all(),
+        ).select_related(
+            "repository",
+        )
+
     def nest_key(self) -> str:
         """Get Nest key."""
         return self.key.replace("www-project-", "")

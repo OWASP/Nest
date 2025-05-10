@@ -29,6 +29,22 @@ export interface ProjectPullRequestsType {
   url: string
 }
 
+export interface ProjectMilestonesType {
+  author: {
+    avatarUrl: string
+    key: string
+    name: string
+    login: string
+  }
+  title: string
+  body: string
+  openIssuesCount: number
+  closedIssuesCount: number
+  repositoryName: string
+  organizationName?: string
+  createdAt: string
+}
+
 export interface ProjectStatsType {
   contributors: number
   forks: number
@@ -82,6 +98,8 @@ export interface ProjectTypeGraphql {
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
   topContributors: TopContributorsTypeGraphql[]
+  openMilestones: ProjectMilestonesType[]
+  closedMilestones: ProjectMilestonesType[]
 }
 
 export interface RepositoriesCardProps {

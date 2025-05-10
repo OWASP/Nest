@@ -91,5 +91,33 @@ export const GET_MAIN_PAGE_DATA = gql`
       suggestedLocation
       url
     }
+    openMilestones: milestones(limit: 5, state: "open") {
+      author {
+        avatarUrl
+        login
+        name
+      }
+      title
+      openIssuesCount
+      closedIssuesCount
+      repositoryName
+      organizationName
+      createdAt
+      url
+    }
+    closedMilestones: milestones(limit: 5, state: "closed") {
+      author {
+        avatarUrl
+        login
+        name
+      }
+      title
+      openIssuesCount
+      closedIssuesCount
+      repositoryName
+      organizationName
+      createdAt
+      url
+    }
   }
 `
