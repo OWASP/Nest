@@ -26,6 +26,9 @@ const ProjectDetailsPage = () => {
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })
+  useEffect(() => {
+   console.log(`project`, project)
+    },[project])
 
   useEffect(() => {
     if (data) {

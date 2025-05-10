@@ -5,6 +5,7 @@ import graphene
 from apps.github.graphql.nodes.issue import IssueNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
+from apps.github.graphql.nodes.user import UserNode
 from apps.owasp.graphql.nodes.common import GenericEntityNode
 from apps.owasp.models.project import Project
 
@@ -18,6 +19,7 @@ class ProjectNode(GenericEntityNode):
     issues_count = graphene.Int()
     key = graphene.String()
     languages = graphene.List(graphene.String)
+    leaders = graphene.List(UserNode)
     level = graphene.String()
     recent_issues = graphene.List(IssueNode)
     recent_releases = graphene.List(ReleaseNode)
@@ -72,3 +74,6 @@ class ProjectNode(GenericEntityNode):
     def resolve_topics(self, info):
         """Resolve topics."""
         return self.idx_topics
+
+    # def resolve_leaders(self, info):
+    #     return self.leaders.all()

@@ -23,6 +23,7 @@ import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/TopContributors'
 import ChapterMapWrapper from './ChapterMapWrapper'
 import LeadersList from './LeadersList'
+import ProjectLeaders from './ProjectLeaders'
 
 const DetailsCard = ({
   title,
@@ -45,6 +46,11 @@ const DetailsCard = ({
   geolocationData = null,
   repositories = [],
 }: DetailsCardProps) => {
+  const isLeaderData = details?.some((detail) => detail?.label === 'Leaders')
+  const leaders = details.find((detail) => detail.label === 'Leaders')?.value || ''
+  const leadersArray = leaders.split(',').map((leader) => leader.trim());
+
+  console.log('Leaders:', leadersArray)
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -150,6 +156,20 @@ const DetailsCard = ({
             )}
           </div>
         )}
+        {
+          isLeaderData && (
+            <ProjectLeaders
+            leaders={
+              leadersArray.reduce((acc, leader) => {
+                acc[leader] = leader
+                return acc
+              }, {} as Record<string, string>)
+            }
+          />
+          )
+        }
+
+
         {topContributors && (
           <TopContributors
             icon={faUsers}
