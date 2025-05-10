@@ -37,7 +37,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             str: The name or login of the user.
 
         """
-        return f"{self.name or self.login}"
+        return self.title
 
     @property
     def issues(self):
