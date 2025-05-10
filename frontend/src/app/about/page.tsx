@@ -37,7 +37,7 @@ const About = () => {
   const projectKey = 'nest'
 
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
-    variables: { key: projectKey },
+    variables: { key: projectKey, excludedUsernames: Object.keys(leaders) },
   })
 
   useEffect(() => {
