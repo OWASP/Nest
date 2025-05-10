@@ -231,6 +231,48 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
 
+  run-fuzz-tests:
+    name: Run fuzz tests
+    needs:
+      - pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+
+      - name: Create .env file for fuzz tests
+        run: |
+          touch backend/fuzz_tests/.env
+          echo "DJANGO_DB_HOST=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_NAME=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_PASSWORD=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_PORT=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_DB_USER=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SETTINGS_MODULE=settings.fuzz" >> backend/fuzz_tests/.env
+          echo "DJANGO_CONFIGURATION=Fuzz" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALGOLIA_WRITE_API_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_ALLOWED_HOSTS=*" >> backend/fuzz_tests/.env
+          echo "DJANGO_AWS_ACCESS_KEY_ID=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_AWS_SECRET_ACCESS_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_OPEN_AI_SECRET_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_PUBLIC_IP_ADDRESS=127.0.0.1" >> backend/fuzz_tests/.env
+          echo "DJANGO_RELEASE_VERSION=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SECRET_KEY=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SENTRY_DSN=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SLACK_BOT_TOKEN=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_SLACK_SIGNING_SECRET=None" >> backend/fuzz_tests/.env
+          echo "GITHUB_TOKEN=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_REDIS_HOST=None" >> backend/fuzz_tests/.env
+          echo "DJANGO_REDIS_PASSWORD=None" >> backend/fuzz_tests/.env
+
+      - name: Run fuzz tests
+        run: make fuzz-test-backend
+
   scan-code:
     name: Run Code Scan
     needs:
