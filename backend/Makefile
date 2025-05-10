@@ -41,7 +41,7 @@ github-enrich-issues:
 	@CMD="python manage.py github_enrich_issues" $(MAKE) exec-backend-command
 
 github-match-users:
-	@CMD="python manage.py github_match_users $(model)" $(MAKE) exec-backend-command
+	@CMD="python manage.py github_match_users $(MATCH_MODEL)" $(MAKE) exec-backend-command
 
 github-update-owasp-organization:
 	@echo "Updating OWASP GitHub organization"

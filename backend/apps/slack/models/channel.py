@@ -22,3 +22,16 @@ class Channel(TimestampedModel):
     def __str__(self):
         """Channel human readable representation."""
         return f"#{self.name} ({self.slack_channel_id})"
+
+    @staticmethod
+    def update_data(workspace, channel_data) -> None:
+        """Update instance based on Slack data."""
+        Channel.objects.update_or_create(
+            slack_channel_id=channel_data["id"],
+            workspace=workspace,
+            defaults={
+                "is_private": channel_data["is_private"],
+                "member_count": channel_data.get("num_members", 0),
+                "name": channel_data["name"],
+            },
+        )

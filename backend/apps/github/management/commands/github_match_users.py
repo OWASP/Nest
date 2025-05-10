@@ -10,7 +10,7 @@ from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
 from apps.slack.models import Member
 
-MIN_NO_OF_WORDS = 2
+ID_MIN_LENGTH = 2
 
 
 class Command(BaseCommand):
@@ -30,7 +30,7 @@ class Command(BaseCommand):
             help="Threshold for fuzzy matching (0-100)",
         )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *_args, **kwargs):
         model_name = kwargs["model_name"].lower()
         threshold = max(0, min(kwargs["threshold"], 100))
 
@@ -50,11 +50,10 @@ class Command(BaseCommand):
             return
 
         model_class, relation_field = model_map[model_name]
-
-        # Pre-fetch GitHub users
-        all_users = User.objects.values("id", "login", "name")
-        filtered_users = {
-            u["id"]: u for u in all_users if self._is_valid_user(u["login"], u["name"])
+        users = {
+            u["id"]: u
+            for u in User.objects.values("id", "login", "name")
+            if self._is_valid_user(u["login"], u["name"])
         }
 
         instances = model_class.objects.prefetch_related(relation_field)
@@ -66,7 +65,7 @@ class Command(BaseCommand):
                 leaders_raw = instance.leaders_raw
 
             exact_matches, fuzzy_matches, unmatched = self.process_leaders(
-                leaders_raw, threshold, filtered_users
+                leaders_raw, threshold, users
             )
 
             matched_user_ids = {user["id"] for user in exact_matches + fuzzy_matches}
@@ -77,7 +76,7 @@ class Command(BaseCommand):
 
     def _is_valid_user(self, login, name):
         """Check if GitHub user meets minimum requirements."""
-        return len(login) >= MIN_NO_OF_WORDS and name and len(name) >= MIN_NO_OF_WORDS
+        return len(login) >= ID_MIN_LENGTH and name and len(name) >= ID_MIN_LENGTH
 
     def process_leaders(self, leaders_raw, threshold, filtered_users):
         """Process leaders with optimized matching, capturing all exact matches."""

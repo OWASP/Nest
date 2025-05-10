@@ -18,21 +18,17 @@ class Command(BaseCommand):
             return
 
         for workspace in workspaces:
-            workspace_id = workspace.slack_workspace_id
-            workspace_name = workspace.name or "Unnamed"
-            bot_token = workspace.bot_token
+            self.stdout.write(f"\nProcessing workspace: {workspace}")
 
-            self.stdout.write(f"\nProcessing workspace: {workspace_name} ({workspace_id})")
-
-            if not bot_token:
-                self.stdout.write(self.style.ERROR(f"No bot token found for {workspace_id}"))
+            if not (bot_token := workspace.bot_token):
+                self.stdout.write(self.style.ERROR(f"No bot token found for {workspace}"))
                 continue
 
             # Slack client
             client = WebClient(token=bot_token)
 
             # Populate channels
-            self.stdout.write(f"Fetching channels for {workspace_id}...")
+            self.stdout.write(f"Fetching channels for {workspace}...")
             total_channels = 0
             try:
                 cursor = None
@@ -43,15 +39,7 @@ class Command(BaseCommand):
                     self._handle_slack_response(response, "conversations_list")
 
                     for channel in response["channels"]:
-                        Channel.objects.update_or_create(
-                            workspace=workspace,
-                            slack_channel_id=channel["id"],
-                            defaults={
-                                "name": channel["name"],
-                                "is_private": channel["is_private"],
-                                "member_count": channel.get("num_members", 0),
-                            },
-                        )
+                        Channel.update_data(workspace, channel)
                     total_channels += len(response["channels"])
 
                     cursor = response.get("response_metadata", {}).get("next_cursor")
@@ -64,7 +52,7 @@ class Command(BaseCommand):
                     self.style.ERROR(f"Failed to fetch channels: {e.response['error']}")
                 )
 
-            self.stdout.write(f"Fetching members for {workspace_id}...")
+            self.stdout.write(f"Fetching members for {workspace}...")
             total_members = 0
             try:
                 cursor = None
@@ -73,17 +61,9 @@ class Command(BaseCommand):
                     self._handle_slack_response(response, "users_list")
 
                     member_count = 0
-                    for user in response["members"]:
-                        if not user["is_bot"] and user["id"] != "USLACKBOT":
-                            Member.objects.update_or_create(
-                                workspace=workspace,
-                                slack_user_id=user["id"],
-                                defaults={
-                                    "username": user["name"],
-                                    "real_name": user.get("real_name", ""),
-                                    "email": user["profile"].get("email", "Not available"),
-                                },
-                            )
+                    for member in response["members"]:
+                        if not member["is_bot"] and member["id"] != "USLACKBOT":
+                            Member.update_data(workspace, member)
                             member_count += 1
                     total_members += member_count
 

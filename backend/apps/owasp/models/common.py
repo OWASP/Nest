@@ -177,17 +177,17 @@ class RepositoryBasedEntityModel(models.Model):
                 extra={"repository": getattr(self.owasp_repository, "name", None)},
             )
 
-    # M2M
-    suggested_leaders = models.ManyToManyField(
-        "github.User",
-        verbose_name="Matched Users",
-        related_name="matched_%(class)s",
-        blank=True,
-    )
+    # M2Ms.
     leaders = models.ManyToManyField(
         "github.User",
-        verbose_name="Assigned leaders",
+        verbose_name="Leaders",
         related_name="assigned_%(class)s",
+        blank=True,
+    )
+    suggested_leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Suggested leaders",
+        related_name="matched_%(class)s",
         blank=True,
     )
 
