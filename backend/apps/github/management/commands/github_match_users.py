@@ -1,7 +1,6 @@
 """A command to perform fuzzy and exact matching of leaders/slack members with User model."""
 
 from django.core.management.base import BaseCommand
-from django.db.utils import DatabaseError
 from thefuzz import fuzz
 
 from apps.github.models.user import User
@@ -56,14 +55,14 @@ class Command(BaseCommand):
             if self._is_valid_user(u["login"], u["name"])
         }
 
-        instances = model_class.objects.prefetch_related(relation_field)
-        for instance in instances:
+        for instance in model_class.objects.prefetch_related(relation_field):
             self.stdout.write(f"Processing {model_name} {instance.id}...")
-            if model_name == "member":
-                leaders_raw = [field for field in [instance.username, instance.real_name] if field]
-            else:
-                leaders_raw = instance.leaders_raw
 
+            leaders_raw = (
+                [field for field in (instance.username, instance.real_name) if field]
+                if model_name == "member"
+                else instance.leaders_raw
+            )
             exact_matches, fuzzy_matches, unmatched = self.process_leaders(
                 leaders_raw, threshold, users
             )
@@ -76,7 +75,7 @@ class Command(BaseCommand):
 
     def _is_valid_user(self, login, name):
         """Check if GitHub user meets minimum requirements."""
-        return len(login) >= ID_MIN_LENGTH and name and len(name) >= ID_MIN_LENGTH
+        return len(login) >= ID_MIN_LENGTH and len(name or "") >= ID_MIN_LENGTH
 
     def process_leaders(self, leaders_raw, threshold, filtered_users):
         """Process leaders with optimized matching, capturing all exact matches."""
@@ -89,7 +88,6 @@ class Command(BaseCommand):
         processed_leaders = set()
 
         user_list = list(filtered_users.values())
-
         for leader in leaders_raw:
             if not leader or leader in processed_leaders:
                 continue
@@ -97,42 +95,37 @@ class Command(BaseCommand):
             processed_leaders.add(leader)
             leader_lower = leader.lower()
 
-            try:
-                # Find all exact matches
-                exact_matches_for_leader = [
-                    u
-                    for u in user_list
-                    if u["login"].lower() == leader_lower
-                    or (u["name"] and u["name"].lower() == leader_lower)
-                ]
+            # Find all exact matches
+            exact_matches_for_leader = [
+                u
+                for u in user_list
+                if u["login"].lower() == leader_lower
+                or (u["name"] and u["name"].lower() == leader_lower)
+            ]
 
-                if exact_matches_for_leader:
-                    exact_matches.extend(exact_matches_for_leader)
-                    for match in exact_matches_for_leader:
-                        self.stdout.write(f"Exact match found for {leader}: {match['login']}")
-                    continue
+            if exact_matches_for_leader:
+                exact_matches.extend(exact_matches_for_leader)
+                for match in exact_matches_for_leader:
+                    self.stdout.write(f"Exact match found for {leader}: {match['login']}")
+                continue
 
-                # Fuzzy matching with token_sort_ratio
-                matches = [
-                    u
-                    for u in user_list
-                    if (fuzz.token_sort_ratio(leader_lower, u["login"].lower()) >= threshold)
-                    or (
-                        u["name"]
-                        and fuzz.token_sort_ratio(leader_lower, u["name"].lower()) >= threshold
-                    )
-                ]
+            # Fuzzy matching with token_sort_ratio
+            matches = [
+                u
+                for u in user_list
+                if (fuzz.token_sort_ratio(leader_lower, u["login"].lower()) >= threshold)
+                or (
+                    u["name"]
+                    and fuzz.token_sort_ratio(leader_lower, u["name"].lower()) >= threshold
+                )
+            ]
 
-                new_fuzzy_matches = [m for m in matches if m not in exact_matches]
-                if new_fuzzy_matches:
-                    fuzzy_matches.extend(new_fuzzy_matches)
-                    for match in new_fuzzy_matches:
-                        self.stdout.write(f"Fuzzy match found for {leader}: {match['login']}")
-                else:
-                    unmatched_leaders.append(leader)
-
-            except DatabaseError as e:
+            new_fuzzy_matches = [m for m in matches if m not in exact_matches]
+            if new_fuzzy_matches:
+                fuzzy_matches.extend(new_fuzzy_matches)
+                for match in new_fuzzy_matches:
+                    self.stdout.write(f"Fuzzy match found for {leader}: {match['login']}")
+            else:
                 unmatched_leaders.append(leader)
-                self.stdout.write(self.style.ERROR(f"Error processing leader {leader}: {e}"))
 
         return exact_matches, fuzzy_matches, unmatched_leaders

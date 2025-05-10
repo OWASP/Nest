@@ -21,7 +21,7 @@ class Channel(TimestampedModel):
 
     def __str__(self):
         """Channel human readable representation."""
-        return f"#{self.name} ({self.slack_channel_id})"
+        return f"#{self.name} - {self.workspace}"
 
     @staticmethod
     def update_data(workspace, channel_data) -> None:

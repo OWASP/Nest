@@ -23,7 +23,6 @@ Sivagangai
 Sonarqube
 Truncator
 Twitterbot
-USLACKBOT
 WSL
 Whistleblower
 Wörld

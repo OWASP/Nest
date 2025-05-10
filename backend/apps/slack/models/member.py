@@ -38,8 +38,8 @@ class Member(TimestampedModel):
     # M2Ms.
     suggested_users = models.ManyToManyField(
         "github.User",
-        verbose_name="github_user_suggestions",
-        related_name="matched_slack_users",
+        verbose_name="Github user suggestions",
+        related_name="suggested_slack_users",
         blank=True,
     )
 

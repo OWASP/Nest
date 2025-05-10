@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         workspaces = Workspace.objects.all()
 
-        if not workspaces:
+        if not workspaces.exists():
             self.stdout.write(self.style.WARNING("No workspaces found in the database"))
             return
 
@@ -24,12 +24,11 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"No bot token found for {workspace}"))
                 continue
 
-            # Slack client
             client = WebClient(token=bot_token)
-
-            # Populate channels
-            self.stdout.write(f"Fetching channels for {workspace}...")
             total_channels = 0
+            total_members = 0
+
+            self.stdout.write(f"Fetching channels for {workspace}...")
             try:
                 cursor = None
                 while True:
@@ -39,6 +38,7 @@ class Command(BaseCommand):
                     self._handle_slack_response(response, "conversations_list")
 
                     for channel in response["channels"]:
+                        # TODO(arkid15r): use bulk save.
                         Channel.update_data(workspace, channel)
                     total_channels += len(response["channels"])
 
@@ -53,7 +53,6 @@ class Command(BaseCommand):
                 )
 
             self.stdout.write(f"Fetching members for {workspace}...")
-            total_members = 0
             try:
                 cursor = None
                 while True:
@@ -62,9 +61,9 @@ class Command(BaseCommand):
 
                     member_count = 0
                     for member in response["members"]:
-                        if not member["is_bot"] and member["id"] != "USLACKBOT":
-                            Member.update_data(workspace, member)
-                            member_count += 1
+                        # TODO(arkid15r): use bulk save.
+                        Member.update_data(workspace, member)
+                        member_count += 1
                     total_members += member_count
 
                     cursor = response.get("response_metadata", {}).get("next_cursor")

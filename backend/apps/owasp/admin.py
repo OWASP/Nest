@@ -41,8 +41,18 @@ class GenericEntityAdminMixin:
             f"<a href='https://owasp.org/{obj.key}' target='_blank'>↗️</a>"
         )
 
+    custom_field_github_urls.short_description = "GitHub 🔗"
+    custom_field_owasp_url.short_description = "OWASP 🔗"
+
+
+class LeaderAdminMixin:
+    """Admin mixin for entities that can have leaders."""
+
+    actions = ("approve_suggested_leaders",)
+    filter_horizontal = ("suggested_leaders",)
+
     def approve_suggested_leaders(self, request, queryset):
-        """Approve all suggested leaders for selected entities."""
+        """Approve suggested leaders for selected entities."""
         for entity in queryset:
             suggestions = entity.suggested_leaders.all()
             entity.leaders.add(*suggestions)
@@ -52,19 +62,10 @@ class GenericEntityAdminMixin:
                 messages.SUCCESS,
             )
 
-    custom_field_github_urls.short_description = "GitHub 🔗"
-    custom_field_owasp_url.short_description = "OWASP 🔗"
-    approve_suggested_leaders.short_description = "Approve all suggested leaders"
+    approve_suggested_leaders.short_description = "Approve suggested leaders"
 
 
-class LeaderAdminMixin(admin.ModelAdmin, GenericEntityAdminMixin):
-    """Admin mixin for entities that can have leaders."""
-
-    actions = ("approve_suggested_leaders",)
-    filter_horizontal = ("suggested_leaders",)
-
-
-class ChapterAdmin(LeaderAdminMixin):
+class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     autocomplete_fields = (
         "leaders",
         "owasp_repository",
@@ -86,7 +87,7 @@ class ChapterAdmin(LeaderAdminMixin):
     search_fields = ("name", "key")
 
 
-class CommitteeAdmin(LeaderAdminMixin):
+class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     autocomplete_fields = (
         "leaders",
         "owasp_repository",
@@ -119,7 +120,7 @@ class PostAdmin(admin.ModelAdmin):
     )
 
 
-class ProjectAdmin(LeaderAdminMixin):
+class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     autocomplete_fields = (
         "leaders",
         "organizations",

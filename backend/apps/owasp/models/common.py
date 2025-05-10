@@ -75,6 +75,20 @@ class RepositoryBasedEntityModel(models.Model):
         related_name="+",
     )
 
+    # M2Ms.
+    leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Leaders",
+        related_name="assigned_%(class)s",
+        blank=True,
+    )
+    suggested_leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Suggested leaders",
+        related_name="matched_%(class)s",
+        blank=True,
+    )
+
     @property
     def github_url(self) -> str:
         """Get GitHub URL."""
@@ -176,20 +190,6 @@ class RepositoryBasedEntityModel(models.Model):
                 "Unable to parse entity metadata",
                 extra={"repository": getattr(self.owasp_repository, "name", None)},
             )
-
-    # M2Ms.
-    leaders = models.ManyToManyField(
-        "github.User",
-        verbose_name="Leaders",
-        related_name="assigned_%(class)s",
-        blank=True,
-    )
-    suggested_leaders = models.ManyToManyField(
-        "github.User",
-        verbose_name="Suggested leaders",
-        related_name="matched_%(class)s",
-        blank=True,
-    )
 
     def get_related_url(self, url, exclude_domains=(), include_domains=()) -> str | None:
         """Get OWASP entity related URL."""
