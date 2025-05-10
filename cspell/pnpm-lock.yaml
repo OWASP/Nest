@@ -15,14 +15,14 @@ importers:
         specifier: ^2.0.8
         version: 2.0.8
       '@cspell/dict-en_us':
-        specifier: ^4.4.6
-        version: 4.4.6
+        specifier: ^4.4.8
+        version: 4.4.8
       '@cspell/dict-fullstack':
         specifier: ^3.2.6
         version: 3.2.6
       '@cspell/dict-golang':
-        specifier: ^6.0.20
-        version: 6.0.20
+        specifier: ^6.0.21
+        version: 6.0.21
       '@cspell/dict-k8s':
         specifier: ^1.0.10
         version: 1.0.10
@@ -110,14 +110,14 @@ packages:
   '@cspell/dict-elixir@4.0.7':
     resolution: {integrity: sha512-MAUqlMw73mgtSdxvbAvyRlvc3bYnrDqXQrx5K9SwW8F7fRYf9V4vWYFULh+UWwwkqkhX9w03ZqFYRTdkFku6uA==}
 
-  '@cspell/dict-en-common-misspellings@2.0.10':
-    resolution: {integrity: sha512-80mXJLtr0tVEtzowrI7ycVae/ULAYImZUlr0kUTpa8i57AUk7Zy3pYBs44EYIKW7ZC9AHu4Qjjfq4vriAtyTDQ==}
+  '@cspell/dict-en-common-misspellings@2.0.11':
+    resolution: {integrity: sha512-xFQjeg0wFHh9sFhshpJ+5BzWR1m9Vu8pD0CGPkwZLK9oii8AD8RXNchabLKy/O5VTLwyqPOi9qpyp1cxm3US4Q==}
 
   '@cspell/dict-en-gb@1.1.33':
     resolution: {integrity: sha512-tKSSUf9BJEV+GJQAYGw5e+ouhEe2ZXE620S7BLKe3ZmpnjlNG9JqlnaBhkIMxKnNFkLY2BP/EARzw31AZnOv4g==}
 
-  '@cspell/dict-en_us@4.4.6':
-    resolution: {integrity: sha512-9QFpNzyvqNkCc3QCJb2RmG87rXz2Iz3R6o9fknOyzN7HL/LRMwipuksricriPYPs+h3ZSQm4Jtgc+sX4gWY5vg==}
+  '@cspell/dict-en_us@4.4.8':
+    resolution: {integrity: sha512-OkNUVuU9Q+Sf827/61YPkk6ya6dSsllzeYniBFqNW9TkoqQXT3vggkgmtCE1aEhSvVctMwxpPYoC8pZgn1TeSA==}
 
   '@cspell/dict-filetypes@3.0.12':
     resolution: {integrity: sha512-+ds5wgNdlUxuJvhg8A1TjuSpalDFGCh7SkANCWvIplg6QZPXL4j83lqxP7PgjHpx7PsBUS7vw0aiHPjZy9BItw==}
@@ -140,8 +140,8 @@ packages:
   '@cspell/dict-git@3.0.4':
     resolution: {integrity: sha512-C44M+m56rYn6QCsLbiKiedyPTMZxlDdEYAsPwwlL5bhMDDzXZ3Ic8OCQIhMbiunhCOJJT+er4URmOmM+sllnjg==}
 
-  '@cspell/dict-golang@6.0.20':
-    resolution: {integrity: sha512-b7nd9XXs+apMMzNSWorjirQsbmlwcTC0ViQJU8u+XNose3z0y7oNeEpbTPTVoN1+1sO9aOHuFwfwoOMFCDS14Q==}
+  '@cspell/dict-golang@6.0.21':
+    resolution: {integrity: sha512-D3wG1MWhFx54ySFJ00CS1MVjR4UiBVsOWGIjJ5Av+HamnguqEshxbF9mvy+BX0KqzdLVzwFkoLBs8QeOID56HA==}
 
   '@cspell/dict-google@1.0.8':
     resolution: {integrity: sha512-BnMHgcEeaLyloPmBs8phCqprI+4r2Jb8rni011A8hE+7FNk7FmLE3kiwxLFrcZnnb7eqM0agW4zUaNoB0P+z8A==}
@@ -229,8 +229,8 @@ packages:
   '@cspell/dict-software-terms@4.2.5':
     resolution: {integrity: sha512-CaRzkWti3AgcXoxuRcMijaNG7YUk/MH1rHjB8VX34v3UdCxXXeqvRyElRKnxhFeVLB/robb2UdShqh/CpskxRg==}
 
-  '@cspell/dict-software-terms@5.0.7':
-    resolution: {integrity: sha512-6ttSc0/EzDN44DF2Bk/37cr3IntzuNcZ4MbUy/zEhfhDMiuQoXslILpAs/9FoKEuFpsm6A+8manT2GytWwr/HA==}
+  '@cspell/dict-software-terms@5.0.8':
+    resolution: {integrity: sha512-VsJesitvaHZpMgNwHHms3yDsZz7LNToC2HuSAnyt1znn37ribiJF1ty0jWhVQO6fv7K4PM1KsKTJIwqBwc446g==}
 
   '@cspell/dict-sql@2.2.0':
     resolution: {integrity: sha512-MUop+d1AHSzXpBvQgQkCiok8Ejzb+nrzyG16E8TvKL2MQeDwnIvMe3bv90eukP6E1HWb+V/MA/4pnq0pcJWKqQ==}
@@ -469,9 +469,9 @@ snapshots:
       '@cspell/dict-docker': 1.1.14
       '@cspell/dict-dotnet': 5.0.9
       '@cspell/dict-elixir': 4.0.7
-      '@cspell/dict-en-common-misspellings': 2.0.10
+      '@cspell/dict-en-common-misspellings': 2.0.11
       '@cspell/dict-en-gb': 1.1.33
-      '@cspell/dict-en_us': 4.4.6
+      '@cspell/dict-en_us': 4.4.8
       '@cspell/dict-filetypes': 3.0.12
       '@cspell/dict-flutter': 1.1.0
       '@cspell/dict-fonts': 4.0.4
@@ -479,7 +479,7 @@ snapshots:
       '@cspell/dict-fullstack': 3.2.6
       '@cspell/dict-gaming-terms': 1.1.1
       '@cspell/dict-git': 3.0.4
-      '@cspell/dict-golang': 6.0.20
+      '@cspell/dict-golang': 6.0.21
       '@cspell/dict-google': 1.0.8
       '@cspell/dict-haskell': 4.0.5
       '@cspell/dict-html': 4.0.11
@@ -505,7 +505,7 @@ snapshots:
       '@cspell/dict-rust': 4.0.11
       '@cspell/dict-scala': 5.0.7
       '@cspell/dict-shell': 1.1.0
-      '@cspell/dict-software-terms': 5.0.7
+      '@cspell/dict-software-terms': 5.0.8
       '@cspell/dict-sql': 2.2.0
       '@cspell/dict-svelte': 1.0.6
       '@cspell/dict-swift': 2.0.5
@@ -559,11 +559,11 @@ snapshots:
 
   '@cspell/dict-elixir@4.0.7': {}
 
-  '@cspell/dict-en-common-misspellings@2.0.10': {}
+  '@cspell/dict-en-common-misspellings@2.0.11': {}
 
   '@cspell/dict-en-gb@1.1.33': {}
 
-  '@cspell/dict-en_us@4.4.6': {}
+  '@cspell/dict-en_us@4.4.8': {}
 
   '@cspell/dict-filetypes@3.0.12': {}
 
@@ -579,7 +579,7 @@ snapshots:
 
   '@cspell/dict-git@3.0.4': {}
 
-  '@cspell/dict-golang@6.0.20': {}
+  '@cspell/dict-golang@6.0.21': {}
 
   '@cspell/dict-google@1.0.8': {}
 
@@ -642,7 +642,7 @@ snapshots:
 
   '@cspell/dict-software-terms@4.2.5': {}
 
-  '@cspell/dict-software-terms@5.0.7': {}
+  '@cspell/dict-software-terms@5.0.8': {}
 
   '@cspell/dict-sql@2.2.0': {}
 

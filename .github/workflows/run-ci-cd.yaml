@@ -135,7 +135,7 @@ jobs:
             type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: |
-            type=local,dest=/tmp/buildx-backend-poetry-cache-new
+            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
@@ -179,7 +179,7 @@ jobs:
             type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new
+            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true

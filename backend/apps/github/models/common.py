@@ -14,7 +14,7 @@ class GenericUserModel(models.Model):
     email = models.EmailField(verbose_name="Email", max_length=100, default="", blank=True)
 
     avatar_url = models.URLField(verbose_name="Avatar URL", max_length=200, default="")
-    company = models.CharField(verbose_name="Company", max_length=200, default="")
+    company = models.CharField(verbose_name="Company", max_length=200, blank=True, default="")
     location = models.CharField(verbose_name="Location", max_length=200, default="", blank=True)
 
     collaborators_count = models.PositiveIntegerField(

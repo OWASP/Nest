@@ -163,6 +163,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         "updated_at",
         "followers_count",
     )
+    list_filter = ("is_owasp_organization",)
     search_fields = ("name",)
 
 
