@@ -3,14 +3,16 @@ from unittest.mock import MagicMock
 import pytest
 from django.conf import settings
 
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
-from apps.slack.events.member_joined_channel.gsoc import gsoc_handler
+from apps.slack.common.gsoc import GSOC_2025_MILESTONES
+from apps.slack.constants import OWASP_GSOC_CHANNEL_ID
+from apps.slack.events.member_joined_channel.gsoc import Gsoc
+from apps.slack.utils import get_text
 
 
 class TestGsocEventHandler:
     @pytest.fixture
     def mock_slack_event(self):
-        return {"user": "U123456", "channel": OWASP_GSOC_CHANNEL_ID}
+        return {"user": "U123456", "channel": OWASP_GSOC_CHANNEL_ID.replace("#", "")}
 
     @pytest.fixture
     def mock_slack_client(self):
@@ -26,9 +28,9 @@ class TestGsocEventHandler:
                 True,
                 [
                     "Hello <@U123456>",
-                    "Here's how you can start your journey",
-                    "🎉 We're excited to have you on board",
-                    FEEDBACK_CHANNEL_MESSAGE.strip(),
+                    "start your journey",
+                    "excited",
+                    "feedback",
                 ],
             ),
         ],
@@ -42,36 +44,44 @@ class TestGsocEventHandler:
     ):
         settings.SLACK_EVENTS_ENABLED = events_enabled
 
-        gsoc_handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
+        gsoc = Gsoc()
+        gsoc.handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
 
         if not events_enabled:
+            mock_slack_client.chat_postEphemeral.assert_not_called()
             mock_slack_client.conversations_open.assert_not_called()
             mock_slack_client.chat_postMessage.assert_not_called()
         else:
+            mock_slack_client.chat_postEphemeral.assert_called_once_with(
+                blocks=GSOC_2025_MILESTONES,
+                channel=mock_slack_event["channel"],
+                user=mock_slack_event["user"],
+                text=get_text(GSOC_2025_MILESTONES),
+            )
+
             mock_slack_client.conversations_open.assert_called_once_with(
                 users=mock_slack_event["user"]
             )
-            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+
+            _, kwargs = mock_slack_client.chat_postMessage.call_args
+            blocks = kwargs["blocks"]
+            block_texts = []
+            for block in blocks:
+                if block.get("type") == "section":
+                    text = block.get("text", {}).get("text", "")
+                    block_texts.append(text)
+            combined_text = " ".join(block_texts)
 
             for message in expected_messages:
-                assert any(message in str(block) for block in blocks)
+                assert message in combined_text
 
     @pytest.mark.parametrize(
         ("channel_id", "expected_result"),
         [
-            (OWASP_GSOC_CHANNEL_ID, True),
+            (OWASP_GSOC_CHANNEL_ID.replace("#", ""), True),
             ("C999999", False),
         ],
     )
-    def test_check_gsoc_handler(self, channel_id, expected_result):
-        gsoc_module = __import__(
-            "apps.slack.events.member_joined_channel.gsoc",
-            fromlist=["gsoc_handler"],
-        )
-        check_gsoc_handler = getattr(
-            gsoc_module,
-            "check_gsoc_handler",
-            lambda x: x.get("channel") == OWASP_GSOC_CHANNEL_ID,
-        )
-
-        assert check_gsoc_handler({"channel": channel_id}) == expected_result
+    def test_matcher(self, channel_id, expected_result):
+        gsoc = Gsoc()
+        assert gsoc.matchers[0]({"channel": channel_id}) == expected_result
