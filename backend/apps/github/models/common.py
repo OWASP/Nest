@@ -33,7 +33,9 @@ class GenericUserModel(models.Model):
     @property
     def title(self) -> str:
         """Entity title."""
-        return f"{self.name or self.login}"
+        return (
+            f"{self.name} ({self.login})" if self.name and self.name != self.login else self.login
+        )
 
     @property
     def url(self) -> str:

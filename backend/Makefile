@@ -21,9 +21,6 @@ collect-static:
 django-shell:
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
-match-user:
-	@CMD="python manage.py matching_users $(model)" $(MAKE) exec-backend-command-it
-
 dump-data:
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json
@@ -42,6 +39,9 @@ generate-sitemap:
 github-enrich-issues:
 	@echo "Enriching GitHub issues"
 	@CMD="python manage.py github_enrich_issues" $(MAKE) exec-backend-command
+
+github-match-users:
+	@CMD="python manage.py github_match_users $(model)" $(MAKE) exec-backend-command
 
 github-update-owasp-organization:
 	@echo "Updating OWASP GitHub organization"
@@ -64,10 +64,6 @@ index-data:
 load-data:
 	@echo "Loading Nest data"
 	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
-
-load-slack-data:
-	@echo "Loading Slack data"
-	@CMD="python manage.py load_slack_data" $(MAKE) exec-backend-command
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -147,6 +143,10 @@ setup:
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
+
+slack-sync-data:
+	@echo "Syncing Slack data"
+	@CMD="python manage.py slack_sync_data" $(MAKE) exec-backend-command
 
 sync-data: \
 	update-data \

@@ -57,15 +57,18 @@ class GenericEntityAdminMixin:
     approve_suggested_leaders.short_description = "Approve all suggested leaders"
 
 
-class LeaderEntityAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
-    """Admin class for entities that have leaders."""
+class LeaderAdminMixin(admin.ModelAdmin, GenericEntityAdminMixin):
+    """Admin mixin for entities that can have leaders."""
 
-    actions = ["approve_suggested_leaders"]
+    actions = ("approve_suggested_leaders",)
     filter_horizontal = ("suggested_leaders",)
 
 
-class ChapterAdmin(LeaderEntityAdmin):
-    autocomplete_fields = ("owasp_repository", "leaders")
+class ChapterAdmin(LeaderAdminMixin):
+    autocomplete_fields = (
+        "leaders",
+        "owasp_repository",
+    )
     list_display = (
         "name",
         "created_at",
@@ -83,8 +86,11 @@ class ChapterAdmin(LeaderEntityAdmin):
     search_fields = ("name", "key")
 
 
-class CommitteeAdmin(LeaderEntityAdmin):
-    autocomplete_fields = ("owasp_repository", "leaders")
+class CommitteeAdmin(LeaderAdminMixin):
+    autocomplete_fields = (
+        "leaders",
+        "owasp_repository",
+    )
     search_fields = ("name",)
 
 
@@ -113,13 +119,13 @@ class PostAdmin(admin.ModelAdmin):
     )
 
 
-class ProjectAdmin(LeaderEntityAdmin):
+class ProjectAdmin(LeaderAdminMixin):
     autocomplete_fields = (
+        "leaders",
         "organizations",
         "owasp_repository",
         "owners",
         "repositories",
-        "leaders",
     )
     list_display = (
         "custom_field_name",

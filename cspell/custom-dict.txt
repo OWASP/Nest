@@ -23,6 +23,7 @@ Sivagangai
 Sonarqube
 Truncator
 Twitterbot
+USLACKBOT
 WSL
 Whistleblower
 Wörld
@@ -103,8 +104,6 @@ tiktok
 tsc
 turbopack
 usefixtures
-USLACKBOT
-Whistleblower
 winsrdf
 wsgi
 xapp

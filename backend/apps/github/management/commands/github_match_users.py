@@ -20,7 +20,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "model_name",
             type=str,
-            choices=["chapter", "committee", "project", "member"],
+            choices=("chapter", "committee", "member", "project"),
             help="Model name to process: chapter, committee, project, or member",
         )
         parser.add_argument(
@@ -37,8 +37,8 @@ class Command(BaseCommand):
         model_map = {
             "chapter": (Chapter, "suggested_leaders"),
             "committee": (Committee, "suggested_leaders"),
-            "project": (Project, "suggested_leaders"),
             "member": (Member, "suggested_users"),
+            "project": (Project, "suggested_leaders"),
         }
 
         if model_name not in model_map:

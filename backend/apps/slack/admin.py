@@ -8,6 +8,14 @@ from apps.slack.models.member import Member
 from apps.slack.models.workspace import Workspace
 
 
+class ChannelAdmin(admin.ModelAdmin):
+    list_filter = ("is_private",)
+    search_fields = (
+        "name",
+        "slack_channel_id",
+    )
+
+
 class EventAdmin(admin.ModelAdmin):
     search_fields = (
         "channel_id",
@@ -19,18 +27,16 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ("trigger",)
 
 
-class ChannelAdmin(admin.ModelAdmin):
-    search_fields = (
-        "slack_channel_id",
-        "name",
-    )
-    list_filter = ("is_private",)
-
-
 class MemberAdmin(admin.ModelAdmin):
-    search_fields = ("slack_user_id", "username", "real_name", "email", "user")
+    actions = ("approve_suggested_users",)
     filter_horizontal = ("suggested_users",)
-    actions = ["approve_suggested_users"]
+    search_fields = (
+        "slack_user_id",
+        "username",
+        "real_name",
+        "email",
+        "user",
+    )
 
     def approve_suggested_users(self, request, queryset):
         """Approve all suggested users for selected members, enforcing one-to-one constraints."""
@@ -63,10 +69,13 @@ class MemberAdmin(admin.ModelAdmin):
 
 
 class WorkspaceAdmin(admin.ModelAdmin):
-    search_fields = ("slack_workspace_id", "name")
+    search_fields = (
+        "name",
+        "slack_workspace_id",
+    )
 
 
-admin.site.register(Event, EventAdmin)
-admin.site.register(Workspace, WorkspaceAdmin)
 admin.site.register(Channel, ChannelAdmin)
+admin.site.register(Event, EventAdmin)
 admin.site.register(Member, MemberAdmin)
+admin.site.register(Workspace, WorkspaceAdmin)
