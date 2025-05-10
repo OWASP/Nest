@@ -5,6 +5,8 @@ import graphene
 from apps.github.graphql.nodes.issue import IssueNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
+from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
+from apps.github.graphql.queries.repository_contributor import RepositoryContributorQuery
 from apps.owasp.graphql.nodes.common import GenericEntityNode
 from apps.owasp.models.project import Project
 
@@ -25,6 +27,12 @@ class ProjectNode(GenericEntityNode):
     repositories_count = graphene.Int()
     topics = graphene.List(graphene.String)
     type = graphene.String()
+    top_contributors = graphene.List(
+        RepositoryContributorNode,
+        limit=graphene.Int(default_value=15),
+        organization=graphene.String(required=False),
+        excludedUsernames=graphene.List(graphene.String, required=False),
+    )
 
     class Meta:
         model = Project
@@ -72,3 +80,13 @@ class ProjectNode(GenericEntityNode):
     def resolve_topics(self, info):
         """Resolve topics."""
         return self.idx_topics
+
+    def resolve_top_contributors(self, info, limit=15, excludedUsernames=None):
+        """Resolve top contributors."""
+        return RepositoryContributorQuery().resolve_top_contributors(
+            info=info,
+            limit=limit,
+            organization=self.organization.login if hasattr(self, "organization") else None,
+            excluded_usernames=excludedUsernames,
+            project_key=self.key,
+        )

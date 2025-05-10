@@ -134,11 +134,18 @@ jobs:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+          cache-to: |
+            type=local,dest=/tmp/buildx-backend-poetry-cache-new
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
+
+      - name: Update buildx backend poetry cache
+        run: |
+          rm -rf /tmp/buildx-backend-poetry-cache
+          mv /tmp/buildx-backend-poetry-cache-new /tmp/buildx-backend-poetry-cache
 
       - name: Run backend tests
         run: |
@@ -171,11 +178,18 @@ jobs:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+          cache-to: |
+            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
+
+      - name: Update buildx frontend pnpm cache
+        run: |
+          rm -rf /tmp/buildx-frontend-pnpm-cache
+          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend=pnpm-cache
 
       - name: Run frontend unit tests
         run: |
@@ -184,8 +198,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - check-frontend
-      - pre-commit
+      - run-frontend-unit-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -311,6 +324,14 @@ jobs:
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
+
+      - name: Restore buildx frontend pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-frontend-pnpm-cache
+          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            buildx-frontend-pnpm-cache-${{ runner.os }}-
 
       - name: Build frontend image
         uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
@@ -479,6 +500,7 @@ jobs:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           context: backend
@@ -500,12 +522,21 @@ jobs:
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
 
+      - name: Restore buildx frontend pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/buildx-frontend-pnpm-cache
+          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            buildx-frontend-pnpm-cache-${{ runner.os }}-
+
       - name: Build frontend image
         uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
+            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
           context: frontend

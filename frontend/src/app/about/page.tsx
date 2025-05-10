@@ -37,7 +37,7 @@ const About = () => {
   const projectKey = 'nest'
 
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
-    variables: { key: projectKey },
+    variables: { key: projectKey, excludedUsernames: Object.keys(leaders) },
   })
 
   useEffect(() => {
@@ -72,11 +72,6 @@ const About = () => {
     )
   }
 
-  const excludedUsernames = Object.keys(leaders)
-  const filteredContributors = project.topContributors?.filter(
-    (contributor) => !excludedUsernames.includes(contributor.login)
-  )
-
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -101,10 +96,10 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        {filteredContributors && (
+        {project.topContributors && (
           <TopContributors
             icon={faUsers}
-            contributors={filteredContributors}
+            contributors={project.topContributors}
             maxInitialDisplay={9}
             type="contributor"
           />
