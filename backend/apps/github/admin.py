@@ -172,12 +172,22 @@ class ReleaseAdmin(admin.ModelAdmin):
         "author",
         "repository",
     )
-    search_fields = ("node_id", "repository__name")
+    search_fields = (
+        "node_id",
+        "repository__name",
+    )
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("title", "created_at", "updated_at")
-    search_fields = ("login", "name")
+    list_display = (
+        "title",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "login",
+        "name",
+    )
 
 
 admin.site.register(Issue, IssueAdmin)
