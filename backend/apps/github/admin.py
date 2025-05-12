@@ -11,11 +11,14 @@ from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
+from apps.github.models.milestone import Milestone
 
 
 class LabelAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
 
+class MilestoneAdmin(admin.ModelAdmin):
+    search_fields = ("title", "body")
 
 class PullRequestAdmin(admin.ModelAdmin):
     autocomplete_fields = (
@@ -192,6 +195,7 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Label, LabelAdmin)
+admin.site.register(Milestone, MilestoneAdmin)
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(PullRequest, PullRequestAdmin)
 admin.site.register(Release, ReleaseAdmin)
