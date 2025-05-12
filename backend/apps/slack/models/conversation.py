@@ -1,7 +1,7 @@
 """Slack app conversation model."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from django.db import models
 
@@ -34,7 +34,7 @@ class Conversation(BulkSaveModel, TimestampedModel):
     def from_slack(self, conversation_data):
         """Update instance based on Slack conversation data."""
         created_timestamp = int(conversation_data.get("created", 0))
-        created_datetime = datetime.fromtimestamp(created_timestamp, tz=timezone.utc)
+        created_datetime = datetime.fromtimestamp(created_timestamp, tz=UTC)
         self.name = conversation_data.get("name", "")
         self.created_at = created_datetime
         self.is_private = conversation_data.get("is_private", False)
@@ -54,38 +54,22 @@ class Conversation(BulkSaveModel, TimestampedModel):
         """Update Conversation data from Slack.
 
         Args:
-        ----
             conversation_data: Dictionary with conversation data from Slack API
             save: Whether to save the model after updating
 
         Returns:
-        -------
             Updated or created Conversation instance, or None if error
 
         """
-        channel_id = conversation_data.get("id")
-        if not channel_id:
-            logger.warning("Found conversation without ID, skipping")
-            return None
-
+        channel_id = conversation_data["id"]
         try:
             conversation = Conversation.objects.get(entity_id=channel_id)
-            logger.debug("Updating existing conversation: %s", channel_id)
         except Conversation.DoesNotExist:
             conversation = Conversation(entity_id=channel_id)
-            logger.debug("Creating new conversation: %s", channel_id)
 
-        try:
-            conversation.from_slack(conversation_data)
-        except Exception:
-            logger.exception("Error updating conversation from Slack data: %s", channel_id)
-            return None
+        conversation.from_slack(conversation_data)
 
         if save:
-            try:
-                conversation.save()
-            except Exception:
-                logger.exception("Error saving conversation: %s", channel_id)
-                return None
+            conversation.save()
 
         return conversation

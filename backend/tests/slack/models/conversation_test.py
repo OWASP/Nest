@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 from apps.slack.models.conversation import Conversation
@@ -149,7 +149,7 @@ class TestConversationModel:
 
         # Assertions
         assert conversation.name == "general"
-        assert conversation.created_at == datetime.fromtimestamp(1605000000, tz=timezone.utc)
+        assert conversation.created_at == datetime.fromtimestamp(1605000000, tz=UTC)
         assert conversation.is_private is True
         assert conversation.is_archived is True
         assert conversation.is_general is True

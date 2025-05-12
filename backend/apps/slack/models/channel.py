@@ -23,15 +23,45 @@ class Channel(TimestampedModel):
         """Channel human readable representation."""
         return f"#{self.name} - {self.workspace}"
 
+    def from_slack(self, conversation_data):
+        """Update instance based on Slack conversation data."""
+        created_timestamp = int(conversation_data.get("created", 0))
+        created_datetime = datetime.fromtimestamp(created_timestamp, tz=timezone.utc)
+        self.name = conversation_data.get("name", "")
+        self.created_at = created_datetime
+        self.is_private = conversation_data.get("is_private", False)
+        self.is_archived = conversation_data.get("is_archived", False)
+        self.is_general = conversation_data.get("is_general", False)
+        self.topic = conversation_data.get("topic", {}).get("value", "")
+        self.purpose = conversation_data.get("purpose", {}).get("value", "")
+        self.creator_id = conversation_data.get("creator", "")
+
     @staticmethod
-    def update_data(workspace, channel_data) -> None:
-        """Update instance based on Slack data."""
-        Channel.objects.update_or_create(
-            slack_channel_id=channel_data["id"],
-            workspace=workspace,
-            defaults={
-                "is_private": channel_data["is_private"],
-                "member_count": channel_data.get("num_members", 0),
-                "name": channel_data["name"],
-            },
-        )
+    def bulk_save(conversations, fields=None):
+        """Bulk save conversations."""
+        BulkSaveModel.bulk_save(Conversation, conversations, fields=fields)
+
+    @staticmethod
+    def update_data(conversation_data, save=True):
+        """Update Conversation data from Slack.
+
+        Args:
+            conversation_data: Dictionary with conversation data from Slack API
+            save: Whether to save the model after updating
+
+        Returns:
+            Updated or created Conversation instance, or None if error
+
+        """
+        channel_id = conversation_data["id"]
+        try:
+            conversation = Conversation.objects.get(entity_id=channel_id)
+        except Conversation.DoesNotExist:
+            conversation = Conversation(entity_id=channel_id)
+
+        conversation.from_slack(conversation_data)
+
+        if save:
+            conversation.save()
+
+        return conversation
