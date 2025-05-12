@@ -10,7 +10,6 @@ import ActionButton from './ActionButton'
 import DisplayIcon from './DisplayIcon'
 import Markdown from './MarkdownWrapper'
 
-
 const Card = ({
   title,
   url,
