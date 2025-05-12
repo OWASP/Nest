@@ -5,20 +5,22 @@ from django.utils.safestring import mark_safe
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
+from apps.github.models.milestone import Milestone
 from apps.github.models.organization import Organization
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
-from apps.github.models.milestone import Milestone
 
 
 class LabelAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
 
+
 class MilestoneAdmin(admin.ModelAdmin):
     search_fields = ("title", "body")
+
 
 class PullRequestAdmin(admin.ModelAdmin):
     autocomplete_fields = (
