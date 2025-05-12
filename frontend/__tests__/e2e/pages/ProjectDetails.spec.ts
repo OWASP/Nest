@@ -88,6 +88,12 @@ test.describe('Project Details Page', () => {
     await expect(page.getByText('Jan 20, 2025')).toBeVisible()
   })
 
+  test('should display recent pull requests section', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
+    await expect(page.getByText('Test Pull Request 1')).toBeVisible()
+    await expect(page.getByText('Test Pull Request 2')).toBeVisible()
+  })
+
   test('should have project repositories', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
     await expect(page.getByText('Repo One')).toBeVisible()

@@ -52,6 +52,7 @@ test.describe('Repository Details Page', () => {
     await expect(page.getByText('web', { exact: true })).toBeVisible()
     await expect(page.getByText('security', { exact: true })).toBeVisible()
   })
+
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
@@ -81,5 +82,11 @@ test.describe('Repository Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'v1.0.0' })).toBeVisible()
     await expect(page.getByText('Jan 1, 2024', { exact: true })).toBeVisible()
+  })
+
+  test('should display recent pull requests section', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
+    await expect(page.getByText('Test Pull Request 1')).toBeVisible()
+    await expect(page.getByText('Test Pull Request 2')).toBeVisible()
   })
 })

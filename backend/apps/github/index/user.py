@@ -1,5 +1,7 @@
 """GitHub user Algolia index configuration."""
 
+from django.db.models import QuerySet
+
 from apps.common.index import IndexBase, register
 from apps.github.models.user import User
 
@@ -63,14 +65,14 @@ class UserIndex(IndexBase):
     should_index = "is_indexable"
 
     @staticmethod
-    def update_synonyms():
+    def update_synonyms() -> None:
         """Update synonyms for the user index."""
         UserIndex.reindex_synonyms("github", "users")
 
-    def get_entities(self):
+    def get_entities(self) -> QuerySet:
         """Get entities for indexing.
 
-        Returns
+        Returns:
             QuerySet: A queryset of User objects to be indexed.
 
         """

@@ -22,9 +22,12 @@ class Organization(
         db_table = "github_organizations"
         verbose_name_plural = "Organizations"
 
-    description = models.CharField(verbose_name="Description", max_length=1000, default="")
+    description = models.CharField(
+        verbose_name="Description", max_length=1000, blank=True, default=""
+    )
+    is_owasp_organization = models.BooleanField(verbose_name="Is OWASP organization", default=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable representation of the organization.
 
         Returns
@@ -33,7 +36,7 @@ class Organization(
         """
         return f"{self.name}"
 
-    def from_github(self, gh_organization):
+    def from_github(self, gh_organization) -> None:
         """Update the instance based on GitHub organization data.
 
         Args:
@@ -59,12 +62,12 @@ class Organization(
         return set(Organization.objects.values_list("login", flat=True))
 
     @staticmethod
-    def bulk_save(organizations):
+    def bulk_save(organizations) -> None:  # type: ignore[override]
         """Bulk save organizations."""
         BulkSaveModel.bulk_save(Organization, organizations)
 
     @staticmethod
-    def update_data(gh_organization, save=True):
+    def update_data(gh_organization, *, save: bool = True) -> "Organization":
         """Update organization data.
 
         Args:

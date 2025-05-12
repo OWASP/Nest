@@ -1,5 +1,7 @@
 """Github app issue model."""
 
+from __future__ import annotations
+
 from functools import lru_cache
 
 from django.db import models
@@ -74,7 +76,7 @@ class Issue(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_issue, author=None, repository=None):
+    def from_github(self, gh_issue, *, author=None, repository=None) -> None:
         """Update the instance based on GitHub issue data.
 
         Args:
@@ -111,7 +113,7 @@ class Issue(GenericIssueModel):
         # Repository.
         self.repository = repository
 
-    def generate_hint(self, open_ai=None, max_tokens=1000):
+    def generate_hint(self, open_ai: OpenAi | None = None, max_tokens: int = 1000) -> None:
         """Generate a hint for the issue using AI.
 
         Args:
@@ -127,7 +129,7 @@ class Issue(GenericIssueModel):
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.hint = open_ai.complete() or ""
 
-    def generate_summary(self, open_ai=None, max_tokens=500):
+    def generate_summary(self, open_ai: OpenAi | None = None, max_tokens: int = 500) -> None:
         """Generate a summary for the issue using AI.
 
         Args:
@@ -149,7 +151,7 @@ class Issue(GenericIssueModel):
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """Save issue."""
         if self.is_open:
             if not self.hint:
@@ -161,7 +163,7 @@ class Issue(GenericIssueModel):
         super().save(*args, **kwargs)
 
     @staticmethod
-    def bulk_save(issues, fields=None):
+    def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
         """Bulk save issues."""
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
 
@@ -172,7 +174,7 @@ class Issue(GenericIssueModel):
         return IndexBase.get_total_count("issues")
 
     @staticmethod
-    def update_data(gh_issue, author=None, repository=None, save=True):
+    def update_data(gh_issue, *, author=None, repository=None, save: bool = True):
         """Update issue data.
 
         Args:

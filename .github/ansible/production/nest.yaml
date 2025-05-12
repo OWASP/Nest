@@ -87,23 +87,25 @@
           dest: ~/
           mode: '0400'
 
+      - name: Copy .env.cache
+        copy:
+          src: '{{ github_workspace }}/.env.cache'
+          dest: ~/
+          mode: '0400'
+
       - name: Copy .env.db
         copy:
           src: '{{ github_workspace }}/.env.db'
           dest: ~/
           mode: '0400'
 
+      - name: Retart services
+        shell:
+          cmd: docker compose up -d --pull always
+
       - name: Prune docker images
         shell:
           cmd: docker image prune -f
-
-      - name: Update Docker images
-        shell:
-          cmd: docker compose pull
-
-      - name: Retart services
-        shell:
-          cmd: docker compose up -d
 
       - name: Index data
         async: 1800 # 30 minutes
