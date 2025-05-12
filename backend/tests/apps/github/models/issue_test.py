@@ -11,7 +11,7 @@ class TestIssueModel:
     def test_str(self):
         author = User(name="Author", login="author")
         issue = Issue(title="Test Issue", author=author)
-        assert str(issue) == "Test Issue by Author"
+        assert str(issue) == "Test Issue by Author (author)"
 
     def test_open_issues_count(self):
         with patch("apps.github.models.issue.IndexBase.get_total_count") as mock_get_total_count:
