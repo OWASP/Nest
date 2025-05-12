@@ -107,7 +107,14 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
     @classmethod
     def get_top_contributors(
-        cls, repositories=None, organization=None, project=None, limit=TOP_CONTRIBUTORS_LIMIT
+        cls,
+        repositories=None,
+        organization=None,
+        project=None,
+        chapter=None,
+        committee=None,
+        repository=None,
+        limit=TOP_CONTRIBUTORS_LIMIT,
     ):
         """Get top contributors across repositories, organization, or project.
 
@@ -115,6 +122,9 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             repositories (QuerySet or list, optional): Repositories to filter by.
             organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
+            chapter (str, optional): Chapter key to filter by.
+            committee (str, optional): Committee key to filter by.
+            repository (str, optional): Repository name to filter by.
             limit (int, optional): Maximum number of contributors to return.
 
         Returns:
@@ -138,9 +148,18 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             )
 
         if project:
+            queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
+
+        if chapter:
+            queryset = queryset.filter(repository__chapter__key__iexact=f"www-chapter-{chapter}")
+
+        if committee:
             queryset = queryset.filter(
-                repository__project__key__iexact=f"www-project-{project}" if project else None
+                repository__committee__key__iexact=f"www-committee-{committee}"
             )
+
+        if repository:
+            queryset = queryset.filter(repository__name__iexact=repository)
 
         if not repositories:
             # Only apply project filter when not filtering by repositories

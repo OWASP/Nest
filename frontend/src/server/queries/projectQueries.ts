@@ -54,16 +54,16 @@ export const GET_PROJECT_DATA = gql`
       repositoriesCount
       starsCount
       summary
-      topContributors {
-        avatarUrl
-        contributionsCount
-        login
-        name
-      }
       topics
       type
       updatedAt
       url
+    }
+    topContributors(project: $key) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `

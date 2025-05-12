@@ -14,14 +14,14 @@ export const GET_CHAPTER_DATA = gql`
       relatedUrls
       suggestedLocation
       summary
-      topContributors {
-        avatarUrl
-        contributionsCount
-        login
-        name
-      }
       updatedAt
       url
+    }
+    topContributors(chapter: $key) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `

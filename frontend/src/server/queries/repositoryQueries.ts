@@ -42,15 +42,15 @@ export const GET_REPOSITORY_DATA = gql`
       }
       size
       starsCount
-      topContributors {
-        avatarUrl
-        contributionsCount
-        login
-        name
-      }
       topics
       updatedAt
       url
+    }
+    topContributors(repository: $repositoryKey, organization: $organizationKey) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `
