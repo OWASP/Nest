@@ -56,7 +56,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 9, distinct: $distinct) {
+    recentReleases(limit: 5, distinct: $distinct) {
       author {
         avatarUrl
         login
@@ -91,21 +91,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       suggestedLocation
       url
     }
-    openMilestones: milestones(limit: 5, state: "open") {
-      author {
-        avatarUrl
-        login
-        name
-      }
-      title
-      openIssuesCount
-      closedIssuesCount
-      repositoryName
-      organizationName
-      createdAt
-      url
-    }
-    closedMilestones: milestones(limit: 5, state: "closed") {
+    recentMilestones: milestones(limit: 5, state: "all") {
       author {
         avatarUrl
         login

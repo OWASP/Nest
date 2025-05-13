@@ -309,10 +309,9 @@ export default function Home() {
           <RecentIssues data={data?.recentIssues} />
           <RecentPullRequests data={data?.recentPullRequests} />
         </div>
-        <RecentReleases data={data?.recentReleases} />
         <div className="grid-cols-2 gap-4 lg:grid">
-          <Milestones data={data?.openMilestones} openMilestones={true} />
-          <Milestones data={data?.closedMilestones} openMilestones={false} />
+          <RecentReleases data={data?.recentReleases} showSingleColumn={true} />
+          <Milestones data={data?.recentMilestones} />
         </div>
         <SecondaryCard
           icon={faNewspaper}

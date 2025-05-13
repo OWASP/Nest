@@ -41,8 +41,7 @@ const DetailsCard = ({
   topics,
   recentIssues,
   recentReleases,
-  openMilestones,
-  closedMilestones,
+  recentMilestones,
   showAvatar = true,
   userSummary,
   geolocationData = null,
@@ -181,14 +180,13 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {(type === 'user' ||
-          type === 'organization' ||
-          type === 'repository' ||
-          type === 'project') && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
+        {(type === 'user' || type === 'organization') && (
+          <RecentReleases data={recentReleases} showAvatar={showAvatar} />
+        )}
         {(type === 'project' || type === 'repository') && (
           <div className="grid-cols-2 gap-4 lg:grid">
-            <Milestones data={openMilestones} showAvatar={showAvatar} openMilestones={true} />
-            <Milestones data={closedMilestones} showAvatar={showAvatar} openMilestones={false} />
+            <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
+            <Milestones data={recentMilestones} showAvatar={showAvatar} />
           </div>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&

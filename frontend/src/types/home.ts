@@ -8,8 +8,7 @@ export type MainPageData = {
   recentReleases: ProjectReleaseType[]
   upcomingEvents: EventType[]
   recentPullRequests: PullRequestsType[]
-  openMilestones: ProjectMilestonesType[]
-  closedMilestones: ProjectMilestonesType[]
+  recentMilestones: ProjectMilestonesType[]
   recentChapters: {
     createdAt: string
     key: string

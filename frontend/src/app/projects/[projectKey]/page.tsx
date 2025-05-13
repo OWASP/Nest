@@ -101,8 +101,7 @@ const ProjectDetailsPage = () => {
       summary={project.summary}
       title={project.name}
       topContributors={project.topContributors}
-      openMilestones={project.openMilestones}
-      closedMilestones={project.closedMilestones}
+      recentMilestones={project.recentMilestones}
       topics={project.topics}
       type="project"
     />
