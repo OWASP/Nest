@@ -2,17 +2,72 @@
 
 from django.contrib import admin, messages
 
-from apps.slack.models.channel import Channel
+from apps.slack.models.conversation import Conversation
 from apps.slack.models.event import Event
 from apps.slack.models.member import Member
 from apps.slack.models.workspace import Workspace
 
 
-class ChannelAdmin(admin.ModelAdmin):
-    list_filter = ("is_private",)
-    search_fields = (
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = (
         "name",
         "slack_channel_id",
+        "created_at",
+        "is_private",
+        "is_archived",
+        "is_general",
+    )
+    search_fields = (
+        "name",
+        "topic",
+        "purpose",
+        "slack_channel_id",
+        "slack_creator_id",
+    )
+    list_filter = (
+        "created_at",
+        "is_archived",
+        "is_channel",
+        "is_general",
+        "is_im",
+        "is_private",
+    )
+    readonly_fields = (
+        "slack_channel_id",
+        "created_at",
+        "slack_creator_id",
+    )
+    fieldsets = (
+        (
+            "Conversation Information",
+            {
+                "fields": (
+                    "slack_channel_id",
+                    "name",
+                    "created_at",
+                    "slack_creator_id",
+                )
+            },
+        ),
+        (
+            "Properties",
+            {
+                "fields": (
+                    "is_private",
+                    "is_archived",
+                    "is_general",
+                )
+            },
+        ),
+        (
+            "Content",
+            {
+                "fields": (
+                    "topic",
+                    "purpose",
+                )
+            },
+        ),
     )
 
 
@@ -29,6 +84,7 @@ class EventAdmin(admin.ModelAdmin):
 
 class MemberAdmin(admin.ModelAdmin):
     actions = ("approve_suggested_users",)
+    autocomplete_fields = ("user",)
     filter_horizontal = ("suggested_users",)
     search_fields = (
         "slack_user_id",
@@ -75,7 +131,7 @@ class WorkspaceAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(Channel, ChannelAdmin)
+admin.site.register(Conversation, ConversationAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Member, MemberAdmin)
 admin.site.register(Workspace, WorkspaceAdmin)

@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 
 from .workspace import Workspace
 
@@ -47,16 +47,32 @@ class Member(TimestampedModel):
         """Member human readable representation."""
         return f"{self.username or 'Unnamed'} ({self.slack_user_id})"
 
+    def from_slack(self, member_data, workspace: Workspace) -> None:
+        """Update instance based on Slack member data."""
+        self.email = member_data["profile"].get("email", "")
+        self.is_bot = member_data["is_bot"]
+        self.real_name = member_data.get("real_name", "")
+        self.slack_user_id = member_data["id"]
+        self.username = member_data["name"]
+
+        self.workspace = workspace
+
     @staticmethod
-    def update_data(workspace, member_data) -> None:
+    def bulk_save(members, fields=None):
+        """Bulk save members."""
+        BulkSaveModel.bulk_save(Member, members, fields=fields)
+
+    @staticmethod
+    def update_data(member_data, workspace, *, save=True) -> None:
         """Update instance based on Slack data."""
-        Member.objects.update_or_create(
-            slack_user_id=member_data["id"],
-            workspace=workspace,
-            defaults={
-                "email": member_data["profile"].get("email", ""),
-                "is_bot": member_data["is_bot"],
-                "real_name": member_data.get("real_name", ""),
-                "username": member_data["name"],
-            },
-        )
+        member_id = member_data["id"]
+        try:
+            member = Member.objects.get(slack_user_id=member_id)
+        except Member.DoesNotExist:
+            member = Member(slack_user_id=member_id)
+
+        member.from_slack(member_data, workspace)
+        if save:
+            member.save()
+
+        return member
