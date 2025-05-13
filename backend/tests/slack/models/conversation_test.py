@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 from apps.slack.models.conversation import Conversation
+from apps.slack.models.workspace import Workspace
 
 
 class TestConversationModel:
@@ -38,11 +39,11 @@ class TestConversationModel:
         mocker.patch.object(Conversation, "save")
 
         # Call update_data
-        result = Conversation.update_data(conversation_data)
+        result = Conversation.update_data(conversation_data, Workspace())
 
         # Assertions
         assert result is not None
-        assert result.entity_id == "C12345"
+        assert result.slack_channel_id == "C12345"
         assert result.from_slack.call_count == 1
         assert result.save.call_count == 1
 
@@ -62,7 +63,7 @@ class TestConversationModel:
 
         # Create a mock conversation object
         mock_conversation = mocker.Mock(spec=Conversation)
-        mock_conversation.entity_id = "C12345"
+        mock_conversation.slack_channel_id = "C12345"
 
         # Mock the objects.get to return the mock conversation
         mocker.patch(
@@ -71,42 +72,13 @@ class TestConversationModel:
         )
 
         # Call update_data
-        result = Conversation.update_data(conversation_data)
+        result = Conversation.update_data(conversation_data, Workspace())
 
         # Assertions
         assert result is not None
-        assert result.entity_id == "C12345"
+        assert result.slack_channel_id == "C12345"
         assert result.from_slack.call_count == 1
         assert result.save.call_count == 1
-
-    def test_update_data_no_id(self, mocker):
-        # Setup conversation data without ID
-        conversation_data = {"name": "general", "created": "1605000000"}
-
-        # Call update_data
-        result = Conversation.update_data(conversation_data)
-
-        # Assertions
-        assert result is None
-
-    def test_update_data_exception(self, mocker):
-        # Setup conversation data
-        conversation_data = {"id": "C12345", "name": "general"}
-
-        # Mock Conversation.objects.get to simulate a new conversation
-        mocker.patch(
-            "apps.slack.models.conversation.Conversation.objects.get",
-            side_effect=Conversation.DoesNotExist,
-        )
-
-        # Make from_slack raise an exception
-        mocker.patch.object(Conversation, "from_slack", side_effect=Exception("Test error"))
-
-        # Call update_data
-        result = Conversation.update_data(conversation_data)
-
-        # Assertions
-        assert result is None
 
     def test_update_data_no_save(self, mocker):
         # Setup conversation data
@@ -122,7 +94,7 @@ class TestConversationModel:
         save_mock = mocker.patch.object(Conversation, "save")
 
         # Call update_data with save=False
-        result = Conversation.update_data(conversation_data, save=False)
+        result = Conversation.update_data(conversation_data, Workspace(), save=False)
 
         # Assertions
         assert result is not None
@@ -145,7 +117,7 @@ class TestConversationModel:
         conversation = Conversation()
 
         # Call from_slack
-        conversation.from_slack(conversation_data)
+        conversation.from_slack(conversation_data, Workspace())
 
         # Assertions
         assert conversation.name == "general"
@@ -155,11 +127,13 @@ class TestConversationModel:
         assert conversation.is_general is True
         assert conversation.topic == "General topic"
         assert conversation.purpose == "General purpose"
-        assert conversation.creator_id == "U12345"
+        assert conversation.slack_creator_id == "U12345"
 
     def test_str_method(self):
         # Create a conversation with a name
-        conversation = Conversation(name="test-channel")
+        conversation = Conversation(
+            name="test-channel", workspace=Workspace(name="test-workspace")
+        )
 
         # Check __str__ returns the name
-        assert str(conversation) == "test-channel"
+        assert str(conversation) == "test-channel - test-workspace"

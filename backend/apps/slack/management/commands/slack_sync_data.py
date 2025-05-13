@@ -1,12 +1,13 @@
 """A command to populate Slack channels and members data based on workspaces's bot tokens."""
 
+import logging
 import time
 
 from django.core.management.base import BaseCommand
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-from apps.slack.models import Channel, Conversation, Member, Workspace
+from apps.slack.models import Conversation, Member, Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -53,18 +54,20 @@ class Command(BaseCommand):
             try:
                 conversations = []
                 cursor = None
+                scope = ("public_channel", "private_channel")
                 while True:
                     response = client.conversations_list(
                         cursor=cursor,
                         exclude_archived=False,
                         limit=batch_size,
                         timeout=30,
-                        types="public_channel,private_channel",
+                        types=",".join(scope),
                     )
                     self._handle_slack_response(response, "conversations_list")
 
                     conversations.extend(
-                        Channel.update_data(workspace, channel) for channel in response["channels"]
+                        Conversation.update_data(channel, workspace, save=False)
+                        for channel in response["channels"]
                     )
                     total_channels += len(response["channels"])
 

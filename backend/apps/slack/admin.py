@@ -2,27 +2,16 @@
 
 from django.contrib import admin, messages
 
-from apps.slack.models.channel import Channel
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.event import Event
 from apps.slack.models.member import Member
 from apps.slack.models.workspace import Workspace
 
 
-class ChannelAdmin(admin.ModelAdmin):
-    list_filter = ("is_private",)
-    search_fields = (
-        "name",
-        "slack_channel_id",
-    )
-
-
 class ConversationAdmin(admin.ModelAdmin):
-    """Admin configuration for Conversation model."""
-
     list_display = (
         "name",
-        "entity_id",
+        "slack_channel_id",
         "created_at",
         "is_private",
         "is_archived",
@@ -32,29 +21,31 @@ class ConversationAdmin(admin.ModelAdmin):
         "name",
         "topic",
         "purpose",
-        "entity_id",
-        "creator_id",
+        "slack_channel_id",
+        "slack_creator_id",
     )
     list_filter = (
         "created_at",
-        "is_private",
         "is_archived",
+        "is_channel",
         "is_general",
+        "is_im",
+        "is_private",
     )
     readonly_fields = (
-        "entity_id",
+        "slack_channel_id",
         "created_at",
-        "creator_id",
+        "slack_creator_id",
     )
     fieldsets = (
         (
             "Conversation Information",
             {
                 "fields": (
-                    "entity_id",
+                    "slack_channel_id",
                     "name",
                     "created_at",
-                    "creator_id",
+                    "slack_creator_id",
                 )
             },
         ),
@@ -139,7 +130,6 @@ class WorkspaceAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(Channel, ChannelAdmin)
 admin.site.register(Conversation, ConversationAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Member, MemberAdmin)
