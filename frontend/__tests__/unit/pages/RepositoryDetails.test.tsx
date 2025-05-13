@@ -182,16 +182,9 @@ describe('RepositoryDetailsPage', () => {
   test('renders milestones section correctly', async () => {
     render(<RepositoryDetailsPage />)
     await waitFor(() => {
-      const openMilestones = mockRepositoryData.repository.openMilestones
-      const closedMilestones = mockRepositoryData.repository.closedMilestones
+      const recentMilestones = mockRepositoryData.repository.recentMilestones
 
-      openMilestones.forEach((milestone) => {
-        expect(screen.getByText(milestone.title)).toBeInTheDocument()
-        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
-        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
-        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
-      closedMilestones.forEach((milestone) => {
+      recentMilestones.forEach((milestone) => {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()

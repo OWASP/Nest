@@ -76,7 +76,7 @@ export const mockProjectDetailsData = {
     type: 'Tool',
     updatedAt: '2025-02-07T12:34:56Z',
     url: 'https://github.com/example-project',
-    openMilestones: [
+    recentMilestones: [
       {
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/33333?v=4',
@@ -90,22 +90,6 @@ export const mockProjectDetailsData = {
         organizationName: 'OWASP',
         createdAt: '2025-03-01T10:00:00Z',
         url: 'https://github.com/OWASP/repo-one/milestone/1',
-      },
-    ],
-    closedMilestones: [
-      {
-        author: {
-          avatarUrl: 'https://avatars.githubusercontent.com/u/66666?v=4',
-          login: 'milestone-author4',
-          name: 'Milestone Author 4',
-        },
-        title: 'Security Updates',
-        openIssuesCount: 0,
-        closedIssuesCount: 12,
-        repositoryName: 'Project Repo 2',
-        organizationName: 'OWASP',
-        createdAt: '2024-11-15T16:45:00Z',
-        url: 'https://github.com/OWASP/repo-two/milestone/4',
       },
     ],
   },

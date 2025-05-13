@@ -84,18 +84,11 @@ test.describe('Repository Details Page', () => {
     await expect(page.getByText('Jan 1, 2024', { exact: true })).toBeVisible()
   })
 
-  test('should have project open milestones', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Open Milestones' })).toBeVisible()
+  test('should have recent milestones', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
     await expect(page.getByText('Mar 1, 2025')).toBeVisible()
     await expect(page.getByText('Repo One')).toBeVisible()
-  })
-
-  test('should have closed milestones', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Closed Milestones' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Security Updates' })).toBeVisible()
-    await expect(page.getByText('Nov 15, 2024')).toBeVisible()
-    await expect(page.getByText('Repo Two')).toBeVisible()
   })
 
   test('should display recent pull requests section', async ({ page }) => {
