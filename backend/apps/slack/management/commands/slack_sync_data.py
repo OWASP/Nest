@@ -47,27 +47,26 @@ class Command(BaseCommand):
                 continue
 
             client = WebClient(token=bot_token)
-            total_channels = 0
-            total_members = 0
 
-            self.stdout.write(f"Fetching channels for {workspace}...")
+            self.stdout.write(f"Fetching conversations for {workspace}...")
+            conversations = []
+            total_channels = 0
             try:
-                conversations = []
                 cursor = None
-                scope = ("public_channel", "private_channel")
                 while True:
                     response = client.conversations_list(
                         cursor=cursor,
                         exclude_archived=False,
                         limit=batch_size,
                         timeout=30,
-                        types=",".join(scope),
+                        types="public_channel,private_channel",
                     )
                     self._handle_slack_response(response, "conversations_list")
 
                     conversations.extend(
-                        Conversation.update_data(channel, workspace, save=False)
-                        for channel in response["channels"]
+                        member
+                        for conversation_data in response["channels"]
+                        if (member := Conversation.update_data(conversation_data, workspace))
                     )
                     total_channels += len(response["channels"])
 
@@ -78,35 +77,42 @@ class Command(BaseCommand):
                         time.sleep(delay)
             except SlackApiError as e:
                 self.stdout.write(
-                    self.style.ERROR(f"Failed to fetch channels: {e.response['error']}")
+                    self.style.ERROR(f"Failed to fetch conversations: {e.response['error']}")
                 )
             if conversations:
                 Conversation.bulk_save(conversations)
                 self.stdout.write(self.style.SUCCESS(f"Populated {total_channels} channels"))
 
             self.stdout.write(f"Fetching members for {workspace}...")
+            members = []
+            total_members = 0
             try:
                 cursor = None
                 while True:
-                    response = client.users_list(limit=1000, cursor=cursor)
+                    response = client.users_list(
+                        cursor=cursor,
+                        limit=batch_size,
+                        timeout=30,
+                    )
                     self._handle_slack_response(response, "users_list")
 
-                    member_count = 0
-                    for member in response["members"]:
-                        # TODO(arkid15r): use bulk save.
-                        Member.update_data(workspace, member)
-                        member_count += 1
-                    total_members += member_count
+                    members.extend(
+                        member
+                        for member_data in response["members"]
+                        if (member := Member.update_data(member_data, workspace))
+                    )
+                    total_members += len(response["members"])
 
                     cursor = response.get("response_metadata", {}).get("next_cursor")
                     if not cursor:
                         break
-
-                self.stdout.write(self.style.SUCCESS(f"Populated {total_members} members"))
             except SlackApiError as e:
                 self.stdout.write(
                     self.style.ERROR(f"Failed to fetch members: {e.response['error']}")
                 )
+            if members:
+                Member.bulk_save(members)
+                self.stdout.write(self.style.SUCCESS(f"Populated {total_members} members"))
 
         self.stdout.write(self.style.SUCCESS("\nFinished processing all workspaces"))
 
@@ -114,5 +120,5 @@ class Command(BaseCommand):
         """Handle Slack API response and raise exception if needed."""
         if not response["ok"]:
             error_message = f"{api_method} API call failed"
-            logger.exception(error_message)
+            logger.error(error_message)
             self.stdout.write(self.style.ERROR(error_message))

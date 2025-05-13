@@ -84,7 +84,6 @@ class Conversation(TimestampedModel):
             conversation = Conversation(slack_channel_id=channel_id)
 
         conversation.from_slack(conversation_data, workspace)
-
         if save:
             conversation.save()
 

@@ -84,6 +84,7 @@ class EventAdmin(admin.ModelAdmin):
 
 class MemberAdmin(admin.ModelAdmin):
     actions = ("approve_suggested_users",)
+    autocomplete_fields = ("user",)
     filter_horizontal = ("suggested_users",)
     search_fields = (
         "slack_user_id",
