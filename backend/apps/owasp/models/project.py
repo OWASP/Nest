@@ -154,18 +154,9 @@ class Project(
         )
 
     @property
-    def open_milestones(self):
-        """Return milestones."""
-        return Milestone.open_milestones.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
-        )
-
-    @property
-    def closed_milestones(self):
-        """Return milestones."""
-        return Milestone.closed_milestones.filter(
+    def recent_milestones(self):
+        """Return recent milestones."""
+        return Milestone.objects.filter(
             repository__in=self.repositories.all(),
         ).select_related(
             "repository",

@@ -182,16 +182,9 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return f"https://github.com/{self.path}"
 
     @property
-    def open_milestones(self):
-        """Repository open milestones."""
-        return Milestone.open_milestones.filter(
-            repository=self,
-        ).order_by("-created_at")
-
-    @property
-    def closed_milestones(self):
-        """Repository closed milestones."""
-        return Milestone.closed_milestones.filter(
+    def recent_milestones(self):
+        """Repository recent milestones."""
+        return Milestone.objects.filter(
             repository=self,
         ).order_by("-created_at")
 

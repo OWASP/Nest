@@ -17,8 +17,10 @@ class RepositoryNode(BaseNode):
     """Repository node."""
 
     issues = graphene.List(IssueNode)
-    open_milestones = graphene.List(MilestoneNode)
-    closed_milestones = graphene.List(MilestoneNode)
+    recent_milestones = graphene.List(
+        MilestoneNode,
+        limit=graphene.Int(default_value=5),
+    )
     languages = graphene.List(graphene.String)
     latest_release = graphene.String()
     owner_key = graphene.String()
@@ -84,17 +86,9 @@ class RepositoryNode(BaseNode):
         """Resolve URL."""
         return self.url
 
-    def resolve_open_milestones(self, info):
-        """Resolve open milestones."""
-        return self.open_milestones.select_related(
-            "repository",
-        ).order_by(
-            "-created_at",
-        )
-
-    def resolve_closed_milestones(self, info):
-        """Resolve closed milestones."""
-        return self.closed_milestones.select_related(
+    def resolve_recent_milestones(self, info, limit):
+        """Resolve recent milestones."""
+        return self.recent_milestones.select_related(
             "repository",
         ).order_by(
             "-created_at",
