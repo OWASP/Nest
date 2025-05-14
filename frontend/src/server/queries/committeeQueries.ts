@@ -21,8 +21,6 @@ export const GET_COMMITTEE_DATA = gql`
       contributionsCount
       login
       name
-      projectKey
-      projectName
     }
   }
 `

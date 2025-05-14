@@ -108,24 +108,23 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     @classmethod
     def get_top_contributors(
         cls,
-        repositories=None,
-        organization=None,
-        project=None,
+        limit=TOP_CONTRIBUTORS_LIMIT,
         chapter=None,
         committee=None,
+        organization=None,
+        project=None,
+        repositories=None,
         repository=None,
-        limit=TOP_CONTRIBUTORS_LIMIT,
     ):
         """Get top contributors across repositories, organization, or project.
 
         Args:
-            repositories (QuerySet or list, optional): Repositories to filter by.
-            organization (str, optional): Organization login to filter by.
-            project (str, optional): Project key to filter by.
+            limit (int, optional): Maximum number of contributors to return.
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
-            repository (str, optional): Repository name to filter by.
-            limit (int, optional): Maximum number of contributors to return.
+            organization (str, optional): Organization login to filter by.
+            project (str, optional): Project key to filter by.
+            repositories (QuerySet or list, optional): Repositories to filter by.
 
         Returns:
             list: List of dictionaries containing contributor information.

@@ -13,10 +13,10 @@ class RepositoryContributorQuery(BaseQuery):
     top_contributors = graphene.List(
         RepositoryContributorNode,
         limit=graphene.Int(default_value=15),
-        organization=graphene.String(required=False),
-        project=graphene.String(required=False),
         chapter=graphene.String(required=False),
         committee=graphene.String(required=False),
+        organization=graphene.String(required=False),
+        project=graphene.String(required=False),
         repository=graphene.String(required=False),
     )
 
@@ -24,10 +24,10 @@ class RepositoryContributorQuery(BaseQuery):
         root,
         info,
         limit,
-        organization=None,
-        project=None,
         chapter=None,
         committee=None,
+        organization=None,
+        project=None,
         repository=None,
     ):
         """Resolve top contributors.
@@ -36,10 +36,10 @@ class RepositoryContributorQuery(BaseQuery):
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of contributors to return.
-            organization (str, optional): Organization login to filter by.
-            project (str, optional): Project key to filter by.
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
+            organization (str, optional): Organization login to filter by.
+            project (str, optional): Project key to filter by.
             repository (str, optional): Repository name to filter by.
 
         Returns:
@@ -47,12 +47,12 @@ class RepositoryContributorQuery(BaseQuery):
 
         """
         top_contributors = RepositoryContributor.get_top_contributors(
-            organization=organization,
-            project=project,
+            limit=limit,
             chapter=chapter,
             committee=committee,
+            organization=organization,
+            project=project,
             repository=repository,
-            limit=limit,
         )
 
         return [
