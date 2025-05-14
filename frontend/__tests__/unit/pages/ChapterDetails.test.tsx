@@ -33,7 +33,7 @@ jest.mock('next/navigation', () => ({
 describe('chapterDetailsPage Component', () => {
   beforeEach(() => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: { chapter: mockChapterDetailsData },
+      data: mockChapterDetailsData,
       error: null,
     })
   })
@@ -56,7 +56,7 @@ describe('chapterDetailsPage Component', () => {
 
   test('renders chapter data correctly', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: { chapter: mockChapterDetailsData },
+      data: mockChapterDetailsData,
       error: null,
     })
     render(<ChapterDetailsPage />)
@@ -109,7 +109,7 @@ describe('chapterDetailsPage Component', () => {
       ],
     }
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: { chapter: chapterDataWithIncompleteContributors },
+      data: chapterDataWithIncompleteContributors,
       error: null,
     })
     render(<ChapterDetailsPage />)

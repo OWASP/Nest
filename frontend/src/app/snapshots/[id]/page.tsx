@@ -88,7 +88,6 @@ const SnapshotDetailsPage: React.FC = () => {
         url={`/chapters/${chapter.key}`}
         summary={chapter.summary}
         icons={filteredIcons}
-        topContributors={chapter.topContributors}
         button={SubmitButton}
         social={formattedUrls}
       />

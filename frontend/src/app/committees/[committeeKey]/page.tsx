@@ -12,26 +12,25 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { GET_COMMITTEE_DATA } from 'server/queries/committeeQueries'
 import type { CommitteeDetailsTypeGraphQL } from 'types/committee'
+import { TopContributorsTypeGraphql } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
   const [committee, setCommittee] = useState<CommitteeDetailsTypeGraphQL | null>(null)
+  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data, error: graphQLRequestError } = useQuery<{ committee: CommitteeDetailsTypeGraphQL }>(
-    GET_COMMITTEE_DATA,
-    {
-      variables: { key: committeeKey },
-    }
-  )
+  const { data, error: graphQLRequestError } = useQuery(GET_COMMITTEE_DATA, {
+    variables: { key: committeeKey },
+  })
 
   useEffect(() => {
     if (data?.committee) {
       setCommittee(data.committee)
+      setTopContributors(data?.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -86,7 +85,7 @@ export default function CommitteeDetailsPage() {
       stats={committeeStats}
       summary={committee.summary}
       title={committee.name}
-      topContributors={committee.topContributors}
+      topContributors={topContributors}
       type="committee"
     />
   )
