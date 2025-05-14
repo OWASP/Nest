@@ -15,12 +15,6 @@ export const mockChapterDetailsData = {
       'https://meetup.com/test',
     ],
     summary: 'This is a test chapter summary.',
-    topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
-      contributionsCount: 30 - i,
-      login: `contributor${i + 1}`,
-      name: `Contributor ${i + 1}`,
-    })),
     geoLocation: {
       lat: 23.2584857,
       lng: 77.401989,
