@@ -1,3 +1,4 @@
+import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 import { mockAboutData } from '@unit/data/mockAboutData'
 
@@ -83,5 +84,9 @@ test.describe('About Page', () => {
     const newPage = await pagePromise
     await newPage.waitForLoadState()
     expect(newPage.url()).toContain('/members/')
+  })
+
+  test('breadcrumb renders correct segments on /about', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'About'])
   })
 })

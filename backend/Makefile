@@ -12,6 +12,9 @@ exec-backend-command-it:
 exec-db-command:
 	@docker exec -it nest-db $(CMD)
 
+clear-cache:
+	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
+
 collect-static:
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
@@ -37,6 +40,9 @@ github-enrich-issues:
 	@echo "Enriching GitHub issues"
 	@CMD="python manage.py github_enrich_issues" $(MAKE) exec-backend-command
 
+github-match-users:
+	@CMD="python manage.py github_match_users $(MATCH_MODEL)" $(MAKE) exec-backend-command
+
 github-update-owasp-organization:
 	@echo "Updating OWASP GitHub organization"
 	@CMD="python manage.py github_update_owasp_organization" $(MAKE) exec-backend-command
@@ -44,6 +50,10 @@ github-update-owasp-organization:
 github-update-project-related-repositories:
 	@echo "Updating OWASP project related GitHub repositories"
 	@CMD="python manage.py github_update_project_related_repositories" $(MAKE) exec-backend-command
+
+github-update-users:
+	@echo "Updating GitHub users"
+	@CMD="python manage.py github_update_users" $(MAKE) exec-backend-command
 
 index-data:
 	@echo "Indexing Nest data"
@@ -109,7 +119,7 @@ owasp-scrape-projects:
 	@CMD="python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
 
 owasp-sync-posts:
-	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command-it
+	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command
 
 owasp-update-events:
 	@echo "Getting OWASP events data"
@@ -134,6 +144,10 @@ setup:
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
+slack-sync-data:
+	@echo "Syncing Slack data"
+	@CMD="python manage.py slack_sync_data" $(MAKE) exec-backend-command
+
 sync-data: \
 	update-data \
 	enrich-data \
@@ -155,6 +169,8 @@ update-data: \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
 	github-update-project-related-repositories \
+	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \
+	owasp-sync-posts \
 	owasp-update-sponsors

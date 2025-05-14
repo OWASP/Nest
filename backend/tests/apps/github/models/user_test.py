@@ -9,7 +9,7 @@ class TestUserModel:
     @pytest.mark.parametrize(
         ("name", "login", "expected_str"),
         [
-            ("John Doe", "john-doe", "John Doe"),
+            ("John Doe", "john-doe", "John Doe (john-doe)"),
             ("", "jane-doe", "jane-doe"),
             (None, "ghost", "ghost"),
         ],

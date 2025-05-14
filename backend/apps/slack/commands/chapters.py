@@ -1,46 +1,30 @@
 """Slack bot chapters command."""
 
-from django.conf import settings
-
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_HELP, COMMAND_START
 from apps.slack.common.handlers.chapters import get_blocks
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.utils import get_text
-
-COMMAND = "/chapters"
 
 
-def chapters_handler(ack, command, client):
-    """Handle the Slack /chapters command.
+class Chapters(CommandBase):
+    """Slack bot /chapters command."""
 
-    Args:
-        ack (function): Acknowledge the Slack command request.
-        command (dict): The Slack command payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    def get_render_blocks(self, command: dict):
+        """Get the rendered blocks.
 
-    """
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+        Args:
+            command (dict): The Slack command payload.
 
-    command_text = command["text"].strip()
+        Returns:
+            list: A list of Slack blocks representing the projects.
 
-    if command_text in COMMAND_HELP:
-        blocks = [
-            markdown(
-                f"*Available Commands:*{NL}"
-                f"• `/chapters` - recent chapters{NL}"
-                f"• `/chapters [search term]` - Search for specific chapters{NL}"
-                f"• `/chapters [region]` - Search for specific region chapters{NL}"
-            ),
-        ]
-    else:
-        search_query = "" if command_text in COMMAND_START else command_text
-        blocks = get_blocks(
-            search_query=search_query,
+        """
+        command_text = command["text"].strip()
+        if command_text in COMMAND_HELP:
+            return super().get_render_blocks(command)
+
+        return get_blocks(
+            search_query="" if command_text in COMMAND_START else command_text,
             limit=10,
             presentation=EntityPresentation(
                 include_feedback=True,
@@ -51,14 +35,3 @@ def chapters_handler(ack, command, client):
                 summary_truncation=300,
             ),
         )
-
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        channel=conversation["channel"]["id"],
-        blocks=blocks,
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    chapters_handler = SlackConfig.app.command(COMMAND)(chapters_handler)

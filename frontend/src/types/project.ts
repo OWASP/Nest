@@ -15,6 +15,20 @@ export interface ProjectIssuesType {
   url: string
 }
 
+export interface ProjectPullRequestsType {
+  author: {
+    avatarUrl: string
+    key: string
+    name: string
+    login: string
+  }
+  createdAt: string
+  organizationName: string
+  repositoryName?: string
+  title: string
+  url: string
+}
+
 export interface ProjectStatsType {
   contributors: number
   forks: number
@@ -64,6 +78,7 @@ export interface ProjectTypeGraphql {
   updatedAt: number
   url: string
   recentIssues: ProjectIssuesType[]
+  recentPullRequests: ProjectPullRequestsType[]
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
   topContributors: TopContributorsTypeGraphql[]

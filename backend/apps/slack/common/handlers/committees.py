@@ -15,15 +15,18 @@ from apps.slack.utils import escape
 
 
 def get_blocks(
-    page=1, search_query: str = "", limit: int = 10, presentation: EntityPresentation | None = None
-):
+    limit: int = 10,
+    page: int = 1,
+    presentation: EntityPresentation | None = None,
+    search_query: str = "",
+) -> list:
     """Get committees blocks.
 
     Args:
-        page (int): The current page number for pagination.
-        search_query (str): The search query for filtering committees.
         limit (int): The maximum number of committees to retrieve per page.
+        page (int): The current page number for pagination.
         presentation (EntityPresentation | None): Configuration for entity presentation.
+        search_query (str): The search query for filtering committees.
 
     Returns:
         list: A list of Slack blocks representing the committees.

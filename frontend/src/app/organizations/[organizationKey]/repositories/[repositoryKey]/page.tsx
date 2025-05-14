@@ -2,9 +2,9 @@
 
 import { useQuery } from '@apollo/client'
 import {
+  faCodeCommit,
   faCodeFork,
   faExclamationCircle,
-  faHistory,
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
@@ -22,6 +22,7 @@ const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()
   const [repository, setRepository] = useState(null)
   const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
+  const [recentPullRequests, setRecentPullRequests] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
@@ -30,6 +31,7 @@ const RepositoryDetailsPage = () => {
     if (data) {
       setRepository(data?.repository)
       setTopContributors(data?.topContributors)
+      setRecentPullRequests(data?.recentPullRequests)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -98,7 +100,7 @@ const RepositoryDetailsPage = () => {
       unit: 'Issue',
     },
     {
-      icon: faHistory,
+      icon: faCodeCommit,
       value: repository.commitsCount,
       unit: 'Commit',
     },
@@ -107,6 +109,7 @@ const RepositoryDetailsPage = () => {
     <DetailsCard
       details={repositoryDetails}
       languages={repository.languages}
+      pullRequests={recentPullRequests}
       recentIssues={repository.issues}
       recentReleases={repository.releases}
       stats={RepositoryStats}

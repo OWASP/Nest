@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
+import AnchorTitle from 'components/AnchorTitle'
 import InfoBlock from 'components/InfoBlock'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
@@ -45,7 +46,7 @@ const DetailsCard = ({
   repositories = [],
 }: DetailsCardProps) => {
   return (
-    <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">{title}</h1>
         <p className="mb-6 text-xl">{description}</p>
@@ -53,26 +54,29 @@ const DetailsCard = ({
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
-          <SecondaryCard icon={faRectangleList} title="Summary">
+          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
         {userSummary && (
-          <SecondaryCard icon={faRectangleList} title="Summary">
+          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             {userSummary}
           </SecondaryCard>
         )}
 
         {heatmap && (
-          <SecondaryCard icon={faSquarePollVertical} title="Contribution Heatmap">
+          <SecondaryCard
+            icon={faSquarePollVertical}
+            title={<AnchorTitle title="Contribution Heatmap" />}
+          >
             {heatmap}
           </SecondaryCard>
         )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            icon={faCircleInfo}
-            title={`${capitalize(type)} Details`}
+            icon={faRectangleList}
+            title={<AnchorTitle title={`${capitalize(type)} Details`} />}
             className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
           >
             {details?.map((detail) =>
@@ -96,16 +100,21 @@ const DetailsCard = ({
             type === 'committee' ||
             type === 'user' ||
             type === 'organization') && (
-            <SecondaryCard icon={faChartPie} title="Statistics" className="md:col-span-2">
+            <SecondaryCard
+              icon={faChartPie}
+              title={<AnchorTitle title="Statistics" />}
+              className="md:col-span-2"
+            >
               {stats.map((stat, index) => (
-                <InfoBlock
-                  className="pb-1"
-                  icon={stat.icon}
-                  key={index}
-                  pluralizedName={stat.pluralizedName}
-                  unit={stat.unit}
-                  value={stat.value}
-                />
+                <div key={index}>
+                  <InfoBlock
+                    className="pb-1"
+                    icon={stat.icon}
+                    pluralizedName={stat.pluralizedName}
+                    unit={stat.unit}
+                    value={stat.value}
+                  />
+                </div>
               ))}
             </SecondaryCard>
           )}
@@ -130,9 +139,15 @@ const DetailsCard = ({
             className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
             {languages.length !== 0 && (
-              <ToggleableList items={languages} icon={faCode} label="Languages" />
+              <ToggleableList
+                items={languages}
+                icon={faCode}
+                label={<AnchorTitle title="Languages" />}
+              />
             )}
-            {topics.length !== 0 && <ToggleableList items={topics} icon={faTags} label="Topics" />}
+            {topics.length !== 0 && (
+              <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
+            )}
           </div>
         )}
         {topContributors && (
@@ -149,7 +164,10 @@ const DetailsCard = ({
           type === 'organization') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' || type === 'organization' ? (
+            {type === 'user' ||
+            type === 'organization' ||
+            type === 'repository' ||
+            type === 'project' ? (
               <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             ) : (
               <RecentReleases
@@ -160,12 +178,17 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {(type === 'user' || type === 'organization') && (
-          <RecentReleases data={recentReleases} showAvatar={showAvatar} />
-        )}
+        {(type === 'user' ||
+          type === 'organization' ||
+          type === 'repository' ||
+          type === 'project') && <RecentReleases data={recentReleases} showAvatar={showAvatar} />}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard icon={faFolderOpen} title="Repositories" className="mt-6">
+            <SecondaryCard
+              icon={faFolderOpen}
+              title={<AnchorTitle title="Repositories" />}
+              className="mt-6"
+            >
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}

@@ -131,4 +131,18 @@ describe('ChaptersPage Component', () => {
     // Clean up the mock
     jest.restoreAllMocks()
   })
+
+  test('detail links are clickable and navigate correctly', async () => {
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      const detailLinks = screen.getAllByText('View Details')
+      expect(detailLinks.length).toBeGreaterThan(0)
+
+      detailLinks.forEach((link, index) => {
+        fireEvent.click(link)
+        expect(mockRouter.push).toHaveBeenCalledWith(`/chapters/chapter_${index + 1}`)
+      })
+    })
+  })
 })

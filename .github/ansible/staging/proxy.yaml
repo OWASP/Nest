@@ -29,6 +29,6 @@
         shell:
           cmd: docker compose pull
 
-      - name: Retart proxy server
+      - name: Retart services
         shell:
           cmd: docker compose restart

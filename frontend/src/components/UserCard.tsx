@@ -1,4 +1,4 @@
-import { faChevronRight, faFileCode, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faFolderOpen, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import millify from 'millify'
@@ -10,6 +10,7 @@ const UserCard = ({
   button,
   className,
   company,
+  description,
   email,
   followers_count,
   location,
@@ -42,6 +43,11 @@ const UserCard = ({
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email}
           </p>
+          {description && (
+            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+              {description}
+            </p>
+          )}
           <div className="flex justify-center gap-3">
             {followers_count > 0 && (
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
@@ -51,7 +57,7 @@ const UserCard = ({
             )}
             {repositories_count > 0 && (
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-                <FontAwesomeIcon icon={faFileCode} className="mr-1 h-4 w-4" />
+                <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
                 {millify(repositories_count, { precision: 1 })}
               </p>
             )}
@@ -59,7 +65,7 @@ const UserCard = ({
         </div>
       </div>
 
-      <div className="mt-auto inline-flex items-center text-sm font-medium text-blue-400">
+      <div className="inline-flex items-center text-sm font-medium text-blue-400">
         View Profile
         <FontAwesomeIcon
           icon={faChevronRight}

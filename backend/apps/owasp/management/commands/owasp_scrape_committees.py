@@ -9,13 +9,13 @@ from apps.github.utils import normalize_url
 from apps.owasp.models.committee import Committee
 from apps.owasp.scraper import OwaspScraper
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Scrape owasp.org pages and update relevant committees."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -24,15 +24,8 @@ class Command(BaseCommand):
         """
         parser.add_argument("--offset", default=0, required=False, type=int)
 
-    def handle(self, *args, **options):
-        """Handle the command execution.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments containing command options.
-                offset (int): The starting index for processing.
-
-        """
+    def handle(self, *args, **options) -> None:
+        """Handle the command execution."""
         active_committees = Committee.active_committees.order_by("-created_at")
         active_committees_count = active_committees.count()
         offset = options["offset"]

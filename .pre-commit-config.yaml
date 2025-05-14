@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.0
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args:
@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.5
+    rev: v0.11.9
     hooks:
       - id: ruff
         args:
@@ -37,15 +37,39 @@ repos:
           - --sequence=4
         exclude: (.github|pnpm-lock.yaml)
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-jsonschema
+          - types-lxml
+          - types-python-dateutil
+          - types-PyYAML
+          - types-requests
+        args:
+          - --config-file
+          - backend/pyproject.toml
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
       - id: check-yaml
+      - id: detect-private-key
       - id: end-of-file-fixer
         exclude_types:
           - svg
+      - id: file-contents-sorter
+        args:
+          - --unique
+        files: cspell/custom-dict.txt
       - id: mixed-line-ending
         args:
           - --fix=lf

@@ -1,49 +1,32 @@
 """Slack bot projects command."""
 
-from django.conf import settings
-
-from apps.slack.apps import SlackConfig
+from apps.slack.commands.command import CommandBase
 from apps.slack.common.handlers.projects import get_blocks
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.utils import get_text
-
-COMMAND = "/projects"
 
 
-def projects_handler(ack, command, client):
-    """Handle the Slack /projects command.
+class Projects(CommandBase):
+    """Slack bot /projects command."""
 
-    Args:
-        ack (function): Acknowledge the Slack command request.
-        command (dict): The Slack command payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
+    def get_render_blocks(self, command: dict):
+        """Get the rendered blocks.
 
-    """
-    ack()
-    if not settings.SLACK_COMMANDS_ENABLED:
-        return
+        Args:
+            command (dict): The Slack command payload.
 
-    search_query = command["text"].strip()
-    blocks = get_blocks(
-        search_query=search_query,
-        limit=10,
-        presentation=EntityPresentation(
-            include_feedback=True,
-            include_metadata=True,
-            include_pagination=False,
-            include_timestamps=True,
-            name_truncation=80,
-            summary_truncation=300,
-        ),
-    )
+        Returns:
+            list: A list of Slack blocks representing the projects.
 
-    conversation = client.conversations_open(users=command["user_id"])
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    projects_handler = SlackConfig.app.command(COMMAND)(projects_handler)
+        """
+        return get_blocks(
+            search_query=command["text"].strip(),
+            limit=10,
+            presentation=EntityPresentation(
+                include_feedback=True,
+                include_metadata=True,
+                include_pagination=False,
+                include_timestamps=True,
+                name_truncation=80,
+                summary_truncation=300,
+            ),
+        )

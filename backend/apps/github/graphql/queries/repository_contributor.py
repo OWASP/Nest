@@ -1,5 +1,7 @@
 """OWASP repository contributor GraphQL queries."""
 
+from __future__ import annotations
+
 import graphene
 
 from apps.common.graphql.queries import BaseQuery
@@ -23,13 +25,14 @@ class RepositoryContributorQuery(BaseQuery):
     def resolve_top_contributors(
         root,
         info,
-        limit,
-        chapter=None,
-        committee=None,
-        organization=None,
-        project=None,
-        repository=None,
-    ):
+        *,
+        limit: int = 15,
+        chapter: str | None = None,
+        committee: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        repository: str | None = None,
+    ) -> list[RepositoryContributorNode]:
         """Resolve top contributors.
 
         Args:

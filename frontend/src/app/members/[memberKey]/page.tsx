@@ -1,11 +1,10 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
-  faCodeBranch,
+  faCodeMerge,
+  faFolderOpen,
+  faPersonWalkingArrowRight,
   faUserPlus,
-  faUser,
-  faFileCode,
-  faBookmark,
 } from '@fortawesome/free-solid-svg-icons'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -173,31 +172,22 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const userDetails = [
-    {
-      label: 'GitHub Profile',
-      value: (
-        <Link href={user?.url || '#'} className="text-blue-400 hover:underline">
-          @{user?.login}
-        </Link>
-      ),
-    },
     { label: 'Joined', value: user?.createdAt ? formatDate(user.createdAt) : 'Not available' },
-    { label: 'Email', value: user?.email || 'Not provided' },
-    { label: 'Company', value: user?.company || 'Not provided' },
-    { label: 'Location', value: user?.location || 'Not provided' },
+    { label: 'Email', value: user?.email || 'N/A' },
+    { label: 'Company', value: user?.company || 'N/A' },
+    { label: 'Location', value: user?.location || 'N/A' },
   ]
 
   const userStats = [
-    { icon: faUser, value: user?.followersCount || 0, unit: 'Follower' },
+    { icon: faPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
     { icon: faUserPlus, value: user?.followingCount || 0, unit: 'Following' },
     {
-      icon: faCodeBranch,
+      icon: faFolderOpen,
       pluralizedName: 'Repositories',
       unit: 'Repository',
       value: user?.publicRepositoriesCount ?? 0,
     },
-    { icon: faFileCode, value: user?.issuesCount || 0, unit: 'Issue' },
-    { icon: faBookmark, value: user?.releasesCount || 0, unit: 'Release' },
+    { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
   const Heatmap = () => (

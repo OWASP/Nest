@@ -1,7 +1,9 @@
 """GraphQL queries for handling GitHub issues."""
 
+from __future__ import annotations
+
 import graphene
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, QuerySet, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.issue import IssueNode
@@ -13,20 +15,28 @@ class IssueQuery(BaseQuery):
 
     recent_issues = graphene.List(
         IssueNode,
-        limit=graphene.Int(default_value=5),
         distinct=graphene.Boolean(default_value=False),
+        limit=graphene.Int(default_value=5),
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
     )
 
-    def resolve_recent_issues(root, info, limit, distinct=False, login=None, organization=None):
+    def resolve_recent_issues(
+        root,
+        info,
+        *,
+        distinct: bool = False,
+        limit: int = 5,
+        login: str | None = None,
+        organization: str | None = None,
+    ) -> QuerySet:
         """Resolve recent issues with optional filtering.
 
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
-            limit (int): Maximum number of issues to return.
             distinct (bool): Whether to return unique issues per author and repository.
+            limit (int): Maximum number of issues to return.
             login (str, optional): Filter issues by a specific author's login.
             organization (str, optional): Filter issues by a specific organization's login.
 
@@ -36,6 +46,8 @@ class IssueQuery(BaseQuery):
         """
         queryset = Issue.objects.select_related(
             "author",
+            "repository",
+            "repository__organization",
         ).order_by(
             "-created_at",
         )
@@ -46,9 +58,7 @@ class IssueQuery(BaseQuery):
             )
 
         if organization:
-            queryset = queryset.select_related(
-                "repository__organization",
-            ).filter(
+            queryset = queryset.filter(
                 repository__organization__login=organization,
             )
 

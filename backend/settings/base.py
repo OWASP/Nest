@@ -122,11 +122,19 @@ class Base(Configuration):
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
 
+    REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
+    REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+            "TIMEOUT": 300,
         }
     }
+
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
     DATABASES = {

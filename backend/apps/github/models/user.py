@@ -1,8 +1,10 @@
 """Github app user model."""
 
+from __future__ import annotations
+
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.constants import GITHUB_GHOST_USER_LOGIN, OWASP_FOUNDATION_LOGIN
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
@@ -18,24 +20,30 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     bio = models.TextField(verbose_name="Bio", max_length=1000, default="")
     is_hireable = models.BooleanField(verbose_name="Is hireable", default=False)
-    twitter_username = models.CharField(verbose_name="Twitter username", max_length=50, default="")
+    twitter_username = models.CharField(
+        verbose_name="Twitter username", max_length=50, default="", blank=True
+    )
 
     is_bot = models.BooleanField(verbose_name="Is bot", default=False)
 
-    def __str__(self):
+    contributions_count = models.PositiveIntegerField(
+        verbose_name="Contributions count", default=0
+    )
+
+    def __str__(self) -> str:
         """Return a human-readable representation of the user.
 
         Returns
             str: The name or login of the user.
 
         """
-        return f"{self.name or self.login}"
+        return self.title
 
     @property
     def issues(self):
         """Get issues created by the user.
 
-        Returns
+        Returns:
             QuerySet: A queryset of issues created by the user.
 
         """
@@ -51,7 +59,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """
         return self.created_releases.all()
 
-    def from_github(self, gh_user):
+    def from_github(self, gh_user) -> None:
         """Update the user instance based on GitHub user data.
 
         Args:
@@ -75,7 +83,12 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         self.is_bot = gh_user.type == "Bot"
 
     @staticmethod
-    def get_non_indexable_logins():
+    def bulk_save(users, fields=None) -> None:
+        """Bulk save users."""
+        BulkSaveModel.bulk_save(User, users, fields=fields)
+
+    @staticmethod
+    def get_non_indexable_logins() -> set:
         """Get logins that should not be indexed.
 
         Returns
@@ -89,7 +102,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         }
 
     @staticmethod
-    def update_data(gh_user, save=True):
+    def update_data(gh_user, *, save: bool = True) -> User:
         """Update GitHub user data.
 
         Args:

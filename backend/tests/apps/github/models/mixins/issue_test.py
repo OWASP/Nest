@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -35,8 +35,8 @@ def issue_index_mixin_instance():
     instance.repository.idx_topics = ["repo_topic1", "repo_topic2"]
 
     instance.comments_count = COMMENTS_COUNT
-    instance.created_at = datetime(2021, 9, 1, tzinfo=timezone.utc)
-    instance.updated_at = datetime(2021, 9, 2, tzinfo=timezone.utc)
+    instance.created_at = datetime(2021, 9, 1, tzinfo=UTC)
+    instance.updated_at = datetime(2021, 9, 2, tzinfo=UTC)
     instance.url = "https://example.com/issue"
     instance.title = "Issue Title"
     instance.summary = "Issue Summary"
@@ -65,8 +65,8 @@ class TestIssueIndexMixin:
             ("idx_repository_stars_count", STARS_COUNT),
             ("idx_repository_topics", ["repo_topic1", "repo_topic2"]),
             ("idx_comments_count", COMMENTS_COUNT),
-            ("idx_created_at", datetime(2021, 9, 1, tzinfo=timezone.utc).timestamp()),
-            ("idx_updated_at", datetime(2021, 9, 2, tzinfo=timezone.utc).timestamp()),
+            ("idx_created_at", datetime(2021, 9, 1, tzinfo=UTC).timestamp()),
+            ("idx_updated_at", datetime(2021, 9, 2, tzinfo=UTC).timestamp()),
             ("idx_url", "https://example.com/issue"),
             ("idx_title", "Issue Title"),
             ("idx_summary", "Issue Summary"),

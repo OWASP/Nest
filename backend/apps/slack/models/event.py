@@ -3,7 +3,9 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.slack.commands.owasp import COMMAND as OWASP_COMMAND
+from apps.slack.commands.owasp import Owasp
+
+OWASP_COMMAND = Owasp().get_command_name()
 
 
 class Event(TimestampedModel):
@@ -20,7 +22,7 @@ class Event(TimestampedModel):
     user_id = models.CharField(verbose_name="User ID", max_length=15)
     user_name = models.CharField(verbose_name="User name", max_length=100, default="")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Event human readable representation.
 
         Returns
@@ -29,7 +31,7 @@ class Event(TimestampedModel):
         """
         return f"Event from {self.user_name or self.user_id} triggered by {self.trigger}"
 
-    def from_slack(self, context, payload):
+    def from_slack(self, context, payload) -> None:
         """Create instance based on Slack data.
 
         Args:
@@ -57,7 +59,7 @@ class Event(TimestampedModel):
         self.user_name = payload.get("user_name", "")
 
     @staticmethod
-    def create(context, payload, save=True):
+    def create(context: dict, payload: dict, *, save: bool = True) -> "Event":
         """Create event.
 
         Args:

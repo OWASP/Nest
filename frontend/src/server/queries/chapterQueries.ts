@@ -25,3 +25,12 @@ export const GET_CHAPTER_DATA = gql`
     }
   }
 `
+
+export const GET_CHAPTER_METADATA = gql`
+  query GetChapter($key: String!) {
+    chapter(key: $key) {
+      name
+      summary
+    }
+  }
+`

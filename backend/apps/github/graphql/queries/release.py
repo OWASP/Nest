@@ -1,7 +1,9 @@
 """GraphQL queries for handling OWASP releases."""
 
+from __future__ import annotations
+
 import graphene
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, QuerySet, Subquery
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.release import ReleaseNode
@@ -13,20 +15,28 @@ class ReleaseQuery(BaseQuery):
 
     recent_releases = graphene.List(
         ReleaseNode,
-        limit=graphene.Int(default_value=6),
         distinct=graphene.Boolean(default_value=False),
+        limit=graphene.Int(default_value=6),
         login=graphene.String(required=False),
         organization=graphene.String(required=False),
     )
 
-    def resolve_recent_releases(root, info, limit, distinct=False, login=None, organization=None):
+    def resolve_recent_releases(
+        root,
+        info,
+        *,
+        distinct: bool = False,
+        limit: int = 6,
+        login=None,
+        organization: str | None = None,
+    ) -> QuerySet:
         """Resolve recent releases with optional distinct filtering.
 
         Args:
             root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
-            limit (int): Maximum number of releases to return.
             distinct (bool): Whether to return unique releases per author and repository.
+            limit (int): Maximum number of releases to return.
             login (str): Optional GitHub username for filtering releases.
             organization (str): Optional GitHub organization for filtering releases.
 
@@ -43,14 +53,14 @@ class ReleaseQuery(BaseQuery):
         if login:
             queryset = queryset.select_related(
                 "author",
+                "repository",
+                "repository__organization",
             ).filter(
                 author__login=login,
             )
 
         if organization:
-            queryset = queryset.select_related(
-                "repository__organization",
-            ).filter(
+            queryset = queryset.filter(
                 repository__organization__login=organization,
             )
 
