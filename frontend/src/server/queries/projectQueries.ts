@@ -54,12 +54,6 @@ export const GET_PROJECT_DATA = gql`
       repositoriesCount
       starsCount
       summary
-      topContributors(excludedUsernames: $excludedUsernames)  {
-        avatarUrl
-        contributionsCount
-        login
-        name
-      }
       topics
       type
       updatedAt
@@ -76,6 +70,12 @@ export const GET_PROJECT_DATA = gql`
       repositoryName
       title
       url
+    }
+    topContributors(project: $key, excludedUsernames: $excludedUsernames) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `

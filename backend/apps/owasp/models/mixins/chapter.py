@@ -1,5 +1,8 @@
 """OWASP app chapter mixins."""
 
+from __future__ import annotations
+
+from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 
@@ -68,7 +71,7 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_top_contributors(self) -> list:
         """Return top contributors for indexing."""
-        return self.get_top_contributors(repositories=[self.owasp_repository])
+        return RepositoryContributor.get_top_contributors(chapter=self.key)
 
     @property
     def idx_updated_at(self) -> float:

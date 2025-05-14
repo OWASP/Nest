@@ -81,12 +81,12 @@ class ProjectNode(GenericEntityNode):
         """Resolve topics."""
         return self.idx_topics
 
-    def resolve_top_contributors(self, info, limit=15, excludedUsernames=None):
+    def resolve_top_contributors(self, info, *, excluded_usernames=None, limit=15):
         """Resolve top contributors."""
         return RepositoryContributorQuery().resolve_top_contributors(
             info=info,
             limit=limit,
             organization=self.organization.login if hasattr(self, "organization") else None,
-            excluded_usernames=excludedUsernames,
+            excluded_usernames=excluded_usernames,
             project_key=self.key,
         )

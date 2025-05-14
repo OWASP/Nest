@@ -65,3 +65,9 @@ OWASP Nest was **originally created by Arkadii Yakovets** (Ark) to address chall
 Over time, OWASP Nest has expanded to address broader OWASP community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, along with NestBot, has become a popular entry point for various OWASP aspects, including projects, chapters, users, and aggregated contribution opportunities -- with even more features planned. OWASP Nest's success is also the result of many valuable [contributions](https://github.com/OWASP/Nest/graphs/contributors) from the broader [OWASP Nest community](https://owasp.slack.com/archives/project-nest), whose efforts have helped shape and improve the project in countless ways.
 
 **No other OWASP projects' code was used in OWASP Nest's development.** While explicit attribution (other than per MIT license) is not required, contributors and other OWASP project leaders are welcome to provide it at their discretion.
+
+### Community and Social Media
+
+- [BlueSky account](https://bsky.app/profile/nest.owasp.org)
+- [LinkedIn group](https://www.linkedin.com/groups/14656108/)
+- [Slack channel](https://owasp.slack.com/archives/project-nest) (join [here](https://owasp.org/slack/invite))

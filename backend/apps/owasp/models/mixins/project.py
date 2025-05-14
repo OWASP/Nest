@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from apps.common.utils import join_values
+from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
 ISSUES_LIMIT = 6
@@ -104,7 +105,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_top_contributors(self) -> list:
         """Return top contributors for indexing."""
-        return self.get_top_contributors(repositories=self.repositories.all())
+        return RepositoryContributor.get_top_contributors(project=self.key)
 
     @property
     def idx_type(self) -> str:

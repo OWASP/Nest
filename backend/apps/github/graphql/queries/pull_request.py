@@ -51,12 +51,18 @@ class PullRequestQuery(BaseQuery):
             QuerySet: Queryset containing the filtered list of pull requests.
 
         """
-        queryset = PullRequest.objects.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).order_by(
-            "-created_at",
+        queryset = (
+            PullRequest.objects.select_related(
+                "author",
+                "repository",
+                "repository__organization",
+            )
+            .exclude(
+                author__is_bot=True,
+            )
+            .order_by(
+                "-created_at",
+            )
         )
 
         if login:
@@ -79,8 +85,12 @@ class PullRequestQuery(BaseQuery):
 
         if distinct:
             latest_pull_request_per_author = (
-                queryset.filter(author_id=OuterRef("author_id"))
-                .order_by("-created_at")
+                queryset.filter(
+                    author_id=OuterRef("author_id"),
+                )
+                .order_by(
+                    "-created_at",
+                )
                 .values("id")[:1]
             )
             queryset = queryset.filter(

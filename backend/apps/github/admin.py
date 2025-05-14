@@ -163,6 +163,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         "updated_at",
         "followers_count",
     )
+    list_filter = ("is_owasp_organization",)
     search_fields = ("name",)
 
 
@@ -171,12 +172,22 @@ class ReleaseAdmin(admin.ModelAdmin):
         "author",
         "repository",
     )
-    search_fields = ("node_id", "repository__name")
+    search_fields = (
+        "node_id",
+        "repository__name",
+    )
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("title", "created_at", "updated_at")
-    search_fields = ("login", "name")
+    list_display = (
+        "title",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "login",
+        "name",
+    )
 
 
 admin.site.register(Issue, IssueAdmin)

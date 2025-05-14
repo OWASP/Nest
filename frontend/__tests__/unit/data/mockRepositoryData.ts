@@ -10,12 +10,6 @@ export const mockRepositoryData = {
     forksCount: 3000,
     openIssuesCount: 2,
     starsCount: 50000,
-    topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
-      contributionsCount: 30 - i,
-      login: `contributor${i + 1}`,
-      name: `Contributor ${i + 1}`,
-    })),
     languages: ['JavaScript', 'TypeScript'],
     topics: ['web', 'security'],
     description: 'A sample test repository',
@@ -66,4 +60,10 @@ export const mockRepositoryData = {
       },
     },
   ],
+  topContributors: Array.from({ length: 15 }, (_, i) => ({
+    avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
+    contributionsCount: 30 - i,
+    login: `contributor${i + 1}`,
+    name: `Contributor ${i + 1}`,
+  })),
 }
