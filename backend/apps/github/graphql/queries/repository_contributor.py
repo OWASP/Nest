@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import graphene
-from django.db.models import F, Window
-from django.db.models.functions import Rank
 
 from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
@@ -54,45 +52,14 @@ class RepositoryContributorQuery(BaseQuery):
             list: List of top contributors with their details.
 
         """
-        queryset = (
-            RepositoryContributor.objects.by_humans()
-            .to_community_repositories()
-            .filter(repository__project__isnull=False)
-            .select_related("repository__project", "user")
-            .annotate(
-                rank=Window(
-                    expression=Rank(),
-                    order_by=F("contributions_count").desc(),
-                    partition_by=F("user__login"),
-                )
-            )
-        )
-
-        if excluded_usernames:
-            queryset = queryset.exclude(user__login__in=excluded_usernames)
-
-        if organization:
-            queryset = queryset.select_related(
-                "repository__organization",
-            ).filter(
-                repository__organization__login=organization,
-            )
-
-        top_contributors = (
-            queryset.filter(rank=1)
-            .annotate(
-                project_name=F("repository__project__name"),
-                project_key=F("repository__project__key"),
-            )
-            .values(
-                "contributions_count",
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-                "project_key",
-                "project_name",
-            )
-            .order_by("-contributions_count")[:limit]
+        top_contributors = RepositoryContributor.get_top_contributors(
+            limit=limit,
+            chapter=chapter,
+            committee=committee,
+            excluded_usernames=excluded_usernames,
+            organization=organization,
+            project=project,
+            repository=repository,
         )
 
         return [

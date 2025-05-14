@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_PROJECT_DATA = gql`
-  query GetProject($key: String!, $excludedUsernames: [String!]) {
+  query GetProject($key: String!) {
     project(key: $key) {
       contributorsCount
       forksCount
@@ -71,7 +71,7 @@ export const GET_PROJECT_DATA = gql`
       title
       url
     }
-    topContributors(project: $key, excludedUsernames: $excludedUsernames) {
+    topContributors(project: $key) {
       avatarUrl
       contributionsCount
       login
@@ -81,10 +81,25 @@ export const GET_PROJECT_DATA = gql`
 `
 
 export const GET_PROJECT_METADATA = gql`
-  query GetProject($key: String!) {
+  query GetProjectMetadata($key: String!) {
     project(key: $key) {
+      contributorsCount
+      forksCount
+      issuesCount
       name
+      starsCount
       summary
+    }
+  }
+`
+
+export const GET_TOP_CONTRIBUTORS = gql`
+  query GetTopContributors($excludedUsernames: [String!], $key: String!) {
+    topContributors(excludedUsernames: $excludedUsernames, project: $key) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `
