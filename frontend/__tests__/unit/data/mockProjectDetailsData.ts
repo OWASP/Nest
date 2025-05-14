@@ -66,12 +66,6 @@ export const mockProjectDetailsData = {
     repositoriesCount: 3,
     starsCount: 2200,
     summary: 'An example project showcasing GraphQL and Django integration.',
-    topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
-      contributionsCount: 30 - i,
-      login: `contributor${i + 1}`,
-      name: `Contributor ${i + 1}`,
-    })),
     topics: ['graphql', 'django', 'backend'],
     type: 'Tool',
     updatedAt: '2025-02-07T12:34:56Z',
@@ -97,4 +91,10 @@ export const mockProjectDetailsData = {
       url: 'https://github.com/test-org/test-repo-2/pull/2',
     },
   ],
+  topContributors: Array.from({ length: 15 }, (_, i) => ({
+    avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
+    contributionsCount: 30 - i,
+    login: `contributor${i + 1}`,
+    name: `Contributor ${i + 1}`,
+  })),
 }
