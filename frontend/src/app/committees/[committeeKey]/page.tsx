@@ -23,12 +23,9 @@ export default function CommitteeDetailsPage() {
   const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data, error: graphQLRequestError } = useQuery<{ committee: CommitteeDetailsTypeGraphQL }>(
-    GET_COMMITTEE_DATA,
-    {
-      variables: { key: committeeKey },
-    }
-  )
+  const { data, error: graphQLRequestError } = useQuery(GET_COMMITTEE_DATA, {
+    variables: { key: committeeKey },
+  })
 
   useEffect(() => {
     if (data?.committee) {

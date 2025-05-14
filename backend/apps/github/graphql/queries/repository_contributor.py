@@ -60,12 +60,12 @@ class RepositoryContributorQuery(BaseQuery):
 
         return [
             RepositoryContributorNode(
-                avatar_url=trc["avatar_url"],
-                contributions_count=trc["contributions_count"],
-                login=trc["login"],
-                name=trc["name"],
-                project_key=trc["project_key"],
-                project_name=trc["project_name"],
+                avatar_url=tc["avatar_url"],
+                contributions_count=tc["contributions_count"],
+                login=tc["login"],
+                name=tc["name"],
+                project_key=tc.get("project_key"),
+                project_name=tc.get("project_name"),
             )
-            for trc in top_contributors
+            for tc in top_contributors
         ]

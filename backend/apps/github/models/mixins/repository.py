@@ -105,7 +105,7 @@ class RepositoryIndexMixin:
     @property
     def idx_top_contributors(self) -> list[dict[str, Any]]:
         """Return top contributors for indexing."""
-        return RepositoryContributor.get_top_contributors(repositories=[self])
+        return RepositoryContributor.get_top_contributors(repository=self.key)
 
     @property
     def idx_topics(self):

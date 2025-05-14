@@ -15,9 +15,6 @@ from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
 )
-from apps.github.models.repository_contributor import (
-    RepositoryContributor,
-)
 from apps.github.utils import get_repository_file_content
 
 logger = logging.getLogger(__name__)
@@ -210,10 +207,6 @@ class RepositoryBasedEntityModel(models.Model):
             return f"https://github.com/{match.group(1)}".lower()
 
         return url
-
-    def get_top_contributors(self, repositories=()) -> list[dict]:
-        """Get top contributors."""
-        return RepositoryContributor.get_top_contributors(repositories=repositories)
 
     def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""

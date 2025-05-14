@@ -8,8 +8,6 @@ from django.template.defaultfilters import pluralize
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.managers.repository_contributor import RepositoryContributorManager
 
-TOP_CONTRIBUTORS_LIMIT = 15
-
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
     """Repository contributor model."""
@@ -114,12 +112,11 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     @classmethod
     def get_top_contributors(
         cls,
-        limit=TOP_CONTRIBUTORS_LIMIT,
+        limit=15,
         chapter=None,
         committee=None,
         organization=None,
         project=None,
-        repositories=None,
         repository=None,
     ):
         """Get top contributors across repositories, organization, or project.
@@ -130,7 +127,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             committee (str, optional): Committee key to filter by.
             organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
-            repositories (QuerySet or list, optional): Repositories to filter by.
             repository (str, optional): Repository key to filter by.
 
         Returns:
@@ -143,8 +139,12 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             .select_related("repository__project", "user")
         )
 
-        if repositories:
-            queryset = queryset.filter(repository__in=repositories)
+        if project:
+            queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
+        elif chapter:
+            queryset = queryset.filter(repository__key__iexact=f"www-chapter-{chapter}")
+        elif committee:
+            queryset = queryset.filter(repository__key__iexact=f"www-committee-{committee}")
 
         if organization:
             queryset = queryset.select_related(
@@ -153,64 +153,48 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 repository__organization__login=organization,
             )
 
-        if project:
-            queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
-
-        if chapter:
-            queryset = queryset.filter(repository__chapter__key__iexact=f"www-chapter-{chapter}")
-
-        if committee:
-            queryset = queryset.filter(
-                repository__committee__key__iexact=f"www-committee-{committee}"
-            )
-
         if repository:
             queryset = queryset.filter(repository__name__iexact=repository)
 
-        if not repositories:
-            # Only apply project filter when not filtering by repositories
-            queryset = queryset.filter(repository__project__isnull=False)
-
-            # Rank by contributions when looking across repositories
-            queryset = queryset.annotate(
-                rank=Window(
-                    expression=Rank(),
-                    order_by=F("contributions_count").desc(),
-                    partition_by=F("user__login"),
+        # Project contributors only for main/project/organization pages.
+        if not (chapter or committee or repository):
+            queryset = (
+                queryset.filter(repository__project__isnull=False)
+                .annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        order_by=F("contributions_count").desc(),
+                        partition_by=F("user__login"),
+                    )
                 )
+                .filter(rank=1)
             )
 
-            # Get top contributor per user
-            queryset = queryset.filter(rank=1)
-
-        # Aggregate total contributions for users
-        result = queryset.values(
-            "user__avatar_url",
-            "user__login",
-            "user__name",
-        ).annotate(total_contributions=Sum("contributions_count"))
-
-        # Add project information if we're not querying by project or organization
-        if not project and not organization and not repositories:
-            result = result.annotate(
+        # Aggregate total contributions for users.
+        top_contributors = (
+            queryset.values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+            )
+            .annotate(
                 project_name=F("repository__project__name"),
                 project_key=F("repository__project__key"),
+                total_contributions=Sum("contributions_count"),
             )
+            .order_by("-total_contributions")[:limit]
+        )
 
-        # Order and limit
-        result = result.order_by("-total_contributions")[:limit]
-
-        # Format the result
         return [
             {
-                "avatar_url": item["user__avatar_url"],
-                "contributions_count": item["total_contributions"],
-                "login": item["user__login"],
-                "name": item["user__name"],
-                "project_key": item.get("project_key", "").replace("www-project-", "")
-                if item.get("project_key")
+                "avatar_url": tc["user__avatar_url"],
+                "contributions_count": tc["total_contributions"],
+                "login": tc["user__login"],
+                "name": tc["user__name"],
+                "project_key": tc["project_key"].replace("www-project-", "")
+                if tc.get("project_key")
                 else None,
-                "project_name": item.get("project_name"),
+                "project_name": tc.get("project_name"),
             }
-            for item in result
+            for tc in top_contributors
         ]
