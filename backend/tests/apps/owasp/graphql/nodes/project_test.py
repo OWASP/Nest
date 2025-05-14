@@ -101,6 +101,7 @@ class TestProjectNode:
             "leaders",
             "recent_issues",
             "recent_releases",
+            "recent_pull_requests",
             "repositories_count",
             "repositories",
             "top_contributors",

@@ -64,18 +64,18 @@ export const GET_PROJECT_DATA = gql`
       type
       updatedAt
       url
-    }
-    recentPullRequests(project: $key) {
-      author {
-        avatarUrl
-        login
-        name
+      recentPullRequests {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        createdAt
+        organizationName
+        repositoryName
+        title
+        url
       }
-      createdAt
-      organizationName
-      repositoryName
-      title
-      url
     }
   }
 `
