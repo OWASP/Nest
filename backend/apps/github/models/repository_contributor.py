@@ -1,12 +1,12 @@
 """Github app label model."""
 
 from django.db import models
+from django.db.models import F, Sum, Window
+from django.db.models.functions import Rank
 from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.managers.repository_contributor import RepositoryContributorManager
-
-TOP_CONTRIBUTORS_LIMIT = 15
 
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
@@ -108,3 +108,93 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             repository_contributor.save()
 
         return repository_contributor
+
+    @classmethod
+    def get_top_contributors(
+        cls,
+        limit=15,
+        chapter=None,
+        committee=None,
+        organization=None,
+        project=None,
+        repository=None,
+    ):
+        """Get top contributors across repositories, organization, or project.
+
+        Args:
+            limit (int, optional): Maximum number of contributors to return.
+            chapter (str, optional): Chapter key to filter by.
+            committee (str, optional): Committee key to filter by.
+            organization (str, optional): Organization login to filter by.
+            project (str, optional): Project key to filter by.
+            repository (str, optional): Repository key to filter by.
+
+        Returns:
+            list: List of dictionaries containing contributor information.
+
+        """
+        queryset = (
+            cls.objects.by_humans()
+            .to_community_repositories()
+            .select_related("repository__project", "user")
+        )
+
+        if project:
+            queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
+        elif chapter:
+            queryset = queryset.filter(repository__key__iexact=f"www-chapter-{chapter}")
+        elif committee:
+            queryset = queryset.filter(repository__key__iexact=f"www-committee-{committee}")
+
+        if organization:
+            queryset = queryset.select_related(
+                "repository__organization",
+            ).filter(
+                repository__organization__login=organization,
+            )
+
+        if repository:
+            queryset = queryset.filter(repository__name__iexact=repository)
+
+        # Project contributors only for main/project/organization pages.
+        if not (chapter or committee or repository):
+            queryset = (
+                queryset.filter(repository__project__isnull=False)
+                .annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        order_by=F("contributions_count").desc(),
+                        partition_by=F("user__login"),
+                    )
+                )
+                .filter(rank=1)
+            )
+
+        # Aggregate total contributions for users.
+        top_contributors = (
+            queryset.values(
+                "user__avatar_url",
+                "user__login",
+                "user__name",
+            )
+            .annotate(
+                project_name=F("repository__project__name"),
+                project_key=F("repository__project__key"),
+                total_contributions=Sum("contributions_count"),
+            )
+            .order_by("-total_contributions")[:limit]
+        )
+
+        return [
+            {
+                "avatar_url": tc["user__avatar_url"],
+                "contributions_count": tc["total_contributions"],
+                "login": tc["user__login"],
+                "name": tc["user__name"],
+                "project_key": tc["project_key"].replace("www-project-", "")
+                if tc.get("project_key")
+                else None,
+                "project_name": tc.get("project_name"),
+            }
+            for tc in top_contributors
+        ]

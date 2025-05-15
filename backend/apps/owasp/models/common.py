@@ -9,16 +9,11 @@ from urllib.parse import urlparse
 
 import yaml
 from django.db import models
-from django.db.models import Sum
 
 from apps.common.open_ai import OpenAi
 from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
-)
-from apps.github.models.repository_contributor import (
-    TOP_CONTRIBUTORS_LIMIT,
-    RepositoryContributor,
 )
 from apps.github.utils import get_repository_file_content
 
@@ -212,26 +207,6 @@ class RepositoryBasedEntityModel(models.Model):
             return f"https://github.com/{match.group(1)}".lower()
 
         return url
-
-    def get_top_contributors(self, repositories=()) -> list[dict]:
-        """Get top contributors."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["total_contributions"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.by_humans()
-            .filter(repository__in=repositories)
-            .values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-            )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
 
     def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""
