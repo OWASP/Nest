@@ -153,6 +153,7 @@ class Project(
             "repository",
         )
 
+    @property
     def nest_key(self) -> str:
         """Get Nest key."""
         return self.key.replace("www-project-", "")
