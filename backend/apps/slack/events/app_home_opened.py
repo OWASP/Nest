@@ -14,10 +14,11 @@ class AppHomeOpened(EventBase):
         """Handle the app_home_opened event."""
         user_id = event["user"]
         context = {
-            "user_id": user_id,
             "TAB": TAB,
+            "user_id": user_id,
         }
 
-        home_view = {"type": "home", "blocks": [*get_header(), *self.get_render_blocks(context)]}
-
-        client.views_publish(user_id=user_id, view=home_view)
+        client.views_publish(
+            user_id=user_id,
+            view={"type": "home", "blocks": [*get_header(), *self.get_render_blocks(context)]},
+        )

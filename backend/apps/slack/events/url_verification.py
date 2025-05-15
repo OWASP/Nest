@@ -9,5 +9,5 @@ class UrlVerification(EventBase):
     event_type = "url_verification"
 
     def handle_event(self, event, client):
-        """Handle the url_verification event."""
+        """Handle the URL verification event."""
         return event["challenge"]

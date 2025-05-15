@@ -1,6 +1,8 @@
 """Base class and common functionality for Slack events."""
 
 import logging
+from collections.abc import Callable
+from typing import Any
 
 from django.conf import settings
 from slack_sdk.errors import SlackApiError
@@ -9,6 +11,7 @@ from apps.common.constants import NL
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.template_loader import env
+from apps.slack.utils import get_text
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +20,12 @@ class EventBase:
     """Base class for Slack events with common functionality.
 
     Template formatting notes:
-    - Use "{{ SECTION_BREAK }}" to separate content into different Slack blocks
-    - Use "{{ DIVIDER }}" to insert a horizontal divider
+        - Use "{{ SECTION_BREAK }}" to separate content into different Slack blocks
+        - Use "{{ DIVIDER }}" to insert a horizontal divider
     """
 
     event_type: str | None = None
-    matchers = None
+    matchers: list[Callable[[Any], bool]] | None = None
 
     @staticmethod
     def get_events():
@@ -33,7 +36,7 @@ class EventBase:
     def configure_events():
         """Configure all event handlers with the Slack app."""
         if SlackConfig.app is None:
-            logger.warning("SlackConfig.app is None. Events not registered.")
+            logger.warning("SlackConfig.app is None. Event handlers are not registered.")
             return
 
         for event_class in EventBase.get_events():
@@ -41,10 +44,10 @@ class EventBase:
 
     def register(self):
         """Register this event handler with the Slack app."""
-        if self.matchers:
-            SlackConfig.app.event(self.event_type, matchers=self.matchers)(self.handler)
-        else:
-            SlackConfig.app.event(self.event_type)(self.handler)
+        SlackConfig.app.event(
+            self.event_type,
+            matchers=self.matchers,
+        )(self.handler)
 
     def handler(self, event, client, ack):
         """Handle the Slack event.
@@ -66,11 +69,15 @@ class EventBase:
             if e.response["error"] == "cannot_dm_bot":
                 logger.warning("Cannot DM bot user in event %s", self.event_type)
                 return
-            logger.exception("Slack API error handling %s", self.event_type)
-            self.handle_error(event, client, e)
-        except Exception as e:
+            logger.exception(
+                "Slack API error while handling %s: %s",
+                self.event_type,
+                e.response["error"],
+            )
+            self.handle_error(event, client)
+        except Exception:
             logger.exception("Error handling %s", self.event_type)
-            self.handle_error(event, client, e)
+            self.handle_error(event, client)
 
     def handle_event(self, event, client):
         """Implement event handling logic in subclasses.
@@ -79,31 +86,29 @@ class EventBase:
             event (dict): The Slack event payload.
             client (WebClient): The Slack WebClient instance.
 
-        Raises:
-            NotImplementedError: If not implemented in subclass.
-
         """
-        error_message = "Subclasses must implement handle_event"
-        raise NotImplementedError(error_message)
+        if conversation := self.open_conversation(client, event.get("user")):
+            blocks = self.get_render_blocks(self.get_context(event))
+            client.chat_postMessage(
+                blocks=blocks,
+                channel=conversation["channel"]["id"],
+                text=get_text(blocks),
+            )
 
-    def handle_error(self, event, client, error):
+    def handle_error(self, event, client):
         """Handle errors during event processing and notify the user if possible.
 
         Args:
             event (dict): The Slack event payload.
             client (WebClient): The Slack WebClient instance.
-            error (Exception): The exception that occurred.
 
         """
         try:
-            if "user" in event or "user_id" in event:
-                user_id = event.get("user") or event.get("user_id")
-                conv = self.open_conversation(client, user_id)
-                if conv:
-                    client.chat_postMessage(
-                        channel=conv["channel"]["id"],
-                        text=":warning: An error occurred processing your request.",
-                    )
+            conversation = self.open_conversation(client, event.get("user"))
+            client.chat_postMessage(
+                channel=conversation["channel"]["id"],
+                text=":warning: An error occurred processing your request.",
+            )
         except Exception:
             logger.exception("Failed to send error notification")
 
@@ -118,6 +123,9 @@ class EventBase:
             dict or None: The conversation object, or None if cannot DM bot.
 
         """
+        if not user_id:
+            return None
+
         try:
             return client.conversations_open(users=user_id)
         except SlackApiError as e:
@@ -141,6 +149,7 @@ class EventBase:
                 blocks.append({"type": "divider"})
             elif section:
                 blocks.append(markdown(section))
+
         return blocks
 
     def get_render_text(self, context):
@@ -153,7 +162,9 @@ class EventBase:
             str: The rendered text.
 
         """
-        return self.get_template_file().render(**self.get_template_context(context))
+        return self.get_template_file().render(
+            **self.get_template_context(context),
+        )
 
     def get_template_context(self, context):
         """Build the template context, including base variables and the provided context.
@@ -166,8 +177,8 @@ class EventBase:
 
         """
         return {
-            "NL": NL,
             "DIVIDER": "{{ DIVIDER }}",
+            "NL": NL,
             "SECTION_BREAK": "{{ SECTION_BREAK }}",
             **context,
         }
@@ -178,16 +189,8 @@ class EventBase:
         Returns:
             Template: The Jinja template object.
 
-        Raises:
-            Exception: If the template cannot be loaded.
-
         """
-        template_name = self.get_template_file_name()
-        try:
-            return env.get_template(template_name)
-        except Exception:
-            logger.exception("Failed to load template '%s'", template_name)
-            raise
+        return env.get_template(self.get_template_file_name())
 
     def get_template_file_name(self):
         """Get the template file name for this event handler.
@@ -196,8 +199,8 @@ class EventBase:
             str: The template file name in snake_case.
 
         """
-        class_name = self.__class__.__name__
-        snake_case = "".join(
-            ["_" + c.lower() if c.isupper() else c.lower() for c in class_name]
+        file_name = "".join(
+            [f"_{c.lower()}" if c.isupper() else c for c in self.__class__.__name__]
         ).lstrip("_")
-        return f"events/{snake_case}.jinja"
+
+        return f"events/{file_name}.jinja"
