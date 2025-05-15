@@ -4,7 +4,7 @@ import logging
 
 from slack_sdk.errors import SlackApiError
 
-from apps.slack.apps import SlackConfig
+from apps.common.constants import OWASP_NEST_URL
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
     OWASP_APPSEC_CHANNEL_ID,
@@ -34,6 +34,38 @@ class TeamJoin(EventBase):
 
     event_type = "team_join"
 
+    def get_context(self, event):
+        """Get the template context.
+
+        Args:
+            event: The Slack event
+
+        Returns:
+            dict: The template context.
+
+        """
+        user_id = event["user"]["id"]
+        return {
+            "user_id": user_id,
+            "project_nest_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
+            "community_channel": OWASP_COMMUNITY_CHANNEL_ID,
+            "ask_channel": OWASP_ASKOWASP_CHANNEL_ID,
+            "london_channel": OWASP_CHAPTER_LONDON_CHANNEL_ID,
+            "juice_shop_channel": OWASP_PROJECT_JUICE_SHOP_CHANNEL_ID,
+            "appsec_channel": OWASP_APPSEC_CHANNEL_ID,
+            "devsecops_channel": OWASP_DEVSECOPS_CHANNEL_ID,
+            "threat_modeling_channel": OWASP_THREAT_MODELING_CHANNEL_ID,
+            "jobs_channel": OWASP_JOBS_CHANNEL_ID,
+            "contribute_channel": OWASP_CONTRIBUTE_CHANNEL_ID,
+            "sponsorship_channel": OWASP_SPONSORSHIP_CHANNEL_ID,
+            "leaders_channel": OWASP_LEADERS_CHANNEL_ID,
+            "mentors_channel": OWASP_MENTORS_CHANNEL_ID,
+            "gsoc_channel": OWASP_GSOC_CHANNEL_ID,
+            "developers_channel": OWASP_DEVELOPERS_CHANNEL_ID,
+            "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
+            "nest_url": OWASP_NEST_URL,
+        }
+
     def handle_event(self, event, client):
         """Handle the team_join event."""
         user_id = event["user"]["id"]
@@ -44,25 +76,7 @@ class TeamJoin(EventBase):
                 logger.warning("Failed to open conversation with user %s", user_id)
                 return
 
-            context = {
-                "user_id": user_id,
-                "project_nest_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
-                "community_channel": OWASP_COMMUNITY_CHANNEL_ID,
-                "ask_channel": OWASP_ASKOWASP_CHANNEL_ID,
-                "london_channel": OWASP_CHAPTER_LONDON_CHANNEL_ID,
-                "juice_shop_channel": OWASP_PROJECT_JUICE_SHOP_CHANNEL_ID,
-                "appsec_channel": OWASP_APPSEC_CHANNEL_ID,
-                "devsecops_channel": OWASP_DEVSECOPS_CHANNEL_ID,
-                "threat_modeling_channel": OWASP_THREAT_MODELING_CHANNEL_ID,
-                "jobs_channel": OWASP_JOBS_CHANNEL_ID,
-                "contribute_channel": OWASP_CONTRIBUTE_CHANNEL_ID,
-                "sponsorship_channel": OWASP_SPONSORSHIP_CHANNEL_ID,
-                "leaders_channel": OWASP_LEADERS_CHANNEL_ID,
-                "mentors_channel": OWASP_MENTORS_CHANNEL_ID,
-                "gsoc_channel": OWASP_GSOC_CHANNEL_ID,
-                "developers_channel": OWASP_DEVELOPERS_CHANNEL_ID,
-                "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
-            }
+            context = self.get_context(event)
 
             client.chat_postMessage(
                 blocks=self.get_render_blocks(context),
@@ -79,7 +93,3 @@ class TeamJoin(EventBase):
         except Exception:
             logger.exception("Error in team_join handler for user: %s", user_id)
             raise
-
-
-if SlackConfig.app:
-    TeamJoin().register()

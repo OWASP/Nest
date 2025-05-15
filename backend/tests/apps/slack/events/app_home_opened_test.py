@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.common.constants import TAB
 from apps.slack.events.app_home_opened import AppHomeOpened
 
 
@@ -61,6 +62,6 @@ class TestAppHomeOpened:
 
             expected_context = {
                 "user_id": "U12345",
-                "TAB": "    ",
+                "TAB": TAB,
             }
             handler.get_render_blocks.assert_called_once_with(expected_context)

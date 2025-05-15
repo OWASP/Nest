@@ -2,7 +2,6 @@
 
 import logging
 
-from apps.slack.apps import SlackConfig
 from apps.slack.common.gsoc import GSOC_2025_MILESTONES, GSOC_GENERAL_INFORMATION_BLOCKS
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
 from apps.slack.events.event import EventBase
@@ -21,6 +20,23 @@ class Gsoc(EventBase):
         super().__init__()
         self.matchers = [lambda event: f"#{event['channel']}" == OWASP_GSOC_CHANNEL_ID]
 
+    def get_context(self, event):
+        """Get the template context.
+
+        Args:
+            event: The Slack event
+
+        Returns:
+            dict: The template context.
+
+        """
+        return {
+            "user_id": event["user"],
+            "gsoc_channel_id": OWASP_GSOC_CHANNEL_ID,
+            "gsoc_info_blocks": GSOC_GENERAL_INFORMATION_BLOCKS,
+            "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
+        }
+
     def handle_event(self, event, client):
         """Handle the member_joined_channel event for the GSoC channel."""
         user_id = event["user"]
@@ -34,19 +50,9 @@ class Gsoc(EventBase):
 
         conv = self.open_conversation(client, user_id)
         if conv:
-            context = {
-                "user_id": user_id,
-                "gsoc_channel_id": OWASP_GSOC_CHANNEL_ID,
-                "gsoc_info_blocks": GSOC_GENERAL_INFORMATION_BLOCKS,
-                "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
-            }
-
+            context = self.get_context(event)
             client.chat_postMessage(
                 blocks=self.get_render_blocks(context),
                 channel=conv["channel"]["id"],
                 text=get_text(self.get_render_blocks(context)),
             )
-
-
-if SlackConfig.app:
-    Gsoc().register()

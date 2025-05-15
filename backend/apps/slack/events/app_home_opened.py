@@ -1,6 +1,6 @@
-"""Slack bot app_home_opened event handler using templates."""
+"""Slack bot app_home_opened event handler."""
 
-from apps.slack.apps import SlackConfig
+from apps.common.constants import TAB
 from apps.slack.blocks import get_header
 from apps.slack.events.event import EventBase
 
@@ -15,13 +15,9 @@ class AppHomeOpened(EventBase):
         user_id = event["user"]
         context = {
             "user_id": user_id,
-            "TAB": "    ",  # 4 spaces for indentation
+            "TAB": TAB,
         }
 
         home_view = {"type": "home", "blocks": [*get_header(), *self.get_render_blocks(context)]}
 
         client.views_publish(user_id=user_id, view=home_view)
-
-
-if SlackConfig.app:
-    AppHomeOpened().register()
