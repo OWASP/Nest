@@ -9,8 +9,8 @@ from apps.github.models.milestone import Milestone
 class MilestoneNode(BaseNode):
     """Github Milestone Node."""
 
-    repository_name = graphene.String()
     organization_name = graphene.String()
+    repository_name = graphene.String()
 
     class Meta:
         model = Milestone

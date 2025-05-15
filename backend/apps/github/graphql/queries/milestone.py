@@ -44,24 +44,25 @@ class MilestoneQuery(BaseQuery):
             list: A list of milestones.
 
         """
-        lower_state = state.lower()
-        if lower_state == "open":
-            milestones = Milestone.open_milestones.all()
-        elif lower_state == "closed":
-            milestones = Milestone.closed_milestones.all()
-        elif lower_state == "all":
-            milestones = Milestone.objects.all()
-        else:
-            message = f"Invalid state: {state}. Valid states are 'open', 'closed', or 'all'."
-            raise ValidationError(message)
+        match state.lower():
+            case "open":
+                milestones = Milestone.open_milestones.all()
+            case "closed":
+                milestones = Milestone.closed_milestones.all()
+            case "all":
+                milestones = Milestone.objects.all()
+            case _:
+                message = f"Invalid state: {state}. Valid states are 'open', 'closed', or 'all'."
+                raise ValidationError(message)
+
         milestones = milestones.select_related(
             "author",
             "repository",
             "repository__organization",
         ).prefetch_related(
             "issues",
-            "pull_requests",
             "labels",
+            "pull_requests",
         )
 
         if login:
@@ -70,4 +71,5 @@ class MilestoneQuery(BaseQuery):
             milestones = milestones.filter(repository__name=repository)
         if organization:
             milestones = milestones.filter(repository__organization__login=organization)
+
         return milestones[:limit]

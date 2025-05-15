@@ -54,15 +54,15 @@ class Issue(GenericIssueModel):
         null=True,
         related_name="created_issues",
     )
-    repository = models.ForeignKey(
-        "github.Repository",
+    milestone = models.ForeignKey(
+        "github.Milestone",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="issues",
     )
-    milestone = models.ForeignKey(
-        "github.Milestone",
+    repository = models.ForeignKey(
+        "github.Repository",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -118,11 +118,11 @@ class Issue(GenericIssueModel):
         # Author.
         self.author = author
 
-        # Repository.
-        self.repository = repository
-
         # Milestone.
         self.milestone = milestone
+
+        # Repository.
+        self.repository = repository
 
     def generate_hint(self, open_ai: OpenAi | None = None, max_tokens: int = 1000) -> None:
         """Generate a hint for the issue using AI.
@@ -191,8 +191,8 @@ class Issue(GenericIssueModel):
         Args:
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
-            repository (Repository, optional): The repository instance.
             milestone (Milestone, optional): The milestone related to the issue.
+            repository (Repository, optional): The repository instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:
@@ -205,7 +205,7 @@ class Issue(GenericIssueModel):
         except Issue.DoesNotExist:
             issue = Issue(node_id=issue_node_id)
 
-        issue.from_github(gh_issue, author=author, repository=repository, milestone=milestone)
+        issue.from_github(gh_issue, author=author, milestone=milestone, repository=repository)
         if save:
             issue.save()
 

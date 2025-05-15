@@ -74,6 +74,14 @@ class RepositoryNode(BaseNode):
             "-published_at",
         )[:RECENT_RELEASES_LIMIT]
 
+    def resolve_recent_milestones(self, info, limit=5):
+        """Resolve recent milestones."""
+        return self.recent_milestones.select_related(
+            "repository",
+        ).order_by(
+            "-created_at",
+        )[:limit]
+
     def resolve_top_contributors(self, info):
         """Resolve top contributors."""
         return self.idx_top_contributors
@@ -85,11 +93,3 @@ class RepositoryNode(BaseNode):
     def resolve_url(self, info):
         """Resolve URL."""
         return self.url
-
-    def resolve_recent_milestones(self, info, limit):
-        """Resolve recent milestones."""
-        return self.recent_milestones.select_related(
-            "repository",
-        ).order_by(
-            "-created_at",
-        )

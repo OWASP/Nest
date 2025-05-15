@@ -33,15 +33,15 @@ class PullRequest(GenericIssueModel):
         null=True,
         related_name="created_pull_requests",
     )
-    repository = models.ForeignKey(
-        "github.Repository",
+    milestone = models.ForeignKey(
+        "github.Milestone",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="pull_requests",
     )
-    milestone = models.ForeignKey(
-        "github.Milestone",
+    repository = models.ForeignKey(
+        "github.Repository",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -62,7 +62,7 @@ class PullRequest(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_pull_request, *, author=None, repository=None, milestone=None):
+    def from_github(self, gh_pull_request, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub pull request data.
 
         Args:
@@ -94,11 +94,11 @@ class PullRequest(GenericIssueModel):
         # Author.
         self.author = author
 
-        # Repository.
-        self.repository = repository
-
         # Milestone.
         self.milestone = milestone
+
+        # Repository.
+        self.repository = repository
 
     def save(self, *args, **kwargs) -> None:
         """Save Pull Request."""
@@ -138,7 +138,7 @@ class PullRequest(GenericIssueModel):
             pull_request = PullRequest(node_id=pull_request_node_id)
 
         pull_request.from_github(
-            gh_pull_request, author=author, repository=repository, milestone=milestone
+            gh_pull_request, author=author, milestone=milestone, repository=repository
         )
         if save:
             pull_request.save()

@@ -19,7 +19,10 @@ class LabelAdmin(admin.ModelAdmin):
 
 
 class MilestoneAdmin(admin.ModelAdmin):
-    search_fields = ("title", "body")
+    search_fields = (
+        "body",
+        "title",
+    )
 
 
 class PullRequestAdmin(admin.ModelAdmin):

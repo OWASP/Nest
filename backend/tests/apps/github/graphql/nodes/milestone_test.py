@@ -17,12 +17,12 @@ class TestMilestoneNode:
         assert MilestoneNode._meta.model == Milestone
         expected_fields = {
             "author",
-            "created_at",
-            "title",
-            "open_issues_count",
             "closed_issues_count",
-            "url",
-            "repository_name",
+            "created_at",
+            "open_issues_count",
             "organization_name",
+            "repository_name",
+            "title",
+            "url",
         }
         assert set(MilestoneNode._meta.fields) == expected_fields

@@ -81,17 +81,19 @@ def sync_repository(
             if gh_milestone.updated_at < until:
                 break
 
-            author = User.update_data(gh_milestone.creator)
+            milestone = Milestone.update_data(
+                gh_milestone,
+                author=User.update_data(gh_milestone.creator),
+                repository=repository,
+            )
 
-            milestone = Milestone.update_data(gh_milestone, author=author, repository=repository)
-
-            # Labels
+            # Labels.
             milestone.labels.clear()
             for gh_milestone_label in gh_milestone.get_labels():
                 try:
                     milestone.labels.add(Label.update_data(gh_milestone_label))
                 except UnknownObjectException:
-                    logger.info("Couldn't get GitHub milestone label %s", milestone.url)
+                    logger.exception("Couldn't get GitHub milestone label %s", milestone.url)
 
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
@@ -120,12 +122,16 @@ def sync_repository(
                 # Milestone
                 milestone = None
                 if gh_issue.milestone:
-                    milestone_author = User.update_data(gh_issue.milestone.creator)
                     milestone = Milestone.update_data(
-                        gh_issue.milestone, repository=repository, author=milestone_author
+                        gh_issue.milestone,
+                        author=User.update_data(gh_issue.milestone.creator),
+                        repository=repository,
                     )
                 issue = Issue.update_data(
-                    gh_issue, author=author, repository=repository, milestone=milestone
+                    gh_issue,
+                    author=author,
+                    milestone=milestone,
+                    repository=repository,
                 )
 
                 # Assignees.
@@ -139,7 +145,7 @@ def sync_repository(
                     try:
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
-                        logger.info("Couldn't get GitHub issue label %s", issue.url)
+                        logger.exception("Couldn't get GitHub issue label %s", issue.url)
         else:
             logger.info("Skipping issues sync for %s", repository.name)
 
@@ -163,12 +169,16 @@ def sync_repository(
             # Milestone
             milestone = None
             if gh_pull_request.milestone:
-                milestone_author = User.update_data(gh_pull_request.milestone.creator)
                 milestone = Milestone.update_data(
-                    gh_pull_request.milestone, repository=repository, author=milestone_author
+                    gh_pull_request.milestone,
+                    author=User.update_data(gh_pull_request.milestone.creator),
+                    repository=repository,
                 )
             pull_request = PullRequest.update_data(
-                gh_pull_request, author=author, repository=repository, milestone=milestone
+                gh_pull_request,
+                author=author,
+                milestone=milestone,
+                repository=repository,
             )
 
             # Assignees.
@@ -182,7 +192,7 @@ def sync_repository(
                 try:
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
-                    logger.info("Couldn't get GitHub pull request label %s", pull_request.url)
+                    logger.exception("Couldn't get GitHub pull request label %s", pull_request.url)
 
     # GitHub repository releases.
     releases = []

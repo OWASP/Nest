@@ -153,15 +153,6 @@ class Project(
             "repository",
         )
 
-    @property
-    def recent_milestones(self):
-        """Return recent milestones."""
-        return Milestone.objects.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
-        )
-
     def nest_key(self) -> str:
         """Get Nest key."""
         return self.key.replace("www-project-", "")
@@ -186,6 +177,15 @@ class Project(
         return Release.objects.filter(
             is_draft=False,
             published_at__isnull=False,
+            repository__in=self.repositories.all(),
+        ).select_related(
+            "repository",
+        )
+
+    @property
+    def recent_milestones(self):
+        """Return recent milestones."""
+        return Milestone.objects.filter(
             repository__in=self.repositories.all(),
         ).select_related(
             "repository",

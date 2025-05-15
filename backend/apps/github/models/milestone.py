@@ -23,14 +23,7 @@ class Milestone(GenericIssueModel):
     closed_issues_count = models.PositiveIntegerField(default=0)
     due_on = models.DateTimeField(blank=True, null=True)
 
-    repository = models.ForeignKey(
-        "github.Repository",
-        on_delete=models.CASCADE,
-        related_name="milestones",
-        blank=True,
-        null=True,
-    )
-
+    # FKs.
     author = models.ForeignKey(
         "github.User",
         on_delete=models.CASCADE,
@@ -39,6 +32,15 @@ class Milestone(GenericIssueModel):
         null=True,
     )
 
+    repository = models.ForeignKey(
+        "github.Repository",
+        on_delete=models.CASCADE,
+        related_name="milestones",
+        blank=True,
+        null=True,
+    )
+
+    # M2Ms.
     labels = models.ManyToManyField(
         "github.Label",
         related_name="milestones",
@@ -55,17 +57,17 @@ class Milestone(GenericIssueModel):
 
         """
         field_mapping = {
-            "url": "html_url",
             "body": "description",
-            "number": "number",
-            "title": "title",
-            "state": "state",
-            "created_at": "created_at",
-            "updated_at": "updated_at",
             "closed_at": "closed_at",
-            "due_on": "due_on",
-            "open_issues_count": "open_issues",
             "closed_issues_count": "closed_issues",
+            "created_at": "created_at",
+            "due_on": "due_on",
+            "number": "number",
+            "open_issues_count": "open_issues",
+            "state": "state",
+            "title": "title",
+            "updated_at": "updated_at",
+            "url": "html_url",
         }
 
         for model_field, gh_field in field_mapping.items():
@@ -101,4 +103,5 @@ class Milestone(GenericIssueModel):
         milestone.from_github(gh_milestone, author, repository)
         if save:
             milestone.save()
+
         return milestone

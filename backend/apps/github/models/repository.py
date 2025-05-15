@@ -135,15 +135,16 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.issues.order_by("-updated_at").first()
 
     @property
+    def latest_updated_milestone(self):
+        """Repository latest updated milestone (most recently modified)."""
+        return self.milestones.order_by("-updated_at").first()
+
+    @property
     def latest_updated_pull_request(self):
         """Repository latest updated pull request (most recently modified)."""
         return self.pull_requests.order_by("-updated_at").first()
 
     @property
-    def latest_updated_milestone(self):
-        """Repository latest updated milestone (most recently modified)."""
-        return self.milestones.order_by("-updated_at").first()
-
     def nest_key(self) -> str:
         """Return repository Nest key."""
         return f"{self.owner.login}-{self.name}"
@@ -168,6 +169,13 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         )
 
     @property
+    def recent_milestones(self):
+        """Repository recent milestones."""
+        return Milestone.objects.filter(
+            repository=self,
+        ).order_by("-created_at")
+
+    @property
     def top_languages(self) -> list[str]:
         """Return a list of top used languages."""
         return sorted(
@@ -180,13 +188,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def url(self) -> str:
         """Return repository URL."""
         return f"https://github.com/{self.path}"
-
-    @property
-    def recent_milestones(self):
-        """Repository recent milestones."""
-        return Milestone.objects.filter(
-            repository=self,
-        ).order_by("-created_at")
 
     def from_github(
         self,
