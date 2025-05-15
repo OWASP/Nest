@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.0
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args:
@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8
+    rev: v0.11.10
     hooks:
       - id: ruff
         args:

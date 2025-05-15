@@ -27,7 +27,7 @@ const eslintConfig = [
   ...compat.extends('next/typescript'),
   react.configs.flat['jsx-runtime'],
   {
-    ignores: ['node_modules', 'build', 'dist', '.cache', '.next'],
+    ignores: ['node_modules', 'build', 'dist', '.cache', '.next', '.pnpm-store'],
   },
   js.configs.recommended,
   {

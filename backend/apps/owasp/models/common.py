@@ -9,16 +9,11 @@ from urllib.parse import urlparse
 
 import yaml
 from django.db import models
-from django.db.models import Sum
 
 from apps.common.open_ai import OpenAi
 from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
-)
-from apps.github.models.repository_contributor import (
-    TOP_CONTRIBUTORS_LIMIT,
-    RepositoryContributor,
 )
 from apps.github.utils import get_repository_file_content
 
@@ -33,7 +28,9 @@ class RepositoryBasedEntityModel(models.Model):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
-    description = models.CharField(verbose_name="Description", max_length=500, default="")
+    description = models.CharField(
+        verbose_name="Description", max_length=500, blank=True, default=""
+    )
     summary = models.TextField(
         verbose_name="Summary", default="", blank=True
     )  # AI generated summary
@@ -71,6 +68,20 @@ class RepositoryBasedEntityModel(models.Model):
         blank=True,
         null=True,
         related_name="+",
+    )
+
+    # M2Ms.
+    leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Leaders",
+        related_name="assigned_%(class)s",
+        blank=True,
+    )
+    suggested_leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Suggested leaders",
+        related_name="matched_%(class)s",
+        blank=True,
     )
 
     @property
@@ -196,26 +207,6 @@ class RepositoryBasedEntityModel(models.Model):
             return f"https://github.com/{match.group(1)}".lower()
 
         return url
-
-    def get_top_contributors(self, repositories=()) -> list[dict]:
-        """Get top contributors."""
-        return [
-            {
-                "avatar_url": tc["user__avatar_url"],
-                "contributions_count": tc["total_contributions"],
-                "login": tc["user__login"],
-                "name": tc["user__name"],
-            }
-            for tc in RepositoryContributor.objects.by_humans()
-            .filter(repository__in=repositories)
-            .values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
-            )
-            .annotate(total_contributions=Sum("contributions_count"))
-            .order_by("-total_contributions")[:TOP_CONTRIBUTORS_LIMIT]
-        ]
 
     def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""

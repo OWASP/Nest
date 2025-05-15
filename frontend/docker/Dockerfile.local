@@ -3,6 +3,7 @@ FROM node:22-alpine AS builder
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
+    apk add --no-cache git && \
     mkdir -p /home/owasp && \
     chown -R node:node /home/owasp && \
     npm install --ignore-scripts -g pnpm
@@ -23,6 +24,7 @@ FROM node:22-alpine
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
+    apk add --no-cache git && \
     mkdir -p /home/owasp/.next && \
     chown -R node:node /home/owasp && \
     npm install --ignore-scripts -g pnpm

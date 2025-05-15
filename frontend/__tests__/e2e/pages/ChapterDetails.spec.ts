@@ -6,7 +6,7 @@ test.describe('Chapter Details Page', () => {
     await page.route('**/graphql/', async (route) => {
       await route.fulfill({
         status: 200,
-        json: { data: { chapter: mockChapterDetailsData } },
+        json: { data: mockChapterDetailsData },
       })
     })
     await page.context().addCookies([
