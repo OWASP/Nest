@@ -48,7 +48,7 @@ const OrganizationDetailsPage = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !graphQLData) {
+  if (!isLoading && !graphQLData.organization) {
     return (
       <ErrorDisplay
         message="Sorry, the organization you're looking for doesn't exist"
