@@ -91,7 +91,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       suggestedLocation
       url
     }
-    recentMilestones: milestones(limit: 5, state: "all", distinct: $distinct) {
+    recentMilestones(limit: 5, state: "all", distinct: $distinct) {
       author {
         avatarUrl
         login

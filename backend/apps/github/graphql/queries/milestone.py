@@ -12,20 +12,24 @@ from apps.github.models.milestone import Milestone
 class MilestoneQuery(BaseQuery):
     """Github Milestone Queries."""
 
-    milestones = graphene.List(
+    recent_milestones = graphene.List(
         MilestoneNode,
         distinct=graphene.Boolean(default_value=False),
         limit=graphene.Int(default_value=5),
+        login=graphene.String(required=False),
+        organization=graphene.String(required=False),
         state=graphene.String(default_value="open"),
     )
 
-    def resolve_milestones(
+    def resolve_recent_milestones(
         root,
         info,
         *,
-        distinct: bool=False,
-        limit: int=5,
-        state: str="open",
+        distinct: bool = False,
+        limit: int = 5,
+        login: str | None = None,
+        organization: str | None = None,
+        state: str = "open",
     ):
         """Resolve milestones.
 
@@ -34,6 +38,8 @@ class MilestoneQuery(BaseQuery):
             info (ResolveInfo): The GraphQL execution context.
             distinct (bool): Whether to return distinct milestones.
             limit (int): The maximum number of milestones to return.
+            login (str, optional): The GitHub username to filter milestones.
+            organization (str, optional): The GitHub organization to filter milestones.
             state (str, optional): The state of the milestones to return.
 
         Returns:
@@ -60,6 +66,15 @@ class MilestoneQuery(BaseQuery):
             "labels",
             "pull_requests",
         )
+        if login:
+            milestones = milestones.filter(
+                author__login=login,
+            )
+
+        if organization:
+            milestones = milestones.filter(
+                repository__organization__login=organization,
+            )
 
         if distinct:
             latest_milestone_per_author = (
