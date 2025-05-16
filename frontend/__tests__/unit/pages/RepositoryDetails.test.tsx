@@ -184,6 +184,7 @@ describe('RepositoryDetailsPage', () => {
     await waitFor(() => {
       const recentMilestones = mockRepositoryData.repository.recentMilestones
 
+      expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
       recentMilestones.forEach((milestone) => {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()

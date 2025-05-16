@@ -93,6 +93,10 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText('Contribution Heatmap')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
+    expect(screen.getByText('10 Followers')).toBeInTheDocument()
+    expect(screen.getByText('5 Followings')).toBeInTheDocument()
+    expect(screen.getByText('3 Repositories')).toBeInTheDocument()
+    expect(screen.getByText('100 Contributions')).toBeInTheDocument()
   })
 
   test('renders recent issues correctly', async () => {
@@ -365,6 +369,40 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
       expect(screen.queryByText('Test Pull Request')).not.toBeInTheDocument()
+    })
+  })
+
+  test('handles no recent releases gracefully', async () => {
+    const noReleasesData = {
+      ...mockUserDetailsData,
+      recentReleases: [],
+    }
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noReleasesData,
+      loading: false,
+      error: null,
+    })
+    render(<UserDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Recent Releases')).toBeInTheDocument()
+      expect(screen.queryByText('Test v1.0.0')).not.toBeInTheDocument()
+    })
+  })
+
+  test('handles no recent milestones gracefully', async () => {
+    const noMilestonesData = {
+      ...mockUserDetailsData,
+      recentMilestones: [],
+    }
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noMilestonesData,
+      loading: false,
+      error: null,
+    })
+    render(<UserDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
+      expect(screen.queryByText('v2.0.0 Release')).not.toBeInTheDocument()
     })
   })
 
