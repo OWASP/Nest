@@ -4,7 +4,7 @@
   • Explore previous years GSoC projects by using corresponding tags, (e.g. `gsoc{{ previous_year }}`, `gsoc{{ previous_year - 1 }}`) on <{{ projects_url }}?q=gsoc{{ previous_year }}|OWASP Nest> as they are more likely to participate in GSoC again.{{ NL }}
   • Run `/contribute --start` to get more information on how to contribute to OWASP.
 {{ SECTION_BREAK }}
-{% include "feedback.jinja" %}
+{% include "commands/feedback.jinja" %}
 {% elif mode == "year" %}
 *GSoC {{ year }} projects:*{{ NL }}{{ NL }}{% for project in projects %}  • <{{ project.idx_url }}|{{ project.idx_name }}>{{ NL }}{% endfor %}
 {{ SECTION_BREAK }}
