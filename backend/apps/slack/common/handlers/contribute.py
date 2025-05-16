@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.utils.text import Truncator
 
 from apps.common.constants import NL
+from apps.common.utils import get_absolute_url
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
@@ -80,9 +82,11 @@ def get_blocks(
     if presentation.include_feedback:
         blocks.append(
             markdown(
-                f"Extended search over {Issue.open_issues_count()} OWASP issues"
+                f"⚠️ *Extended search over {Issue.open_issues_count()} open issues "
+                f"is available at <{get_absolute_url('contribute')}"
+                f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
-            )
+            ),
         )
     if presentation.include_pagination and (
         pagination_block := get_pagination_buttons(
