@@ -19,6 +19,7 @@ const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams()
   const [organization, setOrganization] = useState(null)
   const [issues, setIssues] = useState(null)
+  const [milestones, setMilestones] = useState(null)
   const [pullRequests, setPullRequests] = useState(null)
   const [releases, setReleases] = useState(null)
   const [repositories, setRepositories] = useState(null)
@@ -30,6 +31,7 @@ const OrganizationDetailsPage = () => {
 
   useEffect(() => {
     if (graphQLData) {
+      setMilestones(graphQLData?.recentMilestones)
       setOrganization(graphQLData?.organization)
       setIssues(graphQLData?.recentIssues)
       setPullRequests(graphQLData?.recentPullRequests)
@@ -115,6 +117,7 @@ const OrganizationDetailsPage = () => {
       details={organizationDetails}
       recentIssues={issues}
       recentReleases={releases}
+      recentMilestones={milestones}
       pullRequests={pullRequests}
       repositories={repositories}
       stats={organizationStats}

@@ -111,6 +111,20 @@ describe('OrganizationDetailsPage', () => {
     })
   })
 
+  test('renders milestones section correctly', async () => {
+    render(<OrganizationDetailsPage />)
+    await waitFor(() => {
+      const recentMilestones = mockOrganizationDetailsData.recentMilestones
+
+      recentMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
+      })
+    })
+  })
+
   test('renders pull requests section correctly', async () => {
     render(<OrganizationDetailsPage />)
 
