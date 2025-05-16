@@ -180,10 +180,10 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {(type === 'user') && (
-          <RecentReleases data={recentReleases} showAvatar={showAvatar} />
-        )}
-        {(type === 'project' || type === 'repository' || type === 'organization') && (
+        {(type === 'project' ||
+          type === 'repository' ||
+          type === 'organization' ||
+          type === 'user') && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
             <Milestones data={recentMilestones} showAvatar={showAvatar} />

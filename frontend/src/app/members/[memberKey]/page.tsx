@@ -11,7 +11,12 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { GET_USER_DATA } from 'server/queries/userQueries'
-import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 'types/project'
+import type {
+  ProjectIssuesType,
+  ProjectMilestonesType,
+  ProjectReleaseType,
+  RepositoryCardProps,
+} from 'types/project'
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
@@ -24,6 +29,7 @@ const UserDetailsPage: React.FC = () => {
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
+  const [milestones, setMilestones] = useState<ProjectMilestonesType[]>([])
   const [pullRequests, setPullRequests] = useState<PullRequestsType[]>([])
   const [releases, setReleases] = useState<ProjectReleaseType[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
@@ -42,6 +48,7 @@ const UserDetailsPage: React.FC = () => {
     if (graphQLData) {
       setUser(graphQLData?.user)
       setIssues(graphQLData?.recentIssues)
+      setMilestones(graphQLData?.recentMilestones)
       setPullRequests(graphQLData?.recentPullRequests)
       setReleases(graphQLData?.recentReleases)
       setTopRepositories(graphQLData?.topContributedRepositories)
@@ -157,6 +164,26 @@ const UserDetailsPage: React.FC = () => {
     )
   }, [releases, user])
 
+  const formattedMilestones: ProjectMilestonesType[] = useMemo(() => {
+    return (
+      milestones?.map((milestone) => ({
+        author: {
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          login: user?.login || '',
+          name: user?.name || user?.login || '',
+        },
+        createdAt: milestone.createdAt,
+        openIssuesCount: milestone.openIssuesCount,
+        closedIssuesCount: milestone.closedIssuesCount,
+        organizationName: milestone.organizationName,
+        repositoryName: milestone.repositoryName,
+        title: milestone.title,
+        url: milestone.url,
+      })) || []
+    )
+  }, [milestones, user])
+
   if (isLoading) {
     return <LoadingSpinner />
   }
@@ -246,6 +273,7 @@ const UserDetailsPage: React.FC = () => {
       title={user?.name || user?.login || 'User'}
       heatmap={privateContributor ? undefined : <Heatmap />}
       details={userDetails}
+      recentMilestones={formattedMilestones}
       pullRequests={formattedPullRequest}
       stats={userStats}
       type="user"
