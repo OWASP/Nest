@@ -9,7 +9,7 @@ class Community(CommandBase):
 
     def get_template_file_name(self):
         """Get the template file name."""
-        return "navigate.jinja"
+        return "commands/navigate.jinja"
 
     def get_template_context(self, command: dict):
         """Get the template context.

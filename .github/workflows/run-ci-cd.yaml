@@ -129,7 +129,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build backend test image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
@@ -173,7 +173,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend unit-testing image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
@@ -216,7 +216,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend end-to-end testing image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
@@ -299,7 +299,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
@@ -334,7 +334,7 @@ jobs:
             buildx-frontend-pnpm-cache-${{ runner.os }}-
 
       - name: Build frontend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
@@ -495,7 +495,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
@@ -531,7 +531,7 @@ jobs:
             buildx-frontend-pnpm-cache-${{ runner.os }}-
 
       - name: Build frontend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
