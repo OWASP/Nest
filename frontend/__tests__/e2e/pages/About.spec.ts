@@ -12,6 +12,11 @@ test.describe('About Page', () => {
         const username = postData.variables.key
         const userData = mockAboutData.users[username]
         await route.fulfill({ status: 200, json: { data: { user: userData } } })
+      } else if (postData.query?.includes('topContributors')) {
+        await route.fulfill({
+          status: 200,
+          json: { data: { topContributors: mockAboutData.topContributors } },
+        })
       } else {
         await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
       }
@@ -70,7 +75,7 @@ test.describe('About Page', () => {
 
   test('displays animated counters with correct values', async ({ page }) => {
     await expect(page.getByText('1.2K+Contributors')).toBeVisible()
-    await expect(page.getByText('40+Issues')).toBeVisible()
+    await expect(page.getByText('40+Open Issues')).toBeVisible()
     await expect(page.getByText('60+Forks')).toBeVisible()
     await expect(page.getByText('890+Stars')).toBeVisible()
   })
