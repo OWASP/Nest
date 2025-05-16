@@ -1,75 +1,44 @@
-"""Slack member joined #gsoc channel handler."""
+"""Slack member joined #gsoc channel handler using templates."""
 
 import logging
 
-from django.conf import settings
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
-
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
-from apps.slack.common.gsoc import GSOC_2025_MILESTONES
+from apps.slack.common.gsoc import GSOC_2025_MILESTONES, GSOC_GENERAL_INFORMATION_BLOCKS
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
+from apps.slack.events.event import EventBase
 from apps.slack.utils import get_text
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def gsoc_handler(event: dict, client: WebClient, ack) -> None:
-    """Slack #gsoc new member handler.
+class Gsoc(EventBase):
+    """Slack GSoC channel join event handler."""
 
-    Args:
-        event (dict): The event payload from Slack.
-        client (slack_sdk.WebClient): The Slack WebClient instance.
-        ack (Callable): The acknowledgment function to confirm event processing.
+    event_type = "member_joined_channel"
+    matchers = [lambda event: event["channel"] == OWASP_GSOC_CHANNEL_ID.lstrip("#")]
 
-    """
-    from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS
+    def get_context(self, event):
+        """Get the template context.
 
-    ack()
-    if not settings.SLACK_EVENTS_ENABLED:
-        return
+        Args:
+            event: The Slack event
 
-    user_id = event["user"]
+        Returns:
+            dict: The template context.
 
-    try:
-        conversation = client.conversations_open(users=user_id)
-    except SlackApiError as e:
-        if e.response["error"] == "cannot_dm_bot":
-            logger.warning("Error opening conversation with bot user %s", user_id)
-            return
-        raise
+        """
+        return {
+            "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
+            "gsoc_channel_id": OWASP_GSOC_CHANNEL_ID,
+            "gsoc_info_blocks": GSOC_GENERAL_INFORMATION_BLOCKS,
+            "user_id": event["user"],
+        }
 
-    client.chat_postEphemeral(
-        blocks=GSOC_2025_MILESTONES,
-        channel=event["channel"],
-        user=user_id,
-    )
-
-    blocks = (
-        markdown(
-            f"Hello <@{user_id}> and welcome to <{OWASP_GSOC_CHANNEL_ID}> channel!{NL}"
-            "Here's how you can start your journey toward contributing to OWASP projects and "
-            "making the most of Google Summer of Code:"
-        ),
-        *GSOC_GENERAL_INFORMATION_BLOCKS,
-        markdown(
-            "🎉 We're excited to have you on board, and we can't wait to see the amazing "
-            "contributions you'll make! Happy contributing and good luck with your GSoC "
-            "journey!"
-        ),
-        markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    )
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
-
-
-if SlackConfig.app:
-    SlackConfig.app.event(
-        "member_joined_channel",
-        matchers=[lambda event: f"#{event['channel']}" == OWASP_GSOC_CHANNEL_ID],
-    )(gsoc_handler)
+    def handle_event(self, event, client):
+        """Handle the member_joined_channel event for the GSoC channel."""
+        client.chat_postEphemeral(
+            blocks=GSOC_2025_MILESTONES,
+            channel=event["channel"],
+            text=get_text(GSOC_2025_MILESTONES),
+            user=event["user"],
+        )
+        super().handle_event(event, client)

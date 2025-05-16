@@ -1,4 +1,4 @@
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contributor'
+import { TopContributorsTypeAlgolia } from './contributor'
 
 export interface ChapterDataType {
   active_committees_count: number
@@ -32,7 +32,6 @@ export interface ChapterTypeGraphQL {
   relatedUrls: string[]
   summary: string
   suggestedLocation: string
-  topContributors: TopContributorsTypeGraphql[]
   updatedAt: number
   url: string
 }

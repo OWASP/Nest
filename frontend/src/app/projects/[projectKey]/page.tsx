@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
+import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
@@ -98,7 +99,7 @@ const ProjectDetailsPage = () => {
       stats={projectStats}
       summary={project.summary}
       title={project.name}
-      topContributors={project.topContributors}
+      topContributors={topContributors}
       topics={project.topics}
       type="project"
     />

@@ -13,14 +13,14 @@ export const GET_COMMITTEE_DATA = gql`
       repositoriesCount
       starsCount
       summary
-      topContributors {
-        avatarUrl
-        contributionsCount
-        login
-        name
-      }
       updatedAt
       url
+    }
+    topContributors(committee: $key) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `

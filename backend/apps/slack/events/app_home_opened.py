@@ -1,71 +1,24 @@
 """Slack bot app_home_opened event handler."""
 
-import logging
-
-from django.conf import settings
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
-
-from apps.common.constants import NL, TAB
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import get_header, markdown
-
-logger: logging.Logger = logging.getLogger(__name__)
+from apps.common.constants import TAB
+from apps.slack.blocks import get_header
+from apps.slack.events.event import EventBase
 
 
-def app_home_opened_handler(event: dict, client: WebClient, ack) -> None:
-    """Handle the app_home_opened event.
+class AppHomeOpened(EventBase):
+    """Slack bot home page."""
 
-    Args:
-        event (dict): The Slack event payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
-        ack (function): Acknowledge the Slack event request.
+    event_type = "app_home_opened"
 
-    """
-    ack()
-
-    if not settings.SLACK_EVENTS_ENABLED:
-        return
-
-    user_id = event["user"]
-
-    try:
-        home_view = {
-            "type": "home",
-            "blocks": [
-                *get_header(),
-                markdown(
-                    f"*Hi <@{user_id}>!*{NL}"
-                    "Welcome to the OWASP Slack Community! Here you can connect with other "
-                    "members, collaborate on projects, and learn about the latest OWASP news and "
-                    f"events.{2 * NL}"
-                    "I'm OWASP @nestbot, your friendly neighborhood bot. Please use one of the "
-                    f"following commands:{NL}"
-                    f"{TAB}• /board{NL}"
-                    f"{TAB}• /chapters{NL}"
-                    f"{TAB}• /committees{NL}"
-                    f"{TAB}• /community{NL}"
-                    f"{TAB}• /contact{NL}"
-                    f"{TAB}• /contribute{NL}"
-                    f"{TAB}• /donate{NL}"
-                    f"{TAB}• /gsoc{NL}"
-                    f"{TAB}• /jobs{NL}"
-                    f"{TAB}• /leaders{NL}"
-                    f"{TAB}• /news{NL}"
-                    f"{TAB}• /owasp{NL}"
-                    f"{TAB}• /projects{NL}"
-                    f"{TAB}• /sponsors{NL}"
-                    f"{TAB}• /staff{NL}"
-                    f"{TAB}• /users{NL}"
-                ),
-            ],
+    def handle_event(self, event, client):
+        """Handle the app_home_opened event."""
+        user_id = event["user"]
+        context = {
+            "TAB": TAB,
+            "user_id": user_id,
         }
 
-        client.views_publish(user_id=user_id, view=home_view)
-
-    except SlackApiError:
-        logger.exception("Error publishing Home Tab for user {user_id}: {e.response['error']}")
-
-
-if SlackConfig.app:
-    app_home_opened_handler = SlackConfig.app.event("app_home_opened")(app_home_opened_handler)
+        client.views_publish(
+            user_id=user_id,
+            view={"type": "home", "blocks": [*get_header(), *self.get_render_blocks(context)]},
+        )

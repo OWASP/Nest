@@ -1,20 +1,13 @@
 """Slack URL verification event handler."""
 
-from apps.slack.apps import SlackConfig
+from apps.slack.events.event import EventBase
 
 
-def url_verification_handler(event, *_args, **_kwargs):
-    """Handle Slack URL verification events.
+class UrlVerification(EventBase):
+    """Handle Slack URL verification events."""
 
-    Args:
-        event (dict): The Slack event payload.
+    event_type = "url_verification"
 
-    Returns:
-        str: The challenge token to verify the URL.
-
-    """
-    return event["challenge"]
-
-
-if SlackConfig.app:
-    url_verification_handler = SlackConfig.app.event("url_verification")(url_verification_handler)
+    def handle_event(self, event, client):
+        """Handle the URL verification event."""
+        return event["challenge"]

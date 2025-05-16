@@ -1,14 +1,10 @@
-"""Slack bot user joined team handler."""
+"""Slack bot user joined team handler using templates."""
 
 import logging
 
-from django.conf import settings
-from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-from apps.common.constants import NL
-from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.common.constants import OWASP_NEST_URL
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
     OWASP_APPSEC_CHANNEL_ID,
@@ -27,92 +23,66 @@ from apps.slack.constants import (
     OWASP_SPONSORSHIP_CHANNEL_ID,
     OWASP_THREAT_MODELING_CHANNEL_ID,
 )
+from apps.slack.events.event import EventBase
 from apps.slack.utils import get_text
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def team_join_handler(event: dict, client: WebClient, ack) -> None:
-    """Handle the Slack team_join event.
+class TeamJoin(EventBase):
+    """Slack bot user joined team event handler."""
 
-    Args:
-        event (dict): The Slack event payload.
-        client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
-        ack (function): Acknowledge the Slack event request.
+    event_type = "team_join"
 
-    """
-    ack()
-    if not settings.SLACK_EVENTS_ENABLED:
-        return
+    def get_context(self, event):
+        """Get the template context.
 
-    user_id = event["user"]["id"]  # User object is returned -- other events return just the ID!
-    try:
-        conversation = client.conversations_open(users=user_id)
-    except SlackApiError as e:
-        if e.response["error"] == "cannot_dm_bot":
-            logger.warning("Error opening conversation with bot user %s", user_id)
-            return
-        logger.exception(client.users_info(user=user_id))
-        raise
+        Args:
+            event: The Slack event
 
-    blocks = (
-        markdown(
-            f"*Welcome to the OWASP Slack Community, <@{user_id}>!*{NL}"
-            "We're excited to have you join us! Whether you're a newcomer to OWASP or "
-            "a seasoned professional, this is the space to connect, collaborate, "
-            f"and learn together!{2 * NL}"
-        ),
-        markdown(
-            f"*Get Started*:{NL}"
-            "To explore the full spectrum of OWASP's projects, chapters, and resources, "
-            "check out <https://nest.owasp.org|*OWASP Nest*>. It's your gateway to "
-            "discovering ways to contribute, stay informed, and connect with the OWASP "
-            "community. From finding projects aligned with your interests to engaging with "
-            f"chapters in your area, OWASP Nest makes it easier to navigate and get involved.{NL}"
-            f"Join <{OWASP_PROJECT_NEST_CHANNEL_ID}> to stay updated on OWASP Nest."
-        ),
-        markdown(
-            f"*Connect and Grow:*{NL}"
-            f"  • Visit OWASP channels <{OWASP_COMMUNITY_CHANNEL_ID}> and "
-            f"<{OWASP_ASKOWASP_CHANNEL_ID}> to engage with the broader community.{2 * NL}"
-            f"  • Find your local chapter channel (normally chapter specific channels have "
-            f"`#chapter-<name>` format, e.g. <{OWASP_CHAPTER_LONDON_CHANNEL_ID}>){2 * NL}"
-            f"  • Dive into project-specific channels, like `#project-<name>` (e.g. "
-            f"<{OWASP_PROJECT_JUICE_SHOP_CHANNEL_ID}>, <{OWASP_PROJECT_NEST_CHANNEL_ID}>) "
-            f"to engage directly with the project specific communities.{2 * NL}"
-            f"  • Explore topic channels like <{OWASP_APPSEC_CHANNEL_ID}>, "
-            f"<{OWASP_DEVSECOPS_CHANNEL_ID}>, <{OWASP_THREAT_MODELING_CHANNEL_ID}> to "
-            f"engage with like-minded individuals.{2 * NL}"
-            f"  • Join <{OWASP_JOBS_CHANNEL_ID}> to discover job opportunities in the cyber "
-            f"security field."
-        ),
-        markdown(
-            f"*Learn and Engage:*{NL}"
-            f"  • Explore <{OWASP_CONTRIBUTE_CHANNEL_ID}> for opportunities to get involved "
-            f"in OWASP projects and initiatives.{2 * NL}"
-            f"  • Leverage <{OWASP_SPONSORSHIP_CHANNEL_ID}> program to earn compensation "
-            f"for impactful contributions to OWASP projects.{2 * NL}"
-            f"  • Join leadership channels: <{OWASP_LEADERS_CHANNEL_ID}> and "
-            f"<{OWASP_MENTORS_CHANNEL_ID}> to connect with OWASP leaders and mentors.{2 * NL}"
-            f"  • Learn about OWASP's participation in Google Summer of Code in "
-            f"<{OWASP_GSOC_CHANNEL_ID}>.{2 * NL}"
-            f"  • Connect with developers in <{OWASP_DEVELOPERS_CHANNEL_ID}> to discuss "
-            f"development practices and tools."
-        ),
-        markdown(
-            "We're here to support your journey in making software security visible and "
-            "strengthening the security of the software we all depend on. Have questions or "
-            "need help? Don't hesitate to ask -- this community thrives on collaboration!"
-        ),
-        markdown(f"{FEEDBACK_CHANNEL_MESSAGE}"),
-    )
+        Returns:
+            dict: The template context.
 
-    client.chat_postMessage(
-        blocks=blocks,
-        channel=conversation["channel"]["id"],
-        text=get_text(blocks),
-    )
+        """
+        return {
+            "appsec_channel": OWASP_APPSEC_CHANNEL_ID,
+            "ask_channel": OWASP_ASKOWASP_CHANNEL_ID,
+            "community_channel": OWASP_COMMUNITY_CHANNEL_ID,
+            "contribute_channel": OWASP_CONTRIBUTE_CHANNEL_ID,
+            "developers_channel": OWASP_DEVELOPERS_CHANNEL_ID,
+            "devsecops_channel": OWASP_DEVSECOPS_CHANNEL_ID,
+            "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
+            "gsoc_channel": OWASP_GSOC_CHANNEL_ID,
+            "jobs_channel": OWASP_JOBS_CHANNEL_ID,
+            "juice_shop_channel": OWASP_PROJECT_JUICE_SHOP_CHANNEL_ID,
+            "leaders_channel": OWASP_LEADERS_CHANNEL_ID,
+            "london_channel": OWASP_CHAPTER_LONDON_CHANNEL_ID,
+            "mentors_channel": OWASP_MENTORS_CHANNEL_ID,
+            "nest_url": OWASP_NEST_URL,
+            "project_nest_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
+            "sponsorship_channel": OWASP_SPONSORSHIP_CHANNEL_ID,
+            "threat_modeling_channel": OWASP_THREAT_MODELING_CHANNEL_ID,
+            "user_id": event["user"]["id"],
+        }
 
+    def handle_event(self, event, client):
+        """Handle the team_join event."""
+        user_id = event["user"]["id"]  # User object is returned (other events return just the ID)!
 
-if SlackConfig.app:
-    team_join_handler = SlackConfig.app.event("team_join")(team_join_handler)
+        try:
+            conversation = self.open_conversation(client, user_id)
+            blocks = self.get_render_blocks(self.get_context(event))
+            client.chat_postMessage(
+                blocks=blocks,
+                channel=conversation["channel"]["id"],
+                text=get_text(blocks),
+            )
+        except SlackApiError as e:
+            if e.response["error"] == "cannot_dm_bot":
+                logger.warning("Cannot DM bot user %s", user_id)
+                return
+            logger.exception("Slack API error in team_join handler: %s", e.response["error"])
+            raise
+        except Exception:
+            logger.exception("Error in team_join handler for user: %s", user_id)
+            raise

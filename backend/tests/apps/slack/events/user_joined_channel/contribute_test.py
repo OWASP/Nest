@@ -3,18 +3,19 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
+from apps.slack.common.gsoc import GSOC_2025_MILESTONES
 from apps.slack.constants import (
-    FEEDBACK_CHANNEL_MESSAGE,
     NEST_BOT_NAME,
     OWASP_CONTRIBUTE_CHANNEL_ID,
 )
-from apps.slack.events.member_joined_channel.contribute import contribute_handler
+from apps.slack.events.member_joined_channel.contribute import Contribute
+from apps.slack.utils import get_text
 
 
 class TestContributeEventHandler:
     @pytest.fixture
     def mock_slack_event(self):
-        return {"user": "U123456", "channel": OWASP_CONTRIBUTE_CHANNEL_ID}
+        return {"user": "U123456", "channel": OWASP_CONTRIBUTE_CHANNEL_ID.replace("#", "")}
 
     @pytest.fixture
     def mock_slack_client(self):
@@ -34,16 +35,18 @@ class TestContributeEventHandler:
                     "20 active OWASP projects",
                     "50 recently opened issues",
                     NEST_BOT_NAME,
-                    "/contribute --start",
-                    FEEDBACK_CHANNEL_MESSAGE.strip(),
+                    "/contribute",
+                    "You can share feedback on your NestBot experience",
                 ],
             ),
         ],
     )
     @patch("apps.owasp.models.project.Project.active_projects_count")
     @patch("apps.github.models.issue.Issue.open_issues_count")
+    @patch("apps.common.utils.get_absolute_url", return_value="/contribute")
     def test_handler_responses(
         self,
+        mock_get_absolute_url,
         mock_open_issues_count,
         mock_active_projects_count,
         events_enabled,
@@ -57,17 +60,34 @@ class TestContributeEventHandler:
         mock_active_projects_count.return_value = project_count
         mock_open_issues_count.return_value = issue_count
 
-        contribute_handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
+        contribute = Contribute()
+        contribute.handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
 
         if not events_enabled:
+            mock_slack_client.chat_postEphemeral.assert_not_called()
             mock_slack_client.conversations_open.assert_not_called()
             mock_slack_client.chat_postMessage.assert_not_called()
         else:
+            mock_slack_client.chat_postEphemeral.assert_called_once_with(
+                blocks=GSOC_2025_MILESTONES,
+                channel=mock_slack_event["channel"],
+                user=mock_slack_event["user"],
+                text=get_text(GSOC_2025_MILESTONES),
+            )
+
             mock_slack_client.conversations_open.assert_called_once_with(users="U123456")
-            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+
+            _, kwargs = mock_slack_client.chat_postMessage.call_args
+            blocks = kwargs["blocks"]
+            block_texts = []
+            for block in blocks:
+                if block.get("type") == "section":
+                    text = block.get("text", {}).get("text", "")
+                    block_texts.append(text)
+            combined_text = " ".join(block_texts)
 
             for message in expected_messages:
-                assert any(message in str(block) for block in blocks)
+                assert message in combined_text
 
             mock_active_projects_count.assert_called_once()
             mock_open_issues_count.assert_called_once()
@@ -75,19 +95,10 @@ class TestContributeEventHandler:
     @pytest.mark.parametrize(
         ("channel_id", "expected_result"),
         [
-            (OWASP_CONTRIBUTE_CHANNEL_ID, True),
+            (OWASP_CONTRIBUTE_CHANNEL_ID.replace("#", ""), True),
             ("C999999", False),
         ],
     )
-    def test_check_contribute_handler(self, channel_id, expected_result):
-        contribute_module = __import__(
-            "apps.slack.events.member_joined_channel.contribute",
-            fromlist=["contribute_handler"],
-        )
-        check_contribute_handler = getattr(
-            contribute_module,
-            "check_contribute_handler",
-            lambda x: x.get("channel") == OWASP_CONTRIBUTE_CHANNEL_ID,
-        )
-
-        assert check_contribute_handler({"channel": channel_id}) == expected_result
+    def test_matcher(self, channel_id, expected_result):
+        contribute = Contribute()
+        assert contribute.matchers[0]({"channel": channel_id}) == expected_result
