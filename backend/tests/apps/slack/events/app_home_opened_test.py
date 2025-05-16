@@ -2,18 +2,18 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.slack.events.app_home_opened import app_home_opened_handler
+from apps.common.constants import TAB
+from apps.slack.events.app_home_opened import AppHomeOpened
 
 
-class TestSlackHandler:
+class TestAppHomeOpened:
     @pytest.fixture
     def mock_slack_config(self, mocker):
         mock_app = Mock()
         mocker.patch("apps.slack.apps.SlackConfig.app", mock_app)
         return mock_app
 
-    def test_handler_app_home_opened(self, mock_slack_config):
-        mock_ack = Mock()
+    def test_handle_event(self, mock_slack_config):
         mock_client = Mock()
         mock_event = {
             "user": "U12345",
@@ -23,25 +23,25 @@ class TestSlackHandler:
 
         with (
             patch("apps.slack.events.app_home_opened.get_header") as mock_get_header,
-            patch("apps.slack.events.app_home_opened.markdown") as mock_markdown,
         ):
             mock_get_header.return_value = [
                 {"type": "section", "text": {"type": "mrkdwn", "text": "Header"}}
             ]
 
-            mock_markdown.return_value = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": (
-                        f"*Hi <@{mock_event['user']}>!* Welcome to the OWASP Slack Community!"
-                    ),
-                },
-            }
+            handler = AppHomeOpened()
+            handler.get_render_blocks = Mock(
+                return_value=[
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Hi <@U12345>!* Welcome to the OWASP Slack Community!",
+                        },
+                    }
+                ]
+            )
 
-            app_home_opened_handler(mock_event, mock_client, mock_ack)
-
-            mock_ack.assert_called_once()
+            handler.handle_event(mock_event, mock_client)
 
             mock_client.views_publish.assert_called_once_with(
                 user_id="U12345",
@@ -53,12 +53,15 @@ class TestSlackHandler:
                             "type": "section",
                             "text": {
                                 "type": "mrkdwn",
-                                "text": (
-                                    f"*Hi <@{mock_event['user']}>!* "
-                                    "Welcome to the OWASP Slack Community!"
-                                ),
+                                "text": "*Hi <@U12345>!* Welcome to the OWASP Slack Community!",
                             },
                         },
                     ],
                 },
             )
+
+            expected_context = {
+                "user_id": "U12345",
+                "TAB": TAB,
+            }
+            handler.get_render_blocks.assert_called_once_with(expected_context)
