@@ -12,14 +12,12 @@ test.describe('About Page', () => {
         const username = postData.variables.key
         const userData = mockAboutData.users[username]
         await route.fulfill({ status: 200, json: { data: { user: userData } } })
-      }
-      else if (postData.query?.includes('topContributors')) {
+      } else if (postData.query?.includes('topContributors')) {
         await route.fulfill({
           status: 200,
-          json: { data: { topContributors: mockAboutData.topContributors } }
+          json: { data: { topContributors: mockAboutData.topContributors } },
         })
-      }
-      else {
+      } else {
         await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
       }
     })
