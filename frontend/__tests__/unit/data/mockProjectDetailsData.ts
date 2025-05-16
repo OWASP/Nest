@@ -90,11 +90,11 @@ export const mockProjectDetailsData = {
         url: 'https://github.com/test-org/test-repo-2/pull/2',
       },
     ],
-    topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
-      contributionsCount: 30 - i,
-      login: `contributor${i + 1}`,
-      name: `Contributor ${i + 1}`,
-    })),
   },
+  topContributors: Array.from({ length: 15 }, (_, i) => ({
+    avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
+    contributionsCount: 30 - i,
+    login: `contributor${i + 1}`,
+    name: `Contributor ${i + 1}`,
+  })),
 }

@@ -22,7 +22,7 @@ const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
-
+  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })
@@ -30,6 +30,7 @@ const ProjectDetailsPage = () => {
   useEffect(() => {
     if (data) {
       setProject(data?.project)
+      setTopContributors(data?.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
