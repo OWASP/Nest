@@ -17,6 +17,8 @@ import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
+import SponsorBanner from 'components/SponsorBanner'
+import SecondaryCard from 'components/SecondaryCard'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()
@@ -106,19 +108,30 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      languages={repository.languages}
-      pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <>
+      <DetailsCard
+        details={repositoryDetails}
+        languages={repository.languages}
+        pullRequests={recentPullRequests}
+        recentIssues={repository.issues}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={repository.topContributors}
+        topics={repository.topics}
+        type="repository"
+      />
+      <div className="mt-8 max-w-6xl mx-auto">
+        <SecondaryCard>
+          <SponsorBanner
+            entityType="repository"
+            entityKey={repositoryKey as string}
+            entityName={repository.name}
+          />
+        </SecondaryCard>
+      </div>
+    </>
   )
 }
 export default RepositoryDetailsPage

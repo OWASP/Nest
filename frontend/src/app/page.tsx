@@ -41,6 +41,7 @@ import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import { TruncatedText } from 'components/TruncatedText'
+import SponsorBanner from 'components/SponsorBanner'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)

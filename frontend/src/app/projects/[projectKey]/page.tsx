@@ -18,6 +18,9 @@ import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
+import SponsorBanner from 'components/SponsorBanner'
+import SecondaryCard from 'components/SecondaryCard'
+
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -92,21 +95,32 @@ const ProjectDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={projectDetails}
-      is_active={project.isActive}
-      languages={project.languages}
-      pullRequests={recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
-      stats={projectStats}
-      summary={project.summary}
-      title={project.name}
-      topContributors={topContributors}
-      topics={project.topics}
-      type="project"
-    />
+    <>
+      <DetailsCard
+        details={projectDetails}
+        is_active={project.isActive}
+        languages={project.languages}
+        pullRequests={recentPullRequests}
+        recentIssues={project.recentIssues}
+        recentReleases={project.recentReleases}
+        repositories={project.repositories}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={project.topContributors}
+        topics={project.topics}
+        type="project"
+      />
+      <div className="mt-8 max-w-6xl mx-auto">
+        <SecondaryCard>
+          <SponsorBanner
+            entityType="project"
+            entityKey={projectKey as string}
+            entityName={project.name}
+          />
+        </SecondaryCard>
+      </div>
+    </>
   )
 }
 
