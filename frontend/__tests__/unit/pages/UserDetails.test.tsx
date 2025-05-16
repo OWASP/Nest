@@ -134,6 +134,46 @@ describe('UserDetailsPage', () => {
     })
   })
 
+  test('renders recent releases correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+    render(<UserDetailsPage />)
+    await waitFor(() => {
+      const releasesTitle = screen.getByText('Recent Releases')
+      expect(releasesTitle).toBeInTheDocument()
+      const releases = mockUserDetailsData.recentReleases
+      releases.forEach((release) => {
+        expect(screen.getByText(release.name)).toBeInTheDocument()
+        expect(screen.getByText(release.repositoryName)).toBeInTheDocument()
+      })
+    })
+  })
+
+  test('renders recent milestones correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const milestonesTitle = screen.getByText('Recent Milestones')
+      expect(milestonesTitle).toBeInTheDocument()
+      const milestones = mockUserDetailsData.recentMilestones
+      milestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
+      })
+    })
+  })
+
   test('renders repositories section correctly', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
