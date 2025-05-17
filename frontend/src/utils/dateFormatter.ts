@@ -1,4 +1,8 @@
 export const formatDate = (input: number | string) => {
+  if (!input) {
+    return ''
+  }
+
   const date =
     typeof input === 'number'
       ? new Date(input * 1000) // Unix timestamp in seconds

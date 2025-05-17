@@ -10,10 +10,12 @@ import {
 import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { ProjectTypeGraphql } from 'types/project'
+import { User } from 'types/user'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import AnchorTitle from 'components/AnchorTitle'
@@ -42,7 +44,7 @@ const About = () => {
 
   useEffect(() => {
     if (data) {
-      setProject(data?.project)
+      setProject(data.project)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -181,6 +183,7 @@ const LeaderData = ({ username }: { username: string }) => {
   const { data, loading, error } = useQuery(GET_LEADER_DATA, {
     variables: { key: username },
   })
+  const router = useRouter()
 
   if (loading) return <p>Loading {username}...</p>
   if (error) return <p>Error loading {username}'s data</p>
@@ -191,13 +194,17 @@ const LeaderData = ({ username }: { username: string }) => {
     return <p>No data available for {username}</p>
   }
 
+  const handleButtonClick = (user: User) => {
+    router.push(`/members/${user.login}`)
+  }
+
   return (
     <UserCard
       avatar={user.avatarUrl}
       button={{
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
         label: 'View Profile',
-        onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
+        onclick: () => handleButtonClick(user),
       }}
       className="h-64 w-40 bg-inherit"
       company={user.company}

@@ -41,7 +41,7 @@ export const GET_ORGANIZATION_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 9, organization: $login, distinct: true) {
+    recentReleases(limit: 5, organization: $login, distinct: true) {
       author {
         avatarUrl
         login
@@ -52,6 +52,20 @@ export const GET_ORGANIZATION_DATA = gql`
       publishedAt
       repositoryName
       tagName
+      url
+    }
+    recentMilestones(limit: 5, organization: $login, distinct: true) {
+      author {
+        avatarUrl
+        login
+        name
+      }
+      title
+      openIssuesCount
+      closedIssuesCount
+      repositoryName
+      organizationName
+      createdAt
       url
     }
     repositories(organization: $login, limit: 12) {

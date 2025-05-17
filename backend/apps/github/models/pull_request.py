@@ -33,6 +33,13 @@ class PullRequest(GenericIssueModel):
         null=True,
         related_name="created_pull_requests",
     )
+    milestone = models.ForeignKey(
+        "github.Milestone",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="pull_requests",
+    )
     repository = models.ForeignKey(
         "github.Repository",
         on_delete=models.CASCADE,
@@ -55,13 +62,14 @@ class PullRequest(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_pull_request, *, author=None, repository=None) -> None:
+    def from_github(self, gh_pull_request, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub pull request data.
 
         Args:
             gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
             author (User, optional): The author of the pull request.
             repository (Repository, optional): The repository instance.
+            milestone (Milestone, optional): The milestone related to the pull request.
 
         """
         field_mapping = {
@@ -86,6 +94,9 @@ class PullRequest(GenericIssueModel):
         # Author.
         self.author = author
 
+        # Milestone.
+        self.milestone = milestone
+
         # Repository.
         self.repository = repository
 
@@ -103,6 +114,7 @@ class PullRequest(GenericIssueModel):
         gh_pull_request,
         *,
         author=None,
+        milestone=None,
         repository=None,
         save: bool = True,
     ) -> "PullRequest":
@@ -111,6 +123,7 @@ class PullRequest(GenericIssueModel):
         Args:
             gh_pull_request (github.PullRequest.PullRequest): The GitHub pull request object.
             author (User, optional): The author of the pull request.
+            milestone (Milestone, optional): The milestone related to the pull request.
             repository (Repository, optional): The repository instance.
             save (bool, optional): Whether to save the instance.
 
@@ -124,7 +137,9 @@ class PullRequest(GenericIssueModel):
         except PullRequest.DoesNotExist:
             pull_request = PullRequest(node_id=pull_request_node_id)
 
-        pull_request.from_github(gh_pull_request, author=author, repository=repository)
+        pull_request.from_github(
+            gh_pull_request, author=author, milestone=milestone, repository=repository
+        )
         if save:
             pull_request.save()
 

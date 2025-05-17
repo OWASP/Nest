@@ -222,6 +222,19 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
+  test('renders milestones section correctly', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      const recentMilestones = mockProjectDetailsData.project.recentMilestones
+
+      recentMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
+      })
+    })
+  })
   test('renders project stats correctly', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,

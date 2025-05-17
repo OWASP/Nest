@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
+from apps.github.models.milestone import Milestone
 from apps.github.models.organization import Organization
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
@@ -15,6 +16,13 @@ from apps.github.models.user import User
 
 class LabelAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
+
+
+class MilestoneAdmin(admin.ModelAdmin):
+    search_fields = (
+        "body",
+        "title",
+    )
 
 
 class PullRequestAdmin(admin.ModelAdmin):
@@ -192,6 +200,7 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Label, LabelAdmin)
+admin.site.register(Milestone, MilestoneAdmin)
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(PullRequest, PullRequestAdmin)
 admin.site.register(Release, ReleaseAdmin)

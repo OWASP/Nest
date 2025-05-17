@@ -75,15 +75,9 @@ test.describe('About Page', () => {
     await expect(page.getByText('890+Stars')).toBeVisible()
   })
 
-  test('opens user profile in new window when leader button is clicked', async ({
-    page,
-    context,
-  }) => {
-    const pagePromise = context.waitForEvent('page')
+  test('opens user profile in new window when leader button is clicked', async ({ page }) => {
     await page.getByRole('button', { name: 'View Profile' }).first().click()
-    const newPage = await pagePromise
-    await newPage.waitForLoadState()
-    expect(newPage.url()).toContain('/members/')
+    await expect(page).toHaveURL('/members/arkid15r')
   })
 
   test('breadcrumb renders correct segments on /about', async ({ page }) => {

@@ -108,6 +108,7 @@ wsgi
 xapp
 xdg
 xdist
+xoxb
 xsser
 zsc
 éàëîôû

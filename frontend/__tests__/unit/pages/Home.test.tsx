@@ -230,6 +230,19 @@ describe('Home', () => {
     })
   })
 
+  test('renders milestones section correctly', async () => {
+    render(<Home />)
+    await waitFor(() => {
+      const recentMilestones = mockGraphQLData.recentMilestones
+
+      recentMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
+      })
+    })
+  })
   test('renders when no recent releases', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: {

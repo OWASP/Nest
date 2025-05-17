@@ -400,6 +400,18 @@ describe('About Component', () => {
     })
   })
 
+  test('navigates to user details on View Profile button click', async () => {
+    render(<About />)
+
+    await waitFor(() => {
+      const viewDetailsButtons = screen.getAllByText('View Profile')
+      expect(viewDetailsButtons[0]).toBeInTheDocument()
+      fireEvent.click(viewDetailsButtons[0])
+    })
+
+    expect(mockRouter.push).toHaveBeenCalledWith('/members/arkid15r')
+  })
+
   test('handles partial user data in leader response', async () => {
     const partialUserData = {
       data: {
