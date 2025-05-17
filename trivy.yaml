@@ -1,14 +1,14 @@
 filesystem:
   skip-dirs:
-    - .venv
-    - node_modules
+    - /home/owasp/.venv/
+    - /home/owasp/node_modules
 
 ignorefile: trivyignore.yaml
 
 scan:
   skip-dirs:
-    - .venv
-    - node_modules
+    - /home/owasp/.venv/
+    - /home/owasp/node_modules
 
 timeout: 10m
 
