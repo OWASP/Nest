@@ -253,6 +253,7 @@ jobs:
           scan-type: repo
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   scan-ci-dependencies:
     name: Run CI Denendencies Scan
@@ -276,6 +277,7 @@ jobs:
           scan-type: fs
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   build-staging-images:
     name: Build Staging Images
@@ -381,6 +383,7 @@ jobs:
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
         continue-on-error: true
@@ -390,6 +393,7 @@ jobs:
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -587,6 +591,7 @@ jobs:
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
         continue-on-error: true
@@ -596,6 +601,7 @@ jobs:
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production
