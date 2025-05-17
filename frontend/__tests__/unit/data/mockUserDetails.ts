@@ -22,6 +22,17 @@ export const mockUserDetailsData = {
       url: 'https://github.com/OWASP/Nest/issues/798',
     },
   ],
+  recentMilestones: [
+    {
+      title: 'v2.0.0 Release',
+      openIssuesCount: 5,
+      closedIssuesCount: 15,
+      repositoryName: 'Project Repo 1',
+      organizationName: 'OWASP',
+      createdAt: '2025-03-01T10:00:00Z',
+      url: 'https://github.com/OWASP/repo-one/milestone/1',
+    },
+  ],
   recentReleases: [
     {
       isPreRelease: false,

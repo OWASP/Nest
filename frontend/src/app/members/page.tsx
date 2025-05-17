@@ -38,7 +38,7 @@ const UsersPage = () => {
       <UserCard
         avatar={user.avatar_url}
         button={SubmitButton}
-        company={user?.company || ''}
+        company={user.company || ''}
         email={user.email || ''}
         followers_count={user.followers_count}
         location={user.location || ''}

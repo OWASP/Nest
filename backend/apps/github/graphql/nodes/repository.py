@@ -4,6 +4,7 @@ import graphene
 
 from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.issue import IssueNode
+from apps.github.graphql.nodes.milestone import MilestoneNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository import Repository
@@ -16,6 +17,10 @@ class RepositoryNode(BaseNode):
     """Repository node."""
 
     issues = graphene.List(IssueNode)
+    recent_milestones = graphene.List(
+        MilestoneNode,
+        limit=graphene.Int(default_value=5),
+    )
     languages = graphene.List(graphene.String)
     latest_release = graphene.String()
     owner_key = graphene.String()
@@ -68,6 +73,14 @@ class RepositoryNode(BaseNode):
         return self.published_releases.order_by(
             "-published_at",
         )[:RECENT_RELEASES_LIMIT]
+
+    def resolve_recent_milestones(self, info, limit=5):
+        """Resolve recent milestones."""
+        return self.recent_milestones.select_related(
+            "repository",
+        ).order_by(
+            "-created_at",
+        )[:limit]
 
     def resolve_top_contributors(self, info):
         """Resolve top contributors."""

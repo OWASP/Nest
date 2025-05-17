@@ -44,6 +44,13 @@ test.describe('Organization Details Page', () => {
     await expect(page.getByText('Test Issue 2')).toBeVisible()
   })
 
+  test('should have organization recent milestones', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
+    await expect(page.getByText('Mar 1, 2025')).toBeVisible()
+    await expect(page.getByText('Project Repo 1')).toBeVisible()
+  })
+
   test('should display recent releases section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Release v2.0.0' }).first()).toBeVisible()

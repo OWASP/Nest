@@ -58,6 +58,20 @@ export const GET_PROJECT_DATA = gql`
       type
       updatedAt
       url
+      recentMilestones(limit: 5) {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        title
+        openIssuesCount
+        closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
+      }
       recentPullRequests {
         author {
           avatarUrl

@@ -17,7 +17,7 @@ const SnapshotsPage: React.FC = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setSnapshots(graphQLData?.snapshots)
+      setSnapshots(graphQLData.snapshots)
       setIsLoading(false)
     }
     if (graphQLRequestError) {

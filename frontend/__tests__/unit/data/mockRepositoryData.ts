@@ -39,6 +39,22 @@ export const mockRepositoryData = {
         },
       },
     ],
+    recentMilestones: [
+      {
+        author: {
+          avatarUrl: 'https://avatars.githubusercontent.com/u/33333?v=4',
+          login: 'milestone-author1',
+          name: 'Milestone Author 1',
+        },
+        title: 'v2.0.0 Release',
+        openIssuesCount: 5,
+        closedIssuesCount: 15,
+        repositoryName: 'Repo One',
+        organizationName: 'OWASP',
+        createdAt: '2025-03-01T10:00:00Z',
+        url: 'https://github.com/OWASP/repo-one/milestone/1',
+      },
+    ],
   },
   recentPullRequests: [
     {

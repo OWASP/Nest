@@ -11,7 +11,12 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { GET_USER_DATA } from 'server/queries/userQueries'
-import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 'types/project'
+import type {
+  ProjectIssuesType,
+  ProjectMilestonesType,
+  ProjectReleaseType,
+  RepositoryCardProps,
+} from 'types/project'
 import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
@@ -24,13 +29,14 @@ const UserDetailsPage: React.FC = () => {
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
+  const [milestones, setMilestones] = useState<ProjectMilestonesType[]>([])
   const [pullRequests, setPullRequests] = useState<PullRequestsType[]>([])
   const [releases, setReleases] = useState<ProjectReleaseType[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
-  const [privateContributor, setPrivateContributor] = useState(false)
+  const [isPrivateContributor, setIsPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
@@ -40,11 +46,12 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setUser(graphQLData?.user)
-      setIssues(graphQLData?.recentIssues)
-      setPullRequests(graphQLData?.recentPullRequests)
-      setReleases(graphQLData?.recentReleases)
-      setTopRepositories(graphQLData?.topContributedRepositories)
+      setUser(graphQLData.user)
+      setIssues(graphQLData.recentIssues)
+      setMilestones(graphQLData.recentMilestones)
+      setPullRequests(graphQLData.recentPullRequests)
+      setReleases(graphQLData.recentReleases)
+      setTopRepositories(graphQLData.topContributedRepositories)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -55,15 +62,14 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!memberKey) {
+      const result = await fetchHeatmapData(memberKey as string)
+      if (!result) {
+        setIsPrivateContributor(true)
         return
       }
-      const result = await fetchHeatmapData(memberKey as string)
-      if (typeof result !== 'string' && result.contributions) {
+      if (result?.contributions) {
         setUsername(memberKey as string)
         setData(result as HeatmapData)
-      } else {
-        setPrivateContributor(true)
       }
     }
     fetchData()
@@ -157,6 +163,26 @@ const UserDetailsPage: React.FC = () => {
     )
   }, [releases, user])
 
+  const formattedMilestones: ProjectMilestonesType[] = useMemo(() => {
+    return (
+      milestones?.map((milestone) => ({
+        author: {
+          avatarUrl: user?.avatarUrl || '',
+          key: user?.login || '',
+          login: user?.login || '',
+          name: user?.name || user?.login || '',
+        },
+        createdAt: milestone.createdAt,
+        openIssuesCount: milestone.openIssuesCount,
+        closedIssuesCount: milestone.closedIssuesCount,
+        organizationName: milestone.organizationName,
+        repositoryName: milestone.repositoryName,
+        title: milestone.title,
+        url: milestone.url,
+      })) || []
+    )
+  }, [milestones, user])
+
   if (isLoading) {
     return <LoadingSpinner />
   }
@@ -244,8 +270,9 @@ const UserDetailsPage: React.FC = () => {
     <DetailsCard
       showAvatar={false}
       title={user?.name || user?.login || 'User'}
-      heatmap={privateContributor ? undefined : <Heatmap />}
+      heatmap={isPrivateContributor ? undefined : <Heatmap />}
       details={userDetails}
+      recentMilestones={formattedMilestones}
       pullRequests={formattedPullRequest}
       stats={userStats}
       type="user"

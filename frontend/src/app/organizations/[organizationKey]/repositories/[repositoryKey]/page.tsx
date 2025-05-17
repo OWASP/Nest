@@ -29,9 +29,9 @@ const RepositoryDetailsPage = () => {
   })
   useEffect(() => {
     if (data) {
-      setRepository(data?.repository)
-      setTopContributors(data?.topContributors)
-      setRecentPullRequests(data?.recentPullRequests)
+      setRepository(data.repository)
+      setTopContributors(data.topContributors)
+      setRecentPullRequests(data.recentPullRequests)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -117,6 +117,7 @@ const RepositoryDetailsPage = () => {
       title={repository.name}
       topContributors={topContributors}
       topics={repository.topics}
+      recentMilestones={repository.recentMilestones}
       type="repository"
     />
   )

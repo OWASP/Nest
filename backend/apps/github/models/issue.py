@@ -54,6 +54,13 @@ class Issue(GenericIssueModel):
         null=True,
         related_name="created_issues",
     )
+    milestone = models.ForeignKey(
+        "github.Milestone",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="issues",
+    )
     repository = models.ForeignKey(
         "github.Repository",
         on_delete=models.CASCADE,
@@ -76,12 +83,13 @@ class Issue(GenericIssueModel):
         blank=True,
     )
 
-    def from_github(self, gh_issue, *, author=None, repository=None) -> None:
+    def from_github(self, gh_issue, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub issue data.
 
         Args:
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
+            milestone (Milestone, optional): The milestone related to the issue.
             repository (Repository, optional): The repository instance.
 
         """
@@ -109,6 +117,9 @@ class Issue(GenericIssueModel):
 
         # Author.
         self.author = author
+
+        # Milestone.
+        self.milestone = milestone
 
         # Repository.
         self.repository = repository
@@ -174,12 +185,13 @@ class Issue(GenericIssueModel):
         return IndexBase.get_total_count("issues")
 
     @staticmethod
-    def update_data(gh_issue, *, author=None, repository=None, save: bool = True):
+    def update_data(gh_issue, *, author=None, milestone=None, repository=None, save: bool = True):
         """Update issue data.
 
         Args:
             gh_issue (github.Issue.Issue): The GitHub issue object.
             author (User, optional): The author of the issue.
+            milestone (Milestone, optional): The milestone related to the issue.
             repository (Repository, optional): The repository instance.
             save (bool, optional): Whether to save the instance.
 
@@ -193,7 +205,7 @@ class Issue(GenericIssueModel):
         except Issue.DoesNotExist:
             issue = Issue(node_id=issue_node_id)
 
-        issue.from_github(gh_issue, author=author, repository=repository)
+        issue.from_github(gh_issue, author=author, milestone=milestone, repository=repository)
         if save:
             issue.save()
 
