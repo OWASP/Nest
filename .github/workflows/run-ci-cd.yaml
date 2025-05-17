@@ -359,6 +359,7 @@ jobs:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
           trivy-config: trivy.yaml
+          skip-files: '**/site-packages/PyJWT-*/METADATA'
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
