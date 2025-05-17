@@ -369,6 +369,9 @@ jobs:
       - build-staging-images
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
       - name: Setup Trivy
         uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
         with:
@@ -577,6 +580,9 @@ jobs:
       - build-docker-production-images
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
       - name: Setup Trivy
         uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
         with:
