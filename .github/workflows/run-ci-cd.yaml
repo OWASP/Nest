@@ -240,6 +240,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
       - name: Run Trivy Repository Scan
         continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
@@ -255,6 +261,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
 
       - name: Run Trivy Filesystem Scan
         continue-on-error: true
@@ -353,6 +365,12 @@ jobs:
       - build-staging-images
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
       - name: Scan backend image
         continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
@@ -551,6 +569,12 @@ jobs:
       - build-docker-production-images
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
       - name: Scan backend image
         continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
