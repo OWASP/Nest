@@ -111,7 +111,9 @@ jobs:
   scan-code:
     name: Run Code Scan
     needs:
+      - check-frontend
       - pre-commit
+      - spellcheck
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -134,7 +136,9 @@ jobs:
   scan-ci-dependencies:
     name: Run CI Denendencies Scan
     needs:
+      - check-frontend
       - pre-commit
+      - spellcheck
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -201,7 +205,6 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - check-frontend
       - scan-code
       - scan-ci-dependencies
     runs-on: ubuntu-latest
@@ -246,7 +249,6 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - check-frontend
       - scan-code
       - scan-ci-dependencies
     runs-on: ubuntu-latest
