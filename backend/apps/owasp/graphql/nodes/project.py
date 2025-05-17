@@ -3,8 +3,8 @@
 import graphene
 
 from apps.github.graphql.nodes.issue import IssueNode
-from apps.github.graphql.nodes.pull_request import PullRequestNode
 from apps.github.graphql.nodes.milestone import MilestoneNode
+from apps.github.graphql.nodes.pull_request import PullRequestNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.common import GenericEntityNode
@@ -70,7 +70,6 @@ class ProjectNode(GenericEntityNode):
         """Resolve recent pull requests."""
         pull_requests = self.pull_requests.select_related("author").order_by("-created_at")
         return pull_requests[:RECENT_PULL_REQUESTS_LIMIT]
-
 
     def resolve_recent_releases(self, info):
         """Resolve recent releases."""
