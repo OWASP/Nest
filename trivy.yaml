@@ -1,14 +1,12 @@
 filesystem:
   skip-dirs:
-    - /home/owasp/.venv/
-    - /home/owasp/node_modules
+    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/
 
 ignorefile: trivyignore.yaml
 
 scan:
   skip-dirs:
-    - /home/owasp/.venv/
-    - /home/owasp/node_modules
+    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/
 
 timeout: 10m
 
