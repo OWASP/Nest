@@ -1,12 +1,14 @@
 filesystem:
-  skip-dirs:
-    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/
+  skip-files:
+    # Skip the PyJWT package metadata file to avoid false positives.
+    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/METADATA
 
 ignorefile: trivyignore.yaml
 
 scan:
-  skip-dirs:
-    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/
+  skip-files:
+    # Skip the PyJWT package metadata file to avoid false positives.
+    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/METADATA
 
 timeout: 10m
 
