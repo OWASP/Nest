@@ -1,13 +1,19 @@
 filesystem:
   skip-dirs:
-    - backend/.venv/
-    - frontend/node_modules/
+    - .venv
+    - node_modules
+
+ignorefile: trivyignore.yaml
+
+scan:
+  skip-dirs:
+    - .venv
+    - node_modules
 
 timeout: 10m
 
 vulnerability:
   ignore-unfixed: true
-  ignorefile: trivyignore.yaml
   security-checks:
     - config
     - secret
