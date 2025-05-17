@@ -1,3 +1,9 @@
+secrets:
+  exceptions:
+    - filepath: '**/site-packages/PyJWT-*/METADATA'
+      id: jwt-token
+      reason: Ignore false positive on PyJWT token.
+
 filesystem:
   skip-dirs:
     - backend/.venv/
