@@ -31,8 +31,8 @@ const ProjectDetailsPage = () => {
 
   useEffect(() => {
     if (data) {
-      setProject(data?.project)
-      setTopContributors(data?.topContributors)
+      setProject(data.project)
+      setTopContributors(data.topContributors)
       setRecentPullRequests(data.recentPullRequests)
       setIsLoading(false)
     }

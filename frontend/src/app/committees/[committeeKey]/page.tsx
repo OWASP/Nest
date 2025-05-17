@@ -30,7 +30,7 @@ export default function CommitteeDetailsPage() {
   useEffect(() => {
     if (data?.committee) {
       setCommittee(data.committee)
-      setTopContributors(data?.topContributors)
+      setTopContributors(data.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {

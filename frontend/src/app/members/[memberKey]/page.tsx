@@ -36,7 +36,7 @@ const UserDetailsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
-  const [privateContributor, setPrivateContributor] = useState(false)
+  const [isPrivateContributor, setIsPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
@@ -46,12 +46,12 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setUser(graphQLData?.user)
-      setIssues(graphQLData?.recentIssues)
-      setMilestones(graphQLData?.recentMilestones)
-      setPullRequests(graphQLData?.recentPullRequests)
-      setReleases(graphQLData?.recentReleases)
-      setTopRepositories(graphQLData?.topContributedRepositories)
+      setUser(graphQLData.user)
+      setIssues(graphQLData.recentIssues)
+      setMilestones(graphQLData.recentMilestones)
+      setPullRequests(graphQLData.recentPullRequests)
+      setReleases(graphQLData.recentReleases)
+      setTopRepositories(graphQLData.topContributedRepositories)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -62,15 +62,14 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!memberKey) {
+      const result = await fetchHeatmapData(memberKey as string)
+      if (!result) {
+        setIsPrivateContributor(true)
         return
       }
-      const result = await fetchHeatmapData(memberKey as string)
-      if (typeof result !== 'string' && result.contributions) {
+      if (result?.contributions) {
         setUsername(memberKey as string)
         setData(result as HeatmapData)
-      } else {
-        setPrivateContributor(true)
       }
     }
     fetchData()
@@ -271,7 +270,7 @@ const UserDetailsPage: React.FC = () => {
     <DetailsCard
       showAvatar={false}
       title={user?.name || user?.login || 'User'}
-      heatmap={privateContributor ? undefined : <Heatmap />}
+      heatmap={isPrivateContributor ? undefined : <Heatmap />}
       details={userDetails}
       recentMilestones={formattedMilestones}
       pullRequests={formattedPullRequest}

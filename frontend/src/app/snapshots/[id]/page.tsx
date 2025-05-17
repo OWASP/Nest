@@ -114,13 +114,13 @@ const SnapshotDetailsPage: React.FC = () => {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
-              {snapshot?.title}
+              {snapshot.title}
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-gray-600 dark:text-gray-300">
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faCalendar} className="mr-1 h-4 w-4" />
                 <span>
-                  {formatDate(snapshot?.startAt ?? '')} - {formatDate(snapshot?.endAt ?? '')}
+                  {formatDate(snapshot.startAt)} - {formatDate(snapshot.endAt)}
                 </span>
               </div>
             </div>
@@ -128,40 +128,40 @@ const SnapshotDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      {snapshot?.newChapters && snapshot?.newChapters.length > 0 && (
+      {snapshot.newChapters && snapshot.newChapters.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
             New Chapters
           </h2>
           <div className="mb-4">
             <ChapterMapWrapper
-              geoLocData={snapshot?.newChapters}
+              geoLocData={snapshot.newChapters}
               showLocal={false}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>
           <div className="flex flex-col gap-6">
-            {snapshot?.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
+            {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
           </div>
         </div>
       )}
 
-      {snapshot?.newProjects && snapshot?.newProjects.length > 0 && (
+      {snapshot.newProjects && snapshot.newProjects.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
             New Projects
           </h2>
           <div className="flex flex-col gap-6">
-            {snapshot?.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
+            {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
           </div>
         </div>
       )}
 
-      {snapshot?.newReleases && snapshot?.newReleases.length > 0 && (
+      {snapshot.newReleases && snapshot.newReleases.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">New Releases</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {snapshot?.newReleases.map((release, index) => (
+            {snapshot.newReleases.map((release, index) => (
               <div
                 key={`${release.tagName}-${index}`}
                 className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"

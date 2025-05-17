@@ -37,10 +37,14 @@ interface HeatmapResponse {
   contributions: HeatmapContribution[]
 }
 
-export const fetchHeatmapData = async (username: string): Promise<HeatmapResponse | string> => {
+export const fetchHeatmapData = async (username: string): Promise<HeatmapResponse | null> => {
   try {
     const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}`)
-    const heatmapData: { contributions: { date: string; count: number }[] } = await response.json()
+    const heatmapData = await response.json()
+    if (heatmapData.error) {
+      return null
+    }
+
     if (!heatmapData.contributions) {
       return {
         years: [],
@@ -79,8 +83,8 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
       ],
       contributions: transformedContributions,
     }
-  } catch (err) {
-    return err instanceof Error ? err.message : 'An unknown error occurred'
+  } catch {
+    return null
   }
 }
 // The code below is a modified version of 'github-contributions-canvas'

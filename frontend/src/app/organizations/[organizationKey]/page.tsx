@@ -31,13 +31,13 @@ const OrganizationDetailsPage = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setMilestones(graphQLData?.recentMilestones)
-      setOrganization(graphQLData?.organization)
-      setIssues(graphQLData?.recentIssues)
-      setPullRequests(graphQLData?.recentPullRequests)
-      setReleases(graphQLData?.recentReleases)
-      setRepositories(graphQLData?.repositories)
-      setTopContributors(graphQLData?.topContributors)
+      setMilestones(graphQLData.recentMilestones)
+      setOrganization(graphQLData.organization)
+      setIssues(graphQLData.recentIssues)
+      setPullRequests(graphQLData.recentPullRequests)
+      setReleases(graphQLData.recentReleases)
+      setRepositories(graphQLData.repositories)
+      setTopContributors(graphQLData.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -70,7 +70,7 @@ const OrganizationDetailsPage = () => {
       ),
     },
     {
-      label: 'Joined',
+      label: 'Created',
       value: formatDate(organization.createdAt),
     },
     {
@@ -79,7 +79,7 @@ const OrganizationDetailsPage = () => {
     },
     {
       label: 'Location',
-      value: organization.location || 'Not provided',
+      value: organization.location,
     },
   ]
 

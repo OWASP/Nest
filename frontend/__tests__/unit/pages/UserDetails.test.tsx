@@ -243,6 +243,21 @@ describe('UserDetailsPage', () => {
     })
   })
 
+  test('handles contribution heatmap loading error correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+    })
+    ;(fetchHeatmapData as jest.Mock).mockResolvedValue(null)
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const heatmapTitle = screen.queryByText('Contribution Heatmap')
+      expect(heatmapTitle).not.toBeInTheDocument()
+    })
+  })
+
   test('renders user summary section correctly', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,

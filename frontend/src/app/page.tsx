@@ -112,19 +112,19 @@ export default function Home() {
   const counterData = [
     {
       label: 'Active Projects',
-      value: data?.statsOverview.activeProjectsStats.toString().concat('+'),
+      value: data.statsOverview.activeProjectsStats.toString().concat('+'),
     },
     {
       label: 'Contributors',
-      value: data?.statsOverview.contributorsStats.toString().concat('+'),
+      value: data.statsOverview.contributorsStats.toString().concat('+'),
     },
     {
       label: 'Local Chapters',
-      value: data?.statsOverview.activeChaptersStats.toString().concat('+'),
+      value: data.statsOverview.activeChaptersStats.toString().concat('+'),
     },
     {
       label: 'Countries',
-      value: data?.statsOverview.countriesStats.toString().concat('+'),
+      value: data.statsOverview.countriesStats.toString().concat('+'),
     },
   ]
 
@@ -142,7 +142,7 @@ export default function Home() {
           </div>
           <div className="mx-auto mb-8 flex max-w-2xl justify-center">
             <MultiSearchBar
-              eventData={data?.upcomingEvents}
+              eventData={data.upcomingEvents}
               isLoaded={true}
               placeholder="Search the OWASP community"
               indexes={['chapters', 'organizations', 'projects', 'users']}
@@ -159,7 +159,7 @@ export default function Home() {
           className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data?.upcomingEvents?.map((event: EventType, index: number) => (
+            {data.upcomingEvents.map((event: EventType, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
@@ -205,7 +205,7 @@ export default function Home() {
             className="overflow-hidden"
           >
             <div className="space-y-4">
-              {data?.recentChapters?.map((chapter) => (
+              {data.recentChapters?.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <Link
@@ -247,7 +247,7 @@ export default function Home() {
             className="overflow-hidden"
           >
             <div className="space-y-4">
-              {data?.recentProjects?.map((project) => (
+              {data.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
                     <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
