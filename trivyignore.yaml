@@ -1,9 +1,3 @@
-secrets:
-  - id: jwt-token
-    paths:
-      # Ignore false positive on PyJWT token.
-      - '**/site-packages/PyJWT-*/METADATA'
-
 vulnerabilities:
   - id: CVE-2024-55549  # libxslt use-after-free
   - id: CVE-2024-56171  # libxml2 use-after-free
