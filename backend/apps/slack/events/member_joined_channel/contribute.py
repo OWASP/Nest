@@ -1,7 +1,7 @@
 """Slack member joined #contribute channel handler using templates."""
 
 from apps.common.utils import get_absolute_url
-from apps.slack.common.gsoc import GSOC_2025_MILESTONES
+from apps.slack.common.gsoc import OWASP_NEST_MILESTONES
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
     NEST_BOT_NAME,
@@ -43,9 +43,9 @@ class Contribute(EventBase):
     def handle_event(self, event, client):
         """Handle the member_joined_channel event for the contribute channel."""
         client.chat_postEphemeral(
-            blocks=GSOC_2025_MILESTONES,
+            blocks=OWASP_NEST_MILESTONES,
             channel=event["channel"],
-            text=get_text(GSOC_2025_MILESTONES),
+            text=get_text(OWASP_NEST_MILESTONES),
             user=event["user"],
         )
         super().handle_event(event, client)

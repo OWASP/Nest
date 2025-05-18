@@ -108,10 +108,61 @@ jobs:
         run: |
           make check-spelling
 
+  scan-code:
+    name: Run Code Scan
+    needs:
+      - check-frontend
+      - pre-commit
+      - spellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
+      - name: Run Trivy Repository Scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: repo
+          skip-setup-trivy: true
+          trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+
+  scan-ci-dependencies:
+    name: Run CI Denendencies Scan
+    needs:
+      - check-frontend
+      - pre-commit
+      - spellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
+      - name: Run Trivy Filesystem Scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: fs
+          skip-setup-trivy: true
+          trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+
   run-backend-tests:
     name: Run backend tests
     needs:
-      - pre-commit
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -154,8 +205,8 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - check-frontend
-      - pre-commit
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -198,7 +249,8 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - run-frontend-unit-tests
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -230,38 +282,6 @@ jobs:
       - name: Run frontend end-to-end tests
         run: |
           docker run --env-file frontend/.env.example ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest pnpm run test:e2e
-
-  scan-code:
-    name: Run Code Scan
-    needs:
-      - pre-commit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Run Trivy Repository Scan
-        continue-on-error: true
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
-        with:
-          scan-type: repo
-          trivy-config: trivy.yaml
-
-  scan-ci-dependencies:
-    name: Run CI Denendencies Scan
-    needs:
-      - pre-commit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Run Trivy Filesystem Scan
-        continue-on-error: true
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
-        with:
-          scan-type: fs
-          trivy-config: trivy.yaml
 
   build-staging-images:
     name: Build Staging Images
@@ -353,21 +373,32 @@ jobs:
       - build-staging-images
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
       - name: Scan backend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -380,7 +411,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
-      - build-staging-images
+      - scan-staging-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -417,6 +448,7 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
           touch .env.cache
@@ -551,13 +583,24 @@ jobs:
       - build-docker-production-images
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
       - name: Scan backend image
         continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
         continue-on-error: true
@@ -565,7 +608,9 @@ jobs:
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production
@@ -578,7 +623,7 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - build-docker-production-images
+      - scan-production-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -615,6 +660,7 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
           touch .env.cache
