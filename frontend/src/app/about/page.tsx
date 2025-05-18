@@ -7,7 +7,6 @@ import {
   faTools,
   faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -57,14 +56,6 @@ const About = () => {
     }
 
     if (projectMetadataRequestError) {
-      addToast({
-        description: 'Unable to complete the projectMetadata operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
       handleAppError(projectMetadataRequestError)
     }
   }, [projectMetadataResponse, projectMetadataRequestError])
@@ -75,14 +66,6 @@ const About = () => {
     }
 
     if (topContributorsRequestError) {
-      addToast({
-        description: 'Unable to complete topContributors operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
       handleAppError(topContributorsRequestError)
     }
   }, [topContributorsResponse, topContributorsRequestError])
