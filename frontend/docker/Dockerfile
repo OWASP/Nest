@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk add libc6-compat
 
 WORKDIR /app
-    
+
 RUN --mount=type=cache,target=${NPM_CACHE} \
     npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
 
