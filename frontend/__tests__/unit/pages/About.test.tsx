@@ -528,7 +528,7 @@ describe('About Component', () => {
     })
   })
 
-  test('triggers toaster error when GraphQL request fails for topcontributors', async () => {
+  test('triggers toaster error when GraphQL request fails for topContributors', async () => {
     ;(useQuery as jest.Mock).mockImplementation((query, options) => {
       if (query === GET_TOP_CONTRIBUTORS && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
