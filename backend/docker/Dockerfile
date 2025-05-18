@@ -40,7 +40,9 @@ ENV PATH="/home/owasp/.venv/bin:$PATH" \
 WORKDIR /home/owasp
 
 COPY --from=builder --chmod=555 --chown=owasp:owasp /home/owasp /home/owasp
-RUN chmod +x /home/owasp/entrypoint.sh
+RUN rm -rf /home/owasp/.cache && \
+    rm -rf /home/owasp/.local && \
+    chmod +x /home/owasp/entrypoint.sh
 
 USER owasp
 
