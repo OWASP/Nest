@@ -68,7 +68,11 @@ class ProjectNode(GenericEntityNode):
 
     def resolve_recent_pull_requests(self, info):
         """Resolve recent pull requests."""
-        pull_requests = self.pull_requests.select_related("author").order_by("-created_at")
+        pull_requests = self.pull_requests.select_related(
+            "author",
+        ).order_by(
+            "-created_at",
+        )
         return pull_requests[:RECENT_PULL_REQUESTS_LIMIT]
 
     def resolve_recent_releases(self, info):
