@@ -7,13 +7,13 @@ import {
   faTools,
   faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
+import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
 import { GET_LEADER_DATA } from 'server/queries/userQueries'
+import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
 import { User } from 'types/user'
 import { aboutText, roadmap, technologies } from 'utils/aboutData'
@@ -32,39 +32,57 @@ const leaders = {
   kasya: 'CC',
   mamicidal: 'CISSP',
 }
+const projectKey = 'nest'
 
 const About = () => {
-  const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const projectKey = 'nest'
+  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
+    GET_PROJECT_METADATA,
+    {
+      variables: { key: projectKey },
+    }
+  )
 
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
-    variables: { key: projectKey },
-  })
+  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
+    GET_TOP_CONTRIBUTORS,
+    {
+      variables: { excludedUsernames: Object.keys(leaders), key: projectKey },
+    }
+  )
+
+  const [projectMetadata, setProjectMetadata] = useState<ProjectTypeGraphql | null>(null)
+  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
 
   useEffect(() => {
-    if (data) {
-      setProject(data.project)
-      setIsLoading(false)
+    if (projectMetadataResponse?.project) {
+      setProjectMetadata(projectMetadataResponse.project)
     }
-    if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
-      handleAppError(graphQLRequestError)
-      setIsLoading(false)
+
+    if (projectMetadataRequestError) {
+      handleAppError(projectMetadataRequestError)
     }
-  }, [data, graphQLRequestError, projectKey])
+  }, [projectMetadataResponse, projectMetadataRequestError])
+
+  useEffect(() => {
+    if (topContributorsResponse?.topContributors) {
+      setTopContributors(topContributorsResponse.topContributors)
+    }
+
+    if (topContributorsRequestError) {
+      handleAppError(topContributorsRequestError)
+    }
+  }, [topContributorsResponse, topContributorsRequestError])
+
+  const isLoading =
+    !projectMetadataResponse ||
+    !topContributorsResponse ||
+    (projectMetadataRequestError && !projectMetadata) ||
+    (topContributorsRequestError && !topContributors)
 
   if (isLoading) {
     return <LoadingSpinner />
   }
-  if (!project) {
+
+  if (!projectMetadata || !topContributors) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -98,10 +116,10 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        {project.topContributors && (
+        {topContributors && (
           <TopContributors
             icon={faUsers}
-            contributors={project.topContributors}
+            contributors={topContributors}
             maxInitialDisplay={9}
             type="contributor"
           />
@@ -159,10 +177,10 @@ const About = () => {
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
-            { label: 'Forks', value: project.forksCount },
-            { label: 'Stars', value: project.starsCount },
-            { label: 'Contributors', value: project.contributorsCount },
-            { label: 'Issues', value: project.issuesCount },
+            { label: 'Forks', value: projectMetadata.forksCount },
+            { label: 'Stars', value: projectMetadata.starsCount },
+            { label: 'Contributors', value: projectMetadata.contributorsCount },
+            { label: 'Open Issues', value: projectMetadata.issuesCount },
           ].map((stat, index) => (
             <div key={index}>
               <SecondaryCard className="text-center">
