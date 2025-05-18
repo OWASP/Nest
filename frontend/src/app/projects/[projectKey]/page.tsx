@@ -23,8 +23,6 @@ const ProjectDetailsPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
   const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
-  const [recentPullRequests, setRecentPullRequests] = useState(null)
-
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })
@@ -33,7 +31,6 @@ const ProjectDetailsPage = () => {
     if (data) {
       setProject(data.project)
       setTopContributors(data.topContributors)
-      setRecentPullRequests(data.recentPullRequests)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -96,7 +93,7 @@ const ProjectDetailsPage = () => {
       details={projectDetails}
       is_active={project.isActive}
       languages={project.languages}
-      pullRequests={recentPullRequests}
+      pullRequests={project.recentPullRequests}
       recentIssues={project.recentIssues}
       recentReleases={project.recentReleases}
       repositories={project.repositories}
