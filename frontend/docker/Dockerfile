@@ -4,13 +4,24 @@ FROM node:22-alpine AS base
 FROM base AS builder
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine
 # to understand why libc6-compat might be needed.
-ENV PNPM_HOME="/pnpm"
+ENV APK_CACHE_DIR="/app/.cache/apk" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    NPM_CACHE="/app/.npm" \
+    PNPM_HOME="/pnpm"
+
 ENV PATH="$PNPM_HOME:$PATH"
 
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \
+    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-RUN npm install --ignore-scripts -g pnpm
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    apk add libc6-compat
+
+WORKDIR /app
+    
+RUN --mount=type=cache,target=${NPM_CACHE} \
+    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
