@@ -19,6 +19,15 @@ export const GET_USER_DATA = gql`
       title
       url
     }
+    recentMilestones(limit: 5, login: $key) {
+      title
+      openIssuesCount
+      closedIssuesCount
+      repositoryName
+      organizationName
+      createdAt
+      url
+    }
     recentPullRequests(limit: 5, login: $key) {
       createdAt
       organizationName
@@ -26,7 +35,7 @@ export const GET_USER_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 6, login: $key) {
+    recentReleases(limit: 5, login: $key) {
       isPreRelease
       name
       publishedAt

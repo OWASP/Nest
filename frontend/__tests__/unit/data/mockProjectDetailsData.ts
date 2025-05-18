@@ -70,6 +70,22 @@ export const mockProjectDetailsData = {
     type: 'Tool',
     updatedAt: '2025-02-07T12:34:56Z',
     url: 'https://github.com/example-project',
+    recentMilestones: [
+      {
+        author: {
+          avatarUrl: 'https://avatars.githubusercontent.com/u/33333?v=4',
+          login: 'milestone-author1',
+          name: 'Milestone Author 1',
+        },
+        title: 'v2.0.0 Release',
+        openIssuesCount: 5,
+        closedIssuesCount: 15,
+        repositoryName: 'Project Repo 1',
+        organizationName: 'OWASP',
+        createdAt: '2025-03-01T10:00:00Z',
+        url: 'https://github.com/OWASP/repo-one/milestone/1',
+      },
+    ],
   },
   recentPullRequests: [
     {

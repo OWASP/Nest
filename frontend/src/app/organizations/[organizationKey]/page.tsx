@@ -19,6 +19,7 @@ const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams()
   const [organization, setOrganization] = useState(null)
   const [issues, setIssues] = useState(null)
+  const [milestones, setMilestones] = useState(null)
   const [pullRequests, setPullRequests] = useState(null)
   const [releases, setReleases] = useState(null)
   const [repositories, setRepositories] = useState(null)
@@ -30,12 +31,13 @@ const OrganizationDetailsPage = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setOrganization(graphQLData?.organization)
-      setIssues(graphQLData?.recentIssues)
-      setPullRequests(graphQLData?.recentPullRequests)
-      setReleases(graphQLData?.recentReleases)
-      setRepositories(graphQLData?.repositories)
-      setTopContributors(graphQLData?.topContributors)
+      setMilestones(graphQLData.recentMilestones)
+      setOrganization(graphQLData.organization)
+      setIssues(graphQLData.recentIssues)
+      setPullRequests(graphQLData.recentPullRequests)
+      setReleases(graphQLData.recentReleases)
+      setRepositories(graphQLData.repositories)
+      setTopContributors(graphQLData.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -68,7 +70,7 @@ const OrganizationDetailsPage = () => {
       ),
     },
     {
-      label: 'Joined',
+      label: 'Created',
       value: formatDate(organization.createdAt),
     },
     {
@@ -77,7 +79,7 @@ const OrganizationDetailsPage = () => {
     },
     {
       label: 'Location',
-      value: organization.location || 'Not provided',
+      value: organization.location,
     },
   ]
 
@@ -115,6 +117,7 @@ const OrganizationDetailsPage = () => {
       details={organizationDetails}
       recentIssues={issues}
       recentReleases={releases}
+      recentMilestones={milestones}
       pullRequests={pullRequests}
       repositories={repositories}
       stats={organizationStats}

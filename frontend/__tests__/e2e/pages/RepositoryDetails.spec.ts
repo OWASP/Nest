@@ -84,6 +84,13 @@ test.describe('Repository Details Page', () => {
     await expect(page.getByText('Jan 1, 2024', { exact: true })).toBeVisible()
   })
 
+  test('should have recent milestones', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
+    await expect(page.getByText('Mar 1, 2025')).toBeVisible()
+    await expect(page.getByText('Repo One')).toBeVisible()
+  })
+
   test('should display recent pull requests section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
     await expect(page.getByText('Test Pull Request 1')).toBeVisible()

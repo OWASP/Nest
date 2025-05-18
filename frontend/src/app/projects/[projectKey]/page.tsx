@@ -31,8 +31,8 @@ const ProjectDetailsPage = () => {
 
   useEffect(() => {
     if (data) {
-      setProject(data?.project)
-      setTopContributors(data?.topContributors)
+      setProject(data.project)
+      setTopContributors(data.topContributors)
       setRecentPullRequests(data.recentPullRequests)
       setIsLoading(false)
     }
@@ -103,6 +103,7 @@ const ProjectDetailsPage = () => {
       stats={projectStats}
       summary={project.summary}
       title={project.name}
+      recentMilestones={project.recentMilestones}
       topContributors={topContributors}
       topics={project.topics}
       type="project"

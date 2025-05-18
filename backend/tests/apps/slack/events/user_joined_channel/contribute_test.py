@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.common.gsoc import GSOC_2025_MILESTONES
+from apps.slack.common.gsoc import OWASP_NEST_MILESTONES
 from apps.slack.constants import (
     NEST_BOT_NAME,
     OWASP_CONTRIBUTE_CHANNEL_ID,
@@ -69,10 +69,10 @@ class TestContributeEventHandler:
             mock_slack_client.chat_postMessage.assert_not_called()
         else:
             mock_slack_client.chat_postEphemeral.assert_called_once_with(
-                blocks=GSOC_2025_MILESTONES,
+                blocks=OWASP_NEST_MILESTONES,
                 channel=mock_slack_event["channel"],
                 user=mock_slack_event["user"],
-                text=get_text(GSOC_2025_MILESTONES),
+                text=get_text(OWASP_NEST_MILESTONES),
             )
 
             mock_slack_client.conversations_open.assert_called_once_with(users="U123456")

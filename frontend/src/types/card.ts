@@ -5,7 +5,12 @@ import { GeoLocDataGraphQL } from './chapter'
 import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contributor'
 import { IconType } from './icon'
 import { Level } from './level'
-import { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from './project'
+import {
+  ProjectIssuesType,
+  ProjectReleaseType,
+  RepositoryCardProps,
+  ProjectMilestonesType,
+} from './project'
 import { ItemCardPullRequests } from './user'
 
 export interface CardProps {
@@ -39,6 +44,7 @@ export interface DetailsCardProps {
   pullRequests?: ItemCardPullRequests[]
   recentIssues?: ProjectIssuesType[]
   recentReleases?: ProjectReleaseType[]
+  recentMilestones?: ProjectMilestonesType[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
   stats?: stats[]

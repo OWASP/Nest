@@ -45,6 +45,20 @@ export const GET_REPOSITORY_DATA = gql`
       topics
       updatedAt
       url
+      recentMilestones(limit: 5) {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        title
+        openIssuesCount
+        closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
+      }
     }
     topContributors(organization: $organizationKey, repository: $repositoryKey) {
       avatarUrl

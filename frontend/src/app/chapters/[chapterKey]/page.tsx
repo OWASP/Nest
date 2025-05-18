@@ -23,8 +23,8 @@ export default function ChapterDetailsPage() {
 
   useEffect(() => {
     if (data) {
-      setChapter(data?.chapter)
-      setTopContributors(data?.topContributors)
+      setChapter(data.chapter)
+      setTopContributors(data.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {

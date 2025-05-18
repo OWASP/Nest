@@ -2,7 +2,7 @@
 
 import logging
 
-from apps.slack.common.gsoc import GSOC_2025_MILESTONES, GSOC_GENERAL_INFORMATION_BLOCKS
+from apps.slack.common.gsoc import GSOC_GENERAL_INFORMATION_BLOCKS, OWASP_NEST_MILESTONES
 from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_GSOC_CHANNEL_ID
 from apps.slack.events.event import EventBase
 from apps.slack.utils import get_text
@@ -36,9 +36,9 @@ class Gsoc(EventBase):
     def handle_event(self, event, client):
         """Handle the member_joined_channel event for the GSoC channel."""
         client.chat_postEphemeral(
-            blocks=GSOC_2025_MILESTONES,
+            blocks=OWASP_NEST_MILESTONES,
             channel=event["channel"],
-            text=get_text(GSOC_2025_MILESTONES),
+            text=get_text(OWASP_NEST_MILESTONES),
             user=event["user"],
         )
         super().handle_event(event, client)
