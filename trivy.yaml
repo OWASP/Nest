@@ -1,9 +1,3 @@
-secrets:
-  exceptions:
-    - filepath: '**/site-packages/PyJWT-*/METADATA'
-      id: jwt-token
-      reason: Ignore false positive on PyJWT token.
-
 filesystem:
   skip-files:
     # Skip the PyJWT package metadata file to avoid false positives.
