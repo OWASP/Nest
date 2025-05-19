@@ -177,7 +177,7 @@ jobs:
         with:
           path: |
             cache-poetry
-          key: buildx-backend-poetry-cache-${{ runner.os }}
+          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
 
       - name: Restore apk and pip cache
         uses: actions/cache@v4
@@ -186,7 +186,7 @@ jobs:
           path: |
             cache-apk
             cache-pip
-          key: buildx-backend-cache-${{ runner.os }}
+          key: buildx-backend-cache-${{ runner.os }}-${{ hashFiles('backend/Dockerfile') }}
 
       - name: Inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.2.0
