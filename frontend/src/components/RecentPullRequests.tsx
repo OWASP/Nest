@@ -5,9 +5,9 @@ import React from 'react'
 import { PullRequestsType } from 'types/home'
 import { ItemCardPullRequests } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
-import AnchorTitle from './AnchorTitle'
-import ItemCardList from './ItemCardList'
-import { TruncatedText } from './TruncatedText'
+import AnchorTitle from 'components/AnchorTitle'
+import ItemCardList from 'components/ItemCardList'
+import { TruncatedText } from 'components/TruncatedText'
 
 interface RecentPullRequestsProps {
   data: ItemCardPullRequests[] | PullRequestsType[]

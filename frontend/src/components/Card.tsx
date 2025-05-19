@@ -1,14 +1,14 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { CardProps } from 'types/card'
 import { Icons } from 'utils/data'
 import { getSocialIcon } from 'utils/urlIconMappings'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
-import ActionButton from './ActionButton'
-import DisplayIcon from './DisplayIcon'
-import Markdown from './MarkdownWrapper'
+import DisplayIcon from 'components/DisplayIcon'
+import Markdown from 'components/MarkdownWrapper'
 
 const Card = ({
   title,

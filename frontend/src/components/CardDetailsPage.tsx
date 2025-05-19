@@ -13,7 +13,9 @@ import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
+import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import InfoBlock from 'components/InfoBlock'
+import LeadersList from 'components/LeadersList'
 import Milestones from 'components/Milestones'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
@@ -22,8 +24,6 @@ import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributors from 'components/TopContributors'
-import ChapterMapWrapper from './ChapterMapWrapper'
-import LeadersList from './LeadersList'
 
 const DetailsCard = ({
   title,

@@ -10,7 +10,7 @@ import { capitalize } from 'utils/capitalize'
 import { pluralize } from 'utils/pluralize'
 import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
-import SecondaryCard from './SecondaryCard'
+import SecondaryCard from 'components/SecondaryCard'
 
 const TopContributors = ({
   contributors,

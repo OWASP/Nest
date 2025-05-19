@@ -5,8 +5,8 @@ import Link from 'next/link'
 import React, { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
 import { PullRequestsType } from 'types/user'
-import SecondaryCard from './SecondaryCard'
-import { TruncatedText } from './TruncatedText'
+import SecondaryCard from 'components/SecondaryCard'
+import { TruncatedText } from 'components/TruncatedText'
 
 const ItemCardList = ({
   title,
