@@ -212,10 +212,17 @@ jobs:
           docker wait ${CONTAINER_ID}  # Wait for container to finish
           docker logs ${CONTAINER_ID}  # Show test output
 
-      - name: Write Poetry cache
+      - name: Write poetry cache
         run: |
           docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/.cache/pypoetry cache-poetry
           docker rm ${{ steps.run-tests.outputs.container_id }}
+
+      - name: Save poetry cache
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ steps.cache-poetry.outputs.cache-primary-key }}
+          path: |
+            cache-poetry
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
