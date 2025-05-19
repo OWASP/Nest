@@ -12,7 +12,6 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
 RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} ${POETRY_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-RUN echo "test"
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \

@@ -177,7 +177,7 @@ jobs:
         with:
           path: |
             cache-poetry
-          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          key: buildx-backend-poetry-cache-${{ runner.os }}
 
       - name: Restore apk and pip cache
         uses: actions/cache@v4
@@ -186,14 +186,18 @@ jobs:
           path: |
             cache-apk
             cache-pip
-          key: buildx-backend-apk-cache-${{ runner.os }}-${{ hashFiles('backend/docker/Dockerfile.test') }}
+          key: buildx-backend-cache-${{ runner.os }}
 
       - name: Inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.2.0
         with:
           cache-map: |
             {
-              "cache-poetry": "/home/owasp/.cache/pypoetry",
+              "cache-poetry": {
+                "target": "/home/owasp/.cache/pypoetry",
+                "gid": 1000,
+                "uid": 1000
+              },
               "cache-apk": "/home/owasp/.cache/apk",
               "cache-pip": "/home/owasp/.cache/pip"
             }
