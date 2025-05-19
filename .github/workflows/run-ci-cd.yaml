@@ -196,7 +196,6 @@ jobs:
         with:
           cache-from: |
             type=gha
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: |
             type=gha,mode=max
           context: backend
@@ -244,7 +243,6 @@ jobs:
         with:
           cache-from: |
             type=gha
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           cache-to: |
             type=gha,mode=max
           context: frontend
@@ -292,7 +290,6 @@ jobs:
         with:
           cache-from: |
             type=gha
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
           cache-to: |
             type=gha,mode=max
           context: frontend
