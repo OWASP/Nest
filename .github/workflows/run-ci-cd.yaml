@@ -182,10 +182,8 @@ jobs:
       - name: Inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v2.1.0
         with:
-          cache-source: |
-            cache-poetry
-          cache-target: |
-            /home/owasp/.cache/pypoetry
+          cache-source: cache-poetry
+          cache-target: /home/owasp/.cache/pypoetry
 
       - name: Build backend test image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
