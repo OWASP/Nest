@@ -3,6 +3,8 @@ import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
+import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
+import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
 
@@ -102,6 +104,12 @@ const mockProjectData = {
   error: null,
 }
 
+const mockTopContributorsData = {
+  data: { topContributors: mockAboutData.topContributors },
+  loading: false,
+  error: null,
+}
+
 const mockError = {
   error: new Error('GraphQL error'),
 }
@@ -110,15 +118,26 @@ describe('About Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
     ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return mockUserData('arkid15r')
-      } else if (options?.variables?.key === 'kasya') {
-        return mockUserData('kasya')
-      } else if (options?.variables?.key === 'mamicidal') {
-        return mockUserData('mamicidal')
+      const key = options?.variables?.key
+
+      if (query === GET_PROJECT_METADATA) {
+        if (key === 'nest') {
+          return mockProjectData
+        }
+      } else if (query === GET_TOP_CONTRIBUTORS) {
+        if (key === 'nest') {
+          return mockTopContributorsData
+        }
+      } else if (query === GET_LEADER_DATA) {
+        if (key === 'arkid15r') {
+          return mockUserData('arkid15r')
+        } else if (key === 'kasya') {
+          return mockUserData('kasya')
+        } else if (key === 'mamicidal') {
+          return mockUserData('mamicidal')
+        }
       }
+
       return { loading: true }
     })
     mockRouter = { push: jest.fn() }
@@ -273,31 +292,9 @@ describe('About Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Issues')).toBeInTheDocument()
+      expect(screen.getByText('Open Issues')).toBeInTheDocument()
       expect(screen.getByText('Forks')).toBeInTheDocument()
       expect(screen.getByText('Stars')).toBeInTheDocument()
-    })
-  })
-
-  test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
-      data: null,
-      error: mockError,
-    })
-
-    render(<About />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Data not found')).toBeInTheDocument()
-    })
-
-    expect(addToast).toHaveBeenCalledWith({
-      description: 'Unable to complete the requested operation.',
-      title: 'GraphQL Request Failed',
-      timeout: 3000,
-      shouldShowTimeoutProgress: true,
-      color: 'danger',
-      variant: 'solid',
     })
   })
 
@@ -509,7 +506,7 @@ describe('About Component', () => {
 
   test('triggers toaster error when GraphQL request fails for project', async () => {
     ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
+      if (query === GET_PROJECT_METADATA && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {
@@ -521,11 +518,35 @@ describe('About Component', () => {
     render(<About />)
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
         color: 'danger',
+        description: 'GraphQL error',
+        shouldShowTimeoutProgress: true,
+        timeout: 5000,
+        title: 'Server Error',
+        variant: 'solid',
+      })
+    })
+  })
+
+  test('triggers toaster error when GraphQL request fails for topContributors', async () => {
+    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+      if (query === GET_TOP_CONTRIBUTORS && options?.variables?.key === 'nest') {
+        return { loading: false, data: null, error: new Error('GraphQL error') }
+      }
+      return {
+        loading: false,
+        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
+        error: null,
+      }
+    })
+    render(<About />)
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        color: 'danger',
+        description: 'GraphQL error',
+        shouldShowTimeoutProgress: true,
+        timeout: 5000,
+        title: 'Server Error',
         variant: 'solid',
       })
     })

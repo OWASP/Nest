@@ -17,6 +17,7 @@ class RepositoryContributorQuery(BaseQuery):
         limit=graphene.Int(default_value=15),
         chapter=graphene.String(required=False),
         committee=graphene.String(required=False),
+        excluded_usernames=graphene.List(graphene.String, required=False),
         organization=graphene.String(required=False),
         project=graphene.String(required=False),
         repository=graphene.String(required=False),
@@ -29,6 +30,7 @@ class RepositoryContributorQuery(BaseQuery):
         limit: int = 15,
         chapter: str | None = None,
         committee: str | None = None,
+        excluded_usernames: list[str] | None = None,
         organization: str | None = None,
         project: str | None = None,
         repository: str | None = None,
@@ -42,6 +44,7 @@ class RepositoryContributorQuery(BaseQuery):
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
             organization (str, optional): Organization login to filter by.
+            excluded_usernames (list[str], optional): Usernames to exclude from the results.
             project (str, optional): Project key to filter by.
             repository (str, optional): Repository name to filter by.
 
@@ -53,6 +56,7 @@ class RepositoryContributorQuery(BaseQuery):
             limit=limit,
             chapter=chapter,
             committee=committee,
+            excluded_usernames=excluded_usernames,
             organization=organization,
             project=project,
             repository=repository,
