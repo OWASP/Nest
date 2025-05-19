@@ -219,6 +219,7 @@ jobs:
 
       - name: Save poetry cache
         uses: actions/cache/save@v4
+        if: always()
         with:
           key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
           path: |
