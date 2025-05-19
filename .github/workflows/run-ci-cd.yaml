@@ -160,9 +160,9 @@ jobs:
 
   run-backend-tests:
     name: Run backend tests
-    # needs:
-    #   - scan-code
-    #   - scan-ci-dependencies
+    needs:
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -227,15 +227,10 @@ jobs:
           key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
 
       - name: Inject cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.2.0
+        uses: reproducible-containers/buildkit-cache-dance@4b2444fec0c0fb9dbf175a96c094720a692ef810
         with:
-          cache-map: |
-            {
-              "cache-pnpm": {
-                "target": "/pnpm/store",
-                "id": "pnpm"
-              }
-            }
+          cache-source: cache-pnpm
+          cache-target: /pnpm/store
 
       - name: Build frontend unit-testing image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
@@ -274,15 +269,10 @@ jobs:
           key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
 
       - name: Inject cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.2.0
+        uses: reproducible-containers/buildkit-cache-dance@4b2444fec0c0fb9dbf175a96c094720a692ef810
         with:
-          cache-map: |
-            {
-              "cache-pnpm": {
-                "target": "/pnpm/store",
-                "id": "pnpm"
-              }
-            }
+          cache-source: cache-pnpm
+          cache-target: /pnpm/store
 
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
