@@ -180,7 +180,7 @@ jobs:
           key: backend-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
 
       - name: Inject cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v2.1.0
+        uses: reproducible-containers/buildkit-cache-dance@4b2444fec0c0fb9dbf175a96c094720a692ef810
         with:
           cache-source: cache-poetry
           cache-target: /home/owasp/.cache/pypoetry
