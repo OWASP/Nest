@@ -63,7 +63,7 @@
   "devDependencies": {
     "@axe-core/react": "^4.10.1",
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^9.27.0",
     "@playwright/test": "^1.52.0",
     "@swc/core": "^1.11.24",
     "@swc/jest": "^0.2.38",
