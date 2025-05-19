@@ -179,15 +179,6 @@ jobs:
             cache-poetry
           key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
 
-      - name: Restore apk and pip cache
-        uses: actions/cache@v4
-        id: cache-apk
-        with:
-          path: |
-            cache-apk
-            cache-pip
-          key: buildx-backend-cache-${{ runner.os }}-${{ hashFiles('backend/Dockerfile') }}
-
       - name: Inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.2.0
         with:
@@ -197,9 +188,7 @@ jobs:
                 "target": "/home/owasp/.cache/pypoetry",
                 "gid": 1000,
                 "uid": 1000
-              },
-              "cache-apk": "/home/owasp/.cache/apk",
-              "cache-pip": "/home/owasp/.cache/pip"
+              }
             }
 
       - name: Build backend test image
@@ -230,35 +219,39 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+
       - name: Restore buildx frontend pnpm cache
         uses: actions/cache@v4
         with:
-          path: /tmp/buildx-frontend-pnpm-cache
+          path: cache-pnpm
           key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          restore-keys: |
-            buildx-frontend-pnpm-cache-${{ runner.os }}-
 
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+      - name: Inject cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v3.2.0
+        with:
+          cache-map: |
+            {
+              "cache-pnpm": {
+                "target": "/pnpm/store",
+                "id": "pnpm"
+              }
+            }
 
       - name: Build frontend unit-testing image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
+            type=gha,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
-
-      - name: Update buildx frontend pnpm cache
-        run: |
-          rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend=pnpm-cache
 
       - name: Run frontend unit tests
         run: |
@@ -274,23 +267,34 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+
       - name: Restore buildx frontend pnpm cache
         uses: actions/cache@v4
         with:
-          path: /tmp/buildx-frontend-pnpm-cache
+          path: cache-pnpm
           key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          restore-keys: |
-            buildx-frontend-pnpm-cache-${{ runner.os }}-
 
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+      - name: Inject cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v3.2.0
+        with:
+          cache-map: |
+            {
+              "cache-pnpm": {
+                "target": "/pnpm/store",
+                "id": "pnpm"
+              }
+            }
 
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
+          cache-to: |
+            type=gha,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
