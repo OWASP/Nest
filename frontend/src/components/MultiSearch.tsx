@@ -80,13 +80,15 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     [eventData, indexes]
   )
   useEffect(() => {
-    TagManager.dataLayer({
-      dataLayer: {
-        event: 'search',
-        search_term: searchQuery,
-        page_path: window.location.pathname,
-      },
-    })
+    if (searchQuery && searchQuery.trim() !== '') {
+      TagManager.dataLayer({
+        dataLayer: {
+          event: 'search',
+          search_term: searchQuery,
+          page_path: window.location.pathname,
+        },
+      })
+    }
   }, [searchQuery])
   useEffect(() => {
     return () => {

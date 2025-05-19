@@ -23,7 +23,13 @@ const geistMono = Geist_Mono({
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    TagManager.initialize({ gtmId: GTM_ID })
+    try {
+      if (GTM_ID) {
+        TagManager.initialize({ gtmId: GTM_ID })
+      }
+    } catch (error) {
+      throw new Error(error as string)
+    }
   }, [])
 
   return (

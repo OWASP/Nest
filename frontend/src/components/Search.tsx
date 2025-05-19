@@ -47,13 +47,15 @@ const SearchBar: React.FC<SearchProps> = ({
   }
 
   useEffect(() => {
-    TagManager.dataLayer({
-      dataLayer: {
-        event: 'search',
-        search_term: searchQuery,
-        page_path: window.location.pathname,
-      },
-    })
+    if (searchQuery && searchQuery.trim() !== '') {
+      TagManager.dataLayer({
+        dataLayer: {
+          event: 'search',
+          search_term: searchQuery,
+          page_path: window.location.pathname,
+        },
+      })
+    }
   }, [searchQuery])
 
   const handleClearSearch = () => {
