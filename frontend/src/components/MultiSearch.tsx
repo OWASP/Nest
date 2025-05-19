@@ -44,6 +44,15 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
+        if (query && query.trim() !== '') {
+          TagManager.dataLayer({
+            dataLayer: {
+              event: 'search',
+              search_term: query,
+              page_path: window.location.pathname,
+            },
+          })
+        }
         if (query.length > 0) {
           const results = await Promise.all(
             indexes.map(async (index) => {
@@ -63,6 +72,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           const filteredEvents =
             eventData?.filter((event) => event.name.toLowerCase().includes(query.toLowerCase())) ||
             []
+
           if (filteredEvents.length > 0) {
             results.push({
               indexName: 'events',
@@ -79,17 +89,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       }, 300),
     [eventData, indexes]
   )
-  useEffect(() => {
-    if (searchQuery && searchQuery.trim() !== '') {
-      TagManager.dataLayer({
-        dataLayer: {
-          event: 'search',
-          search_term: searchQuery,
-          page_path: window.location.pathname,
-        },
-      })
-    }
-  }, [searchQuery])
+
   useEffect(() => {
     return () => {
       debouncedSearch.cancel()

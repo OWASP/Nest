@@ -30,7 +30,19 @@ const SearchBar: React.FC<SearchProps> = ({
   }, [])
 
   const debouncedSearch = useMemo(
-    () => debounce((query: string) => onSearch(query), 750),
+    () =>
+      debounce((query: string) => {
+        onSearch(query)
+        if (query && query.trim() !== '') {
+          TagManager.dataLayer({
+            dataLayer: {
+              event: 'search',
+              search_term: query,
+              page_path: window.location.pathname,
+            },
+          })
+        }
+      }, 750),
     [onSearch]
   )
 
@@ -45,18 +57,6 @@ const SearchBar: React.FC<SearchProps> = ({
     setSearchQuery(newQuery)
     debouncedSearch(newQuery)
   }
-
-  useEffect(() => {
-    if (searchQuery && searchQuery.trim() !== '') {
-      TagManager.dataLayer({
-        dataLayer: {
-          event: 'search',
-          search_term: searchQuery,
-          page_path: window.location.pathname,
-        },
-      })
-    }
-  }, [searchQuery])
 
   const handleClearSearch = () => {
     setSearchQuery('')
