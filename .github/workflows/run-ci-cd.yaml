@@ -220,7 +220,7 @@ jobs:
       - name: Save poetry cache
         uses: actions/cache/save@v4
         with:
-          key: ${{ steps.cache-poetry.outputs.cache-primary-key }}
+          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
           path: |
             cache-poetry
 
