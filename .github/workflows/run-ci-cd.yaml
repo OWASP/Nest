@@ -205,8 +205,17 @@ jobs:
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
       - name: Run backend tests
+        id: run-tests
         run: |
-          docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest
+          CONTAINER_ID=$(docker run -d -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest)
+          echo "container_id=${CONTAINER_ID}" >> $GITHUB_OUTPUT
+          docker wait ${CONTAINER_ID}  # Wait for container to finish
+          docker logs ${CONTAINER_ID}  # Show test output
+
+      - name: Write Poetry cache
+        run: |
+          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/.cache/pypoetry cache-poetry
+          docker rm ${{ steps.run-tests.outputs.container_id }}
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
