@@ -177,7 +177,7 @@ jobs:
         with:
           path: |
             cache-poetry
-          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          key: backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
 
       - name: Inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.2.0
@@ -219,9 +219,8 @@ jobs:
 
       - name: Save poetry cache
         uses: actions/cache/save@v4
-        if: always()
         with:
-          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          key: backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
           path: |
             cache-poetry
 
