@@ -1,4 +1,4 @@
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contributor'
+import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
 
 export interface ProjectDataType {
   active_projects_count: number

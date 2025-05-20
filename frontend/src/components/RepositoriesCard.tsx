@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
 import { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
-import InfoItem from './InfoItem'
-import { TruncatedText } from './TruncatedText'
+import InfoItem from 'components/InfoItem'
+import { TruncatedText } from 'components/TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)

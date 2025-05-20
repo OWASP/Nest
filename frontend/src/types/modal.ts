@@ -1,5 +1,5 @@
 import React from 'react'
-import { ButtonType } from './button'
+import { ButtonType } from 'types/button'
 
 export interface ModalProps {
   title: string

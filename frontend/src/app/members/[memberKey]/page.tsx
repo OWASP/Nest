@@ -10,6 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_USER_DATA } from 'server/queries/userQueries'
 import type {
   ProjectIssuesType,
@@ -22,7 +23,6 @@ import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()

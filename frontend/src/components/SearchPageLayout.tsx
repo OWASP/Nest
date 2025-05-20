@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import Pagination from './Pagination'
-import SearchBar from './Search'
-import SkeletonBase from './SkeletonsBase'
+import Pagination from 'components/Pagination'
+import SearchBar from 'components/Search'
+import SkeletonBase from 'components/SkeletonsBase'
 interface SearchPageLayoutProps {
   isLoaded: boolean
   totalPages: number

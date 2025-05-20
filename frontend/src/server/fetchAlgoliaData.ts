@@ -1,8 +1,8 @@
+import { AppError } from 'app/global-error'
+import { IndexedObject, removeIdxPrefix } from 'server/utility'
 import { AlgoliaResponseType } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
-import { AppError } from 'app/global-error'
-import { IndexedObject, removeIdxPrefix } from './utility'
 
 export const fetchAlgoliaData = async <T>(
   indexName: string,
