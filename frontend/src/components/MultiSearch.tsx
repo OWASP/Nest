@@ -8,11 +8,11 @@ import {
   faLocationDot,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { sendGTMEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import TagManager from 'react-gtm-module'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { ChapterTypeAlgolia } from 'types/chapter'
 import { EventType } from 'types/event'
@@ -45,12 +45,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     () =>
       debounce(async (query: string) => {
         if (query && query.trim() !== '') {
-          TagManager.dataLayer({
-            dataLayer: {
-              event: 'search',
-              search_term: query,
-              page_path: window.location.pathname,
-            },
+          sendGTMEvent({
+            event: 'search',
+            search_term: query,
+            page_path: window.location.pathname,
           })
         }
         if (query.length > 0) {

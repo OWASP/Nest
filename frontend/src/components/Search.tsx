@@ -1,9 +1,9 @@
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Skeleton } from '@heroui/skeleton'
+import { sendGTMEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import TagManager from 'react-gtm-module'
 
 interface SearchProps {
   isLoaded: boolean
@@ -34,12 +34,10 @@ const SearchBar: React.FC<SearchProps> = ({
       debounce((query: string) => {
         onSearch(query)
         if (query && query.trim() !== '') {
-          TagManager.dataLayer({
-            dataLayer: {
-              event: 'search',
-              search_term: query,
-              page_path: window.location.pathname,
-            },
+          sendGTMEvent({
+            event: 'search',
+            search_term: query,
+            page_path: window.location.pathname,
           })
         }
       }, 750),
