@@ -48,7 +48,6 @@ ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
-COPY --from=builder /home/owasp/.cache /root/.cache
 WORKDIR /home/owasp
 USER owasp
 
