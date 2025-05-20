@@ -204,18 +204,6 @@ jobs:
           -v $(pwd)/poetry-cache:/home/owasp/.cache/pypoetry \
           ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest
 
-      - name: Save poetry cache
-        uses: actions/cache@v4
-        if: always()
-        with:
-          path: |
-            ./poetry-cache
-          key: ${{ runner.os }}-poetry-cache-${{ hashFiles('backend/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-cache-
-
-
-
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
