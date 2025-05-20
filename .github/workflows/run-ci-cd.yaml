@@ -339,6 +339,7 @@ jobs:
           echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
@@ -548,6 +549,7 @@ jobs:
           echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
