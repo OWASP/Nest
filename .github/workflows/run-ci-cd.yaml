@@ -205,7 +205,7 @@ jobs:
       - name: Run backend tests
         id: run-tests
         run: |
-          docker run -d -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest
+          docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
