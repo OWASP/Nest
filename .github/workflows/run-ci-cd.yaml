@@ -160,9 +160,9 @@ jobs:
 
   run-backend-tests:
     name: Run backend tests
-    needs:
-      - scan-code
-      - scan-ci-dependencies
+    # needs:
+    #   - scan-code
+    #   - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
