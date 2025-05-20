@@ -6,8 +6,9 @@ import BreadCrumbs from 'components/BreadCrumbs'
 import Footer from 'components/Footer'
 
 import Header from 'components/Header'
-import './globals.css'
 import ScrollToTop from 'components/ScrollToTop'
+
+import 'app/globals.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 import { ProjectReleaseType } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
-import AnchorTitle from './AnchorTitle'
-import SecondaryCard from './SecondaryCard'
-import { TruncatedText } from './TruncatedText'
+import AnchorTitle from 'components/AnchorTitle'
+import SecondaryCard from 'components/SecondaryCard'
+import { TruncatedText } from 'components/TruncatedText'
 
 interface RecentReleasesProps {
   data: ProjectReleaseType[]

@@ -2,9 +2,9 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockOrganizationDetailsData } from '@unit/data/mockOrganizationData'
-import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
 import OrganizationDetailsPage from 'app/organizations/[organizationKey]/page'
+import { formatDate } from 'utils/dateFormatter'
 import '@testing-library/jest-dom'
 
 jest.mock('@apollo/client', () => ({

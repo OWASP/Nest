@@ -3,9 +3,9 @@ import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import { useRouter } from 'next/navigation'
-import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

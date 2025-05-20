@@ -3,13 +3,13 @@ import { useQuery } from '@apollo/client'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_CHAPTER_DATA } from 'server/queries/chapterQueries'
 import { ChapterTypeGraphQL } from 'types/chapter'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()

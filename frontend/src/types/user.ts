@@ -1,4 +1,4 @@
-import { RepositoryCardProps } from './project'
+import { RepositoryCardProps } from 'types/project'
 
 export type user = {
   avatar_url: string

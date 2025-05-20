@@ -10,13 +10,13 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_COMMITTEE_DATA } from 'server/queries/committeeQueries'
 import type { CommitteeDetailsTypeGraphQL } from 'types/committee'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
   const [committee, setCommittee] = useState<CommitteeDetailsTypeGraphQL | null>(null)

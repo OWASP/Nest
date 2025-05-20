@@ -1,9 +1,9 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockOrganizationData } from '@unit/data/mockOrganizationData'
 import { useRouter } from 'next/navigation'
-import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
 import Organization from 'app/organizations/page'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
 const mockRouter = {
   push: jest.fn(),

@@ -25,9 +25,10 @@
       "@e2e/*": ["__tests__/e2e/*"],
       "@unit/*": ["__tests__/unit/*"],
       "*": ["./src/*"],
-      "api/*": ["src/api/*"],
+      "app/*": ["src/app/*"],
       "components/*": ["src/components/*"],
       "hooks/*": ["src/hooks/*"],
+      "server/*": ["src/server/*"],
       "types/*": ["src/types/*"],
       "utils/*": ["src/utils/*"],
       "wrappers/*": ["src/wrappers/*"]

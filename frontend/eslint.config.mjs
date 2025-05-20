@@ -87,18 +87,25 @@ const eslintConfig = [
           alphabetize: { order: 'asc', caseInsensitive: true },
           groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
           pathGroups: [
+            { pattern: 'app/**', group: 'internal', position: 'before' },
             { pattern: 'lib/**', group: 'internal', position: 'after' },
+            { pattern: 'server/**', group: 'internal', position: 'after' },
+            { pattern: 'types/**', group: 'internal', position: 'after' },
+            { pattern: 'utils/**', group: 'internal', position: 'after' },
             { pattern: 'components/**', group: 'internal', position: 'after' },
-            { pattern: 'app/**', group: 'internal', position: 'after' },
             { pattern: '@tests/**', group: 'internal', position: 'after' },
           ],
           pathGroupsExcludedImportTypes: ['builtin'],
         },
       ],
       'no-console': 'error',
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['.*'], // Disable relative imports.
+        },
+      ],
       'no-unused-vars': 'off',
-      'import/no-relative-parent-imports': 'error',
-
       ...jsxA11y.configs.recommended.rules,
       'jsx-a11y/anchor-is-valid': 'warn',
       'jsx-a11y/no-autofocus': 'warn',

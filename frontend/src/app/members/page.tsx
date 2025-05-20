@@ -1,8 +1,8 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import { User } from 'types/user'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { User } from 'types/user'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 

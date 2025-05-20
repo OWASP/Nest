@@ -1,4 +1,4 @@
-import { TopContributorsTypeAlgolia } from './contributor'
+import { TopContributorsTypeAlgolia } from 'types/contributor'
 
 export interface ChapterDataType {
   active_committees_count: number

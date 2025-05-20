@@ -1,17 +1,17 @@
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { JSX } from 'react'
-import { ButtonType } from './button'
-import { GeoLocDataGraphQL } from './chapter'
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contributor'
-import { IconType } from './icon'
-import { Level } from './level'
+import { ButtonType } from 'types/button'
+import { GeoLocDataGraphQL } from 'types/chapter'
+import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
+import { IconType } from 'types/icon'
+import { Level } from 'types/level'
 import {
   ProjectIssuesType,
   ProjectReleaseType,
   RepositoryCardProps,
   ProjectMilestonesType,
-} from './project'
-import { ItemCardPullRequests } from './user'
+} from 'types/project'
+import { ItemCardPullRequests } from 'types/user'
 
 export interface CardProps {
   button: ButtonType

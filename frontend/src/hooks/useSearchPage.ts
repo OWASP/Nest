@@ -2,8 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { handleAppError } from 'app/global-error'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 interface UseSearchPageOptions {
   indexName: string
   pageTitle: string

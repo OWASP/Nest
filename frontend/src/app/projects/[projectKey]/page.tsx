@@ -10,6 +10,7 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
@@ -17,7 +18,6 @@ import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)

@@ -1,5 +1,5 @@
-import { CSRF_URL } from 'utils/credentials'
 import { AppError } from 'app/global-error'
+import { CSRF_URL } from 'utils/credentials'
 
 export const fetchCsrfToken = async (): Promise<string> => {
   try {

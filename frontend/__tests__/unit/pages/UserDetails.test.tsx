@@ -2,10 +2,10 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
-import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
 import UserDetailsPage from 'app/members/[memberKey]/page'
+import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 
 // Mock Apollo Client
 jest.mock('@apollo/client', () => ({

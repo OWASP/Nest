@@ -11,12 +11,12 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()

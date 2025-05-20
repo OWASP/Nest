@@ -1,8 +1,8 @@
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { fetchCsrfToken } from 'server/fetchCsrfToken'
 import { twMerge } from 'tailwind-merge'
+import { fetchCsrfToken } from 'server/fetchCsrfToken'
 import { ChapterTypeGraphQL } from 'types/chapter'
 
 import { CommitteeTypeAlgolia } from 'types/committee'

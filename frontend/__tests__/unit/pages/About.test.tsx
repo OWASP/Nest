@@ -3,10 +3,10 @@ import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
-import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
+import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
+import { GET_LEADER_DATA } from 'server/queries/userQueries'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

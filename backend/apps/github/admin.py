@@ -19,6 +19,11 @@ class LabelAdmin(admin.ModelAdmin):
 
 
 class MilestoneAdmin(admin.ModelAdmin):
+    autocomplete_fields = (
+        "author",
+        "labels",
+        "repository",
+    )
     search_fields = (
         "body",
         "title",
