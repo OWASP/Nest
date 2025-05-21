@@ -186,12 +186,8 @@ jobs:
         with:
           cache-source: |
             ./poetry-cache
-            ./pip-cache
-            ./apk-cache
           cache-target: |
             /home/owasp/.cache/pypoetry
-            /home/owasp/.cache/pip
-            /home/owasp/.cache/apk
 
       - name: Build backend test image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
