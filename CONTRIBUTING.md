@@ -341,9 +341,9 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 
 #### NestBot Development
 
-❗ **Never install your development Slack application in the OWASP Slack workspace.
-❗ Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.
-❗ Always use a different workspace (create your own if needed).**
+❗ **Never install your development Slack application in the OWASP Slack workspace.**
+❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
+❗ **Always use a different workspace (create your own if needed).**
 
 To setup NestBot development environment, follow these steps:
 
