@@ -1,17 +1,25 @@
 FROM python:3.13.3-alpine AS builder
 
-ENV OWASP_GID=1000 \
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    OWASP_GID=1000 \
     OWASP_UID=1000 \
+    PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
-RUN apk update && apk upgrade && \
+RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} ${POETRY_CACHE_DIR} && \
+    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    apk update && apk upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
-    mkdir -p ${POETRY_CACHE_DIR} && \
-    chown -R owasp:owasp /home/owasp && \
-    python -m pip install poetry
+    chown -R owasp:owasp /home/owasp
+
+RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+    python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
 WORKDIR /home/owasp
 
