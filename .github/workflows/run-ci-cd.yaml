@@ -197,6 +197,9 @@ jobs:
         with:
           cache-from: |
             type=gha
+            type=local,src=./poetry-cache
+            type=local,src=./pip-cache
+            type=local,src=./apk-cache
           cache-to: |
             type=gha,mode=max
           context: backend
