@@ -160,9 +160,9 @@ jobs:
 
   run-backend-tests:
     name: Run backend tests
-    # needs:
-    #   - scan-code
-    #   - scan-ci-dependencies
+    needs:
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -197,9 +197,6 @@ jobs:
         with:
           cache-from: |
             type=gha
-            type=local,src=./poetry-cache
-            type=local,src=./pip-cache
-            type=local,src=./apk-cache
           cache-to: |
             type=gha,mode=max
           context: backend
