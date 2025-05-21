@@ -181,6 +181,9 @@ jobs:
             ./apk-cache
           key: owasp-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
 
+      - name: Set permissions
+        run: sudo chown -R $(whoami) ./poetry-cache ./pip-cache ./apk-cache
+
       - name: Inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.2.0
         with:
