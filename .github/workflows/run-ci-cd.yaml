@@ -186,24 +186,6 @@ jobs:
           sudo chown -R $USER:$USER ./poetry-cache ./pip-cache ./apk-cache
           chmod -R 777 ./poetry-cache ./pip-cache ./apk-cache
 
-      - name: Inject poetry cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@4b2444fec0c0fb9dbf175a96c094720a692ef810
-        with:
-          cache-source: ./poetry-cache
-          cache-target: /home/owasp/.cache/pypoetry
-
-      - name: Inject pip cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@4b2444fec0c0fb9dbf175a96c094720a692ef810
-        with:
-          cache-source: ./pip-cache
-          cache-target: /home/owasp/.cache/pip
-
-      - name: Inject apk cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@4b2444fec0c0fb9dbf175a96c094720a692ef810
-        with:
-          cache-source: ./apk-cache
-          cache-target: /home/owasp/.cache/apk
-
       - name: Build backend test image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
@@ -216,6 +198,10 @@ jobs:
           load: true
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
+          build-contexts: |
+            poetry-cache=./poetry-cache
+            pip-cache=./pip-cache
+            apk-cache=./apk-cache
 
       - name: Run backend tests
         id: run-tests
