@@ -197,9 +197,11 @@ jobs:
       - name: Run backend tests
         id: run-tests
         run: |
-          container_id=$(docker run -e DJANGO_CONFIGURATION=Test \
+          CONTAINER_ID=$(docker run -d -e DJANGO_CONFIGURATION=Test \
           ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest)
-          echo "container_id=$container_id" >> $GITHUB_OUTPUT
+          echo "container_id=$CONTAINER_ID" >> $GITHUB_OUTPUT
+          docker wait ${CONTAINER_ID}
+          docker logs ${CONTAINER_ID}
 
       - name: Save cache
         run: |
@@ -209,7 +211,7 @@ jobs:
           ./pip-cache
           docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/.cache/apk/ \
           ./apk-cache
-          docker rm ${{ steps.run-tests.outputs.container_id }}
+          docker rm -f ${{ steps.run-tests.outputs.container_id }}
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
