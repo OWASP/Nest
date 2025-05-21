@@ -171,10 +171,6 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
-      - name: Make cache dirs
-        run: |
-          mkdir -p ./poetry-cache ./pip-cache ./apk-cache
-          chmod -R 777 ./poetry-cache ./pip-cache ./apk-cache
       - name: Restore cache
         uses: actions/cache@v4
         id: restore-cache
@@ -209,11 +205,11 @@ jobs:
 
       - name: Save cache
         run: |
-          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/gh/poetry-cache/ \
+          sudo docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/gh/poetry-cache/ \
           ./poetry-cache
-          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/gh/pip-cache/ \
+          sudo docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/gh/pip-cache/ \
           ./pip-cache
-          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/gh/apk-cache/ \
+          sudo docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/gh/apk-cache/ \
           ./apk-cache
           docker rm -f ${{ steps.run-tests.outputs.container_id }}
 
