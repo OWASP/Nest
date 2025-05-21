@@ -102,7 +102,9 @@ class Command(BaseCommand):
                         if (member := Member.update_data(member_data, workspace))
                     )
                     total_members += len(response["members"])
-
+                    # Set workspace total members count
+                    workspace.total_members_count = total_members
+                    workspace.save()
                     cursor = response.get("response_metadata", {}).get("next_cursor")
                     if not cursor:
                         break
