@@ -16,7 +16,6 @@ RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} ${APK_GH_CACHE_DIR} \
     ${PIP_GH_CACHE_DIR} ${POETRY_GH_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-RUN echo "Trivial"
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
