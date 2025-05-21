@@ -190,7 +190,7 @@ jobs:
                 "target": "/home/owasp/.cache/pypoetry",
                 "gid": 1000,
                 "uid": 1000
-              }
+              },
               "pip-cache": "/home/owasp/.cache/pip",
               "apk-cache": "/home/owasp/.cache/apk"
             }
