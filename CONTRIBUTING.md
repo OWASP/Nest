@@ -341,9 +341,9 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 
 #### NestBot Development
 
- - **❗Never install your development Slack application in the OWASP Slack workspace.**
- - **❗Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
- - **❗Always use a different workspace (create your own if needed).**
+- **❗Never install your development Slack application in the OWASP Slack workspace.**
+- **❗Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
+- **❗Always use a different workspace (create your own if needed).**
 
 To setup NestBot development environment, follow these steps:
 
@@ -396,9 +396,12 @@ To setup NestBot development environment, follow these steps:
      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
      DJANGO_SLACK_BOT_TOKEN_<your-workspace-id>=<your-slack-bot-token>
      DJANGO_SLACK_SIGNING_SECRET=<your-slack-signing-secret>
+
      ```
+
 4. **Sync the slack data**:
-   - Run `make slack_sync_data`.
+   - Make sure that the app is running.
+   - Run `make slack-sync-data`.
 
 #### OWASP Schema Development
 
