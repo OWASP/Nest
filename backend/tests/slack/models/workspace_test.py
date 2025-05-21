@@ -8,7 +8,7 @@ class TestWorkspaceModel:
     def test_bot_token(self):
         workspace_id = "T123ABC"
         expected_token = "xoxb-test-token"  # noqa: S105
-        with patch.dict(os.environ, {f"SLACK_BOT_TOKEN_{workspace_id.upper()}": expected_token}):
+        with patch.dict(os.environ, {f"DJANGO_SLACK_BOT_TOKEN_{workspace_id.upper()}": expected_token}):
             workspace = Workspace(slack_workspace_id=workspace_id)
 
             assert workspace.bot_token == expected_token
