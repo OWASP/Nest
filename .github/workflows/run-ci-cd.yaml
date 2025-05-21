@@ -187,18 +187,10 @@ jobs:
           chmod -R 777 ./poetry-cache ./pip-cache ./apk-cache
 
       - name: Inject cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.2.0
+        uses: reproducible-containers/buildkit-cache-dance@4b2444fec0c0fb9dbf175a96c094720a692ef810
         with:
-          cache-map: |
-            {
-              "poetry-cache": {
-                "target": "/home/owasp/.cache/pypoetry",
-                "gid": 1000,
-                "uid": 1000
-              },
-              "pip-cache": "/home/owasp/.cache/pip",
-              "apk-cache": "/home/owasp/.cache/apk"
-            }
+          cache-source: ./poetry-cache
+          cache-target: /home/owasp/.cache/pypoetry
 
       - name: Build backend test image
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
