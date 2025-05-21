@@ -205,11 +205,11 @@ jobs:
 
       - name: Save cache
         run: |
-          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/.cache/pypoetry/ \
+          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/poetry-cache/ \
           ./poetry-cache
-          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/.cache/pip/ \
+          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/pip-cache/ \
           ./pip-cache
-          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/.cache/apk/ \
+          docker cp ${{ steps.run-tests.outputs.container_id }}:/home/owasp/apk-cache/ \
           ./apk-cache
           docker rm -f ${{ steps.run-tests.outputs.container_id }}
 
