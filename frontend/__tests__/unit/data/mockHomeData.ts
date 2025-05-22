@@ -117,10 +117,11 @@ export const mockGraphQLData = {
     },
   ],
   statsOverview: {
-    activeChaptersStats: 540,
-    activeProjectsStats: 95,
-    countriesStats: 245,
-    contributorsStats: 9673,
+    activeChaptersStats: 250,
+    activeProjectsStats: 90,
+    countriesStats: 240,
+    contributorsStats: 9600,
+    workspaceStats: 31500,
   },
   upcomingEvents: [
     {

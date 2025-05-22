@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
+import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
@@ -254,6 +255,29 @@ describe('Home', () => {
     render(<Home />)
     await waitFor(() => {
       expect(screen.getByText('No recent releases.')).toBeInTheDocument()
+    })
+  })
+
+  test('renders stats correctly', async () => {
+    render(<Home />)
+
+    const headers = [
+      'Active Projects',
+      'Local Chapters',
+      'Contributors',
+      'Countries',
+      'Slack Members',
+    ]
+    const stats = mockGraphQLData.statsOverview
+
+    await waitFor(() => {
+      headers.map((header) => expect(screen.getByText(header)).toBeInTheDocument())
+      // Wait for 2 seconds
+      setTimeout(() => {
+        Object.values(stats).forEach((value) =>
+          expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
+        )
+      }, 2000)
     })
   })
 

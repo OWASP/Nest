@@ -242,7 +242,7 @@ export const mockHomeData = {
       activeProjectsStats: 250,
       contributorsStats: 11400,
       countriesStats: 90,
-      __typename: 'StatsNode',
+      workspaceStats: 35800,
     },
     upcomingEvents: [
       {

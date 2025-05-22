@@ -1,5 +1,6 @@
 import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect } from '@playwright/test'
+import millify from 'millify'
 
 test.describe('Home Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -98,6 +99,25 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
     await expect(page.getByText('Apr 5 — 6, 2025')).toBeVisible()
     await page.getByRole('button', { name: 'Event 1' }).click()
+  })
+
+  test('should have stats', async ({ page }) => {
+    const headers = [
+      'Active Projects',
+      'Local Chapters',
+      'Contributors',
+      'Countries',
+      'Slack Members',
+    ]
+    const stats = mockHomeData.data.statsOverview
+    headers.forEach(async (header) => {
+      await expect(page.getByText(header)).toBeVisible()
+    })
+    setTimeout(() => {
+      Object.values(stats).forEach(async (stat) => {
+        await expect(page.getByText(`${millify(stat)}+`)).toBeVisible()
+      })
+    }, 2000)
   })
 
   test('Bluesky icon should be present and link correctly', async ({ page }) => {
