@@ -126,6 +126,10 @@ export default function Home() {
       label: 'Countries',
       value: data.statsOverview.countriesStats.toString().concat('+'),
     },
+    {
+      label: 'Slack Members',
+      value: data.statsOverview.workspaceStats.toString().concat('+'),
+    },
   ]
 
   return (
@@ -352,7 +356,7 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-6 lg:grid-cols-5">
           {counterData.map((stat, index) => (
             <div key={index}>
               <SecondaryCard className="text-center">
