@@ -11,6 +11,7 @@ GSOC
 GTM
 Héllo
 Kateryna
+MINROUNDED
 NETTACKER
 Nadu
 Nominatim
@@ -69,7 +70,6 @@ mastg
 mcr
 mdfile
 mern
-MINROUNDED
 millify
 mpim
 navlink
