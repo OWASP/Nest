@@ -112,23 +112,23 @@ export default function Home() {
   const counterData = [
     {
       label: 'Active Projects',
-      value: data.statsOverview.activeProjectsStats.toString().concat('+'),
+      value: data.statsOverview.activeProjectsStats,
     },
     {
       label: 'Contributors',
-      value: data.statsOverview.contributorsStats.toString().concat('+'),
+      value: data.statsOverview.contributorsStats,
     },
     {
       label: 'Local Chapters',
-      value: data.statsOverview.activeChaptersStats.toString().concat('+'),
+      value: data.statsOverview.activeChaptersStats,
     },
     {
       label: 'Countries',
-      value: data.statsOverview.countriesStats.toString().concat('+'),
+      value: data.statsOverview.countriesStats,
     },
     {
       label: 'Slack Members',
-      value: data.statsOverview.workspaceStats.toString().concat('+'),
+      value: data.statsOverview.workspaceStats,
     },
   ]
 
@@ -361,7 +361,7 @@ export default function Home() {
             <div key={index}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={parseInt(stat.value)} duration={2} />+
+                  <AnimatedCounter end={stat.value} duration={2} />+
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
               </SecondaryCard>
