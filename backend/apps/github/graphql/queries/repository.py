@@ -1,45 +1,32 @@
 """OWASP repository GraphQL queries."""
 
-from __future__ import annotations
+import strawberry
 
-import graphene
-
-from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.github.models.repository import Repository
 
 
-class RepositoryQuery(BaseQuery):
+@strawberry.type
+class RepositoryQuery:
     """Repository queries."""
 
-    repository = graphene.Field(
-        RepositoryNode,
-        organization_key=graphene.String(required=True),
-        repository_key=graphene.String(required=True),
-    )
-
-    repositories = graphene.List(
-        RepositoryNode,
-        limit=graphene.Int(default_value=12),
-        organization=graphene.String(required=True),
-    )
-
-    def resolve_repository(
-        root,
+    @strawberry.field
+    def repository(
+        self,
         info,
         organization_key: str,
         repository_key: str,
-    ) -> Repository | None:
+    ) -> RepositoryNode | None:
         """Resolve repository by key.
 
         Args:
-            root (Any): The root query object.
-            info (ResolveInfo): The GraphQL execution context.
+            self: The RepositoryQuery instance.
+            info: GraphQL execution context.
             organization_key (str): The login of the organization.
             repository_key (str): The unique key of the repository.
 
         Returns:
-            Repository or None: The repository object if found, otherwise None.
+            RepositoryNode | None: The repository node if found, otherwise None.
 
         """
         try:
@@ -50,23 +37,24 @@ class RepositoryQuery(BaseQuery):
         except Repository.DoesNotExist:
             return None
 
-    def resolve_repositories(
-        root,
+    @strawberry.field
+    def repositories(
+        self,
         info,
         organization: str,
         *,
         limit: int = 12,
-    ) -> list[Repository]:
+    ) -> list[RepositoryNode]:
         """Resolve repositories.
 
         Args:
-            root (Any): The root query object.
-            info (ResolveInfo): The GraphQL execution context.
+            self: The RepositoryQuery instance.
+            info: GraphQL execution context.
             limit (int): Maximum number of repositories to return.
             organization (str): The login of the organization.
 
         Returns:
-            QuerySet: Queryset containing the repositories for the organization.
+            list[RepositoryNode]: A list of repositories.
 
         """
         return (

@@ -47,6 +47,7 @@ repos:
           - types-python-dateutil
           - types-PyYAML
           - types-requests
+          - strawberry-graphql-django
         args:
           - --config-file
           - backend/pyproject.toml

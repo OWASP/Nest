@@ -1,18 +1,17 @@
 """OWASP committee GraphQL queries."""
 
-import graphene
+import strawberry
 
-from apps.common.graphql.queries import BaseQuery
 from apps.owasp.graphql.nodes.committee import CommitteeNode
 from apps.owasp.models.committee import Committee
 
 
-class CommitteeQuery(BaseQuery):
+@strawberry.type
+class CommitteeQuery:
     """Committee queries."""
 
-    committee = graphene.Field(CommitteeNode, key=graphene.String(required=True))
-
-    def resolve_committee(root, info, key):
+    @strawberry.field
+    def committee(self, key: str) -> CommitteeNode | None:
         """Resolve committee by key.
 
         Args:
@@ -21,7 +20,7 @@ class CommitteeQuery(BaseQuery):
             key (str): The key of the committee.
 
         Returns:
-            Committee: The committee object if found, otherwise None.
+            CommitteeNode: The committee object if found, otherwise None.
 
         """
         try:

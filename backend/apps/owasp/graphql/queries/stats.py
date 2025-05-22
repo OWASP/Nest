@@ -1,6 +1,6 @@
 """OWASP stats GraphQL queries."""
 
-import graphene
+import strawberry
 
 from apps.github.models.user import User
 from apps.owasp.graphql.nodes.stats import StatsNode
@@ -8,22 +8,13 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.project import Project
 
 
+@strawberry.type
 class StatsQuery:
     """Stats queries."""
 
-    stats_overview = graphene.Field(StatsNode)
-
-    def resolve_stats_overview(self, info) -> StatsNode:
-        """Resolve stats overview.
-
-        Args:
-            self: The StatsQuery instance.
-            info: GraphQL execution info.
-
-        Returns:
-            StatsNode: A node containing aggregated statistics.
-
-        """
+    @strawberry.field
+    def stats_overview(self) -> StatsNode:
+        """Resolve stats overview."""
         active_projects_stats = Project.active_projects_count()
         active_chapters_stats = Chapter.active_chapters_count()
         contributors_stats = User.objects.count()
@@ -36,8 +27,8 @@ class StatsQuery:
         )
 
         return StatsNode(
-            (active_projects_stats // 10) * 10,  # nearest 10
-            (active_chapters_stats // 10) * 10,  # nearest 10
-            (contributors_stats // 100) * 100,  # nearest 100
-            (countries_stats // 10) * 10,  # nearest 10
+            active_projects_stats=(active_projects_stats // 10) * 10,
+            active_chapters_stats=(active_chapters_stats // 10) * 10,
+            contributors_stats=(contributors_stats // 100) * 100,
+            countries_stats=(countries_stats // 10) * 10,
         )

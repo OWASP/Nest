@@ -1,31 +1,26 @@
 """OWASP user GraphQL queries."""
 
-import graphene
+import strawberry
 
-from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.github.graphql.nodes.user import UserNode
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 
 
-class UserQuery(BaseQuery):
+@strawberry.type
+class UserQuery:
     """User queries."""
 
-    top_contributed_repositories = graphene.List(
-        RepositoryNode,
-        login=graphene.String(required=True),
-    )
-    user = graphene.Field(
-        UserNode,
-        login=graphene.String(required=True),
-    )
-
-    def resolve_top_contributed_repositories(root, info, login):
+    @strawberry.field
+    def top_contributed_repositories(
+        self,
+        info,
+        login: str,
+    ) -> list[RepositoryNode]:
         """Resolve user top repositories.
 
         Args:
-            root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             login (str): The login of the user.
 
@@ -43,11 +38,15 @@ class UserQuery(BaseQuery):
             .order_by("-contributions_count")
         ]
 
-    def resolve_user(root, info, login):
+    @strawberry.field
+    def user(
+        self,
+        info,
+        login: str,
+    ) -> UserNode | None:
         """Resolve user by login.
 
         Args:
-            root (Any): The root query object.
             info (ResolveInfo): The GraphQL execution context.
             login (str): The login of the user.
 

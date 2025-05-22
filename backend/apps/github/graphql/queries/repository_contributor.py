@@ -1,32 +1,18 @@
 """OWASP repository contributor GraphQL queries."""
 
-from __future__ import annotations
+import strawberry
 
-import graphene
-
-from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository_contributor import RepositoryContributor
 
 
-class RepositoryContributorQuery(BaseQuery):
+@strawberry.type
+class RepositoryContributorQuery:
     """Repository contributor queries."""
 
-    top_contributors = graphene.List(
-        RepositoryContributorNode,
-        limit=graphene.Int(default_value=15),
-        chapter=graphene.String(required=False),
-        committee=graphene.String(required=False),
-        excluded_usernames=graphene.List(graphene.String, required=False),
-        organization=graphene.String(required=False),
-        project=graphene.String(required=False),
-        repository=graphene.String(required=False),
-    )
-
-    def resolve_top_contributors(
-        root,
-        info,
-        *,
+    @strawberry.field
+    def top_contributors(
+        self,
         limit: int = 15,
         chapter: str | None = None,
         committee: str | None = None,
