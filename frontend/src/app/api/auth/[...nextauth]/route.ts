@@ -4,7 +4,7 @@ import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, NEXTAUTH_SECRET } from 'utils/credentials'
 
-export const authOptions = {
+const authOptions = {
   providers: [
     GitHubProvider({
       clientId: GITHUB_CLIENT_ID!,
@@ -34,8 +34,9 @@ export const authOptions = {
           })
           if (!data.githubAuth.authUser) throw new Error('User sync failed')
           return true
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-          throw new Error('error', error)
+          throw new Error('githubAuth failed')
         }
       }
       return true

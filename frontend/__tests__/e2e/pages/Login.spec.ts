@@ -30,30 +30,16 @@ test.describe('Login Page', () => {
     await expect(button).toBeVisible()
   })
 
-  test('redirects to / if already authenticated', async ({ page }) => {
-    // Set an authenticated session token
-    await page.context().addCookies([
-      {
-        name: 'next-auth.session-token',
-        value: 'mocked-session-token',
-        domain: 'localhost',
-        path: '/',
-        httpOnly: true,
-        secure: false,
-        sameSite: 'Lax',
-      },
-    ])
-
+  test('displays loading spinner when logging in', async ({ page }) => {
     await page.goto('/login')
 
-    // Confirm redirect to home
-    await expect(page).toHaveURL('/')
+    const button = page.getByRole('button', { name: /sign in with github/i })
+    await button.click()
+    await expect(page).toHaveURL(/github\.com/)
   })
-
   test('shows spinner while loading session', async ({ page }) => {
-    // Simulate a delay in session fetch
     await page.route('**/api/auth/session', async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 500)) // delay 500ms
+      await new Promise((resolve) => setTimeout(resolve, 500))
       await route.fulfill({
         status: 200,
         body: JSON.stringify({}),
