@@ -18,6 +18,7 @@ class Base(Configuration):
         load_dotenv(BASE_DIR / ".env.example")
 
     ALLOWED_HOSTS = values.ListValue()
+    AUTH_USER_MODEL = "nest.User"
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
@@ -50,7 +51,6 @@ class Base(Configuration):
         "apps.nest",
         "apps.slack",
     )
-    AUTH_USER_MODEL = "nest.User"
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
     LOGGING = {
