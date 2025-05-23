@@ -1,6 +1,5 @@
 import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect } from '@playwright/test'
-import millify from 'millify'
 
 test.describe('Home Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -109,15 +108,9 @@ test.describe('Home Page', () => {
       'Countries',
       'Slack Members',
     ]
-    const stats = mockHomeData.data.statsOverview
-    headers.forEach(async (header) => {
-      await expect(page.getByText(header)).toBeVisible()
-    })
-    setTimeout(() => {
-      Object.values(stats).forEach(async (stat) => {
-        await expect(page.getByText(`${millify(stat)}+`)).toBeVisible()
-      })
-    }, 2000)
+    for (const header of headers) {
+      await expect(page.getByText(header, { exact: true })).toBeVisible()
+    }
   })
 
   test('Bluesky icon should be present and link correctly', async ({ page }) => {
