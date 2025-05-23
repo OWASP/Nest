@@ -47,9 +47,10 @@ class Base(Configuration):
         "apps.core",
         "apps.github",
         "apps.owasp",
+        "apps.nest",
         "apps.slack",
     )
-
+    AUTH_USER_MODEL = "nest.User"
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
     LOGGING = {
