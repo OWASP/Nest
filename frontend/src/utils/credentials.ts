@@ -8,3 +8,4 @@ export const RELEASE_VERSION = process.env.NEXT_PUBLIC_RELEASE_VERSION
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
 export const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID
 export const GITHUB_CLIENT_SECRET = process.env.NEXT_PUBLIC_GITHUB_CLIENT_SECRET
+export const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET

@@ -1,8 +1,9 @@
 import { gql } from '@apollo/client'
 import NextAuth from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
+import { AppError } from 'app/global-error'
 import { apolloClient } from 'server/apolloClient'
-import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from 'utils/credentials'
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, NEXTAUTH_SECRET } from 'utils/credentials'
 
 export const authOptions = {
   providers: [
@@ -35,8 +36,10 @@ export const authOptions = {
           if (!data.githubAuth.authUser) throw new Error('User sync failed')
           return true
         } catch (error) {
-          console.error('GitHub authentication failed:', error)
-          return false
+          if (error instanceof AppError) {
+            throw error
+          }
+          throw new AppError(500, 'User sync failed')
         }
       }
       return true
@@ -54,7 +57,7 @@ export const authOptions = {
       return session
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: NEXTAUTH_SECRET,
 }
 
 const handler = NextAuth(authOptions)
