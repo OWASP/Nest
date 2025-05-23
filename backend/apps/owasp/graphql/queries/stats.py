@@ -10,6 +10,8 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.project import Project
 from apps.slack.models.workspace import Workspace
 
+# Used as a minimum threshold for rounding down stats
+# to avoid rounding down to zero
 MINROUNDED = 10
 
 
@@ -55,7 +57,8 @@ class StatsQuery:
             .distinct()
             .count()
         )
-        workspace_stats = Workspace.objects.first().total_members_count
+        workspace = Workspace.objects.first()
+        workspace_stats = workspace.total_members_count if workspace else 0
 
         return StatsNode(
             active_projects_stats=StatsQuery.general_round_down(active_projects_stats, 10),
