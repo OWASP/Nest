@@ -11,7 +11,7 @@ def mock_github_response():
 
 
 def test_github_auth_new_user(mock_github_response):
-    """Test mutation without using the database"""
+    """Test mutation without using the database."""
     with (
         patch("apps.nest.graphql.mutations.user.requests.post") as mock_post,
         patch("apps.nest.graphql.mutations.user.User.objects") as mock_objects,
@@ -39,7 +39,7 @@ def test_github_auth_new_user(mock_github_response):
 
 
 def test_github_auth_existing_user(mock_github_response):
-    """Test existing user flow without using the database"""
+    """Test existing user flow without using the database."""
     with (
         patch("apps.nest.graphql.mutations.user.requests.post") as mock_post,
         patch("apps.nest.graphql.mutations.user.User.objects") as mock_objects,
