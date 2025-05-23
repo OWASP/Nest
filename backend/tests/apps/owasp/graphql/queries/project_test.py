@@ -44,12 +44,12 @@ class TestProjectResolution:
     """Test cases for resolving the project field."""
 
     @pytest.fixture
-    def mock_project(self):
-        return Mock(spec=Project)
-
-    @pytest.fixture
     def mock_info(self):
         return Mock()
+
+    @pytest.fixture
+    def mock_project(self):
+        return Mock(spec=Project)
 
     def test_resolve_project_existing(self, mock_project, mock_info):
         """Test resolving an existing project."""
