@@ -2,7 +2,6 @@
 
 import logging
 import time
-from typing import Optional
 
 from django.core.management.base import BaseCommand
 from slack_sdk import WebClient
@@ -82,7 +81,9 @@ class Command(BaseCommand):
         self.stdout.write(f"\nProcessing channel: {conversation.name}")
 
         try:
-            last_message = Message.objects.filter(conversation=conversation).order_by("-timestamp").first()
+            last_message = (
+                Message.objects.filter(conversation=conversation).order_by("-timestamp").first()
+            )
             latest = last_message.timestamp if last_message else None
 
             cursor = None
@@ -98,10 +99,11 @@ class Command(BaseCommand):
                 self._handle_slack_response(response, "conversations_history")
                 messages_data = response.get("messages", [])
 
-                messages = []
-                for message_data in messages_data:
-                    if message := self._create_message_from_data(message_data, conversation):
-                        messages.append(message)
+                messages = [
+                    message
+                    for message_data in messages_data
+                    if (message := self._create_message_from_data(message_data, conversation))
+                ]
 
                 messages_count = len(messages)
                 if messages:
@@ -115,21 +117,26 @@ class Command(BaseCommand):
                     time.sleep(delay)
 
             self.stdout.write(
-                self.style.SUCCESS(f"Finished processing {messages_count} messages from {conversation.name}")
+                self.style.SUCCESS(
+                    f"Finished processing {messages_count} messages from {conversation.name}"
+                )
             )
 
         except SlackApiError as e:
             self.stdout.write(
-                self.style.ERROR(f"Failed to fetch messages for {conversation.name}: {e.response['error']}")
+                self.style.ERROR(
+                    f"Failed to fetch messages for {conversation.name}: {e.response['error']}"
+                )
             )
 
-    def _create_message_from_data(self, message_data: dict, conversation: Conversation) -> Optional[Message]:
+    def _create_message_from_data(
+        self, message_data: dict, conversation: Conversation
+    ) -> Message | None:
         """Create Message instance from Slack API data."""
-
         try:
             if message_data.get("subtype") in ["channel_join", "channel_leave"]:
                 return None
-            
+
             if not message_data.get("text") and not message_data.get("attachments"):
                 return None
 
@@ -144,9 +151,9 @@ class Command(BaseCommand):
                 },
                 save=False,
             )
-        
-        except KeyError as e:
-            logger.warning(f"Invalid message data, missing {e}: {message_data}")
+
+        except KeyError:
+            logger.warning("Invalid message data")
             return None
 
     def _handle_slack_response(self, response, api_method):
@@ -155,4 +162,3 @@ class Command(BaseCommand):
             error_message = f"{api_method} API call failed"
             logger.error(error_message)
             self.stdout.write(self.style.ERROR(error_message))
-            
