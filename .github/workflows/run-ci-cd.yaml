@@ -183,9 +183,11 @@ jobs:
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
+            type=gha
             type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: |
+            type=gha
             type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
           context: backend
           file: backend/docker/Dockerfile.test
@@ -227,9 +229,11 @@ jobs:
         uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
+            type=gha
             type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           cache-to: |
+            type=gha
             type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test

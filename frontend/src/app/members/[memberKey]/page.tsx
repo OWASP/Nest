@@ -257,7 +257,7 @@ const UserDetailsPage: React.FC = () => {
         src={user?.avatarUrl || '/placeholder.svg'}
         alt={user?.name || user?.login || 'User Avatar'}
       />
-      <div>
+      <div className="w-full">
         <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
           @{user?.login}
         </Link>
@@ -268,17 +268,17 @@ const UserDetailsPage: React.FC = () => {
 
   return (
     <DetailsCard
-      showAvatar={false}
-      title={user?.name || user?.login || 'User'}
-      heatmap={isPrivateContributor ? undefined : <Heatmap />}
       details={userDetails}
-      recentMilestones={formattedMilestones}
+      heatmap={isPrivateContributor ? undefined : <Heatmap />}
       pullRequests={formattedPullRequest}
-      stats={userStats}
-      type="user"
       recentIssues={formattedIssues}
+      recentMilestones={formattedMilestones}
       recentReleases={formattedReleases}
       repositories={topRepositories}
+      showAvatar={false}
+      stats={userStats}
+      title={user?.name || user?.login}
+      type="user"
       userSummary={<UserSummary />}
     />
   )

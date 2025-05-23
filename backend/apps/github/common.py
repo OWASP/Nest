@@ -137,7 +137,8 @@ def sync_repository(
                 # Assignees.
                 issue.assignees.clear()
                 for gh_issue_assignee in gh_issue.assignees:
-                    issue.assignees.add(User.update_data(gh_issue_assignee))
+                    if issue_assignee := User.update_data(gh_issue_assignee):
+                        issue.assignees.add(issue_assignee)
 
                 # Labels.
                 issue.labels.clear()
@@ -184,7 +185,8 @@ def sync_repository(
             # Assignees.
             pull_request.assignees.clear()
             for gh_pull_request_assignee in gh_pull_request.assignees:
-                pull_request.assignees.add(User.update_data(gh_pull_request_assignee))
+                if pull_request_assignee := User.update_data(gh_pull_request_assignee):
+                    pull_request.assignees.add(pull_request_assignee)
 
             # Labels.
             pull_request.labels.clear()
