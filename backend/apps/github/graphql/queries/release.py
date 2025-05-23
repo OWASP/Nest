@@ -39,14 +39,14 @@ class ReleaseQuery:
             is_draft=False,
             is_pre_release=False,
             published_at__isnull=False,
-        ).select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        )
+        ).order_by("-published_at")
 
         if login:
-            queryset = queryset.filter().filter(
+            queryset = queryset.select_related(
+                "author",
+                "repository",
+                "repository__organization",
+            ).filter(
                 author__login=login,
             )
 
