@@ -19,7 +19,9 @@ class TestRepositoryQuery:
     @pytest.fixture
     def mock_repository(self):
         """Repository mock fixture."""
-        return Mock(spec=Repository)
+        repo = Mock(spec=Repository)
+        repo.key = "test-repo"
+        return repo
 
     def test_resolve_repository_existing(self, mock_repository, mock_info):
         """Test resolving an existing repository."""
@@ -30,9 +32,8 @@ class TestRepositoryQuery:
             "apps.github.models.repository.Repository.objects.select_related",
             return_value=mock_queryset,
         ) as mock_select_related:
-            result = RepositoryQuery.resolve_repository(
-                None,
-                mock_info,
+            result = RepositoryQuery().repository(
+                info=mock_info,
                 organization_key="test-org",
                 repository_key="test-repo",
             )
@@ -53,9 +54,8 @@ class TestRepositoryQuery:
             "apps.github.models.repository.Repository.objects.select_related",
             return_value=mock_queryset,
         ) as mock_select_related:
-            result = RepositoryQuery.resolve_repository(
-                None,
-                mock_info,
+            result = RepositoryQuery().repository(
+                info=mock_info,
                 organization_key="non-existent-org",
                 repository_key="non-existent-repo",
             )
@@ -66,3 +66,26 @@ class TestRepositoryQuery:
                 organization__login__iexact="non-existent-org",
                 key__iexact="non-existent-repo",
             )
+
+    def test_resolve_repositories(self, mock_info, mock_repository):
+        """Test resolving repositories list."""
+        mock_queryset = MagicMock()
+        mock_queryset.filter.return_value.order_by.return_value.__getitem__.return_value = [
+            mock_repository
+        ]
+
+        with patch(
+            "apps.github.models.repository.Repository.objects.select_related",
+            return_value=mock_queryset,
+        ) as mock_select_related:
+            result = RepositoryQuery().repositories(
+                info=mock_info,
+                organization="test-org",
+                limit=1,
+            )
+
+            assert isinstance(result, list)
+            assert result[0] == mock_repository
+            mock_select_related.assert_called_once_with("organization")
+            mock_queryset.filter.assert_called_once_with(organization__login__iexact="test-org")
+            mock_queryset.filter.return_value.order_by.assert_called_once_with("-stars_count")

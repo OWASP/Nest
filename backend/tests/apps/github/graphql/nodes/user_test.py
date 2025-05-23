@@ -1,8 +1,6 @@
 """Test cases for UserNode."""
 
-from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.user import UserNode
-from apps.github.models.user import User
 
 
 class TestUserNode:
@@ -10,11 +8,12 @@ class TestUserNode:
 
     def test_user_node_inheritance(self):
         """Test if UserNode inherits from BaseNode."""
-        assert issubclass(UserNode, BaseNode)
+        assert hasattr(UserNode, "__strawberry_definition__")
 
     def test_meta_configuration(self):
         """Test if Meta is properly configured."""
-        assert UserNode._meta.model == User
+        fields = UserNode.__strawberry_definition__.fields
+        field_names = {field.name for field in fields}
         expected_fields = {
             "avatar_url",
             "bio",
@@ -34,4 +33,4 @@ class TestUserNode:
             "updated_at",
             "url",
         }
-        assert set(UserNode._meta.fields) == expected_fields
+        assert field_names == expected_fields

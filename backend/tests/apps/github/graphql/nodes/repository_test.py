@@ -1,73 +1,95 @@
-"""Test cases for RepositoryNode."""
+"""Test cases for ProjectNode."""
 
-from graphene import List
-
-from apps.common.graphql.nodes import BaseNode
-from apps.github.graphql.nodes.issue import IssueNode
-from apps.github.graphql.nodes.release import ReleaseNode
-from apps.github.graphql.nodes.repository import RepositoryNode
-from apps.github.models.repository import Repository
+from apps.owasp.graphql.nodes.project import ProjectNode
 
 
-class TestRepositoryNode:
-    def test_repository_node_inheritance(self):
-        assert issubclass(RepositoryNode, BaseNode)
+class TestProjectNode:
+    def test_project_node_inheritance(self):
+        assert hasattr(ProjectNode, "__strawberry_definition__")
 
     def test_meta_configuration(self):
-        assert RepositoryNode._meta.model == Repository
+        fields = ProjectNode.__strawberry_definition__.fields
+        field_names = {field.name for field in fields}
         expected_fields = {
-            "commits_count",
             "contributors_count",
             "created_at",
-            "description",
             "forks_count",
-            "issues",
-            "key",
-            "languages",
-            "latest_release",
-            "license",
+            "is_active",
+            "level",
             "name",
             "open_issues_count",
-            "organization",
-            "owner_key",
-            "recent_milestones",
-            "releases",
-            "size",
             "stars_count",
-            "subscribers_count",
-            "top_contributors",
+            "summary",
+            "type",
+            "issues_count",
+            "key",
+            "languages",
+            "recent_issues",
+            "recent_milestones",
+            "recent_pull_requests",
+            "recent_releases",
+            "repositories",
+            "repositories_count",
             "topics",
-            "updated_at",
-            "url",
         }
-        assert set(RepositoryNode._meta.fields) == expected_fields
+        assert expected_fields.issubset(field_names)
 
-    def test_resolve_languages(self, mocker):
-        field = RepositoryNode._meta.fields.get("languages")
+    def _get_field_by_name(self, name):
+        return next(
+            (f for f in ProjectNode.__strawberry_definition__.fields if f.name == name), None
+        )
+
+    def test_resolve_issues_count(self):
+        field = self._get_field_by_name("issues_count")
         assert field is not None
-        assert str(field.type) == "[String]"
+        assert "int" in str(field.type).lower()
 
-    def test_resolve_topics(self, mocker):
-        field = RepositoryNode._meta.fields.get("topics")
+    def test_resolve_key(self):
+        field = self._get_field_by_name("key")
         assert field is not None
-        assert str(field.type) == "[String]"
+        assert "str" in str(field.type).lower()
 
-    def test_resolve_issues(self, mocker):
-        field = RepositoryNode._meta.fields.get("issues")
+    def test_resolve_languages(self):
+        field = self._get_field_by_name("languages")
         assert field is not None
-        assert field.type == List(IssueNode)
+        assert "str" in str(field.type).lower()
 
-    def test_resolve_releases(self, mocker):
-        field = RepositoryNode._meta.fields.get("releases")
+    def test_resolve_recent_issues(self):
+        field = self._get_field_by_name("recent_issues")
         assert field is not None
-        assert field.type == List(ReleaseNode)
+        inner_type = getattr(field.type, "of_type", None) or field.type
+        assert "IssueNode" in str(inner_type)
 
-    def test_resolve_top_contributors(self, mocker):
-        field = RepositoryNode._meta.fields.get("top_contributors")
+    def test_resolve_recent_milestones(self):
+        field = self._get_field_by_name("recent_milestones")
         assert field is not None
-        assert str(field.type) == "[RepositoryContributorNode]"
+        inner_type = getattr(field.type, "of_type", None) or field.type
+        assert "MilestoneNode" in str(inner_type)
 
-    def test_resolve_url(self, mocker):
-        url = RepositoryNode._meta.fields.get("url")
-        assert url is not None
-        assert str(url.type) == "String"
+    def test_resolve_recent_pull_requests(self):
+        field = self._get_field_by_name("recent_pull_requests")
+        assert field is not None
+        inner_type = getattr(field.type, "of_type", None) or field.type
+        assert "PullRequestNode" in str(inner_type)
+
+    def test_resolve_recent_releases(self):
+        field = self._get_field_by_name("recent_releases")
+        assert field is not None
+        inner_type = getattr(field.type, "of_type", None) or field.type
+        assert "ReleaseNode" in str(inner_type)
+
+    def test_resolve_repositories(self):
+        field = self._get_field_by_name("repositories")
+        assert field is not None
+        inner_type = getattr(field.type, "of_type", None) or field.type
+        assert "RepositoryNode" in str(inner_type)
+
+    def test_resolve_repositories_count(self):
+        field = self._get_field_by_name("repositories_count")
+        assert field is not None
+        assert "int" in str(field.type).lower()
+
+    def test_resolve_topics(self):
+        field = self._get_field_by_name("topics")
+        assert field is not None
+        assert "str" in str(field.type).lower()

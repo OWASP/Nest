@@ -1,23 +1,18 @@
 """Test cases for ReleaseNode."""
 
-from graphene import Field
-
-from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.user import UserNode
-from apps.github.models.release import Release
 
 
 class TestReleaseNode:
     """Test cases for ReleaseNode class."""
 
     def test_release_node_inheritance(self):
-        """Test if ReleaseNode inherits from BaseNode."""
-        assert issubclass(ReleaseNode, BaseNode)
+        assert hasattr(ReleaseNode, "__strawberry_definition__")
 
     def test_meta_configuration(self):
-        """Test if Meta is properly configured."""
-        assert ReleaseNode._meta.model == Release
+        fields = ReleaseNode.__strawberry_definition__.fields
+        field_names = {field.name for field in fields}
         expected_fields = {
             "author",
             "is_pre_release",
@@ -29,10 +24,13 @@ class TestReleaseNode:
             "tag_name",
             "url",
         }
-        assert set(ReleaseNode._meta.fields) == expected_fields
+        assert field_names == expected_fields
 
     def test_author_field(self):
-        """Test if author field is properly configured."""
-        author_field = ReleaseNode._meta.fields.get("author")
-        assert isinstance(author_field, Field)
-        assert author_field.type == UserNode
+        fields = ReleaseNode.__strawberry_definition__.fields
+        author_field = next((field for field in fields if field.name == "author"), None)
+        assert author_field is not None
+        assert (
+            author_field.type == UserNode
+            or getattr(author_field.type, "of_type", None) == UserNode
+        )
