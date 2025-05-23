@@ -271,7 +271,7 @@ describe('Home', () => {
     const stats = mockGraphQLData.statsOverview
 
     await waitFor(() => {
-      headers.map((header) => expect(screen.getByText(header)).toBeInTheDocument())
+      headers.forEach((header) => expect(screen.getByText(header)).toBeInTheDocument())
       // Wait for 2 seconds
       setTimeout(() => {
         Object.values(stats).forEach((value) =>
