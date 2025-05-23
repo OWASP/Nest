@@ -158,7 +158,7 @@ test-backend:
 		--cache-from nest-test-backend \
 		-f backend/docker/Dockerfile.test backend \
 		-t nest-test-backend
-	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest
+	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest --full-trace -s
 
 update-backend-dependencies:
 	@CMD="poetry update" $(MAKE) exec-backend-command

@@ -15,13 +15,11 @@ class Base(Configuration):
     if ENVIRONMENT == "Test":
         from dotenv import load_dotenv
 
-        load_dotenv(BASE_DIR / ".env.example")
+        load_dotenv(BASE_DIR / ".env")
 
     ALLOWED_HOSTS = values.ListValue()
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
-    RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
-    SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 

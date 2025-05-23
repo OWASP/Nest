@@ -2,7 +2,6 @@
 
 import graphene
 import requests
-from django.db import transaction
 
 from apps.nest.graphql.nodes.user import AuthUserNode
 from apps.nest.models import User
@@ -18,7 +17,6 @@ class GitHubAuth(graphene.Mutation):
 
     auth_user = graphene.Field(AuthUserNode)
 
-    @transaction.atomic
     def mutate(self, info, access_token):
         """Mutate method for user authentication."""
         response = requests.post(
