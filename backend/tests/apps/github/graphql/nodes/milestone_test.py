@@ -17,10 +17,12 @@ class TestMilestoneNode:
         assert MilestoneNode._meta.model == Milestone
         expected_fields = {
             "author",
+            "body",
             "closed_issues_count",
             "created_at",
             "open_issues_count",
             "organization_name",
+            "progress",
             "repository_name",
             "title",
             "url",
