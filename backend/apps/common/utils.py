@@ -12,6 +12,19 @@ from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
 
+def convert_to_snake_case(text: str) -> str:
+    """Convert a string to snake_case.
+
+    Args:
+        text (str): The input string.
+
+    Returns:
+        str: The converted string in snake_case.
+
+    """
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
+
+
 def get_absolute_url(path: str) -> str:
     """Return the absolute URL for a given path.
 
