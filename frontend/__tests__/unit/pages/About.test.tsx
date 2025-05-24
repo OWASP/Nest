@@ -34,11 +34,6 @@ jest.mock('utils/aboutData', () => ({
     'This is a test paragraph about the project.',
     'This is another paragraph about the project history.',
   ],
-  roadmap: [
-    { title: 'Feature 1', issueLink: 'https://github.com/owasp/test/issues/1' },
-    { title: 'Feature 2', issueLink: 'https://github.com/owasp/test/issues/2' },
-    { title: 'Feature 3', issueLink: 'https://github.com/owasp/test/issues/3' },
-  ],
   technologies: [
     {
       section: 'Backend',
@@ -129,13 +124,7 @@ describe('About Component', () => {
           return mockTopContributorsData
         }
       } else if (query === GET_LEADER_DATA) {
-        if (key === 'arkid15r') {
-          return mockUserData('arkid15r')
-        } else if (key === 'kasya') {
-          return mockUserData('kasya')
-        } else if (key === 'mamicidal') {
-          return mockUserData('mamicidal')
-        }
+        return mockUserData(key)
       }
 
       return { loading: true }
@@ -183,10 +172,8 @@ describe('About Component', () => {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
         return { data: null, loading: false, error: mockError }
-      } else if (options?.variables?.key === 'kasya') {
-        return mockUserData('kasya')
-      } else if (options?.variables?.key === 'mamicidal') {
-        return mockUserData('mamicidal')
+      } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
+        return mockUserData(options?.variables?.key)
       }
       return { loading: true }
     })
@@ -273,18 +260,18 @@ describe('About Component', () => {
 
     const roadmapSection = screen.getByRole('heading', { name: 'Roadmap' }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
-
-    const roadmapItems = within(roadmapSection).getAllByRole('listitem')
-    expect(roadmapItems).toHaveLength(3)
-
-    expect(screen.getByText('Feature 1')).toBeInTheDocument()
-    expect(screen.getByText('Feature 2')).toBeInTheDocument()
-    expect(screen.getByText('Feature 3')).toBeInTheDocument()
-
+    const roadmapData = mockAboutData.project.recentMilestones
     const links = within(roadmapSection)
       .getAllByRole('link')
       .filter((link) => link.getAttribute('href') !== '#roadmap')
-    expect(links[0].getAttribute('href')).toBe('https://github.com/owasp/test/issues/1')
+
+    for (let i = 0; i < roadmapData.length; i++) {
+      const milestone = roadmapData[i]
+      expect(screen.getByText(milestone.title)).toBeInTheDocument()
+      expect(screen.getByText(milestone.body)).toBeInTheDocument()
+      expect(screen.getByText(`Progress: ${milestone.progress}%`)).toBeInTheDocument()
+      expect(links[i].getAttribute('href')).toBe(milestone.url)
+    }
   })
 
   test('renders project stats cards correctly', async () => {

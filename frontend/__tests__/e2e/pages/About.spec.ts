@@ -70,7 +70,11 @@ test.describe('About Page', () => {
 
   test('loads roadmap items correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
-    expect(await page.locator('li').count()).toBeGreaterThan(0)
+    for (const milestone of mockAboutData.project.recentMilestones) {
+      await expect(page.getByText(milestone.title)).toBeVisible()
+      await expect(page.getByText(milestone.body)).toBeVisible()
+      await expect(page.getByText(`Progress: ${milestone.progress}`)).toBeVisible()
+    }
   })
 
   test('displays animated counters with correct values', async ({ page }) => {

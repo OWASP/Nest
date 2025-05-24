@@ -4,6 +4,26 @@ export const mockAboutData = {
     issuesCount: 40,
     forksCount: 60,
     starsCount: 890,
+    recentMilestones: [
+      {
+        title: 'NestBot',
+        body: 'NestBot Idea',
+        url: 'http/github.com/milestones/5',
+        progress: 58,
+      },
+      {
+        title: 'Contribution Hub',
+        body: 'Contribution Hub Idea',
+        url: 'http/github.com/milestones/8',
+        progress: 75,
+      },
+      {
+        title: 'Project Dashboard',
+        body: 'Project Dashboard Idea',
+        url: 'http/github.com/milestones/10',
+        progress: 80,
+      },
+    ],
   },
   topContributors: Array.from({ length: 15 }, (_, i) => ({
     avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
