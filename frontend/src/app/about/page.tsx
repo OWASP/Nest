@@ -169,11 +169,16 @@ const About = () => {
               .sort((a, b) => (a.title > b.title ? 1 : -1))
               .map((milestone, index) => (
                 <div
-                  key={index}
+                  key={milestone.url || milestone.title || index}
                   className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
                 >
                   <div className="flex-1">
-                    <Link href={milestone.url} target="_blank" className="inline-block">
+                    <Link
+                      href={milestone.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block"
+                    >
                       <h3 className="mb-2 text-xl font-semibold text-blue-400">
                         {milestone.title}
                         <Tooltip
@@ -185,7 +190,7 @@ const About = () => {
                                 ? 'In Progress'
                                 : 'Not Started'
                           }
-                          id={`level-tooltip-progress`}
+                          id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
