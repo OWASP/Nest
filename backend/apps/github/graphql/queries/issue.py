@@ -14,7 +14,6 @@ class IssueQuery:
     @strawberry.field
     def recent_issues(
         self,
-        info,
         *,
         distinct: bool = False,
         limit: int = 5,
@@ -24,7 +23,6 @@ class IssueQuery:
         """Resolve recent issues with optional filtering.
 
         Args:
-            info (ResolveInfo): The GraphQL execution context.
             distinct (bool): Whether to return unique issues per author and repository.
             limit (int): Maximum number of issues to return.
             login (str, optional): Filter issues by a specific author's login.

@@ -11,9 +11,8 @@ class TestReleaseNode:
         assert hasattr(ReleaseNode, "__strawberry_definition__")
 
     def test_meta_configuration(self):
-        fields = ReleaseNode.__strawberry_definition__.fields
-        field_names = {field.name for field in fields}
-        expected_fields = {
+        field_names = {field.name for field in ReleaseNode.__strawberry_definition__.fields}
+        expected_field_names = {
             "author",
             "is_pre_release",
             "name",
@@ -24,7 +23,7 @@ class TestReleaseNode:
             "tag_name",
             "url",
         }
-        assert field_names == expected_fields
+        assert field_names == expected_field_names
 
     def test_author_field(self):
         fields = ReleaseNode.__strawberry_definition__.fields

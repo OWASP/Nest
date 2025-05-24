@@ -38,6 +38,7 @@ class RepositoryNode:
     @strawberry.field
     def issues(self) -> list[IssueNode]:
         """Resolve recent issues."""
+        # TODO(arkid15r): rename this to recent_issues.
         return self.issues.select_related("author").order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
     @strawberry.field
@@ -68,6 +69,7 @@ class RepositoryNode:
     @strawberry.field
     def releases(self) -> list[ReleaseNode]:
         """Resolve recent releases."""
+        # TODO(arkid15r): rename this to recent_releases.
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
     @strawberry.field

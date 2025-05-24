@@ -11,9 +11,8 @@ class TestOrganizationNode:
         assert hasattr(OrganizationNode, "__strawberry_definition__")
 
     def test_meta_configuration(self):
-        fields = OrganizationNode.__strawberry_definition__.fields
-        field_names = {field.name for field in fields}
-        expected_fields = {
+        field_names = {field.name for field in OrganizationNode.__strawberry_definition__.fields}
+        expected_field_names = {
             "avatar_url",
             "collaborators_count",
             "company",
@@ -28,7 +27,7 @@ class TestOrganizationNode:
             "updated_at",
             "url",
         }
-        assert field_names == expected_fields
+        assert field_names == expected_field_names
 
     def test_resolve_stats(self):
         stats_field = next(

@@ -10,9 +10,8 @@ class TestIssueNode:
         assert hasattr(IssueNode, "__strawberry_definition__")
 
     def test_issue_node_fields(self):
-        fields = IssueNode.__strawberry_definition__.fields
-        field_names = {field.name for field in fields}
-        expected_fields = {
+        field_names = {field.name for field in IssueNode.__strawberry_definition__.fields}
+        expected_field_names = {
             "created_at",
             "state",
             "title",
@@ -21,4 +20,4 @@ class TestIssueNode:
             "organization_name",
             "repository_name",
         }
-        assert field_names == expected_fields
+        assert field_names == expected_field_names

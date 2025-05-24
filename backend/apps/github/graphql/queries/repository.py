@@ -13,15 +13,12 @@ class RepositoryQuery:
     @strawberry.field
     def repository(
         self,
-        info,
         organization_key: str,
         repository_key: str,
     ) -> RepositoryNode | None:
         """Resolve repository by key.
 
         Args:
-            self: The RepositoryQuery instance.
-            info: GraphQL execution context.
             organization_key (str): The login of the organization.
             repository_key (str): The unique key of the repository.
 
@@ -40,7 +37,6 @@ class RepositoryQuery:
     @strawberry.field
     def repositories(
         self,
-        info,
         organization: str,
         *,
         limit: int = 12,
@@ -48,10 +44,8 @@ class RepositoryQuery:
         """Resolve repositories.
 
         Args:
-            self: The RepositoryQuery instance.
-            info: GraphQL execution context.
-            limit (int): Maximum number of repositories to return.
             organization (str): The login of the organization.
+            limit (int): Maximum number of repositories to return.
 
         Returns:
             list[RepositoryNode]: A list of repositories.

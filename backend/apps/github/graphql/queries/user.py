@@ -15,13 +15,11 @@ class UserQuery:
     @strawberry.field
     def top_contributed_repositories(
         self,
-        info,
         login: str,
     ) -> list[RepositoryNode]:
         """Resolve user top repositories.
 
         Args:
-            info (ResolveInfo): The GraphQL execution context.
             login (str): The login of the user.
 
         Returns:
@@ -41,13 +39,11 @@ class UserQuery:
     @strawberry.field
     def user(
         self,
-        info,
         login: str,
     ) -> UserNode | None:
         """Resolve user by login.
 
         Args:
-            info (ResolveInfo): The GraphQL execution context.
             login (str): The login of the user.
 
         Returns:

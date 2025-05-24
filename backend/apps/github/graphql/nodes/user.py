@@ -6,14 +6,6 @@ import strawberry_django
 from apps.github.models.user import User
 
 
-@strawberry.type
-class RepositoryType:
-    """Repository type for nested objects."""
-
-    key: str
-    owner_key: str
-
-
 @strawberry_django.type(
     User,
     fields=[

@@ -15,7 +15,6 @@ class MilestoneQuery:
     @strawberry.field
     def recent_milestones(
         self,
-        info,
         *,
         distinct: bool = False,
         limit: int = 5,
@@ -26,7 +25,6 @@ class MilestoneQuery:
         """Resolve milestones.
 
         Args:
-            info (ResolveInfo): The GraphQL execution context.
             distinct (bool): Whether to return distinct milestones.
             limit (int): The maximum number of milestones to return.
             login (str, optional): The GitHub username to filter milestones.

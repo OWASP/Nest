@@ -15,7 +15,6 @@ class CommitteeQuery:
         """Resolve committee by key.
 
         Args:
-            root: The root object.
             info: GraphQL execution info.
             key (str): The key of the committee.
 

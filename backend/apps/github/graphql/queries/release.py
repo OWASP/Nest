@@ -14,7 +14,6 @@ class ReleaseQuery:
     @strawberry.field
     def recent_releases(
         self,
-        info,
         *,
         distinct: bool = False,
         limit: int = 6,
@@ -24,8 +23,6 @@ class ReleaseQuery:
         """Resolve recent releases with optional distinct filtering.
 
         Args:
-            self: The ReleaseQuery instance.
-            info: GraphQL execution context.
             distinct (bool): Whether to return unique releases per author and repository.
             limit (int): Maximum number of releases to return.
             login (str, optional): Filter releases by a specific author's login.

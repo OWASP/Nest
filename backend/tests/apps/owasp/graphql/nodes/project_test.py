@@ -8,9 +8,8 @@ class TestProjectNode:
         assert hasattr(ProjectNode, "__strawberry_definition__")
 
     def test_meta_configuration(self):
-        fields = ProjectNode.__strawberry_definition__.fields
-        field_names = {field.name for field in fields}
-        expected_fields = {
+        field_names = {field.name for field in ProjectNode.__strawberry_definition__.fields}
+        expected_field_names = {
             "contributors_count",
             "created_at",
             "forks_count",
@@ -32,7 +31,7 @@ class TestProjectNode:
             "repositories_count",
             "topics",
         }
-        assert expected_fields.issubset(field_names)
+        assert expected_field_names.issubset(field_names)
 
     def _get_field_by_name(self, name):
         return next(

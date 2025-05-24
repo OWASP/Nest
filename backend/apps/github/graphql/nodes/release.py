@@ -27,20 +27,28 @@ class ReleaseNode:
 
     @strawberry.field
     def organization_name(self) -> str | None:
-        """Return organization name."""
-        return self.repository.organization.login if self.repository.organization else None
+        """Resolve organization name."""
+        return (
+            self.repository.organization.login
+            if self.repository and self.repository.organization
+            else None
+        )
 
     @strawberry.field
     def project_name(self) -> str:
-        """Return project name."""
-        return self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
+        """Resolve project name."""
+        return (
+            self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
+            if self.repository and self.repository.project
+            else None
+        )
 
     @strawberry.field
     def repository_name(self) -> str:
-        """Return repository name."""
-        return self.repository.name
+        """Resolve repository name."""
+        return self.repository.name if self.repository else None
 
     @strawberry.field
     def url(self) -> str:
-        """Return release URL."""
+        """Resolve URL."""
         return self.url

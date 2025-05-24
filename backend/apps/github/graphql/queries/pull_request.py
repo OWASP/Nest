@@ -15,7 +15,6 @@ class PullRequestQuery:
     @strawberry.field
     def recent_pull_requests(
         self,
-        info,
         *,
         distinct: bool = False,
         limit: int = 5,
@@ -27,7 +26,6 @@ class PullRequestQuery:
         """Resolve recent pull requests.
 
         Args:
-            info: GraphQL execution context.
             distinct (bool): Whether to return unique pull requests per author and repository.
             limit (int): Maximum number of pull requests to return.
             login (str, optional): Filter pull requests by a specific author's login.

@@ -13,15 +13,12 @@ class OrganizationQuery:
     @strawberry.field
     def organization(
         self,
-        info,
         *,
         login: str,
     ) -> OrganizationNode | None:
         """Resolve organization by login.
 
         Args:
-            self: The OrganizationQuery instance.
-            info: GraphQL execution context.
             login (str): The login of the organization.
 
         Returns:

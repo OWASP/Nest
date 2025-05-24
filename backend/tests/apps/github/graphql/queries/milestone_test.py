@@ -12,10 +12,6 @@ class TestMilestoneQuery:
     """Unit tests for MilestoneQuery."""
 
     @pytest.fixture
-    def mock_info(self):
-        return Mock()
-
-    @pytest.fixture
     def mock_milestone(self):
         milestone = Mock(spec=Milestone)
         milestone.id = 1
@@ -39,7 +35,7 @@ class TestMilestoneQuery:
             ("all", "objects"),
         ],
     )
-    def test_recent_milestones_by_state(self, mock_info, get_queryset, state, manager):
+    def test_recent_milestones_by_state(self, get_queryset, state, manager):
         """Test fetching milestones with different valid states."""
         with patch.object(Milestone, manager, new_callable=Mock) as mock_manager:
             mock_manager.all.return_value = get_queryset
@@ -48,7 +44,6 @@ class TestMilestoneQuery:
             get_queryset.prefetch_related.return_value = get_queryset
 
             result = MilestoneQuery().recent_milestones(
-                info=mock_info,
                 distinct=False,
                 limit=5,
                 login=None,
@@ -60,13 +55,12 @@ class TestMilestoneQuery:
             assert get_queryset.select_related.called
             assert get_queryset.prefetch_related.called
 
-    def test_recent_milestones_with_filters(self, mock_info, get_queryset):
+    def test_recent_milestones_with_filters(self, get_queryset):
         """Test recent milestones with login and organization filters."""
         with patch.object(Milestone, "open_milestones", new_callable=Mock) as mock_manager:
             mock_manager.all.return_value = get_queryset
 
             result = MilestoneQuery().recent_milestones(
-                info=mock_info,
                 distinct=False,
                 limit=3,
                 login="user",
@@ -78,7 +72,7 @@ class TestMilestoneQuery:
             get_queryset.filter.assert_any_call(repository__organization__login="github")
             assert isinstance(result, list)
 
-    def test_recent_milestones_distinct(self, mock_info):
+    def test_recent_milestones_distinct(self):
         """Test distinct filtering with Subquery for milestones."""
         with patch.object(Milestone, "open_milestones", new_callable=Mock) as mock_manager:
             base_queryset = MagicMock()
@@ -91,7 +85,6 @@ class TestMilestoneQuery:
             mock_manager.all.return_value = base_queryset
 
             result = MilestoneQuery().recent_milestones(
-                info=mock_info,
                 distinct=True,
                 limit=1,
                 login=None,

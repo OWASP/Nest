@@ -12,7 +12,7 @@ class ChapterQuery:
 
     @strawberry.field
     def chapter(self, key: str) -> ChapterNode | None:
-        """Resolve chapter by key."""
+        """Resolve chapter."""
         try:
             return Chapter.objects.get(key=f"www-chapter-{key}")
         except Chapter.DoesNotExist:
@@ -20,5 +20,5 @@ class ChapterQuery:
 
     @strawberry.field
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
-        """Resolve recent active chapters."""
+        """Resolve recent chapters."""
         return Chapter.objects.filter(is_active=True).order_by("-created_at")[:limit]

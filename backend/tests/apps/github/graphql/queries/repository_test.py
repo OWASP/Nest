@@ -12,18 +12,13 @@ class TestRepositoryQuery:
     """Test cases for RepositoryQuery class."""
 
     @pytest.fixture
-    def mock_info(self):
-        """GraphQL info mock fixture."""
-        return Mock()
-
-    @pytest.fixture
     def mock_repository(self):
         """Repository mock fixture."""
         repo = Mock(spec=Repository)
         repo.key = "test-repo"
         return repo
 
-    def test_resolve_repository_existing(self, mock_repository, mock_info):
+    def test_resolve_repository_existing(self, mock_repository):
         """Test resolving an existing repository."""
         mock_queryset = MagicMock()
         mock_queryset.get.return_value = mock_repository
@@ -33,7 +28,6 @@ class TestRepositoryQuery:
             return_value=mock_queryset,
         ) as mock_select_related:
             result = RepositoryQuery().repository(
-                info=mock_info,
                 organization_key="test-org",
                 repository_key="test-repo",
             )
@@ -45,7 +39,7 @@ class TestRepositoryQuery:
                 key__iexact="test-repo",
             )
 
-    def test_resolve_repository_not_found(self, mock_info):
+    def test_resolve_repository_not_found(self):
         """Test resolving a non-existent repository."""
         mock_queryset = MagicMock()
         mock_queryset.get.side_effect = Repository.DoesNotExist
@@ -55,7 +49,6 @@ class TestRepositoryQuery:
             return_value=mock_queryset,
         ) as mock_select_related:
             result = RepositoryQuery().repository(
-                info=mock_info,
                 organization_key="non-existent-org",
                 repository_key="non-existent-repo",
             )
@@ -67,7 +60,7 @@ class TestRepositoryQuery:
                 key__iexact="non-existent-repo",
             )
 
-    def test_resolve_repositories(self, mock_info, mock_repository):
+    def test_resolve_repositories(self, mock_repository):
         """Test resolving repositories list."""
         mock_queryset = MagicMock()
         mock_queryset.filter.return_value.order_by.return_value.__getitem__.return_value = [
@@ -79,7 +72,6 @@ class TestRepositoryQuery:
             return_value=mock_queryset,
         ) as mock_select_related:
             result = RepositoryQuery().repositories(
-                info=mock_info,
                 organization="test-org",
                 limit=1,
             )

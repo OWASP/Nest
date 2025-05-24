@@ -27,7 +27,7 @@ class MilestoneNode:
 
     @strawberry.field
     def organization_name(self) -> str | None:
-        """Return organization name."""
+        """Resolve organization name."""
         return (
             self.repository.organization.login
             if self.repository and self.repository.organization

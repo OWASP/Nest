@@ -39,9 +39,11 @@ class ChapterNode(GenericEntityNode):
     @strawberry.field
     def geo_location(self) -> GeoLocationType | None:
         """Resolve geographic location."""
-        if self.latitude is not None and self.longitude is not None:
-            return GeoLocationType(lat=self.latitude, lng=self.longitude)
-        return None
+        return (
+            GeoLocationType(lat=self.latitude, lng=self.longitude)
+            if self.latitude is not None and self.longitude is not None
+            else None
+        )
 
     @strawberry.field
     def key(self) -> str:

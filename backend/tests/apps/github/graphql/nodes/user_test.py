@@ -12,9 +12,8 @@ class TestUserNode:
 
     def test_meta_configuration(self):
         """Test if Meta is properly configured."""
-        fields = UserNode.__strawberry_definition__.fields
-        field_names = {field.name for field in fields}
-        expected_fields = {
+        field_names = {field.name for field in UserNode.__strawberry_definition__.fields}
+        expected_field_names = {
             "avatar_url",
             "bio",
             "company",
@@ -33,4 +32,4 @@ class TestUserNode:
             "updated_at",
             "url",
         }
-        assert field_names == expected_fields
+        assert field_names == expected_field_names

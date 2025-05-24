@@ -24,8 +24,6 @@ class RepositoryContributorQuery:
         """Resolve top contributors.
 
         Args:
-            root (Any): The root query object.
-            info (ResolveInfo): The GraphQL execution context.
             limit (int): Maximum number of contributors to return.
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
