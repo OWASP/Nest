@@ -30,7 +30,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
         <div className="mt-6 flex items-center justify-center text-center">
           <button
             onClick={() => setShowAllRepositories(!showAllRepositories)}
-            className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
+            className="mt-4 flex items-center justify-center px-0 text-blue-400 hover:underline"
           >
             {showAllRepositories ? (
               <>
