@@ -42,7 +42,7 @@ class Contribute(EventBase):
             "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
             "nest_bot_name": NEST_BOT_NAME,
             "open_issues_count": Issue.open_issues_count(),
-            "user_id": event["user"],
+            "user_id": self.get_user_id(event),
         }
 
     def get_template_file_name(self):

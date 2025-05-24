@@ -59,7 +59,7 @@ class TeamJoin(EventBase):
             "project_nest_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
             "sponsorship_channel": OWASP_SPONSORSHIP_CHANNEL_ID,
             "threat_modeling_channel": OWASP_THREAT_MODELING_CHANNEL_ID,
-            "user_id": event["user"]["id"],
+            "user_id": self.get_user_id(event),
         }
 
     def get_user_id(self, event):

@@ -36,7 +36,7 @@ class Gsoc(EventBase):
             "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
             "gsoc_channel_id": OWASP_GSOC_CHANNEL_ID,
             "gsoc_info_blocks": GSOC_GENERAL_INFORMATION_BLOCKS,
-            "user_id": event["user"],
+            "user_id": self.get_user_id(event),
         }
 
     def get_template_file_name(self):
