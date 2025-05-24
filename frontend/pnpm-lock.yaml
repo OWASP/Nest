@@ -5936,8 +5936,8 @@ packages:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
 
-  webpack-sources@3.2.3:
-    resolution: {integrity: sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==}
+  webpack-sources@3.3.0:
+    resolution: {integrity: sha512-77R0RDmJfj9dyv5p3bM5pOHa+X8/ZkO9c7kpDstigkC4nIDobadsfSGCwB4bKhMVxqAok8tajaoR8rirM7+VFQ==}
     engines: {node: '>=10.13.0'}
 
   webpack-virtual-modules@0.5.0:
@@ -8405,8 +8405,8 @@ snapshots:
   '@react-aria/listbox@3.14.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@react-aria/interactions': 3.25.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/label': 3.7.18(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/selection': 3.24.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/label': 3.7.17(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/selection': 3.24.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/utils': 3.28.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-stately/collections': 3.12.4(react@19.1.0)
       '@react-stately/list': 3.12.1(react@19.1.0)
@@ -8437,17 +8437,17 @@ snapshots:
   '@react-aria/menu@3.18.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@react-aria/focus': 3.20.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/i18n': 3.12.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/i18n': 3.12.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/interactions': 3.25.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/overlays': 3.27.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@react-aria/selection': 3.24.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/overlays': 3.27.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/selection': 3.24.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/utils': 3.28.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-stately/collections': 3.12.4(react@19.1.0)
       '@react-stately/menu': 3.9.3(react@19.1.0)
       '@react-stately/selection': 3.20.2(react@19.1.0)
-      '@react-stately/tree': 3.8.9(react@19.1.0)
-      '@react-types/button': 3.12.1(react@19.1.0)
-      '@react-types/menu': 3.10.0(react@19.1.0)
+      '@react-stately/tree': 3.8.10(react@19.1.0)
+      '@react-types/button': 3.12.0(react@19.1.0)
+      '@react-types/menu': 3.10.1(react@19.1.0)
       '@react-types/shared': 3.29.0(react@19.1.0)
       '@swc/helpers': 0.5.17
       react: 19.1.0
@@ -8856,7 +8856,7 @@ snapshots:
   '@react-stately/menu@3.9.3(react@19.1.0)':
     dependencies:
       '@react-stately/overlays': 3.6.16(react@19.1.0)
-      '@react-types/menu': 3.10.0(react@19.1.0)
+      '@react-types/menu': 3.10.1(react@19.1.0)
       '@react-types/shared': 3.29.0(react@19.1.0)
       '@swc/helpers': 0.5.17
       react: 19.1.0
@@ -13164,7 +13164,7 @@ snapshots:
     dependencies:
       acorn: 8.14.1
       chokidar: 3.6.0
-      webpack-sources: 3.2.3
+      webpack-sources: 3.3.0
       webpack-virtual-modules: 0.5.0
 
   unrs-resolver@1.7.2:
@@ -13264,7 +13264,7 @@ snapshots:
 
   webidl-conversions@7.0.0: {}
 
-  webpack-sources@3.2.3: {}
+  webpack-sources@3.3.0: {}
 
   webpack-virtual-modules@0.5.0: {}
 
@@ -13293,7 +13293,7 @@ snapshots:
       tapable: 2.2.2
       terser-webpack-plugin: 5.3.14(@swc/core@1.11.29(@swc/helpers@0.5.17))(webpack@5.99.9(@swc/core@1.11.29(@swc/helpers@0.5.17)))
       watchpack: 2.4.4
-      webpack-sources: 3.2.3
+      webpack-sources: 3.3.0
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
