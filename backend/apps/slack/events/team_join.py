@@ -2,8 +2,6 @@
 
 import logging
 
-from slack_sdk.errors import SlackApiError
-
 from apps.common.constants import OWASP_NEST_URL
 from apps.slack.constants import (
     FEEDBACK_CHANNEL_MESSAGE,
@@ -24,7 +22,6 @@ from apps.slack.constants import (
     OWASP_THREAT_MODELING_CHANNEL_ID,
 )
 from apps.slack.events.event import EventBase
-from apps.slack.utils import get_text
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -62,27 +59,17 @@ class TeamJoin(EventBase):
             "project_nest_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
             "sponsorship_channel": OWASP_SPONSORSHIP_CHANNEL_ID,
             "threat_modeling_channel": OWASP_THREAT_MODELING_CHANNEL_ID,
-            "user_id": event["user"]["id"],
+            "user_id": self.get_user_id(event),
         }
 
-    def handle_event(self, event, client):
-        """Handle the team_join event."""
-        user_id = event["user"]["id"]  # User object is returned (other events return just the ID)!
+    def get_user_id(self, event):
+        """Get the user ID from the event.
 
-        try:
-            conversation = self.open_conversation(client, user_id)
-            blocks = self.get_render_blocks(self.get_context(event))
-            client.chat_postMessage(
-                blocks=blocks,
-                channel=conversation["channel"]["id"],
-                text=get_text(blocks),
-            )
-        except SlackApiError as e:
-            if e.response["error"] == "cannot_dm_bot":
-                logger.warning("Cannot DM bot user %s", user_id)
-                return
-            logger.exception("Slack API error in team_join handler: %s", e.response["error"])
-            raise
-        except Exception:
-            logger.exception("Error in team_join handler for user: %s", user_id)
-            raise
+        Args:
+            event: The Slack event
+
+        Returns:
+            str: The user ID.
+
+        """
+        return event["user"]["id"]  # User object is returned (other events return just the ID)!
