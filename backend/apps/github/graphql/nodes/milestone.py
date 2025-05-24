@@ -34,8 +34,8 @@ class MilestoneNode(BaseNode):
         """Return milestone progress."""
         total_issues_count = self.closed_issues_count + self.open_issues_count
         if not total_issues_count:
-            return 0
-        return round(self.closed_issues_count / total_issues_count, 2) * 100
+            return 0.0
+        return round((self.closed_issues_count / total_issues_count) * 100, 2)
 
     def resolve_repository_name(self, info):
         """Resolve repository name."""
