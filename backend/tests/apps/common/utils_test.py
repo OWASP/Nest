@@ -11,6 +11,7 @@ from apps.common.utils import (
     join_values,
     natural_date,
     natural_number,
+    round_down,
 )
 
 
@@ -96,3 +97,22 @@ class TestUtils:
         mocker.patch.dict(settings._wrapped.__dict__, {"PUBLIC_IP_ADDRESS": "1.1.1.1"})
 
         assert get_user_ip_address(request) == "1.1.1.1"
+
+    @pytest.mark.parametrize(
+        ("value", "base", "expected"),
+        [
+            (100, 10, 100),
+            (101, 10, 100),
+            (123, 10, 120),
+            (123, 100, 100),
+            (1230, 10, 1230),
+            (1230, 100, 1200),
+            (1230, 1000, 1000),
+            (126, 5, 125),
+            (43, 10, 40),
+            (430, 100, 400),
+            (99, 10, 90),
+        ],
+    )
+    def test_round_down(self, value, base, expected):
+        assert round_down(value, base) == expected

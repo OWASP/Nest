@@ -110,9 +110,15 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.ERROR(f"Failed to fetch members: {e.response['error']}")
                 )
+
             if members:
                 Member.bulk_save(members)
-                self.stdout.write(self.style.SUCCESS(f"Populated {total_members} members"))
+
+            # Update the workspace with the total members count.
+            workspace.total_members_count = total_members
+            workspace.save(update_fields=["total_members_count"])
+
+            self.stdout.write(self.style.SUCCESS(f"Populated {total_members} members"))
 
         self.stdout.write(self.style.SUCCESS("\nFinished processing all workspaces"))
 

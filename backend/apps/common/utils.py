@@ -114,6 +114,20 @@ def natural_number(value: int, unit=None) -> str:
     return f"{number} {unit}{pluralize(value)}" if unit else number
 
 
+def round_down(value: int, base: int) -> int:
+    """Round down the stats to the nearest base.
+
+    Args:
+        value: The value to round down.
+        base: The base to round down to.
+
+    Returns:
+        int: The rounded down value.
+
+    """
+    return value - (value % base)
+
+
 def slugify(text: str) -> str:
     """Generate a slug from the given text.
 
