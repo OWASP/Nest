@@ -5,6 +5,7 @@ from django.contrib import admin, messages
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.event import Event
 from apps.slack.models.member import Member
+from apps.slack.models.message import Message
 from apps.slack.models.workspace import Workspace
 
 
@@ -124,6 +125,13 @@ class MemberAdmin(admin.ModelAdmin):
     approve_suggested_users.short_description = "Approve the suggested user (if only one exists)"
 
 
+class MessageAdmin(admin.ModelAdmin):
+    search_fields = (
+        "slack_message_id",
+        "text",
+    )
+
+
 class WorkspaceAdmin(admin.ModelAdmin):
     search_fields = (
         "name",
@@ -134,4 +142,5 @@ class WorkspaceAdmin(admin.ModelAdmin):
 admin.site.register(Conversation, ConversationAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Member, MemberAdmin)
+admin.site.register(Message, MessageAdmin)
 admin.site.register(Workspace, WorkspaceAdmin)

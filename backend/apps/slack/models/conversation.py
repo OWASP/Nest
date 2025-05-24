@@ -1,4 +1,4 @@
-"""Slack app channel model."""
+"""Slack app conversation model."""
 
 from datetime import UTC, datetime
 
