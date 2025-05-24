@@ -1,17 +1,16 @@
 """OWASP event GraphQL queries."""
 
-import graphene
+import strawberry
 
-from apps.common.graphql.queries import BaseQuery
 from apps.owasp.graphql.nodes.event import EventNode
 from apps.owasp.models.event import Event
 
 
-class EventQuery(BaseQuery):
+@strawberry.type
+class EventQuery:
     """Event queries."""
 
-    upcoming_events = graphene.List(EventNode, limit=graphene.Int(default_value=6))
-
-    def resolve_upcoming_events(root, info, limit):
-        """Resolve all events."""
+    @strawberry.field
+    def upcoming_events(self, limit: int = 6) -> list[EventNode]:
+        """Resolve upcoming events."""
         return Event.upcoming_events()[:limit]

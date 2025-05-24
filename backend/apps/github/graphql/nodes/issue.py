@@ -1,31 +1,39 @@
 """GitHub issue GraphQL node."""
 
-import graphene
+import strawberry
+import strawberry_django
 
-from apps.common.graphql.nodes import BaseNode
+from apps.github.graphql.nodes.user import UserNode
 from apps.github.models.issue import Issue
 
 
-class IssueNode(BaseNode):
+@strawberry_django.type(
+    Issue,
+    fields=[
+        "created_at",
+        "state",
+        "title",
+        "url",
+    ],
+)
+class IssueNode:
     """GitHub issue node."""
 
-    organization_name = graphene.String()
-    repository_name = graphene.String()
+    @strawberry.field
+    def author(self) -> UserNode | None:
+        """Resolve author."""
+        return self.author
 
-    class Meta:
-        model = Issue
-        fields = (
-            "author",
-            "created_at",
-            "state",
-            "title",
-            "url",
+    @strawberry.field
+    def organization_name(self) -> str | None:
+        """Resolve organization name."""
+        return (
+            self.repository.organization.login
+            if self.repository and self.repository.organization
+            else None
         )
 
-    def resolve_organization_name(self, info) -> str | None:
-        """Return organization name."""
-        return self.repository.organization.login if self.repository.organization else None
-
-    def resolve_repository_name(self, info):
+    @strawberry.field
+    def repository_name(self) -> str | None:
         """Resolve the repository name."""
-        return self.repository.name
+        return self.repository.name if self.repository else None
