@@ -242,7 +242,7 @@ export const mockHomeData = {
       activeProjectsStats: 250,
       contributorsStats: 11400,
       countriesStats: 90,
-      workspaceStats: 35800,
+      slackWorkspaceStats: 35800,
     },
     upcomingEvents: [
       {

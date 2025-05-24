@@ -266,7 +266,7 @@ describe('Home', () => {
       'Local Chapters',
       'Contributors',
       'Countries',
-      'Slack Members',
+      'Slack Community',
     ]
     const stats = mockGraphQLData.statsOverview
 

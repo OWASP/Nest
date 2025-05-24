@@ -10,4 +10,4 @@ class StatsNode(graphene.ObjectType):
     active_projects_stats = graphene.Int()
     contributors_stats = graphene.Int()
     countries_stats = graphene.Int()
-    workspace_stats = graphene.Int()
+    slack_workspace_stats = graphene.Int()

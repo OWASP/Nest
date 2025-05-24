@@ -22,6 +22,16 @@ class Workspace(TimestampedModel):
         """Workspace human readable representation."""
         return f"{self.name or self.slack_workspace_id}"
 
+    @staticmethod
+    def get_default_workspace() -> "Workspace":
+        """Get the default workspace.
+
+        Returns:
+            Workspace: The default workspace.
+
+        """
+        return Workspace.objects.first()
+
     @property
     def bot_token(self) -> str:
         """Get bot token for the workspace.

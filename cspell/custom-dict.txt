@@ -11,7 +11,6 @@ GSOC
 GTM
 Héllo
 Kateryna
-MINROUNDED
 NETTACKER
 Nadu
 Nominatim

@@ -106,7 +106,7 @@ test.describe('Home Page', () => {
       'Local Chapters',
       'Contributors',
       'Countries',
-      'Slack Members',
+      'Slack Community',
     ]
     for (const header of headers) {
       await expect(page.getByText(header, { exact: true })).toBeVisible()

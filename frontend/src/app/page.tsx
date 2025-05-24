@@ -127,8 +127,8 @@ export default function Home() {
       value: data.statsOverview.countriesStats,
     },
     {
-      label: 'Slack Members',
-      value: data.statsOverview.workspaceStats,
+      label: 'Slack Community',
+      value: data.statsOverview.slackWorkspaceStats,
     },
   ]
 

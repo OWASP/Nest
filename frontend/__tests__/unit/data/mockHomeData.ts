@@ -121,7 +121,7 @@ export const mockGraphQLData = {
     activeProjectsStats: 90,
     countriesStats: 240,
     contributorsStats: 9600,
-    workspaceStats: 31500,
+    slackWorkspaceStats: 31500,
   },
   upcomingEvents: [
     {
