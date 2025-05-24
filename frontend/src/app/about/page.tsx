@@ -180,7 +180,7 @@ const About = () => {
                       title={
                         milestone.progress === 100
                           ? 'Completed'
-                          : milestone.progress > 100
+                          : milestone.progress > 0
                             ? 'In Progress'
                             : 'Not Started'
                       }
