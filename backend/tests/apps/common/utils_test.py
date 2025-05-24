@@ -21,10 +21,12 @@ class TestUtils:
         [
             ("", ""),
             ("A", "a"),
+            ("a1_b2_c3", "a1_b2_c3"),
             ("A1B2C3", "a1_b2_c3"),
             ("AppHomeOpened", "app_home_opened"),
             ("Contribute", "contribute"),
             ("Gsoc", "gsoc"),
+            ("some_view_with_numbers123", "some_view_with_numbers123"),
             ("SomeViewWithNumbers123", "some_view_with_numbers123"),
             ("TeamJoin", "team_join"),
         ],
