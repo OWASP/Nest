@@ -9,7 +9,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_USER_DATA } from 'server/queries/userQueries'
 import type {
@@ -18,7 +18,7 @@ import type {
   ProjectReleaseType,
   RepositoryCardProps,
 } from 'types/project'
-import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
+import type { ItemCardPullRequests, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
@@ -30,7 +30,7 @@ const UserDetailsPage: React.FC = () => {
   const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
   const [milestones, setMilestones] = useState<ProjectMilestonesType[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequestsType[]>([])
+  const [pullRequests, setPullRequests] = useState<ItemCardPullRequests[]>([])
   const [releases, setReleases] = useState<ProjectReleaseType[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -106,84 +106,6 @@ const UserDetailsPage: React.FC = () => {
     }
     return <span key={index}>{word} </span>
   })
-
-  const formattedIssues: ProjectIssuesType[] = useMemo(() => {
-    return (
-      issues?.map((issue) => ({
-        author: {
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          login: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
-        createdAt: issue.createdAt,
-        organizationName: issue.organizationName,
-        repositoryName: issue.repositoryName,
-        title: issue.title,
-        url: issue.url,
-      })) || []
-    )
-  }, [user, issues])
-
-  const formattedPullRequest: ItemCardPullRequests[] = useMemo(() => {
-    return (
-      pullRequests?.map((pullRequest) => ({
-        author: {
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          login: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
-        createdAt: pullRequest.createdAt,
-        organizationName: pullRequest.organizationName,
-        repositoryName: pullRequest.repositoryName,
-        title: pullRequest.title,
-        url: pullRequest.url,
-      })) || []
-    )
-  }, [pullRequests, user])
-
-  const formattedReleases: ProjectReleaseType[] = useMemo(() => {
-    return (
-      releases?.map((release) => ({
-        author: {
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          login: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
-        isPreRelease: release.isPreRelease,
-        name: release.name,
-        organizationName: release.organizationName,
-        publishedAt: release.publishedAt,
-        repositoryName: release.repositoryName,
-        tagName: release.tagName,
-        url: release.url,
-      })) || []
-    )
-  }, [releases, user])
-
-  const formattedMilestones: ProjectMilestonesType[] = useMemo(() => {
-    return (
-      milestones?.map((milestone) => ({
-        author: {
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          login: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
-        body: milestone.body,
-        createdAt: milestone.createdAt,
-        openIssuesCount: milestone.openIssuesCount,
-        closedIssuesCount: milestone.closedIssuesCount,
-        organizationName: milestone.organizationName,
-        progress: milestone.progress,
-        repositoryName: milestone.repositoryName,
-        title: milestone.title,
-        url: milestone.url,
-      })) || []
-    )
-  }, [milestones, user])
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -272,10 +194,10 @@ const UserDetailsPage: React.FC = () => {
     <DetailsCard
       details={userDetails}
       heatmap={isPrivateContributor ? undefined : <Heatmap />}
-      pullRequests={formattedPullRequest}
-      recentIssues={formattedIssues}
-      recentMilestones={formattedMilestones}
-      recentReleases={formattedReleases}
+      pullRequests={pullRequests}
+      recentIssues={issues}
+      recentMilestones={milestones}
+      recentReleases={releases}
       repositories={topRepositories}
       showAvatar={false}
       stats={userStats}
