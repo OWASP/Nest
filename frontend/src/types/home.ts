@@ -38,6 +38,7 @@ export type MainPageData = {
     activeProjectsStats: number
     contributorsStats: number
     countriesStats: number
+    slackWorkspaceStats: number
   }
 }
 

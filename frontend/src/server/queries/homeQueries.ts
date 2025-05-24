@@ -80,6 +80,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       activeProjectsStats
       contributorsStats
       countriesStats
+      slackWorkspaceStats
     }
     upcomingEvents(limit: 9) {
       category
