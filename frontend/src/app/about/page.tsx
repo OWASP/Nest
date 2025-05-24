@@ -18,7 +18,7 @@ import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
 import { User } from 'types/user'
-import { aboutText, roadmap, technologies } from 'utils/aboutData'
+import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -159,20 +159,38 @@ const About = () => {
         </SecondaryCard>
 
         <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
-          <ul>
-            {roadmap.map((item) => (
-              <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
-                <div className="h-2 w-2 flex-shrink-0 rounded-full bg-gray-600 dark:bg-gray-300"></div>
-                <Link
-                  href={item.issueLink}
-                  target="_blank"
-                  className="text-gray-600 hover:underline dark:text-gray-300"
-                >
-                  {item.title}
-                </Link>
-              </li>
+          <div className="grid gap-4">
+            {projectMetadata.recentMilestones.map((milestone, index) => (
+              <div
+                key={index}
+                className={`flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700 ${
+                  index % 2 === 0 ? '' : 'ml-8'
+                }`}
+              >
+                <div className="flex-1">
+                  <Link
+                    href={milestone.url}
+                    target="_blank"
+                    className="inline-block hover:underline"
+                  >
+                    <h3 className="mb-2 text-xl font-semibold text-blue-400">{milestone.title}</h3>
+                  </Link>
+                  <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                  <div className="mt-2 flex items-center gap-4">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Progress: {milestone.progress}%
+                    </span>
+                    <div className="h-2 flex-1 rounded-full bg-gray-300 dark:bg-gray-600">
+                      <div
+                        className="h-full rounded-full bg-blue-400"
+                        style={{ width: `${milestone.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </SecondaryCard>
 
         <div className="grid gap-6 md:grid-cols-4">
