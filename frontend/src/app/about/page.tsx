@@ -173,7 +173,10 @@ const About = () => {
                     target="_blank"
                     className="inline-block hover:underline"
                   >
-                    <h3 className="mb-2 text-xl font-semibold text-blue-400">
+                    <h3
+                      className="mb-2 text-xl font-semibold text-blue-400"
+                      title={milestone.progress > 0 ? 'In Progress' : 'Not Started'}
+                    >
                       {milestone.progress > 0 && (
                         <span className="mr-2 inline-block">
                           <FontAwesomeIcon icon={faUserGear} />
