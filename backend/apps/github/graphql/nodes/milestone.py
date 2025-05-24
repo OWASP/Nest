@@ -17,6 +17,7 @@ class MilestoneNode(BaseNode):
 
         fields = (
             "author",
+            "body",
             "created_at",
             "title",
             "open_issues_count",
