@@ -1,8 +1,8 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
-  faCheck,
-  faHourglassStart,
+  faCircleCheck,
+  faClock,
   faUserGear,
   faMapSigns,
   faScroll,
@@ -11,6 +11,7 @@ import {
   faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -164,45 +165,49 @@ const About = () => {
 
         <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
           <div className="grid gap-4">
-            {projectMetadata.recentMilestones.map((milestone, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
-              >
-                <div className="flex-1">
-                  <Link
-                    href={milestone.url}
-                    target="_blank"
-                    className="inline-block hover:underline"
-                  >
-                    <h3
-                      className="mb-2 text-xl font-semibold text-blue-400"
-                      title={
-                        milestone.progress === 100
-                          ? 'Completed'
-                          : milestone.progress > 100
-                            ? 'In Progress'
-                            : 'Not Started'
-                      }
-                    >
-                      <span className="mr-2 inline-block">
-                        <FontAwesomeIcon
-                          icon={
+            {[...projectMetadata.recentMilestones]
+              .sort((a, b) => (a.title > b.title ? 1 : -1))
+              .map((milestone, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
+                >
+                  <div className="flex-1">
+                    <Link href={milestone.url} target="_blank" className="inline-block">
+                      <h3 className="mb-2 text-xl font-semibold text-blue-400">
+                        {milestone.title}
+                        <Tooltip
+                          closeDelay={100}
+                          content={
                             milestone.progress === 100
-                              ? faCheck
+                              ? 'Completed'
                               : milestone.progress > 0
-                                ? faUserGear
-                                : faHourglassStart
+                                ? 'In Progress'
+                                : 'Not Started'
                           }
-                        />
-                      </span>
-                      {milestone.title}
-                    </h3>
-                  </Link>
-                  <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                          id={`level-tooltip-progress`}
+                          delay={100}
+                          placement="top"
+                          showArrow
+                        >
+                          <span className="ml-4 inline-block text-gray-400">
+                            <FontAwesomeIcon
+                              icon={
+                                milestone.progress === 100
+                                  ? faCircleCheck
+                                  : milestone.progress > 0
+                                    ? faUserGear
+                                    : faClock
+                              }
+                            />
+                          </span>
+                        </Tooltip>
+                      </h3>
+                    </Link>
+                    <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </SecondaryCard>
 
