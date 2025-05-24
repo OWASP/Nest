@@ -73,7 +73,6 @@ test.describe('About Page', () => {
     for (const milestone of mockAboutData.project.recentMilestones) {
       await expect(page.getByText(milestone.title)).toBeVisible()
       await expect(page.getByText(milestone.body)).toBeVisible()
-      await expect(page.getByText(`Progress: ${milestone.progress}`)).toBeVisible()
     }
   })
 

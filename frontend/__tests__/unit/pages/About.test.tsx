@@ -269,7 +269,6 @@ describe('About Component', () => {
       const milestone = roadmapData[i]
       expect(screen.getByText(milestone.title)).toBeInTheDocument()
       expect(screen.getByText(milestone.body)).toBeInTheDocument()
-      expect(screen.getByText(`Progress: ${milestone.progress}%`)).toBeInTheDocument()
       expect(links[i].getAttribute('href')).toBe(milestone.url)
     }
   })

@@ -1,12 +1,14 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
+  faUserGear,
   faMapSigns,
   faScroll,
   faUsers,
   faTools,
   faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -163,9 +165,7 @@ const About = () => {
             {projectMetadata.recentMilestones.map((milestone, index) => (
               <div
                 key={index}
-                className={`flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700 ${
-                  index % 2 === 0 ? '' : 'ml-8'
-                }`}
+                className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
               >
                 <div className="flex-1">
                   <Link
@@ -173,20 +173,16 @@ const About = () => {
                     target="_blank"
                     className="inline-block hover:underline"
                   >
-                    <h3 className="mb-2 text-xl font-semibold text-blue-400">{milestone.title}</h3>
+                    <h3 className="mb-2 text-xl font-semibold text-blue-400">
+                      {milestone.progress > 0 && (
+                        <span className="mr-2 inline-block">
+                          <FontAwesomeIcon icon={faUserGear} />
+                        </span>
+                      )}
+                      {milestone.title}
+                    </h3>
                   </Link>
                   <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
-                  <div className="mt-2 flex items-center gap-4">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      Progress: {milestone.progress}%
-                    </span>
-                    <div className="h-2 flex-1 rounded-full bg-gray-300 dark:bg-gray-600">
-                      <div
-                        className="h-full rounded-full bg-blue-400"
-                        style={{ width: `${milestone.progress}%` }}
-                      />
-                    </div>
-                  </div>
                 </div>
               </div>
             ))}

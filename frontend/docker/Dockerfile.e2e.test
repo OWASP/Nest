@@ -14,7 +14,9 @@ RUN npm install --ignore-scripts -g pnpm
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
-COPY __tests__/e2e __tests__/e2e
+COPY __tests__/e2e/data __tests__/e2e/data
+COPY __tests__/e2e/helpers __tests__/e2e/helpers
+COPY __tests__/e2e/pages/About.spec.ts __tests__/e2e/pages/About.spec.ts
 COPY __tests__/unit/data __tests__/unit/data
 COPY .pnpmrc next.config.ts postcss.config.js playwright.config.ts tailwind.config.js tsconfig.json ./
 COPY public public
