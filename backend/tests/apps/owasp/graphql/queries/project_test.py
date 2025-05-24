@@ -25,19 +25,13 @@ class TestProjectQuery:
             if field.name == "project"
         )
 
-        assert (
-            project_field.type == ProjectNode
-            or getattr(project_field.type, "of_type", None) == ProjectNode
-        )
+        assert project_field.type.of_type == ProjectNode
 
         arg_names = [arg.python_name for arg in project_field.arguments]
         assert "key" in arg_names
 
         key_arg = next(arg for arg in project_field.arguments if arg.python_name == "key")
-        assert (
-            key_arg.type_annotation.annotation is str
-            or key_arg.type_annotation.annotation == "str"
-        )
+        assert key_arg.type_annotation.annotation is str
 
 
 class TestProjectResolution:

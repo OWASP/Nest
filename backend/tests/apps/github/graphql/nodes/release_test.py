@@ -29,7 +29,4 @@ class TestReleaseNode:
         fields = ReleaseNode.__strawberry_definition__.fields
         author_field = next((field for field in fields if field.name == "author"), None)
         assert author_field is not None
-        assert (
-            author_field.type == UserNode
-            or getattr(author_field.type, "of_type", None) == UserNode
-        )
+        assert author_field.type.of_type == UserNode

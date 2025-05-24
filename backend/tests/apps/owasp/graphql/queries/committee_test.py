@@ -20,16 +20,10 @@ class TestCommitteeQuery:
             if field.name == "committee"
         )
 
-        assert (
-            committee_field.type == CommitteeNode
-            or getattr(committee_field.type, "of_type", None) == CommitteeNode
-        )
+        assert committee_field.type.of_type == CommitteeNode
 
         arg_names = [arg.python_name for arg in committee_field.arguments]
         assert "key" in arg_names
 
         key_arg = next(arg for arg in committee_field.arguments if arg.python_name == "key")
-        assert (
-            key_arg.type_annotation.annotation is str
-            or key_arg.type_annotation.annotation == "str"
-        )
+        assert key_arg.type_annotation.annotation is str

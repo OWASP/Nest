@@ -1,5 +1,10 @@
 """Test cases for ProjectNode."""
 
+from apps.github.graphql.nodes.issue import IssueNode
+from apps.github.graphql.nodes.milestone import MilestoneNode
+from apps.github.graphql.nodes.pull_request import PullRequestNode
+from apps.github.graphql.nodes.release import ReleaseNode
+from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.project import ProjectNode
 
 
@@ -41,54 +46,49 @@ class TestProjectNode:
     def test_resolve_issues_count(self):
         field = self._get_field_by_name("issues_count")
         assert field is not None
-        assert "int" in str(field.type).lower()
+        assert field.type is int
 
     def test_resolve_key(self):
         field = self._get_field_by_name("key")
         assert field is not None
-        assert "str" in str(field.type).lower()
+        assert field.type is str
 
     def test_resolve_languages(self):
         field = self._get_field_by_name("languages")
         assert field is not None
-        assert "str" in str(field.type).lower()
+        assert field.type == list[str]
 
     def test_resolve_recent_issues(self):
         field = self._get_field_by_name("recent_issues")
         assert field is not None
-        inner_type = getattr(field.type, "of_type", None) or field.type
-        assert "IssueNode" in str(inner_type)
+        assert field.type.of_type == IssueNode
 
     def test_resolve_recent_milestones(self):
         field = self._get_field_by_name("recent_milestones")
         assert field is not None
-        inner_type = getattr(field.type, "of_type", None) or field.type
-        assert "MilestoneNode" in str(inner_type)
+        assert field.type.of_type == MilestoneNode
 
     def test_resolve_recent_pull_requests(self):
         field = self._get_field_by_name("recent_pull_requests")
         assert field is not None
-        inner_type = getattr(field.type, "of_type", None) or field.type
-        assert "PullRequestNode" in str(inner_type)
+        assert field.type.of_type == PullRequestNode
 
     def test_resolve_recent_releases(self):
         field = self._get_field_by_name("recent_releases")
         assert field is not None
-        inner_type = getattr(field.type, "of_type", None) or field.type
-        assert "ReleaseNode" in str(inner_type)
+        assert field.type.of_type == ReleaseNode
 
     def test_resolve_repositories(self):
         field = self._get_field_by_name("repositories")
         assert field is not None
-        inner_type = getattr(field.type, "of_type", None) or field.type
-        assert "RepositoryNode" in str(inner_type)
+        assert field.type.of_type == RepositoryNode
 
     def test_resolve_repositories_count(self):
         field = self._get_field_by_name("repositories_count")
         assert field is not None
-        assert "int" in str(field.type).lower()
+        assert field.type is int
 
     def test_resolve_topics(self):
         field = self._get_field_by_name("topics")
         assert field is not None
-        assert "str" in str(field.type).lower()
+        assert field.type == list[str]
