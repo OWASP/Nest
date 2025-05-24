@@ -6,19 +6,19 @@ export const mockAboutData = {
     starsCount: 890,
     recentMilestones: [
       {
-        title: 'NestBot',
+        title: 'NestBot title',
         body: 'NestBot Idea',
         url: 'http/github.com/milestones/5',
         progress: 58,
       },
       {
-        title: 'Contribution Hub',
+        title: 'Contribution Hub title',
         body: 'Contribution Hub Idea',
         url: 'http/github.com/milestones/8',
         progress: 75,
       },
       {
-        title: 'Project Dashboard',
+        title: 'Project Dashboard title',
         body: 'Project Dashboard Idea',
         url: 'http/github.com/milestones/10',
         progress: 80,
