@@ -1,6 +1,8 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
+  faCheck,
+  faHourglassStart,
   faUserGear,
   faMapSigns,
   faScroll,
@@ -175,13 +177,25 @@ const About = () => {
                   >
                     <h3
                       className="mb-2 text-xl font-semibold text-blue-400"
-                      title={milestone.progress > 0 ? 'In Progress' : 'Not Started'}
+                      title={
+                        milestone.progress === 100
+                          ? 'Completed'
+                          : milestone.progress > 100
+                            ? 'In Progress'
+                            : 'Not Started'
+                      }
                     >
-                      {milestone.progress > 0 && (
-                        <span className="mr-2 inline-block">
-                          <FontAwesomeIcon icon={faUserGear} />
-                        </span>
-                      )}
+                      <span className="mr-2 inline-block">
+                        <FontAwesomeIcon
+                          icon={
+                            milestone.progress === 100
+                              ? faCheck
+                              : milestone.progress > 0
+                                ? faUserGear
+                                : faHourglassStart
+                          }
+                        />
+                      </span>
                       {milestone.title}
                     </h3>
                   </Link>
