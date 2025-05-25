@@ -133,7 +133,7 @@ class TestSlackSyncDataCommand:
             "ok": True,
             "members": [
                 {
-                    "id": "UBOT123",
+                    "id": "BOT123",
                     "name": "test.bot",
                     "real_name": "Test Bot",
                     "is_bot": True,
