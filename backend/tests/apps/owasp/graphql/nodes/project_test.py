@@ -61,27 +61,27 @@ class TestProjectNode:
     def test_resolve_recent_issues(self):
         field = self._get_field_by_name("recent_issues")
         assert field is not None
-        assert field.type.of_type == IssueNode
+        assert field.type.of_type is IssueNode
 
     def test_resolve_recent_milestones(self):
         field = self._get_field_by_name("recent_milestones")
         assert field is not None
-        assert field.type.of_type == MilestoneNode
+        assert field.type.of_type is MilestoneNode
 
     def test_resolve_recent_pull_requests(self):
         field = self._get_field_by_name("recent_pull_requests")
         assert field is not None
-        assert field.type.of_type == PullRequestNode
+        assert field.type.of_type is PullRequestNode
 
     def test_resolve_recent_releases(self):
         field = self._get_field_by_name("recent_releases")
         assert field is not None
-        assert field.type.of_type == ReleaseNode
+        assert field.type.of_type is ReleaseNode
 
     def test_resolve_repositories(self):
         field = self._get_field_by_name("repositories")
         assert field is not None
-        assert field.type.of_type == RepositoryNode
+        assert field.type.of_type is RepositoryNode
 
     def test_resolve_repositories_count(self):
         field = self._get_field_by_name("repositories_count")

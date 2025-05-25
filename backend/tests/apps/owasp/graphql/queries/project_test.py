@@ -25,7 +25,7 @@ class TestProjectQuery:
             if field.name == "project"
         )
 
-        assert project_field.type.of_type == ProjectNode
+        assert project_field.type.of_type is ProjectNode
 
         arg_names = [arg.python_name for arg in project_field.arguments]
         assert "key" in arg_names

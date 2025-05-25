@@ -35,7 +35,7 @@ class TestOrganizationNode:
             None,
         )
         assert stats_field is not None
-        assert stats_field.type == OrganizationStatsNode
+        assert stats_field.type is OrganizationStatsNode
 
     def test_resolve_url(self):
         url_field = next(

@@ -20,7 +20,7 @@ class TestCommitteeQuery:
             if field.name == "committee"
         )
 
-        assert committee_field.type.of_type == CommitteeNode
+        assert committee_field.type.of_type is CommitteeNode
 
         arg_names = [arg.python_name for arg in committee_field.arguments]
         assert "key" in arg_names
