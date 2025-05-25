@@ -1,30 +1,28 @@
 """GitHub organization GraphQL queries."""
 
-import graphene
+import strawberry
 
-from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.organization import OrganizationNode
 from apps.github.models.organization import Organization
 
 
-class OrganizationQuery(BaseQuery):
+@strawberry.type
+class OrganizationQuery:
     """Organization queries."""
 
-    organization = graphene.Field(
-        OrganizationNode,
-        login=graphene.String(required=True),
-    )
-
-    def resolve_organization(root, info, login):
+    @strawberry.field
+    def organization(
+        self,
+        *,
+        login: str,
+    ) -> OrganizationNode | None:
         """Resolve organization by login.
 
         Args:
-            root: The root object.
-            info: GraphQL execution info.
             login (str): The login of the organization.
 
         Returns:
-            Organization: The organization object if found, otherwise None.
+            OrganizationNode: The organization node if found, otherwise None.
 
         """
         try:
