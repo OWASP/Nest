@@ -1,47 +1,56 @@
 """OWASP chapter GraphQL node."""
 
-import graphene
+import strawberry
+import strawberry_django
 
 from apps.owasp.graphql.nodes.common import GenericEntityNode
 from apps.owasp.models.chapter import Chapter
 
 
-class GeoLocationType(graphene.ObjectType):
+@strawberry.type
+class GeoLocationType:
     """Geographic location type."""
 
-    lat = graphene.Float()
-    lng = graphene.Float()
+    lat: float
+    lng: float
 
 
+@strawberry_django.type(
+    Chapter,
+    fields=[
+        "country",
+        "is_active",
+        "meetup_group",
+        "name",
+        "postal_code",
+        "region",
+        "summary",
+        "tags",
+    ],
+)
 class ChapterNode(GenericEntityNode):
     """Chapter node."""
 
-    key = graphene.String()
-    suggested_location = graphene.String()
-    geo_location = graphene.Field(GeoLocationType)
+    @strawberry.field
+    def created_at(self) -> float:
+        """Resolve created at."""
+        return self.idx_created_at
 
-    class Meta:
-        model = Chapter
-        fields = (
-            "created_at",
-            "country",
-            "is_active",
-            "meetup_group",
-            "name",
-            "postal_code",
-            "region",
-            "summary",
-            "tags",
+    @strawberry.field
+    def geo_location(self) -> GeoLocationType | None:
+        """Resolve geographic location."""
+        return (
+            GeoLocationType(lat=self.latitude, lng=self.longitude)
+            if self.latitude is not None and self.longitude is not None
+            else None
         )
 
-    def resolve_geo_location(self, info) -> GeoLocationType:
-        """Resolve geographic location."""
-        return GeoLocationType(lat=self.latitude, lng=self.longitude)
-
-    def resolve_key(self, info) -> str:
+    @strawberry.field
+    def key(self) -> str:
         """Resolve key."""
         return self.idx_key
 
-    def resolve_suggested_location(self, info) -> str:
+    @strawberry.field
+    def suggested_location(self) -> str | None:
         """Resolve suggested location."""
         return self.idx_suggested_location

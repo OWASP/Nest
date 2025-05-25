@@ -1,47 +1,46 @@
 """GitHub organization GraphQL node."""
 
-import graphene
+import strawberry
+import strawberry_django
 from django.db import models
 
-from apps.common.graphql.nodes import BaseNode
 from apps.github.models.organization import Organization
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 
 
-class OrganizationStatsNode(graphene.ObjectType):
+@strawberry.type
+class OrganizationStatsNode:
     """Organization stats node."""
 
-    total_repositories = graphene.Int()
-    total_contributors = graphene.Int()
-    total_stars = graphene.Int()
-    total_forks = graphene.Int()
-    total_issues = graphene.Int()
+    total_contributors: int
+    total_forks: int
+    total_issues: int
+    total_repositories: int
+    total_stars: int
 
 
-class OrganizationNode(BaseNode):
+@strawberry_django.type(
+    Organization,
+    fields=[
+        "avatar_url",
+        "collaborators_count",
+        "company",
+        "created_at",
+        "description",
+        "email",
+        "followers_count",
+        "location",
+        "login",
+        "name",
+        "updated_at",
+    ],
+)
+class OrganizationNode:
     """GitHub organization node."""
 
-    stats = graphene.Field(OrganizationStatsNode)
-    url = graphene.String()
-
-    class Meta:
-        model = Organization
-        fields = (
-            "avatar_url",
-            "collaborators_count",
-            "company",
-            "created_at",
-            "description",
-            "email",
-            "followers_count",
-            "location",
-            "login",
-            "name",
-            "updated_at",
-        )
-
-    def resolve_stats(self, info):
+    @strawberry.field
+    def stats(self) -> OrganizationStatsNode:
         """Resolve organization stats."""
         repositories = Repository.objects.filter(organization=self)
 
@@ -51,9 +50,10 @@ class OrganizationNode(BaseNode):
             total_forks=models.Sum("forks_count"),
             total_issues=models.Sum("open_issues_count"),
         )
-        total_stars = aggregated_stats["total_stars"] or 0
-        total_forks = aggregated_stats["total_forks"] or 0
-        total_issues = aggregated_stats["total_issues"] or 0
+
+        total_stars = aggregated_stats.get("total_stars") or 0
+        total_forks = aggregated_stats.get("total_forks") or 0
+        total_issues = aggregated_stats.get("total_issues") or 0
 
         unique_contributors = (
             RepositoryContributor.objects.filter(repository__in=repositories)
@@ -70,6 +70,7 @@ class OrganizationNode(BaseNode):
             total_issues=total_issues,
         )
 
-    def resolve_url(self, info):
+    @strawberry.field
+    def url(self) -> str:
         """Resolve organization URL."""
         return self.url
