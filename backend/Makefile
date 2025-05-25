@@ -2,6 +2,9 @@ clean-backend:
 	@rm -rf backend/.cache
 	@rm -rf backend/.local
 	@rm -rf backend/.venv
+	@docker container rm -f nest-backend >/dev/null 2>&1 || true
+	@docker image rm -f docker-backend >/dev/null 2>&1 || true
+	@docker volume rm -f docker_backend-venv >/dev/null 2>&1 || true
 
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
