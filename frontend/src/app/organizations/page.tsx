@@ -3,6 +3,7 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { OrganizationTypeAlgolia } from 'types/organization'
+import PageLayout from 'components/PageLayout'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -51,21 +52,23 @@ const OrganizationPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      currentPage={currentPage}
-      empty="No organizations found"
-      indexName="organizations"
-      isLoaded={isLoaded}
-      onPageChange={handlePageChange}
-      onSearch={handleSearch}
-      searchPlaceholder="Search for organizations..."
-      searchQuery={searchQuery}
-      totalPages={totalPages}
-    >
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {organizations && organizations.map(renderOrganizationCard)}
-      </div>
-    </SearchPageLayout>
+    <PageLayout bcItems={[{ title: 'Organizations', href: '/organizations' }]}>
+      <SearchPageLayout
+        currentPage={currentPage}
+        empty="No organizations found"
+        indexName="organizations"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for organizations..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
+      >
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {organizations && organizations.map(renderOrganizationCard)}
+        </div>
+      </SearchPageLayout>
+    </PageLayout>
   )
 }
 

@@ -3,6 +3,7 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { User } from 'types/user'
+import PageLayout from 'components/PageLayout'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -50,21 +51,23 @@ const UsersPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      currentPage={currentPage}
-      empty="No Users found"
-      indexName="users"
-      isLoaded={isLoaded}
-      onPageChange={handlePageChange}
-      onSearch={handleSearch}
-      searchPlaceholder="Search for members..."
-      searchQuery={searchQuery}
-      totalPages={totalPages}
-    >
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {users && users.map((user) => <div key={user.key}>{renderUserCard(user)}</div>)}
-      </div>
-    </SearchPageLayout>
+    <PageLayout bcItems={[{ title: 'Members', href: '/members' }]}>
+      <SearchPageLayout
+        currentPage={currentPage}
+        empty="No Users found"
+        indexName="users"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for members..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
+      >
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {users && users.map((user) => <div key={user.key}>{renderUserCard(user)}</div>)}
+        </div>
+      </SearchPageLayout>
+    </PageLayout>
   )
 }
 

@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 import { Providers } from 'wrappers/provider'
 import { GTM_ID } from 'utils/credentials'
-import BreadCrumbs from 'components/BreadCrumbs'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
@@ -68,7 +67,7 @@ export default function RootLayout({
       >
         <Providers>
           <Header />
-          <BreadCrumbs />
+          <GoogleTagManager gtmId={GTM_ID} />
           {children}
           <Footer />
           <ScrollToTop />

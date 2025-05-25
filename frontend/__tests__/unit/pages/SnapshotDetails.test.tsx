@@ -71,7 +71,8 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+      const title = screen.getByRole('heading', { name: 'New Snapshot' })
+      expect(title).toBeInTheDocument()
     })
 
     expect(screen.getByText('New Chapters')).toBeInTheDocument()
@@ -145,7 +146,8 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+      const title = screen.getByRole('heading', { name: 'New Snapshot' })
+      expect(title).toBeInTheDocument()
       expect(screen.getByText('Latest pre-release')).toBeInTheDocument()
     })
 
