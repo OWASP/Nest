@@ -173,4 +173,5 @@ update-data: \
 	owasp-aggregate-projects \
 	owasp-update-events \
 	owasp-sync-posts \
-	owasp-update-sponsors
+	owasp-update-sponsors \
+	slack-sync-data
