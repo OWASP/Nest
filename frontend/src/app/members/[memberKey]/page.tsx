@@ -23,6 +23,7 @@ import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()
@@ -191,20 +192,27 @@ const UserDetailsPage: React.FC = () => {
   )
 
   return (
-    <DetailsCard
-      details={userDetails}
-      heatmap={isPrivateContributor ? undefined : <Heatmap />}
-      pullRequests={pullRequests}
-      recentIssues={issues}
-      recentMilestones={milestones}
-      recentReleases={releases}
-      repositories={topRepositories}
-      showAvatar={false}
-      stats={userStats}
-      title={user?.name || user?.login}
-      type="user"
-      userSummary={<UserSummary />}
-    />
+    <PageLayout
+      bcItems={[
+        { title: 'Members', href: '/members' },
+        { title: user?.name || user?.login, href: `/members/${memberKey}` },
+      ]}
+    >
+      <DetailsCard
+        details={userDetails}
+        heatmap={isPrivateContributor ? undefined : <Heatmap />}
+        pullRequests={pullRequests}
+        recentIssues={issues}
+        recentMilestones={milestones}
+        recentReleases={releases}
+        repositories={topRepositories}
+        showAvatar={false}
+        stats={userStats}
+        title={user?.name || user?.login}
+        type="user"
+        userSummary={<UserSummary />}
+      />
+    </PageLayout>
   )
 }
 

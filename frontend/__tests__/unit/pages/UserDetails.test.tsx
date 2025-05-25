@@ -88,7 +88,8 @@ describe('UserDetailsPage', () => {
       expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
     })
 
-    expect(screen.getByText('Test User')).toBeInTheDocument()
+    const title = screen.getByRole('heading', { name: 'Test User' })
+    expect(title).toBeInTheDocument()
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getByText('Contribution Heatmap')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
@@ -267,7 +268,7 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      const userName = screen.getByText('Test User')
+      const userName = screen.getByRole('heading', { name: 'Test User' })
       expect(userName).toBeInTheDocument()
     })
   })
@@ -327,7 +328,8 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Test User')).toBeInTheDocument()
+      const userName = screen.getByRole('heading', { name: 'Test User' })
+      expect(userName).toBeInTheDocument()
       expect(screen.queryByText('Test @User')).not.toBeInTheDocument()
     })
   })

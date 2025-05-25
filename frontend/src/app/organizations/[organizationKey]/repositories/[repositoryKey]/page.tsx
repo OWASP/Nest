@@ -17,6 +17,7 @@ import { TopContributorsTypeGraphql } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()
@@ -106,20 +107,32 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      languages={repository.languages}
-      pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={topContributors}
-      topics={repository.topics}
-      recentMilestones={repository.recentMilestones}
-      type="repository"
-    />
+    <PageLayout
+      bcItems={[
+        { title: 'Organizations', href: '/organizations' },
+        { title: organizationKey, href: `/organizations/${organizationKey}` },
+        { title: 'Repositories', href: `/organizations/${organizationKey}/repositories` },
+        {
+          title: repository.name,
+          href: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
+        },
+      ]}
+    >
+      <DetailsCard
+        details={repositoryDetails}
+        languages={repository.languages}
+        pullRequests={recentPullRequests}
+        recentIssues={repository.issues}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={topContributors}
+        topics={repository.topics}
+        recentMilestones={repository.recentMilestones}
+        type="repository"
+      />
+    </PageLayout>
   )
 }
 export default RepositoryDetailsPage

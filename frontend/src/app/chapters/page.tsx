@@ -9,6 +9,7 @@ import { ChapterTypeAlgolia } from 'types/chapter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import PageLayout from 'components/PageLayout'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
@@ -76,32 +77,34 @@ const ChaptersPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      currentPage={currentPage}
-      empty="No chapters found"
-      indexName="chapters"
-      isLoaded={isLoaded}
-      onPageChange={handlePageChange}
-      onSearch={handleSearch}
-      searchPlaceholder="Search for chapters..."
-      searchQuery={searchQuery}
-      totalPages={totalPages}
-    >
-      {chapters.length > 0 && (
-        <ChapterMapWrapper
-          geoLocData={searchQuery ? chapters : geoLocData}
-          showLocal={true}
-          style={{
-            height: '400px',
-            width: '100%',
-            zIndex: '0',
-            borderRadius: '0.5rem',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          }}
-        />
-      )}
-      {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
-    </SearchPageLayout>
+    <PageLayout bcItems={[{ title: 'Chapters', href: '/chapters' }]}>
+      <SearchPageLayout
+        currentPage={currentPage}
+        empty="No chapters found"
+        indexName="chapters"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for chapters..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
+      >
+        {chapters.length > 0 && (
+          <ChapterMapWrapper
+            geoLocData={searchQuery ? chapters : geoLocData}
+            showLocal={true}
+            style={{
+              height: '400px',
+              width: '100%',
+              zIndex: '0',
+              borderRadius: '0.5rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
+          />
+        )}
+        {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
+      </SearchPageLayout>
+    </PageLayout>
   )
 }
 
