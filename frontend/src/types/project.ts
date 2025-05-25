@@ -36,13 +36,15 @@ export interface ProjectMilestonesType {
     name: string
     login: string
   }
+  body: string
   title: string
   openIssuesCount: number
   closedIssuesCount: number
+  progress?: number
   repositoryName: string
   organizationName?: string
   createdAt: string
-  url: string
+  url?: string
 }
 
 export interface ProjectStatsType {
