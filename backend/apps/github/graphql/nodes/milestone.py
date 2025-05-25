@@ -12,6 +12,7 @@ from apps.github.models.milestone import Milestone
     fields=[
         "closed_issues_count",
         "created_at",
+        "body",
         "open_issues_count",
         "title",
         "url",
@@ -33,6 +34,14 @@ class MilestoneNode:
             if self.repository and self.repository.organization
             else None
         )
+
+    @strawberry.field
+    def progress(self) -> float:
+        """Resolve milestone progress."""
+        total_issues_count = self.closed_issues_count + self.open_issues_count
+        if not total_issues_count:
+            return 0.0
+        return round((self.closed_issues_count / total_issues_count) * 100, 2)
 
     @strawberry.field
     def repository_name(self) -> str | None:

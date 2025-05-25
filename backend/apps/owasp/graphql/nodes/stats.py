@@ -11,3 +11,4 @@ class StatsNode:
     active_projects_stats: int
     contributors_stats: int
     countries_stats: int
+    slack_workspace_stats: int

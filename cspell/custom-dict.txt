@@ -33,6 +33,7 @@ apk
 arithmatex
 arkid15r
 askowasp
+bangbang
 bsky
 certbot
 collectstatic
