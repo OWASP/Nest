@@ -54,7 +54,7 @@ class RepositoryNode:
     @strawberry.field
     def organization(self) -> OrganizationNode | None:
         """Resolve organization."""
-        return self.organization if self.organization else None
+        return self.organization
 
     @strawberry.field
     def owner_key(self) -> str:
