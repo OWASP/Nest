@@ -1,12 +1,13 @@
 """GraphQL schema."""
 
-import graphene
+import strawberry
 
 from apps.github.graphql.queries import GithubQuery
 from apps.nest.graphql.mutations.user import AuthUserMutation
 from apps.owasp.graphql.queries import OwaspQuery
 
 
+@strawberry.type
 class Query(GithubQuery, OwaspQuery):
     """Schema queries."""
 
@@ -14,5 +15,4 @@ class Query(GithubQuery, OwaspQuery):
 class Mutation(AuthUserMutation):
     """Schema mutations."""
 
-
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = strawberry.Schema(query=Query, mutation=Mutation)

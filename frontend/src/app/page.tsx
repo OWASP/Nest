@@ -311,11 +311,11 @@ export default function Home() {
         />
         <div className="grid-cols-2 gap-4 lg:grid">
           <RecentIssues data={data?.recentIssues} />
-          <RecentPullRequests data={data?.recentPullRequests} />
+          <Milestones data={data?.recentMilestones} />
         </div>
         <div className="grid-cols-2 gap-4 lg:grid">
+          <RecentPullRequests data={data?.recentPullRequests} />
           <RecentReleases data={data?.recentReleases} showSingleColumn={true} />
-          <Milestones data={data?.recentMilestones} />
         </div>
         <SecondaryCard
           icon={faNewspaper}

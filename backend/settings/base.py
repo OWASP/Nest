@@ -38,7 +38,6 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
-        "graphene_django",
         "rest_framework",
         "storages",
     )
@@ -147,10 +146,6 @@ class Base(Configuration):
             "HOST": values.Value(environ_name="DB_HOST"),
             "PORT": values.Value(environ_name="DB_PORT"),
         },
-    }
-
-    GRAPHENE = {
-        "SCHEMA": "settings.graphql.schema",
     }
 
     # Password validation
