@@ -2,6 +2,7 @@ FROM python:3.13.3-alpine AS builder
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1 \
     OWASP_GID=1000 \
     OWASP_UID=1000 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \

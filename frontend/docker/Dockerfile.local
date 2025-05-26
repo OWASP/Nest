@@ -4,6 +4,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1 \
     NPM_CACHE="/home/owasp/.npm" \
     PNPM_HOME="/pnpm"
 
@@ -35,6 +36,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1 \
     NPM_CACHE="/home/owasp/.npm"
 
 RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \

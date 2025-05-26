@@ -4,6 +4,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1 \
     OWASP_GID=1000 \
     OWASP_UID=1000 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
@@ -40,7 +41,8 @@ RUN addgroup -S owasp && \
     mkdir -p /home/owasp && \
     chown owasp:owasp /home/owasp
 
-ENV PATH="/home/owasp/.venv/bin:$PATH" \
+ENV FORCE_COLOR=1 \
+    PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
 EXPOSE 8001

@@ -2,6 +2,7 @@ FROM python:3.13.3-alpine AS builder
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1 \
     OWASP_GID=1000 \
     OWASP_UID=1000 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
@@ -42,7 +43,8 @@ RUN apk update && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp
 
-ENV PATH="/home/owasp/.venv/bin:$PATH" \
+ENV FORCE_COLOR=1 \
+    PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
