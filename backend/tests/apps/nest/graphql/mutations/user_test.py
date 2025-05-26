@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.nest.graphql.mutations.user import GitHubAuth
+from apps.nest.graphql.mutations.user import UserMutations
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def test_github_auth_new_user(mock_github_response):
         mock_user = MagicMock()
         mock_objects.create.return_value = mock_user
 
-        result = GitHubAuth.mutate(None, MagicMock(), "valid_token")
+        result = UserMutations.github_auth(None, MagicMock(), "valid_token")
 
         mock_post.assert_called_once()
         mock_objects.filter.assert_called_once_with(github_id="gh123")
@@ -55,7 +55,7 @@ def test_github_auth_existing_user(mock_github_response):
         mock_qs.first.return_value = mock_user
         mock_objects.filter.return_value = mock_qs
 
-        result = GitHubAuth.mutate(None, MagicMock(), "valid_token")
+        result = UserMutations.github_auth(None, MagicMock(), "valid_token")
 
         mock_post.assert_called_once()
         mock_objects.filter.assert_called_once_with(github_id="gh123")

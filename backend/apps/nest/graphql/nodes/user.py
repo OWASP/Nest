@@ -1,13 +1,10 @@
 """GraphQL node for User model."""
 
-from graphene_django import DjangoObjectType
+import strawberry_django
 
 from apps.nest.models import User
 
 
-class AuthUserNode(DjangoObjectType):
+@strawberry_django.type(User, fields=["username"])
+class AuthUserNode:
     """GraphQL node for User model."""
-
-    class Meta:
-        model = User
-        fields = ("username",)

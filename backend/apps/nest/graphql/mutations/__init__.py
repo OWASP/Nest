@@ -1,3 +1,3 @@
 """Core User mutations."""
 
-from .user import AuthUserMutation
+from .user import UserMutations

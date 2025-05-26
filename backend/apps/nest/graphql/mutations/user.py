@@ -1,33 +1,35 @@
-"""Nest user GraphQL queries."""
+"""Nest user GraphQL Mutations."""
 
-import graphene
 import requests
+import strawberry
 
 from apps.nest.graphql.nodes.user import AuthUserNode
 from apps.nest.models import User
 
 
-class GitHubAuth(graphene.Mutation):
-    """Authenticate via GitHub OAuth2."""
+@strawberry.type
+class GitHubAuthResult:
+    """Payload for GitHubAuth mutation."""
 
-    class Arguments:
-        """Arguments for GitHub authentication."""
+    auth_user: AuthUserNode | None
 
-        access_token = graphene.String(required=True)
 
-    auth_user = graphene.Field(AuthUserNode)
+@strawberry.type
+class UserMutations:
+    """GraphQL mutations related to user."""
 
-    def mutate(self, info, access_token):
-        """Mutate method for user authentication."""
+    @strawberry.mutation
+    def github_auth(self, info, access_token: str) -> GitHubAuthResult:
+        """Authenticate via GitHub OAuth2."""
         response = requests.post(
             "https://api.github.com/graphql",
             json={
                 "query": """query {
-            viewer {
-                id
-                login
-            }
-            }"""
+                    viewer {
+                        id
+                        login
+                    }
+                }"""
             },
             headers={"Authorization": f"Bearer {access_token}", "Accept": "application/json"},
             timeout=5,
@@ -42,11 +44,4 @@ class GitHubAuth(graphene.Mutation):
                 github_id=github_user["id"],
                 username=github_user["login"],
             )
-
-        return GitHubAuth(auth_user=auth_user)
-
-
-class AuthUserMutation(graphene.ObjectType):
-    """GraphQL root mutation for users."""
-
-    github_auth = GitHubAuth.Field()
+        return GitHubAuthResult(auth_user=auth_user)
