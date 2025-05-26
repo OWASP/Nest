@@ -1,13 +1,14 @@
 """OWASP stats GraphQL node."""
 
-import graphene
+import strawberry
 
 
-class StatsNode(graphene.ObjectType):
+@strawberry.type
+class StatsNode:
     """Stats node."""
 
-    active_chapters_stats = graphene.Int()
-    active_projects_stats = graphene.Int()
-    contributors_stats = graphene.Int()
-    countries_stats = graphene.Int()
-    slack_workspace_stats = graphene.Int()
+    active_chapters_stats: int
+    active_projects_stats: int
+    contributors_stats: int
+    countries_stats: int
+    slack_workspace_stats: int

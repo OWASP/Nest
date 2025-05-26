@@ -163,58 +163,61 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
-          <div className="grid gap-4">
-            {[...projectMetadata.recentMilestones]
-              .sort((a, b) => (a.title > b.title ? 1 : -1))
-              .map((milestone, index) => (
-                <div
-                  key={milestone.url || milestone.title || index}
-                  className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
-                >
-                  <div className="flex-1">
-                    <Link
-                      href={milestone.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block"
-                    >
-                      <h3 className="mb-2 text-xl font-semibold text-blue-400">
-                        {milestone.title}
-                        <Tooltip
-                          closeDelay={100}
-                          content={
-                            milestone.progress === 100
-                              ? 'Completed'
-                              : milestone.progress > 0
-                                ? 'In Progress'
-                                : 'Not Started'
-                          }
-                          id={`tooltip-state-${index}`}
-                          delay={100}
-                          placement="top"
-                          showArrow
-                        >
-                          <span className="ml-4 inline-block text-gray-400">
-                            <FontAwesomeIcon
-                              icon={
-                                milestone.progress === 100
-                                  ? faCircleCheck
-                                  : milestone.progress > 0
-                                    ? faUserGear
-                                    : faClock
-                              }
-                            />
-                          </span>
-                        </Tooltip>
-                      </h3>
-                    </Link>
-                    <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+        {projectMetadata.recentMilestones.length > 0 && (
+          <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
+            <div className="grid gap-4">
+              {[...projectMetadata.recentMilestones]
+                .filter((milestone) => milestone.state !== 'closed')
+                .sort((a, b) => (a.title > b.title ? 1 : -1))
+                .map((milestone, index) => (
+                  <div
+                    key={milestone.url || milestone.title || index}
+                    className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
+                  >
+                    <div className="flex-1">
+                      <Link
+                        href={milestone.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block"
+                      >
+                        <h3 className="mb-2 text-xl font-semibold text-blue-400">
+                          {milestone.title}
+                          <Tooltip
+                            closeDelay={100}
+                            content={
+                              milestone.progress === 100
+                                ? 'Completed'
+                                : milestone.progress > 0
+                                  ? 'In Progress'
+                                  : 'Not Started'
+                            }
+                            id={`tooltip-state-${index}`}
+                            delay={100}
+                            placement="top"
+                            showArrow
+                          >
+                            <span className="ml-4 inline-block text-gray-400">
+                              <FontAwesomeIcon
+                                icon={
+                                  milestone.progress === 100
+                                    ? faCircleCheck
+                                    : milestone.progress > 0
+                                      ? faUserGear
+                                      : faClock
+                                }
+                              />
+                            </span>
+                          </Tooltip>
+                        </h3>
+                      </Link>
+                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-          </div>
-        </SecondaryCard>
+                ))}
+            </div>
+          </SecondaryCard>
+        )}
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
@@ -226,7 +229,7 @@ const About = () => {
             <div key={index}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={Math.floor(stat.value / 5) * 5} duration={2} />+
+                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>

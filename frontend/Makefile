@@ -6,6 +6,10 @@ clean-frontend:
 	@rm -rf frontend/.next
 	@rm -rf frontend/.pnpm-store
 	@rm -rf frontend/node_modules
+	@docker container rm -f nest-frontend >/dev/null 2>&1 || true
+	@docker image rm -f docker-frontend >/dev/null 2>&1 || true
+	@docker volume rm -f docker_frontend-next >/dev/null 2>&1 || true
+	@docker volume rm -f docker_frontend-node-modules >/dev/null 2>&1 || true
 
 exec-frontend-command:
 	@docker exec -t nest-frontend $(CMD)

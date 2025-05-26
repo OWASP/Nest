@@ -1,41 +1,30 @@
 """Github Milestone Queries."""
 
-import graphene
+import strawberry
 from django.core.exceptions import ValidationError
 from django.db.models import OuterRef, Subquery
 
-from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.milestone import MilestoneNode
 from apps.github.models.milestone import Milestone
 
 
-class MilestoneQuery(BaseQuery):
+@strawberry.type
+class MilestoneQuery:
     """Github Milestone Queries."""
 
-    recent_milestones = graphene.List(
-        MilestoneNode,
-        distinct=graphene.Boolean(default_value=False),
-        limit=graphene.Int(default_value=5),
-        login=graphene.String(required=False),
-        organization=graphene.String(required=False),
-        state=graphene.String(default_value="open"),
-    )
-
-    def resolve_recent_milestones(
-        root,
-        info,
+    @strawberry.field
+    def recent_milestones(
+        self,
         *,
         distinct: bool = False,
         limit: int = 5,
         login: str | None = None,
         organization: str | None = None,
         state: str = "open",
-    ):
+    ) -> list[MilestoneNode]:
         """Resolve milestones.
 
         Args:
-            root (object): The root object.
-            info (ResolveInfo): The GraphQL execution context.
             distinct (bool): Whether to return distinct milestones.
             limit (int): The maximum number of milestones to return.
             login (str, optional): The GitHub username to filter milestones.
@@ -43,7 +32,7 @@ class MilestoneQuery(BaseQuery):
             state (str, optional): The state of the milestones to return.
 
         Returns:
-            list: A list of milestones.
+            list[MilestoneNode]: A list of milestones.
 
         """
         match state.lower():

@@ -246,7 +246,7 @@ jobs:
       - name: Update buildx frontend pnpm cache
         run: |
           rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend=pnpm-cache
+          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend-pnpm-cache
 
       - name: Run frontend unit tests
         run: |
