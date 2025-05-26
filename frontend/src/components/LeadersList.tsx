@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { LeadersListProps } from 'types/leaders'
-import { TruncatedText } from './TruncatedText'
+import { TruncatedText } from 'components/TruncatedText'
 
 /**
  * Component that renders a list of project leaders as clickable links.

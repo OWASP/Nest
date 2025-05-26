@@ -1,18 +1,17 @@
 """OWASP sponsors GraphQL queries."""
 
-import graphene
+import strawberry
 
-from apps.common.graphql.queries import BaseQuery
 from apps.owasp.graphql.nodes.sponsor import SponsorNode
 from apps.owasp.models.sponsor import Sponsor
 
 
-class SponsorQuery(BaseQuery):
+@strawberry.type
+class SponsorQuery:
     """Sponsor queries."""
 
-    sponsors = graphene.List(SponsorNode)
-
-    def resolve_sponsors(root, info):
+    @strawberry.field
+    def sponsors(self) -> list[SponsorNode]:
         """Resolve sponsors."""
         return sorted(
             Sponsor.objects.all(),

@@ -1,4 +1,4 @@
-import { TopContributorsTypeGraphql } from './contributor'
+import { TopContributorsTypeGraphql } from 'types/contributor'
 
 export interface CommitteeTypeAlgolia {
   created_at: number

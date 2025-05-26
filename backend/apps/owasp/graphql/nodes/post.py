@@ -1,18 +1,19 @@
 """OWASP blog posts GraphQL nodes."""
 
-from apps.common.graphql.nodes import BaseNode
+import strawberry_django
+
 from apps.owasp.models.post import Post
 
 
-class PostNode(BaseNode):
+@strawberry_django.type(
+    Post,
+    fields=[
+        "author_image_url",
+        "author_name",
+        "published_at",
+        "title",
+        "url",
+    ],
+)
+class PostNode:
     """Post node."""
-
-    class Meta:
-        model = Post
-        fields = (
-            "author_image_url",
-            "author_name",
-            "published_at",
-            "title",
-            "url",
-        )

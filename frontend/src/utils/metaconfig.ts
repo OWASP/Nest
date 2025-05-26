@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { METADATA_CONFIG } from './metadata'
+import { METADATA_CONFIG } from 'utils/metadata'
 
 interface SeoMetadataProps {
   title: string

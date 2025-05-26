@@ -1,8 +1,8 @@
-import { ChapterTypeAlgolia } from './chapter'
-import { EventType } from './event'
-import { OrganizationTypeAlgolia } from './organization'
-import { ProjectTypeAlgolia } from './project'
-import { User } from './user'
+import { ChapterTypeAlgolia } from 'types/chapter'
+import { EventType } from 'types/event'
+import { OrganizationTypeAlgolia } from 'types/organization'
+import { ProjectTypeAlgolia } from 'types/project'
+import { User } from 'types/user'
 
 export interface MultiSearchBarProps {
   isLoaded: boolean

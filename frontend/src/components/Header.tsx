@@ -12,9 +12,9 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
-import ModeToggle from './ModeToggle'
-import NavButton from './NavButton'
-import NavDropdown from './NavDropDown'
+import ModeToggle from 'components/ModeToggle'
+import NavButton from 'components/NavButton'
+import NavDropdown from 'components/NavDropDown'
 
 export default function Header() {
   const pathname = usePathname()

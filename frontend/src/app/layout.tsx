@@ -1,13 +1,15 @@
+import { GoogleAnalytics } from '@next/third-parties/google'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 import { Providers } from 'wrappers/provider'
+import { GTM_ID } from 'utils/credentials'
 import BreadCrumbs from 'components/BreadCrumbs'
 import Footer from 'components/Footer'
-
 import Header from 'components/Header'
-import './globals.css'
 import ScrollToTop from 'components/ScrollToTop'
+
+import 'app/globals.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -72,6 +74,7 @@ export default function RootLayout({
           <ScrollToTop />
         </Providers>
       </body>
+      <GoogleAnalytics gaId={GTM_ID} />
     </html>
   )
 }

@@ -102,7 +102,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         }
 
     @staticmethod
-    def update_data(gh_user, *, save: bool = True) -> User:
+    def update_data(gh_user, *, save: bool = True) -> User | None:
         """Update GitHub user data.
 
         Args:
@@ -114,6 +114,9 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         user_node_id = User.get_node_id(gh_user)
+        if not user_node_id:
+            return None
+
         try:
             user = User.objects.get(node_id=user_node_id)
         except User.DoesNotExist:

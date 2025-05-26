@@ -4,35 +4,6 @@ export const aboutText = [
   'The code is licensed under the MIT License, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are certified ISC2 professionals and OWASP members who adhere to the OWASP Code of Conduct.',
 ]
 
-export const roadmap = [
-  {
-    title: 'Create OWASP Contribution Hub to centralize collaboration opportunities',
-    issueLink: 'https://github.com/OWASP/Nest/issues/710',
-  },
-  {
-    title:
-      'Design and launch the OWASP API for chapters, projects, committees, and other OWASP entities',
-    issueLink: 'https://github.com/OWASP/Nest/issues/707',
-  },
-  {
-    title:
-      'Develop OWASP Schema to standardize metadata for chapters, projects, and other entities',
-    issueLink: 'https://github.com/OWASP/Nest/issues/709',
-  },
-  {
-    title: 'Extend OWASP NestBot with AI agent/assistant capabilities',
-    issueLink: 'https://github.com/OWASP/Nest/issues/908',
-  },
-  {
-    title: 'Implement OWASP Project Health Dashboard',
-    issueLink: 'https://github.com/OWASP/Nest/issues/711',
-  },
-  {
-    title: 'Migrate OWASP Nest to Kubernetes',
-    issueLink: 'https://github.com/OWASP/Nest/issues/706',
-  },
-]
-
 export const technologies = [
   {
     section: 'Backend',

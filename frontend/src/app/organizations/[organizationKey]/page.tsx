@@ -10,11 +10,11 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { handleAppError, ErrorDisplay } from 'app/global-error'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams()
   const [organization, setOrganization] = useState(null)
@@ -50,7 +50,7 @@ const OrganizationDetailsPage = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !graphQLData) {
+  if (!isLoading && !graphQLData?.organization) {
     return (
       <ErrorDisplay
         message="Sorry, the organization you're looking for doesn't exist"

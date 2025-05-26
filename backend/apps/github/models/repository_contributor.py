@@ -1,5 +1,7 @@
 """Github app label model."""
 
+from __future__ import annotations
+
 from django.db import models
 from django.db.models import F, Sum, Window
 from django.db.models.functions import Rank
@@ -79,7 +81,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         user,
         *,
         save: bool = True,
-    ) -> "RepositoryContributor":
+    ) -> RepositoryContributor:
         """Update repository contributor data.
 
         Args:
@@ -115,6 +117,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         limit=15,
         chapter=None,
         committee=None,
+        excluded_usernames: list[str] | None = None,
         organization=None,
         project=None,
         repository=None,
@@ -125,6 +128,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             limit (int, optional): Maximum number of contributors to return.
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
+            excluded_usernames (list[str], optional): Usernames to exclude from the results.
             organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
             repository (str, optional): Repository key to filter by.
@@ -138,6 +142,9 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             .to_community_repositories()
             .select_related("repository__project", "user")
         )
+
+        if excluded_usernames:
+            queryset = queryset.exclude(user__login__in=excluded_usernames)
 
         if project:
             queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
