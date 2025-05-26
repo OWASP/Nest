@@ -8,9 +8,17 @@ build:
 	@docker compose build
 
 clean: \
-	clean-backend \
-	clean-frontend \
-	clean-schema
+	clean-dependencies \
+	clean-docker
+
+clean-dependencies: \
+	clean-backend-dependencies \
+	clean-frontend-dependencies \
+	clean-schema-dependencies
+
+clean-docker: \
+	clean-backend-docker \
+	clean-frontend-docker
 
 check: \
 	check-backend \
@@ -54,7 +62,7 @@ test-nest-app: \
 	test-frontend
 
 update: \
-	clean \
+	clean-dependencies \
 	update-docs-dependencies \
 	update-nest-app-dependencies \
 	update-pre-commit \
