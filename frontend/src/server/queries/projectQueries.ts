@@ -103,11 +103,12 @@ export const GET_PROJECT_METADATA = gql`
       name
       starsCount
       summary
-      recentMilestones(limit: 10) {
+      recentMilestones(limit: 25) {
         title
         url
         body
         progress
+        state
       }
     }
   }

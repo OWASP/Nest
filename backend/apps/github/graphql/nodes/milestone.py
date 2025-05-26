@@ -14,6 +14,7 @@ from apps.github.models.milestone import Milestone
         "created_at",
         "body",
         "open_issues_count",
+        "state",
         "title",
         "url",
     ],

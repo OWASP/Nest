@@ -20,6 +20,7 @@ class TestMilestoneNode:
             "organization_name",
             "progress",
             "repository_name",
+            "state",
             "title",
             "url",
         }
