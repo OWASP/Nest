@@ -2,7 +2,6 @@ FROM python:3.13.3-alpine AS builder
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
-    FORCE_COLOR=1 \
     OWASP_GID=1000 \
     OWASP_UID=1000 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
@@ -11,7 +10,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     PYTHONUNBUFFERED=1
 
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
-    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \

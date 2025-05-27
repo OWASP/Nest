@@ -13,7 +13,7 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \
-    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && apk add libc6-compat
