@@ -1,7 +1,9 @@
-clean-backend:
+clean-backend-dependencies:
 	@rm -rf backend/.cache
 	@rm -rf backend/.local
 	@rm -rf backend/.venv
+
+clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
 	@docker image rm -f docker-backend >/dev/null 2>&1 || true
 	@docker volume rm -f docker_backend-venv >/dev/null 2>&1 || true
@@ -169,7 +171,7 @@ test-backend:
 	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest
 
 update-backend-dependencies:
-	@CMD="poetry update" $(MAKE) exec-backend-command
+	@cd backend && poetry update
 
 update-data: \
 	github-update-owasp-organization \

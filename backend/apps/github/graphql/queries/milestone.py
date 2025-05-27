@@ -73,8 +73,8 @@ class MilestoneQuery:
             )
             milestones = milestones.filter(
                 id__in=Subquery(latest_milestone_per_author),
-            ).order_by(
-                "-created_at",
             )
 
-        return milestones[:limit]
+        return milestones.order_by(
+            "-created_at",
+        )[:limit]

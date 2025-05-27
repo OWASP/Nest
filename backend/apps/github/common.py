@@ -219,9 +219,10 @@ def sync_repository(
             RepositoryContributor.update_data(
                 gh_contributor,
                 repository=repository,
-                user=User.update_data(gh_contributor),
+                user=user,
             )
             for gh_contributor in gh_repository.get_contributors()
+            if (user := User.update_data(gh_contributor))
         ]
     )
 
