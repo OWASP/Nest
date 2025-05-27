@@ -72,6 +72,12 @@ class ConversationAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
+    list_display = (
+        "nest_created_at",
+        "trigger",
+        "user_id",
+    )
+    list_filter = ("trigger",)
     search_fields = (
         "channel_id",
         "channel_name",
@@ -79,7 +85,6 @@ class EventAdmin(admin.ModelAdmin):
         "user_id",
         "user_name",
     )
-    list_filter = ("trigger",)
 
 
 class MemberAdmin(admin.ModelAdmin):
