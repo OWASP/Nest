@@ -341,6 +341,10 @@ jobs:
       - name: Prepare frontend environment
         run: |
           touch frontend/.env
+          echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
+          echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> frontend/.env
+          echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
@@ -551,6 +555,10 @@ jobs:
       - name: Prepare frontend environment
         run: |
           touch frontend/.env
+          echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
+          echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> frontend/.env
+          echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env

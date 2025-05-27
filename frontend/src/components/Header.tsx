@@ -15,6 +15,7 @@ import { cn } from 'utils/utility'
 import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
+import UserMenu from 'components/UserMenu'
 
 export default function Header() {
   const pathname = usePathname()
@@ -119,6 +120,7 @@ export default function Header() {
             text="Sponsor"
             className="hidden"
           />
+          <UserMenu />
           <ModeToggle />
           <div className="md:hidden">
             <Button
