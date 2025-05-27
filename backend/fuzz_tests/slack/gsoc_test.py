@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from apps.slack.constants import OWASP_GSOC_CHANNEL_ID
-from apps.slack.events.member_joined_channel.gsoc import gsoc_handler
+from apps.slack.events.member_joined_channel.gsoc import Gsoc
 
 
 class TestGsocEventHandler:
@@ -40,4 +40,5 @@ class TestGsocEventHandler:
         mock_slack_client = MagicMock()
         mock_slack_client.conversations_open.return_value = {"channel": {"id": "C123456"}}
 
-        gsoc_handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
+        gsoc = Gsoc()
+        gsoc.handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
