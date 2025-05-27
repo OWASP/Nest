@@ -10,7 +10,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
-RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} ${POETRY_CACHE_DIR} && \
+RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \

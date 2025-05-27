@@ -42,7 +42,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
-RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \
+RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \

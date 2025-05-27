@@ -39,7 +39,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     FORCE_COLOR=1 \
     NPM_CACHE="/home/owasp/.npm"
 
-RUN mkdir -p ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \
+RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
