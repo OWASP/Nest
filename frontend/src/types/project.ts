@@ -1,4 +1,4 @@
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from './contributor'
+import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
 
 export interface ProjectDataType {
   active_projects_count: number
@@ -27,6 +27,25 @@ export interface ProjectPullRequestsType {
   repositoryName?: string
   title: string
   url: string
+}
+
+export interface ProjectMilestonesType {
+  author: {
+    avatarUrl: string
+    key: string
+    login: string
+    name: string
+  }
+  body: string
+  closedIssuesCount: number
+  createdAt: string
+  openIssuesCount: number
+  organizationName?: string
+  progress?: number
+  repositoryName: string
+  state: string
+  title: string
+  url?: string
 }
 
 export interface ProjectStatsType {
@@ -82,6 +101,7 @@ export interface ProjectTypeGraphql {
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
   topContributors: TopContributorsTypeGraphql[]
+  recentMilestones: ProjectMilestonesType[]
 }
 
 export interface RepositoriesCardProps {

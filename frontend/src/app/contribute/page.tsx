@@ -3,9 +3,9 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { IssueType } from 'types/issue'
 import { getFilteredIcons } from 'utils/utility'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 
 import Card from 'components/Card'
 import DialogComp from 'components/Modal'

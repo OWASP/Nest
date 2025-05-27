@@ -54,37 +54,73 @@ export const GET_PROJECT_DATA = gql`
       repositoriesCount
       starsCount
       summary
-      topContributors {
-        avatarUrl
-        contributionsCount
-        login
-        name
-      }
       topics
       type
       updatedAt
       url
-    }
-    recentPullRequests(project: $key) {
-      author {
-        avatarUrl
-        login
-        name
+      recentMilestones(limit: 5) {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        title
+        openIssuesCount
+        closedIssuesCount
+        repositoryName
+        organizationName
+        createdAt
+        url
       }
-      createdAt
-      organizationName
-      repositoryName
-      title
-      url
+      recentPullRequests {
+        author {
+          avatarUrl
+          login
+          name
+        }
+        createdAt
+        organizationName
+        repositoryName
+        title
+        url
+      }
+    }
+    topContributors(project: $key) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `
 
 export const GET_PROJECT_METADATA = gql`
-  query GetProject($key: String!) {
+  query GetProjectMetadata($key: String!) {
     project(key: $key) {
+      contributorsCount
+      forksCount
+      issuesCount
       name
+      starsCount
       summary
+      recentMilestones(limit: 25) {
+        title
+        url
+        body
+        progress
+        state
+      }
+    }
+  }
+`
+
+export const GET_TOP_CONTRIBUTORS = gql`
+  query GetTopContributors($excludedUsernames: [String!], $key: String!) {
+    topContributors(excludedUsernames: $excludedUsernames, project: $key) {
+      avatarUrl
+      contributionsCount
+      login
+      name
     }
   }
 `

@@ -3,9 +3,9 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_COMMUNITY_SNAPSHOTS } from 'server/queries/snapshotQueries'
 import { Snapshots } from 'types/snapshot'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
 
@@ -17,7 +17,7 @@ const SnapshotsPage: React.FC = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setSnapshots(graphQLData?.snapshots)
+      setSnapshots(graphQLData.snapshots)
       setIsLoading(false)
     }
     if (graphQLRequestError) {

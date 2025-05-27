@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
+from apps.github.models.milestone import Milestone
 from apps.github.models.organization import Organization
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
@@ -15,6 +16,18 @@ from apps.github.models.user import User
 
 class LabelAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
+
+
+class MilestoneAdmin(admin.ModelAdmin):
+    autocomplete_fields = (
+        "author",
+        "labels",
+        "repository",
+    )
+    search_fields = (
+        "body",
+        "title",
+    )
 
 
 class PullRequestAdmin(admin.ModelAdmin):
@@ -163,6 +176,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         "updated_at",
         "followers_count",
     )
+    list_filter = ("is_owasp_organization",)
     search_fields = ("name",)
 
 
@@ -171,16 +185,27 @@ class ReleaseAdmin(admin.ModelAdmin):
         "author",
         "repository",
     )
-    search_fields = ("node_id", "repository__name")
+    search_fields = (
+        "node_id",
+        "repository__name",
+    )
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("title", "created_at", "updated_at")
-    search_fields = ("login", "name")
+    list_display = (
+        "title",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "login",
+        "name",
+    )
 
 
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Label, LabelAdmin)
+admin.site.register(Milestone, MilestoneAdmin)
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(PullRequest, PullRequestAdmin)
 admin.site.register(Release, ReleaseAdmin)

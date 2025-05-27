@@ -4,12 +4,14 @@ on:
   merge_group:
   pull_request:
     branches:
+      - feature/**
       - main
     paths-ignore:
       - backend/data/nest.json.gz
       - schema/*
   push:
     branches:
+      - feature/**
       - main
     paths-ignore:
       - backend/data/nest.json.gz
@@ -108,10 +110,61 @@ jobs:
         run: |
           make check-spelling
 
+  scan-code:
+    name: Run Code Scan
+    needs:
+      - check-frontend
+      - pre-commit
+      - spellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
+      - name: Run Trivy Repository Scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: repo
+          skip-setup-trivy: true
+          trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+
+  scan-ci-dependencies:
+    name: Run CI Denendencies Scan
+    needs:
+      - check-frontend
+      - pre-commit
+      - spellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
+      - name: Run Trivy Filesystem Scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: fs
+          skip-setup-trivy: true
+          trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+
   run-backend-tests:
     name: Run backend tests
     needs:
-      - pre-commit
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -129,13 +182,15 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build backend test image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
+            type=gha
             type=local,src=/tmp/buildx-backend-poetry-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: |
-            type=local,dest=/tmp/buildx-backend-poetry-cache-new
+            type=gha
+            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
@@ -154,8 +209,8 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - check-frontend
-      - pre-commit
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -173,13 +228,15 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend unit-testing image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
+            type=gha
             type=local,src=/tmp/buildx-frontend-pnpm-cache
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
           cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new
+            type=gha
+            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
@@ -189,7 +246,7 @@ jobs:
       - name: Update buildx frontend pnpm cache
         run: |
           rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend=pnpm-cache
+          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend-pnpm-cache
 
       - name: Run frontend unit tests
         run: |
@@ -198,7 +255,8 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - run-frontend-unit-tests
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -216,7 +274,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
       - name: Build frontend end-to-end testing image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
@@ -234,7 +292,8 @@ jobs:
   run-fuzz-tests:
     name: Run fuzz tests
     needs:
-      - pre-commit
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -341,7 +400,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
@@ -361,6 +420,7 @@ jobs:
           echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
@@ -376,7 +436,7 @@ jobs:
             buildx-frontend-pnpm-cache-${{ runner.os }}-
 
       - name: Build frontend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
@@ -395,21 +455,32 @@ jobs:
       - build-staging-images
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
       - name: Scan backend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -422,7 +493,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
-      - build-staging-images
+      - scan-staging-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -459,6 +530,7 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
           touch .env.cache
@@ -537,7 +609,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-backend-poetry-cache
@@ -558,6 +630,7 @@ jobs:
           echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
           echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
@@ -573,7 +646,7 @@ jobs:
             buildx-frontend-pnpm-cache-${{ runner.os }}-
 
       - name: Build frontend image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           cache-from: |
             type=local,src=/tmp/buildx-frontend-pnpm-cache
@@ -593,13 +666,24 @@ jobs:
       - build-docker-production-images
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
+        with:
+          cache: true
+          version: v0.62.1
+
       - name: Scan backend image
         continue-on-error: true
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
         continue-on-error: true
@@ -607,7 +691,9 @@ jobs:
         with:
           exit-code: 1
           image-ref: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production
@@ -620,7 +706,7 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - build-docker-production-images
+      - scan-production-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -657,6 +743,7 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
           echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
           touch .env.cache

@@ -22,7 +22,10 @@ class Organization(
         db_table = "github_organizations"
         verbose_name_plural = "Organizations"
 
-    description = models.CharField(verbose_name="Description", max_length=1000, default="")
+    description = models.CharField(
+        verbose_name="Description", max_length=1000, blank=True, default=""
+    )
+    is_owasp_organization = models.BooleanField(verbose_name="Is OWASP organization", default=True)
 
     def __str__(self) -> str:
         """Return a human-readable representation of the organization.

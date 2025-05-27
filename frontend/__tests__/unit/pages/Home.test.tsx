@@ -2,10 +2,11 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
+import millify from 'millify'
 import { useRouter } from 'next/navigation'
-import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
+import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -230,6 +231,19 @@ describe('Home', () => {
     })
   })
 
+  test('renders milestones section correctly', async () => {
+    render(<Home />)
+    await waitFor(() => {
+      const recentMilestones = mockGraphQLData.recentMilestones
+
+      recentMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
+      })
+    })
+  })
   test('renders when no recent releases', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: {
@@ -241,6 +255,29 @@ describe('Home', () => {
     render(<Home />)
     await waitFor(() => {
       expect(screen.getByText('No recent releases.')).toBeInTheDocument()
+    })
+  })
+
+  test('renders stats correctly', async () => {
+    render(<Home />)
+
+    const headers = [
+      'Active Projects',
+      'Local Chapters',
+      'Contributors',
+      'Countries',
+      'Slack Community',
+    ]
+    const stats = mockGraphQLData.statsOverview
+
+    await waitFor(() => {
+      headers.forEach((header) => expect(screen.getByText(header)).toBeInTheDocument())
+      // Wait for 2 seconds
+      setTimeout(() => {
+        Object.values(stats).forEach((value) =>
+          expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
+        )
+      }, 2000)
     })
   })
 

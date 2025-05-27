@@ -26,7 +26,7 @@ jest.mock('next/navigation', () => ({
 describe('CommitteeDetailsPage Component', () => {
   beforeEach(() => {
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: { committee: mockCommitteeDetailsData.committee },
+      data: mockCommitteeDetailsData,
       error: null,
     })
   })
@@ -81,22 +81,19 @@ describe('CommitteeDetailsPage Component', () => {
 
   test('handles contributors with missing names gracefully', async () => {
     const committeeDataWithIncompleteContributors = {
-      ...mockCommitteeDetailsData,
-      committee: {
-        ...mockCommitteeDetailsData.committee,
-        topContributors: [
-          {
-            avatarUrl: 'https://example.com/avatar1.jpg',
-            contributionsCount: 30,
-            login: 'Contributor 1',
-            name: '',
-            __typename: 'UserNode',
-          },
-        ],
-      },
+      committee: mockCommitteeDetailsData.committee,
+      topContributors: [
+        {
+          avatarUrl: 'https://example.com/avatar1.jpg',
+          contributionsCount: 30,
+          login: 'Contributor 1',
+          name: '',
+          __typename: 'UserNode',
+        },
+      ],
     }
     ;(useQuery as jest.Mock).mockReturnValue({
-      data: { committee: committeeDataWithIncompleteContributors.committee },
+      data: committeeDataWithIncompleteContributors,
       error: null,
     })
     render(<CommitteeDetailsPage />)

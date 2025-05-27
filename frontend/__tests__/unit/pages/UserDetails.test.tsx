@@ -2,10 +2,10 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
-import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
 import UserDetailsPage from 'app/members/[memberKey]/page'
+import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 
 // Mock Apollo Client
 jest.mock('@apollo/client', () => ({
@@ -93,6 +93,10 @@ describe('UserDetailsPage', () => {
     expect(screen.getByText('Contribution Heatmap')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
+    expect(screen.getByText('10 Followers')).toBeInTheDocument()
+    expect(screen.getByText('5 Followings')).toBeInTheDocument()
+    expect(screen.getByText('3 Repositories')).toBeInTheDocument()
+    expect(screen.getByText('100 Contributions')).toBeInTheDocument()
   })
 
   test('renders recent issues correctly', async () => {
@@ -131,6 +135,46 @@ describe('UserDetailsPage', () => {
 
       const pullRequestTitle = screen.getByText('Test Pull Request')
       expect(pullRequestTitle).toBeInTheDocument()
+    })
+  })
+
+  test('renders recent releases correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+    render(<UserDetailsPage />)
+    await waitFor(() => {
+      const releasesTitle = screen.getByText('Recent Releases')
+      expect(releasesTitle).toBeInTheDocument()
+      const releases = mockUserDetailsData.recentReleases
+      releases.forEach((release) => {
+        expect(screen.getByText(release.name)).toBeInTheDocument()
+        expect(screen.getByText(release.repositoryName)).toBeInTheDocument()
+      })
+    })
+  })
+
+  test('renders recent milestones correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const milestonesTitle = screen.getByText('Recent Milestones')
+      expect(milestonesTitle).toBeInTheDocument()
+      const milestones = mockUserDetailsData.recentMilestones
+      milestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
+      })
     })
   })
 
@@ -196,6 +240,21 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       const heatmapTitle = screen.getByText('Contribution Heatmap')
       expect(heatmapTitle).toBeInTheDocument()
+    })
+  })
+
+  test('handles contribution heatmap loading error correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+    })
+    ;(fetchHeatmapData as jest.Mock).mockResolvedValue(null)
+
+    render(<UserDetailsPage />)
+
+    await waitFor(() => {
+      const heatmapTitle = screen.queryByText('Contribution Heatmap')
+      expect(heatmapTitle).not.toBeInTheDocument()
     })
   })
 
@@ -325,6 +384,40 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
       expect(screen.queryByText('Test Pull Request')).not.toBeInTheDocument()
+    })
+  })
+
+  test('handles no recent releases gracefully', async () => {
+    const noReleasesData = {
+      ...mockUserDetailsData,
+      recentReleases: [],
+    }
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noReleasesData,
+      loading: false,
+      error: null,
+    })
+    render(<UserDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Recent Releases')).toBeInTheDocument()
+      expect(screen.queryByText('Test v1.0.0')).not.toBeInTheDocument()
+    })
+  })
+
+  test('handles no recent milestones gracefully', async () => {
+    const noMilestonesData = {
+      ...mockUserDetailsData,
+      recentMilestones: [],
+    }
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noMilestonesData,
+      loading: false,
+      error: null,
+    })
+    render(<UserDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
+      expect(screen.queryByText('v2.0.0 Release')).not.toBeInTheDocument()
     })
   })
 

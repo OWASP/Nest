@@ -1,9 +1,9 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
+import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { CommitteeTypeAlgolia } from 'types/committee'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 

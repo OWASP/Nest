@@ -56,7 +56,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 9, distinct: $distinct) {
+    recentReleases(limit: 5, distinct: $distinct) {
       author {
         avatarUrl
         login
@@ -80,6 +80,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       activeProjectsStats
       contributorsStats
       countriesStats
+      slackWorkspaceStats
     }
     upcomingEvents(limit: 9) {
       category
@@ -89,6 +90,20 @@ export const GET_MAIN_PAGE_DATA = gql`
       startDate
       summary
       suggestedLocation
+      url
+    }
+    recentMilestones(limit: 5, state: "all", distinct: $distinct) {
+      author {
+        avatarUrl
+        login
+        name
+      }
+      title
+      openIssuesCount
+      closedIssuesCount
+      repositoryName
+      organizationName
+      createdAt
       url
     }
   }

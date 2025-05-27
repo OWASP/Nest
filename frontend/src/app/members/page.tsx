@@ -1,8 +1,8 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import { User } from 'types/user'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { User } from 'types/user'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -38,7 +38,7 @@ const UsersPage = () => {
       <UserCard
         avatar={user.avatar_url}
         button={SubmitButton}
-        company={user?.company || ''}
+        company={user.company || ''}
         email={user.email || ''}
         followers_count={user.followers_count}
         location={user.location || ''}

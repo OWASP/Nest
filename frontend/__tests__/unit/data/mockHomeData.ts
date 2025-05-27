@@ -100,11 +100,28 @@ export const mockGraphQLData = {
       url: 'https://github.com/owasp/owasp-nest/releases/tag/v0.9.2',
     },
   ],
+  recentMilestones: [
+    {
+      author: {
+        avatarUrl: 'https://avatars.githubusercontent.com/u/33333?v=4',
+        login: 'milestone-author1',
+        name: 'Milestone Author 1',
+      },
+      title: 'v2.0.0 Release',
+      openIssuesCount: 5,
+      closedIssuesCount: 15,
+      repositoryName: 'Home Repo One',
+      organizationName: 'OWASP',
+      createdAt: '2025-03-01T10:00:00Z',
+      url: 'https://github.com/OWASP/repo-one/milestone/1',
+    },
+  ],
   statsOverview: {
-    activeChaptersStats: 540,
-    activeProjectsStats: 95,
-    countriesStats: 245,
-    contributorsStats: 9673,
+    activeChaptersStats: 250,
+    activeProjectsStats: 90,
+    countriesStats: 240,
+    contributorsStats: 9600,
+    slackWorkspaceStats: 31500,
   },
   upcomingEvents: [
     {

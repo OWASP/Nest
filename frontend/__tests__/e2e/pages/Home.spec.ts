@@ -76,6 +76,13 @@ test.describe('Home Page', () => {
     await expect(page.getByText('repo-1')).toBeVisible()
   })
 
+  test('should have recent milestones', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
+    await expect(page.getByText('Mar 1, 2025')).toBeVisible()
+    await expect(page.getByText('Home Repo One')).toBeVisible()
+  })
+
   test('should be able to join OWASP', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Ready to Make a Difference?' })).toBeVisible()
     await expect(page.getByText('Join OWASP and be part of the')).toBeVisible()
@@ -91,6 +98,19 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
     await expect(page.getByText('Apr 5 — 6, 2025')).toBeVisible()
     await page.getByRole('button', { name: 'Event 1' }).click()
+  })
+
+  test('should have stats', async ({ page }) => {
+    const headers = [
+      'Active Projects',
+      'Local Chapters',
+      'Contributors',
+      'Countries',
+      'Slack Community',
+    ]
+    for (const header of headers) {
+      await expect(page.getByText(header, { exact: true })).toBeVisible()
+    }
   })
 
   test('Bluesky icon should be present and link correctly', async ({ page }) => {

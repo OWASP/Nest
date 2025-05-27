@@ -11,15 +11,17 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
+import { TopContributorsTypeGraphql } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()
   const [repository, setRepository] = useState(null)
+  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
   const [recentPullRequests, setRecentPullRequests] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
@@ -27,8 +29,9 @@ const RepositoryDetailsPage = () => {
   })
   useEffect(() => {
     if (data) {
-      setRepository(data?.repository)
-      setRecentPullRequests(data?.recentPullRequests)
+      setRepository(data.repository)
+      setTopContributors(data.topContributors)
+      setRecentPullRequests(data.recentPullRequests)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -112,8 +115,9 @@ const RepositoryDetailsPage = () => {
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}
-      topContributors={repository.topContributors}
+      topContributors={topContributors}
       topics={repository.topics}
+      recentMilestones={repository.recentMilestones}
       type="repository"
     />
   )

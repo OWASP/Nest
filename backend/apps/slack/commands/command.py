@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 
 from apps.common.constants import NL
+from apps.common.utils import convert_to_snake_case
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.template_loader import env
@@ -104,7 +105,7 @@ class CommandBase:
 
     def get_template_file_name(self):
         """Get the template file name."""
-        return f"{self.__class__.__name__.lower()}.jinja"
+        return f"commands/{convert_to_snake_case(self.__class__.__name__)}.jinja"
 
     def configure_command(self):
         """Configure command."""
@@ -130,18 +131,19 @@ class CommandBase:
             return
 
         try:
-            blocks = self.get_render_blocks(command)
-            conversation = client.conversations_open(users=command["user_id"])
-            client.chat_postMessage(
-                blocks=blocks,
-                channel=conversation["channel"]["id"],
-                text=get_text(blocks),
-            )
+            if (blocks := self.get_render_blocks(command)) and (
+                conversation := client.conversations_open(users=command["user_id"])
+            ):
+                client.chat_postMessage(
+                    blocks=blocks,
+                    channel=conversation["channel"]["id"],
+                    text=get_text(blocks),
+                )
         except Exception:
             logger.exception("Failed to handle command '%s'", self.get_command_name())
-            conversation = client.conversations_open(users=command["user_id"])
-            client.chat_postMessage(
-                blocks=[markdown(":warning: An error occurred. Please try again later.")],
-                channel=conversation["channel"]["id"],
-                text="An error occurred while processing your command.",
-            )
+            if conversation := client.conversations_open(users=command["user_id"]):
+                client.chat_postMessage(
+                    blocks=[markdown(":warning: An error occurred. Please try again later.")],
+                    channel=conversation["channel"]["id"],
+                    text="An error occurred while processing your command.",
+                )

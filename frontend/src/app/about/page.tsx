@@ -1,21 +1,29 @@
 'use client'
 import { useQuery } from '@apollo/client'
 import {
+  faCircleCheck,
+  faClock,
+  faUserGear,
   faMapSigns,
   faScroll,
   faUsers,
   faTools,
   faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
-import { addToast } from '@heroui/toast'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
-import { ProjectTypeGraphql } from 'types/project'
-import { aboutText, roadmap, technologies } from 'utils/aboutData'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
+import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
+import { GET_LEADER_DATA } from 'server/queries/userQueries'
+import { TopContributorsTypeGraphql } from 'types/contributor'
+import { ProjectTypeGraphql } from 'types/project'
+import { User } from 'types/user'
+import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -23,46 +31,63 @@ import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import UserCard from 'components/UserCard'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
 }
+const projectKey = 'nest'
 
 const About = () => {
-  const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const projectKey = 'nest'
+  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
+    GET_PROJECT_METADATA,
+    {
+      variables: { key: projectKey },
+    }
+  )
 
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
-    variables: { key: projectKey },
-  })
+  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
+    GET_TOP_CONTRIBUTORS,
+    {
+      variables: { excludedUsernames: Object.keys(leaders), key: projectKey },
+    }
+  )
+
+  const [projectMetadata, setProjectMetadata] = useState<ProjectTypeGraphql | null>(null)
+  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
 
   useEffect(() => {
-    if (data) {
-      setProject(data?.project)
-      setIsLoading(false)
+    if (projectMetadataResponse?.project) {
+      setProjectMetadata(projectMetadataResponse.project)
     }
-    if (graphQLRequestError) {
-      addToast({
-        description: 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
-      handleAppError(graphQLRequestError)
-      setIsLoading(false)
+
+    if (projectMetadataRequestError) {
+      handleAppError(projectMetadataRequestError)
     }
-  }, [data, graphQLRequestError, projectKey])
+  }, [projectMetadataResponse, projectMetadataRequestError])
+
+  useEffect(() => {
+    if (topContributorsResponse?.topContributors) {
+      setTopContributors(topContributorsResponse.topContributors)
+    }
+
+    if (topContributorsRequestError) {
+      handleAppError(topContributorsRequestError)
+    }
+  }, [topContributorsResponse, topContributorsRequestError])
+
+  const isLoading =
+    !projectMetadataResponse ||
+    !topContributorsResponse ||
+    (projectMetadataRequestError && !projectMetadata) ||
+    (topContributorsRequestError && !topContributors)
 
   if (isLoading) {
     return <LoadingSpinner />
   }
-  if (!project) {
+
+  if (!projectMetadata || !topContributors) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -96,10 +121,10 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        {project.topContributors && (
+        {topContributors && (
           <TopContributors
             icon={faUsers}
-            contributors={project.topContributors}
+            contributors={topContributors}
             maxInitialDisplay={9}
             type="contributor"
           />
@@ -138,34 +163,73 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
-          <ul>
-            {roadmap.map((item) => (
-              <li key={item.title} className="mb-4 flex flex-row items-center gap-2 pl-4 md:pl-6">
-                <div className="h-2 w-2 flex-shrink-0 rounded-full bg-gray-600 dark:bg-gray-300"></div>
-                <Link
-                  href={item.issueLink}
-                  target="_blank"
-                  className="text-gray-600 hover:underline dark:text-gray-300"
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </SecondaryCard>
+        {projectMetadata.recentMilestones.length > 0 && (
+          <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
+            <div className="grid gap-4">
+              {[...projectMetadata.recentMilestones]
+                .filter((milestone) => milestone.state !== 'closed')
+                .sort((a, b) => (a.title > b.title ? 1 : -1))
+                .map((milestone, index) => (
+                  <div
+                    key={milestone.url || milestone.title || index}
+                    className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
+                  >
+                    <div className="flex-1">
+                      <Link
+                        href={milestone.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block"
+                      >
+                        <h3 className="mb-2 text-xl font-semibold text-blue-400">
+                          {milestone.title}
+                          <Tooltip
+                            closeDelay={100}
+                            content={
+                              milestone.progress === 100
+                                ? 'Completed'
+                                : milestone.progress > 0
+                                  ? 'In Progress'
+                                  : 'Not Started'
+                            }
+                            id={`tooltip-state-${index}`}
+                            delay={100}
+                            placement="top"
+                            showArrow
+                          >
+                            <span className="ml-4 inline-block text-gray-400">
+                              <FontAwesomeIcon
+                                icon={
+                                  milestone.progress === 100
+                                    ? faCircleCheck
+                                    : milestone.progress > 0
+                                      ? faUserGear
+                                      : faClock
+                                }
+                              />
+                            </span>
+                          </Tooltip>
+                        </h3>
+                      </Link>
+                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </SecondaryCard>
+        )}
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
-            { label: 'Forks', value: project.forksCount },
-            { label: 'Stars', value: project.starsCount },
-            { label: 'Contributors', value: project.contributorsCount },
-            { label: 'Issues', value: project.issuesCount },
+            { label: 'Forks', value: projectMetadata.forksCount },
+            { label: 'Stars', value: projectMetadata.starsCount },
+            { label: 'Contributors', value: projectMetadata.contributorsCount },
+            { label: 'Open Issues', value: projectMetadata.issuesCount },
           ].map((stat, index) => (
             <div key={index}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={Math.floor(stat.value / 5) * 5} duration={2} />+
+                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
@@ -181,6 +245,7 @@ const LeaderData = ({ username }: { username: string }) => {
   const { data, loading, error } = useQuery(GET_LEADER_DATA, {
     variables: { key: username },
   })
+  const router = useRouter()
 
   if (loading) return <p>Loading {username}...</p>
   if (error) return <p>Error loading {username}'s data</p>
@@ -191,13 +256,17 @@ const LeaderData = ({ username }: { username: string }) => {
     return <p>No data available for {username}</p>
   }
 
+  const handleButtonClick = (user: User) => {
+    router.push(`/members/${user.login}`)
+  }
+
   return (
     <UserCard
       avatar={user.avatarUrl}
       button={{
         icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
         label: 'View Profile',
-        onclick: () => window.open(`/members/${username}`, '_blank', 'noopener,noreferrer'),
+        onclick: () => handleButtonClick(user),
       }}
       className="h-64 w-40 bg-inherit"
       company={user.company}

@@ -2,9 +2,9 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockOrganizationDetailsData } from '@unit/data/mockOrganizationData'
-import { formatDate } from 'utils/dateFormatter'
 import { render } from 'wrappers/testUtil'
 import OrganizationDetailsPage from 'app/organizations/[organizationKey]/page'
+import { formatDate } from 'utils/dateFormatter'
 import '@testing-library/jest-dom'
 
 jest.mock('@apollo/client', () => ({
@@ -108,6 +108,56 @@ describe('OrganizationDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Release v1.0.0')).toBeInTheDocument()
       expect(screen.getByText('Release v2.0.0')).toBeInTheDocument()
+    })
+  })
+
+  test('renders milestones section correctly', async () => {
+    render(<OrganizationDetailsPage />)
+    await waitFor(() => {
+      const recentMilestones = mockOrganizationDetailsData.recentMilestones
+
+      recentMilestones.forEach((milestone) => {
+        expect(screen.getByText(milestone.title)).toBeInTheDocument()
+        expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
+        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
+      })
+    })
+  })
+
+  test('handles no recent releases gracefully', async () => {
+    const noReleasesData = {
+      ...mockOrganizationDetailsData,
+      recentReleases: [],
+    }
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noReleasesData,
+      loading: false,
+      error: null,
+    })
+    render(<OrganizationDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Recent Releases')).toBeInTheDocument()
+      expect(screen.queryByText('Test v1.0.0')).not.toBeInTheDocument()
+    })
+  })
+
+  test('renders no milestones correctly', async () => {
+    const noMilestones = {
+      ...mockOrganizationDetailsData,
+      recentMilestones: [],
+    }
+
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noMilestones,
+      loading: false,
+      error: null,
+    })
+
+    render(<OrganizationDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
+      expect(screen.queryByText('v2.0.0 Release')).not.toBeInTheDocument()
     })
   })
 

@@ -1,6 +1,7 @@
 """Github app common models."""
 
 from django.db import models
+from github.GithubException import UnknownObjectException
 
 
 class GenericUserModel(models.Model):
@@ -14,7 +15,7 @@ class GenericUserModel(models.Model):
     email = models.EmailField(verbose_name="Email", max_length=100, default="", blank=True)
 
     avatar_url = models.URLField(verbose_name="Avatar URL", max_length=200, default="")
-    company = models.CharField(verbose_name="Company", max_length=200, default="")
+    company = models.CharField(verbose_name="Company", max_length=200, blank=True, default="")
     location = models.CharField(verbose_name="Location", max_length=200, default="", blank=True)
 
     collaborators_count = models.PositiveIntegerField(
@@ -33,7 +34,9 @@ class GenericUserModel(models.Model):
     @property
     def title(self) -> str:
         """Entity title."""
-        return f"{self.name or self.login}"
+        return (
+            f"{self.name} ({self.login})" if self.name and self.name != self.login else self.login
+        )
 
     @property
     def url(self) -> str:
@@ -76,4 +79,7 @@ class NodeModel(models.Model):
     @staticmethod
     def get_node_id(node):
         """Extract node_id."""
-        return node.raw_data["node_id"]
+        try:
+            return node.raw_data["node_id"]
+        except UnknownObjectException:
+            pass

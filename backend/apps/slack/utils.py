@@ -9,7 +9,7 @@ from html import escape as escape_html
 from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from django.db.models import QuerySet
 
 import requests

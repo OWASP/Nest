@@ -3,10 +3,10 @@ import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
-import { ProjectIssuesType, ProjectReleaseType } from 'types/project'
+import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
 import { PullRequestsType } from 'types/user'
-import SecondaryCard from './SecondaryCard'
-import { TruncatedText } from './TruncatedText'
+import SecondaryCard from 'components/SecondaryCard'
+import { TruncatedText } from 'components/TruncatedText'
 
 const ItemCardList = ({
   title,
@@ -14,11 +14,13 @@ const ItemCardList = ({
   icon,
   renderDetails,
   showAvatar = true,
+  showSingleColumn = true,
 }: {
   title: React.ReactNode
-  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[]
+  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[] | ProjectMilestonesType[]
   icon?: IconProp
   showAvatar?: boolean
+  showSingleColumn?: boolean
   renderDetails: (item: {
     createdAt: string
     commentsCount: number
@@ -26,6 +28,8 @@ const ItemCardList = ({
     publishedAt: string
     repositoryName: string
     tagName: string
+    openIssuesCount: number
+    closedIssuesCount: number
     author: {
       avatarUrl: string
       login: string
@@ -35,7 +39,9 @@ const ItemCardList = ({
 }) => (
   <SecondaryCard icon={icon} title={title}>
     {data && data.length > 0 ? (
-      <div className="overflow-y-auto pr-2">
+      <div
+        className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+      >
         {data.map((item, index) => (
           <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
             <div className="flex w-full flex-col justify-between">

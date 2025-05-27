@@ -33,6 +33,7 @@ apk
 arithmatex
 arkid15r
 askowasp
+bangbang
 bsky
 certbot
 collectstatic
@@ -109,6 +110,7 @@ wsgi
 xapp
 xdg
 xdist
+xoxb
 xsser
 zsc
 éàëîôû

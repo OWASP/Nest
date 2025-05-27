@@ -9,28 +9,34 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_USER_DATA } from 'server/queries/userQueries'
-import type { ProjectIssuesType, ProjectReleaseType, RepositoryCardProps } from 'types/project'
-import type { ItemCardPullRequests, PullRequestsType, UserDetailsProps } from 'types/user'
+import type {
+  ProjectIssuesType,
+  ProjectMilestonesType,
+  ProjectReleaseType,
+  RepositoryCardProps,
+} from 'types/project'
+import type { ItemCardPullRequests, UserDetailsProps } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()
   const [user, setUser] = useState<UserDetailsProps | null>()
   const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequestsType[]>([])
+  const [milestones, setMilestones] = useState<ProjectMilestonesType[]>([])
+  const [pullRequests, setPullRequests] = useState<ItemCardPullRequests[]>([])
   const [releases, setReleases] = useState<ProjectReleaseType[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [imageLink, setImageLink] = useState('')
-  const [privateContributor, setPrivateContributor] = useState(false)
+  const [isPrivateContributor, setIsPrivateContributor] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
@@ -40,11 +46,12 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     if (graphQLData) {
-      setUser(graphQLData?.user)
-      setIssues(graphQLData?.recentIssues)
-      setPullRequests(graphQLData?.recentPullRequests)
-      setReleases(graphQLData?.recentReleases)
-      setTopRepositories(graphQLData?.topContributedRepositories)
+      setUser(graphQLData.user)
+      setIssues(graphQLData.recentIssues)
+      setMilestones(graphQLData.recentMilestones)
+      setPullRequests(graphQLData.recentPullRequests)
+      setReleases(graphQLData.recentReleases)
+      setTopRepositories(graphQLData.topContributedRepositories)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -55,15 +62,14 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!memberKey) {
+      const result = await fetchHeatmapData(memberKey as string)
+      if (!result) {
+        setIsPrivateContributor(true)
         return
       }
-      const result = await fetchHeatmapData(memberKey as string)
-      if (typeof result !== 'string' && result.contributions) {
+      if (result?.contributions) {
         setUsername(memberKey as string)
         setData(result as HeatmapData)
-      } else {
-        setPrivateContributor(true)
       }
     }
     fetchData()
@@ -100,62 +106,6 @@ const UserDetailsPage: React.FC = () => {
     }
     return <span key={index}>{word} </span>
   })
-
-  const formattedIssues: ProjectIssuesType[] = useMemo(() => {
-    return (
-      issues?.map((issue) => ({
-        author: {
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          login: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
-        createdAt: issue.createdAt,
-        organizationName: issue.organizationName,
-        repositoryName: issue.repositoryName,
-        title: issue.title,
-        url: issue.url,
-      })) || []
-    )
-  }, [user, issues])
-
-  const formattedPullRequest: ItemCardPullRequests[] = useMemo(() => {
-    return (
-      pullRequests?.map((pullRequest) => ({
-        author: {
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          login: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
-        createdAt: pullRequest.createdAt,
-        organizationName: pullRequest.organizationName,
-        repositoryName: pullRequest.repositoryName,
-        title: pullRequest.title,
-        url: pullRequest.url,
-      })) || []
-    )
-  }, [pullRequests, user])
-
-  const formattedReleases: ProjectReleaseType[] = useMemo(() => {
-    return (
-      releases?.map((release) => ({
-        author: {
-          avatarUrl: user?.avatarUrl || '',
-          key: user?.login || '',
-          login: user?.login || '',
-          name: user?.name || user?.login || '',
-        },
-        isPreRelease: release.isPreRelease,
-        name: release.name,
-        organizationName: release.organizationName,
-        publishedAt: release.publishedAt,
-        repositoryName: release.repositoryName,
-        tagName: release.tagName,
-        url: release.url,
-      })) || []
-    )
-  }, [releases, user])
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -231,7 +181,7 @@ const UserDetailsPage: React.FC = () => {
         src={user?.avatarUrl || '/placeholder.svg'}
         alt={user?.name || user?.login || 'User Avatar'}
       />
-      <div>
+      <div className="w-full">
         <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
           @{user?.login}
         </Link>
@@ -242,16 +192,17 @@ const UserDetailsPage: React.FC = () => {
 
   return (
     <DetailsCard
-      showAvatar={false}
-      title={user?.name || user?.login || 'User'}
-      heatmap={privateContributor ? undefined : <Heatmap />}
       details={userDetails}
-      pullRequests={formattedPullRequest}
-      stats={userStats}
-      type="user"
-      recentIssues={formattedIssues}
-      recentReleases={formattedReleases}
+      heatmap={isPrivateContributor ? undefined : <Heatmap />}
+      pullRequests={pullRequests}
+      recentIssues={issues}
+      recentMilestones={milestones}
+      recentReleases={releases}
       repositories={topRepositories}
+      showAvatar={false}
+      stats={userStats}
+      title={user?.name || user?.login}
+      type="user"
       userSummary={<UserSummary />}
     />
   )

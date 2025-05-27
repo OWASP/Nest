@@ -1,6 +1,6 @@
 """OWASP app admin."""
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
 from apps.owasp.models.chapter import Chapter
@@ -45,8 +45,31 @@ class GenericEntityAdminMixin:
     custom_field_owasp_url.short_description = "OWASP 🔗"
 
 
-class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
-    autocomplete_fields = ("owasp_repository",)
+class LeaderAdminMixin:
+    """Admin mixin for entities that can have leaders."""
+
+    actions = ("approve_suggested_leaders",)
+    filter_horizontal = ("suggested_leaders",)
+
+    def approve_suggested_leaders(self, request, queryset):
+        """Approve suggested leaders for selected entities."""
+        for entity in queryset:
+            suggestions = entity.suggested_leaders.all()
+            entity.leaders.add(*suggestions)
+            self.message_user(
+                request,
+                f"Approved {suggestions.count()} leader suggestions for {entity.name}",
+                messages.SUCCESS,
+            )
+
+    approve_suggested_leaders.short_description = "Approve suggested leaders"
+
+
+class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+    autocomplete_fields = (
+        "leaders",
+        "owasp_repository",
+    )
     list_display = (
         "name",
         "created_at",
@@ -64,8 +87,11 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     search_fields = ("name", "key")
 
 
-class CommitteeAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("owasp_repository",)
+class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+    autocomplete_fields = (
+        "leaders",
+        "owasp_repository",
+    )
     search_fields = ("name",)
 
 
@@ -94,8 +120,9 @@ class PostAdmin(admin.ModelAdmin):
     )
 
 
-class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
+class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     autocomplete_fields = (
+        "leaders",
         "organizations",
         "owasp_repository",
         "owners",

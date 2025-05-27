@@ -8,9 +8,17 @@ build:
 	@docker compose build
 
 clean: \
-	clean-backend \
-	clean-frontend \
-	clean-schema
+	clean-dependencies \
+	clean-docker
+
+clean-dependencies: \
+	clean-backend-dependencies \
+	clean-frontend-dependencies \
+	clean-schema-dependencies
+
+clean-docker: \
+	clean-backend-docker \
+	clean-frontend-docker
 
 check: \
 	check-backend \
@@ -42,7 +50,8 @@ prune:
 
 run:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose -f docker/docker-compose-local.yaml up --build --remove-orphans
+	docker compose -f docker/docker-compose-local.yaml build && \
+	docker compose -f docker/docker-compose-local.yaml up --remove-orphans
 
 fuzz-test-backend:
 	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-fuzz.yaml up --build --abort-on-container-exit --remove-orphans
@@ -56,7 +65,7 @@ test-nest-app: \
 	test-frontend
 
 update: \
-	clean \
+	clean-dependencies \
 	update-docs-dependencies \
 	update-nest-app-dependencies \
 	update-pre-commit \

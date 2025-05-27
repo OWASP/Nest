@@ -10,12 +10,6 @@ export const mockRepositoryData = {
     forksCount: 3000,
     openIssuesCount: 2,
     starsCount: 50000,
-    topContributors: Array.from({ length: 15 }, (_, i) => ({
-      avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
-      contributionsCount: 30 - i,
-      login: `contributor${i + 1}`,
-      name: `Contributor ${i + 1}`,
-    })),
     languages: ['JavaScript', 'TypeScript'],
     topics: ['web', 'security'],
     description: 'A sample test repository',
@@ -45,6 +39,22 @@ export const mockRepositoryData = {
         },
       },
     ],
+    recentMilestones: [
+      {
+        author: {
+          avatarUrl: 'https://avatars.githubusercontent.com/u/33333?v=4',
+          login: 'milestone-author1',
+          name: 'Milestone Author 1',
+        },
+        title: 'v2.0.0 Release',
+        openIssuesCount: 5,
+        closedIssuesCount: 15,
+        repositoryName: 'Repo One',
+        organizationName: 'OWASP',
+        createdAt: '2025-03-01T10:00:00Z',
+        url: 'https://github.com/OWASP/repo-one/milestone/1',
+      },
+    ],
   },
   recentPullRequests: [
     {
@@ -66,4 +76,10 @@ export const mockRepositoryData = {
       },
     },
   ],
+  topContributors: Array.from({ length: 15 }, (_, i) => ({
+    avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
+    contributionsCount: 30 - i,
+    login: `contributor${i + 1}`,
+    name: `Contributor ${i + 1}`,
+  })),
 }

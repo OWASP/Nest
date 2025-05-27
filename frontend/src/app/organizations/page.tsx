@@ -1,8 +1,8 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import { OrganizationTypeAlgolia } from 'types/organization'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { OrganizationTypeAlgolia } from 'types/organization'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
