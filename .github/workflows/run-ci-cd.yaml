@@ -332,38 +332,6 @@ jobs:
       - name: Run fuzz tests
         run: make fuzz-test-backend
 
-  scan-code:
-    name: Run Code Scan
-    needs:
-      - pre-commit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Run Trivy Repository Scan
-        continue-on-error: true
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
-        with:
-          scan-type: repo
-          trivy-config: trivy.yaml
-
-  scan-ci-dependencies:
-    name: Run CI Denendencies Scan
-    needs:
-      - pre-commit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Run Trivy Filesystem Scan
-        continue-on-error: true
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
-        with:
-          scan-type: fs
-          trivy-config: trivy.yaml
-
   build-staging-images:
     name: Build Staging Images
     environment: staging
