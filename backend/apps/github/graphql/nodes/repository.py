@@ -52,7 +52,7 @@ class RepositoryNode:
         return self.latest_release
 
     @strawberry.field
-    def organization(self) -> OrganizationNode:
+    def organization(self) -> OrganizationNode | None:
         """Resolve organization."""
         return self.organization
 
