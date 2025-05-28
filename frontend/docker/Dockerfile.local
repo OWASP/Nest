@@ -2,7 +2,7 @@ FROM node:22-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-builder" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     NPM_CACHE="/home/owasp/.npm" \
     PNPM_HOME="/pnpm"
@@ -33,7 +33,7 @@ FROM node:22-alpine
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend" \
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-stage" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     FORCE_COLOR=1 \
     NPM_CACHE="/home/owasp/.npm"
