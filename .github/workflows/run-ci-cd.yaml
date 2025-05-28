@@ -179,8 +179,6 @@ jobs:
           cache-from: |
             type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
-          cache-to: |
-            type=gha,compression=zstd
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
@@ -210,8 +208,6 @@ jobs:
           cache-from: |
             type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
-          cache-to: |
-            type=gha,mode=max,compression=zstd
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           load: true
