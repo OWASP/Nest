@@ -266,14 +266,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Restore buildx backend poetry cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/buildx-backend-poetry-cache
-          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
-          restore-keys: |
-            buildx-backend-poetry-cache-${{ runner.os }}-
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
@@ -290,7 +282,7 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-backend-poetry-cache
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           cache-to: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
@@ -314,19 +306,11 @@ jobs:
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
 
-      - name: Restore buildx frontend pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/buildx-frontend-pnpm-cache
-          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          restore-keys: |
-            buildx-frontend-pnpm-cache-${{ runner.os }}-
-
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           cache-to: |
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
@@ -475,14 +459,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Restore buildx backend poetry cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/buildx-backend-poetry-cache
-          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
-          restore-keys: |
-            buildx-backend-poetry-cache-${{ runner.os }}-
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
@@ -499,11 +475,8 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-backend-poetry-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
-          cache-to: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production-cache
           context: backend
           file: backend/docker/Dockerfile
           platforms: linux/amd64
@@ -524,23 +497,12 @@ jobs:
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
 
-      - name: Restore buildx frontend pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/buildx-frontend-pnpm-cache
-          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          restore-keys: |
-            buildx-frontend-pnpm-cache-${{ runner.os }}-
-
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
+            type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
-          cache-to: |
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production-cache
           context: frontend
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
