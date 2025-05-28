@@ -34,18 +34,12 @@ class Command(BaseCommand):
             type=str,
             help="Specific channel ID to fetch messages from",
         )
-        parser.add_argument(
-            "--include-threads",
-            action="store_true",
-            default=True,
-            help="Fetch and combine thread messages",
-        )
 
     def handle(self, *args, **options):
         batch_size = options["batch_size"]
         delay = options["delay"]
         channel_id = options["channel_id"]
-        include_threads = options["include_threads"]
+        include_threads = True
 
         workspaces = Workspace.objects.all()
         if not workspaces.exists():
@@ -165,7 +159,6 @@ class Command(BaseCommand):
             ):
                 return None
 
-            print(f"Processing message data: {message_data}")
             message_ts = message_data.get("ts")
             thread_ts = message_data.get("thread_ts")
 
@@ -185,7 +178,6 @@ class Command(BaseCommand):
 
             if include_threads and is_actual_thread_parent:
                 try:
-                    self.stdout.write(f"Fetching thread replies for message {message_ts}")
                     thread_response = client.conversations_replies(
                         channel=conversation.slack_channel_id,
                         ts=message_ts,

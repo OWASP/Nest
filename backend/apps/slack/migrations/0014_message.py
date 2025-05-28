@@ -5,28 +5,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('slack', '0013_alter_conversation_total_members_count_and_more'),
+        ("slack", "0013_alter_conversation_total_members_count_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Message',
+            name="Message",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('is_thread', models.BooleanField(default=False, verbose_name='Is Thread')),
-                ('slack_message_id', models.CharField(max_length=50, verbose_name='Slack Message ID')),
-                ('text', models.TextField(blank=True, verbose_name='Message Text')),
-                ('timestamp', models.DateTimeField(blank=True, verbose_name='Message Timestamp')),
-                ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='slack.conversation')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                ("is_thread", models.BooleanField(default=False, verbose_name="Is Thread")),
+                (
+                    "slack_message_id",
+                    models.CharField(max_length=50, verbose_name="Slack Message ID"),
+                ),
+                ("text", models.TextField(blank=True, verbose_name="Message Text")),
+                ("timestamp", models.DateTimeField(blank=True, verbose_name="Message Timestamp")),
+                (
+                    "conversation",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="messages",
+                        to="slack.conversation",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Messages',
-                'db_table': 'slack_messages',
-                'unique_together': {('conversation', 'slack_message_id')},
+                "verbose_name_plural": "Messages",
+                "db_table": "slack_messages",
+                "unique_together": {("conversation", "slack_message_id")},
             },
         ),
     ]

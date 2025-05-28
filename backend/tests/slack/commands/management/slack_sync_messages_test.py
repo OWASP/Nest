@@ -1,8 +1,8 @@
 """Tests for the slack_sync_messages management command."""
 
+from datetime import UTC, datetime
 from io import StringIO
 from unittest.mock import MagicMock, Mock, patch
-from datetime import UTC, datetime
 
 import pytest
 from django.core.management import call_command
@@ -406,9 +406,7 @@ class TestSlackSyncMessagesCommand:
             channel=TEST_CHANNEL_ID, ts=TEST_THREAD_TS
         )
 
-        expected_combined_text = (
-            "This is a thread parent\n\nFirst reply\n\nSecond reply"
-        )
+        expected_combined_text = "This is a thread parent\n\nFirst reply\n\nSecond reply"
         mock_update_data.assert_called_once_with(
             {
                 "slack_message_id": TEST_THREAD_TS,
@@ -488,7 +486,7 @@ class TestSlackSyncMessagesCommand:
         parser = MagicMock()
         command.add_arguments(parser)
 
-        assert parser.add_argument.call_count == CONSTANT_4
+        assert parser.add_argument.call_count == CONSTANT_3
 
         parser.add_argument.assert_any_call(
             "--batch-size",
@@ -510,59 +508,6 @@ class TestSlackSyncMessagesCommand:
             help="Specific channel ID to fetch messages from",
         )
 
-        parser.add_argument.assert_any_call(
-            "--include-threads",
-            action="store_true",
-            default=True,
-            help="Fetch and combine thread messages",
-        )
-
-    @patch("apps.slack.management.commands.slack_sync_messages.WebClient")
-    @patch("apps.slack.management.commands.slack_sync_messages.time.sleep")
-    def test_handle_with_custom_options(
-        self,
-        mock_sleep,
-        mock_web_client,
-        command,
-        mock_workspace,
-        mock_conversation,
-        mock_slack_history_response_final,
-    ):
-        """Test handle method with custom batch size and delay options."""
-        mock_workspaces = Mock()
-        mock_workspaces.exists.return_value = True
-        mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
-
-        mock_conversations = Mock()
-        mock_conversations.__iter__ = Mock(return_value=iter([mock_conversation]))
-
-        mock_client = Mock()
-        mock_web_client.return_value = mock_client
-        mock_client.conversations_history.return_value = mock_slack_history_response_final
-
-        stdout = StringIO()
-        with (
-            patch.object(Workspace.objects, "all", return_value=mock_workspaces),
-            patch.object(Conversation.objects, "filter", return_value=mock_conversations),
-            patch.object(Message.objects, "filter") as mock_message_filter,
-            patch.object(Message, "update_data") as mock_update_data,
-            patch.object(Message, "bulk_save") as mock_bulk_save,
-            patch("builtins.print"),
-        ):
-            mock_message_filter.return_value.order_by.return_value.first.return_value = None
-            mock_update_data.return_value = Mock(spec=Message)
-            command.stdout = stdout
-            command.handle(batch_size=100, delay=1.0, channel_id=None, include_threads=False)
-
-        mock_client.conversations_history.assert_called_once_with(
-            channel=TEST_CHANNEL_ID,
-            cursor=None,
-            limit=100,
-            oldest=None,
-        )
-
-        mock_sleep.assert_not_called()
-
     def test_management_command_via_call_command(self):
         """Test running the command via Django's call_command."""
         stdout = StringIO()
@@ -577,62 +522,3 @@ class TestSlackSyncMessagesCommand:
         output = stdout.getvalue()
         assert "No workspaces found in the database" in output
         mock_print.assert_not_called()
-
-    @patch("apps.slack.management.commands.slack_sync_messages.WebClient")
-    def test_handle_include_threads_false(
-        self,
-        mock_web_client,
-        command,
-        mock_workspace,
-        mock_conversation,
-    ):
-        """Test handling with include_threads=False."""
-        mock_workspaces = Mock()
-        mock_workspaces.exists.return_value = True
-        mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
-
-        mock_conversations = Mock()
-        mock_conversations.__iter__ = Mock(return_value=iter([mock_conversation]))
-
-        mock_client = Mock()
-        mock_web_client.return_value = mock_client
-
-        response_with_thread = {
-            "ok": True,
-            "messages": [
-                {
-                    "ts": TEST_THREAD_TS,
-                    "text": "Thread parent",
-                    "user": "U67890",
-                    "reply_count": 2,
-                    "thread_ts": TEST_THREAD_TS,
-                },
-                {
-                    "ts": "1605000000.000300",
-                    "text": "Thread reply",
-                    "user": "U11111",
-                    "thread_ts": TEST_THREAD_TS,
-                },
-            ],
-            "response_metadata": {},
-        }
-        mock_client.conversations_history.return_value = response_with_thread
-
-        stdout = StringIO()
-        with (
-            patch.object(Workspace.objects, "all", return_value=mock_workspaces),
-            patch.object(Conversation.objects, "filter", return_value=mock_conversations),
-            patch.object(Message.objects, "filter") as mock_message_filter,
-            patch.object(Message, "update_data") as mock_update_data,
-            patch.object(Message, "bulk_save") as mock_bulk_save,
-            patch("builtins.print"),
-        ):
-            mock_message_filter.return_value.order_by.return_value.first.return_value = None
-            mock_update_data.return_value = Mock(spec=Message)
-            command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, include_threads=False)
-
-        assert mock_update_data.call_count == CONSTANT_2
-        mock_bulk_save.assert_called_once()
-
-        mock_client.conversations_replies.assert_not_called()
