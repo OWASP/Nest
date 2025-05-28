@@ -18,6 +18,7 @@ clean-dependencies: \
 
 clean-docker: \
 	clean-backend-docker \
+	clean-docs-docker \
 	clean-frontend-docker
 
 check: \

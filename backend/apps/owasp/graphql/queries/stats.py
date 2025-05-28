@@ -39,5 +39,5 @@ class StatsQuery:
             active_projects_stats=round_down(active_projects_stats, 10),
             contributors_stats=round_down(contributors_stats, 1000),
             countries_stats=round_down(countries_stats, 10),
-            slack_workspace_stats=round_down(slack_workspace_stats, 100),
+            slack_workspace_stats=round_down(slack_workspace_stats, 1000),
         )

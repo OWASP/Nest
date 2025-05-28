@@ -33,17 +33,17 @@ FROM node:22-alpine
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     FORCE_COLOR=1 \
     NPM_CACHE="/home/owasp/.npm"
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
-    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && \
-    apk add --no-cache git && \
+    apk add git && \
     mkdir -p /home/owasp/.next && \
     chown -R node:node /home/owasp
 
