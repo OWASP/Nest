@@ -241,8 +241,6 @@ jobs:
           cache-from: |
             type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
-          cache-to: |
-            type=gha,mode=max,compression=zstd
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           load: true
