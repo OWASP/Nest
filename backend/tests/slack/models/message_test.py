@@ -4,8 +4,6 @@ from unittest.mock import Mock, patch
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.message import Message
 
-CONSTANT_2 = 2
-
 
 class TestMessageModel:
     def test_bulk_save(self):
@@ -22,8 +20,6 @@ class TestMessageModel:
             "slack_message_id": "123456",
             "conversation": mock_conversation_instance,
             "text": "Test message",
-            "reply_count": 0,
-            "thread_timestamp": "123456.000",
             "timestamp": "1605000000.000000",
         }
 
@@ -39,8 +35,7 @@ class TestMessageModel:
         assert isinstance(result, Message)
         assert result.slack_message_id == "123456"
         assert result.text == "Test message"
-        assert result.reply_count == 0
-        assert result.thread_timestamp == "123456.000"
+        assert result.is_thread is False
         assert result.timestamp == datetime.fromtimestamp(1605000000, tz=UTC)
         patched_message_save.assert_called_once()
 
@@ -52,8 +47,6 @@ class TestMessageModel:
             "slack_message_id": "123456",
             "conversation": mock_conversation_instance,
             "text": "Updated message",
-            "reply_count": 2,
-            "thread_timestamp": "123456.000",
             "timestamp": "1605000000.000000",
         }
 
@@ -70,7 +63,7 @@ class TestMessageModel:
 
         assert result is mock_message_instance
         assert result.text == "Updated message"
-        assert result.reply_count == CONSTANT_2
+        assert result.is_thread is False
         result.save.assert_called_once()
 
     def test_update_data_no_save(self, mocker):
@@ -81,8 +74,6 @@ class TestMessageModel:
             "slack_message_id": "123456",
             "conversation": mock_conversation_instance,
             "text": "Test message",
-            "reply_count": 0,
-            "thread_timestamp": "123456.000",
             "timestamp": "1605000000.000000",
         }
 
@@ -102,62 +93,65 @@ class TestMessageModel:
         assert result.slack_message_id == "123456"
         assert result.text == "Test message"
         assert result.conversation == mock_conversation_instance
-        assert result.reply_count == 0
-        assert result.thread_timestamp == "123456.000"
+        assert result.is_thread is False
         assert result.timestamp == datetime.fromtimestamp(1605000000, tz=UTC)
 
         patched_save_method.assert_not_called()
 
-    def test_is_thread_parent(self):
-        message = Message(reply_count=1)
-        assert message.is_thread_parent is True
+    def test_update_data_with_thread_messages(self, mocker):
+        mock_conversation_instance = Mock(spec=Conversation)
+        mock_conversation_instance._state = Mock()
 
-        message = Message(reply_count=0)
-        assert message.is_thread_parent is False
+        message_data = {
+            "slack_message_id": "123456",
+            "conversation": mock_conversation_instance,
+            "text": "Parent message",
+            "thread_messages": [{"text": "Reply 1"}, {"text": "Reply 2"}, {"text": ""}],
+            "timestamp": "1605000000.000000",
+        }
 
-    def test_is_thread_reply(self):
-        message = Message(thread_timestamp="123456.000", slack_message_id="123457.000")
-        assert message.is_thread_reply is True
-
-        message = Message(thread_timestamp="123456.000", slack_message_id="123456.000")
-        assert message.is_thread_reply is False
-
-        message = Message(thread_timestamp="")
-        assert message.is_thread_reply is False
-
-    def test_get_thread_messages(self, mocker):
-        mock_conversation = Mock(spec=Conversation)
-        mock_conversation._state = Mock()
-
-        mock_parent = Mock(spec=Message)
-        mock_parent._state = Mock()
-        mock_parent.conversation = mock_conversation
-        mock_parent.slack_message_id = "123456.000"
-        mock_parent.thread_timestamp = "123456.000"
-
-        mock_parent.get_thread_messages = Message.get_thread_messages.__get__(mock_parent, Message)
-
-        mock_thread_messages_list = [
-            Mock(spec=Message, _state=Mock()),
-            Mock(spec=Message, _state=Mock()),
-        ]
-
-        filter_chain_mock = Mock()
-        filter_chain_mock.order_by.return_value = mock_thread_messages_list
-
-        patched_filter_method = mocker.patch(
-            "apps.slack.models.message.Message.objects.filter",
-            return_value=filter_chain_mock,
+        mocker.patch(
+            "apps.slack.models.message.Message.objects.get",
+            side_effect=Message.DoesNotExist,
         )
+        patched_message_save = mocker.patch("apps.slack.models.message.Message.save")
 
-        result = mock_parent.get_thread_messages()
+        result = Message.update_data(message_data)
 
-        patched_filter_method.assert_called_once_with(
-            conversation=mock_conversation,
-            thread_timestamp="123456.000",
+        assert result is not None
+        assert isinstance(result, Message)
+        assert result.slack_message_id == "123456"
+        assert result.text == "Parent message\n\nReply 1\n\nReply 2"
+        assert result.is_thread is True
+        assert result.timestamp == datetime.fromtimestamp(1605000000, tz=UTC)
+        patched_message_save.assert_called_once()
+
+    def test_update_data_with_is_thread_flag(self, mocker):
+        mock_conversation_instance = Mock(spec=Conversation)
+        mock_conversation_instance._state = Mock()
+
+        message_data = {
+            "slack_message_id": "123456",
+            "conversation": mock_conversation_instance,
+            "text": "Thread message",
+            "is_thread": True,
+            "timestamp": "1605000000.000000",
+        }
+
+        mocker.patch(
+            "apps.slack.models.message.Message.objects.get",
+            side_effect=Message.DoesNotExist,
         )
-        filter_chain_mock.order_by.assert_called_once()
-        assert result == mock_thread_messages_list
+        patched_message_save = mocker.patch("apps.slack.models.message.Message.save")
+
+        result = Message.update_data(message_data)
+
+        assert result is not None
+        assert isinstance(result, Message)
+        assert result.slack_message_id == "123456"
+        assert result.text == "Thread message"
+        assert result.is_thread is True
+        patched_message_save.assert_called_once()
 
     def test_str_method(self):
         message = Message(text="Short message")

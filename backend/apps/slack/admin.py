@@ -135,6 +135,10 @@ class MessageAdmin(admin.ModelAdmin):
         "slack_message_id",
         "text",
     )
+    list_display = (
+        "text",
+        "is_thread",
+    )
 
 
 class WorkspaceAdmin(admin.ModelAdmin):

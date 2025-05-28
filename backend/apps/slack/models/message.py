@@ -19,10 +19,9 @@ class Message(TimestampedModel):
     conversation = models.ForeignKey(
         Conversation, on_delete=models.CASCADE, related_name="messages"
     )
-    reply_count = models.PositiveIntegerField(verbose_name="Reply Count", default=0)
+    is_thread = models.BooleanField(verbose_name="Is Thread", default=False)
     slack_message_id = models.CharField(verbose_name="Slack Message ID", max_length=50)
     text = models.TextField(verbose_name="Message Text", blank=True)
-    thread_timestamp = models.CharField(verbose_name="Thread Timestamp", blank=True)
     timestamp = models.DateTimeField(verbose_name="Message Timestamp", blank=True)
 
     def __str__(self):
@@ -34,25 +33,6 @@ class Message(TimestampedModel):
             else self.text
         )
         return f"{text_preview}"
-
-    @property
-    def is_thread_parent(self) -> bool:
-        """Check if this message is a thread parent."""
-        return self.reply_count > 0
-
-    @property
-    def is_thread_reply(self) -> bool:
-        """Check if this message is a thread reply."""
-        return bool(self.thread_timestamp and self.thread_timestamp != self.slack_message_id)
-
-    def get_thread_messages(self):
-        """Get all messages in the same thread."""
-        if not self.thread_timestamp:
-            return Message.objects.none()
-
-        return Message.objects.filter(
-            conversation=self.conversation, thread_timestamp=self.thread_timestamp
-        ).order_by("timestamp")
 
     @staticmethod
     def bulk_save(messages: list["Message"], fields=None) -> None:
@@ -81,9 +61,19 @@ class Message(TimestampedModel):
         except Message.DoesNotExist:
             message = Message(slack_message_id=slack_message_id, conversation=conversation)
 
-        message.text = data.get("text", "")
-        message.reply_count = data.get("reply_count", 0)
-        message.thread_timestamp = data.get("thread_timestamp")
+        thread_replies_list = data.get("thread_messages", [])
+        if thread_replies_list:
+            parent_text = data.get("text", "")
+            combined_text_parts = [parent_text]
+            combined_text_parts.extend(
+                msg.get("text", "") for msg in thread_replies_list if msg.get("text")
+            )
+            message.text = "\n\n".join(filter(None, combined_text_parts))
+            message.is_thread = True
+        else:
+            message.text = data.get("text", "")
+            message.is_thread = data.get("is_thread", False)
+
         retrieved_timestamp = data.get("timestamp")
         if retrieved_timestamp:
             message.timestamp = datetime.fromtimestamp(float(retrieved_timestamp), tz=UTC)
