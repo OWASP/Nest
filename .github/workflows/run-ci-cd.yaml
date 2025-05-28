@@ -187,11 +187,6 @@ jobs:
           platforms: linux/amd64
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
 
-      - name: Update buildx backend poetry cache
-        run: |
-          rm -rf /tmp/buildx-backend-poetry-cache
-          mv /tmp/buildx-backend-poetry-cache-new /tmp/buildx-backend-poetry-cache
-
       - name: Run backend tests
         run: |
           docker run -e DJANGO_CONFIGURATION=Test ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest pytest
