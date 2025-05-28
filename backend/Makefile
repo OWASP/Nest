@@ -168,6 +168,7 @@ test-backend:
 		-t nest-test-backend
 	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest
 
+
 update-backend-dependencies:
 	@cd backend && poetry update
 
