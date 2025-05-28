@@ -180,7 +180,7 @@ jobs:
             type=gha
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
           cache-to: |
-            type=gha,mode=max,compression=zstd
+            type=gha,compression=zstd
           context: backend
           file: backend/docker/Dockerfile.test
           load: true
