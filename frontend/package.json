@@ -97,7 +97,7 @@
     "jest-axe": "^10.0.0",
     "jest-environment-jsdom": "^29.7.0",
     "open": "^10.1.2",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.4",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "require-in-the-middle": "^7.5.2",
