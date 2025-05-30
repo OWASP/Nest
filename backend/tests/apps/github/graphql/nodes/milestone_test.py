@@ -1,21 +1,17 @@
 """Test cases for MilestoneNode."""
 
-from apps.common.graphql.nodes import BaseNode
 from apps.github.graphql.nodes.milestone import MilestoneNode
-from apps.github.models.milestone import Milestone
 
 
 class TestMilestoneNode:
     """Test cases for MilestoneNode class."""
 
-    def test_milestone_node_inheritance(self):
-        """Test if IssueNode inherits from BaseNode."""
-        assert issubclass(MilestoneNode, BaseNode)
+    def test_milestone_node_type(self):
+        assert hasattr(MilestoneNode, "__strawberry_definition__")
 
-    def test_meta_configuration(self):
-        """Test if Meta is properly configured."""
-        assert MilestoneNode._meta.model == Milestone
-        expected_fields = {
+    def test_milestone_node_fields(self):
+        field_names = {field.name for field in MilestoneNode.__strawberry_definition__.fields}
+        expected_field_names = {
             "author",
             "body",
             "closed_issues_count",
@@ -24,7 +20,8 @@ class TestMilestoneNode:
             "organization_name",
             "progress",
             "repository_name",
+            "state",
             "title",
             "url",
         }
-        assert set(MilestoneNode._meta.fields) == expected_fields
+        assert field_names == expected_field_names

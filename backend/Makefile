@@ -1,7 +1,12 @@
-clean-backend:
+clean-backend-dependencies:
 	@rm -rf backend/.cache
 	@rm -rf backend/.local
 	@rm -rf backend/.venv
+
+clean-backend-docker:
+	@docker container rm -f nest-backend >/dev/null 2>&1 || true
+	@docker image rm -f docker-backend >/dev/null 2>&1 || true
+	@docker volume rm -f docker_backend-venv >/dev/null 2>&1 || true
 
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
@@ -9,7 +14,7 @@ exec-backend-command:
 exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
-exec-db-command:
+exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
 
 clear-cache:
@@ -135,7 +140,7 @@ purge-data:
 recreate-schema:
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
-	  	$(MAKE) exec-db-command 2>/dev/null
+	  	$(MAKE) exec-db-command-it 2>/dev/null
 	$(MAKE) migrate
 
 setup:
@@ -143,6 +148,9 @@ setup:
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
+
+shell-db:
+	@CMD="/bin/sh" $(MAKE) exec-db-command-it
 
 slack-sync-data:
 	@echo "Syncing Slack data"
@@ -161,7 +169,7 @@ test-backend:
 	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest
 
 update-backend-dependencies:
-	@CMD="poetry update" $(MAKE) exec-backend-command
+	@cd backend && poetry update
 
 update-data: \
 	github-update-owasp-organization \
@@ -173,4 +181,5 @@ update-data: \
 	owasp-aggregate-projects \
 	owasp-update-events \
 	owasp-sync-posts \
-	owasp-update-sponsors
+	owasp-update-sponsors \
+	slack-sync-data

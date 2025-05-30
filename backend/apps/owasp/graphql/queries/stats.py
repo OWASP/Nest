@@ -1,6 +1,6 @@
 """OWASP stats GraphQL queries."""
 
-import graphene
+import strawberry
 
 from apps.common.utils import round_down
 from apps.github.models.user import User
@@ -10,22 +10,13 @@ from apps.owasp.models.project import Project
 from apps.slack.models.workspace import Workspace
 
 
+@strawberry.type
 class StatsQuery:
     """Stats queries."""
 
-    stats_overview = graphene.Field(StatsNode)
-
-    def resolve_stats_overview(self, info) -> StatsNode:
-        """Resolve stats overview.
-
-        Args:
-            self: The StatsQuery instance.
-            info: GraphQL execution info.
-
-        Returns:
-            StatsNode: A node containing aggregated statistics.
-
-        """
+    @strawberry.field
+    def stats_overview(self) -> StatsNode:
+        """Resolve stats overview."""
         active_projects_stats = Project.active_projects_count()
         active_chapters_stats = Chapter.active_chapters_count()
         contributors_stats = User.objects.count()
@@ -46,7 +37,7 @@ class StatsQuery:
         return StatsNode(
             active_chapters_stats=round_down(active_chapters_stats, 10),
             active_projects_stats=round_down(active_projects_stats, 10),
-            contributors_stats=round_down(contributors_stats, 100),
+            contributors_stats=round_down(contributors_stats, 1000),
             countries_stats=round_down(countries_stats, 10),
-            slack_workspace_stats=round_down(slack_workspace_stats, 100),
+            slack_workspace_stats=round_down(slack_workspace_stats, 1000),
         )

@@ -1,4 +1,4 @@
-import { GoogleTagManager } from '@next/third-parties/google'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
@@ -67,12 +67,12 @@ export default function RootLayout({
       >
         <Providers>
           <Header />
-          <GoogleTagManager gtmId={GTM_ID} />
           {children}
           <Footer />
           <ScrollToTop />
         </Providers>
       </body>
+      <GoogleAnalytics gaId={GTM_ID} />
     </html>
   )
 }
