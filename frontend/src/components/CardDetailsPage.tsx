@@ -9,6 +9,7 @@ import {
   faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Link from 'next/link'
 import { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -35,6 +36,7 @@ const DetailsCard = ({
   details,
   socialLinks,
   type,
+  key,
   topContributors,
   languages,
   pullRequests,
@@ -47,6 +49,24 @@ const DetailsCard = ({
   geolocationData = null,
   repositories = [],
 }: DetailsCardProps) => {
+  const getDonationUrl = () => {
+    if (!key) return 'https://owasp.org/donate/'
+
+    let repoPrefix = ''
+    if (type === 'project') {
+      repoPrefix = 'www-project-'
+    } else if (type === 'chapter') {
+      repoPrefix = 'www-chapter-'
+    } else if (type === 'repository') {
+      repoPrefix = ''
+    }
+
+    const encodedTitle = encodeURIComponent(`OWASP ${title || ''}`)
+    return `https://owasp.org/donate/?reponame=${repoPrefix}${key}&title=${encodedTitle}`
+  }
+
+  const shouldShowSponsor = ['project', 'chapter', 'repository'].includes(type)
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -199,6 +219,26 @@ const DetailsCard = ({
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
+
+        {/* Sponsor Section */}
+        {shouldShowSponsor && (
+          <div className="mb-20 mt-8">
+            <SecondaryCard className="text-center">
+              <h3 className="mb-4 text-2xl font-semibold">Support Our Work</h3>
+              <p className="mb-6 text-gray-600 dark:text-gray-400">
+                Your contribution helps maintain and improve {title}. Support the OWASP community!
+              </p>
+              <Link
+                href={getDonationUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600"
+              >
+                Sponsor {type === 'chapter' ? 'Chapter' : type === 'project' ? 'Project' : 'Repository'}
+              </Link>
+            </SecondaryCard>
+          </div>
+        )}
       </div>
     </div>
   )
