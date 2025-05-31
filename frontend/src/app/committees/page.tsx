@@ -5,6 +5,7 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { CommitteeTypeAlgolia } from 'types/committee'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
+import PageLayout from 'components/PageLayout'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const CommitteesPage = () => {
@@ -51,19 +52,21 @@ const CommitteesPage = () => {
   }
 
   return (
-    <SearchPageLayout
-      currentPage={currentPage}
-      empty="No committees found"
-      indexName="committees"
-      isLoaded={isLoaded}
-      onPageChange={handlePageChange}
-      onSearch={handleSearch}
-      searchPlaceholder="Search for committees..."
-      searchQuery={searchQuery}
-      totalPages={totalPages}
-    >
-      {committees && committees.map(renderCommitteeCard)}
-    </SearchPageLayout>
+    <PageLayout bcItems={[{ title: 'Committees', href: '/committees' }]}>
+      <SearchPageLayout
+        currentPage={currentPage}
+        empty="No committees found"
+        indexName="committees"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for committees..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
+      >
+        {committees && committees.map(renderCommitteeCard)}
+      </SearchPageLayout>
+    </PageLayout>
   )
 }
 

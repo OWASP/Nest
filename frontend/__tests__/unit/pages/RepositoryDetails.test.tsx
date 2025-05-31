@@ -68,7 +68,8 @@ describe('RepositoryDetailsPage', () => {
     render(<RepositoryDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Repo')).toBeInTheDocument()
+      const title = screen.getByRole('heading', { name: 'Test Repo' })
+      expect(title).toBeInTheDocument()
       expect(screen.getByText('MIT')).toBeInTheDocument()
     })
     expect(screen.getByText('50K Stars')).toBeInTheDocument()
