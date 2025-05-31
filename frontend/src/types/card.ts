@@ -40,7 +40,7 @@ export interface DetailsCardProps {
   geolocationData?: GeoLocDataGraphQL | null
   heatmap?: JSX.Element
   is_active?: boolean
-  key?: string 
+  key?: string
   languages?: string[]
   pullRequests?: ItemCardPullRequests[]
   recentIssues?: ProjectIssuesType[]
