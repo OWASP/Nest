@@ -1,9 +1,13 @@
+"""Tests for the clear_cache Django management command."""
+
 import pytest
 from django.core.cache import cache
 from django.core.management import call_command
 
 
 class TestClearCacheCommand:
+    """Test suite for the clear_cache management command."""
+
     @pytest.fixture(autouse=True)
     def _setup_cache(self):
         cache.clear()
@@ -35,7 +39,6 @@ class TestClearCacheCommand:
         self._assert_cache_no_data(test_data)
 
     def test_clear_cache_command_empty_cache(self):
-        cache.clear()
         assert cache.get("any_key") is None
 
         call_command("clear_cache")
