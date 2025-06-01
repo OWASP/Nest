@@ -37,8 +37,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         batch_size = options["batch_size"]
-        delay = options["delay"]
         channel_id = options["channel_id"]
+        delay = options["delay"]
         include_threads = True
 
         workspaces = Workspace.objects.all()
@@ -56,16 +56,16 @@ class Command(BaseCommand):
             client = WebClient(token=bot_token)
 
             conversations = (
-                [Conversation.objects.get(slack_channel_id=channel_id)]
+                Conversation.objects.filter(slack_channel_id=channel_id)
                 if channel_id
                 else Conversation.objects.filter(workspace=workspace)
             )
 
             for conversation in conversations:
                 self._fetch_messages_for_conversation(
+                    batch_size=batch_size,
                     client=client,
                     conversation=conversation,
-                    batch_size=batch_size,
                     delay=delay,
                     include_threads=include_threads,
                 )
