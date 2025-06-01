@@ -1,35 +1,23 @@
 import pytest
 from django.core.cache import cache
 from django.core.management import call_command
-from django.test import override_settings
 
 
 class TestClearCacheCommand:
-    TEST_CACHE_SETTINGS = {
-        "CACHES": {
-            "default": {
-                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-                "LOCATION": "test-cache",
-            },
-        },
-    }
-
     @pytest.fixture(autouse=True)
-    @override_settings(**TEST_CACHE_SETTINGS)
-    def setup_cache(self):
+    def _setup_cache(self):
         cache.clear()
         yield
         cache.clear()
 
-    def assert_cache_keys_exist(self, keys_values):
-        for key, expected_value in keys_values.items():
+    def _assert_cache_data(self, data):
+        for key, expected_value in data.items():
             assert cache.get(key) == expected_value
 
-    def assert_cache_keys_none(self, keys):
-        for key in keys:
+    def _assert_cache_no_data(self, data):
+        for key in data:
             assert cache.get(key) is None
 
-    @override_settings(**TEST_CACHE_SETTINGS)
     def test_clear_cache_command(self):
         test_data = {
             "test_key_1": "test_value_1",
@@ -40,13 +28,12 @@ class TestClearCacheCommand:
         for key, value in test_data.items():
             cache.set(key, value)
 
-        self.assert_cache_keys_exist(test_data)
+        self._assert_cache_data(test_data)
 
         call_command("clear_cache")
 
-        self.assert_cache_keys_none(test_data.keys())
+        self._assert_cache_no_data(test_data)
 
-    @override_settings(**TEST_CACHE_SETTINGS)
     def test_clear_cache_command_empty_cache(self):
         cache.clear()
         assert cache.get("any_key") is None
@@ -55,8 +42,7 @@ class TestClearCacheCommand:
 
         assert cache.get("any_key") is None
 
-    @override_settings(**TEST_CACHE_SETTINGS)
-    def test_clear_cache_command_with_timeout_keys(self):
+    def test_clear_cache_command_timeout(self):
         cache.set("timeout_key", "timeout_value", timeout=3600)
         assert cache.get("timeout_key") == "timeout_value"
 
