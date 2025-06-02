@@ -7,7 +7,6 @@ from apps.nest.models.user import User
 
 class UserAdmin(admin.ModelAdmin):
     search_fields = ("username",)
-    list_display = ("github_id",)
     ordering = ("username",)
 
 

@@ -46,8 +46,8 @@ class Base(Configuration):
         "apps.common",
         "apps.core",
         "apps.github",
-        "apps.owasp",
         "apps.nest",
+        "apps.owasp",
         "apps.slack",
     )
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
