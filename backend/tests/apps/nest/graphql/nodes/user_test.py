@@ -3,9 +3,9 @@ from apps.nest.graphql.nodes.user import AuthUserNode
 
 def test_auth_user_node_configuration():
     """Test user node configuration."""
-    assert AuthUserNode._type_definition.name == "AuthUserNode"
+    assert AuthUserNode.__strawberry_definition__.name == "AuthUserNode"
 
-    fields = {f.name: f for f in AuthUserNode._type_definition.fields}
+    fields = {f.name: f for f in AuthUserNode.__strawberry_definition__.fields}
     assert "username" in fields
 
     username_field = fields["username"]
