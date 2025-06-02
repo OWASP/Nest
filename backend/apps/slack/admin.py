@@ -13,9 +13,7 @@ class ConversationAdmin(admin.ModelAdmin):
         "name",
         "slack_channel_id",
         "created_at",
-        "is_private",
-        "is_archived",
-        "is_general",
+        "total_members_count",
     )
     search_fields = (
         "name",
