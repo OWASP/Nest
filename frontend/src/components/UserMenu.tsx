@@ -3,11 +3,12 @@
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Skeleton } from '@heroui/react'
 import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
+import { currentStatus } from 'utils/constants'
 
 export default function UserMenu() {
   const { data: session, status } = useSession()
 
-  if (status === 'loading') {
+  if (status === currentStatus.loading) {
     return (
       <div className="flex h-10 w-10 items-center justify-center">
         <Skeleton className="h-10 w-10 rounded-full" />

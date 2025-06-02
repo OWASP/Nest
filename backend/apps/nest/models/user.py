@@ -17,6 +17,14 @@ class User(AbstractUser):
             models.Index(fields=["username"]),
         ]
 
+    email = models.EmailField(
+        max_length=255,
+        unique=True,
+        verbose_name="Email",
+        blank=True,
+        null=True,
+    )
+
     github_id = models.CharField(
         max_length=255,
         unique=True,

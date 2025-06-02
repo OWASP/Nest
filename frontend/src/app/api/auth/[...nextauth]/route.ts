@@ -2,7 +2,12 @@ import { gql } from '@apollo/client'
 import NextAuth from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
-import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, NEXTAUTH_SECRET } from 'utils/credentials'
+import {
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  NEXTAUTH_SECRET,
+  NEXTAUTH_URL,
+} from 'utils/credentials'
 
 const authOptions = {
   providers: [
@@ -55,6 +60,7 @@ const authOptions = {
     },
   },
   secret: NEXTAUTH_SECRET,
+  url: NEXTAUTH_URL,
 }
 
 const handler = NextAuth(authOptions)
