@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0034_alter_chapter_leaders_and_more'),
+        ("owasp", "0034_alter_chapter_leaders_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='projecthealthmetrics',
-            old_name='total_pull_request_count',
-            new_name='total_pull_requests_count',
+            model_name="projecthealthmetrics",
+            old_name="total_pull_request_count",
+            new_name="total_pull_requests_count",
         ),
     ]
