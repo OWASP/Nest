@@ -72,7 +72,7 @@ class TestProjectHealthMetricsModel:
             ("recent_releases_count", 0),
             ("stars_count", 0),
             ("total_issues_count", 0),
-            ("total_pull_request_count", 0),
+            ("total_pull_requests_count", 0),
             ("total_releases_count", 0),
             ("unanswered_issues_count", 0),
             ("unassigned_issues_count", 0),
