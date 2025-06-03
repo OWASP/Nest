@@ -17,6 +17,7 @@ class Command(BaseCommand):
             "contributors_count": "contributors_count",
             "created_at": "created_at",
             "forks_count": "forks_count",
+            "is_funding_requirements_compliant": "is_funding_requirements_compliant",
             "last_released_at": "released_at",
             "last_committed_at": "pushed_at",
             "open_issues_count": "open_issues_count",
@@ -40,7 +41,6 @@ class Command(BaseCommand):
 
                 # Update metrics based on requirements
                 # TODO(ahmedxgouda): update from owasp page: owasp_page_last_updated_at
-                # TODO(ahmedxgouda): update is_funding_requirements_compliant,
                 # TODO(ahmedxgouda): add score
                 for metric_field, project_field in field_mappings.items():
                     value = getattr(project, project_field)

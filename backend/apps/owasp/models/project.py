@@ -143,6 +143,19 @@ class Project(
         return self.type == self.ProjectType.DOCUMENTATION
 
     @property
+    def is_funding_requirements_compliant(self) -> bool:
+        """Indicate whether project is compliant with funding requirements."""
+        total_repos = self.repositories.count()
+        if total_repos == 0:
+            return True
+
+        compliant_repos = self.repositories.filter(
+            is_funding_policy_compliant=True,
+        ).count()
+
+        return compliant_repos == total_repos
+
+    @property
     def is_tool_type(self) -> bool:
         """Indicate whether project has TOOL type."""
         return self.type == self.ProjectType.TOOL
