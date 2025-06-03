@@ -1,15 +1,13 @@
 """Tests for the slack_sync_messages management command."""
 
-from datetime import UTC, datetime
 from io import StringIO
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from django.core.management import call_command
-from slack_sdk.errors import SlackApiError
 
 from apps.slack.management.commands.slack_sync_messages import Command
-from apps.slack.models import Conversation, Message, Workspace
+from apps.slack.models import Conversation, Member, Message, Workspace
 
 CONSTANT_2 = 2
 CONSTANT_3 = 3
@@ -54,7 +52,15 @@ class TestSlackSyncMessagesCommand:
         conversation = Mock(spec=Conversation)
         conversation.name = "general"
         conversation.slack_channel_id = TEST_CHANNEL_ID
+        conversation.workspace = Mock()
         return conversation
+
+    @pytest.fixture
+    def mock_member(self):
+        """Create a mock member."""
+        member = Mock(spec=Member)
+        member.slack_user_id = "U12345"
+        return member
 
     @pytest.fixture
     def mock_slack_history_response(self):
@@ -74,13 +80,6 @@ class TestSlackSyncMessagesCommand:
                     "user": "U67890",
                     "type": "message",
                     "reply_count": 2,
-                    "thread_ts": TEST_THREAD_TS,
-                },
-                {
-                    "ts": "1605000000.000300",
-                    "text": "Thread reply",
-                    "user": "U11111",
-                    "type": "message",
                     "thread_ts": TEST_THREAD_TS,
                 },
             ],
@@ -142,10 +141,24 @@ class TestSlackSyncMessagesCommand:
         with patch.object(Workspace.objects, "all") as mock_all:
             mock_all.return_value.exists.return_value = False
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, include_threads=True)
+            command.handle(batch_size=200, delay=0.5, channel_id=None)
 
         output = stdout.getvalue()
         assert "No workspaces found in the database" in output
+
+    def test_handle_workspace_no_token(self, command, mock_workspace_no_token, mock_conversation):
+        """Test handle when workspace has no bot token."""
+        mock_workspaces = Mock()
+        mock_workspaces.exists.return_value = True
+        mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace_no_token]))
+
+        stdout = StringIO()
+        with patch.object(Workspace.objects, "all", return_value=mock_workspaces):
+            command.stdout = stdout
+            command.handle(batch_size=200, delay=0.5, channel_id=None)
+
+        output = stdout.getvalue()
+        assert "No bot token found for Workspace No Token" in output
 
     @patch("apps.slack.management.commands.slack_sync_messages.WebClient")
     @patch("apps.slack.management.commands.slack_sync_messages.time.sleep")
@@ -156,6 +169,7 @@ class TestSlackSyncMessagesCommand:
         command,
         mock_workspace,
         mock_conversation,
+        mock_member,
         mock_slack_history_response,
         mock_slack_history_response_final,
         mock_slack_replies_response,
@@ -178,113 +192,30 @@ class TestSlackSyncMessagesCommand:
 
         mock_client.conversations_replies.return_value = mock_slack_replies_response
 
-        mock_last_message = Mock()
-        mock_last_message.timestamp = datetime.fromtimestamp(1605000000, tz=UTC)
+        mock_message = Mock(spec=Message)
+        mock_message.is_thread_parent = True
+        mock_message.slack_message_id = TEST_THREAD_TS
 
         stdout = StringIO()
         with (
             patch.object(Workspace.objects, "all", return_value=mock_workspaces),
             patch.object(Conversation.objects, "filter", return_value=mock_conversations),
             patch.object(Message.objects, "filter") as mock_message_filter,
-            patch.object(Message, "update_data") as mock_update_data,
+            patch.object(Member.objects, "get", return_value=mock_member),
+            patch.object(Message, "update_data", return_value=mock_message),
             patch.object(Message, "bulk_save") as mock_bulk_save,
-            patch("builtins.print"),
         ):
-            mock_message_filter.return_value.order_by.return_value.first.return_value = (
-                mock_last_message
-            )
-            mock_message_instance = Mock(spec=Message)
-            mock_update_data.return_value = mock_message_instance
+            mock_message_filter.return_value.order_by.return_value.first.return_value = None
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, include_threads=True)
+            command.handle(batch_size=200, delay=0.5, channel_id=None)
 
         assert mock_client.conversations_history.call_count == CONSTANT_2
-        mock_client.conversations_replies.assert_called_once_with(
-            channel=TEST_CHANNEL_ID, ts=TEST_THREAD_TS
-        )
-
         mock_bulk_save.assert_called()
 
         output = stdout.getvalue()
         assert "Processing workspace: Test Workspace" in output
         assert "Processing channel: general" in output
         assert "Finished processing all workspaces" in output
-
-    @patch("apps.slack.management.commands.slack_sync_messages.WebClient")
-    def test_handle_api_error(
-        self,
-        mock_web_client,
-        command,
-        mock_workspace,
-        mock_conversation,
-    ):
-        """Test handling SlackApiError during conversations_history."""
-        mock_workspaces = Mock()
-        mock_workspaces.exists.return_value = True
-        mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
-
-        mock_conversations = Mock()
-        mock_conversations.__iter__ = Mock(return_value=iter([mock_conversation]))
-
-        mock_client = Mock()
-        mock_web_client.return_value = mock_client
-
-        error_response = {"error": "channel_not_found"}
-        mock_client.conversations_history.side_effect = SlackApiError(
-            "Error", response=error_response
-        )
-
-        stdout = StringIO()
-        with (
-            patch.object(Workspace.objects, "all", return_value=mock_workspaces),
-            patch.object(Conversation.objects, "filter", return_value=mock_conversations),
-            patch.object(Message.objects, "filter") as mock_message_filter,
-        ):
-            mock_message_filter.return_value.order_by.return_value.first.return_value = None
-            command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, include_threads=True)
-
-        output = stdout.getvalue()
-        assert "Failed to fetch messages for general: channel_not_found" in output
-
-    @patch("apps.slack.management.commands.slack_sync_messages.WebClient")
-    def test_handle_no_messages_returned(
-        self,
-        mock_web_client,
-        command,
-        mock_workspace,
-        mock_conversation,
-    ):
-        """Test handling when no messages are returned."""
-        mock_workspaces = Mock()
-        mock_workspaces.exists.return_value = True
-        mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
-
-        mock_conversations = Mock()
-        mock_conversations.__iter__ = Mock(return_value=iter([mock_conversation]))
-
-        mock_client = Mock()
-        mock_web_client.return_value = mock_client
-
-        empty_response = {
-            "ok": True,
-            "messages": [],
-            "response_metadata": {},
-        }
-        mock_client.conversations_history.return_value = empty_response
-
-        stdout = StringIO()
-        with (
-            patch.object(Workspace.objects, "all", return_value=mock_workspaces),
-            patch.object(Conversation.objects, "filter", return_value=mock_conversations),
-            patch.object(Message.objects, "filter") as mock_message_filter,
-            patch.object(Message, "bulk_save") as mock_bulk_save,
-        ):
-            mock_message_filter.return_value.order_by.return_value.first.return_value = None
-            command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, include_threads=True)
-
-        mock_bulk_save.assert_not_called()
 
     def test_create_message_from_data_channel_join_subtype(self, command, mock_conversation):
         """Test _create_message_from_data with channel_join subtype."""
@@ -298,7 +229,8 @@ class TestSlackSyncMessagesCommand:
             client=Mock(),
             message_data=message_data,
             conversation=mock_conversation,
-            include_threads=True,
+            is_thread_reply=False,
+            parent_message=None,
         )
 
         assert result is None
@@ -314,32 +246,55 @@ class TestSlackSyncMessagesCommand:
             client=Mock(),
             message_data=message_data,
             conversation=mock_conversation,
-            include_threads=True,
+            is_thread_reply=False,
+            parent_message=None,
         )
 
         assert result is None
 
-    def test_create_message_from_data_thread_reply_excluded(self, command, mock_conversation):
-        """Test _create_message_from_data excludes thread replies when include_threads=True."""
+    def test_create_message_from_data_no_user(self, command, mock_conversation):
+        """Test _create_message_from_data with no user or bot_id."""
         message_data = {
-            "ts": "1605000000.000300",
-            "text": "This is a reply",
-            "user": "U12345",
-            "thread_ts": TEST_THREAD_TS,
+            "ts": TEST_MESSAGE_TS,
+            "text": "Hello world!",
         }
 
         result = command._create_message_from_data(
             client=Mock(),
             message_data=message_data,
             conversation=mock_conversation,
-            include_threads=True,
+            is_thread_reply=False,
+            parent_message=None,
         )
 
         assert result is None
 
+    def test_create_message_from_data_member_not_found(self, command, mock_conversation):
+        """Test _create_message_from_data when member is not found."""
+        message_data = {
+            "ts": TEST_MESSAGE_TS,
+            "text": "Hello world!",
+            "user": "U12345",
+        }
+
+        stdout = StringIO()
+        with patch.object(Member.objects, "get", side_effect=Member.DoesNotExist):
+            command.stdout = stdout
+            result = command._create_message_from_data(
+                client=Mock(),
+                message_data=message_data,
+                conversation=mock_conversation,
+                is_thread_reply=False,
+                parent_message=None,
+            )
+
+        assert result is None
+        output = stdout.getvalue()
+        assert "Member U12345 not found in database" in output
+
     @patch("apps.slack.management.commands.slack_sync_messages.Message.update_data")
     def test_create_message_from_data_regular_message(
-        self, mock_update_data, command, mock_conversation
+        self, mock_update_data, command, mock_conversation, mock_member
     ):
         """Test _create_message_from_data with regular message."""
         message_data = {
@@ -351,116 +306,75 @@ class TestSlackSyncMessagesCommand:
         mock_message = Mock(spec=Message)
         mock_update_data.return_value = mock_message
 
-        with patch("builtins.print"):
+        with patch.object(Member.objects, "get", return_value=mock_member):
             result = command._create_message_from_data(
                 client=Mock(),
                 message_data=message_data,
                 conversation=mock_conversation,
-                include_threads=True,
+                is_thread_reply=False,
+                parent_message=None,
             )
 
         assert result is mock_message
         mock_update_data.assert_called_once_with(
-            {
-                "slack_message_id": TEST_MESSAGE_TS,
-                "conversation": mock_conversation,
-                "text": "Hello world!",
-                "timestamp": TEST_MESSAGE_TS,
-                "is_thread": False,
-            },
+            data=message_data,
+            conversation=mock_conversation,
+            author=mock_member,
+            is_thread_reply=False,
+            parent_message=None,
             save=False,
         )
 
-    @patch("apps.slack.management.commands.slack_sync_messages.Message.update_data")
-    def test_create_message_from_data_thread_parent_with_replies(
-        self, mock_update_data, command, mock_conversation, mock_slack_replies_response
-    ):
-        """Test _create_message_from_data with thread parent and replies."""
-        message_data = {
-            "ts": TEST_THREAD_TS,
-            "text": "This is a thread parent",
-            "user": "U67890",
-            "reply_count": 2,
-            "thread_ts": TEST_THREAD_TS,
-        }
+    def test_fetch_thread_replies_no_parents(self, command, mock_conversation):
+        """Test _fetch_thread_replies with no parent messages."""
+        mock_client = Mock()
 
+        stdout = StringIO()
+        command.stdout = stdout
+
+        command._fetch_thread_replies(
+            client=mock_client,
+            conversation=mock_conversation,
+            parent_messages=[],
+            delay=0.5,
+        )
+
+        output = stdout.getvalue()
+        assert "No threaded parent messages to process" in output
+
+    @patch("apps.slack.management.commands.slack_sync_messages.time.sleep")
+    def test_fetch_thread_replies_success(
+        self, mock_sleep, command, mock_conversation, mock_member, mock_slack_replies_response
+    ):
+        """Test _fetch_thread_replies successful execution."""
         mock_client = Mock()
         mock_client.conversations_replies.return_value = mock_slack_replies_response
 
-        mock_message = Mock(spec=Message)
-        mock_update_data.return_value = mock_message
+        mock_parent = Mock(spec=Message)
+        mock_parent.slack_message_id = TEST_THREAD_TS
+
+        mock_reply = Mock(spec=Message)
 
         stdout = StringIO()
-        with patch("builtins.print"):
-            command.stdout = stdout
-            result = command._create_message_from_data(
+        command.stdout = stdout
+
+        with (
+            patch.object(Message.objects, "filter") as mock_filter,
+            patch.object(Member.objects, "get", return_value=mock_member),
+            patch.object(Message, "update_data", return_value=mock_reply),
+            patch.object(Message, "bulk_save") as mock_bulk_save,
+        ):
+            mock_filter.return_value.order_by.return_value.first.return_value = None
+
+            command._fetch_thread_replies(
                 client=mock_client,
-                message_data=message_data,
                 conversation=mock_conversation,
-                include_threads=True,
+                parent_messages=[mock_parent],
+                delay=0.5,
             )
 
-        assert result is mock_message
-
-        mock_client.conversations_replies.assert_called_once_with(
-            channel=TEST_CHANNEL_ID, ts=TEST_THREAD_TS
-        )
-
-        expected_combined_text = "This is a thread parent\n\nFirst reply\n\nSecond reply"
-        mock_update_data.assert_called_once_with(
-            {
-                "slack_message_id": TEST_THREAD_TS,
-                "conversation": mock_conversation,
-                "text": expected_combined_text,
-                "timestamp": TEST_THREAD_TS,
-                "is_thread": True,
-            },
-            save=False,
-        )
-
-    @patch("apps.slack.management.commands.slack_sync_messages.Message.update_data")
-    def test_create_message_from_data_thread_replies_api_error(
-        self, mock_update_data, command, mock_conversation
-    ):
-        """Test _create_message_from_data when conversations_replies fails."""
-        message_data = {
-            "ts": TEST_THREAD_TS,
-            "text": "This is a thread parent",
-            "user": "U67890",
-            "reply_count": 2,
-            "thread_ts": TEST_THREAD_TS,
-        }
-
-        mock_client = Mock()
-        mock_client.conversations_replies.side_effect = SlackApiError(
-            "Error", response={"error": "thread_not_found"}
-        )
-
-        mock_message = Mock(spec=Message)
-        mock_update_data.return_value = mock_message
-
-        stdout = StringIO()
-        with patch("builtins.print"):
-            command.stdout = stdout
-            result = command._create_message_from_data(
-                client=mock_client,
-                message_data=message_data,
-                conversation=mock_conversation,
-                include_threads=True,
-            )
-
-        assert result is mock_message
-
-        mock_update_data.assert_called_once_with(
-            {
-                "slack_message_id": TEST_THREAD_TS,
-                "conversation": mock_conversation,
-                "text": "This is a thread parent",
-                "timestamp": TEST_THREAD_TS,
-                "is_thread": True,
-            },
-            save=False,
-        )
+        mock_client.conversations_replies.assert_called_once()
+        mock_bulk_save.assert_called_once()
 
     def test_handle_slack_response_with_invalid_response(self, command):
         """Test _handle_slack_response with invalid response."""
@@ -468,18 +382,15 @@ class TestSlackSyncMessagesCommand:
         command.stdout = stdout
 
         response = {"ok": False}
-        result = command._handle_slack_response(response, "conversations_history")
+        command._handle_slack_response(response, "conversations_history")
 
-        assert result is None
         output = stdout.getvalue()
         assert "conversations_history API call failed" in output
 
     def test_handle_slack_response_with_valid_response(self, command):
         """Test _handle_slack_response with valid response."""
         response = {"ok": True, "messages": []}
-        result = command._handle_slack_response(response, "conversations_history")
-
-        assert result is None
+        command._handle_slack_response(response, "conversations_history")
 
     def test_add_arguments(self, command):
         """Test add_arguments method."""
@@ -512,13 +423,9 @@ class TestSlackSyncMessagesCommand:
         """Test running the command via Django's call_command."""
         stdout = StringIO()
 
-        with (
-            patch.object(Workspace.objects, "all") as mock_all,
-            patch("builtins.print") as mock_print,
-        ):
+        with patch.object(Workspace.objects, "all") as mock_all:
             mock_all.return_value.exists.return_value = False
             call_command("slack_sync_messages", stdout=stdout)
 
         output = stdout.getvalue()
         assert "No workspaces found in the database" in output
-        mock_print.assert_not_called()

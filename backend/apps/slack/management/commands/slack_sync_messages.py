@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-from apps.slack.models import Conversation, Message, Workspace
+from apps.slack.models import Conversation, Member, Message, Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -85,48 +85,18 @@ class Command(BaseCommand):
         self.stdout.write(f"\nProcessing channel: {conversation.name}")
 
         try:
-            last_message = (
-                Message.objects.filter(conversation=conversation).order_by("-timestamp").first()
-            )
-            oldest = (
-                str(last_message.timestamp.timestamp())
-                if last_message and last_message.timestamp
-                else None
+            parent_messages = self._fetch_parent_messages(
+                client=client, conversation=conversation, batch_size=batch_size, delay=delay
             )
 
-            cursor = None
-            has_more = True
-
-            while has_more:
-                response = client.conversations_history(
-                    channel=conversation.slack_channel_id,
-                    cursor=cursor,
-                    limit=batch_size,
-                    oldest=oldest,
+            if include_threads:
+                self.stdout.write("Fetching thread replies...")
+                self._fetch_thread_replies(
+                    client=client,
+                    conversation=conversation,
+                    parent_messages=parent_messages,
+                    delay=delay,
                 )
-                self._handle_slack_response(response, "conversations_history")
-                messages_data = response.get("messages", [])
-
-                messages = [
-                    message
-                    for message_data in messages_data
-                    if (
-                        message := self._create_message_from_data(
-                            client, message_data, conversation, include_threads=include_threads
-                        )
-                    )
-                ]
-
-                messages_count = len(messages)
-                if messages:
-                    Message.bulk_save(messages)
-                    self.stdout.write(f"Saved {messages_count} messages")
-
-                cursor = response.get("response_metadata", {}).get("next_cursor")
-                has_more = bool(cursor)
-
-                if delay and has_more:
-                    time.sleep(delay)
 
             self.stdout.write(
                 self.style.SUCCESS(f"Finished processing messages from {conversation.name}")
@@ -139,72 +109,193 @@ class Command(BaseCommand):
                 )
             )
 
+    def _fetch_parent_messages(
+        self, client: WebClient, conversation: Conversation, batch_size: int, delay: float
+    ) -> list[Message]:
+        """Fetch all parent messages (non-thread) for a conversation."""
+        cursor = None
+        has_more = True
+        batch_messages = []
+        all_threaded_parents = []
+
+        last_message = (
+            Message.objects.filter(conversation=conversation).order_by("-timestamp").first()
+        )
+        oldest = last_message.timestamp.timestamp() if last_message else None
+
+        while has_more:
+            try:
+                response = client.conversations_history(
+                    channel=conversation.slack_channel_id,
+                    cursor=cursor,
+                    limit=batch_size,
+                    oldest=oldest,
+                )
+                self._handle_slack_response(response, "conversations_history")
+
+                for message_data in response.get("messages", []):
+                    if message_data.get("thread_ts") and message_data.get(
+                        "ts"
+                    ) != message_data.get("thread_ts"):
+                        continue
+
+                    message = self._create_message_from_data(
+                        client=client,
+                        message_data=message_data,
+                        conversation=conversation,
+                        is_thread_reply=False,
+                        parent_message=None,
+                    )
+
+                    if message:
+                        batch_messages.append(message)
+                        if message.is_thread_parent:
+                            all_threaded_parents.append(message)
+
+                if batch_messages:
+                    Message.bulk_save(batch_messages)
+                    self.stdout.write(f"Saved {len(batch_messages)} parent messages")
+                    batch_messages = []
+
+                cursor = response.get("response_metadata", {}).get("next_cursor")
+                has_more = bool(cursor)
+
+                if delay and has_more:
+                    time.sleep(delay)
+
+            except SlackApiError as e:
+                self.stdout.write(
+                    self.style.ERROR(f"Error fetching messages: {e.response['error']}")
+                )
+                break
+
+        return all_threaded_parents
+
+    def _fetch_thread_replies(
+        self,
+        client: WebClient,
+        conversation: Conversation,
+        parent_messages: list[Message],
+        delay: float,
+    ):
+        """Fetch all thread replies for parent messages."""
+        if not parent_messages:
+            self.stdout.write("No threaded parent messages to process")
+            return
+
+        replies_to_save = []
+
+        self.stdout.write(f"Processing {len(parent_messages)} threaded parent messages")
+
+        for parent_message in parent_messages:
+            try:
+                latest_reply = (
+                    Message.objects.filter(
+                        conversation=conversation,
+                        parent_message=parent_message,
+                    )
+                    .order_by("-timestamp")
+                    .first()
+                )
+                oldest_ts = latest_reply.timestamp.timestamp() if latest_reply else None
+
+                cursor = None
+                has_more = True
+                thread_reply_count = 0
+
+                while has_more:
+                    params = {
+                        "channel": conversation.slack_channel_id,
+                        "ts": parent_message.slack_message_id,
+                        "cursor": cursor,
+                        "limit": 100,
+                        "inclusive": True,
+                    }
+                    if oldest_ts:
+                        params["oldest"] = str(oldest_ts)
+
+                    response = client.conversations_replies(**params)
+                    self._handle_slack_response(response, "conversations_replies")
+
+                    messages_in_response = response.get("messages", [])
+                    if not messages_in_response:
+                        break
+
+                    for reply_data in messages_in_response[1:]:
+                        reply = self._create_message_from_data(
+                            client=client,
+                            message_data=reply_data,
+                            conversation=conversation,
+                            is_thread_reply=True,
+                            parent_message=parent_message,
+                        )
+                        if reply:
+                            replies_to_save.append(reply)
+                            thread_reply_count += 1
+
+                    cursor = response.get("response_metadata", {}).get("next_cursor")
+                    has_more = bool(cursor)
+
+                    if delay and has_more:
+                        time.sleep(delay)
+
+            except SlackApiError:
+                self.stdout.write(self.style.ERROR("Failed to fetch thread replies for message"))
+
+        if replies_to_save:
+            batch_size = 1000
+            for i in range(0, len(replies_to_save), batch_size):
+                batch = replies_to_save[i : i + batch_size]
+                Message.bulk_save(batch)
+
     def _create_message_from_data(
         self,
         client: WebClient,
         message_data: dict,
         conversation: Conversation,
         *,
-        include_threads: bool,
+        is_thread_reply: bool,
+        parent_message: Message | None = None,
     ) -> Message | None:
-        """Create Message instance from Slack API data."""
+        """Create Message instance using from_slack pattern."""
         try:
-            if message_data.get("subtype") in ["channel_join", "channel_leave"]:
+            if message_data.get("subtype") in ["channel_join", "channel_leave", "bot_message"]:
                 return None
-
-            if (
-                not message_data.get("text")
-                and not message_data.get("attachments")
-                and not message_data.get("files")
+            if not any(
+                [
+                    message_data.get("text"),
+                    message_data.get("attachments"),
+                    message_data.get("files"),
+                    message_data.get("blocks"),
+                ]
             ):
                 return None
 
-            message_ts = message_data.get("ts")
-            thread_ts = message_data.get("thread_ts")
-
-            is_actual_thread_parent = message_data.get("reply_count", 0) > 0
-            is_reply_in_thread = thread_ts is not None and thread_ts != message_ts
-
-            if include_threads and is_reply_in_thread:
+            slack_user_id = message_data.get("user") or message_data.get("bot_id")
+            if not slack_user_id:
                 return None
 
-            message_dict = {
-                "slack_message_id": message_ts,
-                "conversation": conversation,
-                "text": message_data.get("text", ""),
-                "timestamp": message_ts,
-                "is_thread": is_actual_thread_parent,
-            }
+            try:
+                author = Member.objects.get(
+                    slack_user_id=slack_user_id, workspace=conversation.workspace
+                )
+            except Member.DoesNotExist:
+                self.stdout.write(
+                    self.style.WARNING(f"Member {slack_user_id} not found in database")
+                )
+                return None
 
-            if include_threads and is_actual_thread_parent:
-                try:
-                    thread_response = client.conversations_replies(
-                        channel=conversation.slack_channel_id,
-                        ts=message_ts,
-                    )
-                    self._handle_slack_response(thread_response, "conversations_replies")
+            return Message.update_data(
+                data=message_data,
+                conversation=conversation,
+                author=author,
+                is_thread_reply=is_thread_reply,
+                parent_message=parent_message,
+                save=False,
+            )
 
-                    if thread_response.get("ok"):
-                        api_thread_messages = thread_response.get("messages", [])
-                        current_parent_text = message_dict.get("text", "")
-                        combined_text_list = [current_parent_text]
-
-                        reply_texts = [
-                            reply_msg_data.get("text", "")
-                            for reply_msg_data in api_thread_messages[1:]
-                            if reply_msg_data.get("text", "")
-                        ]
-                        combined_text_list.extend(reply_texts)
-
-                        message_dict["text"] = "\n\n".join(filter(None, combined_text_list))
-
-                except SlackApiError:
-                    logger.warning("Failed to fetch thread replies")
-
-            return Message.update_data(message_dict, save=False)
-
-        except KeyError:
-            logger.warning("Invalid message data")
+        except Exception:
+            logger.exception("Error creating message from data")
             return None
 
     def _handle_slack_response(self, response, api_method):

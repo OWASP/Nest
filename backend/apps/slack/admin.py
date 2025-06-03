@@ -135,7 +135,8 @@ class MessageAdmin(admin.ModelAdmin):
     )
     list_display = (
         "text",
-        "is_thread",
+        "is_thread_parent",
+        "author",
     )
 
 
