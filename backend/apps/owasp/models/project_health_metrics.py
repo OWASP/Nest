@@ -51,7 +51,7 @@ class ProjectHealthMetrics(TimestampedModel):
     )
     stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)
     total_issues_count = models.PositiveIntegerField(verbose_name="Total issues", default=0)
-    total_pull_request_count = models.PositiveIntegerField(
+    total_pull_requests_count = models.PositiveIntegerField(
         verbose_name="Total pull requests", default=0
     )
     total_releases_count = models.PositiveIntegerField(verbose_name="Total releases", default=0)

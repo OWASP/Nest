@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import datetime
 from functools import lru_cache
 
 from django.db import models
+from django.utils import timezone
 
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -17,6 +19,8 @@ from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
+
+RECENT_RELEASES_PERIOD = timezone.now() - datetime.timedelta(days=60)
 
 
 class Project(
@@ -155,6 +159,11 @@ class Project(
         )
 
     @property
+    def issues_count(self) -> int:
+        """Return count of issues."""
+        return self.issues.count()
+
+    @property
     def nest_key(self) -> str:
         """Get Nest key."""
         return self.key.replace("www-project-", "")
@@ -163,6 +172,11 @@ class Project(
     def nest_url(self) -> str:
         """Get Nest URL for project."""
         return get_absolute_url(f"projects/{self.nest_key}")
+
+    @property
+    def leaders_count(self) -> int:
+        """Return the count of leaders."""
+        return len(self.leaders_raw)
 
     @property
     def open_issues(self):
@@ -174,6 +188,11 @@ class Project(
         )
 
     @property
+    def open_pull_requests_count(self) -> int:
+        """Return count of open pull requests."""
+        return self.pull_requests.filter(state="open").count()
+
+    @property
     def pull_requests(self):
         """Return pull requests."""
         return PullRequest.objects.filter(
@@ -181,6 +200,18 @@ class Project(
         ).select_related(
             "repository",
         )
+
+    @property
+    def pull_requests_count(self) -> int:
+        """Return count of pull requests."""
+        return self.pull_requests.count()
+
+    @property
+    def pull_request_last_created_at(self) -> datetime.datetime | None:
+        """Return last created pull request."""
+        if pull_request := self.pull_requests.order_by("-created_at").first():
+            return pull_request.created_at
+        return None
 
     @property
     def published_releases(self):
@@ -201,6 +232,23 @@ class Project(
         ).select_related(
             "repository",
         )
+
+    @property
+    def recent_releases_count(self) -> int:
+        """Return count of recent releases per a specific period."""
+        return self.published_releases.filter(
+            published_at__gte=RECENT_RELEASES_PERIOD,
+        ).count()
+
+    @property
+    def unanswered_issues_count(self) -> int:
+        """Return count of unanswered issues."""
+        return self.issues.filter(comments_count=0).count()
+
+    @property
+    def unassigned_issues_count(self) -> int:
+        """Return count of unassigned issues."""
+        return self.issues.filter(assignees__isnull=True).count()
 
     def deactivate(self) -> None:
         """Deactivate project."""

@@ -5,6 +5,8 @@ from django.core.management.base import BaseCommand
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
+MINIMUM_LEADERS = 3
+
 
 class Command(BaseCommand):
     help = "Update OWASP project health metrics."
@@ -15,8 +17,8 @@ class Command(BaseCommand):
             "contributors_count": "contributors_count",
             "created_at": "created_at",
             "forks_count": "forks_count",
-            "last_released_at": "last_released_at",
-            "last_committed_at": "last_committed_at",
+            "last_released_at": "released_at",
+            "last_committed_at": "pushed_at",
             "open_issues_count": "open_issues_count",
             "open_pull_requests_count": "open_pull_requests_count",
             "pull_request_last_created_at": "pull_request_last_created_at",
@@ -29,19 +31,19 @@ class Command(BaseCommand):
             "unassigned_issues_count": "unassigned_issues_count",
         }
         for project in projects:
+            self.stdout.write(self.style.NOTICE(f"Updating metrics for project: {project.name}"))
             metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
 
             # Update metrics based on requirements
-            # TODO(ahmedxgouda): add these properties to the Project model
-            # TODO(ahmedxgouda): open_pull_requests_count, total_issues_count,
-            # TODO(ahmedxgouda): total_pull_requests_count,  recent_releases_count
-            # TODO(ahmedxgouda): total_releases_count, last_released_at, last_committed_at
             # TODO(ahmedxgouda): update from owasp page: owasp_page_last_updated_at
-            # TODO(ahmedxgouda): add score
             # TODO(ahmedxgouda): update is_funding_requirements_compliant,
-            # TODO(ahmedxgouda): is_project_leaders_requirements_compliant
-            for field, metric_field in field_mappings.items():
-                value = getattr(project, field, 0)
+            # TODO(ahmedxgouda): add score
+            for metric_field, project_field in field_mappings.items():
+                value = getattr(project, project_field)
                 setattr(metrics, metric_field, value)
+
+            is_leaders_compliant = project.leaders_count >= MINIMUM_LEADERS
+            metrics.is_project_leaders_requirements_compliant = is_leaders_compliant
+            metrics.save()
 
         self.stdout.write(self.style.SUCCESS("Project health metrics updated successfully."))
