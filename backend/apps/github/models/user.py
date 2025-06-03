@@ -76,7 +76,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         # Direct fields.
         for model_field, gh_field in field_mapping.items():
-            value = getattr(gh_user, gh_field)
+            value = getattr(gh_user, gh_field, None)
             if value is not None:
                 setattr(self, model_field, value)
 

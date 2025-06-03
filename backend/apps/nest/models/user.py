@@ -17,18 +17,19 @@ class User(AbstractUser):
             models.Index(fields=["username"]),
         ]
 
-    email = models.EmailField(
-        max_length=255,
-        unique=True,
-        verbose_name="Email",
-        blank=True,
-        null=True,
-    )
-
     github_id = models.CharField(
         max_length=255,
         unique=True,
         verbose_name="GitHub ID",
+    )
+
+    github_user = models.OneToOneField(
+        "github.user",
+        verbose_name="Github User",
+        null=True,
+        blank=False,
+        unique=True,
+        on_delete=models.CASCADE,
     )
 
     def __str__(self) -> str:

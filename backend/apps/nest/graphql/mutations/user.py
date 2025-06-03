@@ -4,6 +4,7 @@ import requests
 import strawberry
 from github import Github
 
+from apps.github.models import User as GithubUser
 from apps.nest.graphql.nodes.user import AuthUserNode
 from apps.nest.models import User
 
@@ -24,18 +25,22 @@ class UserMutations:
         """Authenticate via GitHub OAuth2."""
         try:
             github = Github(access_token)
-            user = github.get_user()
-            github_user = {"id": user.id, "login": user.login, "email": user.email}
+            gh_user = github.get_user()
 
-            existing_user = User.objects.filter(github_id=github_user["id"]).first()
-            if existing_user:
-                auth_user = existing_user
-            else:
+            github_user = GithubUser.update_data(gh_user)
+            if not github_user:
+                return GitHubAuthResult(auth_user=None)
+
+            try:
+                auth_user = User.objects.get(github_id=gh_user.id)
+            except User.DoesNotExist:
                 auth_user = User.objects.create(
-                    github_id=github_user["id"],
-                    username=github_user["login"],
-                    email=github_user.get("email"),
+                    github_id=str(gh_user.id),
+                    github_user=github_user,
+                    username=gh_user.login,
                 )
+
             return GitHubAuthResult(auth_user=auth_user)
+
         except requests.exceptions.RequestException:
             return GitHubAuthResult(auth_user=None)
