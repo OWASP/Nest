@@ -20,8 +20,6 @@ from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 
-RECENT_RELEASES_PERIOD = timezone.now() - datetime.timedelta(days=60)
-
 
 class Project(
     BulkSaveModel,
@@ -236,8 +234,9 @@ class Project(
     @property
     def recent_releases_count(self) -> int:
         """Return count of recent releases per a specific period."""
+        recent_period = timezone.now() - datetime.timedelta(days=60)
         return self.published_releases.filter(
-            published_at__gte=RECENT_RELEASES_PERIOD,
+            published_at__gte=recent_period,
         ).count()
 
     @property

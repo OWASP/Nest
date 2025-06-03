@@ -30,20 +30,33 @@ class Command(BaseCommand):
             "unanswered_issues_count": "unanswered_issues_count",
             "unassigned_issues_count": "unassigned_issues_count",
         }
+        updated_count = errors_count = 0
         for project in projects:
-            self.stdout.write(self.style.NOTICE(f"Updating metrics for project: {project.name}"))
-            metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
+            try:
+                self.stdout.write(
+                    self.style.NOTICE(f"Updating metrics for project: {project.name}")
+                )
+                metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
 
-            # Update metrics based on requirements
-            # TODO(ahmedxgouda): update from owasp page: owasp_page_last_updated_at
-            # TODO(ahmedxgouda): update is_funding_requirements_compliant,
-            # TODO(ahmedxgouda): add score
-            for metric_field, project_field in field_mappings.items():
-                value = getattr(project, project_field)
-                setattr(metrics, metric_field, value)
+                # Update metrics based on requirements
+                # TODO(ahmedxgouda): update from owasp page: owasp_page_last_updated_at
+                # TODO(ahmedxgouda): update is_funding_requirements_compliant,
+                # TODO(ahmedxgouda): add score
+                for metric_field, project_field in field_mappings.items():
+                    value = getattr(project, project_field)
+                    setattr(metrics, metric_field, value)
 
-            is_leaders_compliant = project.leaders_count >= MINIMUM_LEADERS
-            metrics.is_project_leaders_requirements_compliant = is_leaders_compliant
-            metrics.save()
+                is_leaders_compliant = project.leaders_count >= MINIMUM_LEADERS
+                metrics.is_project_leaders_requirements_compliant = is_leaders_compliant
+                metrics.save()
+                updated_count += 1
+            except AttributeError:
+                self.stdout.write(self.style.ERROR(f"Error updating project {project.name}"))
+                errors_count += 1
 
-        self.stdout.write(self.style.SUCCESS("Project health metrics updated successfully."))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Updated {updated_count} projects health metrics successfully. "
+                f"Encountered errors for {errors_count} projects."
+            )
+        )
