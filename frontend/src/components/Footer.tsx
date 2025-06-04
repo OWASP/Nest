@@ -90,7 +90,7 @@ export default function Footer() {
 
           </div>
           <div className="text-center">
-            {frontendVersion && (
+            {RELEASE_VERSION && (
               <span className="text-xs text-slate-600 dark:text-slate-400">v{RELEASE_VERSION}</span>
             )}
           </div>
