@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 metrics.is_project_leaders_requirements_compliant = is_leaders_compliant
                 metrics.save()
                 updated_count += 1
-            except AttributeError:
+            except (AttributeError, ValueError, TypeError):
                 self.stdout.write(self.style.ERROR(f"Error updating project {project.name}"))
                 errors_count += 1
 
