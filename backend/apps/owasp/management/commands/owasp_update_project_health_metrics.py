@@ -22,6 +22,7 @@ class Command(BaseCommand):
             "last_committed_at": "pushed_at",
             "open_issues_count": "open_issues_count",
             "open_pull_requests_count": "open_pull_requests_count",
+            "owasp_page_last_updated_at": "owasp_page_last_updated_at",
             "pull_request_last_created_at": "pull_request_last_created_at",
             "recent_releases_count": "recent_releases_count",
             "stars_count": "stars_count",
@@ -40,7 +41,6 @@ class Command(BaseCommand):
                 metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
 
                 # Update metrics based on requirements
-                # TODO(ahmedxgouda): update from owasp page: owasp_page_last_updated_at
                 # TODO(ahmedxgouda): add score
                 for metric_field, project_field in field_mappings.items():
                     value = getattr(project, project_field)

@@ -204,6 +204,13 @@ class Project(
         return self.pull_requests.filter(state="open").count()
 
     @property
+    def owasp_page_last_updated_at(self) -> datetime.datetime | None:
+        """Return the last updated date of the OWASP page."""
+        if owasp_repository := self.owasp_repository:
+            return owasp_repository.updated_at
+        return None
+
+    @property
     def pull_requests(self):
         """Return pull requests."""
         return PullRequest.objects.filter(
