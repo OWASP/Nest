@@ -145,15 +145,14 @@ class Project(
     @property
     def is_funding_requirements_compliant(self) -> bool:
         """Indicate whether project is compliant with funding requirements."""
-        total_repos = self.repositories.count()
-        if total_repos == 0:
+        if self.repositories_count == 0:
             return True
 
         compliant_repos = self.repositories.filter(
             is_funding_policy_compliant=True,
         ).count()
 
-        return compliant_repos == total_repos
+        return compliant_repos == self.repositories_count
 
     @property
     def is_tool_type(self) -> bool:
@@ -258,6 +257,11 @@ class Project(
         return self.published_releases.filter(
             published_at__gte=recent_period,
         ).count()
+
+    @property
+    def repositories_count(self) -> int:
+        """Return count of repositories."""
+        return self.repositories.count()
 
     @property
     def unanswered_issues_count(self) -> int:
