@@ -21,24 +21,26 @@ class UserMutations:
     """GraphQL mutations related to user."""
 
     @strawberry.mutation
-    def github_auth(self, info, access_token: str) -> GitHubAuthResult:
+    def github_auth(self, access_token: str) -> GitHubAuthResult:
         """Authenticate via GitHub OAuth2."""
         try:
             github = Github(access_token)
             gh_user = github.get_user()
+            gh_user_email = next(
+                (e.email for e in gh_user.get_emails() if e.primary and e.verified), ""
+            )
 
-            github_user = GithubUser.update_data(gh_user)
+            github_user = GithubUser.update_data(gh_user, email=gh_user_email)
             if not github_user:
                 return GitHubAuthResult(auth_user=None)
 
-            try:
-                auth_user = User.objects.get(github_id=gh_user.id)
-            except User.DoesNotExist:
-                auth_user = User.objects.create(
-                    github_id=str(gh_user.id),
-                    github_user=github_user,
-                    username=gh_user.login,
-                )
+            auth_user, _ = User.objects.get_or_create(
+                defaults={
+                    "email": gh_user_email,
+                    "github_user": github_user,
+                },
+                username=gh_user.login,
+            )
 
             return GitHubAuthResult(auth_user=auth_user)
 

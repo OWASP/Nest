@@ -7,13 +7,13 @@ from apps.nest.graphql.mutations.user import UserMutations
 from apps.owasp.graphql.queries import OwaspQuery
 
 
+class Mutation(UserMutations):
+    """Schema mutations."""
+
+
 @strawberry.type
 class Query(GithubQuery, OwaspQuery):
     """Schema queries."""
 
 
-class Mutation(UserMutations):
-    """Schema mutations."""
-
-
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+schema = strawberry.Schema(mutation=Mutation, query=Query)

@@ -17,18 +17,11 @@ class User(AbstractUser):
             models.Index(fields=["username"]),
         ]
 
-    github_id = models.CharField(
-        max_length=255,
-        unique=True,
-        verbose_name="GitHub ID",
-    )
-
     github_user = models.OneToOneField(
         "github.user",
         verbose_name="Github User",
+        blank=True,
         null=True,
-        blank=False,
-        unique=True,
         on_delete=models.CASCADE,
     )
 
@@ -36,7 +29,7 @@ class User(AbstractUser):
         """Return a human-readable representation of the user.
 
         Returns:
-            str: The github_id or username of the user.
+            str: The user's string representation.
 
         """
         return self.username

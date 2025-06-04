@@ -2,12 +2,6 @@ import { faGithub, faSlack, faBluesky, faLinkedin } from '@fortawesome/free-bran
 import { Link } from 'types/link'
 import { Section } from 'types/section'
 
-export const currentStatus = {
-  authenticated: 'authenticated',
-  loading: 'loading',
-  unauthenticated: 'unauthenticated',
-}
-
 export const headerLinks: Link[] = [
   {
     text: 'Community',
@@ -123,3 +117,9 @@ export const themeToggleTooltip = {
 }
 
 export const desktopViewMinWidth = 768
+
+export const userAuthStatus = {
+  AUTHENTICATED: 'authenticated',
+  LOADING: 'loading',
+  UNAUTHENTICATED: 'unauthenticated',
+}

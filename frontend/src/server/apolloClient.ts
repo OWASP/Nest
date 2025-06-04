@@ -31,8 +31,8 @@ async function createApolloClient() {
 
 // This is a no-op Apollo client for end-to-end tests.
 const noopApolloClient = {
-  query: async () => ({ data: null }),
   mutate: async () => ({ data: null }),
+  query: async () => ({ data: null }),
 }
 export const apolloClient =
   process.env.NEXT_SERVER_DISABLE_SSR === 'true' ? noopApolloClient : await createApolloClient()

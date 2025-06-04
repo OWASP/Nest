@@ -7,14 +7,14 @@ import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { useEffect } from 'react'
-import { currentStatus } from 'utils/constants'
+import { userAuthStatus } from 'utils/constants'
 
 export default function LoginPage() {
   const { status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    if (status === currentStatus.authenticated) {
+    if (status === userAuthStatus.AUTHENTICATED) {
       addToast({
         description: 'You are already logged in.',
         title: 'Already logged in',
@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
   }, [status, router])
 
-  if (status === currentStatus.loading) {
+  if (status === userAuthStatus.LOADING) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
         <FontAwesomeIcon icon={faSpinner} height={16} width={16} />
@@ -35,7 +35,7 @@ export default function LoginPage() {
       </div>
     )
   }
-  if (status === currentStatus.authenticated) {
+  if (status === userAuthStatus.AUTHENTICATED) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
         <FontAwesomeIcon icon={faSpinner} height={16} width={16} />

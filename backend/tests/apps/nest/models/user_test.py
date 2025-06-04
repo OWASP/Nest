@@ -11,20 +11,12 @@ class TestUserModel:
 
     def test_model_fields(self):
         """Test field types and constraints."""
-        max_github_id_length = 255
-
-        github_id_field = User._meta.get_field("github_id")
-        assert isinstance(github_id_field, models.CharField)
-        assert github_id_field.max_length == max_github_id_length
-        assert github_id_field.unique is True
-
         github_user_field = User._meta.get_field("github_user")
         assert isinstance(github_user_field, models.OneToOneField)
 
         assert github_user_field.remote_field.model == GithubUser
-        assert github_user_field.unique is True
         assert github_user_field.null is True
-        assert github_user_field.blank is False
+        assert github_user_field.blank is True
 
         username_field = User._meta.get_field("username")
         assert isinstance(username_field, models.CharField)
@@ -46,8 +38,5 @@ class TestUserModel:
 
     def test_str_representation(self):
         """Test __str__ returns the username."""
-        user = User(username="testuser", github_id="gh123")
-        assert str(user) == "testuser"
-
-        user.github_id = None
+        user = User(username="testuser")
         assert str(user) == "testuser"

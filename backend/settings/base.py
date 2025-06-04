@@ -50,6 +50,7 @@ class Base(Configuration):
         "apps.owasp",
         "apps.slack",
     )
+
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
     LOGGING = {
