@@ -2,6 +2,7 @@
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 from apps.common.models import TimestampedModel
 
@@ -61,6 +62,41 @@ class ProjectHealthMetrics(TimestampedModel):
     unassigned_issues_count = models.PositiveIntegerField(
         verbose_name="Unassigned issues", default=0
     )
+
+    @property
+    def age_days(self) -> int:
+        """Calculate project age in days."""
+        if self.created_at:
+            return (timezone.now() - self.created_at).days
+        return 0
+
+    @property
+    def last_commit_days(self) -> int:
+        """Calculate days since last commit."""
+        if self.last_committed_at:
+            return (timezone.now() - self.last_committed_at).days
+        return 0
+
+    @property
+    def last_pull_request_days(self) -> int:
+        """Calculate days since last pull request."""
+        if self.pull_request_last_created_at:
+            return (timezone.now() - self.pull_request_last_created_at).days
+        return 0
+
+    @property
+    def last_release_days(self) -> int:
+        """Calculate days since last release."""
+        if self.last_released_at:
+            return (timezone.now() - self.last_released_at).days
+        return 0
+
+    @property
+    def owasp_page_last_update_days(self) -> int:
+        """Calculate days since OWASP page last update."""
+        if self.owasp_page_last_updated_at:
+            return (timezone.now() - self.owasp_page_last_updated_at).days
+        return 0
 
     def __str__(self) -> str:
         """Project health metrics human readable representation."""
