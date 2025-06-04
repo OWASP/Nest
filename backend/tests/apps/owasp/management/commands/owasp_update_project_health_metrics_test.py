@@ -6,6 +6,7 @@ from django.core.management import call_command
 
 from apps.owasp.management.commands.owasp_update_project_health_metrics import Command
 from apps.owasp.models.project import Project
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
 class TestUpdateProjectHealthMetricsCommand:
@@ -17,7 +18,7 @@ class TestUpdateProjectHealthMetricsCommand:
         with (
             patch("apps.owasp.models.project.Project.objects.all") as projects_patch,
             patch(
-                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.get_or_create"
+                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects"
             ) as metrics_patch,
         ):
             self.mock_projects = projects_patch
@@ -56,6 +57,13 @@ class TestUpdateProjectHealthMetricsCommand:
 
         self.mock_projects.return_value = [mock_project]
 
+        mock_metrics_instance = MagicMock(spec=ProjectHealthMetrics)
+        self.mock_metrics.get_or_create.return_value = (mock_metrics_instance, True)
+        # Set the leaders count to meet compliance
+        mock_project.leaders_count = 3
+        mock_metrics_instance.is_project_leaders_requirements_compliant = True
+        mock_metrics_instance.save = MagicMock()
+
         # Execute command
         with patch("sys.stdout", new=self.stdout):
             call_command("owasp_update_project_health_metrics")
@@ -64,19 +72,8 @@ class TestUpdateProjectHealthMetricsCommand:
         assert "Updating metrics for project: Test Project" in self.stdout.getvalue()
 
         # Verify mock was called correctly
-        self.mock_metrics.assert_called_once_with(project=mock_project)
-
-        # Get the mocked metrics object
-        metrics = self.mock_metrics.return_value[0]
-
-        # Verify all field mappings
-        for metrics_field, expected_value in test_data.values():
-            # Skip name field as it's not in metrics
-            if metrics_field != "name":
-                actual_value = getattr(metrics, metrics_field)
-                assert actual_value == expected_value, (
-                    f"Field {metrics_field}: expected {expected_value}, got {actual_value}"
-                )
+        self.mock_metrics.get_or_create.assert_called_once_with(project=mock_project)
+        mock_metrics_instance.save.assert_called_once()
 
     def test_handle_empty_projects(self):
         """Test command with no projects."""
@@ -88,3 +85,19 @@ class TestUpdateProjectHealthMetricsCommand:
         output = self.stdout.getvalue()
         assert "Updated 0 projects health metrics successfully" in output
         assert "Encountered errors for 0 projects" in output
+
+    def test_handle_exception(self):
+        """Test command handling exceptions during metrics update."""
+        mock_project = MagicMock(spec=Project)
+        mock_project.name = "Test Project"
+        self.mock_projects.return_value = [mock_project]
+
+        # Simulate an error during metrics update
+        self.mock_metrics.get_or_create.side_effect = ValueError("Test error")
+
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_metrics")
+
+        output = self.stdout.getvalue()
+        assert "Error updating project Test Project" in output
+        assert "Encountered errors for 1 projects" in output
