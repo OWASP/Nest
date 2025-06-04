@@ -12,46 +12,46 @@ import ScrollToTop from 'components/ScrollToTop'
 import 'app/globals.css'
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
   subsets: ['latin'],
+  variable: '--font-geist-sans',
 })
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
   subsets: ['latin'],
+  variable: '--font-geist-mono',
 })
 
 export const metadata: Metadata = {
-  title: 'OWASP Nest',
   description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
+  icons: {
+    apple: 'https://owasp.org/www--site-theme/favicon.ico',
+    icon: 'https://owasp.org/www--site-theme/favicon.ico',
+    shortcut: 'https://owasp.org/www--site-theme/favicon.ico',
+  },
   openGraph: {
-    title: 'OWASP Nest',
     description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
-    url: 'https://nest.owasp.org/',
-    siteName: 'OWASP Nest',
     images: [
       {
+        alt: 'OWASP logo',
+        height: 630,
         url: 'https://nest.owasp.org/img/owasp_icon_white_background.png',
         width: 1200,
-        height: 630,
-        alt: 'OWASP logo',
       },
     ],
     locale: 'en_US',
+    siteName: 'OWASP Nest',
+    title: 'OWASP Nest',
     type: 'website',
+    url: 'https://nest.owasp.org/',
   },
+  title: 'OWASP Nest',
   twitter: {
     card: 'summary_large_image',
-    title: 'Home – OWASP Nest',
+    creator: '@owasp',
     description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
     images: ['https://nest.owasp.org/img/owasp_icon_white_background.png'],
-    creator: '@owasp',
     site: '@owasp',
-  },
-  icons: {
-    icon: 'https://owasp.org/www--site-theme/favicon.ico',
-    shortcut: 'https://owasp.org/www--site-theme/favicon.ico',
-    apple: 'https://owasp.org/www--site-theme/favicon.ico',
+    title: 'Home – OWASP Nest',
   },
 }
 
