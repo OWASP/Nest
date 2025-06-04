@@ -41,7 +41,6 @@ class Command(BaseCommand):
                 metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
 
                 # Update metrics based on requirements
-                # TODO(ahmedxgouda): add score
                 for metric_field, project_field in field_mappings.items():
                     value = getattr(project, project_field)
                     setattr(metrics, metric_field, value)
