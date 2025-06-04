@@ -51,19 +51,16 @@ const DetailsCard = ({
 }: DetailsCardProps) => {
   const getDonationUrl = () => {
     if (!key) return 'https://owasp.org/donate/'
-
-    let repoPrefix = ''
-    if (type === 'project') {
-      repoPrefix = 'www-project-'
-    } else if (type === 'chapter') {
-      repoPrefix = 'www-chapter-'
-    } else if (type === 'repository') {
-      repoPrefix = ''
+  
+    const prefixMap = {
+      project: 'www-project-',
+      chapter: 'www-chapter-',
+      repository: '',
     }
-
+  
     const encodedTitle = encodeURIComponent(`OWASP ${title || ''}`)
-    return `https://owasp.org/donate/?reponame=${repoPrefix}${key}&title=${encodedTitle}`
-  }
+    return `https://owasp.org/donate/?reponame=${prefixMap[type] || ''}${key}&title=${encodedTitle}`
+}
 
   const shouldShowSponsor = ['project', 'chapter', 'repository'].includes(type)
 
