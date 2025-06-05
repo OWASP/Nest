@@ -65,7 +65,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.28.0",
     "@playwright/test": "^1.52.0",
-    "@swc/core": "^1.11.29",
+    "@swc/core": "^1.11.31",
     "@swc/jest": "^0.2.38",
     "@tailwindcss/postcss": "^4.1.8",
     "@testing-library/jest-dom": "^6.6.3",
