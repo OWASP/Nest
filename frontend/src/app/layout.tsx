@@ -53,9 +53,6 @@ export const metadata: Metadata = {
     site: '@owasp',
     title: 'Home – OWASP Nest',
   },
-  verification: {
-    google: 'R-nJy0vMNddkJRXX-MhX16El0faHjqgCRAIVlIrywvU',
-  },
 }
 
 export default function RootLayout({
