@@ -24,12 +24,12 @@ class Conversation(TimestampedModel):
     is_mpim = models.BooleanField(verbose_name="Is MPIM", default=False)
     is_private = models.BooleanField(verbose_name="Is private", default=False)
     is_shared = models.BooleanField(verbose_name="Is shared", default=False)
-    member_count = models.PositiveIntegerField(verbose_name="Member count", default=0)
     name = models.CharField(verbose_name="Name", max_length=100, default="")
     purpose = models.TextField(verbose_name="Purpose", blank=True, default="")
     slack_channel_id = models.CharField(verbose_name="Channel ID", max_length=50, unique=True)
     slack_creator_id = models.CharField(verbose_name="Creator ID", max_length=255)
     topic = models.TextField(verbose_name="Topic", blank=True, default="")
+    total_members_count = models.PositiveIntegerField(verbose_name="Members count", default=0)
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="channels")
 
     def __str__(self):

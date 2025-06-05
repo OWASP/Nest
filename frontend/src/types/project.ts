@@ -33,16 +33,19 @@ export interface ProjectMilestonesType {
   author: {
     avatarUrl: string
     key: string
-    name: string
     login: string
+    name: string
   }
-  title: string
-  openIssuesCount: number
+  body: string
   closedIssuesCount: number
-  repositoryName: string
-  organizationName?: string
   createdAt: string
-  url: string
+  openIssuesCount: number
+  organizationName?: string
+  progress?: number
+  repositoryName: string
+  state: string
+  title: string
+  url?: string
 }
 
 export interface ProjectStatsType {

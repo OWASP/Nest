@@ -12,6 +12,19 @@ from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
 
+def convert_to_snake_case(text: str) -> str:
+    """Convert a string to snake_case.
+
+    Args:
+        text (str): The input string.
+
+    Returns:
+        str: The converted string in snake_case.
+
+    """
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
+
+
 def get_absolute_url(path: str) -> str:
     """Return the absolute URL for a given path.
 
@@ -99,6 +112,20 @@ def natural_number(value: int, unit=None) -> str:
     """
     number = intword(value)
     return f"{number} {unit}{pluralize(value)}" if unit else number
+
+
+def round_down(value: int, base: int) -> int:
+    """Round down the stats to the nearest base.
+
+    Args:
+        value: The value to round down.
+        base: The base to round down to.
+
+    Returns:
+        int: The rounded down value.
+
+    """
+    return value - (value % base)
 
 
 def slugify(text: str) -> str:

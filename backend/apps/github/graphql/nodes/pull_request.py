@@ -1,34 +1,42 @@
 """GitHub Pull Request Node."""
 
-import graphene
+import strawberry
+import strawberry_django
 
-from apps.common.graphql.nodes import BaseNode
+from apps.github.graphql.nodes.user import UserNode
 from apps.github.models.pull_request import PullRequest
 
 
-class PullRequestNode(BaseNode):
+@strawberry_django.type(
+    PullRequest,
+    fields=[
+        "created_at",
+        "title",
+    ],
+)
+class PullRequestNode:
     """GitHub pull request node."""
 
-    organization_name = graphene.String()
-    repository_name = graphene.String()
-    url = graphene.String()
+    @strawberry.field
+    def author(self) -> UserNode | None:
+        """Resolve author."""
+        return self.author
 
-    class Meta:
-        model = PullRequest
-        fields = (
-            "author",
-            "created_at",
-            "title",
+    @strawberry.field
+    def organization_name(self) -> str | None:
+        """Resolve organization name."""
+        return (
+            self.repository.organization.login
+            if self.repository and self.repository.organization
+            else None
         )
 
-    def resolve_organization_name(self, info):
-        """Return organization name."""
-        return self.repository.organization.login if self.repository.organization else None
-
-    def resolve_repository_name(self, info):
+    @strawberry.field
+    def repository_name(self) -> str | None:
         """Resolve repository name."""
-        return self.repository.name
+        return self.repository.name if self.repository else None
 
-    def resolve_url(self, info):
+    @strawberry.field
+    def url(self) -> str:
         """Resolve URL."""
-        return self.url
+        return str(self.url) if self.url else ""

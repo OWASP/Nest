@@ -1,22 +1,23 @@
 """OWASP event GraphQL node."""
 
-from apps.common.graphql.nodes import BaseNode
+import strawberry_django
+
 from apps.owasp.models.event import Event
 
 
-class EventNode(BaseNode):
+@strawberry_django.type(
+    Event,
+    fields=[
+        "category",
+        "description",
+        "end_date",
+        "key",
+        "name",
+        "start_date",
+        "suggested_location",
+        "summary",
+        "url",
+    ],
+)
+class EventNode:
     """Event node."""
-
-    class Meta:
-        model = Event
-        fields = (
-            "category",
-            "end_date",
-            "description",
-            "key",
-            "name",
-            "start_date",
-            "suggested_location",
-            "summary",
-            "url",
-        )

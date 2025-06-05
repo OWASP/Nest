@@ -1,47 +1,35 @@
 """GraphQL queries for handling OWASP releases."""
 
-from __future__ import annotations
+import strawberry
+from django.db.models import OuterRef, Subquery
 
-import graphene
-from django.db.models import OuterRef, QuerySet, Subquery
-
-from apps.common.graphql.queries import BaseQuery
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.models.release import Release
 
 
-class ReleaseQuery(BaseQuery):
+@strawberry.type
+class ReleaseQuery:
     """GraphQL query class for retrieving recent GitHub releases."""
 
-    recent_releases = graphene.List(
-        ReleaseNode,
-        distinct=graphene.Boolean(default_value=False),
-        limit=graphene.Int(default_value=6),
-        login=graphene.String(required=False),
-        organization=graphene.String(required=False),
-    )
-
-    def resolve_recent_releases(
-        root,
-        info,
+    @strawberry.field
+    def recent_releases(
+        self,
         *,
         distinct: bool = False,
         limit: int = 6,
-        login=None,
+        login: str | None = None,
         organization: str | None = None,
-    ) -> QuerySet:
+    ) -> list[ReleaseNode]:
         """Resolve recent releases with optional distinct filtering.
 
         Args:
-            root (Any): The root query object.
-            info (ResolveInfo): The GraphQL execution context.
             distinct (bool): Whether to return unique releases per author and repository.
             limit (int): Maximum number of releases to return.
-            login (str): Optional GitHub username for filtering releases.
-            organization (str): Optional GitHub organization for filtering releases.
+            login (str, optional): Filter releases by a specific author's login.
+            organization (str, optional): Filter releases by a specific organization's login.
 
         Returns:
-            QuerySet: Queryset containing the filtered list of releases.
+            list[ReleaseNode]: List of release nodes containing the filtered list of releases.
 
         """
         queryset = Release.objects.filter(

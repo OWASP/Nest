@@ -8,6 +8,7 @@ import {
   faLocationDot,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { sendGAEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
@@ -43,6 +44,13 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
+        if (query && query.trim() !== '') {
+          sendGAEvent({
+            event: 'homepageSearch',
+            path: window.location.pathname,
+            value: query,
+          })
+        }
         if (query.length > 0) {
           const results = await Promise.all(
             indexes.map(async (index) => {
@@ -62,6 +70,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           const filteredEvents =
             eventData?.filter((event) => event.name.toLowerCase().includes(query.toLowerCase())) ||
             []
+
           if (filteredEvents.length > 0) {
             results.push({
               indexName: 'events',

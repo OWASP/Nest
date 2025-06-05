@@ -17,7 +17,7 @@ export async function generateMetadata({
     },
   })
   const user = data?.user
-  const title = user?.name ?? user?.login
+  const title = user?.name || user?.login
 
   return user
     ? generateSeoMetadata({

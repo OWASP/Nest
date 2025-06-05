@@ -1,17 +1,18 @@
 """OWASP sponsors GraphQL node."""
 
-from apps.common.graphql.nodes import BaseNode
+import strawberry_django
+
 from apps.owasp.models.sponsor import Sponsor
 
 
-class SponsorNode(BaseNode):
+@strawberry_django.type(
+    Sponsor,
+    fields=[
+        "image_url",
+        "name",
+        "sponsor_type",
+        "url",
+    ],
+)
+class SponsorNode:
     """Sponsor node."""
-
-    class Meta:
-        model = Sponsor
-        fields = (
-            "image_url",
-            "name",
-            "sponsor_type",
-            "url",
-        )

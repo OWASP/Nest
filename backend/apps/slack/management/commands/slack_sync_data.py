@@ -81,6 +81,18 @@ class Command(BaseCommand):
                     timeout=30,
                     types="public_channel,private_channel",
                 )
+    slack-member-count-sync
+
+
+            if members:
+                Member.bulk_save(members)
+
+            # Update the workspace with the total members count.
+            workspace.total_members_count = total_members
+            workspace.save(update_fields=["total_members_count"])
+
+            self.stdout.write(self.style.SUCCESS(f"Populated {total_members} members"))
+        main
 
                 for conversation_data in response["channels"]:
                     try:

@@ -63,11 +63,15 @@ class Command(BaseCommand):
                         project.save(update_fields=("invalid_urls", "related_urls"))
                         continue
 
-                organization, repository = sync_repository(gh_repository)
-                if organization is not None:
-                    organization.save()
+                try:
+                    organization, repository = sync_repository(gh_repository)
+                    if organization is not None:
+                        organization.save()
 
-                project.repositories.add(repository)
+                    project.repositories.add(repository)
+                except Exception:
+                    logger.exception("Error syncing repository %s", repository_url)
+                    continue
 
             projects.append(project)
 

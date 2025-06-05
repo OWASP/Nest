@@ -1,4 +1,4 @@
-clean-schema:
+clean-schema-dependencies:
 	@rm -rf schema/.venv
 
 test-schema:

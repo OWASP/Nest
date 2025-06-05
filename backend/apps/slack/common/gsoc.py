@@ -40,7 +40,7 @@ OWASP_NEST_MILESTONES = (
         "challenges that will help take the OWASP organization to the next level. Each milestone "
         "is designed to tackle key problems, making OWASP more efficient, accessible, and "
         f"impactful.{2 * NL}"
-        f"*<{OWASP_NEST_MILESTONES_URL}|Here are the key milestones>* that were accepted as part "
+        f"Here are the key *<{OWASP_NEST_MILESTONES_URL}|milestones>* that were accepted as part "
         f"of the OWASP Nest project for *GSoC 2025*:{2 * NL}"
         "  • *OWASP Contribution Hub*: Aiming to streamline the onboarding process and connect "
         "contributors with mentors and impactful projects. This milestone focuses on improving "
@@ -48,6 +48,9 @@ OWASP_NEST_MILESTONES = (
         "  • *OWASP Nest API*: The development of REST and GraphQL API endpoints for OWASP "
         "Projects, Chapters, Events, and Committees. This milestone will standardize data access "
         f"across OWASP's resources.{2 * NL}"
+        "  • *OWASP NestBot AI Assistant*: Develop an AI-powered Slack assistant, NestBot, that "
+        " acts as an auto-responder for frequently asked questions, intelligently routes queries "
+        f"to the appropriate OWASP channels, and helps users navigate the OWASP community.{2 * NL}"
         " •  *OWASP Schema*: Developing and extending a standardized schema for OWASP Projects "
         "and Chapters. This milestone aims to ensure consistency and ease of integration across "
         f"OWASP resources.{2 * NL}"
@@ -59,26 +62,10 @@ OWASP_NEST_MILESTONES = (
         "overall acceptance rate of around 8%, this is a strong reflection of the quality of the "
         f"proposals and the growing impact of the OWASP Nest project.{2 * NL}"
     ),
-    divider(),
     markdown(
-        ":exclamation: For projects that were not accepted this year we're going to launch a "
-        "dedicated program to support them. The program is going to cover the following project "
-        f"ideas:{NL}"
-        f" •  *OWASP Community Snapshots*: Creating a summary of activities within OWASP "
-        "Projects, Chapters, and Events, including new blog posts and news, to keep the "
-        f"community informed about recent developments.{2 * NL}"
-        "  •  *OWASP NestBot calendar events support*: Implement a feature that would allow "
-        "users to configure upcoming meetings/events notifications for a specific Slack channel "
-        f"using Google calendar as a source.{2 * NL}"
-        "  • *OWASP Nest Kubernetes Adoption*: This milestone focuses on migrating the OWASP Nest "
-        "application to Kubernetes, ensuring scalability, reliability, and ease of "
-        f"deployment.{2 * NL}"
-        "  •  *OWASP Project Health Dashboard*: A dashboard for monitoring the health of OWASP "
-        "Projects. This includes tracking vital metrics such as release frequency, issue "
-        f"resolution, and contributor growth.{NL}"
-    ),
-    markdown(
-        "We're looking for high-quality contributors to help us with the above projects. "
+        ":bangbang: For projects that were not accepted this year we've launched a dedicated "
+        "sponsorship program to support them. We're looking for high-quality contributors to help "
+        "us with those project ideas. "
         f"Feel free to join <{OWASP_SPONSORSHIP_CHANNEL_ID}|sponsorship> channel to learn more "
         f"about it.{NL}"
     ),

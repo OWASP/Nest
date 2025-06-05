@@ -3,6 +3,7 @@ import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
+import { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
 import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
@@ -33,11 +34,6 @@ jest.mock('utils/aboutData', () => ({
   aboutText: [
     'This is a test paragraph about the project.',
     'This is another paragraph about the project history.',
-  ],
-  roadmap: [
-    { title: 'Feature 1', issueLink: 'https://github.com/owasp/test/issues/1' },
-    { title: 'Feature 2', issueLink: 'https://github.com/owasp/test/issues/2' },
-    { title: 'Feature 3', issueLink: 'https://github.com/owasp/test/issues/3' },
   ],
   technologies: [
     {
@@ -129,13 +125,7 @@ describe('About Component', () => {
           return mockTopContributorsData
         }
       } else if (query === GET_LEADER_DATA) {
-        if (key === 'arkid15r') {
-          return mockUserData('arkid15r')
-        } else if (key === 'kasya') {
-          return mockUserData('kasya')
-        } else if (key === 'mamicidal') {
-          return mockUserData('mamicidal')
-        }
+        return mockUserData(key)
       }
 
       return { loading: true }
@@ -149,7 +139,9 @@ describe('About Component', () => {
   })
 
   test('renders project history correctly', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     const historySection = screen.getByText('History').closest('div')
     expect(historySection).toBeInTheDocument()
@@ -163,7 +155,9 @@ describe('About Component', () => {
   })
 
   test('renders leaders section with three leaders', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     const leadersSection = screen.getByText('Leaders').closest('div')
     expect(leadersSection).toBeInTheDocument()
@@ -183,15 +177,15 @@ describe('About Component', () => {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
         return { data: null, loading: false, error: mockError }
-      } else if (options?.variables?.key === 'kasya') {
-        return mockUserData('kasya')
-      } else if (options?.variables?.key === 'mamicidal') {
-        return mockUserData('mamicidal')
+      } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
+        return mockUserData(options?.variables?.key)
       }
       return { loading: true }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText("Error loading arkid15r's data")).toBeInTheDocument()
@@ -201,7 +195,9 @@ describe('About Component', () => {
   })
 
   test('renders top contributors section correctly', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Top Contributors')).toBeInTheDocument()
@@ -212,7 +208,9 @@ describe('About Component', () => {
   })
 
   test('toggles contributors list when show more/less is clicked', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
     await waitFor(() => {
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
       expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
@@ -235,7 +233,9 @@ describe('About Component', () => {
   })
 
   test('renders technologies section correctly', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     const technologiesSection = screen.getByText('Technologies & Tools').closest('div')
     expect(technologiesSection).toBeInTheDocument()
@@ -269,26 +269,29 @@ describe('About Component', () => {
   })
 
   test('renders roadmap correctly', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     const roadmapSection = screen.getByRole('heading', { name: 'Roadmap' }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
-
-    const roadmapItems = within(roadmapSection).getAllByRole('listitem')
-    expect(roadmapItems).toHaveLength(3)
-
-    expect(screen.getByText('Feature 1')).toBeInTheDocument()
-    expect(screen.getByText('Feature 2')).toBeInTheDocument()
-    expect(screen.getByText('Feature 3')).toBeInTheDocument()
-
+    const roadmapData = mockAboutData.project.recentMilestones
     const links = within(roadmapSection)
       .getAllByRole('link')
       .filter((link) => link.getAttribute('href') !== '#roadmap')
-    expect(links[0].getAttribute('href')).toBe('https://github.com/owasp/test/issues/1')
+
+    for (let i = 0; i < roadmapData.length; i++) {
+      const milestone = [...roadmapData].sort((a, b) => (a.title > b.title ? 1 : -1))[i]
+      expect(screen.getByText(milestone.title)).toBeInTheDocument()
+      expect(screen.getByText(milestone.body)).toBeInTheDocument()
+      expect(links[i].getAttribute('href')).toBe(milestone.url)
+    }
   })
 
   test('renders project stats cards correctly', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Contributors')).toBeInTheDocument()
@@ -312,7 +315,9 @@ describe('About Component', () => {
       return { loading: true }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Loading arkid15r...')).toBeInTheDocument()
@@ -341,7 +346,9 @@ describe('About Component', () => {
       return { loading: true }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('No data available for arkid15r')).toBeInTheDocument()
@@ -366,7 +373,9 @@ describe('About Component', () => {
       return { loading: true }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Data not found')).toBeInTheDocument()
@@ -388,7 +397,9 @@ describe('About Component', () => {
       return { loading: true }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('No data available for arkid15r')).toBeInTheDocument()
@@ -398,7 +409,9 @@ describe('About Component', () => {
   })
 
   test('navigates to user details on View Profile button click', async () => {
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       const viewDetailsButtons = screen.getAllByText('View Profile')
@@ -434,7 +447,9 @@ describe('About Component', () => {
       return { loading: true }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('arkid15r')).toBeInTheDocument()
@@ -457,7 +472,9 @@ describe('About Component', () => {
       return { loading: true }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText(/No data available for arkid15r/i)).toBeInTheDocument()
@@ -476,7 +493,9 @@ describe('About Component', () => {
       }
     })
 
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
     await waitFor(() => {
       // Look for the element with alt text "Loading indicator"
       const spinner = screen.getAllByAltText('Loading indicator')
@@ -495,7 +514,9 @@ describe('About Component', () => {
         error: null,
       }
     })
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
     await waitFor(() => {
       expect(screen.getByText(/Data not found/)).toBeInTheDocument()
       expect(
@@ -515,7 +536,9 @@ describe('About Component', () => {
         error: null,
       }
     })
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith({
         color: 'danger',
@@ -539,7 +562,9 @@ describe('About Component', () => {
         error: null,
       }
     })
-    render(<About />)
+    await act(async () => {
+      render(<About />)
+    })
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith({
         color: 'danger',

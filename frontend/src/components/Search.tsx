@@ -1,9 +1,9 @@
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Skeleton } from '@heroui/skeleton'
+import { sendGTMEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import TagManager from 'react-gtm-module'
 
 interface SearchProps {
   isLoaded: boolean
@@ -30,7 +30,17 @@ const SearchBar: React.FC<SearchProps> = ({
   }, [])
 
   const debouncedSearch = useMemo(
-    () => debounce((query: string) => onSearch(query), 750),
+    () =>
+      debounce((query: string) => {
+        onSearch(query)
+        if (query && query.trim() !== '') {
+          sendGTMEvent({
+            event: 'search',
+            path: window.location.pathname,
+            value: query,
+          })
+        }
+      }, 750),
     [onSearch]
   )
 
@@ -45,16 +55,6 @@ const SearchBar: React.FC<SearchProps> = ({
     setSearchQuery(newQuery)
     debouncedSearch(newQuery)
   }
-
-  useEffect(() => {
-    TagManager.dataLayer({
-      dataLayer: {
-        event: 'search',
-        search_term: searchQuery,
-        page_path: window.location.pathname,
-      },
-    })
-  }, [searchQuery])
 
   const handleClearSearch = () => {
     setSearchQuery('')

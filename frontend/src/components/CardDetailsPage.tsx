@@ -170,7 +170,7 @@ const DetailsCard = ({
             type === 'organization' ||
             type === 'repository' ||
             type === 'project' ? (
-              <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
+              <Milestones data={recentMilestones} showAvatar={showAvatar} />
             ) : (
               <RecentReleases
                 data={recentReleases}
@@ -185,8 +185,8 @@ const DetailsCard = ({
           type === 'organization' ||
           type === 'user') && (
           <div className="grid-cols-2 gap-4 lg:grid">
+            <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
-            <Milestones data={recentMilestones} showAvatar={showAvatar} />
           </div>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&

@@ -12,7 +12,7 @@ class AppHomeOpened(EventBase):
 
     def handle_event(self, event, client):
         """Handle the app_home_opened event."""
-        user_id = event["user"]
+        user_id = self.get_user_id(event)
         context = {
             "TAB": TAB,
             "user_id": user_id,

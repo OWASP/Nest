@@ -8,6 +8,7 @@ from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
 from apps.common.constants import NL
+from apps.common.utils import convert_to_snake_case
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown
 from apps.slack.template_loader import env
@@ -28,11 +29,6 @@ class EventBase:
     matchers: list[Callable[[Any], bool]] | None = None
 
     @staticmethod
-    def get_events():
-        """Yield all subclasses of EventBase."""
-        yield from EventBase.__subclasses__()
-
-    @staticmethod
     def configure_events():
         """Configure all event handlers with the Slack app."""
         if SlackConfig.app is None:
@@ -41,6 +37,16 @@ class EventBase:
 
         for event_class in EventBase.get_events():
             event_class().register()
+
+    @staticmethod
+    def get_events():
+        """Yield all subclasses of EventBase."""
+        yield from EventBase.__subclasses__()
+
+    @property
+    def ephemeral_message(self) -> tuple | None:
+        """Return ephemeral message text."""
+        return None
 
     def register(self):
         """Register this event handler with the Slack app."""
@@ -69,48 +75,36 @@ class EventBase:
             if e.response["error"] == "cannot_dm_bot":
                 logger.warning("Cannot DM bot user in event %s", self.event_type)
                 return
-            logger.exception(
-                "Slack API error while handling %s: %s",
-                self.event_type,
-                e.response["error"],
-            )
-            self.handle_error(event, client)
+            raise
         except Exception:
             logger.exception("Error handling %s", self.event_type)
-            self.handle_error(event, client)
 
     def handle_event(self, event, client):
-        """Implement event handling logic in subclasses.
+        """Implement event handling logic.
 
         Args:
             event (dict): The Slack event payload.
             client (WebClient): The Slack WebClient instance.
 
         """
-        if conversation := self.open_conversation(client, event.get("user")):
-            blocks = self.get_render_blocks(self.get_context(event))
+        user_id = self.get_user_id(event)
+
+        if (blocks := self.get_render_blocks(self.get_context(event))) and (
+            conversation := self.open_conversation(client, user_id)
+        ):
             client.chat_postMessage(
                 blocks=blocks,
                 channel=conversation["channel"]["id"],
                 text=get_text(blocks),
             )
 
-    def handle_error(self, event, client):
-        """Handle errors during event processing and notify the user if possible.
-
-        Args:
-            event (dict): The Slack event payload.
-            client (WebClient): The Slack WebClient instance.
-
-        """
-        try:
-            conversation = self.open_conversation(client, event.get("user"))
-            client.chat_postMessage(
-                channel=conversation["channel"]["id"],
-                text=":warning: An error occurred processing your request.",
+        if ephemeral_message := self.ephemeral_message:
+            client.chat_postEphemeral(
+                blocks=ephemeral_message,
+                channel=event["channel"],
+                text=get_text(ephemeral_message),
+                user=user_id,
             )
-        except Exception:
-            logger.exception("Failed to send error notification")
 
     def open_conversation(self, client, user_id):
         """Open a DM conversation with a user.
@@ -199,8 +193,16 @@ class EventBase:
             str: The template file name in snake_case.
 
         """
-        file_name = "".join(
-            [f"_{c.lower()}" if c.isupper() else c for c in self.__class__.__name__]
-        ).lstrip("_")
+        return f"events/{convert_to_snake_case(self.__class__.__name__)}.jinja"
 
-        return f"events/{file_name}.jinja"
+    def get_user_id(self, event) -> str:
+        """Get the user ID from the event.
+
+        Args:
+            event (dict): The Slack event payload.
+
+        Returns:
+            str: The user ID.
+
+        """
+        return event["user"]
