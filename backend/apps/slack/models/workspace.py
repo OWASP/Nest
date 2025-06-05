@@ -15,7 +15,7 @@ class Workspace(TimestampedModel):
         verbose_name_plural = "Workspaces"
 
     name = models.CharField(verbose_name="Workspace Name", max_length=100, default="")
-    slack_workspace_id = models.CharField(verbose_name="Workspace ID", max_length=50, unique=True)
+    slack_workspace_id = models.CharField(verbose_name="Workspace ID", max_length=100, unique=True)
 
     def __str__(self):
         """Workspace human readable representation."""
@@ -29,4 +29,5 @@ class Workspace(TimestampedModel):
             str: The bot token for the workspace.
 
         """
-        return os.getenv(f"SLACK_BOT_TOKEN_{self.slack_workspace_id.upper()}", "")
+        env_key = f"SLACK_BOT_TOKEN_{self.slack_workspace_id.upper().replace('-','_')}"
+        return os.getenv(env_key, "")
