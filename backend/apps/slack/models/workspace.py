@@ -15,12 +15,9 @@ class Workspace(TimestampedModel):
         verbose_name_plural = "Workspaces"
 
     name = models.CharField(verbose_name="Workspace Name", max_length=100, default="")
-        slack-member-count-sync
+    name = models.CharField(verbose_name="Workspace Name", max_length=100, default="")
     slack_workspace_id = models.CharField(verbose_name="Workspace ID", max_length=100, unique=True)
-
-    slack_workspace_id = models.CharField(verbose_name="Workspace ID", max_length=50, unique=True)
     total_members_count = models.PositiveIntegerField(default=0, verbose_name="Members count")
-        main
 
     def __str__(self):
         """Workspace human readable representation."""
