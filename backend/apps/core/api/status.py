@@ -13,5 +13,10 @@ def status(request: HttpRequest) -> JsonResponse:
     Returns:
         JsonResponse containing the application version
     """
+    if request.method != 'GET':
+        return JsonResponse(
+            {'error': f'Method {request.method} is not allowed'},
+            status=requests.codes.method_not_allowed
+        )
     version = getattr(settings, 'RELEASE_VERSION', 'unknown')
     return JsonResponse({"version": version})
