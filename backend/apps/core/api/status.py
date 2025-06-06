@@ -3,7 +3,7 @@ from django.conf import settings
 from django.http import HttpRequest, JsonResponse
 
 
-def status(request: HttpRequest) -> JsonResponse:
+def status_view(request: HttpRequest) -> JsonResponse:
     """
     Return the current application version.
     
