@@ -95,19 +95,21 @@ class Command(BaseCommand):
         main
 
                 for conversation_data in response["channels"]:
-                    try:
-                        info_response = self._call_slack_api(
-                            client.conversations_info,
-                            channel=conversation_data["id"],
-                            include_num_members=True,
-                        )
-                        conversation_data["num_members"] = info_response["channel"].get("num_members")
-                    except SlackApiError as e:
-                        self.stdout.write(
-                            self.style.WARNING(f"Failed to get member count for {conversation_data['id']}: {e}")
-                        )
-                        conversation_data["num_members"] = None
-
+                    # Use member count from conversations.list when available
+                    if "num_members" not in conversation_data:
+                        # Fallback for types without num_members (e.g., DMs)
+                        try:
+                            info = self._call_slack_api(
+                                client.conversations_info,
+                                channel=conversation_data["id"],
+                                include_num_members=True,
+                            )
+                            conversation_data["num_members"] = info["channel"].get("num_members")
+                        except SlackApiError as e:
+                            self.stdout.write(
+                                self.style.WARNING(f"Failed to get member count for {conversation_data['id']}: {e}")
+                            )
+                            conversation_data["num_members"] = None
                     if (member := Conversation.update_data(conversation_data, workspace)):
                         conversations.append(member)
 
