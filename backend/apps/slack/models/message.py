@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import truncate
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.member import Member
 
@@ -35,12 +36,7 @@ class Message(TimestampedModel):
 
     def __str__(self):
         """Human readable representation."""
-        text_display_limit = 50
-        text_preview = (
-            self.text[:text_display_limit] + "..."
-            if len(self.text) > text_display_limit
-            else self.text
-        )
+        text_preview = truncate(self.text, 50)
         return f"{text_preview}"
 
     def from_slack(

@@ -135,6 +135,22 @@ class TestSlackSyncMessagesCommand:
             ],
         }
 
+    @pytest.fixture
+    def mock_user_info_response(self):
+        """Create a mock Slack users_info response."""
+        return {
+            "ok": True,
+            "user": {
+                "id": "U12345",
+                "name": "testuser",
+                "profile": {
+                    "real_name": "Test User",
+                    "display_name": "testuser",
+                    "email": "test@example.com",
+                },
+            },
+        }
+
     def test_handle_no_workspaces(self, command):
         """Test handle when no workspaces exist."""
         stdout = StringIO()
@@ -225,8 +241,9 @@ class TestSlackSyncMessagesCommand:
             "text": "User joined channel",
         }
 
+        mock_client = Mock()
         result = command._create_message_from_data(
-            client=Mock(),
+            client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
             is_thread_reply=False,
@@ -242,8 +259,9 @@ class TestSlackSyncMessagesCommand:
             "user": "U12345",
         }
 
+        mock_client = Mock()
         result = command._create_message_from_data(
-            client=Mock(),
+            client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
             is_thread_reply=False,
@@ -259,8 +277,9 @@ class TestSlackSyncMessagesCommand:
             "text": "Hello world!",
         }
 
+        mock_client = Mock()
         result = command._create_message_from_data(
-            client=Mock(),
+            client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
             is_thread_reply=False,
@@ -269,7 +288,9 @@ class TestSlackSyncMessagesCommand:
 
         assert result is None
 
-    def test_create_message_from_data_member_not_found(self, command, mock_conversation):
+    def test_create_message_from_data_member_not_found(
+        self, command, mock_conversation, mock_user_info_response
+    ):
         """Test _create_message_from_data when member is not found."""
         message_data = {
             "ts": TEST_MESSAGE_TS,
@@ -277,20 +298,27 @@ class TestSlackSyncMessagesCommand:
             "user": "U12345",
         }
 
+        mock_client = Mock()
+        mock_client.users_info.return_value = mock_user_info_response
+
         stdout = StringIO()
-        with patch.object(Member.objects, "get", side_effect=Member.DoesNotExist):
+        with (
+            patch.object(Member.objects, "get", side_effect=Member.DoesNotExist),
+            patch.object(Member, "update_data", return_value=Mock(spec=Member)),
+            patch.object(Message, "update_data", return_value=Mock(spec=Message)),
+        ):
             command.stdout = stdout
             result = command._create_message_from_data(
-                client=Mock(),
+                client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
                 is_thread_reply=False,
                 parent_message=None,
             )
 
-        assert result is None
+        assert result is not None
         output = stdout.getvalue()
-        assert "Member U12345 not found in database" in output
+        assert "Created new member: U12345" in output
 
     @patch("apps.slack.management.commands.slack_sync_messages.Message.update_data")
     def test_create_message_from_data_regular_message(
@@ -306,9 +334,10 @@ class TestSlackSyncMessagesCommand:
         mock_message = Mock(spec=Message)
         mock_update_data.return_value = mock_message
 
+        mock_client = Mock()
         with patch.object(Member.objects, "get", return_value=mock_member):
             result = command._create_message_from_data(
-                client=Mock(),
+                client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
                 is_thread_reply=False,

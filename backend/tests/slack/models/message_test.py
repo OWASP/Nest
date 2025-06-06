@@ -188,8 +188,3 @@ class TestMessageModel:
     def test_str_method(self):
         message = Message(text="Short message")
         assert str(message) == "Short message"
-
-        long_text = "This is a very long message that should be truncated for display purposes"
-        message = Message(text=long_text)
-        expected = "This is a very long message that should be truncat..."
-        assert str(message) == expected

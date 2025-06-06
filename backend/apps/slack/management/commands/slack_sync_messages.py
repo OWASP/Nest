@@ -280,10 +280,21 @@ class Command(BaseCommand):
                     slack_user_id=slack_user_id, workspace=conversation.workspace
                 )
             except Member.DoesNotExist:
-                self.stdout.write(
-                    self.style.WARNING(f"Member {slack_user_id} not found in database")
-                )
-                return None
+                try:
+                    user_info = client.users_info(user=slack_user_id)
+                    self._handle_slack_response(user_info, "users_info")
+
+                    user_data = user_info["user"]
+                    author = Member.update_data(user_data, conversation.workspace, save=True)
+
+                    self.stdout.write(self.style.SUCCESS(f"Created new member: {slack_user_id}"))
+                except SlackApiError as e:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Failed to fetch user data for {slack_user_id}: {e.response['error']}"
+                        )
+                    )
+                    return None
 
             return Message.update_data(
                 data=message_data,

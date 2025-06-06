@@ -2,11 +2,23 @@
 
 from django.contrib import admin, messages
 
+from apps.slack.models.chunk import Chunk
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.event import Event
 from apps.slack.models.member import Member
 from apps.slack.models.message import Message
 from apps.slack.models.workspace import Workspace
+
+
+class ChunkAdmin(admin.ModelAdmin):
+    list_display = (
+        "message",
+        "chunk_text",
+    )
+    search_fields = (
+        "message__slack_message_id",
+        "chunk_text",
+    )
 
 
 class ConversationAdmin(admin.ModelAdmin):
@@ -147,6 +159,7 @@ class WorkspaceAdmin(admin.ModelAdmin):
     )
 
 
+admin.site.register(Chunk, ChunkAdmin)
 admin.site.register(Conversation, ConversationAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Member, MemberAdmin)
