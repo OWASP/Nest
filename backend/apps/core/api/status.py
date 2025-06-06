@@ -1,7 +1,7 @@
 """API endpoint for application status information."""
 from django.conf import settings
 from django.http import HttpRequest, JsonResponse
-
+import requests
 
 def status_view(request: HttpRequest) -> JsonResponse:
     """
