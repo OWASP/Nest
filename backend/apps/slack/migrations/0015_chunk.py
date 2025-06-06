@@ -5,27 +5,44 @@ import pgvector.django.vector
 from django.db import migrations, models
 from pgvector.django import VectorExtension
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('slack', '0014_message'),
+        ("slack", "0014_message"),
     ]
 
     operations = [
         VectorExtension(),
         migrations.CreateModel(
-            name='Chunk',
+            name="Chunk",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('chunk_text', models.TextField(verbose_name='Chunk Text')),
-                ('embedding', pgvector.django.vector.VectorField(dimensions=1536, verbose_name='Chunk Embedding')),
-                ('message', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='chunks', to='slack.message')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                ("chunk_text", models.TextField(verbose_name="Chunk Text")),
+                (
+                    "embedding",
+                    pgvector.django.vector.VectorField(
+                        dimensions=1536, verbose_name="Chunk Embedding"
+                    ),
+                ),
+                (
+                    "message",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="chunks",
+                        to="slack.message",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Chunks',
-                'db_table': 'slack_chunks',
+                "verbose_name": "Chunks",
+                "db_table": "slack_chunks",
             },
         ),
     ]

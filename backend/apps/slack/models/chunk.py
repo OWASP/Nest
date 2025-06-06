@@ -1,10 +1,12 @@
 """Slack app chunk model."""
 
 from django.db import models
-from apps.common.models import TimestampedModel
-from apps.slack.models.message import Message
 from pgvector.django import VectorField
+
+from apps.common.models import TimestampedModel
 from apps.common.utils import truncate
+from apps.slack.models.message import Message
+
 
 class Chunk(TimestampedModel):
     """Slack Chunk model."""
@@ -13,12 +15,9 @@ class Chunk(TimestampedModel):
         db_table = "slack_chunks"
         verbose_name = "Chunks"
 
-    message = models.ForeignKey(
-        Message, on_delete=models.CASCADE, related_name="chunks"
-    )
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="chunks")
     chunk_text = models.TextField(verbose_name="Chunk Text")
     embedding = VectorField(verbose_name="Chunk Embedding", dimensions=1536)
-
 
     def __str__(self):
         """Human readable representation."""
@@ -29,18 +28,17 @@ class Chunk(TimestampedModel):
     def bulk_save(chunks, fields=None):
         """Bulk save chunks."""
         from apps.common.models import BulkSaveModel
+
         BulkSaveModel.bulk_save(Chunk, chunks, fields=fields)
 
     @staticmethod
-    def update_data(chunk_text: str, message: Message, embedding=None, *, save: bool = True) -> "Chunk":
+    def update_data(
+        chunk_text: str, message: Message, embedding=None, *, save: bool = True
+    ) -> "Chunk":
         """Create or update chunk data."""
-        chunk = Chunk(
-            message=message,
-            chunk_text=chunk_text,
-            embedding=embedding
-        )
-        
+        chunk = Chunk(message=message, chunk_text=chunk_text, embedding=embedding)
+
         if save:
             chunk.save()
-        
+
         return chunk
