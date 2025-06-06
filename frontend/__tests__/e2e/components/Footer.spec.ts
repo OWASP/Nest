@@ -35,6 +35,13 @@ test.describe('Footer - Desktop (Chrome)', () => {
     await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
   })
+   test('should display the frontend version', async ({ page }) => {
+    // The version is read from the environment at build time,
+    // so we just check for its presence in the rendered footer.
+    // This regex looks for "Frontend Version: " followed by a version number like "x.y.z".
+    const versionRegex = /Frontend Version: \d+\.\d+\.\d+/;
+    await expect(page.getByText(versionRegex)).toBeVisible();
+  })
 })
 
 // Mobile tests (iPhone 13)
@@ -75,5 +82,12 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
+  })
+  test('should display the frontend version', async ({ page }) => {
+    // The version is read from the environment at build time,
+    // so we just check for its presence in the rendered footer.
+    // This regex looks for "Frontend Version: " followed by a version number like "x.y.z".
+    const versionRegex = /Frontend Version: \d+\.\d+\.\d+/;
+    await expect(page.getByText(versionRegex)).toBeVisible();
   })
 })
