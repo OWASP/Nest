@@ -22,7 +22,7 @@ class Command(BaseCommand):
             )
             return
 
-        openai.api_key = openai_api_key
+        self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
         messages = Message.objects.all()
         total_messages = messages.count()
@@ -51,13 +51,14 @@ class Command(BaseCommand):
             return []
 
         try:
-            response = openai.embeddings.create(model="text-embedding-3-small", input=chunk_texts)
+            response = self.openai_client.embeddings.create(
+                model="text-embedding-3-small", input=chunk_texts
+            )
             embeddings = [d.embedding for d in response.data]
             return [
                 Chunk(message=message, chunk_text=text, embedding=embedding)
-                for text, embedding in zip(chunk_texts, embeddings, strict=False)
+                for text, embedding in zip(chunk_texts, embeddings, strict=True)
             ]
-
         except openai.error.OpenAIError as e:
             self.stdout.write(
                 self.style.ERROR(f"OpenAI API error for message {message.slack_message_id}: {e}")

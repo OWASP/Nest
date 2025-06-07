@@ -90,7 +90,6 @@ class Command(BaseCommand):
             )
 
             if include_threads:
-                self.stdout.write("Fetching thread replies...")
                 self._fetch_thread_replies(
                     client=client,
                     conversation=conversation,
@@ -154,7 +153,6 @@ class Command(BaseCommand):
 
                 if batch_messages:
                     Message.bulk_save(batch_messages)
-                    self.stdout.write(f"Saved {len(batch_messages)} parent messages")
                     batch_messages = []
 
                 cursor = response.get("response_metadata", {}).get("next_cursor")
@@ -180,12 +178,9 @@ class Command(BaseCommand):
     ):
         """Fetch all thread replies for parent messages."""
         if not parent_messages:
-            self.stdout.write("No threaded parent messages to process")
             return
 
         replies_to_save = []
-
-        self.stdout.write(f"Processing {len(parent_messages)} threaded parent messages")
 
         for parent_message in parent_messages:
             try:

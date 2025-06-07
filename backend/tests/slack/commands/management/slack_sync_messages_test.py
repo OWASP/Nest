@@ -354,23 +354,6 @@ class TestSlackSyncMessagesCommand:
             save=False,
         )
 
-    def test_fetch_thread_replies_no_parents(self, command, mock_conversation):
-        """Test _fetch_thread_replies with no parent messages."""
-        mock_client = Mock()
-
-        stdout = StringIO()
-        command.stdout = stdout
-
-        command._fetch_thread_replies(
-            client=mock_client,
-            conversation=mock_conversation,
-            parent_messages=[],
-            delay=0.5,
-        )
-
-        output = stdout.getvalue()
-        assert "No threaded parent messages to process" in output
-
     @patch("apps.slack.management.commands.slack_sync_messages.time.sleep")
     def test_fetch_thread_replies_success(
         self, mock_sleep, command, mock_conversation, mock_member, mock_slack_replies_response
