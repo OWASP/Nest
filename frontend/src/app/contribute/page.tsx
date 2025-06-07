@@ -9,6 +9,7 @@ import { getFilteredIcons } from 'utils/utility'
 
 import Card from 'components/Card'
 import DialogComp from 'components/Modal'
+import PageLayout from 'components/PageLayout'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ContributePage = () => {
@@ -70,19 +71,21 @@ const ContributePage = () => {
   }
 
   return (
-    <SearchPageLayout
-      currentPage={currentPage}
-      empty="No issues found"
-      indexName="issues"
-      isLoaded={isLoaded}
-      onPageChange={handlePageChange}
-      onSearch={handleSearch}
-      searchPlaceholder="Search for issues..."
-      searchQuery={searchQuery}
-      totalPages={totalPages}
-    >
-      {issues && issues.map(renderContributeCard)}
-    </SearchPageLayout>
+    <PageLayout>
+      <SearchPageLayout
+        currentPage={currentPage}
+        empty="No issues found"
+        indexName="issues"
+        isLoaded={isLoaded}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchPlaceholder="Search for issues..."
+        searchQuery={searchQuery}
+        totalPages={totalPages}
+      >
+        {issues && issues.map(renderContributeCard)}
+      </SearchPageLayout>
+    </PageLayout>
   )
 }
 

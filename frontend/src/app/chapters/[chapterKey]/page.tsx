@@ -10,6 +10,7 @@ import { TopContributorsTypeGraphql } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -60,15 +61,21 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <DetailsCard
-      details={details}
-      geolocationData={chapter}
-      is_active={chapter.isActive}
-      socialLinks={chapter.relatedUrls}
-      summary={chapter.summary}
-      title={chapter.name}
-      topContributors={topContributors}
-      type="chapter"
-    />
+    <PageLayout
+      breadcrumbItems={[
+        { title: chapter.name, path: `/chapters/${chapter.key}` },
+      ]}
+    >
+      <DetailsCard
+        details={details}
+        geolocationData={chapter}
+        is_active={chapter.isActive}
+        socialLinks={chapter.relatedUrls}
+        summary={chapter.summary}
+        title={chapter.name}
+        topContributors={topContributors}
+        type="chapter"
+      />
+    </PageLayout>
   )
 }

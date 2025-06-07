@@ -70,7 +70,8 @@ describe('OrganizationDetailsPage', () => {
     render(<OrganizationDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Organization')).toBeInTheDocument()
+      const title = screen.getByRole('heading', { name: 'Test Organization' })
+      expect(title).toBeInTheDocument()
     })
 
     expect(screen.getByText('@test-org')).toBeInTheDocument()

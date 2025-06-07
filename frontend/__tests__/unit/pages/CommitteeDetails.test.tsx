@@ -51,7 +51,8 @@ describe('CommitteeDetailsPage Component', () => {
   test('renders committee data correctly', async () => {
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Test Committee')).toBeInTheDocument()
+      const title = screen.getByRole('heading', { name: 'Test Committee' })
+      expect(title).toBeInTheDocument()
     })
     expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
     expect(screen.getByText('Leader 1')).toBeInTheDocument()
