@@ -5,7 +5,9 @@ from django.core.management.base import BaseCommand
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
-MINIMUM_LEADERS = 3
+# Minimum number of leaders required for a project to be compliant
+# See issue #711 for more details
+MINIMUM_LEADERS = 2
 
 
 class Command(BaseCommand):
@@ -32,30 +34,19 @@ class Command(BaseCommand):
             "unanswered_issues_count": "unanswered_issues_count",
             "unassigned_issues_count": "unassigned_issues_count",
         }
-        updated_count = errors_count = 0
+        to_save = []
         for project in projects:
-            try:
-                self.stdout.write(
-                    self.style.NOTICE(f"Updating metrics for project: {project.name}")
-                )
-                metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
+            self.stdout.write(self.style.NOTICE(f"Updating metrics for project: {project.name}"))
+            metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
 
-                # Update metrics based on requirements
-                for metric_field, project_field in field_mappings.items():
-                    value = getattr(project, project_field)
-                    setattr(metrics, metric_field, value)
+            # Update metrics based on requirements
+            for metric_field, project_field in field_mappings.items():
+                value = getattr(project, project_field)
+                setattr(metrics, metric_field, value)
 
-                is_leaders_compliant = project.leaders_count >= MINIMUM_LEADERS
-                metrics.is_project_leaders_requirements_compliant = is_leaders_compliant
-                metrics.save()
-                updated_count += 1
-            except (AttributeError, ValueError, TypeError):
-                self.stdout.write(self.style.ERROR(f"Error updating project {project.name}"))
-                errors_count += 1
+            is_leaders_compliant = project.leaders_count >= MINIMUM_LEADERS
+            metrics.is_project_leaders_requirements_compliant = is_leaders_compliant
+            to_save.append(metrics)
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Updated {updated_count} projects health metrics successfully. "
-                f"Encountered errors for {errors_count} projects."
-            )
-        )
+        ProjectHealthMetrics.bulk_save(to_save)
+        self.stdout.write(self.style.SUCCESS("Updated projects health metrics successfully. "))

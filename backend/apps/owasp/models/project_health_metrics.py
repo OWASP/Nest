@@ -4,10 +4,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 
 
-class ProjectHealthMetrics(TimestampedModel):
+class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     """Project health metrics model."""
 
     class Meta:
@@ -97,6 +97,17 @@ class ProjectHealthMetrics(TimestampedModel):
         if self.owasp_page_last_updated_at:
             return (timezone.now() - self.owasp_page_last_updated_at).days
         return 0
+
+    @staticmethod
+    def bulk_save(metrics: list, fields: list | None = None) -> None:  # type: ignore[override]
+        """Bulk save method for ProjectHealthMetrics.
+
+        Args:
+            metrics (list[ProjectHealthMetrics]): List of ProjectHealthMetrics instances to save.
+            fields (list[str], optional): List of fields to update. Defaults to None.
+
+        """
+        BulkSaveModel.bulk_save(ProjectHealthMetrics, metrics, fields=fields)
 
     def __str__(self) -> str:
         """Project health metrics human readable representation."""

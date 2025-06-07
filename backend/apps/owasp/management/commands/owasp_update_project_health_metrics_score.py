@@ -28,26 +28,25 @@ class Command(BaseCommand):
             "unanswered_issues_count": 8.0,
             "unassigned_issues_count": 8.0,
         }
+        to_save = []
         for metric in metrics:
-            try:
-                # Calculate the score based on requirements
-                requirements = ProjectHealthRequirements.objects.get(level=metric.project.level)
+            # Calculate the score based on requirements
+            self.stdout.write(
+                self.style.NOTICE(f"Updating score for project: {metric.project.name}")
+            )
+            requirements = ProjectHealthRequirements.objects.get(level=metric.project.level)
 
-                score = 0.0
-                for field, weight in weight_mapping.items():
-                    metric_value = getattr(metric, field)
-                    requirement_value = getattr(requirements, field)
+            score = 0.0
+            for field, weight in weight_mapping.items():
+                metric_value = getattr(metric, field)
+                requirement_value = getattr(requirements, field)
 
-                    if metric_value >= requirement_value:
-                        score += weight
+                if metric_value >= requirement_value:
+                    score += weight
 
-                metric.score = score
-                metric.save(update_fields=["score"])
-                self.stdout.write(
-                    self.style.SUCCESS(f"Updated score for project {metric.project.name}: {score}")
-                )
-
-            except (AttributeError, ValueError, TypeError) as e:
-                self.stdout.write(
-                    self.style.ERROR(f"Error updating project {metric.project.name}: {e}")
-                )
+            metric.score = score
+            to_save.append(metric)
+        ProjectHealthMetrics.bulk_save(to_save, fields=["score"])
+        self.stdout.write(
+            self.style.SUCCESS("Updated projects health metrics score successfully.")
+        )

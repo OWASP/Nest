@@ -145,14 +145,7 @@ class Project(
     @property
     def is_funding_requirements_compliant(self) -> bool:
         """Indicate whether project is compliant with funding requirements."""
-        if self.repositories_count == 0:
-            return True
-
-        compliant_repos = self.repositories.filter(
-            is_funding_policy_compliant=True,
-        ).count()
-
-        return compliant_repos == self.repositories_count
+        return not self.repositories.filter(is_funding_policy_compliant=False).exists()
 
     @property
     def is_tool_type(self) -> bool:
@@ -226,9 +219,9 @@ class Project(
     @property
     def pull_request_last_created_at(self) -> datetime.datetime | None:
         """Return last created pull request."""
-        if pull_request := self.pull_requests.order_by("-created_at").first():
-            return pull_request.created_at
-        return None
+        return self.pull_requests.aggregate(
+            models.Max("created_at"),
+        )["created_at__max"]
 
     @property
     def published_releases(self):

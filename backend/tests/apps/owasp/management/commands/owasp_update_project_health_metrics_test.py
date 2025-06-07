@@ -20,9 +20,13 @@ class TestUpdateProjectHealthMetricsCommand:
             patch(
                 "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects"
             ) as metrics_patch,
+            patch(
+                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
+            ) as bulk_save_patch,
         ):
             self.mock_projects = projects_patch
             self.mock_metrics = metrics_patch
+            self.mock_bulk_save = bulk_save_patch
             yield
 
     def test_handle_successful_update(self):
@@ -60,9 +64,8 @@ class TestUpdateProjectHealthMetricsCommand:
         mock_metrics_instance = MagicMock(spec=ProjectHealthMetrics)
         self.mock_metrics.get_or_create.return_value = (mock_metrics_instance, True)
         # Set the leaders count to meet compliance
-        mock_project.leaders_count = 3
+        mock_project.leaders_count = 2
         mock_metrics_instance.is_project_leaders_requirements_compliant = True
-        mock_metrics_instance.save = MagicMock()
 
         # Execute command
         with patch("sys.stdout", new=self.stdout):
@@ -73,7 +76,6 @@ class TestUpdateProjectHealthMetricsCommand:
 
         # Verify mock was called correctly
         self.mock_metrics.get_or_create.assert_called_once_with(project=mock_project)
-        mock_metrics_instance.save.assert_called_once()
 
     def test_handle_empty_projects(self):
         """Test command with no projects."""
@@ -83,21 +85,4 @@ class TestUpdateProjectHealthMetricsCommand:
             call_command("owasp_update_project_health_metrics")
 
         output = self.stdout.getvalue()
-        assert "Updated 0 projects health metrics successfully" in output
-        assert "Encountered errors for 0 projects" in output
-
-    def test_handle_exception(self):
-        """Test command handling exceptions during metrics update."""
-        mock_project = MagicMock(spec=Project)
-        mock_project.name = "Test Project"
-        self.mock_projects.return_value = [mock_project]
-
-        # Simulate an error during metrics update
-        self.mock_metrics.get_or_create.side_effect = ValueError("Test error")
-
-        with patch("sys.stdout", new=self.stdout):
-            call_command("owasp_update_project_health_metrics")
-
-        output = self.stdout.getvalue()
-        assert "Error updating project Test Project" in output
-        assert "Encountered errors for 1 projects" in output
+        assert "Updated projects health metrics successfully" in output

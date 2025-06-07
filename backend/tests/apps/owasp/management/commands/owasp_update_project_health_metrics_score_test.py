@@ -22,9 +22,13 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             patch(
                 "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.get"
             ) as requirements_patch,
+            patch(
+                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
+            ) as bulk_save_patch,
         ):
             self.mock_metrics = metrics_patch
             self.mock_requirements = requirements_patch
+            self.mock_bulk_save = bulk_save_patch
             yield
 
     def test_handle_successful_update(self):
@@ -53,6 +57,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         for field, weight in fields_weights.items():
             setattr(mock_metric, field, weight)
         mock_metric.project.level = "test_level"
+        mock_metric.project.name = "Test Project"
         self.mock_metrics.return_value = [mock_metric]
 
         mock_requirements = MagicMock(spec=ProjectHealthRequirements)
@@ -70,28 +75,5 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         self.mock_requirements.assert_called_once_with(level=mock_metric.project.level)
         # Check if score was calculated correctly
 
-        mock_metric.save.assert_called_once_with(update_fields=["score"])
-        assert (
-            f"Updated score for project {mock_metric.project.name}: {mock_metric.score}"
-            in self.stdout.getvalue()
-        )
-
-    def test_handle_update_with_errors(self):
-        """Test handling errors during metrics score update."""
-        # Create mock metric with invalid data
-        mock_metric = MagicMock(spec=ProjectHealthMetrics)
-        mock_metric.project.level = "test_level"
-        self.mock_metrics.return_value = [mock_metric]
-
-        # Simulate an error in requirements retrieval
-        self.mock_requirements.side_effect = ValueError("Invalid level")
-
-        # Execute command
-        with patch("sys.stdout", new=self.stdout):
-            call_command("owasp_update_project_health_metrics_score")
-
-        self.mock_requirements.assert_called_once_with(level=mock_metric.project.level)
-        assert (
-            f"Error updating project {mock_metric.project.name}: Invalid level"
-            in self.stdout.getvalue()
-        )
+        assert "Updated projects health metrics score successfully." in self.stdout.getvalue()
+        assert "Updating score for project: Test Project" in self.stdout.getvalue()
