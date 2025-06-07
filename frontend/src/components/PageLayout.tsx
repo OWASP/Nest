@@ -5,7 +5,7 @@ import BreadCrumbs, { BreadCrumbItem } from 'components/BreadCrumbs'
 
 export interface PageLayoutProps {
   breadcrumbItems?: BreadCrumbItem[],
-  children: React.ReactNode 
+  children: React.ReactNode
 }
 
 function generateBreadcrumbs(pathname: string, excludeLast = false): BreadCrumbItem[] {
