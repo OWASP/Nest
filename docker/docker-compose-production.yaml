@@ -37,7 +37,7 @@ services:
 
   production-nest-db:
     container_name: production-nest-db
-    image: postgres:16.4
+    image: pgvector/pgvector:pg16
     env_file: .env.db
     healthcheck:
       interval: 5s
