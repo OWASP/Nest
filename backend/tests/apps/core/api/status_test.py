@@ -1,43 +1,32 @@
 import json
-from unittest.mock import Mock
 
 import pytest
-import requests
 from django.conf import settings
-
-from apps.core.api.status import status_view
+from django.test import Client
+from django.urls import reverse
+from requests.status_codes import codes
 
 
 class TestStatusEndpoint:
-    """
-    Test suite for the status endpoint.
-    """
+    """Test suite for the status endpoint."""
+
+    @pytest.fixture(autouse=True)
+    def setup_client(self):
+        self.client = Client()
+        self.url = reverse("get_status")
 
     def test_status_endpoint_valid_request(self):
-        """
-        Test a valid GET request to the status endpoint.
-        """
-        mock_request = Mock()
-        mock_request.method = "GET"
-        expected_version = settings.RELEASE_VERSION
-        expected_result = {"version": expected_version}
+        """Test a valid GET request to the status endpoint."""
+        response = self.client.get(self.url)
 
-        response = status_view(mock_request)
+        assert response.status_code == codes.ok
         response_data = json.loads(response.content)
 
-        assert response.status_code == requests.codes.ok
-        assert response_data == expected_result
+        assert response_data == {"version": settings.RELEASE_VERSION}
 
-    @pytest.mark.parametrize("invalid_method", ["POST", "PUT", "DELETE", "PATCH"])
+    @pytest.mark.parametrize("invalid_method", ["post", "put", "delete", "patch"])
     def test_status_endpoint_invalid_method(self, invalid_method):
-        """
-        Test that methods other than GET are not allowed.
-        """
-        mock_request = Mock()
-        mock_request.method = invalid_method
+        """Test that methods other than GET are not allowed."""
+        response = getattr(self.client, invalid_method)(self.url)
 
-        response = status_view(mock_request)
-        response_data = json.loads(response.content)
-
-        assert response.status_code == requests.codes.method_not_allowed
-        assert response_data["error"] == f"Method {invalid_method} is not allowed"
+        assert response.status_code == codes.not_allowed

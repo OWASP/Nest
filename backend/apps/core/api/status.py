@@ -1,22 +1,23 @@
 """API endpoint for application status information."""
+
 from django.conf import settings
 from django.http import HttpRequest, JsonResponse
-import requests
+from django.views.decorators.http import require_GET
 
-def status_view(request: HttpRequest) -> JsonResponse:
-    """
-    Return the current application version.
-    
+
+@require_GET
+def get_status(_request: HttpRequest) -> JsonResponse:
+    """Return the current application version.
+
     Args:
-        request: HTTP request object (unused but required by Django)
-        
+        _request: HTTP request object (unused)
+
     Returns:
         JsonResponse containing the application version
+
     """
-    if request.method != 'GET':
-        return JsonResponse(
-            {'error': f'Method {request.method} is not allowed'},
-            status=requests.codes.method_not_allowed
-        )
-    version = getattr(settings, 'RELEASE_VERSION', 'unknown')
-    return JsonResponse({"version": version})
+    return JsonResponse(
+        {
+            "version": settings.RELEASE_VERSION or settings.ENVIRONMENT.lower(),
+        }
+    )
