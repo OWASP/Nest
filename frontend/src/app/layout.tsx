@@ -67,7 +67,6 @@ export default function RootLayout({
       >
         <Providers>
           <Header />
-          <GoogleTagManager gtmId={GTM_ID} />
           {children}
           <Footer />
           <ScrollToTop />

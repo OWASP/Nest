@@ -52,7 +52,7 @@ const CommitteesPage = () => {
   }
 
   return (
-    <PageLayout bcItems={[{ title: 'Committees', href: '/committees' }]}>
+    <PageLayout>
       <SearchPageLayout
         currentPage={currentPage}
         empty="No committees found"

@@ -62,9 +62,8 @@ export default function ChapterDetailsPage() {
   ]
   return (
     <PageLayout
-      bcItems={[
-        { title: 'Chapters', href: '/chapters' },
-        { title: chapter.name, href: `/chapters/${chapter.key}` },
+      breadcrumbItems={[
+        { title: chapter.name, path: `/chapters/${chapter.key}` },
       ]}
     >
       <DetailsCard

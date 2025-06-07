@@ -99,7 +99,7 @@ const About = () => {
   }
 
   return (
-    <PageLayout bcItems={[{ title: 'About', href: '/about' }]}>
+    <PageLayout>
       <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
         <div className="mx-auto max-w-6xl">
           <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>

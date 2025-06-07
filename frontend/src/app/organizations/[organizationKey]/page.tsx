@@ -115,9 +115,8 @@ const OrganizationDetailsPage = () => {
 
   return (
     <PageLayout
-      bcItems={[
-        { title: 'Organizations', href: '/organizations' },
-        { title: organization.name, href: `/organizations/${organizationKey}` },
+      breadcrumbItems={[
+        { title: organization.name, path: `/organizations/${organizationKey}` },
       ]}
     >
       <DetailsCard

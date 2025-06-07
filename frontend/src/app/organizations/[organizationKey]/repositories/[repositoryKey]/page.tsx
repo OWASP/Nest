@@ -108,13 +108,10 @@ const RepositoryDetailsPage = () => {
   ]
   return (
     <PageLayout
-      bcItems={[
-        { title: 'Organizations', href: '/organizations' },
-        { title: organizationKey, href: `/organizations/${organizationKey}` },
-        { title: 'Repositories', href: `/organizations/${organizationKey}/repositories` },
+      breadcrumbItems={[
         {
           title: repository.name,
-          href: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
+          path: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
         },
       ]}
     >

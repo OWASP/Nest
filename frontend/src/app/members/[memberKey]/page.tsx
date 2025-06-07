@@ -193,9 +193,8 @@ const UserDetailsPage: React.FC = () => {
 
   return (
     <PageLayout
-      bcItems={[
-        { title: 'Members', href: '/members' },
-        { title: user?.name || user?.login, href: `/members/${memberKey}` },
+      breadcrumbItems={[
+        { title: user?.name || user?.login, path: `/members/${memberKey}` },
       ]}
     >
       <DetailsCard

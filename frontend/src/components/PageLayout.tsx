@@ -1,20 +1,41 @@
+import _ from 'lodash'
+import { usePathname } from 'next/navigation'
 import React from 'react'
-import BreadCrumbs from 'components/BreadCrumbs'
+import BreadCrumbs, { BreadCrumbItem } from 'components/BreadCrumbs'
 
-interface BreadcrumbItem {
-  title: string
-  href: string
+export interface PageLayoutProps {
+  breadcrumbItems?: BreadCrumbItem[],
+  children: React.ReactNode 
 }
+
+function generateBreadcrumbs(pathname: string, excludeLast = false): BreadCrumbItem[] {
+  let segments = _.filter(_.split(pathname || '', '/'))
+  if (excludeLast && segments.length > 0) {
+    segments = segments.slice(0, -1)
+  }
+  let path = ''
+  return segments.map((segment) => {
+    path += `/${segment}`
+    return {
+      title: segment.charAt(0).toUpperCase() + segment.slice(1),
+      path,
+    }
+  })
+}
+
 export default function PageLayout({
-  bcItems,
+  breadcrumbItems,
   children,
-}: {
-  bcItems: BreadcrumbItem[]
-  children: React.ReactNode
-}) {
+}: PageLayoutProps) {
+  const pathname = usePathname()
+  const autoBreadcrumbs = generateBreadcrumbs(pathname, !_.isEmpty(breadcrumbItems))
+  const allBreadcrumbs = breadcrumbItems
+    ? [...autoBreadcrumbs, ...breadcrumbItems]
+    : autoBreadcrumbs
+
   return (
     <>
-      <BreadCrumbs bcItems={bcItems} />
+      <BreadCrumbs breadcrumbItems={allBreadcrumbs} />
       <main>{children}</main>
     </>
   )

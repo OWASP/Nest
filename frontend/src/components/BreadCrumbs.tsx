@@ -6,17 +6,17 @@ import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
 import _ from 'lodash'
 import Link from 'next/link'
 
-interface BCrumbItem {
+export interface BreadCrumbItem {
   title: string
-  href: string
+  path: string
 }
 
-interface BreadCrumbsProps {
-  bcItems: BCrumbItem[]
+export interface BreadCrumbsProps {
+  breadcrumbItems: BreadCrumbItem[]
 }
 
-export default function BreadCrumbs({ bcItems }: BreadCrumbsProps) {
-  if (_.isEmpty(bcItems)) return null
+export default function BreadCrumbs({ breadcrumbItems }: BreadCrumbsProps) {
+  if (_.isEmpty(breadcrumbItems)) return null
 
   return (
     <div className="mt-16 w-full pt-4">
@@ -42,17 +42,17 @@ export default function BreadCrumbs({ bcItems }: BreadCrumbsProps) {
             </Link>
           </BreadcrumbItem>
 
-          {bcItems.map((item, index) => {
-            const isLast = index === bcItems.length - 1
+          {breadcrumbItems.map((item, index) => {
+            const isLast = index === breadcrumbItems.length - 1
             return (
-              <BreadcrumbItem key={item.href} isDisabled={isLast}>
+              <BreadcrumbItem key={item.path} isDisabled={isLast}>
                 {isLast ? (
                   <span className="cursor-default font-semibold text-gray-600 dark:text-gray-300">
                     {item.title}
                   </span>
                 ) : (
                   <Link
-                    href={item.href}
+                    href={item.path}
                     className="hover:text-blue-700 hover:underline dark:text-blue-400"
                   >
                     {item.title}

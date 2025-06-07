@@ -77,7 +77,7 @@ const ChaptersPage = () => {
   }
 
   return (
-    <PageLayout bcItems={[{ title: 'Chapters', href: '/chapters' }]}>
+    <PageLayout>
       <SearchPageLayout
         currentPage={currentPage}
         empty="No chapters found"

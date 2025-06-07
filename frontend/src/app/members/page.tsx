@@ -51,7 +51,7 @@ const UsersPage = () => {
   }
 
   return (
-    <PageLayout bcItems={[{ title: 'Members', href: '/members' }]}>
+    <PageLayout>
       <SearchPageLayout
         currentPage={currentPage}
         empty="No Users found"

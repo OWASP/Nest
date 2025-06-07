@@ -111,9 +111,8 @@ const SnapshotDetailsPage: React.FC = () => {
 
   return (
     <PageLayout
-      bcItems={[
-        { title: 'Snapshots', href: '/snapshots' },
-        { title: snapshot?.title || 'Snapshot Details', href: `/snapshots/${snapshotKey}` },
+      breadcrumbItems={[
+        { title: snapshot?.title || 'Snapshot Details', path: `/snapshots/${snapshotKey}` },
       ]}
     >
       <div className="mx-auto min-h-screen max-w-6xl p-4">

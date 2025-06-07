@@ -3,18 +3,18 @@ import BreadCrumbs from 'components/BreadCrumbs'
 import '@testing-library/jest-dom'
 
 describe('BreadCrumbs', () => {
-  test('does not render when bcItems is empty', () => {
-    render(<BreadCrumbs bcItems={[]} />)
+  test('does not render when breadcrumb item is empty', () => {
+    render(<BreadCrumbs breadcrumbItems={[]} />)
     expect(screen.queryByText('Home')).not.toBeInTheDocument()
   })
 
   test('renders breadcrumb with multiple segments', () => {
     render(
       <BreadCrumbs
-        bcItems={[
-          { title: 'Dashboard', href: '/dashboard' },
-          { title: 'Users', href: '/dashboard/users' },
-          { title: 'Profile', href: '/dashboard/users/profile' },
+        breadcrumbItems={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Users', path: '/dashboard/users' },
+          { title: 'Profile', path: '/dashboard/users/profile' },
         ]}
       />
     )
@@ -28,9 +28,9 @@ describe('BreadCrumbs', () => {
   test('disables the last segment (non-clickable)', () => {
     render(
       <BreadCrumbs
-        bcItems={[
-          { title: 'Settings', href: '/settings' },
-          { title: 'Account', href: '/settings/account' },
+        breadcrumbItems={[
+          { title: 'Settings', path: '/settings' },
+          { title: 'Account', path: '/settings/account' },
         ]}
       />
     )
@@ -40,13 +40,13 @@ describe('BreadCrumbs', () => {
     expect(lastSegment.closest('a')).toBeNull()
   })
 
-  test('links have correct href attributes', () => {
+  test('links have correct path attributes', () => {
     render(
       <BreadCrumbs
-        bcItems={[
-          { title: 'Dashboard', href: '/dashboard' },
-          { title: 'Users', href: '/dashboard/users' },
-          { title: 'Profile', href: '/dashboard/users/profile' },
+        breadcrumbItems={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Users', path: '/dashboard/users' },
+          { title: 'Profile', path: '/dashboard/users/profile' },
         ]}
       />
     )
@@ -63,9 +63,9 @@ describe('BreadCrumbs', () => {
   test('links have hover styles', () => {
     render(
       <BreadCrumbs
-        bcItems={[
-          { title: 'Dashboard', href: '/dashboard' },
-          { title: 'Users', href: '/dashboard/users' },
+        breadcrumbItems={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Users', path: '/dashboard/users' },
         ]}
       />
     )

@@ -81,9 +81,8 @@ export default function CommitteeDetailsPage() {
 
   return (
     <PageLayout
-      bcItems={[
-        { title: 'Committees', href: '/committees' },
-        { title: committee.name, href: `/committees/${committeeKey}` },
+      breadcrumbItems={[
+        { title: committee.name, path: `/committees/${committeeKey}` },
       ]}
     >
       <DetailsCard

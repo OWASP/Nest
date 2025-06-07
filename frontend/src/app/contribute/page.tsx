@@ -71,7 +71,7 @@ const ContributePage = () => {
   }
 
   return (
-    <PageLayout bcItems={[{ title: 'Contribute', href: '/contribute' }]}>
+    <PageLayout>
       <SearchPageLayout
         currentPage={currentPage}
         empty="No issues found"

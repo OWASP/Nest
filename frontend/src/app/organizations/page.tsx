@@ -52,7 +52,7 @@ const OrganizationPage = () => {
   }
 
   return (
-    <PageLayout bcItems={[{ title: 'Organizations', href: '/organizations' }]}>
+    <PageLayout>
       <SearchPageLayout
         currentPage={currentPage}
         empty="No organizations found"

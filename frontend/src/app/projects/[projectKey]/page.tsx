@@ -91,9 +91,8 @@ const ProjectDetailsPage = () => {
   ]
   return (
     <PageLayout
-      bcItems={[
-        { title: 'Projects', href: '/projects' },
-        { title: project.name, href: `/projects/${project.key}` },
+      breadcrumbItems={[
+        { title: project.name, path: `/projects/${project.key}` },
       ]}
     >
       <DetailsCard
