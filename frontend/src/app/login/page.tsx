@@ -30,7 +30,6 @@ export default function LoginPage() {
   if (!isAuthEnable()) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <FontAwesomeIcon icon={faSpinner} height={16} width={16} />
         <span className="text-lg text-gray-500">Authentication is disabled</span>
       </div>
     )
