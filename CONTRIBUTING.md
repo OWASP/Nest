@@ -384,7 +384,7 @@ To setup NestBot development environment, follow these steps:
    - Copy the content from [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) to the `App Manifest` from `Features`, and replace all `nest.owasp.org` with your ngrok domain (keep the slack endpoints like the original, just put your ngrok link).
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
-3. **Update environment Variables with your NestBot Configuration**:
+3. **Update environment variables with your NestBot Configuration**:
 
    - Open the app dashboard.
    - Update `backend/.env` with your Slack application tokens:
