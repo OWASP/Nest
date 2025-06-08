@@ -12,7 +12,7 @@ import {
 
 const providers = []
 
-if (isAuthEnable) {
+if (isAuthEnable()) {
   providers.push(
     GitHubProvider({
       clientId: GITHUB_CLIENT_ID,
@@ -28,7 +28,7 @@ const authOptions = {
   },
   callbacks: {
     async signIn({ account }) {
-      if (!isAuthEnable && account?.provider === 'github') {
+      if (!isAuthEnable() && account?.provider === 'github') {
         return false
       }
 

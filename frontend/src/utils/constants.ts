@@ -125,4 +125,6 @@ export const userAuthStatus = {
   UNAUTHENTICATED: 'unauthenticated',
 }
 
-export const isAuthEnable = Boolean(GITHUB_CLIENT_ID)
+export const isAuthEnable = () => {
+  return Boolean(GITHUB_CLIENT_ID)
+}
