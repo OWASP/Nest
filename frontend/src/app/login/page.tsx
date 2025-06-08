@@ -7,7 +7,7 @@ import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { useEffect } from 'react'
-import { userAuthStatus } from 'utils/constants'
+import { isAuthEnable, userAuthStatus } from 'utils/constants'
 
 export default function LoginPage() {
   const { status } = useSession()
@@ -26,6 +26,15 @@ export default function LoginPage() {
       router.push('/')
     }
   }, [status, router])
+
+  if (!isAuthEnable) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center">
+        <FontAwesomeIcon icon={faSpinner} height={16} width={16} />
+        <span className="text-lg text-gray-500">Authentication is disabled</span>
+      </div>
+    )
+  }
 
   if (status === userAuthStatus.LOADING) {
     return (

@@ -2,6 +2,7 @@ import { gql } from '@apollo/client'
 import NextAuth from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
+import { isAuthEnable } from 'utils/constants'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
@@ -9,18 +10,28 @@ import {
   NEXTAUTH_URL,
 } from 'utils/credentials'
 
-const authOptions = {
-  providers: [
+const providers = []
+
+if (isAuthEnable) {
+  providers.push(
     GitHubProvider({
-      clientId: GITHUB_CLIENT_ID!,
-      clientSecret: GITHUB_CLIENT_SECRET!,
-    }),
-  ],
+      clientId: GITHUB_CLIENT_ID,
+      clientSecret: GITHUB_CLIENT_SECRET,
+    })
+  )
+}
+
+const authOptions = {
+  providers,
   session: {
     strategy: 'jwt' as const,
   },
   callbacks: {
     async signIn({ account }) {
+      if (!isAuthEnable && account?.provider === 'github') {
+        return false
+      }
+
       if (account?.provider === 'github' && account.access_token) {
         try {
           const { data } = await apolloClient.mutate({

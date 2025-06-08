@@ -3,7 +3,7 @@
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Skeleton } from '@heroui/react'
 import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
-import { userAuthStatus } from 'utils/constants'
+import { isAuthEnable, userAuthStatus } from 'utils/constants'
 
 export default function UserMenu() {
   const { data: session, status } = useSession()
@@ -15,10 +15,12 @@ export default function UserMenu() {
       </div>
     )
   }
-  if (!session) {
+
+  if (!session || !isAuthEnable) {
     return (
       <button
-        onClick={() => signIn('github', { callbackUrl: '/', prompt: 'login' })}
+        onClick={() => isAuthEnable && signIn('github', { callbackUrl: '/', prompt: 'login' })}
+        disabled={!isAuthEnable}
         className="group relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 overflow-hidden whitespace-pre rounded-md bg-[#87a1bc] px-4 py-2 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b] md:flex"
       >
         Sign in

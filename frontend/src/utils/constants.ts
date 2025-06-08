@@ -1,6 +1,7 @@
 import { faGithub, faSlack, faBluesky, faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import { Link } from 'types/link'
 import { Section } from 'types/section'
+import { GITHUB_CLIENT_ID } from 'utils/credentials'
 
 export const headerLinks: Link[] = [
   {
@@ -123,3 +124,5 @@ export const userAuthStatus = {
   LOADING: 'loading',
   UNAUTHENTICATED: 'unauthenticated',
 }
+
+export const isAuthEnable = Boolean(GITHUB_CLIENT_ID)
