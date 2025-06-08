@@ -1,7 +1,7 @@
 import { ChapterType } from 'types/chapter'
 import { ProjectType } from 'types/project'
 
-export interface ReleaseType {
+export type ReleaseType = {
   name: string
   publishedAt: string
   tagName: string
@@ -18,7 +18,7 @@ export interface SnapshotDetailsProps {
   newChapters: ChapterType[]
 }
 
-export interface Snapshots {
+export type Snapshots = {
   endAt: string
   key: string
   startAt: string

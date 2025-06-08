@@ -28,7 +28,7 @@ export interface CardProps {
   url: string
 }
 
-interface stats {
+type stats = {
   icon: IconDefinition
   pluralizedName?: string
   unit?: string

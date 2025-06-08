@@ -12,7 +12,7 @@ export interface MultiSearchBarProps {
   eventData?: EventType[]
 }
 
-export interface Suggestion {
+export type Suggestion = {
   indexName: string
   hits: ChapterType[] | EventType[] | Organization[] | ProjectType[] | User[]
   totalPages: number

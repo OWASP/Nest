@@ -1,4 +1,4 @@
-export interface IssuesDataType {
+export type IssuesDataType = {
   issues: IssueType[]
   open_issues_count: number
   total_pages: number

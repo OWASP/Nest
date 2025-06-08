@@ -1,6 +1,6 @@
 import { RepositoryCardProps } from 'types/project'
 
-export type user = {
+export interface user {
   avatar_url: string
   bio: string
   company: string
@@ -73,7 +73,7 @@ export interface UserDetailsProps extends UserBase<string> {
   topRepositories: RepositoryCardProps[]
 }
 
-export interface PullRequestsType {
+export type PullRequestsType = {
   createdAt: string
   organizationName: string
   repositoryName?: string
@@ -81,7 +81,7 @@ export interface PullRequestsType {
   url: string
 }
 
-export interface ItemCardPullRequests {
+export type ItemCardPullRequests = {
   createdAt: string
   title: string
   author: {

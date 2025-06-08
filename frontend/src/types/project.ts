@@ -7,7 +7,7 @@ export type Author = {
   name: string
 }
 
-export interface ProjectIssuesType {
+export type ProjectIssuesType = {
   author: Author
   createdAt: number
   organizationName?: string
@@ -16,7 +16,7 @@ export interface ProjectIssuesType {
   url: string
 }
 
-export interface ProjectPullRequestsType {
+export type ProjectPullRequestsType = {
   author: Author
   createdAt: string
   organizationName: string
@@ -25,7 +25,7 @@ export interface ProjectPullRequestsType {
   url: string
 }
 
-export interface ProjectMilestonesType {
+export type ProjectMilestonesType = {
   author: Author
   body: string
   closedIssuesCount: number
@@ -39,7 +39,7 @@ export interface ProjectMilestonesType {
   url?: string
 }
 
-export interface ProjectStatsType {
+export type ProjectStatsType = {
   contributors: number
   forks: number
   issues: number
@@ -69,12 +69,11 @@ export interface ProjectBase {
   url: string
 }
 
-export interface ProjectType extends ProjectBase {
+export type ProjectType = ProjectBase & {
   recentIssues: ProjectIssuesType[]
   recentPullRequests: ProjectPullRequestsType[]
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
-  topContributors: TopContributorsType[]
   recentMilestones: ProjectMilestonesType[]
 }
 

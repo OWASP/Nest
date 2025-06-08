@@ -1,6 +1,6 @@
 import { Link } from 'types/link'
 
-export interface Section {
+export type Section = {
   title: string
   links: Link[]
 }

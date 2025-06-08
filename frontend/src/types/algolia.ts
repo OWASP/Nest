@@ -3,7 +3,7 @@ export interface AlgoliaResponseType<T> {
   totalPages?: number
 }
 
-export interface AlgoliaRequestType {
+export type AlgoliaRequestType = {
   aroundLatLngViaIP?: boolean
   attributesToHighlight: string[]
   attributesToRetrieve: string[]
