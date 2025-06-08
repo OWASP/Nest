@@ -4,8 +4,6 @@ import type { NextConfig } from 'next'
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
 const nextConfig: NextConfig = {
-  // Enable source maps for production
-  productionBrowserSourceMaps: true,
   devIndicators: false,
   images: {
     // This is a list of remote patterns that Next.js will use to determine
@@ -29,6 +27,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   turbopack: {
     resolveExtensions: ['.ts', '.tsx', '.mjs', '.json', '.yaml', '.js', '.jsx'],
