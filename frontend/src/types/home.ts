@@ -1,9 +1,9 @@
-import { TopContributorsTypeGraphql } from 'types/contributor'
+import { TopContributorsType } from 'types/contributor'
 import { EventType } from 'types/event'
 import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
 
 export type MainPageData = {
-  topContributors: TopContributorsTypeGraphql[]
+  topContributors: TopContributorsType[]
   recentIssues: ProjectIssuesType[]
   recentReleases: ProjectReleaseType[]
   upcomingEvents: EventType[]

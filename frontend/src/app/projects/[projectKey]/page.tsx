@@ -91,7 +91,7 @@ const ProjectDetailsPage = () => {
   return (
     <DetailsCard
       details={projectDetails}
-      is_active={project.isActive}
+      isActive={project.isActive}
       languages={project.languages}
       pullRequests={project.recentPullRequests}
       recentIssues={project.recentIssues}

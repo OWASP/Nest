@@ -1,7 +1,7 @@
-import { ChapterTypeAlgolia } from 'types/chapter'
+import { ChapterType } from 'types/chapter'
 import { EventType } from 'types/event'
-import { OrganizationTypeAlgolia } from 'types/organization'
-import { ProjectTypeAlgolia } from 'types/project'
+import { Organization } from 'types/organization'
+import { ProjectType } from 'types/project'
 import { User } from 'types/user'
 
 export interface MultiSearchBarProps {
@@ -14,11 +14,6 @@ export interface MultiSearchBarProps {
 
 export interface Suggestion {
   indexName: string
-  hits:
-    | ChapterTypeAlgolia[]
-    | EventType[]
-    | OrganizationTypeAlgolia[]
-    | ProjectTypeAlgolia[]
-    | User[]
+  hits: ChapterType[] | EventType[] | Organization[] | ProjectType[] | User[]
   totalPages: number
 }

@@ -27,7 +27,7 @@ import TopContributors from 'components/TopContributors'
 
 const DetailsCard = ({
   title,
-  is_active = true,
+  isActive = true,
   summary,
   description,
   heatmap,
@@ -52,7 +52,7 @@ const DetailsCard = ({
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">{title}</h1>
         <p className="mb-6 text-xl">{description}</p>
-        {!is_active && (
+        {!isActive && (
           <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
         )}
         {summary && (
@@ -123,7 +123,7 @@ const DetailsCard = ({
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
-                geoLocData={geolocationData ? [geolocationData] : []}
+                geoLocData={geolocationData}
                 showLocal={true}
                 style={{
                   borderRadius: '0.5rem',

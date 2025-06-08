@@ -1,5 +1,5 @@
-import { ChapterTypeGraphQL } from 'types/chapter'
-import { ProjectTypeGraphql } from 'types/project'
+import { ChapterType } from 'types/chapter'
+import { ProjectType } from 'types/project'
 
 export interface ReleaseType {
   name: string
@@ -14,8 +14,8 @@ export interface SnapshotDetailsProps {
   startAt: string
   title: string
   newReleases: ReleaseType[]
-  newProjects: ProjectTypeGraphql[]
-  newChapters: ChapterTypeGraphQL[]
+  newProjects: ProjectType[]
+  newChapters: ChapterType[]
 }
 
 export interface Snapshots {

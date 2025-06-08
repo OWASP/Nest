@@ -1,12 +1,6 @@
 import { TopContributorsType } from 'types/contributor'
 
-export interface ChapterDataType {
-  active_committees_count: number
-  chapters: ChapterType[]
-  total_pages: number
-}
-
-export interface ChapterType {
+export type ChapterType = {
   _geoloc?: { lat: number; lng: number }
   geoLocation?: { lat: number; lng: number }
   createdAt: number
@@ -24,32 +18,20 @@ export interface ChapterType {
   url: string
 }
 
-// export interface ChapterTypeGraphQL {
-//   geoLocation: GeoLocation
-//   isActive: boolean
-//   key: string
-//   name: string
-//   region: string
-//   relatedUrls: string[]
-//   summary: string
-//   suggestedLocation: string
-//   updatedAt: number
-//   url: string
-// }
+export type GeoLocation = {
+  lat: number
+  lng: number
+}
 
-// export interface GeoLocation {
-//   lat: number
-//   lng: number
-// }
+//todo fix the interfaces
+export type GeoLocDataAlgolia = {
+  _geoloc: GeoLocation
+  key: string
+  name: string
+}
 
-// export interface GeoLocDataAlgolia {
-//   _geoloc: { lat: number; lng: number }
-//   key: string
-//   name: string
-// }
-
-// export interface GeoLocDataGraphQL {
-//   geoLocation: { lat: number; lng: number }
-//   key: string
-//   name: string
-// }
+export type GeoLocDataGraphQL = {
+  geoLocation: GeoLocation
+  key: string
+  name: string
+}

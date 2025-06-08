@@ -1,13 +1,14 @@
 import { TopContributorsType } from 'types/contributor'
 
-export interface ProjectDataType {
-  active_projects_count: number
-  total_pages: number
-  projects: ProjectBase[]
+export type Author = {
+  avatarUrl: string
+  key: string
+  login: string
+  name: string
 }
 
 export interface ProjectIssuesType {
-  author: { avatarUrl: string; key: string; name: string }
+  author: Author
   createdAt: number
   organizationName?: string
   repositoryName?: string
@@ -16,12 +17,7 @@ export interface ProjectIssuesType {
 }
 
 export interface ProjectPullRequestsType {
-  author: {
-    avatarUrl: string
-    key: string
-    name: string
-    login: string
-  }
+  author: Author
   createdAt: string
   organizationName: string
   repositoryName?: string
@@ -30,12 +26,7 @@ export interface ProjectPullRequestsType {
 }
 
 export interface ProjectMilestonesType {
-  author: {
-    avatarUrl: string
-    key: string
-    login: string
-    name: string
-  }
+  author: Author
   body: string
   closedIssuesCount: number
   createdAt: string
@@ -87,54 +78,6 @@ export interface ProjectType extends ProjectBase {
   recentMilestones: ProjectMilestonesType[]
 }
 
-// export interface ProjectType{
-//   contributorsCount: number
-//   description: string
-//   forksCount: number
-//   isActive: boolean
-//   issuesCount: number
-//   key: string
-//   languages: string[]
-//   leaders: string[]
-//   level: string
-//   name: string
-//   objectID: string
-//   organizations: string
-//   repositoriesCount: number
-//   starsCount: number
-//   summary: string
-//   topics: string[]
-//   topContributors: TopContributorsType[]
-//   type: string
-//   updatedAt: number
-//   url: string
-// }
-
-// export interface ProjectTypeGraphql {
-//   contributorsCount: number
-//   forksCount: number
-//   isActive: boolean
-//   issuesCount: number
-//   key: string
-//   languages: string[]
-//   leaders: string[]
-//   level: string
-//   name: string
-//   repositoriesCount: number
-//   starsCount: number
-//   summary: string
-//   topics: string[]
-//   type: string
-//   updatedAt: number
-//   url: string
-//   recentIssues: ProjectIssuesType[]
-//   recentPullRequests: ProjectPullRequestsType[]
-//   recentReleases: ProjectReleaseType[]
-//   repositories: RepositoryCardProps[]
-//   topContributors: TopContributorsTypeGraphql[]
-//   recentMilestones: ProjectMilestonesType[]
-// }
-
 export interface RepositoriesCardProps {
   repositories: RepositoryCardProps[]
 }
@@ -154,12 +97,7 @@ export interface RepositoryCardProps {
 }
 
 export type ProjectReleaseType = {
-  author: {
-    avatarUrl: string
-    key: string
-    login: string
-    name: string
-  }
+  author: Author
   isPreRelease: boolean
   name: string
   organizationName?: string

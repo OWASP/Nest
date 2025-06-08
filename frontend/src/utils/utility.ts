@@ -8,7 +8,7 @@ import { ChapterType } from 'types/chapter'
 import { CommitteeBase } from 'types/committee'
 import { IconType } from 'types/icon'
 import { IssueType } from 'types/issue'
-import { ProjectBase, ProjectTypeGraphql } from 'types/project'
+import { ProjectBase } from 'types/project'
 import { IconKeys, Icons, urlMappings } from 'utils/data'
 
 dayjs.extend(relativeTime)
@@ -20,24 +20,6 @@ export function cn(...inputs: ClassValue[]) {
 type projectType = ProjectBase | IssueType | CommitteeBase | ChapterType
 
 export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
-  const filteredIcons = params.reduce((acc: IconType, key) => {
-    if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
-      if (key === 'createdAt') {
-        acc[key] = dayjs.unix(project[key as keyof projectType] as unknown as number).fromNow()
-      } else {
-        acc[key] = project[key as keyof typeof project] as unknown as number
-      }
-    }
-    return acc
-  }, {})
-
-  return filteredIcons
-}
-
-export const getFilteredIconsGraphql = (
-  project: ProjectTypeGraphql,
-  params: string[]
-): IconType => {
   const filteredIcons = params.reduce((acc: IconType, key) => {
     if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       if (key === 'createdAt') {

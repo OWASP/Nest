@@ -12,7 +12,7 @@ import { ProjectType } from 'types/project'
 import { SnapshotDetailsProps } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
-import { getFilteredIconsGraphql, handleSocialUrls } from 'utils/utility'
+import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -40,7 +40,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
   const renderProjectCard = (project: ProjectType) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
-    const filteredIcons = getFilteredIconsGraphql(project, params)
+    const filteredIcons = getFilteredIcons(project, params)
 
     const handleButtonClick = () => {
       router.push(`/projects/${project.key}`)
@@ -68,7 +68,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
   const renderChapterCard = (chapter: ChapterType) => {
     const params: string[] = ['updatedAt']
-    const filteredIcons = getFilteredIconsGraphql(chapter, params)
+    const filteredIcons = getFilteredIcons(chapter, params)
     const formattedUrls = handleSocialUrls(chapter.relatedUrls)
 
     const handleButtonClick = () => {

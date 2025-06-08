@@ -1,8 +1,8 @@
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { JSX } from 'react'
 import { ButtonType } from 'types/button'
-import { GeoLocDataGraphQL } from 'types/chapter'
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
+import { ChapterType } from 'types/chapter'
+import { TopContributorsType } from 'types/contributor'
 import { IconType } from 'types/icon'
 import { Level } from 'types/level'
 import {
@@ -24,7 +24,7 @@ export interface CardProps {
   summary: string
   title: string
   tooltipLabel?: string
-  topContributors?: TopContributorsTypeGraphql[] | TopContributorsTypeAlgolia[]
+  topContributors?: TopContributorsType[]
   url: string
 }
 
@@ -37,9 +37,9 @@ interface stats {
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
-  geolocationData?: GeoLocDataGraphQL | null
+  geolocationData?: ChapterType[]
   heatmap?: JSX.Element
-  is_active?: boolean
+  isActive?: boolean
   languages?: string[]
   pullRequests?: ItemCardPullRequests[]
   recentIssues?: ProjectIssuesType[]
@@ -51,7 +51,7 @@ export interface DetailsCardProps {
   summary?: string
   showAvatar?: boolean
   title?: string
-  topContributors?: TopContributorsTypeGraphql[]
+  topContributors?: TopContributorsType[]
   topics?: string[]
   type: string
   userSummary?: JSX.Element
@@ -64,10 +64,10 @@ export interface UserCardProps {
   company?: string
   description?: string
   email?: string
-  followers_count?: number
+  followersCount?: number
   location?: string
   name?: string
-  repositories_count?: number
+  repositoriesCount?: number
 }
 
 export interface SnapshotCardProps {
