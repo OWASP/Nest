@@ -4,8 +4,8 @@ import type { NextConfig } from 'next'
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
 const nextConfig: NextConfig = {
-   productionBrowserSourceMaps: true, // Enable source maps for production
-  // ...existing config...
+  // Enable source maps for production
+  productionBrowserSourceMaps: true,
   devIndicators: false,
   images: {
     // This is a list of remote patterns that Next.js will use to determine
