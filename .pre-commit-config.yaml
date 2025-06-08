@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.10
+    rev: v0.11.13
     hooks:
       - id: ruff
         args:
@@ -38,10 +38,11 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+    rev: v1.16.0
     hooks:
       - id: mypy
         additional_dependencies:
+          - strawberry-graphql-django
           - types-jsonschema
           - types-lxml
           - types-python-dateutil

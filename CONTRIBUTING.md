@@ -7,7 +7,7 @@ Thank you for considering contributing to the **OWASP Nest** project! This docum
 Nest is a full-stack web application built using:
 
 - **Backend**: Python, Django
-- **Frontend**: TypeScript, React, Tailwind CSS
+- **Frontend**: TypeScript, Next.js, React, Tailwind CSS
 - **Search**: Algolia
 
 The project uses a **containerized approach** for both development and production environments. Docker is required to run Nest locally.

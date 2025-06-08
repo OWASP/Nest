@@ -100,6 +100,19 @@ test.describe('Home Page', () => {
     await page.getByRole('button', { name: 'Event 1' }).click()
   })
 
+  test('should have stats', async ({ page }) => {
+    const headers = [
+      'Active Projects',
+      'Local Chapters',
+      'Contributors',
+      'Countries',
+      'Slack Community',
+    ]
+    for (const header of headers) {
+      await expect(page.getByText(header, { exact: true })).toBeVisible()
+    }
+  })
+
   test('Bluesky icon should be present and link correctly', async ({ page }) => {
     const blueskyIcon = page.locator('footer a[aria-label="OWASP Nest Bluesky"]')
     await expect(blueskyIcon).toBeVisible()
