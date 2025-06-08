@@ -158,10 +158,6 @@ slack-sync-data:
 	@echo "Syncing Slack messages"
 	@CMD="python manage.py slack_sync_messages" $(MAKE) exec-backend-command
 
-slack-create-message-chunks:
-	@echo "creating message chunks"
-	@CMD="python manage.py slack_create_chunks" $(MAKE) exec-backend-command
-
 sync-data: \
 	update-data \
 	enrich-data \
