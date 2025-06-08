@@ -17,7 +17,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         self.command = Command()
         with (
             patch(
-                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.all"
+                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter"
             ) as metrics_patch,
             patch(
                 "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.get"

@@ -14,7 +14,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         db_table = "owasp_project_health_metrics"
         verbose_name_plural = "Project Health Metrics"
 
-    project = models.OneToOneField(
+    project = models.ForeignKey(
         "owasp.Project",
         on_delete=models.CASCADE,
         related_name="health_metrics",
@@ -46,7 +46,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     recent_releases_count = models.PositiveIntegerField(verbose_name="Recent releases", default=0)
     # score of projects health between 0 and 100(float value)
     score = models.FloatField(
-        default=0.0,
+        null=True,
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
         help_text="Project health score (0-100)",
     )

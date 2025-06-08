@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = "Update OWASP project health metrics score."
 
     def handle(self, *args, **options):
-        metrics = ProjectHealthMetrics.objects.all()
+        metrics = ProjectHealthMetrics.objects.filter(score__isnull=True)
         weight_mapping = {
             "age_days": 6.0,
             "contributors_count": 6.0,

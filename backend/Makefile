@@ -107,9 +107,9 @@ owasp-update-project-health-metrics:
 	@echo "Updating OWASP project health metrics"
 	@CMD="python manage.py owasp_update_project_health_metrics" $(MAKE) exec-backend-command
 
-owasp-update-project-health-metrics-score:
+owasp-update-project-health-metrics-scores:
 	@echo "Updating OWASP project health metrics score"
-	@CMD="python manage.py owasp_update_project_health_metrics_score" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_update_project_health_metrics_scores" $(MAKE) exec-backend-command
 
 owasp-update-project-health-requirements:
 	@echo "Updating OWASP project health requirements"

@@ -7,7 +7,7 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
 class TestProjectHealthMetricsModel:
-    DEFAULT_SCORE = 0.0
+    DEFAULT_SCORE = None
     VALID_SCORE = 75.0
     MAX_SCORE = 100.0
     MIN_SCORE = 0.0
@@ -83,7 +83,7 @@ class TestProjectHealthMetricsModel:
             ("owasp_page_last_update_days", 0),
             ("pull_request_last_created_at", None),
             ("recent_releases_count", 0),
-            ("score", 0.0),
+            ("score", None),
             ("stars_count", 0),
             ("total_issues_count", 0),
             ("total_pull_requests_count", 0),

@@ -62,7 +62,7 @@ class TestUpdateProjectHealthMetricsCommand:
         self.mock_projects.return_value = [mock_project]
 
         mock_metrics_instance = MagicMock(spec=ProjectHealthMetrics)
-        self.mock_metrics.get_or_create.return_value = (mock_metrics_instance, True)
+        self.mock_metrics.create.return_value = mock_metrics_instance
         # Set the leaders count to meet compliance
         mock_project.leaders_count = 2
         mock_metrics_instance.is_project_leaders_requirements_compliant = True
@@ -72,10 +72,10 @@ class TestUpdateProjectHealthMetricsCommand:
             call_command("owasp_update_project_health_metrics")
 
         # Verify command output
-        assert "Updating metrics for project: Test Project" in self.stdout.getvalue()
+        assert "Evaluating metrics for project: Test Project" in self.stdout.getvalue()
 
         # Verify mock was called correctly
-        self.mock_metrics.get_or_create.assert_called_once_with(project=mock_project)
+        self.mock_metrics.create.assert_called_once_with(project=mock_project)
 
     def test_handle_empty_projects(self):
         """Test command with no projects."""
@@ -85,4 +85,4 @@ class TestUpdateProjectHealthMetricsCommand:
             call_command("owasp_update_project_health_metrics")
 
         output = self.stdout.getvalue()
-        assert "Updated projects health metrics successfully" in output
+        assert "Evaluated projects health metrics successfully" in output

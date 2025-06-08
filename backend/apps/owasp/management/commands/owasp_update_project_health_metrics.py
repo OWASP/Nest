@@ -5,10 +5,6 @@ from django.core.management.base import BaseCommand
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
-# Minimum number of leaders required for a project to be compliant
-# See issue #711 for more details
-MINIMUM_LEADERS = 2
-
 
 class Command(BaseCommand):
     help = "Update OWASP project health metrics."
@@ -20,6 +16,7 @@ class Command(BaseCommand):
             "created_at": "created_at",
             "forks_count": "forks_count",
             "is_funding_requirements_compliant": "is_funding_requirements_compliant",
+            "is_project_leaders_requirements_compliant": "is_leaders_requirements_compliant",
             "last_released_at": "released_at",
             "last_committed_at": "pushed_at",
             "open_issues_count": "open_issues_count",
@@ -36,17 +33,14 @@ class Command(BaseCommand):
         }
         to_save = []
         for project in projects:
-            self.stdout.write(self.style.NOTICE(f"Updating metrics for project: {project.name}"))
-            metrics = ProjectHealthMetrics.objects.get_or_create(project=project)[0]
+            self.stdout.write(self.style.NOTICE(f"Evaluating metrics for project: {project.name}"))
+            metrics = ProjectHealthMetrics.objects.create(project=project)
 
             # Update metrics based on requirements
             for metric_field, project_field in field_mappings.items():
-                value = getattr(project, project_field)
-                setattr(metrics, metric_field, value)
+                setattr(metrics, metric_field, getattr(project, project_field))
 
-            is_leaders_compliant = project.leaders_count >= MINIMUM_LEADERS
-            metrics.is_project_leaders_requirements_compliant = is_leaders_compliant
             to_save.append(metrics)
 
         ProjectHealthMetrics.bulk_save(to_save)
-        self.stdout.write(self.style.SUCCESS("Updated projects health metrics successfully. "))
+        self.stdout.write(self.style.SUCCESS("Evaluated projects health metrics successfully. "))

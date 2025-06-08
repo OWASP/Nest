@@ -20,6 +20,10 @@ from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 
+# Minimum number of leaders required for a project to be compliant
+# See issue #711 for more details
+MINIMUM_LEADERS = 2
+
 
 class Project(
     BulkSaveModel,
@@ -146,6 +150,11 @@ class Project(
     def is_funding_requirements_compliant(self) -> bool:
         """Indicate whether project is compliant with funding requirements."""
         return not self.repositories.filter(is_funding_policy_compliant=False).exists()
+
+    @property
+    def is_leaders_requirements_compliant(self) -> bool:
+        """Indicate whether project is compliant with project leaders requirements."""
+        return self.leaders_count >= MINIMUM_LEADERS
 
     @property
     def is_tool_type(self) -> bool:
