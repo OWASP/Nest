@@ -70,7 +70,9 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                       href={
                         item?.url && item?.url !== '/'
                           ? item.url
-                          : `/organizations/${item.organizationName}/repositories/${item.repositoryName}/releases/tag/${item.tagName}`
+                          : item.organizationName && item.repositoryName && item.tagName
+                            ? `/organizations/${encodeURIComponent(item.organizationName)}/repositories/${encodeURIComponent(item.repositoryName)}/releases/tag/${encodeURIComponent(item.tagName)}`
+                            : '/'
                       }
                       target="_blank"
                       rel="noopener noreferrer"
