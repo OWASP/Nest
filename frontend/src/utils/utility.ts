@@ -4,7 +4,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
 import { fetchCsrfToken } from 'server/fetchCsrfToken'
 
-import { CommitteeTypeAlgolia } from 'types/committee'
+import { ChapterType } from 'types/chapter'
+import { CommitteeBase } from 'types/committee'
 import { IconType } from 'types/icon'
 import { IssueType } from 'types/issue'
 import { ProjectBase, ProjectTypeGraphql } from 'types/project'
@@ -16,7 +17,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type projectType = ProjectBase | IssueType | CommitteeTypeAlgolia
+type projectType = ProjectBase | IssueType | CommitteeBase | ChapterType
 
 export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
   const filteredIcons = params.reduce((acc: IconType, key) => {

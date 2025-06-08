@@ -1,4 +1,4 @@
-import { TopContributorsTypeAlgolia } from 'types/contributor'
+import { TopContributorsType } from 'types/contributor'
 
 export interface ChapterDataType {
   active_committees_count: number
@@ -19,7 +19,7 @@ export interface ChapterType {
   relatedUrls: string[]
   summary: string
   suggestedLocation: string
-  topContributors: TopContributorsTypeAlgolia[]
+  topContributors: TopContributorsType[]
   updatedAt: number
   url: string
 }

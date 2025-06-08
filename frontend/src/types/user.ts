@@ -39,46 +39,38 @@ export type Release = {
   url: string
 }
 
-export type User = {
-  avatar_url: string
+export interface UserBase<T = number> {
+  createdAt: T
+  avatarUrl: string
   bio?: string | null
   company?: string | null
-  created_at: number
   email?: string | null
-  followers_count: number
-  following_count: number
+  followersCount: number
+  followingCount: number
   issues?: Issue[]
-  issues_count?: number
+  issuesCount?: number
   key: string
   location?: string | null
   login: string
   name?: string | null
-  public_repositories_count: number
-  releases?: Release[]
-  releases_count?: number
-  url: string
-  contributions_count: number
-}
-
-export interface UserDetailsProps {
-  avatarUrl: string
-  bio: string | null
-  company: string | null
-  createdAt: string
-  email: string | null
-  followersCount: number
-  followingCount: number
-  issues?: Issue[]
-  issuesCount: number
-  location: string | null
-  login: string
-  name: string | null
   publicRepositoriesCount: number
   releases?: Release[]
-  releasesCount: number
-  topRepositories: RepositoryCardProps[]
+  releasesCount?: number
   url: string
   contributionsCount: number
+}
+
+export type User = UserBase<number>
+
+export interface UserDetailsProps extends UserBase<string> {
+  issuesCount: number
+  releasesCount: number
+  location: string | null
+  company: string | null
+  bio: string | null
+  email: string | null
+  name: string | null
+  topRepositories: RepositoryCardProps[]
 }
 
 export interface PullRequestsType {

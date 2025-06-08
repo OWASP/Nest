@@ -5,14 +5,14 @@ import { useEffect, useState } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { AlgoliaResponseType } from 'types/algolia'
-import { ChapterTypeAlgolia } from 'types/chapter'
+import { ChapterType } from 'types/chapter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
-  const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
+  const [geoLocData, setGeoLocData] = useState<ChapterType[]>([])
   const {
     items: chapters,
     isLoaded,
@@ -21,7 +21,7 @@ const ChaptersPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<ChapterTypeAlgolia>({
+  } = useSearchPage<ChapterType>({
     indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
   })
@@ -34,7 +34,7 @@ const ChaptersPage = () => {
         currentPage,
         hitsPerPage: currentPage === 1 ? 1000 : 25,
       }
-      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+      const data: AlgoliaResponseType<ChapterType> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
@@ -46,10 +46,10 @@ const ChaptersPage = () => {
   }, [currentPage])
 
   const router = useRouter()
-  const renderChapterCard = (chapter: ChapterTypeAlgolia) => {
-    const params: string[] = ['updated_at']
+  const renderChapterCard = (chapter: ChapterType) => {
+    const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.related_urls)
+    const formattedUrls = handleSocialUrls(chapter.relatedUrls)
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
@@ -68,7 +68,7 @@ const ChaptersPage = () => {
         url={`/chapters/${chapter.key}`}
         summary={chapter.summary}
         icons={filteredIcons}
-        topContributors={chapter.top_contributors}
+        topContributors={chapter.topContributors}
         button={SubmitButton}
         social={formattedUrls}
       />
@@ -100,7 +100,7 @@ const ChaptersPage = () => {
           }}
         />
       )}
-      {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
+      {chapters && chapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
     </SearchPageLayout>
   )
 }

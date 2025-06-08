@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { OrganizationTypeAlgolia } from 'types/organization'
+import { Organization } from 'types/organization'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -15,7 +15,7 @@ const OrganizationPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<OrganizationTypeAlgolia>({
+  } = useSearchPage<Organization>({
     indexName: 'organizations',
     pageTitle: 'GitHub Organizations',
     hitsPerPage: 24,
@@ -23,7 +23,7 @@ const OrganizationPage = () => {
 
   const router = useRouter()
 
-  const renderOrganizationCard = (organization: OrganizationTypeAlgolia) => {
+  const renderOrganizationCard = (organization: Organization) => {
     const handleButtonClick = () => {
       router.push(`/organizations/${organization.login}`)
     }
@@ -36,15 +36,15 @@ const OrganizationPage = () => {
 
     return (
       <UserCard
-        avatar={organization.avatar_url}
+        avatar={organization.avatarUrl}
         button={SubmitButton}
         company={organization.company || ''}
         email={organization.email || ''}
-        followers_count={organization.followers_count}
+        followers_count={organization.followersCount}
         key={organization.objectID}
         location={organization.location || `@${organization.login}`}
         name={organization.name}
-        repositories_count={organization.public_repositories_count}
+        repositories_count={organization.publicRepositoriesCount}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       />
     )
