@@ -20,8 +20,8 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
 import { GET_LEADER_DATA } from 'server/queries/userQueries'
-import { TopContributorsTypeGraphql } from 'types/contributor'
-import { ProjectTypeGraphql } from 'types/project'
+import { TopContributorsType } from 'types/contributor'
+import { ProjectType } from 'types/project'
 import { User } from 'types/user'
 import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
@@ -54,8 +54,8 @@ const About = () => {
     }
   )
 
-  const [projectMetadata, setProjectMetadata] = useState<ProjectTypeGraphql | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
+  const [projectMetadata, setProjectMetadata] = useState<ProjectType | null>(null)
+  const [topContributors, setTopContributors] = useState<TopContributorsType[]>([])
 
   useEffect(() => {
     if (projectMetadataResponse?.project) {

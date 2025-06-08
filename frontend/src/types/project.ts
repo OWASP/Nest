@@ -78,7 +78,7 @@ export interface ProjectBase {
   url: string
 }
 
-export interface ProjectTypeGraphql extends ProjectBase {
+export interface ProjectType extends ProjectBase {
   recentIssues: ProjectIssuesType[]
   recentPullRequests: ProjectPullRequestsType[]
   recentReleases: ProjectReleaseType[]

@@ -7,8 +7,8 @@ import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
-import { ChapterTypeGraphQL } from 'types/chapter'
-import { ProjectTypeGraphql } from 'types/project'
+import { ChapterType } from 'types/chapter'
+import { ProjectType } from 'types/project'
 import { SnapshotDetailsProps } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
@@ -38,7 +38,7 @@ const SnapshotDetailsPage: React.FC = () => {
     }
   }, [graphQLData, graphQLRequestError, snapshotKey])
 
-  const renderProjectCard = (project: ProjectTypeGraphql) => {
+  const renderProjectCard = (project: ProjectType) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
     const filteredIcons = getFilteredIconsGraphql(project, params)
 
@@ -66,7 +66,7 @@ const SnapshotDetailsPage: React.FC = () => {
     )
   }
 
-  const renderChapterCard = (chapter: ChapterTypeGraphQL) => {
+  const renderChapterCard = (chapter: ChapterType) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIconsGraphql(chapter, params)
     const formattedUrls = handleSocialUrls(chapter.relatedUrls)

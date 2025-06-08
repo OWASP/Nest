@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { GET_MAIN_PAGE_DATA } from 'server/queries/homeQueries'
 import { AlgoliaResponseType } from 'types/algolia'
-import { ChapterTypeAlgolia } from 'types/chapter'
+import { ChapterType } from 'types/chapter'
 import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
@@ -50,7 +50,7 @@ export default function Home() {
     variables: { distinct: true },
   })
 
-  const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
+  const [geoLocData, setGeoLocData] = useState<ChapterType[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function Home() {
         currentPage: 1,
         hitsPerPage: 1000,
       }
-      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+      const data: AlgoliaResponseType<ChapterType> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,

@@ -5,16 +5,16 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_CHAPTER_DATA } from 'server/queries/chapterQueries'
-import { ChapterTypeGraphQL } from 'types/chapter'
-import { TopContributorsTypeGraphql } from 'types/contributor'
+import { ChapterType } from 'types/chapter'
+import { TopContributorsType } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
-  const [chapter, setChapter] = useState<ChapterTypeGraphQL>({} as ChapterTypeGraphQL)
-  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
+  const [chapter, setChapter] = useState<ChapterType>({} as ChapterType)
+  const [topContributors, setTopContributors] = useState<TopContributorsType[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { data, error: graphQLRequestError } = useQuery(GET_CHAPTER_DATA, {
