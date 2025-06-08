@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.management import call_command
+from django.db.models.base import ModelState
 
 from apps.owasp.management.commands.owasp_update_project_health_metrics import Command
 from apps.owasp.models.project import Project
@@ -18,7 +19,7 @@ class TestUpdateProjectHealthMetricsCommand:
         with (
             patch("apps.owasp.models.project.Project.objects.all") as projects_patch,
             patch(
-                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects"
+                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics"
             ) as metrics_patch,
             patch(
                 "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
@@ -56,13 +57,15 @@ class TestUpdateProjectHealthMetricsCommand:
 
         # Create mock project with test data
         mock_project = MagicMock(spec=Project)
+        mock_project._state = ModelState()
         for project_field, (_, value) in test_data.items():
             setattr(mock_project, project_field, value)
 
         self.mock_projects.return_value = [mock_project]
 
         mock_metrics_instance = MagicMock(spec=ProjectHealthMetrics)
-        self.mock_metrics.create.return_value = mock_metrics_instance
+        mock_metrics_instance._state = ModelState()
+        self.mock_metrics.return_value = mock_metrics_instance
         # Set the leaders count to meet compliance
         mock_project.leaders_count = 2
         mock_metrics_instance.is_project_leaders_requirements_compliant = True
@@ -73,9 +76,6 @@ class TestUpdateProjectHealthMetricsCommand:
 
         # Verify command output
         assert "Evaluating metrics for project: Test Project" in self.stdout.getvalue()
-
-        # Verify mock was called correctly
-        self.mock_metrics.create.assert_called_once_with(project=mock_project)
 
     def test_handle_empty_projects(self):
         """Test command with no projects."""

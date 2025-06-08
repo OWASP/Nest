@@ -34,7 +34,7 @@ class Command(BaseCommand):
         to_save = []
         for project in projects:
             self.stdout.write(self.style.NOTICE(f"Evaluating metrics for project: {project.name}"))
-            metrics = ProjectHealthMetrics.objects.create(project=project)
+            metrics = ProjectHealthMetrics(project=project)
 
             # Update metrics based on requirements
             for metric_field, project_field in field_mappings.items():

@@ -1,4 +1,4 @@
-"""A command to update OWASP project health metrics score."""
+"""A command to update OWASP project health metrics scores."""
 
 from django.core.management.base import BaseCommand
 
@@ -12,21 +12,21 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         metrics = ProjectHealthMetrics.objects.filter(score__isnull=True)
         weight_mapping = {
-            "age_days": 6.0,
-            "contributors_count": 6.0,
-            "forks_count": 6.0,
-            "last_release_days": 6.0,
-            "last_commit_days": 6.0,
-            "open_issues_count": 6.0,
-            "open_pull_requests_count": 6.0,
-            "owasp_page_last_update_days": 6.0,
-            "last_pull_request_days": 6.0,
-            "recent_releases_count": 6.0,
-            "stars_count": 8.0,
-            "total_pull_requests_count": 8.0,
-            "total_releases_count": 8.0,
-            "unanswered_issues_count": 8.0,
-            "unassigned_issues_count": 8.0,
+            "age_days": (6.0, -1),
+            "contributors_count": (6.0, 1),
+            "forks_count": (6.0, 1),
+            "last_release_days": (6.0, -1),
+            "last_commit_days": (6.0, -1),
+            "open_issues_count": (6.0, 1),
+            "open_pull_requests_count": (6.0, 1),
+            "owasp_page_last_update_days": (6.0, -1),
+            "last_pull_request_days": (6.0, -1),
+            "recent_releases_count": (6.0, 1),
+            "stars_count": (8.0, 1),
+            "total_pull_requests_count": (8.0, 1),
+            "total_releases_count": (8.0, 1),
+            "unanswered_issues_count": (8.0, -1),
+            "unassigned_issues_count": (8.0, -1),
         }
         to_save = []
         for metric in metrics:
@@ -37,11 +37,13 @@ class Command(BaseCommand):
             requirements = ProjectHealthRequirements.objects.get(level=metric.project.level)
 
             score = 0.0
-            for field, weight in weight_mapping.items():
+            for field, (weight, direction) in weight_mapping.items():
                 metric_value = getattr(metric, field)
                 requirement_value = getattr(requirements, field)
 
-                if metric_value >= requirement_value:
+                if (metric_value >= requirement_value and direction == 1) or (
+                    metric_value < requirement_value and direction == -1
+                ):
                     score += weight
 
             metric.score = score
