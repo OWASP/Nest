@@ -23,7 +23,6 @@ export type GeoLocation = {
   lng: number
 }
 
-//todo fix the interfaces
 export type GeoLocDataAlgolia = {
   _geoloc: GeoLocation
   key: string
