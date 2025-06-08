@@ -5,6 +5,7 @@ import contextlib
 from algoliasearch_django import register, unregister
 from algoliasearch_django.registration import RegistrationError
 from django.apps import apps
+from humps import camelize
 
 
 def get_params_for_index(index_name: str) -> dict:
@@ -159,3 +160,22 @@ def unregister_indexes(app_names: tuple[str, ...] = ("github", "owasp")) -> None
         for model in apps.get_app_config(app_name).get_models():
             with contextlib.suppress(RegistrationError):
                 unregister(model)
+
+
+def deep_camelize(obj) -> dict | list:
+    """Deep camelize.
+
+    Args:
+        obj: The object to camelize.
+
+    Returns:
+        The camelize object.
+
+    """
+    if isinstance(obj, dict):
+        return {
+            camelize(key.removeprefix("idx_")): deep_camelize(value) for key, value in obj.items()
+        }
+    if isinstance(obj, list):
+        return [deep_camelize(item) for item in obj]
+    return obj

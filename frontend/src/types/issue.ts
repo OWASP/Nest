@@ -5,15 +5,15 @@ export interface IssuesDataType {
 }
 
 export interface IssueType {
-  created_at: number
+  createdAt: number
   hint: string
   labels: string[]
-  project_name: string
-  project_url: string
-  repository_languages: string[]
+  projectName: string
+  projectUrl: string
+  repositoryLanguages: string[]
   summary: string
   title: string
-  updated_at: number
+  updatedAt: number
   url: string
   objectID: string
 }

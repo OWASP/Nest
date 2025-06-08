@@ -14,7 +14,7 @@ from django.http import HttpRequest, HttpResponseNotAllowed, JsonResponse
 
 from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
-from apps.core.utils.index import get_params_for_index
+from apps.core.utils.index import deep_camelize, get_params_for_index
 from apps.core.validators import validate_search_params
 
 CACHE_PREFIX = "algolia_proxy"
@@ -58,8 +58,10 @@ def get_search_results(
     response = client.search(search_method_params={"requests": [search_params]})
     search_result = response.results[0].to_dict()
 
+    cleaned_search_result = deep_camelize(search_result["hits"])
+
     return {
-        "hits": search_result.get("hits", []),
+        "hits": cleaned_search_result,
         "nbPages": search_result.get("nbPages", 0),
     }
 

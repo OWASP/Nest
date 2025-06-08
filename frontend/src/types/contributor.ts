@@ -1,11 +1,11 @@
-export type TopContributorsTypeAlgolia = {
-  avatar_url: string
-  contributions_count: number
-  login: string
-  name: string
-}
+// export type TopContributors = {
+//   avatarUrl: string
+//   contributionsCount: number
+//   login: string
+//   name: string
+// }
 
-export type TopContributorsTypeGraphql = {
+export type TopContributorsType = {
   avatarUrl: string
   contributionsCount: number
   login: string

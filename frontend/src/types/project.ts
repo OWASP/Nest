@@ -1,9 +1,9 @@
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
+import { TopContributorsType } from 'types/contributor'
 
 export interface ProjectDataType {
   active_projects_count: number
   total_pages: number
-  projects: ProjectTypeAlgolia[]
+  projects: ProjectBase[]
 }
 
 export interface ProjectIssuesType {
@@ -56,31 +56,9 @@ export interface ProjectStatsType {
   stars: number
 }
 
-export interface ProjectTypeAlgolia {
-  contributors_count: number
-  description: string
-  forks_count: number
-  is_active: boolean
-  issues_count: number
-  key: string
-  languages: string[]
-  leaders: string[]
-  level: string
-  name: string
-  objectID: string
-  organizations: string
-  repositories_count: number
-  stars_count: number
-  summary: string
-  topics: string[]
-  top_contributors: TopContributorsTypeAlgolia[]
-  type: string
-  updated_at: number
-  url: string
-}
-
-export interface ProjectTypeGraphql {
+export interface ProjectBase {
   contributorsCount: number
+  description: string
   forksCount: number
   isActive: boolean
   issuesCount: number
@@ -89,20 +67,73 @@ export interface ProjectTypeGraphql {
   leaders: string[]
   level: string
   name: string
+  organizations: string
   repositoriesCount: number
   starsCount: number
   summary: string
   topics: string[]
+  topContributors: TopContributorsType[]
   type: string
   updatedAt: number
   url: string
+}
+
+export interface ProjectTypeGraphql extends ProjectBase {
   recentIssues: ProjectIssuesType[]
   recentPullRequests: ProjectPullRequestsType[]
   recentReleases: ProjectReleaseType[]
   repositories: RepositoryCardProps[]
-  topContributors: TopContributorsTypeGraphql[]
+  topContributors: TopContributorsType[]
   recentMilestones: ProjectMilestonesType[]
 }
+
+// export interface ProjectType{
+//   contributorsCount: number
+//   description: string
+//   forksCount: number
+//   isActive: boolean
+//   issuesCount: number
+//   key: string
+//   languages: string[]
+//   leaders: string[]
+//   level: string
+//   name: string
+//   objectID: string
+//   organizations: string
+//   repositoriesCount: number
+//   starsCount: number
+//   summary: string
+//   topics: string[]
+//   topContributors: TopContributorsType[]
+//   type: string
+//   updatedAt: number
+//   url: string
+// }
+
+// export interface ProjectTypeGraphql {
+//   contributorsCount: number
+//   forksCount: number
+//   isActive: boolean
+//   issuesCount: number
+//   key: string
+//   languages: string[]
+//   leaders: string[]
+//   level: string
+//   name: string
+//   repositoriesCount: number
+//   starsCount: number
+//   summary: string
+//   topics: string[]
+//   type: string
+//   updatedAt: number
+//   url: string
+//   recentIssues: ProjectIssuesType[]
+//   recentPullRequests: ProjectPullRequestsType[]
+//   recentReleases: ProjectReleaseType[]
+//   repositories: RepositoryCardProps[]
+//   topContributors: TopContributorsTypeGraphql[]
+//   recentMilestones: ProjectMilestonesType[]
+// }
 
 export interface RepositoriesCardProps {
   repositories: RepositoryCardProps[]
