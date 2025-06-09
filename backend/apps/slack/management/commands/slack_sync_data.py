@@ -44,7 +44,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("\nFinished processing all workspaces"))
 
     def _call_slack_api(self, func, *args, **kwargs):
-        """Handles rate limiting and retries."""
+        """Handles Slack API calls with rate limit retries."""
         retries = 0
         while retries < MAX_RETRIES:
             try:
@@ -53,17 +53,16 @@ class Command(BaseCommand):
                     raise SlackApiError(f"{func.__name__} failed", response)
                 return response
             except SlackApiError as e:
-                if e.response.status_code == 429:
+                if e.response.status_code == 429:  # Rate limit hit
                     retry_after = int(e.response.headers.get("Retry-After", 1))
-                    self.stdout.write(
-                        self.style.WARNING(f"Rate limited. Retrying after {retry_after}s...")
-                    )
+                    self.stdout.write(self.style.WARNING(f"Rate limited. Sleeping {retry_after}s..."))
                     time.sleep(retry_after)
                     retries += 1
                 else:
                     raise e
             retries += 1
-            time.sleep(2 ** retries + random.random())
+            backoff = 2 ** retries + random.random()
+            time.sleep(backoff)
         raise SlackApiError("Max retries exceeded", {})
 
     def _fetch_conversations(self, client, workspace, batch_size, delay):
@@ -81,23 +80,9 @@ class Command(BaseCommand):
                     timeout=30,
                     types="public_channel,private_channel",
                 )
-    slack-member-count-sync
-
-
-            if members:
-                Member.bulk_save(members)
-
-            # Update the workspace with the total members count.
-            workspace.total_members_count = total_members
-            workspace.save(update_fields=["total_members_count"])
-
-            self.stdout.write(self.style.SUCCESS(f"Populated {total_members} members"))
-        main
 
                 for conversation_data in response["channels"]:
-                    # Use member count from conversations.list when available
                     if "num_members" not in conversation_data:
-                        # Fallback for types without num_members (e.g., DMs)
                         try:
                             info = self._call_slack_api(
                                 client.conversations_info,
@@ -110,8 +95,9 @@ class Command(BaseCommand):
                                 self.style.WARNING(f"Failed to get member count for {conversation_data['id']}: {e}")
                             )
                             conversation_data["num_members"] = None
-                    if (member := Conversation.update_data(conversation_data, workspace)):
-                        conversations.append(member)
+
+                    if (conversation := Conversation.update_data(conversation_data, workspace)):
+                        conversations.append(conversation)
 
                 total_channels += len(response["channels"])
                 cursor = response.get("response_metadata", {}).get("next_cursor")
