@@ -61,11 +61,7 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <PageLayout
-      breadcrumbItems={[
-        { title: chapter.name, path: `/chapters/${chapter.key}` },
-      ]}
-    >
+    <PageLayout breadcrumbItems={[{ title: chapter.name, path: `/chapters/${chapter.key}` }]}>
       <DetailsCard
         details={details}
         geolocationData={chapter}

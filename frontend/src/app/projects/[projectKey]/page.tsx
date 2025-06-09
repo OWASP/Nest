@@ -90,11 +90,7 @@ const ProjectDetailsPage = () => {
     },
   ]
   return (
-    <PageLayout
-      breadcrumbItems={[
-        { title: project.name, path: `/projects/${project.key}` },
-      ]}
-    >
+    <PageLayout breadcrumbItems={[{ title: project.name, path: `/projects/${project.key}` }]}>
       <DetailsCard
         details={projectDetails}
         is_active={project.isActive}

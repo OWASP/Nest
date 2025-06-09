@@ -165,11 +165,11 @@ const About = () => {
             </div>
           </SecondaryCard>
 
-        {projectMetadata.recentMilestones.length > 0 && (
+          {projectMetadata.recentMilestones.length > 0 && (
             <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
               <div className="grid gap-4">
                 {[...projectMetadata.recentMilestones]
-                .filter((milestone) => milestone.state !== 'closed')
+                  .filter((milestone) => milestone.state !== 'closed')
                   .sort((a, b) => (a.title > b.title ? 1 : -1))
                   .map((milestone, index) => (
                     <div
@@ -219,7 +219,7 @@ const About = () => {
                   ))}
               </div>
             </SecondaryCard>
-        )}
+          )}
 
           <div className="grid gap-6 md:grid-cols-4">
             {[

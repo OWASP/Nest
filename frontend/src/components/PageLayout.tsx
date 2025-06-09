@@ -4,7 +4,7 @@ import React from 'react'
 import BreadCrumbs, { BreadCrumbItem } from 'components/BreadCrumbs'
 
 export interface PageLayoutProps {
-  breadcrumbItems?: BreadCrumbItem[],
+  breadcrumbItems?: BreadCrumbItem[]
   children: React.ReactNode
 }
 
@@ -23,10 +23,7 @@ function generateBreadcrumbs(pathname: string, excludeLast = false): BreadCrumbI
   })
 }
 
-export default function PageLayout({
-  breadcrumbItems,
-  children,
-}: PageLayoutProps) {
+export default function PageLayout({ breadcrumbItems, children }: PageLayoutProps) {
   const pathname = usePathname()
   const autoBreadcrumbs = generateBreadcrumbs(pathname, !_.isEmpty(breadcrumbItems))
   const allBreadcrumbs = breadcrumbItems
