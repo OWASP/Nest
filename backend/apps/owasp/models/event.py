@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from apps.core.models.prompt import Prompt
+
 if TYPE_CHECKING:  # pragma: no cover
     from datetime import date
 
@@ -144,7 +146,7 @@ class Event(BulkSaveModel, TimestampedModel):
         return None
 
     @staticmethod
-    def update_data(category, data, *, save: bool = True) -> Event:
+    def update_data(category, data, *, save: bool = True) -> Event | None:
         """Update event data.
 
         Args:
@@ -162,7 +164,11 @@ class Event(BulkSaveModel, TimestampedModel):
         except Event.DoesNotExist:
             event = Event(key=key)
 
-        event.from_dict(category, data)
+        try:
+            event.from_dict(category, data)
+        except KeyError:  # No start date.
+            return None
+
         if save:
             event.save()
 
@@ -179,6 +185,7 @@ class Event(BulkSaveModel, TimestampedModel):
             None
 
         """
+        start_date = data["start-date"]
         fields = {
             "category": {
                 "AppSec Days": Event.Category.APPSEC_DAYS,
@@ -186,11 +193,11 @@ class Event(BulkSaveModel, TimestampedModel):
                 "Partner": Event.Category.PARTNER,
             }.get(category, Event.Category.OTHER),
             "description": data.get("optional-text", ""),
-            "end_date": Event.parse_dates(data.get("dates", ""), data["start-date"]),
+            "end_date": Event.parse_dates(data.get("dates", ""), start_date),
             "name": data["name"],
-            "start_date": parser.parse(data["start-date"]).date()
-            if isinstance(data["start-date"], str)
-            else data["start-date"],
+            "start_date": parser.parse(start_date).date()
+            if isinstance(start_date, str)
+            else start_date,
             "url": normalize_url(data.get("url", "")) or "",
         }
 
@@ -213,7 +220,7 @@ class Event(BulkSaveModel, TimestampedModel):
             self.latitude = location.latitude
             self.longitude = location.longitude
 
-    def generate_suggested_location(self, prompt) -> None:
+    def generate_suggested_location(self, prompt=None) -> None:
         """Generate a suggested location for the event.
 
         Args:
@@ -225,7 +232,9 @@ class Event(BulkSaveModel, TimestampedModel):
         """
         open_ai = OpenAi()
         open_ai.set_input(self.get_context())
-        open_ai.set_max_tokens(100).set_prompt(prompt)
+        open_ai.set_max_tokens(100).set_prompt(
+            prompt or Prompt.get_owasp_event_suggested_location()
+        )
         try:
             suggested_location = open_ai.complete()
             self.suggested_location = (
@@ -234,7 +243,7 @@ class Event(BulkSaveModel, TimestampedModel):
         except (ValueError, TypeError):
             self.suggested_location = ""
 
-    def generate_summary(self, prompt) -> None:
+    def generate_summary(self, prompt=None) -> None:
         """Generate a summary for the event.
 
         Args:
@@ -246,7 +255,7 @@ class Event(BulkSaveModel, TimestampedModel):
         """
         open_ai = OpenAi()
         open_ai.set_input(self.get_context(include_dates=True))
-        open_ai.set_max_tokens(100).set_prompt(prompt)
+        open_ai.set_max_tokens(100).set_prompt(prompt or Prompt.get_owasp_event_summary())
         try:
             summary = open_ai.complete()
             self.summary = summary if summary and summary != "None" else ""

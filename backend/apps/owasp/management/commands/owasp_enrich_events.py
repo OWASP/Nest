@@ -40,7 +40,7 @@ class Command(BaseCommand):
             if not event.suggested_location and (
                 prompt := Prompt.get_owasp_event_suggested_location()
             ):
-                event.generate_suggested_location(prompt)
+                event.generate_suggested_location(prompt=prompt)
 
             # Geo location.
             if not event.latitude or not event.longitude:

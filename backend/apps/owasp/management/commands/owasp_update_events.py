@@ -20,8 +20,9 @@ class Command(BaseCommand):
 
         Event.bulk_save(
             [
-                Event.update_data(category["category"], event_data)
+                event
                 for category in data
                 for event_data in category["events"]
+                if (event := Event.update_data(category["category"], event_data, save=False))
             ]
         )
