@@ -28,10 +28,11 @@ class ProjectHealthMetricsQuery:
         no_recent_commits: bool = False,
         no_recent_releases: bool = False,
         leaders_requirement_compliant: bool = True,
+        limit: int = 20,
         long_open_issues: bool = False,
         long_unanswered_issues: bool = False,
         long_unassigned_issues: bool = False,
-        low_score: bool = False,
+        low_score: bool = True,
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve unhealthy projects."""
         filters = {}
@@ -61,7 +62,7 @@ class ProjectHealthMetricsQuery:
         # Get the last created metrics (one for each project)
         queryset = (
             ProjectHealthMetrics.objects.select_related("project")
-            .order_by("project__key", "-created_at")
+            .order_by("project__key", "-nest_created_at", "-score")
             .distinct("project__key")
         )
 
@@ -80,4 +81,4 @@ class ProjectHealthMetricsQuery:
             )
             queryset = queryset.filter(no_commits_filter)
 
-        return queryset
+        return queryset.select_related("project")[:limit]

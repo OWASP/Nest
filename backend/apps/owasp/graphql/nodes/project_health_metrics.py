@@ -1,35 +1,35 @@
 """OWASP Project Health Metrics Node."""
 
 import strawberry
+import strawberry_django
 
-from apps.owasp.graphql.nodes.project import ProjectNode
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
-@strawberry.type
+@strawberry_django.type(
+    ProjectHealthMetrics,
+    fields=[
+        "age_days",
+        "contributors_count",
+        "forks_count",
+        "is_funding_requirements_compliant",
+        "is_project_leaders_requirements_compliant",
+        "last_commit_days",
+        "last_pull_request_days",
+        "last_release_days",
+        "open_issues_count",
+        "owasp_page_last_update_days",
+        "recent_releases_count",
+        "score",
+        "stars_count",
+        "unanswered_issues_count",
+        "unassigned_issues_count",
+    ],
+)
 class ProjectHealthMetricsNode:
     """Project health metrics node."""
 
-    age_days: int = strawberry.field(description="Project age in days")
-    contributors_count: int = strawberry.field(description="Number of contributors")
-    last_commit_days: int = strawberry.field(description="Days since last commit")
-    last_pull_request_days: int = strawberry.field(description="Days since last pull request")
-    last_release_days: int = strawberry.field(description="Days since last release")
-    recent_issues_count: int = strawberry.field(description="Recent issues count")
-    recent_pull_requests_count: int = strawberry.field(description="Recent pull requests count")
-    recent_releases_count: int = strawberry.field(description="Recent releases count")
-    score: float = strawberry.field(description="Project health score (0-100)")
-    forks_count: int = strawberry.field(description="Number of forks")
-    stars_count: int = strawberry.field(description="Number of stars")
-    is_project_leaders_requirements_compliant: bool = strawberry.field(
-        description="Is leaders requirement compliant"
-    )
-    is_funding_requirements_compliant: bool = strawberry.field(
-        description="Is funding policy requirements compliant"
-    )
-    open_issues_count: int = strawberry.field(description="Open issues count")
-    unanswered_issues_count: int = strawberry.field(description="Unanswered issues count")
-
     @strawberry.field
-    def project(self) -> ProjectNode:
+    def project_name(self) -> str:
         """Resolve project node."""
-        return self.project
+        return self.project.name
