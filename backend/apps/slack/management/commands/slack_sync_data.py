@@ -2,6 +2,7 @@ import logging
 import time
 import random
 import os  # <-- Added to access environment variables
+import secrets
 
 from django.core.management.base import BaseCommand
 from slack_sdk import WebClient
@@ -64,7 +65,7 @@ class Command(BaseCommand):
                 else:
                     raise e
             retries += 1
-            backoff = 2 ** retries + random.random()
+            backoff = 2 ** retries + secrets.randbelow(1000) / 1000  # gives 0.000–0.999
             time.sleep(backoff)
         raise SlackApiError("Max retries exceeded", {})
 
