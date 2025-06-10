@@ -1,6 +1,7 @@
 import logging
 import time
 import random
+import os  # <-- Added to access environment variables
 
 from django.core.management.base import BaseCommand
 from slack_sdk import WebClient
@@ -32,7 +33,9 @@ class Command(BaseCommand):
         for workspace in workspaces:
             self.stdout.write(f"\nProcessing workspace: {workspace}")
 
-            if not (bot_token := workspace.bot_token):
+            # Fallback to environment variable if DB token is missing
+            bot_token = getattr(workspace, "bot_token", None) or os.environ.get("DJANGO_SLACK_BOT_TOKEN")
+            if not bot_token:
                 self.stdout.write(self.style.ERROR(f"No bot token found for {workspace}"))
                 continue
 
