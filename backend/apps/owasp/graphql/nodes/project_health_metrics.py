@@ -9,16 +9,11 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 @strawberry_django.type(
     ProjectHealthMetrics,
     fields=[
-        "age_days",
         "contributors_count",
         "forks_count",
         "is_funding_requirements_compliant",
         "is_project_leaders_requirements_compliant",
-        "last_commit_days",
-        "last_pull_request_days",
-        "last_release_days",
         "open_issues_count",
-        "owasp_page_last_update_days",
         "recent_releases_count",
         "score",
         "stars_count",
@@ -28,6 +23,31 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 )
 class ProjectHealthMetricsNode:
     """Project health metrics node."""
+
+    @strawberry.field
+    def age_days(self) -> int:
+        """Resolve project age in days."""
+        return self.age_days
+
+    @strawberry.field
+    def last_commit_days(self) -> int:
+        """Resolve last commit age in days."""
+        return self.last_commit_days
+
+    @strawberry.field
+    def last_pull_request_days(self) -> int:
+        """Resolve last pull request age in days."""
+        return self.last_pull_request_days
+
+    @strawberry.field
+    def last_release_days(self) -> int:
+        """Resolve last release age in days."""
+        return self.last_release_days
+
+    @strawberry.field
+    def owasp_page_last_update_days(self) -> int:
+        """Resolve OWASP page last update age in days."""
+        return self.owasp_page_last_update_days
 
     @strawberry.field
     def project_name(self) -> str:
