@@ -5,10 +5,10 @@ import { twMerge } from 'tailwind-merge'
 import { fetchCsrfToken } from 'server/fetchCsrfToken'
 
 import { ChapterType } from 'types/chapter'
-import { CommitteeBase } from 'types/committee'
+import { CommitteeType } from 'types/committee'
 import { IconType } from 'types/icon'
 import { IssueType } from 'types/issue'
-import { ProjectBase } from 'types/project'
+import { ProjectType } from 'types/project'
 import { IconKeys, Icons, urlMappings } from 'utils/data'
 
 dayjs.extend(relativeTime)
@@ -17,7 +17,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type projectType = ProjectBase | IssueType | CommitteeBase | ChapterType
+type projectType = ProjectType | IssueType | CommitteeType | ChapterType
 
 export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
   const filteredIcons = params.reduce((acc: IconType, key) => {

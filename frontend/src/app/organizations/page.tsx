@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { Organization } from 'types/organization'
+import { OrganizationType } from 'types/organization'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -15,7 +15,7 @@ const OrganizationPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<Organization>({
+  } = useSearchPage<OrganizationType>({
     indexName: 'organizations',
     pageTitle: 'GitHub Organizations',
     hitsPerPage: 24,
@@ -23,7 +23,7 @@ const OrganizationPage = () => {
 
   const router = useRouter()
 
-  const renderOrganizationCard = (organization: Organization) => {
+  const renderOrganizationCard = (organization: OrganizationType) => {
     const handleButtonClick = () => {
       router.push(`/organizations/${organization.login}`)
     }

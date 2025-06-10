@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { CommitteeBase } from 'types/committee'
+import { CommitteeType } from 'types/committee'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
@@ -16,12 +16,12 @@ const CommitteesPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<CommitteeBase>({
+  } = useSearchPage<CommitteeType>({
     indexName: 'committees',
     pageTitle: 'OWASP Committees',
   })
   const router = useRouter()
-  const renderCommitteeCard = (committee: CommitteeBase) => {
+  const renderCommitteeCard = (committee: CommitteeType) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(committee, params)
     const formattedUrls = handleSocialUrls(committee.relatedUrls)

@@ -18,7 +18,7 @@ import type {
   ProjectReleaseType,
   RepositoryCardProps,
 } from 'types/project'
-import type { ItemCardPullRequests, UserDetailsProps } from 'types/user'
+import type { ItemCardPullRequests, UserDetails } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
@@ -26,7 +26,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()
-  const [user, setUser] = useState<UserDetailsProps | null>()
+  const [user, setUser] = useState<UserDetails | null>()
   const [issues, setIssues] = useState<ProjectIssuesType[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
   const [milestones, setMilestones] = useState<ProjectMilestonesType[]>([])

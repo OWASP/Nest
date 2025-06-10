@@ -47,7 +47,7 @@ export type ProjectStatsType = {
   stars: number
 }
 
-export interface ProjectBase {
+export interface ProjectType {
   contributorsCount: number
   description: string
   forksCount: number
@@ -67,18 +67,15 @@ export interface ProjectBase {
   type: string
   updatedAt: number
   url: string
-}
-
-export type ProjectType = ProjectBase & {
-  recentIssues: ProjectIssuesType[]
-  recentPullRequests: ProjectPullRequestsType[]
-  recentReleases: ProjectReleaseType[]
-  repositories: RepositoryCardProps[]
-  recentMilestones: ProjectMilestonesType[]
+  recentIssues?: ProjectIssuesType[]
+  recentPullRequests?: ProjectPullRequestsType[]
+  recentReleases?: ProjectReleaseType[]
+  repositories?: RepositoryCardProps[]
+  recentMilestones?: ProjectMilestonesType[]
 }
 
 export interface RepositoriesCardProps {
-  repositories: RepositoryCardProps[]
+  repositories?: RepositoryCardProps[]
 }
 
 export interface RepositoryCardProps {

@@ -16,8 +16,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { ChapterType } from 'types/chapter'
 import { EventType } from 'types/event'
-import { Organization } from 'types/organization'
-import { ProjectBase } from 'types/project'
+import { OrganizationType } from 'types/organization'
+import { ProjectType } from 'types/project'
 import { MultiSearchBarProps, Suggestion } from 'types/search'
 import { User } from 'types/user'
 
@@ -60,8 +60,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 hits: data.hits as
                   | ChapterType[]
                   | EventType[]
-                  | Organization[]
-                  | ProjectBase[]
+                  | OrganizationType[]
+                  | ProjectType[]
                   | User[],
                 totalPages: data.totalPages || 0,
               }
@@ -96,7 +96,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
   const handleSuggestionClick = useCallback(
     (
-      suggestion: ChapterType | ProjectBase | User | EventType | Organization,
+      suggestion: ChapterType | ProjectType | User | EventType | OrganizationType,
       indexName: string
     ) => {
       setSearchQuery(suggestion.name ?? '')
@@ -135,7 +135,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
         handleSuggestionClick(
-          suggestion as ChapterType | Organization | ProjectBase | User | EventType,
+          suggestion as ChapterType | OrganizationType | ProjectType | User | EventType,
           suggestions[index].indexName
         )
       } else if (event.key === 'ArrowDown') {

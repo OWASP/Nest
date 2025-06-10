@@ -1,22 +1,5 @@
 import { RepositoryCardProps } from 'types/project'
 
-export interface user {
-  avatar_url: string
-  bio: string
-  company: string
-  contributions_count: number
-  created_at: number
-  email: string
-  followers_count: number
-  following_count: number
-  key: string
-  location: string
-  login: string
-  name: string
-  objectID: string
-  public_repositories_count: number
-}
-
 export type RepositoryDetails = {
   key: string
   ownerKey: string
@@ -39,39 +22,31 @@ export type Release = {
   url: string
 }
 
-export interface UserBase<T = number> {
+export interface UserType<T = number> {
   createdAt: T
   avatarUrl: string
-  bio?: string | null
-  company?: string | null
-  email?: string | null
   followersCount: number
   followingCount: number
   issues?: Issue[]
-  issuesCount?: number
   key: string
-  location?: string | null
   login: string
-  name?: string | null
   publicRepositoriesCount: number
   releases?: Release[]
-  releasesCount?: number
   url: string
   contributionsCount: number
+  issuesCount?: number
+  releasesCount?: number
+  location?: string
+  company?: string
+  bio?: string
+  email?: string
+  name?: string
+  topRepositories?: RepositoryCardProps[]
 }
 
-export type User = UserBase<number>
+export type User = UserType<number>
 
-export interface UserDetailsProps extends UserBase<string> {
-  issuesCount: number
-  releasesCount: number
-  location: string | null
-  company: string | null
-  bio: string | null
-  email: string | null
-  name: string | null
-  topRepositories: RepositoryCardProps[]
-}
+export type UserDetails = UserType<string>
 
 export type PullRequestsType = {
   createdAt: string
