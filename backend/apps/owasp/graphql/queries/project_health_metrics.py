@@ -17,13 +17,14 @@ class ProjectHealthMetricsQuery:
     def unhealthy_projects(
         self,
         *,
-        contributors_count_requirement_compliant: bool = False,
         # Set the default of the `funding_requirement_compliant`
         # `leaders_requirement_compliant`, `long_open_issues`, `long_unanswered_issues`,
+        # `contributors_count_requirement_compliant`,
         # and `long_unassigned_issues` parameters to None,
         # to allow retrieving projects with or without these requirements
+        contributors_count_requirement_compliant: bool | None = None,
         funding_requirement_compliant: bool | None = None,
-        no_recent_commits: bool = False,
+        no_recent_commits: bool | None = None,
         no_recent_releases: bool = False,
         leaders_requirement_compliant: bool | None = None,
         limit: int = 20,
@@ -41,14 +42,14 @@ class ProjectHealthMetricsQuery:
         """Resolve unhealthy projects."""
         filters = {}
 
-        if contributors_count_requirement_compliant:
-            filters["contributors_count__lt"] = CONTRIBUTORS_COUNT_REQUIREMENT
-
         if no_recent_releases:
             filters["recent_releases_count"] = 0
 
-        if no_recent_commits:
-            filters["recent_commits_count"] = 0
+        if contributors_count_requirement_compliant is not None:
+            filters["contributors_count__lt"] = CONTRIBUTORS_COUNT_REQUIREMENT
+
+        if no_recent_commits is not None:
+            filters["has_no_recent_commits"] = no_recent_commits
 
         if long_open_issues is not None:
             filters["has_long_open_issues"] = long_open_issues
