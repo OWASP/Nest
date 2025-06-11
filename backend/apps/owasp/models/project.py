@@ -249,6 +249,12 @@ class Project(
         )
 
     @property
+    def has_no_recent_commits(self) -> bool:
+        """Indicate whether project has no recent commits."""
+        recent_period = timezone.now() - datetime.timedelta(days=60)
+        return self.pushed_at is None or self.pushed_at < recent_period or not self.commits_count
+
+    @property
     def recent_releases_count(self) -> int:
         """Return count of recent releases per a specific period."""
         recent_period = timezone.now() - datetime.timedelta(days=60)
