@@ -118,9 +118,9 @@ class Command(BaseCommand):
         all_threaded_parents = []
 
         last_message = (
-            Message.objects.filter(conversation=conversation).order_by("-timestamp").first()
+            Message.objects.filter(conversation=conversation).order_by("-created_at").first()
         )
-        oldest = last_message.timestamp.timestamp() if last_message else None
+        oldest = last_message.created_at.timestamp() if last_message else None
 
         while has_more:
             try:
@@ -189,10 +189,10 @@ class Command(BaseCommand):
                         conversation=conversation,
                         parent_message=parent_message,
                     )
-                    .order_by("-timestamp")
+                    .order_by("-created_at")
                     .first()
                 )
-                oldest_ts = latest_reply.timestamp.timestamp() if latest_reply else None
+                oldest_ts = latest_reply.created_at.timestamp() if latest_reply else None
 
                 cursor = None
                 has_more = True
@@ -249,12 +249,12 @@ class Command(BaseCommand):
         message_data: dict,
         conversation: Conversation,
         *,
-        is_thread_reply: bool,
+        is_thread_reply: bool = False,
         parent_message: Message | None = None,
     ) -> Message | None:
         """Create Message instance using from_slack pattern."""
         try:
-            if message_data.get("subtype") in ["channel_join", "channel_leave", "bot_message"]:
+            if message_data.get("subtype") in {"channel_join", "channel_leave", "bot_message"}:
                 return None
             if not any(
                 [

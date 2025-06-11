@@ -32,12 +32,11 @@ class Message(TimestampedModel):
     )
     slack_message_id = models.CharField(verbose_name="Slack Message ID", max_length=50)
     text = models.TextField(verbose_name="Message Text", blank=True)
-    timestamp = models.DateTimeField(verbose_name="Message Timestamp", blank=True)
+    created_at = models.DateTimeField(verbose_name="Created at", blank=True)
 
     def __str__(self):
         """Human readable representation."""
-        text_preview = truncate(self.text, 50)
-        return f"{text_preview}"
+        return truncate(self.text, 50)
 
     def from_slack(
         self,
@@ -54,9 +53,8 @@ class Message(TimestampedModel):
         self.text = message_data.get("text", "")
         self.author = author
 
-        self.is_thread_parent = not is_thread_reply and bool(
-            message_data.get("reply_count", 0) > 0
-        )
+        self.is_thread_parent = not is_thread_reply and message_data.get("reply_count", 0) > 0
+
         if is_thread_reply and parent_message:
             self.parent_message = parent_message
 
