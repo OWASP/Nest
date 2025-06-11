@@ -209,7 +209,7 @@ class TestSlackSyncMessagesCommand:
         mock_client.conversations_replies.return_value = mock_slack_replies_response
 
         mock_message = Mock(spec=Message)
-        mock_message.is_thread_parent = True
+        mock_message.has_replies = True
         mock_message.slack_message_id = TEST_THREAD_TS
 
         stdout = StringIO()
@@ -246,7 +246,6 @@ class TestSlackSyncMessagesCommand:
             client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
-            is_thread_reply=False,
             parent_message=None,
         )
 
@@ -264,7 +263,6 @@ class TestSlackSyncMessagesCommand:
             client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
-            is_thread_reply=False,
             parent_message=None,
         )
 
@@ -282,7 +280,6 @@ class TestSlackSyncMessagesCommand:
             client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
-            is_thread_reply=False,
             parent_message=None,
         )
 
@@ -312,7 +309,6 @@ class TestSlackSyncMessagesCommand:
                 client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
-                is_thread_reply=False,
                 parent_message=None,
             )
 
@@ -340,7 +336,6 @@ class TestSlackSyncMessagesCommand:
                 client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
-                is_thread_reply=False,
                 parent_message=None,
             )
 
@@ -349,7 +344,6 @@ class TestSlackSyncMessagesCommand:
             data=message_data,
             conversation=mock_conversation,
             author=mock_member,
-            is_thread_reply=False,
             parent_message=None,
             save=False,
         )
@@ -378,10 +372,10 @@ class TestSlackSyncMessagesCommand:
         ):
             mock_filter.return_value.order_by.return_value.first.return_value = None
 
-            command._fetch_thread_replies(
+            command._fetch_replies(
                 client=mock_client,
                 conversation=mock_conversation,
-                parent_messages=[mock_parent],
+                message=mock_parent,
                 delay=0.5,
             )
 

@@ -18,11 +18,16 @@ class Message(TimestampedModel):
         verbose_name_plural = "Messages"
         unique_together = ("conversation", "slack_message_id")
 
+    created_at = models.DateTimeField(verbose_name="Created at")
+    has_replies = models.BooleanField(verbose_name="Has replies", default=False)
+    slack_message_id = models.CharField(verbose_name="Slack message ID", max_length=50)
+    text = models.TextField(verbose_name="Text")
+
+    # FKs.
     author = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="messages")
     conversation = models.ForeignKey(
         Conversation, on_delete=models.CASCADE, related_name="messages"
     )
-    is_thread_parent = models.BooleanField(verbose_name="Is Thread", default=False)
     parent_message = models.ForeignKey(
         "self",
         on_delete=models.CASCADE,
@@ -30,9 +35,6 @@ class Message(TimestampedModel):
         null=True,
         blank=True,
     )
-    slack_message_id = models.CharField(verbose_name="Slack Message ID", max_length=50)
-    text = models.TextField(verbose_name="Message Text", blank=True)
-    created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
 
     def __str__(self):
         """Human readable representation."""
@@ -44,22 +46,17 @@ class Message(TimestampedModel):
         conversation: Conversation,
         author: Member,
         *,
-        is_thread_reply: bool = False,
         parent_message: "Message | None" = None,
     ) -> None:
         """Update instance based on Slack message data."""
+        self.created_at = datetime.fromtimestamp(float(message_data["ts"]), tz=UTC)
+        self.has_replies = message_data.get("reply_count", 0) > 0
         self.slack_message_id = message_data.get("ts", "")
-        self.conversation = conversation
         self.text = message_data.get("text", "")
+
         self.author = author
-
-        self.is_thread_parent = not is_thread_reply and message_data.get("reply_count", 0) > 0
-
-        if is_thread_reply and parent_message:
-            self.parent_message = parent_message
-
-        if ts := message_data.get("ts"):
-            self.created_at = datetime.fromtimestamp(float(ts), tz=UTC)
+        self.conversation = conversation
+        self.parent_message = parent_message
 
     @staticmethod
     def bulk_save(messages: list["Message"], fields=None) -> None:
@@ -72,25 +69,23 @@ class Message(TimestampedModel):
         conversation: Conversation,
         author: Member,
         *,
-        save: bool = True,
-        is_thread_reply: bool = False,
         parent_message: "Message | None" = None,
+        save: bool = True,
     ) -> "Message":
         """Update message data.
 
         Args:
           data (dict): Data to update the message with.
-          save (bool): Whether to save the message to the database.
           conversation (Conversation): The conversation the message belongs to.
           author (Member): The author of the message.
-          is_thread_reply (bool): Whether the message is a reply in a thread.
           parent_message (Message | None): The parent message if this is a thread reply.
+          save (bool): Whether to save the message to the database.
 
         Returns:
           Message: The updated message instance.
 
         """
-        slack_message_id = data.get("ts")
+        slack_message_id = data["ts"]
         try:
             message = Message.objects.get(
                 slack_message_id=slack_message_id, conversation=conversation
@@ -98,13 +93,7 @@ class Message(TimestampedModel):
         except Message.DoesNotExist:
             message = Message(slack_message_id=slack_message_id, conversation=conversation)
 
-        message.from_slack(
-            data,
-            conversation=conversation,
-            author=author,
-            is_thread_reply=is_thread_reply,
-            parent_message=parent_message,
-        )
+        message.from_slack(data, conversation, author, parent_message=parent_message)
 
         if save:
             message.save()

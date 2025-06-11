@@ -129,14 +129,15 @@ class MemberAdmin(admin.ModelAdmin):
 
 
 class MessageAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("author", "conversation", "parent_message")
+    list_display = (
+        "text",
+        "has_replies",
+        "author",
+    )
     search_fields = (
         "slack_message_id",
         "text",
-    )
-    list_display = (
-        "text",
-        "is_thread_parent",
-        "author",
     )
 
 

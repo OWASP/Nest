@@ -77,9 +77,8 @@ class TestMessageModel:
 
         mock_message_instance.from_slack.assert_called_once_with(
             message_data,
-            conversation=mock_conversation,
-            author=mock_author,
-            is_thread_reply=False,
+            mock_conversation,
+            mock_author,
             parent_message=None,
         )
         mock_message_instance.save.assert_called_once()
@@ -141,7 +140,6 @@ class TestMessageModel:
                 data=message_data,
                 conversation=mock_conversation,
                 author=mock_author,
-                is_thread_reply=True,
                 parent_message=mock_parent,
                 save=True,
             )
@@ -151,7 +149,7 @@ class TestMessageModel:
             assert result.slack_message_id == "123456.789"
             assert result.text == "Reply message"
             assert result.parent_message == mock_parent
-            assert result.is_thread_parent is False
+            assert not result.has_replies
             patched_message_save.assert_called_once()
 
     def test_update_data_with_thread_parent(self, mocker):
@@ -182,7 +180,7 @@ class TestMessageModel:
             assert isinstance(result, Message)
             assert result.slack_message_id == "123456.789"
             assert result.text == "Parent message"
-            assert result.is_thread_parent is True
+            assert result.has_replies
             patched_message_save.assert_called_once()
 
     def test_str_method(self):
