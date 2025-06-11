@@ -17,7 +17,7 @@ class Command(BaseCommand):
             "forks_count": (6.0, 1),
             "last_release_days": (6.0, -1),
             "last_commit_days": (6.0, -1),
-            "open_issues_count": (6.0, 1),
+            "open_issues_count": (6.0, -1),
             "open_pull_requests_count": (6.0, 1),
             "owasp_page_last_update_days": (6.0, -1),
             "last_pull_request_days": (6.0, -1),

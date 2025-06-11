@@ -33,41 +33,35 @@ class TestUpdateProjectHealthMetricsScoreCommand:
 
     def test_handle_successful_update(self):
         """Test successful metrics score update."""
-        # field -> requirements weight, metrics weight
         fields_weights = {
-            "age_days": 3.0,
-            "contributors_count": 3.0,
-            "forks_count": 3.0,
-            "last_release_days": 3.0,
-            "last_commit_days": 3.0,
-            "open_issues_count": 3.0,
-            "open_pull_requests_count": 3.0,
-            "owasp_page_last_update_days": 3.0,
-            "last_pull_request_days": 3.0,
-            "recent_releases_count": 3.0,
-            "stars_count": 4.0,
-            "total_pull_requests_count": 4.0,
-            "total_releases_count": 4.0,
-            "unanswered_issues_count": 4.0,
-            "unassigned_issues_count": 4.0,
+            "age_days": (5, 6),
+            "contributors_count": (5, 6),
+            "forks_count": (5, 6),
+            "last_release_days": (5, 6),
+            "last_commit_days": (5, 6),
+            "open_issues_count": (5, 6),
+            "open_pull_requests_count": (5, 6),
+            "owasp_page_last_update_days": (5, 6),
+            "last_pull_request_days": (5, 6),
+            "recent_releases_count": (5, 6),
+            "stars_count": (5, 6),
+            "total_pull_requests_count": (5, 6),
+            "total_releases_count": (5, 6),
+            "unanswered_issues_count": (5, 6),
+            "unassigned_issues_count": (5, 6),
         }
 
         # Create mock metrics with test data
         mock_metric = MagicMock(spec=ProjectHealthMetrics)
-        for field, weight in fields_weights.items():
-            setattr(mock_metric, field, weight)
+        mock_requirements = MagicMock(spec=ProjectHealthRequirements)
+        for field, (metric_weight, requirement_weight) in fields_weights.items():
+            setattr(mock_metric, field, metric_weight)
+            setattr(mock_requirements, field, requirement_weight)
         mock_metric.project.level = "test_level"
         mock_metric.project.name = "Test Project"
         self.mock_metrics.return_value = [mock_metric]
-
-        mock_requirements = MagicMock(spec=ProjectHealthRequirements)
-        for field, weight in fields_weights.items():
-            setattr(mock_requirements, field, weight)
         self.mock_requirements.return_value = mock_requirements
         mock_requirements.level = "test_level"
-
-        expected_score = sum(weight for weight in fields_weights.values())
-        mock_metric.score = expected_score
         # Execute command
         with patch("sys.stdout", new=self.stdout):
             call_command("owasp_update_project_health_metrics_scores")
@@ -75,5 +69,6 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         self.mock_requirements.assert_called_once_with(level=mock_metric.project.level)
         # Check if score was calculated correctly
 
+        self.mock_bulk_save.assert_called_once_with([mock_metric], fields=["score"])
         assert "Updated projects health metrics score successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
