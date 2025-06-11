@@ -138,20 +138,64 @@ describe('About Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders project history correctly', async () => {
+  test('renders mission and who its for sections correctly', async () => {
     await act(async () => {
       render(<About />)
     })
 
-    const historySection = screen.getByText('History').closest('div')
-    expect(historySection).toBeInTheDocument()
+    const missionSection = screen.getByText('Mission').closest('div')
+    expect(missionSection).toBeInTheDocument()
+    expect(screen.getByText(/OWASP Nest is a comprehensive platform/)).toBeInTheDocument()
 
-    const markdownContents = await screen.findAllByTestId('markdown-content')
-    expect(markdownContents.length).toBe(2)
-    expect(markdownContents[0].textContent).toBe('This is a test paragraph about the project.')
-    expect(markdownContents[1].textContent).toBe(
-      'This is another paragraph about the project history.'
-    )
+    const whoItsForSection = screen.getByText("Who It's For").closest('div')
+    expect(whoItsForSection).toBeInTheDocument()
+    expect(screen.getByText(/OWASP Nest is designed for developers/)).toBeInTheDocument()
+  })
+
+  test('renders key features section correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const keyFeaturesSection = screen.getByText('Key Features').closest('div')
+    expect(keyFeaturesSection).toBeInTheDocument()
+    
+    expect(screen.getByText('Advanced Search Capabilities')).toBeInTheDocument()
+    expect(screen.getByText('Slack Integration')).toBeInTheDocument()
+    expect(screen.getByText('OWASP Chapters Proximity Page')).toBeInTheDocument()
+    expect(screen.getByText('AI-Generated Insights')).toBeInTheDocument()
+  })
+
+  test('renders get involved section correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const getInvolvedSection = screen.getByText('Get Involved').closest('div')
+    expect(getInvolvedSection).toBeInTheDocument()
+    
+    expect(screen.getByText(/OWASP Nest thrives thanks to community-driven contributions/)).toBeInTheDocument()
+    expect(screen.getByText(/Code Contributions – Fix bugs or build new features/)).toBeInTheDocument()
+    expect(screen.getByText(/Code Review – Improve quality by reviewing pull requests/)).toBeInTheDocument()
+  })
+
+  test('renders project history timeline correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const projectHistorySection = screen.getByText('Project History').closest('div')
+    expect(projectHistorySection).toBeInTheDocument()
+    
+    expect(screen.getByText('Project Inception')).toBeInTheDocument()
+    expect(screen.getByText('Backend MVP')).toBeInTheDocument()
+    expect(screen.getByText('Frontend Development')).toBeInTheDocument()
+    expect(screen.getByText('Platform Integrations')).toBeInTheDocument()
+    expect(screen.getByText('GSoC Integration')).toBeInTheDocument()
+    
+    // Check for year indicators
+    expect(screen.getAllByText('23')).toHaveLength(2) // 2023 entries
+    expect(screen.getAllByText('24')).toHaveLength(3) // 2024 entries
   })
 
   test('renders leaders section with three leaders', async () => {
