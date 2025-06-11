@@ -126,7 +126,7 @@ class TestRepositoryBasedEntityModel:
 
         model.deactivate()
 
-        assert model.is_active is False
+        assert not model.is_active
         model.save.assert_called_once_with(update_fields=("is_active",))
 
     @pytest.mark.parametrize(
