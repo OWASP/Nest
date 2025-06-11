@@ -22,11 +22,11 @@ class Command(BaseCommand):
             "owasp_page_last_update_days": (6.0, -1),
             "last_pull_request_days": (6.0, -1),
             "recent_releases_count": (6.0, 1),
-            "stars_count": (8.0, 1),
-            "total_pull_requests_count": (8.0, 1),
-            "total_releases_count": (8.0, 1),
-            "unanswered_issues_count": (8.0, -1),
-            "unassigned_issues_count": (8.0, -1),
+            "stars_count": (6.0, 1),
+            "total_pull_requests_count": (6.0, 1),
+            "total_releases_count": (6.0, 1),
+            "unanswered_issues_count": (6.0, -1),
+            "unassigned_issues_count": (6.0, -1),
         }
         to_save = []
         for metric in metrics:
@@ -42,9 +42,15 @@ class Command(BaseCommand):
                 requirement_value = getattr(requirements, field)
 
                 if (metric_value >= requirement_value and direction == 1) or (
-                    metric_value < requirement_value and direction == -1
+                    metric_value <= requirement_value and direction == -1
                 ):
                     score += weight
+
+            # Evaluate compliance with funding and leaders requirements
+            if metric.is_funding_requirements_compliant:
+                score += 5.0
+            if metric.is_project_leaders_requirements_compliant:
+                score += 5.0
 
             metric.score = score
             to_save.append(metric)

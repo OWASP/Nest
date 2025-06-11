@@ -8,6 +8,8 @@ from apps.owasp.management.commands.owasp_update_project_health_metrics_scores i
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
+EXPECTED_SCORE = 58.0
+
 
 class TestUpdateProjectHealthMetricsScoreCommand:
     @pytest.fixture(autouse=True)
@@ -59,6 +61,8 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             setattr(mock_requirements, field, requirement_weight)
         mock_metric.project.level = "test_level"
         mock_metric.project.name = "Test Project"
+        mock_metric.is_funding_requirements_compliant = True
+        mock_metric.is_project_leaders_requirements_compliant = True
         self.mock_metrics.return_value = [mock_metric]
         self.mock_requirements.return_value = mock_requirements
         mock_requirements.level = "test_level"
@@ -67,8 +71,9 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             call_command("owasp_update_project_health_metrics_scores")
 
         self.mock_requirements.assert_called_once_with(level=mock_metric.project.level)
-        # Check if score was calculated correctly
 
+        # Check if score was calculated correctly
         self.mock_bulk_save.assert_called_once_with([mock_metric], fields=["score"])
+        assert mock_metric.score == EXPECTED_SCORE
         assert "Updated projects health metrics score successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
