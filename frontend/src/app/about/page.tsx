@@ -27,96 +27,16 @@ import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
 import { User } from 'types/user'
-import { technologies } from 'utils/aboutData'
+import { technologies, leaders, newAboutContent } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
+import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributors from 'components/TopContributors'
 import UserCard from 'components/UserCard'
 
-const leaders = {
-  arkid15r: 'CCSP, CISSP, CSSLP',
-  kasya: 'CC',
-  mamicidal: 'CISSP',
-}
 const projectKey = 'nest'
-
-// New content data
-const newAboutContent = {
-  mission:
-    'OWASP Nest is a comprehensive platform built to enhance collaboration and streamline contributions across the OWASP community. Acting as a central hub, it helps users discover projects, find contribution opportunities, and connect with like-minded individuals based on their interests and expertise.',
-
-  whoItsFor:
-    "OWASP Nest is designed for developers, designers, technical writers, students, security professionals, and contributors of all backgrounds. Whether you're just starting out or a seasoned OSS veteran, Nest provides intuitive tools to help you engage meaningfully in the OWASP ecosystem.",
-
-  keyFeatures: [
-    {
-      title: 'Advanced Search Capabilities',
-      description:
-        'Easily filter and explore projects or issues using keywords, tags, and contributor preferences.',
-    },
-    {
-      title: 'Slack Integration',
-      description:
-        'Stay connected through a Slack bot that delivers updates and supports both direct and channel messaging.',
-    },
-    {
-      title: 'OWASP Chapters Proximity Page',
-      description: 'Discover and connect with nearby OWASP chapters for local engagement.',
-    },
-    {
-      title: 'AI-Generated Insights',
-      description:
-        'Benefit from AI-powered summaries and actionable suggestions for tackling project issues.',
-    },
-  ],
-
-  getInvolved: {
-    description:
-      "OWASP Nest thrives thanks to community-driven contributions. Here's how you can make an impact:",
-    ways: [
-      'Code Contributions – Fix bugs or build new features',
-      'Code Review – Improve quality by reviewing pull requests',
-      'Documentation – Create or enhance onboarding guides and tutorials',
-      'Issue Reporting – Report bugs or propose improvements',
-      'Community Engagement – Join Slack discussions and provide feedback',
-    ],
-    callToAction:
-      'To get started, visit the OWASP Nest Repository, explore the Contributing Guidelines, and review the Code of Conduct.',
-  },
-
-  projectHistory: [
-    {
-      title: 'Project Inception',
-      description:
-        'Initial brainstorming and vision by Arkadii Yakovets (Ark) & Starr Brown to solve OWASP project navigation challenges',
-      year: '2023',
-    },
-    {
-      title: 'Backend MVP',
-      description:
-        'Backend foundations built using Python, Django, DRF with AI capabilities integrated',
-      year: '2023',
-    },
-    {
-      title: 'Frontend Development',
-      description:
-        'Frontend initially developed by Kateryna Golovanova (Kate) using Vue.js, later transitioned to React',
-      year: '2024',
-    },
-    {
-      title: 'Platform Integrations',
-      description: 'Slack & Algolia integrations implemented for enhanced user experience',
-      year: '2024',
-    },
-    {
-      title: 'GSoC Integration',
-      description: 'Scaled to support Google Summer of Code and streamline contributor onboarding',
-      year: '2024',
-    },
-  ],
-}
 
 const About = () => {
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
@@ -335,11 +255,14 @@ const About = () => {
         </SecondaryCard>
 
         <SecondaryCard icon={faTimeline} title={<AnchorTitle title="History" />}>
-          <div className="relative">
+          <div className="relative" data-testid="project-history-section">
             <div className="absolute bottom-0 left-4 top-8 w-0.5 bg-gradient-to-b from-blue-400 to-gray-300 dark:to-gray-600"></div>
 
             <div className="space-y-8">
-              {newAboutContent.projectHistory.map((milestone, index) => (
+              {(Array.isArray(newAboutContent.projectHistory)
+                ? newAboutContent.projectHistory
+                : []
+              ).map((milestone, index) => (
                 <div key={index} className="relative flex gap-6">
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-400 text-xs font-bold text-white shadow-lg ring-4 ring-white dark:ring-gray-800">
@@ -365,21 +288,17 @@ const About = () => {
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
-            {
-              label: 'Contributors',
-              value: projectMetadata.contributorsCount,
-              displayValue: '1.2K+',
-            },
-            { label: 'Open Issues', value: projectMetadata.issuesCount, displayValue: '40+' },
-            { label: 'Forks', value: projectMetadata.forksCount, displayValue: '60+' },
-            { label: 'Stars', value: projectMetadata.starsCount, displayValue: '890+' },
+            { label: 'Forks', value: projectMetadata.forksCount },
+            { label: 'Stars', value: projectMetadata.starsCount },
+            { label: 'Contributors', value: projectMetadata.contributorsCount },
+            { label: 'Open Issues', value: projectMetadata.issuesCount },
           ].map((stat, index) => (
             <div key={index}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  {stat.displayValue}
-                  {stat.label}
+                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
                 </div>
+                <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
             </div>
           ))}

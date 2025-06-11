@@ -35,6 +35,77 @@ jest.mock('utils/aboutData', () => ({
     'This is a test paragraph about the project.',
     'This is another paragraph about the project history.',
   ],
+  leaders: {
+    arkid15r: 'CCSP, CISSP, CSSLP',
+    kasya: 'CC',
+    mamicidal: 'CISSP',
+  },
+  newAboutContent: {
+    mission:
+      'OWASP Nest is a comprehensive platform designed to empower developers, security professionals, and organizations in their journey toward building secure applications.',
+    whoItsFor:
+      'OWASP Nest is designed for developers, security professionals, project leaders, and organizations looking to integrate security best practices into their development workflows.',
+    keyFeatures: [
+      {
+        title: 'Advanced Search Capabilities',
+        description:
+          'Find OWASP projects, tools, and resources with precision using our intelligent search functionality.',
+      },
+      {
+        title: 'Slack Integration',
+        description: 'Stay connected with the OWASP community through seamless Slack integration.',
+      },
+      {
+        title: 'OWASP Chapters Proximity Page',
+        description:
+          'Discover local OWASP chapters and events near you to engage with the community.',
+      },
+      {
+        title: 'AI-Generated Insights',
+        description:
+          'Leverage AI-powered insights to better understand project relationships and recommendations.',
+      },
+    ],
+    getInvolved: {
+      description:
+        'OWASP Nest thrives thanks to community-driven contributions. Here are ways you can get involved:',
+      ways: [
+        'Code Contributions – Fix bugs or build new features.',
+        'Code Review – Improve quality by reviewing pull requests.',
+        'Documentation – Help improve our guides and tutorials.',
+        'Testing – Report bugs and help test new features.',
+        'Community Engagement – Share your experiences and help others.',
+      ],
+    },
+
+    projectHistory: [
+      {
+        year: '2023',
+        title: 'Project Inception',
+        description: 'The project was started and initial planning began.',
+      },
+      {
+        year: '2023',
+        title: 'Backend MVP',
+        description: 'The backend MVP was released.',
+      },
+      {
+        year: '2024',
+        title: 'Frontend Development',
+        description: 'Frontend development kicked off.',
+      },
+      {
+        year: '2024',
+        title: 'Platform Integrations',
+        description: 'Integrated with several platforms.',
+      },
+      {
+        year: '2024',
+        title: 'GSoC Integration',
+        description: 'Google Summer of Code integration completed.',
+      },
+    ],
+  },
   technologies: [
     {
       section: 'Backend',
