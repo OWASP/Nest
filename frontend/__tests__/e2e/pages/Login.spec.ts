@@ -1,7 +1,7 @@
 import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect } from '@playwright/test'
 
-test.describe('LoginPage - Auth Disabled State', () => {
+test.describe('Login Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/graphql/', async (route) => {
       await route.fulfill({
@@ -9,7 +9,6 @@ test.describe('LoginPage - Auth Disabled State', () => {
         body: JSON.stringify(mockHomeData),
       })
     })
-
     await page.context().addCookies([
       {
         name: 'csrftoken',
@@ -23,8 +22,24 @@ test.describe('LoginPage - Auth Disabled State', () => {
     ])
   })
 
-  test('should display auth disabled message if env vars are missing', async ({ page }) => {
+  test('displays GitHub login button when unauthenticated', async ({ page }) => {
     await page.goto('/login')
-    await expect(page.getByText(/authentication is disabled/i)).toBeVisible()
+
+    const button = page.getByRole('button', { name: /sign in with github/i })
+    await expect(button).toBeVisible()
+  })
+
+  test('shows spinner while loading session', async ({ page }) => {
+    await page.route('**/api/auth/session', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      await route.fulfill({
+        status: 200,
+        body: JSON.stringify({}),
+      })
+    })
+
+    await page.goto('/login')
+
+    await expect(page.getByText(/checking session/i)).toBeVisible()
   })
 })
