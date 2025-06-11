@@ -32,7 +32,7 @@ class Message(TimestampedModel):
     )
     slack_message_id = models.CharField(verbose_name="Slack Message ID", max_length=50)
     text = models.TextField(verbose_name="Message Text", blank=True)
-    created_at = models.DateTimeField(verbose_name="Created at", blank=True)
+    created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
 
     def __str__(self):
         """Human readable representation."""
@@ -59,7 +59,7 @@ class Message(TimestampedModel):
             self.parent_message = parent_message
 
         if ts := message_data.get("ts"):
-            self.timestamp = datetime.fromtimestamp(float(ts), tz=UTC)
+            self.created_at = datetime.fromtimestamp(float(ts), tz=UTC)
 
     @staticmethod
     def bulk_save(messages: list["Message"], fields=None) -> None:
