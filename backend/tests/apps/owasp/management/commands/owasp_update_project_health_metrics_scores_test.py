@@ -73,7 +73,15 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         self.mock_requirements.assert_called_once()
 
         # Check if score was calculated correctly
-        self.mock_bulk_save.assert_called_once_with([mock_metric], fields=["score"])
+        self.mock_bulk_save.assert_called_once_with(
+            [mock_metric],
+            fields=[
+                "score",
+                "has_long_open_issues",
+                "has_long_unanswered_issues",
+                "has_long_unassigned_issues",
+            ],
+        )
         assert mock_metric.score == EXPECTED_SCORE
         assert mock_metric.has_long_open_issues is True
         assert mock_metric.has_long_unanswered_issues is True
