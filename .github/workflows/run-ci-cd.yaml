@@ -505,7 +505,7 @@ jobs:
           echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
           echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
 
-          - name: Build frontend image
+      - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |

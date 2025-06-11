@@ -1,17 +1,31 @@
 'use client'
 
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Skeleton } from '@heroui/react'
 import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
 export default function UserMenu() {
   const { data: session, status } = useSession()
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const dropdownId = useId()
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   if (status === userAuthStatus.LOADING) {
     return (
       <div className="flex h-10 w-10 items-center justify-center">
-        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="animate-pulse h-10 w-10 rounded-full bg-gray-300 dark:bg-slate-700" />
       </div>
     )
   }
@@ -20,7 +34,7 @@ export default function UserMenu() {
     return (
       <button
         onClick={() => signIn('github', { callbackUrl: '/', prompt: 'login' })}
-        className="group relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 overflow-hidden whitespace-pre rounded-md bg-[#87a1bc] px-4 py-2 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b] md:flex"
+        className="group relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 overflow-hidden whitespace-pre rounded-md bg-[#87a1bc] px-4 py-2 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
       >
         Sign in
       </button>
@@ -28,27 +42,41 @@ export default function UserMenu() {
   }
 
   return (
-    <Dropdown className="bg-owasp-blue dark:bg-slate-800">
-      <DropdownTrigger>
-        <Image
-          src={session.user?.image || '/default-avatar.png'}
-          height={40}
-          width={40}
-          alt="User avatar"
-          className="h-10 w-10 cursor-pointer rounded-full object-cover"
-        />
-      </DropdownTrigger>
+    <div ref={dropdownRef} className="relative flex items-center justify-center">
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        aria-controls={dropdownId}
+        className="w-auto focus:outline-none"
+      >
+        <div className="h-10 w-10 overflow-hidden rounded-full">
+          <Image
+            src={session.user?.image || '/default-avatar.png'}
+            height={40}
+            width={40}
+            alt="User avatar"
+            className="h-full w-full object-cover"
+          />
+        </div>
+      </button>
 
-      <DropdownMenu className="w-48" variant="bordered">
-        <DropdownItem
-          key={'sign-out'}
-          disableAnimation
-          onClick={() => signOut({ callbackUrl: '/' })}
-          className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 whitespace-pre rounded-md bg-[#87a1bc] px-4 py-2 text-sm font-medium text-black focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white"
+      {isOpen && (
+        <div
+          id={dropdownId}
+          className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
-          Sign out
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+          <button
+            onClick={() => {
+              signOut({ callbackUrl: '/' })
+              setIsOpen(false)
+            }}
+            className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white"
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
