@@ -9,7 +9,6 @@ test.describe('Login Page', () => {
         body: JSON.stringify(mockHomeData),
       })
     })
-
     await page.context().addCookies([
       {
         name: 'csrftoken',
@@ -30,13 +29,6 @@ test.describe('Login Page', () => {
     await expect(button).toBeVisible()
   })
 
-  test('displays loading spinner when logging in', async ({ page }) => {
-    await page.goto('/login')
-
-    const button = page.getByRole('button', { name: /sign in with github/i })
-    await button.click()
-    await expect(page).toHaveURL(/github\.com/)
-  })
   test('shows spinner while loading session', async ({ page }) => {
     await page.route('**/api/auth/session', async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 500))

@@ -9,11 +9,9 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
   signIn: jest.fn(),
 }))
-
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
-
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
@@ -37,7 +35,6 @@ describe('LoginPage', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
 
     render(<LoginPage />)
-
     expect(screen.getByText(/Redirecting/i)).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith(
       expect.objectContaining({

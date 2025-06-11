@@ -295,8 +295,6 @@ jobs:
       - name: Prepare frontend environment
         run: |
           touch frontend/.env
-          echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
-          echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
           echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> frontend/.env
           echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
@@ -309,6 +307,8 @@ jobs:
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
+          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -490,8 +490,6 @@ jobs:
       - name: Prepare frontend environment
         run: |
           touch frontend/.env
-          echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
-          echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
           echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> frontend/.env
           echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
@@ -504,6 +502,8 @@ jobs:
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
+          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83

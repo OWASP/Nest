@@ -9,13 +9,19 @@ import {
   NEXTAUTH_URL,
 } from 'utils/credentials'
 
-const authOptions = {
-  providers: [
+const providers = []
+
+if (GITHUB_CLIENT_ID && GITHUB_CLIENT_SECRET) {
+  providers.push(
     GitHubProvider({
-      clientId: GITHUB_CLIENT_ID!,
-      clientSecret: GITHUB_CLIENT_SECRET!,
-    }),
-  ],
+      clientId: GITHUB_CLIENT_ID,
+      clientSecret: GITHUB_CLIENT_SECRET,
+    })
+  )
+}
+
+const authOptions = {
+  providers,
   session: {
     strategy: 'jwt' as const,
   },
@@ -48,14 +54,16 @@ const authOptions = {
     },
 
     async jwt({ token, account }) {
-      if (account) {
+      if (account?.access_token) {
         token.accessToken = account.access_token
       }
       return token
     },
 
     async session({ session, token }) {
-      session.accessToken = token.accessToken
+      if (token?.accessToken) {
+        session.accessToken = token.accessToken
+      }
       return session
     },
   },
