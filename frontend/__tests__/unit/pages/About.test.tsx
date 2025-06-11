@@ -43,6 +43,14 @@ jest.mock('utils/aboutData', () => ({
           icon: '/images/icons/python.svg',
           url: 'https://www.python.org/',
         },
+        Django: {
+          icon: '/images/icons/django.svg',
+          url: 'https://www.djangoproject.com/',
+        },
+        PostgreSQL: {
+          icon: '/images/icons/postgresql.svg',
+          url: 'https://www.postgresql.org/',
+        },
       },
     },
     {
@@ -51,6 +59,14 @@ jest.mock('utils/aboutData', () => ({
         'Next.js': {
           icon: '/images/icons/nextjs.svg',
           url: 'https://nextjs.org/',
+        },
+        'Tailwind CSS': {
+          icon: '/images/icons/tailwind.svg',
+          url: 'https://tailwindcss.com/',
+        },
+        Typescript: {
+          icon: '/images/icons/typescript.svg',
+          url: 'https://www.typescriptlang.org/',
         },
       },
     },
@@ -65,6 +81,10 @@ jest.mock('utils/aboutData', () => ({
           icon: '/images/icons/pytest.svg',
           url: 'https://docs.pytest.org/',
         },
+        PlayWright: {
+          icon: '/images/icons/playwright.svg',
+          url: 'https://playwright.dev/',
+        },
       },
     },
     {
@@ -73,6 +93,10 @@ jest.mock('utils/aboutData', () => ({
         Ansible: {
           icon: '/images/icons/ansible.svg',
           url: 'https://www.ansible.com/',
+        },
+        Docker: {
+          icon: '/images/icons/docker.svg',
+          url: 'https://www.docker.com/',
         },
         GitHub: {
           icon: '/images/icons/github.svg',
@@ -159,7 +183,7 @@ describe('About Component', () => {
 
     const keyFeaturesSection = screen.getByText('Key Features').closest('div')
     expect(keyFeaturesSection).toBeInTheDocument()
-    
+
     expect(screen.getByText('Advanced Search Capabilities')).toBeInTheDocument()
     expect(screen.getByText('Slack Integration')).toBeInTheDocument()
     expect(screen.getByText('OWASP Chapters Proximity Page')).toBeInTheDocument()
@@ -173,10 +197,16 @@ describe('About Component', () => {
 
     const getInvolvedSection = screen.getByText('Get Involved').closest('div')
     expect(getInvolvedSection).toBeInTheDocument()
-    
-    expect(screen.getByText(/OWASP Nest thrives thanks to community-driven contributions/)).toBeInTheDocument()
-    expect(screen.getByText(/Code Contributions – Fix bugs or build new features/)).toBeInTheDocument()
-    expect(screen.getByText(/Code Review – Improve quality by reviewing pull requests/)).toBeInTheDocument()
+
+    expect(
+      screen.getByText(/OWASP Nest thrives thanks to community-driven contributions/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Code Contributions – Fix bugs or build new features/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Code Review – Improve quality by reviewing pull requests/)
+    ).toBeInTheDocument()
   })
 
   test('renders project history timeline correctly', async () => {
@@ -184,15 +214,15 @@ describe('About Component', () => {
       render(<About />)
     })
 
-    const projectHistorySection = screen.getByText('Project History').closest('div')
+    const projectHistorySection = screen.getByText('History').closest('div')
     expect(projectHistorySection).toBeInTheDocument()
-    
+
     expect(screen.getByText('Project Inception')).toBeInTheDocument()
     expect(screen.getByText('Backend MVP')).toBeInTheDocument()
     expect(screen.getByText('Frontend Development')).toBeInTheDocument()
     expect(screen.getByText('Platform Integrations')).toBeInTheDocument()
     expect(screen.getByText('GSoC Integration')).toBeInTheDocument()
-    
+
     // Check for year indicators
     expect(screen.getAllByText('23')).toHaveLength(2) // 2023 entries
     expect(screen.getAllByText('24')).toHaveLength(3) // 2024 entries

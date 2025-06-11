@@ -5,7 +5,6 @@ import {
   faClock,
   faUserGear,
   faMapSigns,
-  faScroll,
   faUsers,
   faTools,
   faArrowUpRightFromSquare,
@@ -28,9 +27,8 @@ import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
 import { User } from 'types/user'
-import { aboutText, technologies } from 'utils/aboutData'
+import { technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
-import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
@@ -69,13 +67,14 @@ const newAboutContent = {
     },
     {
       title: 'AI-Generated Insights',
-      description: 'Benefit from AI-powered summaries and actionable suggestions for tackling project issues.',
+      description:
+        'Benefit from AI-powered summaries and actionable suggestions for tackling project issues.',
     },
   ],
 
   getInvolved: {
     description:
-      'OWASP Nest thrives thanks to community-driven contributions. Here\'s how you can make an impact:',
+      "OWASP Nest thrives thanks to community-driven contributions. Here's how you can make an impact:",
     ways: [
       'Code Contributions – Fix bugs or build new features',
       'Code Review – Improve quality by reviewing pull requests',
@@ -96,7 +95,8 @@ const newAboutContent = {
     },
     {
       title: 'Backend MVP',
-      description: 'Backend foundations built using Python, Django, DRF with AI capabilities integrated',
+      description:
+        'Backend foundations built using Python, Django, DRF with AI capabilities integrated',
       year: '2023',
     },
     {
@@ -181,7 +181,6 @@ const About = () => {
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
 
-        {/* Mission and Who It's For - 2 columns */}
         <div className="mb-8 grid gap-6 md:grid-cols-2">
           <SecondaryCard icon={faBullseye} title={<AnchorTitle title="Mission" />}>
             <p className="text-gray-600 dark:text-gray-300">{newAboutContent.mission}</p>
@@ -192,7 +191,6 @@ const About = () => {
           </SecondaryCard>
         </div>
 
-        {/* Key Features - 1 column */}
         <SecondaryCard icon={faRocket} title={<AnchorTitle title="Key Features" />}>
           <div className="grid gap-4 sm:grid-cols-2">
             {newAboutContent.keyFeatures.map((feature, index) => (
@@ -286,8 +284,8 @@ const About = () => {
                               milestone.progress === 100
                                 ? 'Completed'
                                 : milestone.progress > 0
-                                ? 'In Progress'
-                                : 'Not Started'
+                                  ? 'In Progress'
+                                  : 'Not Started'
                             }
                             id={`tooltip-state-${index}`}
                             delay={100}
@@ -300,8 +298,8 @@ const About = () => {
                                   milestone.progress === 100
                                     ? faCircleCheck
                                     : milestone.progress > 0
-                                    ? faUserGear
-                                    : faClock
+                                      ? faUserGear
+                                      : faClock
                                 }
                               />
                             </span>
@@ -319,7 +317,9 @@ const About = () => {
         {/* Get Involved */}
         <SecondaryCard icon={faHandsHelping} title={<AnchorTitle title="Get Involved" />}>
           <div className="space-y-4">
-            <p className="text-gray-600 dark:text-gray-300">{newAboutContent.getInvolved.description}</p>
+            <p className="text-gray-600 dark:text-gray-300">
+              {newAboutContent.getInvolved.description}
+            </p>
             <ul className="space-y-2">
               {newAboutContent.getInvolved.ways.map((way, index) => (
                 <li key={index} className="flex items-start gap-2">
@@ -334,24 +334,24 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        {/* Project History Timeline */}
-        <SecondaryCard icon={faTimeline} title={<AnchorTitle title="Project History" />}>
+        <SecondaryCard icon={faTimeline} title={<AnchorTitle title="History" />}>
           <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-4 top-8 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 to-gray-300 dark:to-gray-600"></div>
+            <div className="absolute bottom-0 left-4 top-8 w-0.5 bg-gradient-to-b from-blue-400 to-gray-300 dark:to-gray-600"></div>
 
             <div className="space-y-8">
               {newAboutContent.projectHistory.map((milestone, index) => (
                 <div key={index} className="relative flex gap-6">
                   <div className="relative z-10 flex flex-col items-center">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-400 text-white text-xs font-bold shadow-lg ring-4 ring-white dark:ring-gray-800">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-400 text-xs font-bold text-white shadow-lg ring-4 ring-white dark:ring-gray-800">
                       {milestone.year.slice(-2)}
                     </div>
                   </div>
                   <div className="flex-1 pb-2">
                     <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
                       <h3 className="mb-2 font-semibold text-blue-400">{milestone.title}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {milestone.description}
+                      </p>
                       <span className="mt-2 inline-block text-xs font-medium text-gray-500 dark:text-gray-400">
                         {milestone.year}
                       </span>
@@ -363,20 +363,23 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        {/* Project Statistics */}
         <div className="grid gap-6 md:grid-cols-4">
           {[
-            { label: 'Forks', value: projectMetadata.forksCount },
-            { label: 'Stars', value: projectMetadata.starsCount },
-            { label: 'Contributors', value: projectMetadata.contributorsCount },
-            { label: 'Open Issues', value: projectMetadata.issuesCount },
+            {
+              label: 'Contributors',
+              value: projectMetadata.contributorsCount,
+              displayValue: '1.2K+',
+            },
+            { label: 'Open Issues', value: projectMetadata.issuesCount, displayValue: '40+' },
+            { label: 'Forks', value: projectMetadata.forksCount, displayValue: '60+' },
+            { label: 'Stars', value: projectMetadata.starsCount, displayValue: '890+' },
           ].map((stat, index) => (
             <div key={index}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
+                  {stat.displayValue}
+                  {stat.label}
                 </div>
-                <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
             </div>
           ))}
