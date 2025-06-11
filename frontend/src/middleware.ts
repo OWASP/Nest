@@ -13,5 +13,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // required authentication for all defined routes under matcher
-  matcher: [],
+  matcher: ['/projects'],
 }
