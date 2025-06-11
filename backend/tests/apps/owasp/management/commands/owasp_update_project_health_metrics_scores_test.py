@@ -8,7 +8,7 @@ from apps.owasp.management.commands.owasp_update_project_health_metrics_scores i
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
-EXPECTED_SCORE = 52.0
+EXPECTED_SCORE = 46.0
 
 
 class TestUpdateProjectHealthMetricsScoreCommand:
@@ -41,7 +41,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             "forks_count": (5, 6),
             "last_release_days": (5, 6),
             "last_commit_days": (5, 6),
-            "open_issues_count": (5, 6),
+            "open_issues_count": (7, 6),
             "open_pull_requests_count": (5, 6),
             "owasp_page_last_update_days": (5, 6),
             "last_pull_request_days": (5, 6),
@@ -49,8 +49,8 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             "stars_count": (5, 6),
             "total_pull_requests_count": (5, 6),
             "total_releases_count": (5, 6),
-            "unanswered_issues_count": (5, 6),
-            "unassigned_issues_count": (5, 6),
+            "unanswered_issues_count": (7, 6),
+            "unassigned_issues_count": (7, 6),
         }
 
         # Create mock metrics with test data
@@ -75,5 +75,8 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         # Check if score was calculated correctly
         self.mock_bulk_save.assert_called_once_with([mock_metric], fields=["score"])
         assert mock_metric.score == EXPECTED_SCORE
+        assert mock_metric.has_long_open_issues is True
+        assert mock_metric.has_long_unanswered_issues is True
+        assert mock_metric.has_long_unassigned_issues is True
         assert "Updated projects health metrics score successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
