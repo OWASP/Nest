@@ -18,16 +18,16 @@ class TestOrganizationIndexMixin:
 
     def test_is_indexable(self):
         organization = Organization(name="Organization Name", login="login")
-        assert organization.is_indexable is True
+        assert organization.is_indexable
 
         organization = Organization(login="login")
-        assert organization.is_indexable is False
+        assert not organization.is_indexable
 
         organization = Organization(name="Organization Name")
-        assert organization.is_indexable is False
+        assert not organization.is_indexable
 
         organization = Organization()
-        assert organization.is_indexable is False
+        assert not organization.is_indexable
 
     def test_idx_description_with_value(self):
         organization = Organization(description="Organization Description")

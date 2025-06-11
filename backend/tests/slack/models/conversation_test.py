@@ -122,9 +122,9 @@ class TestConversationModel:
         # Assertions
         assert conversation.name == "general"
         assert conversation.created_at == datetime.fromtimestamp(1605000000, tz=UTC)
-        assert conversation.is_private is True
-        assert conversation.is_archived is True
-        assert conversation.is_general is True
+        assert conversation.is_private
+        assert conversation.is_archived
+        assert conversation.is_general
         assert conversation.topic == "General topic"
         assert conversation.purpose == "General purpose"
         assert conversation.slack_creator_id == "U12345"
