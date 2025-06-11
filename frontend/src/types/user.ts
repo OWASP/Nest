@@ -48,7 +48,7 @@ export type User = UserType<number>
 
 export type UserDetails = UserType<string>
 
-export type PullRequestsType = {
+export type PullRequest = {
   createdAt: string
   organizationName: string
   repositoryName?: string

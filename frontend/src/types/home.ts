@@ -1,9 +1,9 @@
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 import { EventType } from 'types/event'
 import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
 
 export type MainPageData = {
-  topContributors: TopContributorsType[]
+  topContributors: TopContributors[]
   recentIssues: ProjectIssuesType[]
   recentReleases: ProjectReleaseType[]
   upcomingEvents: EventType[]

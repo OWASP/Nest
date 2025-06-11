@@ -1,19 +1,19 @@
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 
-export interface CommitteeType {
+export interface Committee {
+  contributorsCount?: number
   createdAt: number
+  forksCount?: number
+  issuesCount?: number
   key: string
   leaders: string[]
   name: string
   objectID?: string
   relatedUrls: string[]
-  topContributors: TopContributorsType[]
+  repositoriesCount?: number
+  starsCount?: number
   summary: string
+  topContributors: TopContributors[]
   updatedAt: number
   url: string
-  contributorsCount?: number
-  forksCount?: number
-  issuesCount?: number
-  starsCount?: number
-  repositoriesCount?: number
 }

@@ -1,9 +1,9 @@
-export interface AlgoliaResponseType<T> {
+export interface AlgoliaResponse<T> {
   hits: T[]
   totalPages?: number
 }
 
-export type AlgoliaRequestType = {
+export type AlgoliaRequest = {
   aroundLatLngViaIP?: boolean
   attributesToHighlight: string[]
   attributesToRetrieve: string[]

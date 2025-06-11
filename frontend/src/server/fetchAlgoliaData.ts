@@ -1,5 +1,5 @@
 import { AppError } from 'app/global-error'
-import { AlgoliaResponseType } from 'types/algolia'
+import { AlgoliaResponse } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
 
@@ -9,7 +9,7 @@ export const fetchAlgoliaData = async <T>(
   currentPage = 0,
   hitsPerPage = 25,
   facetFilters: string[] = []
-): Promise<AlgoliaResponseType<T>> => {
+): Promise<AlgoliaResponse<T>> => {
   try {
     if (['projects', 'chapters'].includes(indexName)) {
       facetFilters.push('idx_is_active:true')

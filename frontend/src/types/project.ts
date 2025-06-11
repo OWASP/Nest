@@ -1,4 +1,4 @@
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 
 export type Author = {
   avatarUrl: string
@@ -63,7 +63,7 @@ export interface ProjectType {
   starsCount: number
   summary: string
   topics: string[]
-  topContributors: TopContributorsType[]
+  topContributors: TopContributors[]
   type: string
   updatedAt: number
   url: string

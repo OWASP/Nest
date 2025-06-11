@@ -20,7 +20,7 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
 import { GET_LEADER_DATA } from 'server/queries/userQueries'
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 import { ProjectType } from 'types/project'
 import { User } from 'types/user'
 import { aboutText, technologies } from 'utils/aboutData'
@@ -29,7 +29,7 @@ import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/TopContributors'
+import TopContributorsList from 'components/TopContributorsList'
 import UserCard from 'components/UserCard'
 
 const leaders = {
@@ -55,7 +55,7 @@ const About = () => {
   )
 
   const [projectMetadata, setProjectMetadata] = useState<ProjectType | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsType[]>([])
+  const [topContributors, setTopContributors] = useState<TopContributors[]>([])
 
   useEffect(() => {
     if (projectMetadataResponse?.project) {
@@ -122,7 +122,7 @@ const About = () => {
         </SecondaryCard>
 
         {topContributors && (
-          <TopContributors
+          <TopContributorsList
             icon={faUsers}
             contributors={topContributors}
             maxInitialDisplay={9}

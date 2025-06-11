@@ -1,4 +1,4 @@
-import { ChapterType } from 'types/chapter'
+import { Chapter } from 'types/chapter'
 import { EventType } from 'types/event'
 import { OrganizationType } from 'types/organization'
 import { ProjectType } from 'types/project'
@@ -14,6 +14,6 @@ export interface MultiSearchBarProps {
 
 export type Suggestion = {
   indexName: string
-  hits: ChapterType[] | EventType[] | OrganizationType[] | ProjectType[] | User[]
+  hits: Chapter[] | EventType[] | OrganizationType[] | ProjectType[] | User[]
   totalPages: number
 }

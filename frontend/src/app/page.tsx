@@ -21,8 +21,8 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { GET_MAIN_PAGE_DATA } from 'server/queries/homeQueries'
-import { AlgoliaResponseType } from 'types/algolia'
-import { ChapterType } from 'types/chapter'
+import { AlgoliaResponse } from 'types/algolia'
+import { Chapter } from 'types/chapter'
 import { EventType } from 'types/event'
 import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
@@ -40,7 +40,7 @@ import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/TopContributors'
+import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
@@ -50,7 +50,7 @@ export default function Home() {
     variables: { distinct: true },
   })
 
-  const [geoLocData, setGeoLocData] = useState<ChapterType[]>([])
+  const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function Home() {
         currentPage: 1,
         hitsPerPage: 1000,
       }
-      const data: AlgoliaResponseType<ChapterType> = await fetchAlgoliaData(
+      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
@@ -303,7 +303,7 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributors
+        <TopContributorsList
           icon={faUsers}
           contributors={data?.topContributors}
           type="company"

@@ -1,8 +1,8 @@
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { JSX } from 'react'
 import { ButtonType } from 'types/button'
-import { ChapterType } from 'types/chapter'
-import { TopContributorsType } from 'types/contributor'
+import { Chapter } from 'types/chapter'
+import { TopContributors } from 'types/contributor'
 import { IconType } from 'types/icon'
 import { Level } from 'types/level'
 import {
@@ -24,7 +24,7 @@ export interface CardProps {
   summary: string
   title: string
   tooltipLabel?: string
-  topContributors?: TopContributorsType[]
+  topContributors?: TopContributors[]
   url: string
 }
 
@@ -37,7 +37,7 @@ type stats = {
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
-  geolocationData?: ChapterType[]
+  geolocationData?: Chapter[]
   heatmap?: JSX.Element
   isActive?: boolean
   languages?: string[]
@@ -51,7 +51,7 @@ export interface DetailsCardProps {
   summary?: string
   showAvatar?: boolean
   title?: string
-  topContributors?: TopContributorsType[]
+  topContributors?: TopContributors[]
   topics?: string[]
   type: string
   userSummary?: JSX.Element

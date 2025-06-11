@@ -23,7 +23,7 @@ import RecentReleases from 'components/RecentReleases'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ToggleableList from 'components/ToggleableList'
-import TopContributors from 'components/TopContributors'
+import TopContributorsList from 'components/TopContributorsList'
 
 const DetailsCard = ({
   title,
@@ -153,7 +153,7 @@ const DetailsCard = ({
           </div>
         )}
         {topContributors && (
-          <TopContributors
+          <TopContributorsList
             icon={faUsers}
             contributors={topContributors}
             maxInitialDisplay={9}

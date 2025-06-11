@@ -1,9 +1,9 @@
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 
-export type ChapterType = {
+export type Chapter = {
   _geoloc?: { lat: number; lng: number }
-  geoLocation?: { lat: number; lng: number }
   createdAt: number
+  geoLocation?: { lat: number; lng: number }
   isActive: boolean
   key: string
   leaders: string[]
@@ -11,9 +11,9 @@ export type ChapterType = {
   objectID: string
   region: string
   relatedUrls: string[]
-  summary: string
   suggestedLocation: string
-  topContributors: TopContributorsType[]
+  summary: string
+  topContributors: TopContributors[]
   updatedAt: number
   url: string
 }

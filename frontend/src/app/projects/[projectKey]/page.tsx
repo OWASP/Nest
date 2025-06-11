@@ -12,7 +12,7 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 import { ProjectType } from 'types/project'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
@@ -22,7 +22,7 @@ const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [project, setProject] = useState<ProjectType | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsType[]>([])
+  const [topContributors, setTopContributors] = useState<TopContributors[]>([])
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })

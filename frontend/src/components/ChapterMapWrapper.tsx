@@ -1,11 +1,11 @@
 import dynamic from 'next/dynamic'
 import React from 'react'
-import { ChapterType } from 'types/chapter'
+import { Chapter } from 'types/chapter'
 
 const ChapterMap = dynamic(() => import('./ChapterMap'), { ssr: false })
 
 const ChapterMapWrapper = (props: {
-  geoLocData: ChapterType[]
+  geoLocData: Chapter[]
   showLocal: boolean
   style: React.CSSProperties
 }) => {

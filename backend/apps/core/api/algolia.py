@@ -58,10 +58,8 @@ def get_search_results(
     response = client.search(search_method_params={"requests": [search_params]})
     search_result = response.results[0].to_dict()
 
-    cleaned_search_result = deep_camelize(search_result["hits"])
-
     return {
-        "hits": cleaned_search_result,
+        "hits": deep_camelize(search_result["hits"]),
         "nbPages": search_result.get("nbPages", 0),
     }
 

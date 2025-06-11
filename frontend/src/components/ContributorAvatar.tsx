@@ -2,16 +2,14 @@ import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import { memo } from 'react'
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 
 type ContributorProps = {
-  contributor: TopContributorsType
+  contributor: TopContributors
   uniqueKey: string
 }
 
-const isAlgoliaContributor = (
-  contributor: TopContributorsType
-): contributor is TopContributorsType => {
+const isAlgoliaContributor = (contributor: TopContributors): contributor is TopContributors => {
   return (
     typeof contributor === 'object' &&
     contributor !== null &&
@@ -23,20 +21,18 @@ const isAlgoliaContributor = (
 const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) => {
   const isAlgolia = isAlgoliaContributor(contributor)
 
-  const avatarUrl = isAlgolia
-    ? contributor.avatarUrl
-    : (contributor as TopContributorsType).avatarUrl
+  const avatarUrl = isAlgolia ? contributor.avatarUrl : (contributor as TopContributors).avatarUrl
 
   const contributionsCount = isAlgolia
     ? contributor.contributionsCount
-    : (contributor as TopContributorsType).contributionsCount
+    : (contributor as TopContributors).contributionsCount
 
   const { login, name } = contributor
   const displayName = name || login
 
   const repositoryInfo =
-    !isAlgolia && (contributor as TopContributorsType).projectName
-      ? ` in ${(contributor as TopContributorsType).projectName}`
+    !isAlgolia && (contributor as TopContributors).projectName
+      ? ` in ${(contributor as TopContributors).projectName}`
       : ''
 
   return (

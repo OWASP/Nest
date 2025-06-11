@@ -13,7 +13,7 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -21,7 +21,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()
   const [repository, setRepository] = useState(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsType[]>([])
+  const [topContributors, setTopContributors] = useState<TopContributors[]>([])
   const [recentPullRequests, setRecentPullRequests] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {

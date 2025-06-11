@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
-import { ChapterType } from 'types/chapter'
+import { Chapter } from 'types/chapter'
 import { ProjectType } from 'types/project'
 import { SnapshotDetailsProps } from 'types/snapshot'
 import { level } from 'utils/data'
@@ -66,7 +66,7 @@ const SnapshotDetailsPage: React.FC = () => {
     )
   }
 
-  const renderChapterCard = (chapter: ChapterType) => {
+  const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
     const formattedUrls = handleSocialUrls(chapter.relatedUrls)

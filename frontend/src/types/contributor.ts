@@ -1,4 +1,4 @@
-export type TopContributorsType = {
+export type TopContributors = {
   avatarUrl: string
   contributionsCount: number
   login: string

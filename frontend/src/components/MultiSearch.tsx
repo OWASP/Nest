@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { ChapterType } from 'types/chapter'
+import { Chapter } from 'types/chapter'
 import { EventType } from 'types/event'
 import { OrganizationType } from 'types/organization'
 import { ProjectType } from 'types/project'
@@ -58,7 +58,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               return {
                 indexName: index,
                 hits: data.hits as
-                  | ChapterType[]
+                  | Chapter[]
                   | EventType[]
                   | OrganizationType[]
                   | ProjectType[]
@@ -96,7 +96,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
   const handleSuggestionClick = useCallback(
     (
-      suggestion: ChapterType | ProjectType | User | EventType | OrganizationType,
+      suggestion: Chapter | ProjectType | User | EventType | OrganizationType,
       indexName: string
     ) => {
       setSearchQuery(suggestion.name ?? '')
@@ -135,7 +135,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
         handleSuggestionClick(
-          suggestion as ChapterType | OrganizationType | ProjectType | User | EventType,
+          suggestion as Chapter | OrganizationType | ProjectType | User | EventType,
           suggestions[index].indexName
         )
       } else if (event.key === 'ArrowDown') {

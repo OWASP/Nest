@@ -12,16 +12,16 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_COMMITTEE_DATA } from 'server/queries/committeeQueries'
-import { CommitteeType } from 'types/committee'
-import { TopContributorsType } from 'types/contributor'
+import { Committee } from 'types/committee'
+import { TopContributors } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
-  const [committee, setCommittee] = useState<CommitteeType | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsType[]>([])
+  const [committee, setCommittee] = useState<Committee | null>(null)
+  const [topContributors, setTopContributors] = useState<TopContributors[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { data, error: graphQLRequestError } = useQuery(GET_COMMITTEE_DATA, {

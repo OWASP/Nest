@@ -1,7 +1,7 @@
 'use client'
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef } from 'react'
-import { ChapterType } from 'types/chapter'
+import { Chapter } from 'types/chapter'
 import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
@@ -13,7 +13,7 @@ const ChapterMap = ({
   showLocal,
   style,
 }: {
-  geoLocData: ChapterType[]
+  geoLocData: Chapter[]
   showLocal: boolean
   style: React.CSSProperties
 }) => {

@@ -1,4 +1,4 @@
-import { ChapterType } from 'types/chapter'
+import { Chapter } from 'types/chapter'
 import { ProjectType } from 'types/project'
 
 export type ReleaseType = {
@@ -15,7 +15,7 @@ export interface SnapshotDetailsProps {
   title: string
   newReleases: ReleaseType[]
   newProjects: ProjectType[]
-  newChapters: ChapterType[]
+  newChapters: Chapter[]
 }
 
 export type Snapshots = {

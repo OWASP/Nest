@@ -5,21 +5,21 @@ import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { TopContributorsType } from 'types/contributor'
+import { TopContributors } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 import { pluralize } from 'utils/pluralize'
 import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
-const TopContributors = ({
+const TopContributorsList = ({
   contributors,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
   type,
   icon,
 }: {
-  contributors: TopContributorsType[]
+  contributors: TopContributors[]
   label?: string
   maxInitialDisplay?: number
   type: string
@@ -109,4 +109,4 @@ const TopContributors = ({
   )
 }
 
-export default TopContributors
+export default TopContributorsList

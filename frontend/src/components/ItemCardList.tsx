@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
 import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
-import { PullRequestsType } from 'types/user'
+import { PullRequest } from 'types/user'
 import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
@@ -17,7 +17,7 @@ const ItemCardList = ({
   showSingleColumn = true,
 }: {
   title: React.ReactNode
-  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[] | ProjectMilestonesType[]
+  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequest[] | ProjectMilestonesType[]
   icon?: IconProp
   showAvatar?: boolean
   showSingleColumn?: boolean
