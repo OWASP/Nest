@@ -32,12 +32,17 @@ const config: Config = {
   globals: {},
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',
-  testPathIgnorePatterns: ['<rootDir>/__tests__/unit/data/', '<rootDir>/__tests__/e2e/'],
+  testPathIgnorePatterns: [
+    '<rootDir>/__tests__/unit/data/',
+    '<rootDir>/__tests__/e2e/',
+    '<rootDir>/__tests__/testUtils/',
+  ],
   transform: {
     '^.+\\.tsx?$': '@swc/jest',
   },
   moduleNameMapper: {
     '^@unit/(.*)$': '<rootDir>/__tests__/unit/$1',
+    '^@testUtils/(.*)$': '<rootDir>/__tests__/testUtils/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(scss|sass|css)$': 'identity-obj-proxy',
   },
