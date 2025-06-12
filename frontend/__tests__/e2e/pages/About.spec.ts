@@ -77,11 +77,10 @@ test.describe('About Page', () => {
   })
 
   test('displays animated counters with correct values', async ({ page }) => {
-    // Just check that the stat labels are visible - that's enough to verify the counters section works
-    await expect(page.getByText('Contributors')).toBeVisible()
-    await expect(page.getByText('Open Issues')).toBeVisible()
-    await expect(page.getByText('Forks')).toBeVisible()
-    await expect(page.getByText('Stars')).toBeVisible()
+    await expect(page.getByText('Contributors', { exact: true })).toBeVisible()
+    await expect(page.getByText('Open Issues', { exact: true })).toBeVisible()
+    await expect(page.getByText('Forks', { exact: true })).toBeVisible()
+    await expect(page.getByText('Stars', { exact: true })).toBeVisible()
   })
 
   test('opens user profile in new window when leader button is clicked', async ({ page }) => {

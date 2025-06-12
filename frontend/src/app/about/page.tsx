@@ -27,7 +27,14 @@ import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
 import { User } from 'types/user'
-import { technologies, leaders, missionContent, keyFeatures, getInvolvedContent, projectHistory } from 'utils/aboutData'
+import {
+  technologies,
+  leaders,
+  missionContent,
+  keyFeatures,
+  getInvolvedContent,
+  projectHistory,
+} from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -237,9 +244,7 @@ const About = () => {
         {/* Get Involved */}
         <SecondaryCard icon={faHandsHelping} title={<AnchorTitle title="Get Involved" />}>
           <div className="space-y-4">
-            <p className="text-gray-600 dark:text-gray-300">
-              {getInvolvedContent.description}
-            </p>
+            <p className="text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
             <ul className="space-y-2">
               {getInvolvedContent.ways.map((way, index) => (
                 <li key={index} className="flex items-start gap-2">
