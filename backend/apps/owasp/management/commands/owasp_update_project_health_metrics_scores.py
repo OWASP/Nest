@@ -32,6 +32,11 @@ class Command(BaseCommand):
             "unassigned_issues_count": 6.0,
         }
 
+        boolean_mapping = {
+            "open_issues_count": "has_long_open_issues",
+            "unanswered_issues_count": "has_long_unanswered_issues",
+            "unassigned_issues_count": "has_long_unassigned_issues",
+        }
         project_health_metrics = []
         project_health_requirements = {
             phr.level: phr for phr in ProjectHealthRequirements.objects.all()
@@ -56,6 +61,8 @@ class Command(BaseCommand):
             for field, weight in backward_fields.items():
                 if int(getattr(metric, field)) <= int(getattr(requirements, field)):
                     score += weight
+                elif field in boolean_mapping:
+                    setattr(metric, boolean_mapping[field], True)
 
             metric.score = score
             project_health_metrics.append(metric)
