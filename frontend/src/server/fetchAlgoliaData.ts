@@ -1,5 +1,5 @@
 import { AppError } from 'app/global-error'
-import { AlgoliaResponse } from 'types/algolia'
+import type { AlgoliaResponse } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
 

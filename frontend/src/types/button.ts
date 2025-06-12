@@ -1,5 +1,5 @@
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
-import { JSX } from 'react'
+import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import type { JSX } from 'react'
 
 export type ButtonType = {
   label: string
@@ -8,7 +8,7 @@ export type ButtonType = {
   url?: string
 }
 
-export interface NavButtonProps {
+export type NavButtonProps = {
   href: string
   defaultIcon: IconDefinition
   hoverIcon: IconDefinition

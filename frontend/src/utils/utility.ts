@@ -4,11 +4,11 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
 import { fetchCsrfToken } from 'server/fetchCsrfToken'
 
-import { Chapter } from 'types/chapter'
-import { Committee } from 'types/committee'
-import { IconType } from 'types/icon'
-import { IssueType } from 'types/issue'
-import { ProjectType } from 'types/project'
+import type { Chapter } from 'types/chapter'
+import type { Committee } from 'types/committee'
+import type { IconType } from 'types/icon'
+import type { IssueType } from 'types/issue'
+import type { ProjectType } from 'types/project'
 import { IconKeys, Icons, urlMappings } from 'utils/data'
 
 dayjs.extend(relativeTime)

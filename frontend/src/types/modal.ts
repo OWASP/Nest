@@ -1,7 +1,7 @@
 import React from 'react'
-import { ButtonType } from 'types/button'
+import type { ButtonType } from 'types/button'
 
-export interface ModalProps {
+export type ModalProps = {
   title: string
   summary: string
   hint?: string

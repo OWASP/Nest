@@ -4,7 +4,7 @@ import { OrganizationType } from 'types/organization'
 import { ProjectType } from 'types/project'
 import { User } from 'types/user'
 
-export interface MultiSearchBarProps {
+export type MultiSearchBarProps = {
   isLoaded: boolean
   placeholder: string
   indexes: string[]

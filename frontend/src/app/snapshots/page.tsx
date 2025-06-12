@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_COMMUNITY_SNAPSHOTS } from 'server/queries/snapshotQueries'
-import { Snapshots } from 'types/snapshot'
+import type { Snapshots } from 'types/snapshot'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
 

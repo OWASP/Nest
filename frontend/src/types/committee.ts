@@ -1,6 +1,6 @@
-import { TopContributors } from 'types/contributor'
+import type { TopContributors } from 'types/contributor'
 
-export interface Committee {
+export type Committee = {
   contributorsCount?: number
   createdAt: number
   forksCount?: number

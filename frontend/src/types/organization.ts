@@ -1,4 +1,4 @@
-export interface OrganizationType {
+export type OrganizationType = {
   avatarUrl: string
   collaboratorsCount: number
   company?: string

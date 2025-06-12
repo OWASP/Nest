@@ -1,4 +1,4 @@
-export interface AlgoliaResponse<T> {
+export type AlgoliaResponse<T> = {
   hits: T[]
   totalPages?: number
 }

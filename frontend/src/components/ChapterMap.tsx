@@ -1,7 +1,7 @@
 'use client'
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef } from 'react'
-import { Chapter } from 'types/chapter'
+import type { Chapter } from 'types/chapter'
 import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'

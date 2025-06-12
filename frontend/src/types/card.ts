@@ -1,19 +1,17 @@
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
-import { JSX } from 'react'
-import { ButtonType } from 'types/button'
-import { Chapter } from 'types/chapter'
-import { TopContributors } from 'types/contributor'
-import { IconType } from 'types/icon'
-import { Level } from 'types/level'
-import {
-  ProjectIssuesType,
-  ProjectReleaseType,
-  RepositoryCardProps,
-  ProjectMilestonesType,
-} from 'types/project'
-import { ItemCardPullRequests } from 'types/user'
+import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import type { JSX } from 'react'
+import type { ButtonType } from 'types/button'
+import type { Chapter } from 'types/chapter'
+import type { TopContributors } from 'types/contributor'
+import type { IconType } from 'types/icon'
+import type { IssueType } from 'types/issue'
+import type { Level } from 'types/level'
+import type { MilestonesType } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequestType } from 'types/pullRequest'
+import type { ReleaseType } from 'types/release'
 
-export interface CardProps {
+export type CardProps = {
   button: ButtonType
   icons?: IconType
   isActive?: boolean
@@ -41,10 +39,10 @@ export interface DetailsCardProps {
   heatmap?: JSX.Element
   isActive?: boolean
   languages?: string[]
-  pullRequests?: ItemCardPullRequests[]
-  recentIssues?: ProjectIssuesType[]
-  recentReleases?: ProjectReleaseType[]
-  recentMilestones?: ProjectMilestonesType[]
+  pullRequests?: PullRequestType[]
+  recentIssues?: IssueType[]
+  recentReleases?: ReleaseType[]
+  recentMilestones?: MilestonesType[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
   stats?: stats[]

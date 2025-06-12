@@ -1,14 +1,8 @@
-import { Chapter } from 'types/chapter'
-import { ProjectType } from 'types/project'
+import type { Chapter } from 'types/chapter'
+import type { ProjectType } from 'types/project'
+import { ReleaseType } from 'types/release'
 
-export type ReleaseType = {
-  name: string
-  publishedAt: string
-  tagName: string
-  projectName: string
-}
-
-export interface SnapshotDetailsProps {
+export type SnapshotDetailsProps = {
   endAt: string
   key: string
   startAt: string

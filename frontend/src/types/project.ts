@@ -1,43 +1,9 @@
-import { TopContributors } from 'types/contributor'
-
-export type Author = {
-  avatarUrl: string
-  key: string
-  login: string
-  name: string
-}
-
-export type ProjectIssuesType = {
-  author: Author
-  createdAt: number
-  organizationName?: string
-  repositoryName?: string
-  title: string
-  url: string
-}
-
-export type ProjectPullRequestsType = {
-  author: Author
-  createdAt: string
-  organizationName: string
-  repositoryName?: string
-  title: string
-  url: string
-}
-
-export type ProjectMilestonesType = {
-  author: Author
-  body: string
-  closedIssuesCount: number
-  createdAt: string
-  openIssuesCount: number
-  organizationName?: string
-  progress?: number
-  repositoryName: string
-  state: string
-  title: string
-  url?: string
-}
+import type { TopContributors } from 'types/contributor'
+import type { IssueType } from 'types/issue'
+import { MilestonesType } from 'types/milestone'
+import { OrganizationType } from 'types/organization'
+import { PullRequestType } from 'types/pullRequest'
+import type { ReleaseType } from 'types/release'
 
 export type ProjectStatsType = {
   contributors: number
@@ -47,7 +13,8 @@ export type ProjectStatsType = {
   stars: number
 }
 
-export interface ProjectType {
+export type ProjectType = {
+  createdAt?: string
   contributorsCount: number
   description: string
   forksCount: number
@@ -58,6 +25,7 @@ export interface ProjectType {
   leaders: string[]
   level: string
   name: string
+  openIssuesCount?: number
   organizations: string
   repositoriesCount: number
   starsCount: number
@@ -67,38 +35,25 @@ export interface ProjectType {
   type: string
   updatedAt: number
   url: string
-  recentIssues?: ProjectIssuesType[]
-  recentPullRequests?: ProjectPullRequestsType[]
-  recentReleases?: ProjectReleaseType[]
+  recentIssues?: IssueType[]
+  recentPullRequests?: PullRequestType[]
+  recentReleases?: ReleaseType[]
   repositories?: RepositoryCardProps[]
-  recentMilestones?: ProjectMilestonesType[]
+  recentMilestones?: MilestonesType[]
 }
 
-export interface RepositoriesCardProps {
+export type RepositoriesCardProps = {
   repositories?: RepositoryCardProps[]
 }
 
-export interface RepositoryCardProps {
+export type RepositoryCardProps = {
   contributorsCount: number
   forksCount: number
   key?: string
   name: string
   openIssuesCount: number
-  organization?: {
-    login: string
-  }
+  organization?: OrganizationType
   starsCount: number
   subscribersCount: number
-  url: string
-}
-
-export type ProjectReleaseType = {
-  author: Author
-  isPreRelease: boolean
-  name: string
-  organizationName?: string
-  publishedAt: number
-  repositoryName: string
-  tagName: string
   url: string
 }

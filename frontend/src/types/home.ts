@@ -1,21 +1,20 @@
-import { TopContributors } from 'types/contributor'
-import { EventType } from 'types/event'
-import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
+import type { Chapter } from 'types/chapter'
+import type { TopContributors } from 'types/contributor'
+import type { EventType } from 'types/event'
+import type { IssueType } from 'types/issue'
+import type { MilestonesType } from 'types/milestone'
+import { ProjectType } from 'types/project'
+import type { PullRequestType } from 'types/pullRequest'
+import type { ReleaseType } from 'types/release'
 
 export type MainPageData = {
   topContributors: TopContributors[]
-  recentIssues: ProjectIssuesType[]
-  recentReleases: ProjectReleaseType[]
+  recentIssues: IssueType[]
+  recentReleases: ReleaseType[]
   upcomingEvents: EventType[]
-  recentPullRequests: PullRequestsType[]
-  recentMilestones: ProjectMilestonesType[]
-  recentChapters: {
-    createdAt: string
-    key: string
-    leaders: string[]
-    name: string
-    suggestedLocation: string
-  }[]
+  recentPullRequests: PullRequestType[]
+  recentMilestones: MilestonesType[]
+  recentChapters: Chapter[]
   recentPosts: {
     authorName: string
     authorImageUrl: string
@@ -23,15 +22,7 @@ export type MainPageData = {
     title: string
     url: string
   }[]
-  recentProjects: {
-    createdAt: string
-    key: string
-    leaders: string[]
-    name: string
-    openIssuesCount: number
-    repositoriesCount: number
-    type: string
-  }[]
+  recentProjects: ProjectType[]
   sponsors: SponsorType[]
   statsOverview: {
     activeChaptersStats: number
@@ -46,17 +37,5 @@ export type SponsorType = {
   imageUrl: string
   name: string
   sponsorType: string
-  url: string
-}
-
-export type PullRequestsType = {
-  author: {
-    avatarUrl: string
-    login: string
-    name: string
-  }
-  organizationName: string
-  createdAt: string
-  title: string
   url: string
 }

@@ -4,7 +4,7 @@ export type IssuesDataType = {
   total_pages: number
 }
 
-export interface IssueType {
+export type IssueType = {
   createdAt: number
   hint: string
   labels: string[]

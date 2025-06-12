@@ -14,12 +14,12 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { Chapter } from 'types/chapter'
-import { EventType } from 'types/event'
-import { OrganizationType } from 'types/organization'
-import { ProjectType } from 'types/project'
-import { MultiSearchBarProps, Suggestion } from 'types/search'
-import { User } from 'types/user'
+import type { Chapter } from 'types/chapter'
+import type { EventType } from 'types/event'
+import type { OrganizationType } from 'types/organization'
+import type { ProjectType } from 'types/project'
+import type { MultiSearchBarProps, Suggestion } from 'types/search'
+import type { User } from 'types/user'
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,

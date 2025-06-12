@@ -1,4 +1,4 @@
-export interface CardSkeletonProps {
+export type CardSkeletonProps = {
   showLevel?: boolean
   showIcons?: boolean
   showProjectName?: boolean
@@ -10,7 +10,7 @@ export interface CardSkeletonProps {
   numIcons?: number
 }
 
-export interface UserCardSkeletonProps {
+export type UserCardSkeletonProps = {
   showAvatar?: boolean
   showName?: boolean
   showViewProfile?: boolean

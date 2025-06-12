@@ -2,7 +2,7 @@ import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import { memo } from 'react'
-import { TopContributors } from 'types/contributor'
+import type { TopContributors } from 'types/contributor'
 
 type ContributorProps = {
   contributor: TopContributors

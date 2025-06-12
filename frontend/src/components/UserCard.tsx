@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import millify from 'millify'
 import Image from 'next/image'
-import { UserCardProps } from 'types/card'
+import type { UserCardProps } from 'types/card'
 
 const UserCard = ({
   avatar,

@@ -1,7 +1,7 @@
 import { Tooltip } from '@heroui/tooltip'
 import { millify } from 'millify'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { IconType } from 'types/icon'
+import type { IconType } from 'types/icon'
 import { IconKeys, Icons } from 'utils/data'
 
 export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
