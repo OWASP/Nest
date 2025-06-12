@@ -23,7 +23,7 @@ import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { GET_MAIN_PAGE_DATA } from 'server/queries/homeQueries'
 import { AlgoliaResponse } from 'types/algolia'
 import { Chapter } from 'types/chapter'
-import { EventType } from 'types/event'
+import { Event } from 'types/event'
 import { MainPageData } from 'types/home'
 import { capitalize } from 'utils/capitalize'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
@@ -163,7 +163,7 @@ export default function Home() {
           className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data.upcomingEvents.map((event: EventType, index: number) => (
+            {data.upcomingEvents.map((event: Event, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
