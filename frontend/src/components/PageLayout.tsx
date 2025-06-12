@@ -3,21 +3,25 @@ import { usePathname } from 'next/navigation'
 import React from 'react'
 import BreadCrumbs, { BreadCrumbItem } from 'components/BreadCrumbs'
 
+export interface crumbItem {
+  title: string
+}
+
 export interface PageLayoutProps {
-  breadcrumbItems?: BreadCrumbItem[]
+  breadcrumbItems?: crumbItem
   children: React.ReactNode
 }
 
 function generateBreadcrumbs(pathname: string, excludeLast = false): BreadCrumbItem[] {
-  let segments = _.filter(_.split(pathname || '', '/'))
-  if (excludeLast && segments.length > 0) {
-    segments = segments.slice(0, -1)
+  let segments = _.compact(_.split(pathname, '/'))
+  if (excludeLast) {
+    segments = _.dropRight(segments)
   }
-  let path = ''
-  return segments.map((segment) => {
-    path += `/${segment}`
+
+  return _.map(segments, (segment, index) => {
+    const path = '/' + _.join(_.slice(segments, 0, index + 1), '/')
     return {
-      title: segment.charAt(0).toUpperCase() + segment.slice(1),
+      title: _.capitalize(segment),
       path,
     }
   })
@@ -25,10 +29,11 @@ function generateBreadcrumbs(pathname: string, excludeLast = false): BreadCrumbI
 
 export default function PageLayout({ breadcrumbItems, children }: PageLayoutProps) {
   const pathname = usePathname()
-  const autoBreadcrumbs = generateBreadcrumbs(pathname, !_.isEmpty(breadcrumbItems))
-  const allBreadcrumbs = breadcrumbItems
-    ? [...autoBreadcrumbs, ...breadcrumbItems]
-    : autoBreadcrumbs
+  const isBreadCrumbItemsEmpty = _.isEmpty(breadcrumbItems)
+  const autoBreadcrumbs = generateBreadcrumbs(pathname, !isBreadCrumbItemsEmpty)
+  const allBreadcrumbs = isBreadCrumbItemsEmpty
+    ? autoBreadcrumbs
+    : [...autoBreadcrumbs, { title: _.get(breadcrumbItems, 'title', ''), path: pathname }]
 
   return (
     <>

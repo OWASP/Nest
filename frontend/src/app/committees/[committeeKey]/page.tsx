@@ -80,7 +80,7 @@ export default function CommitteeDetailsPage() {
   ]
 
   return (
-    <PageLayout breadcrumbItems={[{ title: committee.name, path: `/committees/${committeeKey}` }]}>
+    <PageLayout breadcrumbItems={{ title: committee.name }}>
       <DetailsCard
         details={details}
         socialLinks={committee.relatedUrls}

@@ -107,14 +107,7 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <PageLayout
-      breadcrumbItems={[
-        {
-          title: repository.name,
-          path: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
-        },
-      ]}
-    >
+    <PageLayout breadcrumbItems={{ title: repository.name }}>
       <DetailsCard
         details={repositoryDetails}
         languages={repository.languages}

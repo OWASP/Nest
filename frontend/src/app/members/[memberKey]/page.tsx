@@ -192,9 +192,7 @@ const UserDetailsPage: React.FC = () => {
   )
 
   return (
-    <PageLayout
-      breadcrumbItems={[{ title: user?.name || user?.login, path: `/members/${memberKey}` }]}
-    >
+    <PageLayout breadcrumbItems={{ title: user?.name || user?.login }}>
       <DetailsCard
         details={userDetails}
         heatmap={isPrivateContributor ? undefined : <Heatmap />}

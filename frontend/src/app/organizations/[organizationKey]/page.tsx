@@ -114,9 +114,7 @@ const OrganizationDetailsPage = () => {
   ]
 
   return (
-    <PageLayout
-      breadcrumbItems={[{ title: organization.name, path: `/organizations/${organizationKey}` }]}
-    >
+    <PageLayout breadcrumbItems={{ title: organization.name }}>
       <DetailsCard
         details={organizationDetails}
         recentIssues={issues}

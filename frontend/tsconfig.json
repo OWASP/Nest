@@ -24,6 +24,7 @@
     "paths": {
       "@e2e/*": ["__tests__/e2e/*"],
       "@unit/*": ["__tests__/unit/*"],
+      "@testUtils/*": ["__tests__/testUtils/*"],
       "*": ["./src/*"],
       "app/*": ["src/app/*"],
       "components/*": ["src/components/*"],

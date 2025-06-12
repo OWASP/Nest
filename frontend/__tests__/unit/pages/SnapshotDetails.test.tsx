@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { assertHeadingsAndTexts } from '@testUtils/sharedAssertions'
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/snapshots/[id]/page'
@@ -62,6 +63,7 @@ describe('SnapshotDetailsPage', () => {
     })
   })
 
+  // eslint-disable-next-line jest/expect-expect
   test('renders snapshot details when data is available', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
@@ -70,14 +72,10 @@ describe('SnapshotDetailsPage', () => {
 
     render(<SnapshotDetailsPage />)
 
-    await waitFor(() => {
-      const title = screen.getByRole('heading', { name: 'New Snapshot' })
-      expect(title).toBeInTheDocument()
+    await assertHeadingsAndTexts({
+      headingText: 'New Snapshot',
+      texts: ['New Chapters', 'New Projects', 'New Releases'],
     })
-
-    expect(screen.getByText('New Chapters')).toBeInTheDocument()
-    expect(screen.getByText('New Projects')).toBeInTheDocument()
-    expect(screen.getByText('New Releases')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {

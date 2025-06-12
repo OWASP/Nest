@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
+import { assertContributorToggle, assertRepoDetails } from '@testUtils/sharedAssertions'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage from 'app/projects/[projectKey]/page'
@@ -59,6 +60,7 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
+  // eslint-disable-next-line jest/expect-expect
   test('renders project details when data is available', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
@@ -66,15 +68,13 @@ describe('ProjectDetailsPage', () => {
     })
 
     render(<ProjectDetailsPage />)
-
-    await waitFor(() => {
-      const title = screen.getByRole('heading', { name: 'Test Project' })
-      expect(title).toBeInTheDocument()
-      expect(screen.getByText('Lab')).toBeInTheDocument()
+    await assertRepoDetails({
+      heading: 'Test Project',
+      license: 'Lab',
+      stars: '2.2K Stars',
+      forks: '10 Forks',
+      issues: '10 Issues',
     })
-    expect(screen.getByText('2.2K Stars')).toBeInTheDocument()
-    expect(screen.getByText('10 Forks')).toBeInTheDocument()
-    expect(screen.getByText('10 Issues')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {
@@ -97,27 +97,10 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
+  // eslint-disable-next-line jest/expect-expect
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
-    })
-
-    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
-    fireEvent.click(showMoreButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
-    })
-
-    const showLessButton = screen.getByRole('button', { name: /Show less/i })
-    fireEvent.click(showLessButton)
-
-    await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
-    })
+    await assertContributorToggle('Contributor 9', ['Contributor 7', 'Contributor 8'])
   })
 
   test('navigates to user page when contributor is clicked', async () => {

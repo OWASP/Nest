@@ -2,8 +2,7 @@ import { render, screen } from '@testing-library/react'
 import BreadCrumbs from 'components/BreadCrumbs'
 import '@testing-library/jest-dom'
 
-const renderBreadCrumbs = (items = []) =>
-  render(<BreadCrumbs breadcrumbItems={items} />)
+const renderBreadCrumbs = (items = []) => render(<BreadCrumbs breadcrumbItems={items} />)
 
 const sampleItems = [
   { title: 'Dashboard', path: '/dashboard' },
@@ -49,7 +48,13 @@ describe('BreadCrumbs', () => {
       { title: 'Users', path: '/dashboard/users' },
     ]
     renderBreadCrumbs(items)
-    expect(screen.getByText('Home').closest('a')).toHaveClass('hover:text-blue-700', 'hover:underline')
-    expect(screen.getByText('Dashboard').closest('a')).toHaveClass('hover:text-blue-700', 'hover:underline')
+    expect(screen.getByText('Home').closest('a')).toHaveClass(
+      'hover:text-blue-700',
+      'hover:underline'
+    )
+    expect(screen.getByText('Dashboard').closest('a')).toHaveClass(
+      'hover:text-blue-700',
+      'hover:underline'
+    )
   })
 })

@@ -1,5 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
+import { assertHeadingsAndTexts } from '@testUtils/sharedAssertions'
 import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { render } from 'wrappers/testUtil'
 import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
@@ -48,16 +49,18 @@ describe('CommitteeDetailsPage Component', () => {
     })
   })
 
+  // eslint-disable-next-line jest/expect-expect
   test('renders committee data correctly', async () => {
     render(<CommitteeDetailsPage />)
-    await waitFor(() => {
-      const title = screen.getByRole('heading', { name: 'Test Committee' })
-      expect(title).toBeInTheDocument()
+    await assertHeadingsAndTexts({
+      headingText: 'Test Committee',
+      texts: [
+        'This is a test committee summary.',
+        'Leader 1',
+        'Leader 2',
+        'https://owasp.org/test-committee',
+      ],
     })
-    expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
-    expect(screen.getByText('Leader 1')).toBeInTheDocument()
-    expect(screen.getByText('Leader 2')).toBeInTheDocument()
-    expect(screen.getByText('https://owasp.org/test-committee')).toBeInTheDocument()
   })
 
   test('displays "Committee not found" when there is no committee', async () => {
