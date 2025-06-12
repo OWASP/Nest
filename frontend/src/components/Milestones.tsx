@@ -8,14 +8,14 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import type { Milestones as MilestonesType } from 'types/milestone'
+import type { Milestone } from 'types/milestone'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import ItemCardList from 'components/ItemCardList'
 import { TruncatedText } from 'components/TruncatedText'
 
 interface ProjectMilestonesProps {
-  data: MilestonesType[]
+  data: Milestone[]
   showAvatar?: boolean
   showSingleColumn?: boolean
 }

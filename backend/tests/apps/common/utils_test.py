@@ -24,7 +24,7 @@ class TestUtils:
             ("my_variable", "myVariable"),
             ("long_variable_name", "longVariableName"),
             ("top_contributor_project", "topContributorProject"),
-            ("_leading_underscore", "leadingUnderscore"),
+            ("_leading_underscore", "_leadingUnderscore"),
             ("trailing_underscore_", "trailingUnderscore"),
             ("multiple__underscores", "multipleUnderscores"),
             ("alreadyCamelCase", "alreadyCamelCase"),

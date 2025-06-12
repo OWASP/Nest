@@ -1,6 +1,6 @@
 import type { User } from 'types/user'
 
-export type Milestones = {
+export type Milestone = {
   author: User
   body: string
   closedIssuesCount: number
