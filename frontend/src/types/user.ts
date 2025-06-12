@@ -1,22 +1,22 @@
-import type { IssueType } from 'types/issue'
+import type { Issue } from 'types/issue'
 import type { RepositoryCardProps } from 'types/project'
-import type { ReleaseType } from 'types/release'
+import type { Release } from 'types/release'
 
 export type RepositoryDetails = {
   key: string
   ownerKey: string
 }
 
-export type UserType<T = number> = {
+export type User<T = number> = {
   createdAt: T
   avatarUrl: string
   followersCount: number
   followingCount: number
-  issues?: IssueType[]
+  issues?: Issue[]
   key: string
   login: string
   publicRepositoriesCount: number
-  releases?: ReleaseType[]
+  releases?: Release[]
   url: string
   contributionsCount: number
   issuesCount?: number
@@ -29,6 +29,4 @@ export type UserType<T = number> = {
   topRepositories?: RepositoryCardProps[]
 }
 
-export type User = UserType<number>
-
-export type UserDetails = UserType<string>
+export type UserDetails = User<string>

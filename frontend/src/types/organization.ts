@@ -1,4 +1,4 @@
-export type OrganizationType = {
+export type Organization = {
   avatarUrl: string
   collaboratorsCount: number
   company?: string

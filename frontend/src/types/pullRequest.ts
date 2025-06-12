@@ -1,6 +1,6 @@
 import type { User } from 'types/user'
 
-export type PullRequestType = {
+export type PullRequest = {
   author: User
   createdAt: string
   organizationName: string

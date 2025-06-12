@@ -21,7 +21,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
 import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import type { TopContributors } from 'types/contributor'
-import type { ProjectType } from 'types/project'
+import type { Project } from 'types/project'
 import type { User } from 'types/user'
 import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
@@ -54,7 +54,7 @@ const About = () => {
     }
   )
 
-  const [projectMetadata, setProjectMetadata] = useState<ProjectType | null>(null)
+  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
   const [topContributors, setTopContributors] = useState<TopContributors[]>([])
 
   useEffect(() => {

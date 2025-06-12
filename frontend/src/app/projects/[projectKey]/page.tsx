@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import type { TopContributors } from 'types/contributor'
-import type { ProjectType } from 'types/project'
+import type { Project } from 'types/project'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -21,7 +21,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [project, setProject] = useState<ProjectType | null>(null)
+  const [project, setProject] = useState<Project | null>(null)
   const [topContributors, setTopContributors] = useState<TopContributors[]>([])
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },

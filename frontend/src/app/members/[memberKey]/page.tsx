@@ -12,11 +12,11 @@ import { useParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_USER_DATA } from 'server/queries/userQueries'
-import type { IssueType } from 'types/issue'
-import type { MilestonesType } from 'types/milestone'
+import type { Issue } from 'types/issue'
+import type { Milestones } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
-import type { PullRequestType } from 'types/pullRequest'
-import type { ReleaseType } from 'types/release'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import type { UserDetails } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
@@ -26,11 +26,11 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()
   const [user, setUser] = useState<UserDetails | null>()
-  const [issues, setIssues] = useState<IssueType[]>([])
+  const [issues, setIssues] = useState<Issue[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<MilestonesType[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequestType[]>([])
-  const [releases, setReleases] = useState<ReleaseType[]>([])
+  const [milestones, setMilestones] = useState<Milestones[]>([])
+  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
+  const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')

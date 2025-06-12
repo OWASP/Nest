@@ -6,9 +6,9 @@ import { fetchCsrfToken } from 'server/fetchCsrfToken'
 
 import type { Chapter } from 'types/chapter'
 import type { Committee } from 'types/committee'
-import type { IconType } from 'types/icon'
-import type { IssueType } from 'types/issue'
-import type { ProjectType } from 'types/project'
+import type { Icon } from 'types/icon'
+import type { Issue } from 'types/issue'
+import type { Project } from 'types/project'
 import { IconKeys, Icons, urlMappings } from 'utils/data'
 
 dayjs.extend(relativeTime)
@@ -17,10 +17,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type projectType = ProjectType | IssueType | Committee | Chapter
+type projectType = Project | Issue | Committee | Chapter
 
-export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
-  const filteredIcons = params.reduce((acc: IconType, key) => {
+export const getFilteredIcons = (project: projectType, params: string[]): Icon => {
+  const filteredIcons = params.reduce((acc: Icon, key) => {
     if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       if (key === 'createdAt') {
         acc[key] = dayjs.unix(project[key as keyof projectType] as unknown as number).fromNow()

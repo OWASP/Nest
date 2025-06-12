@@ -1,7 +1,7 @@
 import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
 
-export type ButtonType = {
+export type Button = {
   label: string
   icon?: JSX.Element
   onclick?: () => void

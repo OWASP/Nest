@@ -1,6 +1,6 @@
-import { User } from 'types/user'
+import type { User } from 'types/user'
 
-export type MilestonesType = {
+export type Milestones = {
   author: User
   body: string
   closedIssuesCount: number

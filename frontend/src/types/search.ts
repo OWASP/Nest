@@ -1,19 +1,19 @@
-import { Chapter } from 'types/chapter'
-import { EventType } from 'types/event'
-import { OrganizationType } from 'types/organization'
-import { ProjectType } from 'types/project'
-import { User } from 'types/user'
+import type { Chapter } from 'types/chapter'
+import type { Event } from 'types/event'
+import type { Organization } from 'types/organization'
+import type { Project } from 'types/project'
+import type { User } from 'types/user'
 
-export type MultiSearchBarProps = {
+export interface MultiSearchBarProps {
   isLoaded: boolean
   placeholder: string
   indexes: string[]
   initialValue?: string
-  eventData?: EventType[]
+  eventData?: Event[]
 }
 
 export type Suggestion = {
   indexName: string
-  hits: Chapter[] | EventType[] | OrganizationType[] | ProjectType[] | User[]
+  hits: Chapter[] | Event[] | Organization[] | Project[] | User[]
   totalPages: number
 }

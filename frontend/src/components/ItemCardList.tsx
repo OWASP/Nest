@@ -3,10 +3,10 @@ import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
-import type { IssueType } from 'types/issue'
-import type { MilestonesType } from 'types/milestone'
-import type { PullRequestType } from 'types/pullRequest'
-import type { ReleaseType } from 'types/release'
+import type { Issue } from 'types/issue'
+import type { Milestones } from 'types/milestone'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
@@ -19,7 +19,7 @@ const ItemCardList = ({
   showSingleColumn = true,
 }: {
   title: React.ReactNode
-  data: ReleaseType[] | IssueType[] | PullRequestType[] | MilestonesType[]
+  data: Release[] | Issue[] | PullRequest[] | Milestones[]
   icon?: IconProp
   showAvatar?: boolean
   showSingleColumn?: boolean

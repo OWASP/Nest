@@ -2,14 +2,14 @@ import { faCalendar, faFolderOpen, faCircleExclamation } from '@fortawesome/free
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import type { IssueType } from 'types/issue'
+import type { Issue } from 'types/issue'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import ItemCardList from 'components/ItemCardList'
 import { TruncatedText } from 'components/TruncatedText'
 
 interface RecentIssuesProps {
-  data: IssueType[]
+  data: Issue[]
   showAvatar?: boolean
 }
 

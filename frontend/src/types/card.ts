@@ -1,19 +1,19 @@
 import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
-import type { ButtonType } from 'types/button'
+import type { Button } from 'types/button'
 import type { Chapter } from 'types/chapter'
 import type { TopContributors } from 'types/contributor'
-import type { IconType } from 'types/icon'
-import type { IssueType } from 'types/issue'
+import type { Icon } from 'types/icon'
+import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
-import type { MilestonesType } from 'types/milestone'
+import type { Milestones } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
-import type { PullRequestType } from 'types/pullRequest'
-import type { ReleaseType } from 'types/release'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 
 export type CardProps = {
-  button: ButtonType
-  icons?: IconType
+  button: Button
+  icons?: Icon
   isActive?: boolean
   level?: Level
   projectLink?: string
@@ -39,10 +39,10 @@ export interface DetailsCardProps {
   heatmap?: JSX.Element
   isActive?: boolean
   languages?: string[]
-  pullRequests?: PullRequestType[]
-  recentIssues?: IssueType[]
-  recentReleases?: ReleaseType[]
-  recentMilestones?: MilestonesType[]
+  pullRequests?: PullRequest[]
+  recentIssues?: Issue[]
+  recentReleases?: Release[]
+  recentMilestones?: Milestones[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
   stats?: stats[]
@@ -57,7 +57,7 @@ export interface DetailsCardProps {
 
 export interface UserCardProps {
   avatar: string
-  button: ButtonType
+  button: Button
   className?: string
   company?: string
   description?: string
@@ -73,5 +73,5 @@ export interface SnapshotCardProps {
   startAt: string
   endAt: string
   title: string
-  button: ButtonType
+  button: Button
 }

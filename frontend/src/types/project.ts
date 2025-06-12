@@ -1,11 +1,11 @@
 import type { TopContributors } from 'types/contributor'
-import type { IssueType } from 'types/issue'
-import { MilestonesType } from 'types/milestone'
-import { OrganizationType } from 'types/organization'
-import { PullRequestType } from 'types/pullRequest'
-import type { ReleaseType } from 'types/release'
+import type { Issue } from 'types/issue'
+import type { Milestones } from 'types/milestone'
+import type { Organization } from 'types/organization'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 
-export type ProjectStatsType = {
+export type ProjectStats = {
   contributors: number
   forks: number
   issues: number
@@ -13,7 +13,7 @@ export type ProjectStatsType = {
   stars: number
 }
 
-export type ProjectType = {
+export type Project = {
   createdAt?: string
   contributorsCount: number
   description: string
@@ -35,11 +35,11 @@ export type ProjectType = {
   type: string
   updatedAt: number
   url: string
-  recentIssues?: IssueType[]
-  recentPullRequests?: PullRequestType[]
-  recentReleases?: ReleaseType[]
+  recentIssues?: Issue[]
+  recentPullRequests?: PullRequest[]
+  recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
-  recentMilestones?: MilestonesType[]
+  recentMilestones?: Milestones[]
 }
 
 export type RepositoriesCardProps = {
@@ -52,7 +52,7 @@ export type RepositoryCardProps = {
   key?: string
   name: string
   openIssuesCount: number
-  organization?: OrganizationType
+  organization?: Organization
   starsCount: number
   subscribersCount: number
   url: string

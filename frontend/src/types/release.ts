@@ -1,6 +1,6 @@
 import type { RepositoryDetails, User } from 'types/user'
 
-export type ReleaseType = {
+export type Release = {
   author: User
   isPreRelease: boolean
   name: string

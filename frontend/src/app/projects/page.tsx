@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import type { ProjectType } from 'types/project'
+import type { Project } from 'types/project'
 import { level } from 'utils/data'
 import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
@@ -22,7 +22,7 @@ const ProjectsPage = () => {
     handlePageChange,
     handleSortChange,
     handleOrderChange,
-  } = useSearchPage<ProjectType>({
+  } = useSearchPage<Project>({
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
@@ -30,7 +30,7 @@ const ProjectsPage = () => {
   })
 
   const router = useRouter()
-  const renderProjectCard = (project: ProjectType) => {
+  const renderProjectCard = (project: Project) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
     const filteredIcons = getFilteredIcons(project, params)
     const handleButtonClick = () => {

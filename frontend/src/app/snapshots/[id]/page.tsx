@@ -8,7 +8,7 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
 import type { Chapter } from 'types/chapter'
-import type { ProjectType } from 'types/project'
+import type { Project } from 'types/project'
 import type { SnapshotDetailsProps } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
@@ -38,7 +38,7 @@ const SnapshotDetailsPage: React.FC = () => {
     }
   }, [graphQLData, graphQLRequestError, snapshotKey])
 
-  const renderProjectCard = (project: ProjectType) => {
+  const renderProjectCard = (project: Project) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
     const filteredIcons = getFilteredIcons(project, params)
 

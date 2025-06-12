@@ -1,14 +1,14 @@
 import type { Chapter } from 'types/chapter'
-import type { ProjectType } from 'types/project'
-import { ReleaseType } from 'types/release'
+import type { Project } from 'types/project'
+import type { Release } from 'types/release'
 
 export type SnapshotDetailsProps = {
   endAt: string
   key: string
   startAt: string
   title: string
-  newReleases: ReleaseType[]
-  newProjects: ProjectType[]
+  newReleases: Release[]
+  newProjects: Project[]
   newChapters: Chapter[]
 }
 

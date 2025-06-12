@@ -1,19 +1,19 @@
 import type { Chapter } from 'types/chapter'
 import type { TopContributors } from 'types/contributor'
-import type { EventType } from 'types/event'
-import type { IssueType } from 'types/issue'
-import type { MilestonesType } from 'types/milestone'
-import { ProjectType } from 'types/project'
-import type { PullRequestType } from 'types/pullRequest'
-import type { ReleaseType } from 'types/release'
+import type { Event } from 'types/event'
+import type { Issue } from 'types/issue'
+import type { Milestones } from 'types/milestone'
+import type { Project } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 
 export type MainPageData = {
   topContributors: TopContributors[]
-  recentIssues: IssueType[]
-  recentReleases: ReleaseType[]
-  upcomingEvents: EventType[]
-  recentPullRequests: PullRequestType[]
-  recentMilestones: MilestonesType[]
+  recentIssues: Issue[]
+  recentReleases: Release[]
+  upcomingEvents: Event[]
+  recentPullRequests: PullRequest[]
+  recentMilestones: Milestones[]
   recentChapters: Chapter[]
   recentPosts: {
     authorName: string
@@ -22,8 +22,8 @@ export type MainPageData = {
     title: string
     url: string
   }[]
-  recentProjects: ProjectType[]
-  sponsors: SponsorType[]
+  recentProjects: Project[]
+  sponsors: Sponsor[]
   statsOverview: {
     activeChaptersStats: number
     activeProjectsStats: number
@@ -33,7 +33,7 @@ export type MainPageData = {
   }
 }
 
-export type SponsorType = {
+export type Sponsor = {
   imageUrl: string
   name: string
   sponsorType: string
