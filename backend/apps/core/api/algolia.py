@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
+from http import HTTPStatus
 from typing import Any
 
-import requests
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
@@ -77,7 +77,7 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
     if request.method != "POST":
         return JsonResponse(
             {"error": f"Method {request.method} is not allowed"},
-            status=requests.codes.method_not_allowed,
+            status=HTTPStatus.METHOD_NOT_ALLOWED,
         )
 
     try:
