@@ -27,6 +27,7 @@ class TestUtils:
             ("_leading_underscore", "_leadingUnderscore"),
             ("trailing_underscore_", "trailingUnderscore"),
             ("multiple__underscores", "multipleUnderscores"),
+            ("multiple__under___scores", "multipleUnderScores"),
             ("alreadyCamelCase", "alreadyCamelCase"),
         ],
     )
