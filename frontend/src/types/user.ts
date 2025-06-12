@@ -1,6 +1,6 @@
 import type { IssueType } from 'types/issue'
 import type { RepositoryCardProps } from 'types/project'
-import { ReleaseType } from 'types/release'
+import type { ReleaseType } from 'types/release'
 
 export type RepositoryDetails = {
   key: string

@@ -1,4 +1,4 @@
-import type { User } from 'types/user'
+import type { RepositoryDetails, User } from 'types/user'
 
 export type ReleaseType = {
   author: User
@@ -7,6 +7,7 @@ export type ReleaseType = {
   organizationName?: string
   projectName?: string
   publishedAt: number
+  repository?: RepositoryDetails
   repositoryName: string
   tagName: string
   url: string

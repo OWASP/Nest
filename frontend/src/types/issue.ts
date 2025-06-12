@@ -1,3 +1,5 @@
+import type { RepositoryDetails, User } from 'types/user'
+
 export type IssuesDataType = {
   issues: IssueType[]
   open_issues_count: number
@@ -5,11 +7,15 @@ export type IssuesDataType = {
 }
 
 export type IssueType = {
+  author: User
   createdAt: number
   hint: string
   labels: string[]
+  number?: string
+  organizationName?: string
   projectName: string
   projectUrl: string
+  repository?: RepositoryDetails
   repositoryLanguages: string[]
   summary: string
   title: string
