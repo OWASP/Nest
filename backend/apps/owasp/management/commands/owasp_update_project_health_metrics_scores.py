@@ -31,13 +31,17 @@ class Command(BaseCommand):
             "unassigned_issues_count",
         ]
         to_save = []
+        requirements_cache = {}
         for metric in metrics:
             # Calculate the score based on requirements
             self.stdout.write(
                 self.style.NOTICE(f"Updating score for project: {metric.project.name}")
             )
-            requirements = ProjectHealthRequirements.objects.get(level=metric.project.level)
+            level = metric.project.level
+            if level not in requirements_cache:
+                requirements_cache[level] = ProjectHealthRequirements.objects.get(level=level)
 
+            requirements = requirements_cache[level]
             score = 0.0
             for field in forward_fields:
                 if getattr(metric, field) >= getattr(requirements, field):
