@@ -27,7 +27,7 @@ import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import { TopContributorsTypeGraphql } from 'types/contributor'
 import { ProjectTypeGraphql } from 'types/project'
 import { User } from 'types/user'
-import { technologies, leaders, newAboutContent } from 'utils/aboutData'
+import { technologies, leaders, missionContent, keyFeatures, getInvolvedContent, projectHistory } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -103,17 +103,17 @@ const About = () => {
 
         <div className="mb-8 grid gap-6 md:grid-cols-2">
           <SecondaryCard icon={faBullseye} title={<AnchorTitle title="Mission" />}>
-            <p className="text-gray-600 dark:text-gray-300">{newAboutContent.mission}</p>
+            <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
           </SecondaryCard>
 
           <SecondaryCard icon={faUserGroup} title={<AnchorTitle title="Who It's For" />}>
-            <p className="text-gray-600 dark:text-gray-300">{newAboutContent.whoItsFor}</p>
+            <p className="text-gray-600 dark:text-gray-300">{missionContent.whoItsFor}</p>
           </SecondaryCard>
         </div>
 
         <SecondaryCard icon={faRocket} title={<AnchorTitle title="Key Features" />}>
           <div className="grid gap-4 sm:grid-cols-2">
-            {newAboutContent.keyFeatures.map((feature, index) => (
+            {keyFeatures.map((feature, index) => (
               <div key={index} className="rounded-lg bg-gray-100 p-4 dark:bg-gray-700">
                 <h3 className="mb-2 font-semibold text-blue-400">{feature.title}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">{feature.description}</p>
@@ -238,10 +238,10 @@ const About = () => {
         <SecondaryCard icon={faHandsHelping} title={<AnchorTitle title="Get Involved" />}>
           <div className="space-y-4">
             <p className="text-gray-600 dark:text-gray-300">
-              {newAboutContent.getInvolved.description}
+              {getInvolvedContent.description}
             </p>
             <ul className="space-y-2">
-              {newAboutContent.getInvolved.ways.map((way, index) => (
+              {getInvolvedContent.ways.map((way, index) => (
                 <li key={index} className="flex items-start gap-2">
                   <span className="mt-1 text-blue-400">•</span>
                   <span className="text-gray-600 dark:text-gray-300">{way}</span>
@@ -249,20 +249,17 @@ const About = () => {
               ))}
             </ul>
             <div className="mt-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-              <Markdown content={newAboutContent.getInvolved.callToAction} />
+              <Markdown content={getInvolvedContent.callToAction} />
             </div>
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faTimeline} title={<AnchorTitle title="History" />}>
+        <SecondaryCard icon={faTimeline} title={<AnchorTitle title="Project History" />}>
           <div className="relative" data-testid="project-history-section">
             <div className="absolute bottom-0 left-4 top-8 w-0.5 bg-gradient-to-b from-blue-400 to-gray-300 dark:to-gray-600"></div>
 
             <div className="space-y-8">
-              {(Array.isArray(newAboutContent.projectHistory)
-                ? newAboutContent.projectHistory
-                : []
-              ).map((milestone, index) => (
+              {projectHistory.map((milestone, index) => (
                 <div key={index} className="relative flex gap-6">
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-400 text-xs font-bold text-white shadow-lg ring-4 ring-white dark:ring-gray-800">
@@ -296,7 +293,7 @@ const About = () => {
             <div key={index}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
+                  <AnimatedCounter end={stat.value} duration={2} />+
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
