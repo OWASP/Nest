@@ -82,6 +82,7 @@ owasppcitoolkit
 owtf
 pentest
 pentesting
+pgvector
 pnpmrc
 psycopg
 pygithub
