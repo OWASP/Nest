@@ -11,23 +11,25 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         metrics = ProjectHealthMetrics.objects.filter(score__isnull=True)
-        weight_mapping = {
-            "age_days": (6.0, -1),
-            "contributors_count": (6.0, 1),
-            "forks_count": (6.0, 1),
-            "last_release_days": (6.0, -1),
-            "last_commit_days": (6.0, -1),
-            "open_issues_count": (6.0, -1),
-            "open_pull_requests_count": (6.0, 1),
-            "owasp_page_last_update_days": (6.0, -1),
-            "last_pull_request_days": (6.0, -1),
-            "recent_releases_count": (6.0, 1),
-            "stars_count": (6.0, 1),
-            "total_pull_requests_count": (6.0, 1),
-            "total_releases_count": (6.0, 1),
-            "unanswered_issues_count": (6.0, -1),
-            "unassigned_issues_count": (6.0, -1),
-        }
+        forward_fields = [
+            "contributors_count",
+            "forks_count",
+            "open_pull_requests_count",
+            "recent_releases_count",
+            "stars_count",
+            "total_pull_requests_count",
+            "total_releases_count",
+        ]
+        backward_fields = [
+            "age_days",
+            "last_commit_days",
+            "last_pull_request_days",
+            "last_release_days",
+            "open_issues_count",
+            "owasp_page_last_update_days",
+            "unanswered_issues_count",
+            "unassigned_issues_count",
+        ]
         to_save = []
         for metric in metrics:
             # Calculate the score based on requirements
@@ -37,14 +39,12 @@ class Command(BaseCommand):
             requirements = ProjectHealthRequirements.objects.get(level=metric.project.level)
 
             score = 0.0
-            for field, (weight, direction) in weight_mapping.items():
-                metric_value = getattr(metric, field)
-                requirement_value = getattr(requirements, field)
-
-                if (metric_value >= requirement_value and direction == 1) or (
-                    metric_value <= requirement_value and direction == -1
-                ):
-                    score += weight
+            for field in forward_fields:
+                if getattr(metric, field) >= getattr(requirements, field):
+                    score += 6.0
+            for field in backward_fields:
+                if getattr(metric, field) <= getattr(requirements, field):
+                    score += 6.0
 
             # Evaluate compliance with funding and leaders requirements
             if metric.is_funding_requirements_compliant:
