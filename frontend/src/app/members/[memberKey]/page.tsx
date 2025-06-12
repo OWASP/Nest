@@ -13,7 +13,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_USER_DATA } from 'server/queries/userQueries'
 import type { Issue } from 'types/issue'
-import type { Milestones } from 'types/milestone'
+import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
@@ -28,7 +28,7 @@ const UserDetailsPage: React.FC = () => {
   const [user, setUser] = useState<UserDetails | null>()
   const [issues, setIssues] = useState<Issue[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<Milestones[]>([])
+  const [milestones, setMilestones] = useState<Milestone[]>([])
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
   const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)

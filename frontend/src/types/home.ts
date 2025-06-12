@@ -2,7 +2,7 @@ import type { Chapter } from 'types/chapter'
 import type { TopContributors } from 'types/contributor'
 import type { Event } from 'types/event'
 import type { Issue } from 'types/issue'
-import type { Milestones } from 'types/milestone'
+import type { Milestone } from 'types/milestone'
 import type { Project } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
@@ -13,7 +13,7 @@ export type MainPageData = {
   recentReleases: Release[]
   upcomingEvents: Event[]
   recentPullRequests: PullRequest[]
-  recentMilestones: Milestones[]
+  recentMilestones: Milestone[]
   recentChapters: Chapter[]
   recentPosts: {
     authorName: string

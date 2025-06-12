@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
 import type { Issue } from 'types/issue'
-import type { Milestones } from 'types/milestone'
+import type { Milestone } from 'types/milestone'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import SecondaryCard from 'components/SecondaryCard'
@@ -19,7 +19,7 @@ const ItemCardList = ({
   showSingleColumn = true,
 }: {
   title: React.ReactNode
-  data: Release[] | Issue[] | PullRequest[] | Milestones[]
+  data: Release[] | Issue[] | PullRequest[] | Milestone[]
   icon?: IconProp
   showAvatar?: boolean
   showSingleColumn?: boolean

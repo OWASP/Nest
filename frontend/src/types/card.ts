@@ -6,7 +6,7 @@ import type { TopContributors } from 'types/contributor'
 import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
-import type { Milestones } from 'types/milestone'
+import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
@@ -42,7 +42,7 @@ export interface DetailsCardProps {
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
   recentReleases?: Release[]
-  recentMilestones?: Milestones[]
+  recentMilestones?: Milestone[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
   stats?: stats[]

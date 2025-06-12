@@ -1,6 +1,6 @@
 import type { TopContributors } from 'types/contributor'
 import type { Issue } from 'types/issue'
-import type { Milestones } from 'types/milestone'
+import type { Milestone } from 'types/milestone'
 import type { Organization } from 'types/organization'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
@@ -39,7 +39,7 @@ export type Project = {
   recentPullRequests?: PullRequest[]
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
-  recentMilestones?: Milestones[]
+  recentMilestones?: Milestone[]
 }
 
 export type RepositoriesCardProps = {
