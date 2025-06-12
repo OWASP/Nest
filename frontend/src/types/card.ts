@@ -2,7 +2,7 @@ import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
 import type { Button } from 'types/button'
 import type { Chapter } from 'types/chapter'
-import type { TopContributors } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
@@ -22,7 +22,7 @@ export type CardProps = {
   summary: string
   title: string
   tooltipLabel?: string
-  topContributors?: TopContributors[]
+  topContributors?: Contributor[]
   url: string
 }
 
@@ -49,7 +49,7 @@ export interface DetailsCardProps {
   summary?: string
   showAvatar?: boolean
   title?: string
-  topContributors?: TopContributors[]
+  topContributors?: Contributor[]
   topics?: string[]
   type: string
   userSummary?: JSX.Element

@@ -37,7 +37,7 @@ const ProjectsPage = () => {
       router.push(`/projects/${project.key}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -45,7 +45,7 @@ const ProjectsPage = () => {
 
     return (
       <Card
-        button={SubmitButton}
+        button={submitButton}
         icons={filteredIcons}
         key={project.key}
         level={level[`${project.level as keyof typeof level}`]}

@@ -2,18 +2,18 @@ import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
 
 export type Button = {
-  label: string
   icon?: JSX.Element
+  label: string
   onclick?: () => void
   url?: string
 }
 
 export type NavButtonProps = {
-  href: string
-  defaultIcon: IconDefinition
-  hoverIcon: IconDefinition
-  defaultIconColor?: string
-  hoverIconColor?: string
-  text: string
   className?: string
+  defaultIcon: IconDefinition
+  defaultIconColor?: string
+  hoverIcon: IconDefinition
+  hoverIconColor?: string
+  href: string
+  text: string
 }

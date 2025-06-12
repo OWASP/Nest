@@ -28,7 +28,7 @@ const OrganizationPage = () => {
       router.push(`/organizations/${organization.login}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Profile',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -37,7 +37,8 @@ const OrganizationPage = () => {
     return (
       <UserCard
         avatar={organization.avatarUrl}
-        button={SubmitButton}
+        button={submitButton}
+        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={organization.company || ''}
         email={organization.email || ''}
         followersCount={organization.followersCount}
@@ -45,7 +46,6 @@ const OrganizationPage = () => {
         location={organization.location || `@${organization.login}`}
         name={organization.name}
         repositoriesCount={organization.publicRepositoriesCount}
-        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       />
     )
   }

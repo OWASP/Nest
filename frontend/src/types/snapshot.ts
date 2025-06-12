@@ -2,7 +2,7 @@ import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
 import type { Release } from 'types/release'
 
-export type SnapshotDetailsProps = {
+export type SnapshotDetails = {
   endAt: string
   key: string
   startAt: string
@@ -12,7 +12,7 @@ export type SnapshotDetailsProps = {
   newChapters: Chapter[]
 }
 
-export type Snapshots = {
+export type Snapshot = {
   endAt: string
   key: string
   startAt: string

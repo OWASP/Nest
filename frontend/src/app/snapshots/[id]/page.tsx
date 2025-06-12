@@ -9,7 +9,7 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
-import type { SnapshotDetailsProps } from 'types/snapshot'
+import type { SnapshotDetails } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -19,7 +19,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams()
-  const [snapshot, setSnapshot] = useState<SnapshotDetailsProps | null>(null)
+  const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
@@ -46,7 +46,7 @@ const SnapshotDetailsPage: React.FC = () => {
       router.push(`/projects/${project.key}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -54,7 +54,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
     return (
       <Card
-        button={SubmitButton}
+        button={submitButton}
         icons={filteredIcons}
         key={project.key}
         level={level[`${project.level.toLowerCase() as keyof typeof level}`]}
@@ -75,7 +75,7 @@ const SnapshotDetailsPage: React.FC = () => {
       router.push(`/chapters/${chapter.key}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -83,13 +83,13 @@ const SnapshotDetailsPage: React.FC = () => {
 
     return (
       <Card
+        button={submitButton}
+        icons={filteredIcons}
         key={chapter.key}
+        social={formattedUrls}
+        summary={chapter.summary}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
-        summary={chapter.summary}
-        icons={filteredIcons}
-        button={SubmitButton}
-        social={formattedUrls}
       />
     )
   }

@@ -1,4 +1,4 @@
-import type { TopContributors } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 
 export type Committee = {
   contributorsCount?: number
@@ -13,7 +13,7 @@ export type Committee = {
   repositoriesCount?: number
   starsCount?: number
   summary: string
-  topContributors: TopContributors[]
+  topContributors: Contributor[]
   updatedAt: number
   url: string
 }

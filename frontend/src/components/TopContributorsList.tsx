@@ -5,7 +5,7 @@ import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import type { TopContributors } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 import { pluralize } from 'utils/pluralize'
 import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
@@ -19,7 +19,7 @@ const TopContributorsList = ({
   type,
   icon,
 }: {
-  contributors: TopContributors[]
+  contributors: Contributor[]
   label?: string
   maxInitialDisplay?: number
   type: string

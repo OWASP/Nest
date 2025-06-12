@@ -19,7 +19,7 @@ const ItemCardList = ({
   showSingleColumn = true,
 }: {
   title: React.ReactNode
-  data: Release[] | Issue[] | PullRequest[] | Milestone[]
+  data: Issue[] | Milestone[] | PullRequest[] | Release[]
   icon?: IconProp
   showAvatar?: boolean
   showSingleColumn?: boolean

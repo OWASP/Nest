@@ -1,4 +1,4 @@
-import type { TopContributors } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 
 export type Chapter = {
   _geoloc?: GeoLocation
@@ -13,7 +13,7 @@ export type Chapter = {
   relatedUrls: string[]
   suggestedLocation: string
   summary: string
-  topContributors: TopContributors[]
+  topContributors: Contributor[]
   updatedAt: number
   url: string
 }

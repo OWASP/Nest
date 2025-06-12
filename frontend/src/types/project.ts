@@ -1,4 +1,4 @@
-import type { TopContributors } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { Organization } from 'types/organization'
@@ -31,7 +31,7 @@ export type Project = {
   starsCount: number
   summary: string
   topics: string[]
-  topContributors: TopContributors[]
+  topContributors: Contributor[]
   type: string
   updatedAt: number
   url: string

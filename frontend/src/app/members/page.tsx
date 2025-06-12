@@ -28,7 +28,7 @@ const UsersPage = () => {
   }
 
   const renderUserCard = (user: User) => {
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: () => handleButtonClick(user),
@@ -37,14 +37,14 @@ const UsersPage = () => {
     return (
       <UserCard
         avatar={user.avatarUrl}
-        button={SubmitButton}
+        button={submitButton}
+        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={user.company || ''}
         email={user.email || ''}
         followersCount={user.followersCount}
         location={user.location || ''}
         name={user.name || `@${user.login}`}
         repositoriesCount={user.publicRepositoriesCount}
-        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       />
     )
   }

@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_COMMUNITY_SNAPSHOTS } from 'server/queries/snapshotQueries'
-import type { Snapshots } from 'types/snapshot'
+import type { Snapshot } from 'types/snapshot'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
-  const [snapshots, setSnapshots] = useState<Snapshots[] | null>(null)
+  const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
@@ -35,11 +35,11 @@ const SnapshotsPage: React.FC = () => {
 
   const router = useRouter()
 
-  const handleButtonClick = (snapshot: Snapshots) => {
+  const handleButtonClick = (snapshot: Snapshot) => {
     router.push(`/snapshots/${snapshot.key}`)
   }
 
-  const renderSnapshotCard = (snapshot: Snapshots) => {
+  const renderSnapshotCard = (snapshot: Snapshot) => {
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
@@ -68,7 +68,7 @@ const SnapshotsPage: React.FC = () => {
           {!snapshots?.length ? (
             <div className="col-span-full py-8 text-center">No Snapshots found</div>
           ) : (
-            snapshots.map((snapshot: Snapshots) => (
+            snapshots.map((snapshot: Snapshot) => (
               <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
             ))
           )}

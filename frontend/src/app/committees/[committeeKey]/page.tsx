@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_COMMITTEE_DATA } from 'server/queries/committeeQueries'
 import type { Committee } from 'types/committee'
-import type { TopContributors } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -21,7 +21,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
   const [committee, setCommittee] = useState<Committee | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributors[]>([])
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { data, error: graphQLRequestError } = useQuery(GET_COMMITTEE_DATA, {

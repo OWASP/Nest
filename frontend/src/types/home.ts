@@ -1,5 +1,5 @@
 import type { Chapter } from 'types/chapter'
-import type { TopContributors } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 import type { Event } from 'types/event'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
@@ -8,7 +8,7 @@ import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 
 export type MainPageData = {
-  topContributors: TopContributors[]
+  topContributors: Contributor[]
   recentIssues: Issue[]
   recentReleases: Release[]
   upcomingEvents: Event[]
