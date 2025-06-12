@@ -10,7 +10,7 @@ export type Issue = {
   projectName: string
   projectUrl: string
   repository?: RepositoryDetails
-  repositoryLanguages: string[]
+  repositoryLanguages?: string[]
   summary: string
   title: string
   updatedAt: number

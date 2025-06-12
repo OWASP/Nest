@@ -22,15 +22,3 @@ export type GeoLocation = {
   lat: number
   lng: number
 }
-
-export type GeoLocDataAlgolia = {
-  _geoloc: GeoLocation
-  key: string
-  name: string
-}
-
-export type GeoLocDataGraphQL = {
-  geoLocation: GeoLocation
-  key: string
-  name: string
-}

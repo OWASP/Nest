@@ -6,6 +6,8 @@ from algoliasearch_django import register, unregister
 from algoliasearch_django.registration import RegistrationError
 from django.apps import apps
 
+from apps.common.utils import convert_to_camel_case
+
 
 def get_params_for_index(index_name: str) -> dict:
     """Return search parameters based on the index name.
@@ -173,21 +175,9 @@ def deep_camelize(obj) -> dict | list:
     """
     if isinstance(obj, dict):
         return {
-            camelize(key.removeprefix("idx_")): deep_camelize(value) for key, value in obj.items()
+            convert_to_camel_case(key.removeprefix("idx_")): deep_camelize(value)
+            for key, value in obj.items()
         }
     if isinstance(obj, list):
         return [deep_camelize(item) for item in obj]
     return obj
-
-
-def camelize(key: str) -> str:
-    """Camelize a string.
-
-    Args:
-        key (str): The string to camelize.
-
-    Returns:
-        str: The camelize string.
-
-    """
-    return key.replace("_", "").title()
