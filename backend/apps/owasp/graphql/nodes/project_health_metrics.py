@@ -12,7 +12,7 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
         "contributors_count",
         "forks_count",
         "is_funding_requirements_compliant",
-        "is_project_leaders_requirements_compliant",
+        "is_leader_requirements_compliant",
         "open_issues_count",
         "recent_releases_count",
         "score",
