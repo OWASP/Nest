@@ -120,8 +120,11 @@ const About = () => {
 
         <SecondaryCard icon={faRocket} title={<AnchorTitle title="Key Features" />}>
           <div className="grid gap-4 sm:grid-cols-2">
-            {keyFeatures.map((feature, index) => (
-              <div key={index} className="rounded-lg bg-gray-100 p-4 dark:bg-gray-700">
+            {keyFeatures.map((feature) => (
+              <div
+                key={`${feature.title}-${feature.description.slice(0, 10)}`}
+                className="rounded-lg bg-gray-100 p-4 dark:bg-gray-700"
+              >
                 <h3 className="mb-2 font-semibold text-blue-400">{feature.title}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">{feature.description}</p>
               </div>
@@ -246,8 +249,8 @@ const About = () => {
           <div className="space-y-4">
             <p className="text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
             <ul className="space-y-2">
-              {getInvolvedContent.ways.map((way, index) => (
-                <li key={index} className="flex items-start gap-2">
+              {getInvolvedContent.ways.map((way) => (
+                <li key={way.slice(0, 32)} className="flex items-start gap-2">
                   <span className="mt-1 text-blue-400">•</span>
                   <span className="text-gray-600 dark:text-gray-300">{way}</span>
                 </li>
@@ -264,8 +267,11 @@ const About = () => {
             <div className="absolute bottom-0 left-4 top-8 w-0.5 bg-gradient-to-b from-blue-400 to-gray-300 dark:to-gray-600"></div>
 
             <div className="space-y-8">
-              {projectHistory.map((milestone, index) => (
-                <div key={index} className="relative flex gap-6">
+              {projectHistory.map((milestone) => (
+                <div
+                  key={`${milestone.year}-${milestone.title}`}
+                  className="relative flex gap-6"
+                >
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-400 text-xs font-bold text-white shadow-lg ring-4 ring-white dark:ring-gray-800">
                       {milestone.year.slice(-2)}
