@@ -10,25 +10,27 @@ class Command(BaseCommand):
     help = "Update OWASP project health metrics score."
 
     def handle(self, *args, **options):
-        forward_fields = [
-            "contributors_count",
-            "forks_count",
-            "open_pull_requests_count",
-            "recent_releases_count",
-            "stars_count",
-            "total_pull_requests_count",
-            "total_releases_count",
-        ]
-        backward_fields = [
-            "age_days",
-            "last_commit_days",
-            "last_pull_request_days",
-            "last_release_days",
-            "open_issues_count",
-            "owasp_page_last_update_days",
-            "unanswered_issues_count",
-            "unassigned_issues_count",
-        ]
+        forward_fields = {
+            "contributors_count": 6.0,
+            "forks_count": 6.0,
+            "is_funding_requirements_compliant": 5.0,
+            "is_leader_requirements_compliant": 5.0,
+            "open_pull_requests_count": 6.0,
+            "recent_releases_count": 6.0,
+            "stars_count": 6.0,
+            "total_pull_requests_count": 6.0,
+            "total_releases_count": 6.0,
+        }
+        backward_fields = {
+            "age_days": 6.0,
+            "last_commit_days": 6.0,
+            "last_pull_request_days": 6.0,
+            "last_release_days": 6.0,
+            "open_issues_count": 6.0,
+            "owasp_page_last_update_days": 6.0,
+            "unanswered_issues_count": 6.0,
+            "unassigned_issues_count": 6.0,
+        }
 
         project_health_metrics = []
         project_health_requirements = {
@@ -46,18 +48,17 @@ class Command(BaseCommand):
 
             requirements = project_health_requirements[metric.project.level]
             score = 0.0
-            for field in forward_fields:
-                if getattr(metric, field) >= getattr(requirements, field):
-                    score += 6.0
-            for field in backward_fields:
+            for field, weight in forward_fields.items():
+                metric_value = getattr(metric, field)
+                if (
+                    field
+                    in ["is_funding_requirements_compliant", "is_leader_requirements_compliant"]
+                    and metric_value
+                ) or metric_value >= getattr(requirements, field):
+                    score += weight
+            for field, weight in backward_fields.items():
                 if getattr(metric, field) <= getattr(requirements, field):
-                    score += 6.0
-
-            # Evaluate compliance with funding and leaders requirements.
-            if metric.is_funding_requirements_compliant:
-                score += 5.0
-            if metric.is_leader_requirements_compliant:
-                score += 5.0
+                    score += weight
 
             metric.score = score
             project_health_metrics.append(metric)
