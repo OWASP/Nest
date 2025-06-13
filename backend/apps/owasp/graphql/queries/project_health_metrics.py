@@ -18,10 +18,10 @@ class ProjectHealthMetricsQuery:
         self,
         *,
         is_contributors_requirement_compliant: bool | None = None,
-        is_funding_requirement_compliant: bool | None = None,
+        is_funding_requirements_compliant: bool | None = None,
         has_recent_commits: bool | None = None,
         has_recent_releases: bool | None = None,
-        is_leaders_requirement_compliant: bool | None = None,
+        is_leader_requirements_compliant: bool | None = None,
         limit: int = 20,
         has_long_open_issues: bool | None = None,
         has_long_unanswered_issues: bool | None = None,
@@ -59,11 +59,11 @@ class ProjectHealthMetricsQuery:
         if has_long_unassigned_issues is not None:
             filters["has_long_unassigned_issues"] = has_long_unassigned_issues
 
-        if is_leaders_requirement_compliant is not None:
-            filters["is_project_leaders_requirements_compliant"] = is_leaders_requirement_compliant
+        if is_leader_requirements_compliant is not None:
+            filters["is_leader_requirements_compliant"] = is_leader_requirements_compliant
 
-        if is_funding_requirement_compliant is not None:
-            filters["is_funding_requirements_compliant"] = is_funding_requirement_compliant
+        if is_funding_requirements_compliant is not None:
+            filters["is_funding_requirements_compliant"] = is_funding_requirements_compliant
 
         if has_low_score:
             filters["score__lt"] = 50

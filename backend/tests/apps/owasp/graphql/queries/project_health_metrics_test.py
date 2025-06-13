@@ -30,16 +30,16 @@ class TestProjectHealthMetricsQuery:
 
         arg_names = [arg.python_name for arg in unhealthy_projects_field.arguments]
         expected_arg_names = [
-            "contributors_count_requirement_compliant",
-            "funding_requirement_compliant",
-            "no_recent_commits",
-            "no_recent_releases",
-            "leaders_requirement_compliant",
+            "is_contributors_requirement_compliant",
+            "is_funding_requirements_compliant",
+            "has_recent_commits",
+            "has_recent_releases",
+            "is_leader_requirements_compliant",
             "limit",
-            "long_open_issues",
-            "long_unanswered_issues",
-            "long_unassigned_issues",
-            "low_score",
+            "has_long_open_issues",
+            "has_long_unanswered_issues",
+            "has_long_unassigned_issues",
+            "has_low_score",
         ]
         assert set(arg_names) == set(expected_arg_names)
 
@@ -55,7 +55,7 @@ class TestProjectHealthMetricsResolution:
             self.mocked_objects = mocked_objects
             yield
 
-    def test_resolve_unhealthy_projects(self):
+    def test_resolve_unhealthy_projects_without_filters(self):
         """Test the resolution of unhealthy projects."""
         # Mock the queryset
         mock_queryset = Mock()
@@ -77,3 +77,38 @@ class TestProjectHealthMetricsResolution:
 
         assert isinstance(result, list)
         mock_filter.select_related.assert_called_with("project")
+
+    # def test_resolve_unhealthy_projects_with_filters(self):
+    #     """Test the resolution of unhealthy projects with filters."""
+    #     # Mock the queryset
+    #     mock_queryset = Mock()
+    #     self.mocked_objects.select_related.return_value = mock_queryset
+    #     mock_queryset.order_by.return_value.distinct.return_value = mock_queryset
+    #     # Filters
+    #     mock_filter = Mock()
+    #     mock_queryset.filter.return_value = mock_filter
+    #     mock_filter.select_related.return_value = [mock_filter]
+
+    #     # Create an instance of the query class
+    #     query_instance = ProjectHealthMetricsQuery()
+
+    #     # Call the method with filters
+    #     result = query_instance.unhealthy_projects(
+    #         is_contributors_requirement_compliant=True,
+    #         is_funding_requirements_compliant=False,
+    #         has_recent_commits=True,
+    #         has_recent_releases=False,
+    #         is_leaders_requirement_compliant=True,
+    #         limit=10,
+    #         has_long_open_issues=False,
+    #         has_long_unanswered_issues=True,
+    #         has_long_unassigned_issues=False,
+    #         has_low_score=True,
+    #     )
+
+    #     # Assert that the mocked queryset was called correctly with filters
+    #     self.mocked_objects.select_related.assert_called_with("project")
+    #     mock_queryset.order_by.assert_called_with("project__key", "-nest_created_at")
+
+    #     assert isinstance(result, list)
+    #     mock_filter.select_related.assert_called_with("project")
