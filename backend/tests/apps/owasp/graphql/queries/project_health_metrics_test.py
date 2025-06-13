@@ -34,7 +34,7 @@ class TestProjectHealthMetricsQuery:
         expected_arg_names = [
             "is_contributors_requirement_compliant",
             "is_funding_requirements_compliant",
-            "has_recent_commits",
+            "has_no_recent_commits",
             "has_recent_releases",
             "is_leader_requirements_compliant",
             "limit",
@@ -92,7 +92,7 @@ class TestProjectHealthMetricsResolution:
         mock_metrics.contributors_count = 3
         mock_metrics.is_funding_requirements_compliant = False
         mock_metrics.is_leader_requirements_compliant = True
-        mock_metrics.has_recent_commits = True
+        mock_metrics.has_no_recent_commits = True
         mock_metrics.has_long_open_issues = True
         mock_metrics.has_long_unanswered_issues = True
         mock_metrics.has_long_unassigned_issues = True
@@ -129,7 +129,7 @@ class TestProjectHealthMetricsResolution:
         result = query_instance.unhealthy_projects(
             is_contributors_requirement_compliant=True,
             is_funding_requirements_compliant=False,
-            has_recent_commits=True,
+            has_no_recent_commits=True,
             has_recent_releases=True,
             is_leader_requirements_compliant=True,
             limit=10,
@@ -144,7 +144,7 @@ class TestProjectHealthMetricsResolution:
         mock_queryset.order_by.assert_called_with("project__key", "-nest_created_at")
         mock_queryset.filter.assert_called_with(
             contributors_count__gte=2,
-            has_recent_commits=True,
+            has_no_recent_commits=True,
             has_long_open_issues=True,
             has_long_unanswered_issues=True,
             has_long_unassigned_issues=True,

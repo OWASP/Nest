@@ -19,7 +19,7 @@ class ProjectHealthMetricsQuery:
         *,
         is_contributors_requirement_compliant: bool | None = None,
         is_funding_requirements_compliant: bool | None = None,
-        has_recent_commits: bool | None = None,
+        has_no_recent_commits: bool | None = None,
         has_recent_releases: bool | None = None,
         is_leader_requirements_compliant: bool | None = None,
         limit: int = 20,
@@ -47,8 +47,8 @@ class ProjectHealthMetricsQuery:
             suffix = "__gte" if is_contributors_requirement_compliant else "__lt"
             filters[f"contributors_count{suffix}"] = CONTRIBUTORS_COUNT_REQUIREMENT
 
-        if has_recent_commits is not None:
-            filters["has_recent_commits"] = has_recent_commits
+        if has_no_recent_commits is not None:
+            filters["has_no_recent_commits"] = has_no_recent_commits
 
         if has_long_open_issues is not None:
             filters["has_long_open_issues"] = has_long_open_issues

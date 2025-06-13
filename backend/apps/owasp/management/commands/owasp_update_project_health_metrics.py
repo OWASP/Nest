@@ -14,7 +14,7 @@ class Command(BaseCommand):
             "contributors_count": "contributors_count",
             "created_at": "created_at",
             "forks_count": "forks_count",
-            "has_recent_commits": "has_recent_commits",
+            "has_no_recent_commits": "has_no_recent_commits",
             "is_funding_requirements_compliant": "is_funding_requirements_compliant",
             "is_leader_requirements_compliant": "is_leader_requirements_compliant",
             "last_committed_at": "pushed_at",
