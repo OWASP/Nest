@@ -17,56 +17,55 @@ class ProjectHealthMetricsQuery:
     def unhealthy_projects(
         self,
         *,
-        # Set the default of the `funding_requirement_compliant`
-        # `leaders_requirement_compliant`, `long_open_issues`, `long_unanswered_issues`,
-        # `contributors_count_requirement_compliant`,
-        # and `long_unassigned_issues` parameters to None,
-        # to allow retrieving projects with or without these requirements
-        contributors_count_requirement_compliant: bool | None = None,
-        funding_requirement_compliant: bool | None = None,
-        no_recent_commits: bool | None = None,
-        no_recent_releases: bool = False,
-        leaders_requirement_compliant: bool | None = None,
+        is_contributors_requirement_compliant: bool | None = None,
+        is_funding_requirement_compliant: bool | None = None,
+        has_recent_commits: bool | None = None,
+        has_recent_releases: bool | None = None,
+        is_leaders_requirement_compliant: bool | None = None,
         limit: int = 20,
-        long_open_issues: bool | None = None,
-        long_unanswered_issues: bool | None = None,
-        long_unassigned_issues: bool | None = None,
+        has_long_open_issues: bool | None = None,
+        has_long_unanswered_issues: bool | None = None,
+        has_long_unassigned_issues: bool | None = None,
         # Because the default behavior is to return unhealthy projects with low scores,
         # we set `low_score` to True by default.
         # We may return projects with high scores to indicate issues that need attention,
         # like a lack of contributors, recent commits, or otherwise.
-        # We set the default of other parameters to False,
+        # We set the default of other parameters to None,
         # to allow retrieving all unhealthy projects without any filters.
-        low_score: bool = True,
+        has_low_score: bool = True,
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve unhealthy projects."""
         filters = {}
 
-        if no_recent_releases:
-            filters["recent_releases_count"] = 0
+        if has_recent_releases is not None:
+            if has_recent_releases:
+                filters["recent_releases_count__gt"] = 0
+            else:
+                filters["recent_releases_count"] = 0
 
-        if contributors_count_requirement_compliant is not None:
-            filters["contributors_count__lt"] = CONTRIBUTORS_COUNT_REQUIREMENT
+        if is_contributors_requirement_compliant is not None:
+            suffix = "__gte" if is_contributors_requirement_compliant else "__lt"
+            filters[f"contributors_count{suffix}"] = CONTRIBUTORS_COUNT_REQUIREMENT
 
-        if no_recent_commits is not None:
-            filters["has_no_recent_commits"] = no_recent_commits
+        if has_recent_commits is not None:
+            filters["has_recent_commits"] = has_recent_commits
 
-        if long_open_issues is not None:
-            filters["has_long_open_issues"] = long_open_issues
+        if has_long_open_issues is not None:
+            filters["has_long_open_issues"] = has_long_open_issues
 
-        if long_unanswered_issues is not None:
-            filters["has_long_unanswered_issues"] = long_unanswered_issues
+        if has_long_unanswered_issues is not None:
+            filters["has_long_unanswered_issues"] = has_long_unanswered_issues
 
-        if long_unassigned_issues is not None:
-            filters["has_long_unassigned_issues"] = long_unassigned_issues
+        if has_long_unassigned_issues is not None:
+            filters["has_long_unassigned_issues"] = has_long_unassigned_issues
 
-        if leaders_requirement_compliant is not None:
-            filters["is_project_leaders_requirements_compliant"] = leaders_requirement_compliant
+        if is_leaders_requirement_compliant is not None:
+            filters["is_project_leaders_requirements_compliant"] = is_leaders_requirement_compliant
 
-        if funding_requirement_compliant is not None:
-            filters["is_funding_requirements_compliant"] = funding_requirement_compliant
+        if is_funding_requirement_compliant is not None:
+            filters["is_funding_requirements_compliant"] = is_funding_requirement_compliant
 
-        if low_score:
+        if has_low_score:
             filters["score__lt"] = 50
 
         # Get the last created metrics (one for each project)
