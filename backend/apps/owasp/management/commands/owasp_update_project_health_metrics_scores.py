@@ -10,7 +10,6 @@ class Command(BaseCommand):
     help = "Update OWASP project health metrics score."
 
     def handle(self, *args, **options):
-        metrics = ProjectHealthMetrics.objects.filter(score__isnull=True).select_related("project")
         forward_fields = [
             "contributors_count",
             "forks_count",
@@ -30,18 +29,22 @@ class Command(BaseCommand):
             "unanswered_issues_count",
             "unassigned_issues_count",
         ]
-        to_save = []
-        requirements_cache = {}
-        for metric in metrics:
-            # Calculate the score based on requirements
+
+        project_health_metrics = []
+        project_health_requirements = {
+            phr.level: phr for phr in ProjectHealthRequirements.objects.all()
+        }
+        for metric in ProjectHealthMetrics.objects.filter(
+            score__isnull=True,
+        ).select_related(
+            "project",
+        ):
+            # Calculate the score based on requirements.
             self.stdout.write(
                 self.style.NOTICE(f"Updating score for project: {metric.project.name}")
             )
-            level = metric.project.level
-            if level not in requirements_cache:
-                requirements_cache[level] = ProjectHealthRequirements.objects.get(level=level)
 
-            requirements = requirements_cache[level]
+            requirements = project_health_requirements[metric.project.level]
             score = 0.0
             for field in forward_fields:
                 if getattr(metric, field) >= getattr(requirements, field):
@@ -50,15 +53,16 @@ class Command(BaseCommand):
                 if getattr(metric, field) <= getattr(requirements, field):
                     score += 6.0
 
-            # Evaluate compliance with funding and leaders requirements
+            # Evaluate compliance with funding and leaders requirements.
             if metric.is_funding_requirements_compliant:
                 score += 5.0
-            if metric.is_project_leaders_requirements_compliant:
+            if metric.is_leader_requirements_compliant:
                 score += 5.0
 
             metric.score = score
-            to_save.append(metric)
-        ProjectHealthMetrics.bulk_save(to_save, fields=["score"])
+            project_health_metrics.append(metric)
+
+        ProjectHealthMetrics.bulk_save(project_health_metrics, fields=["score"])
         self.stdout.write(
             self.style.SUCCESS("Updated projects health metrics score successfully.")
         )

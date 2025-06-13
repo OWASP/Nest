@@ -10,15 +10,14 @@ class Command(BaseCommand):
     help = "Update OWASP project health metrics."
 
     def handle(self, *args, **options):
-        projects = Project.objects.all()
-        field_mappings = {
+        metric_project_field_mapping = {
             "contributors_count": "contributors_count",
             "created_at": "created_at",
             "forks_count": "forks_count",
             "is_funding_requirements_compliant": "is_funding_requirements_compliant",
-            "is_project_leaders_requirements_compliant": "is_leaders_requirements_compliant",
-            "last_released_at": "released_at",
+            "is_leader_requirements_compliant": "is_leader_requirements_compliant",
             "last_committed_at": "pushed_at",
+            "last_released_at": "released_at",
             "open_issues_count": "open_issues_count",
             "open_pull_requests_count": "open_pull_requests_count",
             "owasp_page_last_updated_at": "owasp_page_last_updated_at",
@@ -31,16 +30,16 @@ class Command(BaseCommand):
             "unanswered_issues_count": "unanswered_issues_count",
             "unassigned_issues_count": "unassigned_issues_count",
         }
-        to_save = []
-        for project in projects:
+        project_health_metrics = []
+        for project in Project.objects.all():
             self.stdout.write(self.style.NOTICE(f"Evaluating metrics for project: {project.name}"))
             metrics = ProjectHealthMetrics(project=project)
 
-            # Update metrics based on requirements
-            for metric_field, project_field in field_mappings.items():
+            # Update metrics based on requirements.
+            for metric_field, project_field in metric_project_field_mapping.items():
                 setattr(metrics, metric_field, getattr(project, project_field))
 
-            to_save.append(metrics)
+            project_health_metrics.append(metrics)
 
-        ProjectHealthMetrics.bulk_save(to_save)
+        ProjectHealthMetrics.bulk_save(project_health_metrics)
         self.stdout.write(self.style.SUCCESS("Evaluated projects health metrics successfully. "))

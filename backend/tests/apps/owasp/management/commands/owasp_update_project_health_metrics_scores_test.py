@@ -22,7 +22,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
                 "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter"
             ) as metrics_patch,
             patch(
-                "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.get"
+                "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all"
             ) as requirements_patch,
             patch(
                 "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
@@ -64,13 +64,13 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_project_leaders_requirements_compliant = True
         self.mock_metrics.return_value.select_related.return_value = [mock_metric]
-        self.mock_requirements.return_value = mock_requirements
+        self.mock_requirements.return_value = [mock_requirements]
         mock_requirements.level = "test_level"
         # Execute command
         with patch("sys.stdout", new=self.stdout):
             call_command("owasp_update_project_health_metrics_scores")
 
-        self.mock_requirements.assert_called_once_with(level=mock_metric.project.level)
+        self.mock_requirements.assert_called_once()
 
         # Check if score was calculated correctly
         self.mock_bulk_save.assert_called_once_with([mock_metric], fields=["score"])

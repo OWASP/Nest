@@ -71,7 +71,7 @@ class TestProjectHealthMetricsModel:
             ("contributors_count", 0),
             ("forks_count", 0),
             ("is_funding_requirements_compliant", False),
-            ("is_project_leaders_requirements_compliant", False),
+            ("is_leader_requirements_compliant", False),
             ("last_committed_at", None),
             ("last_commit_days", 0),
             ("last_pull_request_days", 0),
