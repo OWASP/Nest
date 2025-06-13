@@ -7,7 +7,7 @@ export const mockProjectData = {
       summary: 'This is a summary of Project 1.',
       level: '1',
       leaders: ['Leader 1'],
-      top_contributors: [
+      topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar1.png',
           contributionsCount: 10,
@@ -18,12 +18,12 @@ export const mockProjectData = {
         },
       ],
       topics: ['Topic 1'],
-      updated_at: '2023-10-01',
-      forks_count: 10,
+      updatedAt: '2023-10-01',
+      forksCount: 10,
       key: 'project_1',
-      stars_count: 20,
-      contributors_count: 5,
-      is_active: true,
+      starsCount: 20,
+      contributorsCount: 5,
+      isActive: true,
     },
   ],
 }
