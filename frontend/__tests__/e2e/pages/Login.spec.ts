@@ -23,14 +23,14 @@ test.describe('Login Page', () => {
   })
 
   test('displays GitHub login button when unauthenticated', async ({ page }) => {
-    await page.goto('/login')
+    await page.goto('/auth/login')
 
     const button = page.getByRole('button', { name: /sign in with github/i })
     await expect(button).toBeVisible()
   })
 
   test('shows spinner while loading session', async ({ page }) => {
-    await page.route('**/api/auth/session', async (route) => {
+    await page.route('**/auth/session', async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 500))
       await route.fulfill({
         status: 200,
@@ -38,7 +38,7 @@ test.describe('Login Page', () => {
       })
     })
 
-    await page.goto('/login')
+    await page.goto('/auth/login')
 
     await expect(page.getByText(/checking session/i)).toBeVisible()
   })
