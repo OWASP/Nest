@@ -24,9 +24,9 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
 import { GET_LEADER_DATA } from 'server/queries/userQueries'
-import { TopContributorsTypeGraphql } from 'types/contributor'
-import { ProjectTypeGraphql } from 'types/project'
-import { User } from 'types/user'
+import type { Contributor } from 'types/contributor'
+import type { Project } from 'types/project'
+import type { User } from 'types/user'
 import {
   technologies,
   leaders,
@@ -40,7 +40,7 @@ import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/TopContributors'
+import TopContributorsList from 'components/TopContributorsList'
 import UserCard from 'components/UserCard'
 
 const projectKey = 'nest'
@@ -60,8 +60,8 @@ const About = () => {
     }
   )
 
-  const [projectMetadata, setProjectMetadata] = useState<ProjectTypeGraphql | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
+  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
 
   useEffect(() => {
     if (projectMetadataResponse?.project) {
@@ -142,7 +142,7 @@ const About = () => {
 
         {/* Top Contributors */}
         {topContributors && (
-          <TopContributors
+          <TopContributorsList
             icon={faUsers}
             contributors={topContributors}
             maxInitialDisplay={9}
