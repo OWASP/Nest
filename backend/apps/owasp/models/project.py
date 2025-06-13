@@ -133,6 +133,12 @@ class Project(
         return f"{self.name or self.key}"
 
     @property
+    def has_recent_commits(self) -> bool:
+        """Indicate whether project has recent commits."""
+        recent_period = timezone.now() - datetime.timedelta(days=60)
+        return self.pushed_at is not None and self.pushed_at >= recent_period
+
+    @property
     def is_code_type(self) -> bool:
         """Indicate whether project has CODE type."""
         return self.type == self.ProjectType.CODE
@@ -247,12 +253,6 @@ class Project(
         ).select_related(
             "repository",
         )
-
-    @property
-    def has_no_recent_commits(self) -> bool:
-        """Indicate whether project has no recent commits."""
-        recent_period = timezone.now() - datetime.timedelta(days=60)
-        return self.pushed_at is None or self.pushed_at < recent_period or not self.commits_count
 
     @property
     def recent_releases_count(self) -> int:
