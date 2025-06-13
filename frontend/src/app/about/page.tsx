@@ -268,10 +268,7 @@ const About = () => {
 
             <div className="space-y-8">
               {projectHistory.map((milestone) => (
-                <div
-                  key={`${milestone.year}-${milestone.title}`}
-                  className="relative flex gap-6"
-                >
+                <div key={`${milestone.year}-${milestone.title}`} className="relative flex gap-6">
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-400 text-xs font-bold text-white shadow-lg ring-4 ring-white dark:ring-gray-800">
                       {milestone.year.slice(-2)}

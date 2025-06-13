@@ -722,4 +722,58 @@ describe('About Component', () => {
       })
     })
   })
+
+  test('renders mission section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Mission')).toBeInTheDocument()
+    expect(screen.getByText(/empower developers, security professionals/)).toBeInTheDocument()
+  })
+
+  test("renders 'Who It's For' section", async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText("Who It's For")).toBeInTheDocument()
+    expect(
+      screen.getByText(/developers, security professionals, project leaders/)
+    ).toBeInTheDocument()
+  })
+
+  test('renders key features section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Key Features')).toBeInTheDocument()
+    expect(screen.getByText('Advanced Search Capabilities')).toBeInTheDocument()
+    expect(screen.getByText('Slack Integration')).toBeInTheDocument()
+    expect(screen.getByText('OWASP Chapters Proximity Page')).toBeInTheDocument()
+    expect(screen.getByText('AI-Generated Insights')).toBeInTheDocument()
+  })
+
+  test('renders get involved section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Get Involved')).toBeInTheDocument()
+    expect(screen.getByText(/community-driven contributions/)).toBeInTheDocument()
+    expect(screen.getByText(/Code Contributions/)).toBeInTheDocument()
+    expect(screen.getByText(/Code Review/)).toBeInTheDocument()
+    expect(screen.getByText(/Documentation/)).toBeInTheDocument()
+    expect(screen.getByText(/Testing/)).toBeInTheDocument()
+    expect(screen.getByText(/Community Engagement/)).toBeInTheDocument()
+  })
+
+  test('renders project history timeline section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Project History')).toBeInTheDocument()
+    expect(screen.getByText('Project Inception')).toBeInTheDocument()
+    expect(screen.getByText('Backend MVP')).toBeInTheDocument()
+    expect(screen.getByText('Frontend Development')).toBeInTheDocument()
+    expect(screen.getByText('Platform Integrations')).toBeInTheDocument()
+    expect(screen.getByText('GSoC Integration')).toBeInTheDocument()
+  })
 })
