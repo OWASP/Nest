@@ -1,10 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
-import { SponsorType } from 'types/home'
+import type { Sponsor } from 'types/home'
 
 interface MovingLogosProps {
-  sponsors: SponsorType[]
+  sponsors: Sponsor[]
 }
 
 export default function MovingLogos({ sponsors }: MovingLogosProps) {

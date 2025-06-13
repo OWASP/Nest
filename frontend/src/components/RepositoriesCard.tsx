@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
+import type { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
 import InfoItem from 'components/InfoItem'
 import { TruncatedText } from 'components/TruncatedText'
 

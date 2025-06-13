@@ -14,12 +14,12 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { ChapterTypeAlgolia } from 'types/chapter'
-import { EventType } from 'types/event'
-import { OrganizationTypeAlgolia } from 'types/organization'
-import { ProjectTypeAlgolia } from 'types/project'
-import { MultiSearchBarProps, Suggestion } from 'types/search'
-import { User } from 'types/user'
+import type { Chapter } from 'types/chapter'
+import type { Event } from 'types/event'
+import type { Organization } from 'types/organization'
+import type { Project } from 'types/project'
+import type { MultiSearchBarProps, Suggestion } from 'types/search'
+import type { User } from 'types/user'
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -57,12 +57,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
               return {
                 indexName: index,
-                hits: data.hits as
-                  | ChapterTypeAlgolia[]
-                  | EventType[]
-                  | OrganizationTypeAlgolia[]
-                  | ProjectTypeAlgolia[]
-                  | User[],
+                hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
                 totalPages: data.totalPages || 0,
               }
             })
@@ -74,11 +69,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           if (filteredEvents.length > 0) {
             results.push({
               indexName: 'events',
-              hits: filteredEvents.slice(0, suggestionCount),
+              hits: filteredEvents.slice(0, suggestionCount) as Event[],
               totalPages: 1,
             })
           }
-          setSuggestions(results.filter((result) => result.hits.length > 0))
+          setSuggestions(results.filter((result) => result.hits.length > 0) as Suggestion[])
           setShowSuggestions(true)
         } else {
           setSuggestions([])
@@ -95,15 +90,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [debouncedSearch])
 
   const handleSuggestionClick = useCallback(
-    (
-      suggestion:
-        | ChapterTypeAlgolia
-        | ProjectTypeAlgolia
-        | User
-        | EventType
-        | OrganizationTypeAlgolia,
-      indexName: string
-    ) => {
+    (suggestion: Chapter | Project | User | Event | Organization, indexName: string) => {
       setSearchQuery(suggestion.name ?? '')
       setShowSuggestions(false)
 
@@ -112,7 +99,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           router.push(`/chapters/${suggestion.key}`)
           break
         case 'events':
-          window.open((suggestion as EventType).url, '_blank')
+          window.open((suggestion as Event).url, '_blank')
           break
         case 'organizations':
           // Use type guard to safely access login property
@@ -140,12 +127,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
         handleSuggestionClick(
-          suggestion as
-            | ChapterTypeAlgolia
-            | OrganizationTypeAlgolia
-            | ProjectTypeAlgolia
-            | User
-            | EventType,
+          suggestion as Chapter | Organization | Project | User | Event,
           suggestions[index].indexName
         )
       } else if (event.key === 'ArrowDown') {
