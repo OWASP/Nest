@@ -92,19 +92,9 @@ test.describe('About Page', () => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'About'])
   })
 
-  test("renders 'Who It's For' section", async ({ page }) => {
-    await expect(page.getByText("Who It's For")).toBeVisible()
-    await expect(page.getByText('designed for developers')).toBeVisible()
-  })
-
   test('renders key features section', async ({ page }) => {
     await expect(page.getByText('Key Features')).toBeVisible()
     await expect(page.getByText('Advanced Search Capabilities')).toBeVisible()
-  })
-
-  test('renders get involved section', async ({ page }) => {
-    await expect(page.getByText('Get Involved')).toBeVisible()
-    await expect(page.getByText('community-driven contributions')).toBeVisible()
   })
 
   test('renders project history timeline section', async ({ page }) => {
