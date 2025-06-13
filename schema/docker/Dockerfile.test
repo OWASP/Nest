@@ -1,4 +1,4 @@
-FROM python:3.13.4-alpine AS builder
+FROM python:3.13.5-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -35,7 +35,7 @@ COPY *.json ./
 COPY tests tests
 COPY utils utils
 
-FROM python:3.13.4-alpine
+FROM python:3.13.5-alpine
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
