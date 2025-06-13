@@ -245,7 +245,7 @@ const About = () => {
         )}
 
         {/* Get Involved */}
-        <SecondaryCard icon={faHandsHelping} title={<AnchorTitle title="Get Involved" />}>
+        <SecondaryCard icon={faHandshake} title={<AnchorTitle title="Get Involved" />}>
           <div className="space-y-4">
             <p className="text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
             <ul className="space-y-2">
@@ -262,7 +262,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faTimeline} title={<AnchorTitle title="Project History" />}>
+        <SecondaryCard icon={faHistory} title={<AnchorTitle title="Project History" />}>
           <div className="relative" data-testid="project-history-section">
             <div className="absolute bottom-0 left-4 top-8 w-0.5 bg-gradient-to-b from-blue-400 to-gray-300 dark:to-gray-600"></div>
 
