@@ -44,7 +44,6 @@ class TestProjectHealthMetricsModel:
             (MIN_SCORE, True),
             (MAX_SCORE + 0.1, False),
             (MIN_SCORE - 10.0, False),
-            (None, False),
         ],
     )
     def test_score_validation(self, score, is_valid):

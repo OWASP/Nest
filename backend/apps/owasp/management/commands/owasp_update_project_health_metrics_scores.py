@@ -47,19 +47,14 @@ class Command(BaseCommand):
             )
 
             requirements = project_health_requirements[metric.project.level]
+
             score = 0.0
             for field, weight in forward_fields.items():
-                metric_value = getattr(metric, field)
-                if field in [
-                    "is_funding_requirements_compliant",
-                    "is_leader_requirements_compliant",
-                ]:
-                    if metric_value:
-                        score += weight
-                elif metric_value >= getattr(requirements, field):
+                if int(getattr(metric, field)) >= int(getattr(requirements, field)):
                     score += weight
+
             for field, weight in backward_fields.items():
-                if getattr(metric, field) <= getattr(requirements, field):
+                if int(getattr(metric, field)) <= int(getattr(requirements, field)):
                     score += weight
 
             metric.score = score

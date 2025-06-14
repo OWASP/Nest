@@ -205,9 +205,7 @@ class Project(
     @property
     def owasp_page_last_updated_at(self) -> datetime.datetime | None:
         """Return the last updated date of the OWASP page."""
-        if owasp_repository := self.owasp_repository:
-            return owasp_repository.updated_at
-        return None
+        return self.owasp_repository.updated_at if self.owasp_repository else None
 
     @property
     def pull_requests(self):

@@ -44,11 +44,12 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         verbose_name="Pull request last created at", blank=True, null=True
     )
     recent_releases_count = models.PositiveIntegerField(verbose_name="Recent releases", default=0)
-    # score of projects health between 0 and 100(float value)
     score = models.FloatField(
+        blank=True,
         null=True,
+        verbose_name="Project health score",
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
-        help_text="Project health score (0-100)",
+        help_text="0-100",
     )
     stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)
     total_issues_count = models.PositiveIntegerField(verbose_name="Total issues", default=0)
@@ -62,6 +63,10 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     unassigned_issues_count = models.PositiveIntegerField(
         verbose_name="Unassigned issues", default=0
     )
+
+    def __str__(self) -> str:
+        """Project health metrics human readable representation."""
+        return f"Health Metrics for {self.project.name}"
 
     @property
     def age_days(self) -> int:
@@ -106,7 +111,3 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
 
         """
         BulkSaveModel.bulk_save(ProjectHealthMetrics, metrics, fields=fields)
-
-    def __str__(self) -> str:
-        """Project health metrics human readable representation."""
-        return f"Health Metrics for {self.project.name}"

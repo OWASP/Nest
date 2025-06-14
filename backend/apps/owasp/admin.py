@@ -166,9 +166,13 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
 
 class ProjectHealthMetricsAdmin(admin.ModelAdmin):
     autocomplete_fields = ("project",)
-    list_filter = ("project__level",)
+    list_filter = (
+        "project__level",
+        "nest_created_at",
+    )
     list_display = (
         "project",
+        "nest_created_at",
         "score",
         "contributors_count",
         "stars_count",
