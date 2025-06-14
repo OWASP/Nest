@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from apps.mentorship.models.mentee import Mentee
 from apps.mentorship.models.mentor import Mentor
+from apps.mentorship.models.program import Program
 
 
 class MenteeAdmin(admin.ModelAdmin):
@@ -32,5 +33,27 @@ class MentorAdmin(admin.ModelAdmin):
     )
 
 
+class ProgramAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "status",
+        "start_date",
+        "end_date",
+    )
+
+    search_fields = (
+        "name",
+        "description",
+    )
+
+    list_filter = (
+        "status",
+        "start_date",
+        "end_date",
+    )
+
+
 admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)
+admin.site.register(Program, ProgramAdmin)
