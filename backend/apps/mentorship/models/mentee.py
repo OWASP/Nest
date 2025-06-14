@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from apps.common.models import TimestampedModel
@@ -27,20 +26,17 @@ class Mentee(TimestampedModel):
         verbose_name="Mentee level",
     )
 
-    top_skills = ArrayField(
-        base_field=models.CharField(max_length=100),
+    top_skills = models.JSONField(
         default=list,
         verbose_name="Top skills (languages/frameworks)",
     )
 
-    preferred_tech_stack = ArrayField(
-        base_field=models.CharField(max_length=100),
+    preferred_tech_stack = models.JSONField(
         default=list,
         verbose_name="Preferred tech stack",
     )
 
-    interested_domains = ArrayField(
-        base_field=models.CharField(max_length=100),
+    interested_domains = models.JSONField(
         default=list,
         verbose_name="Interested domains",
     )

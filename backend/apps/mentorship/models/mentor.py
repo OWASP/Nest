@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from apps.common.models import TimestampedModel
@@ -28,8 +27,7 @@ class Mentor(TimestampedModel):
         default=0,
     )
 
-    domain = ArrayField(
-        base_field=models.CharField(max_length=100),
+    domain = models.JSONField(
         default=list,
         verbose_name="Primary domain(s)",
     )
