@@ -5,92 +5,239 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('github', '0028_merge_20250510_1542'),
-        ('owasp', '0034_alter_chapter_leaders_and_more'),
+        ("github", "0028_merge_20250510_1542"),
+        ("owasp", "0034_alter_chapter_leaders_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Mentee',
+            name="Mentee",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('level', models.PositiveIntegerField(verbose_name='Mentee level')),
-                ('top_skills', models.JSONField(default=list, verbose_name='Top skills (languages/frameworks)')),
-                ('preferred_tech_stack', models.JSONField(default=list, verbose_name='Preferred tech stack')),
-                ('interested_domains', models.JSONField(default=list, verbose_name='Interested domains')),
-                ('issues_worked_on', models.PositiveIntegerField(default=0, verbose_name='Number of issues worked on')),
-                ('prs_opened', models.PositiveIntegerField(default=0, verbose_name='Number of PRs opened')),
-                ('prs_merged', models.PositiveIntegerField(default=0, verbose_name='Number of PRs merged')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='mentee', to='github.user', verbose_name='GitHub user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                ("level", models.PositiveIntegerField(verbose_name="Mentee level")),
+                (
+                    "top_skills",
+                    models.JSONField(
+                        default=list, verbose_name="Top skills (languages/frameworks)"
+                    ),
+                ),
+                (
+                    "preferred_tech_stack",
+                    models.JSONField(default=list, verbose_name="Preferred tech stack"),
+                ),
+                (
+                    "interested_domains",
+                    models.JSONField(default=list, verbose_name="Interested domains"),
+                ),
+                (
+                    "issues_worked_on",
+                    models.PositiveIntegerField(
+                        default=0, verbose_name="Number of issues worked on"
+                    ),
+                ),
+                (
+                    "prs_opened",
+                    models.PositiveIntegerField(default=0, verbose_name="Number of PRs opened"),
+                ),
+                (
+                    "prs_merged",
+                    models.PositiveIntegerField(default=0, verbose_name="Number of PRs merged"),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mentee",
+                        to="github.user",
+                        verbose_name="GitHub user",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Mentees',
-                'db_table': 'mentorship_mentees',
+                "verbose_name_plural": "Mentees",
+                "db_table": "mentorship_mentees",
             },
         ),
         migrations.CreateModel(
-            name='Mentor',
+            name="Mentor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('years_of_experience', models.PositiveIntegerField(default=0, verbose_name='Years of experience')),
-                ('domain', models.JSONField(default=list, verbose_name='Primary domain(s)')),
-                ('preferred_mentee_level', models.PositiveIntegerField(default=1, verbose_name='Preferred mentee level')),
-                ('mentee_limit', models.PositiveIntegerField(default=1, verbose_name='Mentee limit')),
-                ('active_mentees', models.PositiveIntegerField(default=0, verbose_name='Active mentees')),
-                ('is_available', models.BooleanField(default=True, verbose_name='Currently available')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='mentor', to='github.user', verbose_name='GitHub user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "years_of_experience",
+                    models.PositiveIntegerField(default=0, verbose_name="Years of experience"),
+                ),
+                ("domain", models.JSONField(default=list, verbose_name="Primary domain(s)")),
+                (
+                    "preferred_mentee_level",
+                    models.PositiveIntegerField(default=1, verbose_name="Preferred mentee level"),
+                ),
+                (
+                    "mentee_limit",
+                    models.PositiveIntegerField(default=1, verbose_name="Mentee limit"),
+                ),
+                (
+                    "active_mentees",
+                    models.PositiveIntegerField(default=0, verbose_name="Active mentees"),
+                ),
+                (
+                    "is_available",
+                    models.BooleanField(default=True, verbose_name="Currently available"),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mentor",
+                        to="github.user",
+                        verbose_name="GitHub user",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Mentors',
-                'db_table': 'mentorship_mentors',
+                "verbose_name_plural": "Mentors",
+                "db_table": "mentorship_mentors",
             },
         ),
         migrations.CreateModel(
-            name='Module',
+            name="Module",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(blank=True, default='', max_length=200, verbose_name='Module name')),
-                ('description', models.TextField(blank=True, default='', verbose_name='Module description')),
-                ('start_date', models.DateField(verbose_name='Start date')),
-                ('end_date', models.DateField(verbose_name='End date')),
-                ('mentees', models.ManyToManyField(blank=True, related_name='modules', to='mentorship.mentee', verbose_name='Mentees')),
-                ('mentors', models.ManyToManyField(blank=True, related_name='modules', to='mentorship.mentor', verbose_name='Mentors')),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='modules', to='owasp.project', verbose_name='Associated project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "name",
+                    models.CharField(
+                        blank=True, default="", max_length=200, verbose_name="Module name"
+                    ),
+                ),
+                (
+                    "description",
+                    models.TextField(blank=True, default="", verbose_name="Module description"),
+                ),
+                ("start_date", models.DateField(verbose_name="Start date")),
+                ("end_date", models.DateField(verbose_name="End date")),
+                (
+                    "mentees",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="modules",
+                        to="mentorship.mentee",
+                        verbose_name="Mentees",
+                    ),
+                ),
+                (
+                    "mentors",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="modules",
+                        to="mentorship.mentor",
+                        verbose_name="Mentors",
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="modules",
+                        to="owasp.project",
+                        verbose_name="Associated project",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Modules',
-                'db_table': 'mentorship_modules',
+                "verbose_name_plural": "Modules",
+                "db_table": "mentorship_modules",
             },
         ),
         migrations.CreateModel(
-            name='Program',
+            name="Program",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=200, verbose_name='Program name')),
-                ('description', models.TextField(blank=True, default='', verbose_name='Program description')),
-                ('tags', models.JSONField(blank=True, default=list, verbose_name='Technology tags (e.g., languages, frameworks)')),
-                ('domains', models.JSONField(blank=True, default=list, verbose_name='Relevant domains or topics')),
-                ('status', models.CharField(choices=[('draft', 'Draft'), ('published', 'Published'), ('completed', 'Completed')], default='draft', max_length=20, verbose_name='Program status')),
-                ('start_date', models.DateField(verbose_name='Start date')),
-                ('end_date', models.DateField(verbose_name='End date')),
-                ('modules', models.ManyToManyField(blank=True, related_name='linked_programs', to='mentorship.module', verbose_name='Modules')),
-                ('owners', models.ManyToManyField(blank=True, related_name='owned_programs', to='mentorship.mentor', verbose_name='Program owners')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=200, verbose_name="Program name")),
+                (
+                    "description",
+                    models.TextField(blank=True, default="", verbose_name="Program description"),
+                ),
+                (
+                    "tags",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        verbose_name="Technology tags (e.g., languages, frameworks)",
+                    ),
+                ),
+                (
+                    "domains",
+                    models.JSONField(
+                        blank=True, default=list, verbose_name="Relevant domains or topics"
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Draft"),
+                            ("published", "Published"),
+                            ("completed", "Completed"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                        verbose_name="Program status",
+                    ),
+                ),
+                ("start_date", models.DateField(verbose_name="Start date")),
+                ("end_date", models.DateField(verbose_name="End date")),
+                (
+                    "modules",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="linked_programs",
+                        to="mentorship.module",
+                        verbose_name="Modules",
+                    ),
+                ),
+                (
+                    "owners",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="owned_programs",
+                        to="mentorship.mentor",
+                        verbose_name="Program owners",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Programs',
-                'db_table': 'mentorship_programs',
+                "verbose_name_plural": "Programs",
+                "db_table": "mentorship_programs",
             },
         ),
     ]
