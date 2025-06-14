@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import type { CardProps } from 'types/card'
 import { Icons } from 'utils/data'
@@ -22,7 +23,19 @@ const Card = ({
   projectLink,
   social,
   tooltipLabel,
+  labels,
+  languages,
 }: CardProps) => {
+  const router = useRouter()
+
+  const handleLabelClick = (label: string) => {
+    router.push(`/contribute?q=${encodeURIComponent(label)}`)
+  }
+
+  const handleLanguageClick = (language: string) => {
+    router.push(`/contribute?q=${encodeURIComponent(language)}`)
+  }
+
   return (
     <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white p-4 dark:bg-[#212529] md:max-w-6xl">
       {/* Card Header with Badge and Title */}
@@ -85,6 +98,47 @@ const Card = ({
         >
           {projectName}
         </Link>
+      )}
+
+      {/* Labels */}
+      {labels && labels.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {labels.slice(0, 3).map((label, index) => (
+            <button
+              key={index}
+              onClick={() => handleLabelClick(label)}
+              className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+            >
+              {label}
+            </button>
+          ))}
+          {labels.length > 3 && (
+            <span className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm text-gray-600 dark:border-gray-300 dark:text-gray-400">
+              +{labels.length - 3} more
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Programming Languages */}
+      {languages && languages.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {languages.slice(0, 3).map((language, index) => (
+            <button
+              key={index}
+              onClick={() => handleLanguageClick(language)}
+              className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+            >
+              <FontAwesomeIcon icon="fa-solid fa-code" className="mr-1 h-3 w-3" />
+              {language}
+            </button>
+          ))}
+          {languages.length > 3 && (
+            <span className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm text-gray-600 dark:border-gray-300 dark:text-gray-400">
+              +{languages.length - 3} more
+            </span>
+          )}
+        </div>
       )}
 
       {/* Project summary */}

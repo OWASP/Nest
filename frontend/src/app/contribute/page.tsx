@@ -54,6 +54,8 @@ const ContributePage = () => {
           summary={issue.summary}
           icons={filteredIcons}
           button={SubmitButton}
+          labels={issue.labels}
+          languages={issue.repositoryLanguages}
         />
         <DialogComp
           key={`modal-${index}`}

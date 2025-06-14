@@ -65,7 +65,7 @@ const SearchBar: React.FC<SearchProps> = ({
   return (
     <div className="w-full max-w-md p-4">
       <div className="relative">
-        {!isLoaded ? (
+        {isLoaded ? (
           <>
             <FontAwesomeIcon
               icon={faSearch}
