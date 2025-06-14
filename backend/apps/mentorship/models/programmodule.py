@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from django.db import models
 
-from apps.mentorship.models.program import Program
 from apps.mentorship.models.module import Module
+from apps.mentorship.models.program import Program
 
 
 class ProgramModule(models.Model):
