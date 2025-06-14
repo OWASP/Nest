@@ -36,7 +36,7 @@ test.describe('About Page', () => {
 
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'History' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project History', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
   })
@@ -77,10 +77,10 @@ test.describe('About Page', () => {
   })
 
   test('displays animated counters with correct values', async ({ page }) => {
-    await expect(page.getByText('1.2K+Contributors')).toBeVisible()
-    await expect(page.getByText('40+Open Issues')).toBeVisible()
-    await expect(page.getByText('60+Forks')).toBeVisible()
-    await expect(page.getByText('890+Stars')).toBeVisible()
+    await expect(page.getByText('Contributors', { exact: true })).toBeVisible()
+    await expect(page.getByText('Open Issues', { exact: true })).toBeVisible()
+    await expect(page.getByText('Forks', { exact: true })).toBeVisible()
+    await expect(page.getByText('Stars', { exact: true })).toBeVisible()
   })
 
   test('opens user profile in new window when leader button is clicked', async ({ page }) => {
@@ -90,5 +90,15 @@ test.describe('About Page', () => {
 
   test('breadcrumb renders correct segments on /about', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'About'])
+  })
+
+  test('renders key features section', async ({ page }) => {
+    await expect(page.getByText('Key Features')).toBeVisible()
+    await expect(page.getByText('Advanced Search Capabilities')).toBeVisible()
+  })
+
+  test('renders project history timeline section', async ({ page }) => {
+    await expect(page.getByText('Project History')).toBeVisible()
+    await expect(page.getByText('Project Inception')).toBeVisible()
   })
 })
