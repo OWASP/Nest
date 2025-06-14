@@ -12,18 +12,31 @@ import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 
 export type CardProps = {
-  button: Button
-  icons?: Icon
-  isActive?: boolean
-  level?: Level
-  projectLink?: string
-  projectName?: string
-  social?: { title: string; icon: string; url: string }[]
-  summary: string
   title: string
-  tooltipLabel?: string
-  topContributors?: Contributor[]
   url: string
+  summary: string
+  level?: {
+    level: string
+    color: string
+    icon: any
+  }
+  icons?: Record<string, boolean>
+  topContributors?: Contributor[]
+  button: {
+    url: string
+    onclick?: () => void
+    icon?: React.ReactNode
+    label?: string
+  }
+  projectName?: string
+  projectLink?: string
+  social?: {
+    title: string
+    url: string
+  }[]
+  tooltipLabel?: string
+  labels?: string[]
+  languages?: string[]
 }
 
 type stats = {

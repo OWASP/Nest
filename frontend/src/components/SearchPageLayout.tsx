@@ -43,7 +43,7 @@ const SearchPageLayout = ({
     <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
       <div className="flex w-full items-center justify-center">
         <SearchBar
-          isLoaded={isFirstLoad}
+          isLoaded={!isFirstLoad}
           onSearch={onSearch}
           placeholder={searchPlaceholder}
           initialValue={searchQuery}
