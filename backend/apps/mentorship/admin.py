@@ -1,11 +1,27 @@
-"""Mentorship app admin"""
+"""Mentorship app admin."""
 
-import algoliasearch.search.client
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 
+from apps.mentorship.models.mentee import Mentee
 from apps.mentorship.models.mentor import Mentor
-import django.contrib.auth.models
+
+
+class MenteeAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "user",
+        "level",
+        "issues_worked_on",
+        "prs_opened",
+        "prs_merged",
+    )
+
+    search_fields = (
+        "user__login",
+        "user__name",
+    )
+
+    list_filter = ("level",)
 
 
 class MentorAdmin(admin.ModelAdmin):
@@ -16,4 +32,5 @@ class MentorAdmin(admin.ModelAdmin):
     )
 
 
+admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)

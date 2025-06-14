@@ -6,31 +6,66 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('github', '0028_merge_20250510_1542'),
+        ("github", "0028_merge_20250510_1542"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Mentor',
+            name="Mentor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('years_of_experience', models.PositiveIntegerField(default=0, verbose_name='Years of experience')),
-                ('domain', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100), default=list, size=None, verbose_name='Primary domain(s)')),
-                ('preferred_mentee_level', models.PositiveIntegerField(default=1, verbose_name='Preferred mentee level')),
-                ('mentee_limit', models.PositiveIntegerField(default=1, verbose_name='Mentee limit')),
-                ('active_mentees', models.PositiveIntegerField(default=0, verbose_name='Active mentees')),
-                ('is_available', models.BooleanField(default=True, verbose_name='Currently available')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='mentor', to='github.user', verbose_name='GitHub user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "years_of_experience",
+                    models.PositiveIntegerField(default=0, verbose_name="Years of experience"),
+                ),
+                (
+                    "domain",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(max_length=100),
+                        default=list,
+                        size=None,
+                        verbose_name="Primary domain(s)",
+                    ),
+                ),
+                (
+                    "preferred_mentee_level",
+                    models.PositiveIntegerField(default=1, verbose_name="Preferred mentee level"),
+                ),
+                (
+                    "mentee_limit",
+                    models.PositiveIntegerField(default=1, verbose_name="Mentee limit"),
+                ),
+                (
+                    "active_mentees",
+                    models.PositiveIntegerField(default=0, verbose_name="Active mentees"),
+                ),
+                (
+                    "is_available",
+                    models.BooleanField(default=True, verbose_name="Currently available"),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mentor",
+                        to="github.user",
+                        verbose_name="GitHub user",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Mentors',
-                'db_table': 'mentorship_mentors',
+                "verbose_name_plural": "Mentors",
+                "db_table": "mentorship_mentors",
             },
         ),
     ]
