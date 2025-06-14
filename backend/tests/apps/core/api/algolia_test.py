@@ -1,8 +1,8 @@
 import json
+from http import HTTPStatus
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
 
 from apps.core.api.algolia import algolia_search
 
@@ -66,7 +66,7 @@ class TestAlgoliaSearch:
             response = algolia_search(mock_request)
             response_data = json.loads(response.content)
 
-            assert response.status_code == requests.codes.ok
+            assert response.status_code == HTTPStatus.OK
             assert response_data == expected_result
             mock_get_search_results.assert_called_once_with(
                 index_name,
@@ -85,7 +85,7 @@ class TestAlgoliaSearch:
         response = algolia_search(mock_request)
         response_data = json.loads(response.content)
 
-        assert response.status_code == requests.codes.method_not_allowed
+        assert response.status_code == HTTPStatus.METHOD_NOT_ALLOWED
         assert response_data["error"] == "Method GET is not allowed"
 
     @pytest.mark.parametrize(
@@ -158,5 +158,5 @@ class TestAlgoliaSearch:
         response = algolia_search(mock_request)
         response_data = json.loads(response.content)
 
-        assert response.status_code == requests.codes.bad_request
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         assert response_data["error"] == error_message

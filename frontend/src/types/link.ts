@@ -1,4 +1,4 @@
-export interface Link {
+export type Link = {
   href?: string
   isSpan?: boolean
   submenu?: Link[]

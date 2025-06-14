@@ -162,13 +162,13 @@ export const mockAlgoliaData = {
   hits: [
     {
       objectID: '539',
-      idx_name: 'OWASP Nagoya',
-      idx_suggested_location: 'Nagoya, Aichi Prefecture, Japan',
-      idx_region: 'Asia',
-      idx_top_contributors: [
+      name: 'OWASP Nagoya',
+      suggestedLocation: 'Nagoya, Aichi Prefecture, Japan',
+      region: 'Asia',
+      topContributors: [
         {
-          avatar_url: 'https://avatars.githubusercontent.com/u/58754211?v=4',
-          contributions_count: 286,
+          avatarUrl: 'https://avatars.githubusercontent.com/u/58754211?v=4',
+          contributionsCount: 286,
           login: 'isanori-sakanashi-owasp',
           name: 'Isanori Sakanashi',
         },

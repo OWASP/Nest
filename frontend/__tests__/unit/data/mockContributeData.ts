@@ -6,17 +6,17 @@ dayjs.extend(relativeTime)
 export const mockContributeData = {
   issues: [
     {
-      comments_count: 1,
-      created_at: dayjs().subtract(4, 'months').unix(),
+      commentsCount: 1,
+      createdAt: dayjs().subtract(4, 'months').unix(),
       hint: 'Hint',
       labels: [],
       objectID: '9180',
-      project_key: 'project-nest',
-      project_name: 'Owasp Nest',
-      repository_languages: ['Python', 'TypeScript'],
+      projectKey: 'project-nest',
+      projectName: 'Owasp Nest',
+      repositoryLanguages: ['Python', 'TypeScript'],
       summary: 'This is a summary of Contribution 1',
       title: 'Contribution 1',
-      updated_at: 1734727031,
+      updatedAt: 1734727031,
       url: 'https://github.com/OWASP/Nest/issues/225',
     },
   ],

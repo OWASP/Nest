@@ -5,14 +5,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import { ProjectReleaseType } from 'types/project'
+import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
 interface RecentReleasesProps {
-  data: ProjectReleaseType[]
+  data: Release[]
   showAvatar?: boolean
   showSingleColumn?: boolean
 }

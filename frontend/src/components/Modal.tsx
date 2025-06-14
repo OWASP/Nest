@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import React from 'react'
-import { ModalProps } from 'types/modal'
+import type { ModalProps } from 'types/modal'
 import ActionButton from 'components/ActionButton'
 import Markdown from 'components/MarkdownWrapper'
 

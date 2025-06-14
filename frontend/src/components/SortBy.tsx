@@ -2,7 +2,7 @@ import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-soli
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Select, SelectItem } from '@heroui/select'
 import { Tooltip } from '@heroui/tooltip'
-import { SortByProps } from 'types/sortBy'
+import type { SortByProps } from 'types/sortBy'
 
 const SortBy = ({
   sortOptions,

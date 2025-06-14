@@ -1,19 +1,19 @@
-export interface IssuesDataType {
-  issues: IssueType[]
-  open_issues_count: number
-  total_pages: number
-}
+import type { RepositoryDetails, User } from 'types/user'
 
-export interface IssueType {
-  created_at: number
+export type Issue = {
+  author: User
+  createdAt: number
   hint: string
   labels: string[]
-  project_name: string
-  project_url: string
-  repository_languages: string[]
+  number?: string
+  organizationName?: string
+  projectName: string
+  projectUrl: string
+  repository?: RepositoryDetails
+  repositoryLanguages?: string[]
   summary: string
   title: string
-  updated_at: number
+  updatedAt: number
   url: string
   objectID: string
 }

@@ -1,10 +1,10 @@
 import { Tooltip } from '@heroui/tooltip'
 import { millify } from 'millify'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { IconType } from 'types/icon'
+import type { Icon } from 'types/icon'
 import { IconKeys, Icons } from 'utils/data'
 
-export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
+export default function DisplayIcon({ item, icons }: { item: string; icons: Icon }) {
   // className for the container
   const containerClassName = [
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',

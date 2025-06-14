@@ -1,4 +1,4 @@
-FROM python:3.13.4-alpine AS builder
+FROM python:3.13.5-alpine AS builder
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-test" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
@@ -36,7 +36,7 @@ COPY static static
 COPY templates templates
 COPY tests tests
 
-FROM python:3.13.4-alpine
+FROM python:3.13.5-alpine
 
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \

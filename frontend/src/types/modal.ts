@@ -1,13 +1,13 @@
 import React from 'react'
-import { ButtonType } from 'types/button'
+import type { Button } from 'types/button'
 
-export interface ModalProps {
-  title: string
-  summary: string
+export type ModalProps = {
+  button: Button
+  children?: React.ReactNode
+  description: string
   hint?: string
   isOpen: boolean
   onClose: () => void
-  button: ButtonType
-  children?: React.ReactNode
-  description: string
+  summary: string
+  title: string
 }

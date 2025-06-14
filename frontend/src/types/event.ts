@@ -1,4 +1,4 @@
-export type EventType = {
+export type Event = {
   category: string
   endDate?: string
   key: string

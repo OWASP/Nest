@@ -1,7 +1,7 @@
 import { faChevronRight, faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
-import { SnapshotCardProps } from 'types/card'
+import type { SnapshotCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 
 const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {

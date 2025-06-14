@@ -1,6 +1,5 @@
 import { AppError } from 'app/global-error'
-import { IndexedObject, removeIdxPrefix } from 'server/utility'
-import { AlgoliaResponseType } from 'types/algolia'
+import type { AlgoliaResponse } from 'types/algolia'
 import { IDX_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
 
@@ -10,7 +9,7 @@ export const fetchAlgoliaData = async <T>(
   currentPage = 0,
   hitsPerPage = 25,
   facetFilters: string[] = []
-): Promise<AlgoliaResponseType<T>> => {
+): Promise<AlgoliaResponse<T>> => {
   try {
     if (['projects', 'chapters'].includes(indexName)) {
       facetFilters.push('idx_is_active:true')
@@ -43,10 +42,9 @@ export const fetchAlgoliaData = async <T>(
     const results = await response.json()
     if (results && results.hits.length > 0) {
       const { hits, nbPages } = results
-      const cleanedHits = hits.map((hit: IndexedObject) => removeIdxPrefix(hit)) as T[]
 
       return {
-        hits: cleanedHits,
+        hits: hits,
         totalPages: nbPages || 0,
       }
     } else {

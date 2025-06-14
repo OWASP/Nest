@@ -1,6 +1,6 @@
 import { Skeleton } from '@heroui/skeleton'
 import type React from 'react'
-import { UserCardSkeletonProps } from 'types/skeleton'
+import type { UserCardSkeletonProps } from 'types/skeleton'
 
 const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
   showAvatar = true,

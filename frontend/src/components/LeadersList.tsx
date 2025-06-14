@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LeadersListProps } from 'types/leaders'
+import type { LeadersListProps } from 'types/leaders'
 import { TruncatedText } from 'components/TruncatedText'
 
 /**

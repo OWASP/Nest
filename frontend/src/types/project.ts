@@ -1,54 +1,11 @@
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { Organization } from 'types/organization'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 
-export interface ProjectDataType {
-  active_projects_count: number
-  total_pages: number
-  projects: ProjectTypeAlgolia[]
-}
-
-export interface ProjectIssuesType {
-  author: { avatarUrl: string; key: string; name: string }
-  createdAt: number
-  organizationName?: string
-  repositoryName?: string
-  title: string
-  url: string
-}
-
-export interface ProjectPullRequestsType {
-  author: {
-    avatarUrl: string
-    key: string
-    name: string
-    login: string
-  }
-  createdAt: string
-  organizationName: string
-  repositoryName?: string
-  title: string
-  url: string
-}
-
-export interface ProjectMilestonesType {
-  author: {
-    avatarUrl: string
-    key: string
-    login: string
-    name: string
-  }
-  body: string
-  closedIssuesCount: number
-  createdAt: string
-  openIssuesCount: number
-  organizationName?: string
-  progress?: number
-  repositoryName: string
-  state: string
-  title: string
-  url?: string
-}
-
-export interface ProjectStatsType {
+export type ProjectStats = {
   contributors: number
   forks: number
   issues: number
@@ -56,31 +13,10 @@ export interface ProjectStatsType {
   stars: number
 }
 
-export interface ProjectTypeAlgolia {
-  contributors_count: number
-  description: string
-  forks_count: number
-  is_active: boolean
-  issues_count: number
-  key: string
-  languages: string[]
-  leaders: string[]
-  level: string
-  name: string
-  objectID: string
-  organizations: string
-  repositories_count: number
-  stars_count: number
-  summary: string
-  topics: string[]
-  top_contributors: TopContributorsTypeAlgolia[]
-  type: string
-  updated_at: number
-  url: string
-}
-
-export interface ProjectTypeGraphql {
+export type Project = {
+  createdAt?: string
   contributorsCount: number
+  description: string
   forksCount: number
   isActive: boolean
   issuesCount: number
@@ -89,51 +25,35 @@ export interface ProjectTypeGraphql {
   leaders: string[]
   level: string
   name: string
+  openIssuesCount?: number
+  organizations: string
   repositoriesCount: number
   starsCount: number
   summary: string
   topics: string[]
+  topContributors: Contributor[]
   type: string
   updatedAt: number
   url: string
-  recentIssues: ProjectIssuesType[]
-  recentPullRequests: ProjectPullRequestsType[]
-  recentReleases: ProjectReleaseType[]
-  repositories: RepositoryCardProps[]
-  topContributors: TopContributorsTypeGraphql[]
-  recentMilestones: ProjectMilestonesType[]
+  recentIssues?: Issue[]
+  recentPullRequests?: PullRequest[]
+  recentReleases?: Release[]
+  repositories?: RepositoryCardProps[]
+  recentMilestones?: Milestone[]
 }
 
-export interface RepositoriesCardProps {
-  repositories: RepositoryCardProps[]
+export type RepositoriesCardProps = {
+  repositories?: RepositoryCardProps[]
 }
 
-export interface RepositoryCardProps {
+export type RepositoryCardProps = {
   contributorsCount: number
   forksCount: number
   key?: string
   name: string
   openIssuesCount: number
-  organization?: {
-    login: string
-  }
+  organization?: Organization
   starsCount: number
   subscribersCount: number
-  url: string
-}
-
-export type ProjectReleaseType = {
-  author: {
-    avatarUrl: string
-    key: string
-    login: string
-    name: string
-  }
-  isPreRelease: boolean
-  name: string
-  organizationName?: string
-  publishedAt: number
-  repositoryName: string
-  tagName: string
   url: string
 }

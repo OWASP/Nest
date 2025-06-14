@@ -1,0 +1,4 @@
+# OWASP Nest production cron job schedule.
+
+# Daily GitHub sync.
+17 5 * * * cd /home/production; make sync-data > /var/log/nest/production/sync-data.log 2>&1

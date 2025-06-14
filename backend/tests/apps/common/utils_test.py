@@ -5,6 +5,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.utils import (
+    convert_to_camel_case,
     convert_to_snake_case,
     get_absolute_url,
     get_user_ip_address,
@@ -16,6 +17,23 @@ from apps.common.utils import (
 
 
 class TestUtils:
+    @pytest.mark.parametrize(
+        ("input_text", "expected_output"),
+        [
+            ("simple", "simple"),
+            ("my_variable", "myVariable"),
+            ("long_variable_name", "longVariableName"),
+            ("top_contributor_project", "topContributorProject"),
+            ("_leading_underscore", "_leadingUnderscore"),
+            ("trailing_underscore_", "trailingUnderscore"),
+            ("multiple__underscores", "multipleUnderscores"),
+            ("multiple__under___scores", "multipleUnderScores"),
+            ("alreadyCamelCase", "alreadyCamelCase"),
+        ],
+    )
+    def test_convert_to_camel_case(self, input_text, expected_output):
+        assert convert_to_camel_case(input_text) == expected_output
+
     @pytest.mark.parametrize(
         ("text", "expected"),
         [

@@ -2,7 +2,7 @@ import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useId } from 'react'
-import { Link as LinkType } from 'types/link'
+import type { Link as LinkType } from 'types/link'
 import { cn } from 'utils/utility'
 
 interface NavDropDownProps {
