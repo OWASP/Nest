@@ -1,24 +1,18 @@
-import { ChapterTypeGraphQL } from 'types/chapter'
-import { ProjectTypeGraphql } from 'types/project'
+import type { Chapter } from 'types/chapter'
+import type { Project } from 'types/project'
+import type { Release } from 'types/release'
 
-export interface ReleaseType {
-  name: string
-  publishedAt: string
-  tagName: string
-  projectName: string
-}
-
-export interface SnapshotDetailsProps {
+export type SnapshotDetails = {
   endAt: string
   key: string
   startAt: string
   title: string
-  newReleases: ReleaseType[]
-  newProjects: ProjectTypeGraphql[]
-  newChapters: ChapterTypeGraphQL[]
+  newReleases: Release[]
+  newProjects: Project[]
+  newChapters: Chapter[]
 }
 
-export interface Snapshots {
+export type Snapshot = {
   endAt: string
   key: string
   startAt: string

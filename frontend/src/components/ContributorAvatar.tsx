@@ -2,16 +2,14 @@ import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import { memo } from 'react'
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
+import type { Contributor } from 'types/contributor'
 
 type ContributorProps = {
-  contributor: TopContributorsTypeAlgolia | TopContributorsTypeGraphql
+  contributor: Contributor
   uniqueKey: string
 }
 
-const isAlgoliaContributor = (
-  contributor: TopContributorsTypeAlgolia | TopContributorsTypeGraphql
-): contributor is TopContributorsTypeAlgolia => {
+const isAlgoliaContributor = (contributor: Contributor): contributor is Contributor => {
   return (
     typeof contributor === 'object' &&
     contributor !== null &&
@@ -23,20 +21,18 @@ const isAlgoliaContributor = (
 const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) => {
   const isAlgolia = isAlgoliaContributor(contributor)
 
-  const avatarUrl = isAlgolia
-    ? contributor.avatar_url
-    : (contributor as TopContributorsTypeGraphql).avatarUrl
+  const avatarUrl = isAlgolia ? contributor.avatarUrl : (contributor as Contributor).avatarUrl
 
   const contributionsCount = isAlgolia
-    ? contributor.contributions_count
-    : (contributor as TopContributorsTypeGraphql).contributionsCount
+    ? contributor.contributionsCount
+    : (contributor as Contributor).contributionsCount
 
   const { login, name } = contributor
   const displayName = name || login
 
   const repositoryInfo =
-    !isAlgolia && (contributor as TopContributorsTypeGraphql).projectName
-      ? ` in ${(contributor as TopContributorsTypeGraphql).projectName}`
+    !isAlgolia && (contributor as Contributor).projectName
+      ? ` in ${(contributor as Contributor).projectName}`
       : ''
 
   return (

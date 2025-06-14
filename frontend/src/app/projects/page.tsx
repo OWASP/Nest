@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { ProjectTypeAlgolia } from 'types/project'
+import type { Project } from 'types/project'
 import { level } from 'utils/data'
 import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
@@ -22,7 +22,7 @@ const ProjectsPage = () => {
     handlePageChange,
     handleSortChange,
     handleOrderChange,
-  } = useSearchPage<ProjectTypeAlgolia>({
+  } = useSearchPage<Project>({
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
@@ -30,14 +30,14 @@ const ProjectsPage = () => {
   })
 
   const router = useRouter()
-  const renderProjectCard = (project: ProjectTypeAlgolia) => {
-    const params: string[] = ['forks_count', 'stars_count', 'contributors_count']
+  const renderProjectCard = (project: Project) => {
+    const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
     const filteredIcons = getFilteredIcons(project, params)
     const handleButtonClick = () => {
       router.push(`/projects/${project.key}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -45,13 +45,13 @@ const ProjectsPage = () => {
 
     return (
       <Card
-        button={SubmitButton}
+        button={submitButton}
         icons={filteredIcons}
-        key={project.objectID}
+        key={project.key}
         level={level[`${project.level as keyof typeof level}`]}
         summary={project.summary}
         title={project.name}
-        topContributors={project.top_contributors}
+        topContributors={project.topContributors}
         url={`/projects/${project.key}`}
       />
     )
@@ -78,7 +78,7 @@ const ProjectsPage = () => {
       }
       totalPages={totalPages}
     >
-      {projects && projects.filter((project) => project.is_active).map(renderProjectCard)}
+      {projects && projects.filter((project) => project.isActive).map(renderProjectCard)}
     </SearchPageLayout>
   )
 }
