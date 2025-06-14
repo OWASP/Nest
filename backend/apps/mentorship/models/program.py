@@ -6,6 +6,7 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.mentorship.models.mentor import Mentor
+from apps.mentorship.models.module import Module
 
 
 class Program(TimestampedModel):
@@ -38,7 +39,12 @@ class Program(TimestampedModel):
         verbose_name="Program owners",
         blank=True,
     )
-    # M2M with Program(TBD)
+    modules = models.ManyToManyField(
+        Module,
+        related_name="linked_programs",
+        verbose_name="Modules",
+        blank=True,
+    )
     tags = models.JSONField(
         verbose_name="Technology tags (e.g., languages, frameworks)",
         default=list,
