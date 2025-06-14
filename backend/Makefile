@@ -104,11 +104,15 @@ owasp-process-snapshots:
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
 
 owasp-update-project-health-metrics:
-	@echo "Updating OWASP project health requirements"
+	@echo "Updating OWASP project health metrics"
 	@CMD="python manage.py owasp_update_project_health_metrics" $(MAKE) exec-backend-command
 
+owasp-update-project-health-metrics-scores:
+	@echo "Updating OWASP project health metrics score"
+	@CMD="python manage.py owasp_update_project_health_metrics_scores" $(MAKE) exec-backend-command
+
 owasp-update-project-health-requirements:
-	@echo "Updating OWASP project health metrics"
+	@echo "Updating OWASP project health requirements"
 	@CMD="python manage.py owasp_update_project_health_requirements" $(MAKE) exec-backend-command
 
 owasp-scrape-chapters:
