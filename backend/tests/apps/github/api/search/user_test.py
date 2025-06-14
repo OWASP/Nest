@@ -10,7 +10,7 @@ class TestGetUsers:
         result = get_users("test-query")
         assert result == {"hits": [], "nbHits": 0}
         called_args = mock_raw_search.call_args[0]
-        assert called_args[0].__name__ == "User" or called_args[0].__name__ == "User"  
+        assert called_args[0].__name__ == "User"  
         assert called_args[1] == "test-query"
         params = called_args[2]
         assert params["hitsPerPage"] == 25
