@@ -192,7 +192,7 @@ class Command(BaseCommand):
                         break
 
                     retry_after = int(
-                        e.response.get("headers", {}).get("Retry-After", delay * (retry_count + 1))
+                        e.response.headers.get("Retry-After", delay * (retry_count + 1))
                     )
                     retry_count += 1
                     self.stdout.write(
@@ -286,9 +286,7 @@ class Command(BaseCommand):
                             break
 
                         retry_after = int(
-                            e.response.get("headers", {}).get(
-                                "Retry-After", delay * (retry_count + 1)
-                            )
+                            e.response.headers.get("Retry-After", delay * (retry_count + 1))
                         )
                         retry_count += 1
                         self.stdout.write(
@@ -367,9 +365,7 @@ class Command(BaseCommand):
                     except SlackApiError as e:
                         if e.response["error"] == "ratelimited":
                             retry_after = int(
-                                e.response.get("headers", {}).get(
-                                    "Retry-After", delay * (retry_count + 1)
-                                )
+                                e.response.headers.get("Retry-After", delay * (retry_count + 1))
                             )
 
                             retry_count += 1
