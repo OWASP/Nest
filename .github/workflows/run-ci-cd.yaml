@@ -290,6 +290,7 @@ jobs:
           file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
+          load: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
       - name: Prepare frontend environment
@@ -327,6 +328,7 @@ jobs:
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
+          load: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
       - name: Get frontend image size
