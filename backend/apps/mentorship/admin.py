@@ -6,6 +6,7 @@ from apps.mentorship.models.mentee import Mentee
 from apps.mentorship.models.mentor import Mentor
 from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
+from apps.mentorship.models.programmodule import ProgramModule
 
 
 class MenteeAdmin(admin.ModelAdmin):
@@ -49,8 +50,6 @@ class ModuleAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "project",
-        "start_date",
-        "end_date",
     )
 
     search_fields = (
@@ -83,10 +82,27 @@ class ProgramAdmin(admin.ModelAdmin):
         "end_date",
     )
 
-    filter_horizontal = ("owners", "modules")
+    filter_horizontal = ("owners",)
+
+
+class ProgramModuleAdmin(admin.ModelAdmin):
+    """Admin view for ProgramModule model."""
+
+    list_display = (
+        "program",
+        "module",
+        "start_date",
+        "end_date",
+    )
+    search_fields = (
+        "program__name",
+        "module__name",
+    )
+    list_filter = ("program",)
 
 
 admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Program, ProgramAdmin)
+admin.site.register(ProgramModule, ProgramModuleAdmin)

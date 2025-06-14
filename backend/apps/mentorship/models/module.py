@@ -52,14 +52,6 @@ class Module(TimestampedModel):
         default="",
     )
 
-    start_date = models.DateField(
-        verbose_name="Start date",
-    )
-
-    end_date = models.DateField(
-        verbose_name="End date",
-    )
-
     def __str__(self) -> str:
         """Return a human-readable representation of the module.
 
