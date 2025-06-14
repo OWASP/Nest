@@ -11,8 +11,8 @@ import {
   faBullseye,
   faUserGroup,
   faRocket,
-  faHandsHelping,
-  faTimeline,
+  faHandshake,
+  faHistory,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
