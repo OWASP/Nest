@@ -8,6 +8,8 @@ export type CardSkeletonProps = {
   showProjectName?: boolean
   showSocial?: boolean
   showSummary?: boolean
+  showLabels?: boolean
+  showLanguages?: boolean
 }
 
 export type UserCardSkeletonProps = {

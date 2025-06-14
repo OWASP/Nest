@@ -35,6 +35,7 @@ const ContributePage = () => {
       label: 'Read More',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-wand-magic-sparkles" />,
       onclick: () => setModalOpenIndex(index),
+      url: issue.url,
     }
 
     const viewIssueButton = {
@@ -52,10 +53,14 @@ const ContributePage = () => {
           projectName={issue.projectName}
           projectLink={issue.projectUrl}
           summary={issue.summary}
-          icons={filteredIcons}
+          icons={
+            Object.fromEntries(
+              Object.entries(filteredIcons).map(([key, value]) => [key, Boolean(value)])
+            ) as Record<string, boolean>
+          }
           button={SubmitButton}
-          labels={issue.labels}
           languages={issue.repositoryLanguages}
+          labels={issue.labels}
         />
         <DialogComp
           key={`modal-${index}`}

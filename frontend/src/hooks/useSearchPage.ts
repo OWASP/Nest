@@ -28,7 +28,6 @@ interface UseSearchPageReturn<T> {
 
 export function useSearchPage<T>({
   indexName,
-  pageTitle,
   defaultSortBy = '',
   defaultOrder = '',
   hitsPerPage,
@@ -51,7 +50,7 @@ export function useSearchPage<T>({
       const sortByParam = searchParams.get('sortBy') || defaultSortBy
       const orderParam = searchParams.get('order') || defaultOrder
       const pageParam = parseInt(searchParams.get('page') || '1')
-      
+
       setSearchQuery(searchQueryParam)
       setSortBy(sortByParam)
       setOrder(orderParam)

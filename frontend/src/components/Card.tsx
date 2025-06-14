@@ -1,7 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCode, faTag } from '@fortawesome/free-solid-svg-icons'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import type { CardProps } from 'types/card'
 import { Icons } from 'utils/data'
@@ -27,6 +29,8 @@ const Card = ({
   languages,
 }: CardProps) => {
   const router = useRouter()
+  const [showAllLabels, setShowAllLabels] = useState(false)
+  const [showAllLanguages, setShowAllLanguages] = useState(false)
 
   const handleLabelClick = (label: string) => {
     router.push(`/contribute?q=${encodeURIComponent(label)}`)
@@ -73,17 +77,20 @@ const Card = ({
         </div>
 
         {/* Icons associated with the project */}
-        {icons && Object.keys(Icons).some((key) => icons[key]) && (
+        {icons && Object.keys(Icons).some((key) => icons[key as keyof typeof icons]) && (
           <div className="mt-3 flex flex-wrap">
-            {Object.keys(Icons).map((key, index) =>
-              icons[key] ? (
+            {Object.keys(Icons).map((key, index) => {
+              const iconKey = key as keyof typeof icons;
+              return icons[iconKey] ? (
                 <DisplayIcon
                   key={`${key}-${index}`}
                   item={key}
-                  icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))}
+                  icons={Object.fromEntries(
+                    Object.entries(icons).filter(([_, value]) => Boolean(value))
+                  )}
                 />
-              ) : null
-            )}
+              ) : null;
+            })}
           </div>
         )}
       </div>
@@ -103,19 +110,23 @@ const Card = ({
       {/* Labels */}
       {labels && labels.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {labels.slice(0, 3).map((label, index) => (
+          {(showAllLabels ? labels : labels.slice(0, 3)).map((label, index) => (
             <button
               key={index}
               onClick={() => handleLabelClick(label)}
-              className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+              className="inline-flex items-center rounded-lg border border-gray-300 bg-gray-50 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
+              <FontAwesomeIcon icon={faTag} className="mr-1 h-3 w-3" />
               {label}
             </button>
           ))}
           {labels.length > 3 && (
-            <span className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm text-gray-600 dark:border-gray-300 dark:text-gray-400">
-              +{labels.length - 3} more
-            </span>
+            <button
+              onClick={() => setShowAllLabels(!showAllLabels)}
+              className="inline-flex items-center rounded-lg border border-gray-300 bg-gray-50 px-3 py-1 text-sm text-gray-600 transition-all duration-200 ease-in-out hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+            >
+              {showAllLabels ? 'Show less' : `+${labels.length - 3} more`}
+            </button>
           )}
         </div>
       )}
@@ -123,20 +134,23 @@ const Card = ({
       {/* Programming Languages */}
       {languages && languages.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {languages.slice(0, 3).map((language, index) => (
+          {(showAllLanguages ? languages : languages.slice(0, 3)).map((language, index) => (
             <button
               key={index}
               onClick={() => handleLanguageClick(language)}
-              className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+              className="inline-flex items-center rounded-lg border border-blue-300 bg-blue-50 px-3 py-1 text-sm text-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:bg-blue-100 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-800/40"
             >
-              <FontAwesomeIcon icon="fa-solid fa-code" className="mr-1 h-3 w-3" />
+              <FontAwesomeIcon icon={faCode} className="mr-1 h-3 w-3" />
               {language}
             </button>
           ))}
           {languages.length > 3 && (
-            <span className="inline-flex items-center rounded-lg border border-gray-400 px-3 py-1 text-sm text-gray-600 dark:border-gray-300 dark:text-gray-400">
-              +{languages.length - 3} more
-            </span>
+            <button
+              onClick={() => setShowAllLanguages(!showAllLanguages)}
+              className="inline-flex items-center rounded-lg border border-blue-300 bg-blue-50 px-3 py-1 text-sm text-blue-600 transition-all duration-200 ease-in-out hover:bg-blue-100 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40"
+            >
+              {showAllLanguages ? 'Show less' : `+${languages.length - 3} more`}
+            </button>
           )}
         </div>
       )}
