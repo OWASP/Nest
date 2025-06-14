@@ -400,7 +400,7 @@ jobs:
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
-          echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "GITHUB_TOKEN=${{ secrets.NEST_GITHUB_TOKEN }}" >> .env.backend
           echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
@@ -591,7 +591,7 @@ jobs:
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
-          echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "GITHUB_TOKEN=${{ secrets.NEST_GITHUB_TOKEN }}" >> .env.backend
           echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
