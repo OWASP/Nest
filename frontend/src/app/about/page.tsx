@@ -301,7 +301,7 @@ const About = () => {
             <div key={index}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={stat.value} duration={2} />+
+                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
