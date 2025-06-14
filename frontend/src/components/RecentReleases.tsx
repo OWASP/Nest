@@ -67,11 +67,11 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                     <Link
                       className="text-blue-400 hover:underline"
-                      href={item?.url || '/'}
+                      href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <TruncatedText text={item?.name} />
+                      <TruncatedText text={item?.name || item?.tagName} />
                     </Link>
                   </h3>
                 </div>
