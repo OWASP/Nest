@@ -14,6 +14,8 @@ class Command(BaseCommand):
             "age_days": 15,
             "contributors_count": 1,
             "forks_count": 2,
+            "is_funding_requirements_compliant": True,
+            "is_leader_requirements_compliant": False,
             "last_commit_days": 365,
             "last_pull_request_days": 60,
             "last_release_days": 365,
@@ -32,6 +34,8 @@ class Command(BaseCommand):
             "age_days": 20,
             "contributors_count": 3,
             "forks_count": 5,
+            "is_funding_requirements_compliant": True,
+            "is_leader_requirements_compliant": True,
             "last_commit_days": 270,
             "last_pull_request_days": 45,
             "last_release_days": 365,
@@ -50,6 +54,8 @@ class Command(BaseCommand):
             "age_days": 30,
             "contributors_count": 4,
             "forks_count": 7,
+            "is_funding_requirements_compliant": True,
+            "is_leader_requirements_compliant": True,
             "last_commit_days": 90,
             "last_pull_request_days": 30,
             "last_release_days": 180,
@@ -68,6 +74,8 @@ class Command(BaseCommand):
             "age_days": 30,
             "contributors_count": 5,
             "forks_count": 10,
+            "is_funding_requirements_compliant": True,
+            "is_leader_requirements_compliant": True,
             "last_commit_days": 180,
             "last_pull_request_days": 30,
             "last_release_days": 365,
@@ -84,59 +92,41 @@ class Command(BaseCommand):
         },
     }
 
-    def add_arguments(self, parser) -> None:
-        parser.add_argument(
-            "--level",
-            type=str,
-            choices=[level[0] for level in Project.ProjectLevel.choices],
-            help="Project level to set requirements for",
-        )
-
     def get_level_requirements(self, level):
         """Get default requirements based on project level."""
-        defaults = {
-            "age_days": 0,
-            "contributors_count": 0,
-            "forks_count": 0,
-            "last_commit_days": 0,
-            "last_pull_request_days": 0,
-            "last_release_days": 0,
-            "open_issues_count": 0,
-            "open_pull_requests_count": 0,
-            "owasp_page_last_update_days": 0,
-            "recent_releases_count": 0,
-            "recent_releases_time_window_days": 0,
-            "stars_count": 0,
-            "total_pull_requests_count": 0,
-            "total_releases_count": 0,
-            "unanswered_issues_count": 0,
-            "unassigned_issues_count": 0,
-        }
-
-        return self.LEVEL_REQUIREMENTS.get(level, defaults)
+        return self.LEVEL_REQUIREMENTS.get(
+            level,
+            {
+                "age_days": 0,
+                "contributors_count": 0,
+                "forks_count": 0,
+                "is_funding_requirements_compliant": True,
+                "is_leader_requirements_compliant": True,
+                "last_commit_days": 0,
+                "last_pull_request_days": 0,
+                "last_release_days": 0,
+                "open_issues_count": 0,
+                "open_pull_requests_count": 0,
+                "owasp_page_last_update_days": 0,
+                "recent_releases_count": 0,
+                "recent_releases_time_window_days": 0,
+                "stars_count": 0,
+                "total_pull_requests_count": 0,
+                "total_releases_count": 0,
+                "unanswered_issues_count": 0,
+                "unassigned_issues_count": 0,
+            },
+        )
 
     def handle(self, *args, **options) -> None:
         """Handle the command execution."""
-        level = options.get("level")
-
-        if level:
-            defaults = self.get_level_requirements(level)
-            requirements, created = ProjectHealthRequirements.objects.get_or_create(
-                level=level, defaults=defaults
+        for level_code, level_name in sorted(Project.ProjectLevel.choices):
+            _, created = ProjectHealthRequirements.objects.update_or_create(
+                level=level_code,
+                defaults=self.get_level_requirements(level_code),
             )
 
-            action = "Created" if created else "Updated"
-            print(f"{action} health requirements for {requirements.get_level_display()} projects")
-        else:
-            for level_choice in Project.ProjectLevel.choices:
-                level_code = level_choice[0]
-                defaults = self.get_level_requirements(level_code)
-
-                requirements, created = ProjectHealthRequirements.objects.get_or_create(
-                    level=level_code, defaults=defaults
-                )
-
-                if created:
-                    print(f"Created default health requirements for {level_choice[1]} projects")
-                else:
-                    print(f"Health requirements already exist for {level_choice[1]} projects")
+            print(
+                f"{'Created' if created else 'Updated'} health requirements for "
+                f"{level_name} projects"
+            )

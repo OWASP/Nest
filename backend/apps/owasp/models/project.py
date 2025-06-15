@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import datetime
 from functools import lru_cache
 
 from django.db import models
+from django.utils import timezone
 
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -141,6 +143,18 @@ class Project(
         return self.type == self.ProjectType.DOCUMENTATION
 
     @property
+    def is_funding_requirements_compliant(self) -> bool:
+        """Indicate whether project is compliant with funding requirements."""
+        return not self.repositories.filter(is_funding_policy_compliant=False).exists()
+
+    @property
+    def is_leader_requirements_compliant(self) -> bool:
+        """Indicate whether project is compliant with project leaders requirements."""
+        # https://owasp.org/www-committee-project/#div-practice
+        # Have multiple Project Leaders who are not all employed by the same company.
+        return self.leaders_count > 1
+
+    @property
     def is_tool_type(self) -> bool:
         """Indicate whether project has TOOL type."""
         return self.type == self.ProjectType.TOOL
@@ -155,6 +169,11 @@ class Project(
         )
 
     @property
+    def issues_count(self) -> int:
+        """Return count of issues."""
+        return self.issues.count()
+
+    @property
     def nest_key(self) -> str:
         """Get Nest key."""
         return self.key.replace("www-project-", "")
@@ -163,6 +182,11 @@ class Project(
     def nest_url(self) -> str:
         """Get Nest URL for project."""
         return get_absolute_url(f"projects/{self.nest_key}")
+
+    @property
+    def leaders_count(self) -> int:
+        """Return the count of leaders."""
+        return len(self.leaders_raw)
 
     @property
     def open_issues(self):
@@ -174,6 +198,16 @@ class Project(
         )
 
     @property
+    def open_pull_requests_count(self) -> int:
+        """Return count of open pull requests."""
+        return self.pull_requests.filter(state="open").count()
+
+    @property
+    def owasp_page_last_updated_at(self) -> datetime.datetime | None:
+        """Return the last updated date of the OWASP page."""
+        return self.owasp_repository.updated_at if self.owasp_repository else None
+
+    @property
     def pull_requests(self):
         """Return pull requests."""
         return PullRequest.objects.filter(
@@ -181,6 +215,18 @@ class Project(
         ).select_related(
             "repository",
         )
+
+    @property
+    def pull_requests_count(self) -> int:
+        """Return count of pull requests."""
+        return self.pull_requests.count()
+
+    @property
+    def pull_request_last_created_at(self) -> datetime.datetime | None:
+        """Return last created pull request."""
+        return self.pull_requests.aggregate(
+            models.Max("created_at"),
+        )["created_at__max"]
 
     @property
     def published_releases(self):
@@ -201,6 +247,29 @@ class Project(
         ).select_related(
             "repository",
         )
+
+    @property
+    def recent_releases_count(self) -> int:
+        """Return count of recent releases per a specific period."""
+        recent_period = timezone.now() - datetime.timedelta(days=60)
+        return self.published_releases.filter(
+            published_at__gte=recent_period,
+        ).count()
+
+    @property
+    def repositories_count(self) -> int:
+        """Return count of repositories."""
+        return self.repositories.count()
+
+    @property
+    def unanswered_issues_count(self) -> int:
+        """Return count of unanswered issues."""
+        return self.issues.filter(comments_count=0).count()
+
+    @property
+    def unassigned_issues_count(self) -> int:
+        """Return count of unassigned issues."""
+        return self.issues.filter(assignees__isnull=True).count()
 
     def deactivate(self) -> None:
         """Deactivate project."""
