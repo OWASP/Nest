@@ -25,12 +25,14 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
   const router = useRouter()
 
   // Convert publishedAt to number if it's a string
-  const normalizedData = data?.map(item => ({
-    ...item,
-    publishedAt: typeof item.publishedAt === 'string' 
-      ? new Date(item.publishedAt).getTime() / 1000 
-      : item.publishedAt
-  })) || []
+  const normalizedData =
+    data?.map((item) => ({
+      ...item,
+      publishedAt:
+        typeof item.publishedAt === 'string'
+          ? new Date(item.publishedAt).getTime() / 1000
+          : item.publishedAt,
+    })) || []
 
   return (
     <SecondaryCard
@@ -60,11 +62,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     >
                       <Link
                         className="flex-shrink-0 text-blue-400 hover:underline"
-                        href={
-                          item?.author?.login
-                            ? `/members/${item?.author?.login}`
-                            : "#"
-                        }
+                        href={item?.author?.login ? `/members/${item?.author?.login}` : '#'}
                       >
                         <Image
                           alt={item?.author?.name ?? 'author'}
@@ -79,11 +77,14 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                     <Link
                       className="text-blue-400 hover:underline"
-                      href={item.url ?? "#"}
+                      href={
+                        item.url ??
+                        `https://github.com/${item.organizationName}/${item.repositoryName}/releases/tag/${item.tagName}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <TruncatedText text={item?.name ?? item?.tagName} />
+                      <TruncatedText text={item?.name || item?.tagName} />
                     </Link>
                   </h3>
                 </div>
