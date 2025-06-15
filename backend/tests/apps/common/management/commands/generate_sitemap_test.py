@@ -169,12 +169,12 @@ class TestGenerateSitemapCommand:
         self,
     ):
         self.command.create_sitemap_index_entry = MagicMock(return_value="<sitemap>mock</sitemap>")
-        self.command.create_sitemap_index = MagicMock(return_value="<xml>mockindex</xml>")
+        self.command.create_sitemap_index = MagicMock(return_value="<xml>mock-index</xml>")
         files = ["sitemap-foo.xml", "sitemap-bar.xml"]
         with patch("django.conf.settings.SITE_URL", "https://example.com"):
             result = self.command.generate_index_sitemap(files)
 
-        assert result == "<xml>mockindex</xml>"
+        assert result == "<xml>mock-index</xml>"
         assert self.command.create_sitemap_index_entry.call_count == 2
 
         self.command.create_sitemap_index.assert_called_once()
