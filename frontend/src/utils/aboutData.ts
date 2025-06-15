@@ -1,28 +1,19 @@
+import type {
+  KeyFeature,
+  ProjectHistory,
+  GetInvolved,
+  MissionContent,
+  Leaders,
+  TechnologySection,
+} from 'types/about'
+
 export const aboutText = [
   'OWASP Nest was originally created by Arkadii Yakovets (Ark) to simplify OWASP projects navigation. Built from scratch based on Ark’s vision and discussions with Starr Brown (Starr), the platform integrates structured system design into the OWASP ecosystem. The initial frontend, based on Vue.js, was introduced by Kateryna Golovanova (Kate), who later became the project co-leader due to her invaluable frontend and project management skills.',
   'Over time, OWASP Nest has expanded to address broader community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, alongside NestBot, has become a central hub for OWASP projects, chapters, users, and aggregated contribution opportunities.',
   'The code is licensed under the MIT License, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are certified ISC2 professionals and OWASP members who adhere to the OWASP Code of Conduct.',
 ]
 
-// TypeScript interfaces
-export interface KeyFeature {
-  title: string
-  description: string
-}
-
-export interface ProjectHistory {
-  year: string
-  title: string
-  description: string
-}
-
-export interface GetInvolved {
-  description: string
-  ways: string[]
-  callToAction: string
-}
-
-export const missionContent = {
+export const missionContent: MissionContent = {
   mission:
     'OWASP Nest is a comprehensive platform built to enhance collaboration and streamline contributions across the OWASP community. Acting as a central hub, it helps users discover projects, find contribution opportunities, and connect with like-minded individuals based on their interests and expertise.',
   whoItsFor:
@@ -62,7 +53,7 @@ export const getInvolvedContent: GetInvolved = {
     'Community Engagement – Join Slack discussions and provide feedback',
   ],
   callToAction:
-    'To get started, visit the OWASP Nest Repository, explore the Contributing Guidelines, and review the Code of Conduct.',
+    'To get started, visit the [OWASP Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and review the [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).',
 }
 
 export const projectHistory: ProjectHistory[] = [
@@ -70,39 +61,39 @@ export const projectHistory: ProjectHistory[] = [
     title: 'Project Inception',
     description:
       'Initial brainstorming and vision by Arkadii Yakovets (Ark) & Starr Brown to solve OWASP project navigation challenges',
-    year: '2023',
+    year: 'Jan 2023',
   },
   {
     title: 'Backend MVP',
     description:
       'Backend foundations built using Python, Django, DRF with AI capabilities integrated',
-    year: '2023',
+    year: 'Mar 2023',
   },
   {
     title: 'Frontend Development',
     description:
       'Frontend initially developed by Kateryna Golovanova (Kate) using Vue.js, later transitioned to React',
-    year: '2024',
+    year: 'Sep 2024',
   },
   {
     title: 'Platform Integrations',
     description: 'Slack & Algolia integrations implemented for enhanced user experience',
-    year: '2024',
+    year: 'Nov 2024',
   },
   {
     title: 'GSoC Integration',
     description: 'Scaled to support Google Summer of Code and streamline contributor onboarding',
-    year: '2024',
+    year: 'Dec 2024',
   },
 ]
 
-export const leaders = {
+export const leaders: Leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
 }
 
-export const technologies = [
+export const technologies: TechnologySection[] = [
   {
     section: 'Backend',
     tools: {

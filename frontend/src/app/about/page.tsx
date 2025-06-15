@@ -108,7 +108,7 @@ const About = () => {
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
 
-        <div className="mb-8 grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           <SecondaryCard icon={faBullseye} title={<AnchorTitle title="Mission" />}>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
           </SecondaryCard>
@@ -123,10 +123,10 @@ const About = () => {
             {keyFeatures.map((feature) => (
               <div
                 key={`${feature.title}-${feature.description.slice(0, 10)}`}
-                className="rounded-lg bg-gray-100 p-4 dark:bg-gray-700"
+                className="overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
               >
-                <h3 className="mb-2 font-semibold text-blue-400">{feature.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{feature.description}</p>
+                <h3 className="mb-2 text-xl font-semibold text-blue-400">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
               </div>
             ))}
           </div>
