@@ -514,7 +514,17 @@ jobs:
           file: backend/docker/Dockerfile
           platforms: linux/amd64
           push: true
+          load: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+
+      - name: Get backend image size
+        id: size-backend
+        run: |
+          IMAGE_ID=$(docker images -q ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging)
+          RAW_SIZE=$(docker image inspect "$IMAGE_ID" --format='{{.Size}}')
+          HR_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "raw_size=$RAW_SIZE" >> $GITHUB_OUTPUT
+          echo "hr_size=$HR_SIZE" >> $GITHUB_OUTPUT
 
       - name: Prepare frontend environment
         run: |
@@ -540,7 +550,30 @@ jobs:
           file: frontend/docker/Dockerfile
           platforms: linux/amd64
           push: true
+          load: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+
+      - name: Get frontend image size
+        id: size-frontend
+        run: |
+          IMAGE_ID=$(docker images -q ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging)
+          RAW_SIZE=$(docker image inspect "$IMAGE_ID" --format='{{.Size}}')
+          HR_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "raw_size=$RAW_SIZE" >> $GITHUB_OUTPUT
+          echo "hr_size=$HR_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Summarize Docker image sizes
+        run: |
+          echo "## Docker Images Size Report"
+          echo ""
+          echo "Backend: ${{ steps.size-backend.outputs.hr_size }} (${{ steps.size-backend.outputs.raw_size }} bytes)"
+          echo "Frontend: ${{ steps.size-frontend.outputs.hr_size }} (${{ steps.size-frontend.outputs.raw_size }} bytes)"
+          {
+            echo "## Docker Images Size Report"
+            echo ""
+            echo "**Backend:** ${{ steps.size-backend.outputs.hr_size }} (${{ steps.size-backend.outputs.raw_size }} bytes)"
+            echo "**Frontend:** ${{ steps.size-frontend.outputs.hr_size }} (${{ steps.size-frontend.outputs.raw_size }} bytes)"
+          } >> $GITHUB_STEP_SUMMARY
 
   scan-production-images:
     name: Scan Production Images
