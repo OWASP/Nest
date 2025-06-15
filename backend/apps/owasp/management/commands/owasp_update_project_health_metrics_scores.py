@@ -11,6 +11,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         forward_fields = {
+            "age_days": 6.0,
             "contributors_count": 6.0,
             "forks_count": 6.0,
             "is_funding_requirements_compliant": 5.0,
@@ -22,7 +23,6 @@ class Command(BaseCommand):
             "total_releases_count": 6.0,
         }
         backward_fields = {
-            "age_days": 6.0,
             "last_commit_days": 6.0,
             "last_pull_request_days": 6.0,
             "last_release_days": 6.0,
