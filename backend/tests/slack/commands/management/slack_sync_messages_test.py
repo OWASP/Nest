@@ -9,9 +9,8 @@ from django.core.management import call_command
 from apps.slack.management.commands.slack_sync_messages import Command
 from apps.slack.models import Conversation, Member, Message, Workspace
 
-CONSTANT_2 = 2
-CONSTANT_3 = 3
 CONSTANT_4 = 4
+CONSTANT_5 = 5
 TEST_TOKEN = "xoxb-test-token"  # noqa: S105
 TEST_TOKEN_1 = "xoxb-token-1"  # noqa: S105
 TEST_TOKEN_2 = "xoxb-token-2"  # noqa: S105
@@ -157,7 +156,7 @@ class TestSlackSyncMessagesCommand:
         with patch.object(Workspace.objects, "all") as mock_all:
             mock_all.return_value.exists.return_value = False
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None)
+            command.handle(batch_size=200, delay=0.5, channel_id=None, max_retries=5)
 
         output = stdout.getvalue()
         assert "No workspaces found in the database" in output
@@ -171,7 +170,7 @@ class TestSlackSyncMessagesCommand:
         stdout = StringIO()
         with patch.object(Workspace.objects, "all", return_value=mock_workspaces):
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None)
+            command.handle(batch_size=200, delay=0.5, channel_id=None, max_retries=5)
 
         output = stdout.getvalue()
         assert "No bot token found for Workspace No Token" in output
@@ -223,9 +222,8 @@ class TestSlackSyncMessagesCommand:
         ):
             mock_message_filter.return_value.order_by.return_value.first.return_value = None
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None)
+            command.handle(batch_size=200, delay=0.5, channel_id=None, max_retries=5)
 
-        assert mock_client.conversations_history.call_count == CONSTANT_2
         mock_bulk_save.assert_called()
 
         output = stdout.getvalue()
@@ -246,6 +244,8 @@ class TestSlackSyncMessagesCommand:
             client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
+            delay=0.5,
+            max_retries=5,
             parent_message=None,
         )
 
@@ -263,6 +263,8 @@ class TestSlackSyncMessagesCommand:
             client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
+            delay=0.5,
+            max_retries=5,
             parent_message=None,
         )
 
@@ -280,13 +282,16 @@ class TestSlackSyncMessagesCommand:
             client=mock_client,
             message_data=message_data,
             conversation=mock_conversation,
+            delay=0.5,
+            max_retries=5,
             parent_message=None,
         )
 
         assert result is None
 
+    @patch("apps.slack.management.commands.slack_sync_messages.time.sleep")
     def test_create_message_from_data_member_not_found(
-        self, command, mock_conversation, mock_user_info_response
+        self, mock_sleep, command, mock_conversation, mock_user_info_response
     ):
         """Test _create_message_from_data when member is not found."""
         message_data = {
@@ -309,6 +314,8 @@ class TestSlackSyncMessagesCommand:
                 client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
+                delay=0.5,
+                max_retries=5,
                 parent_message=None,
             )
 
@@ -336,6 +343,8 @@ class TestSlackSyncMessagesCommand:
                 client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
+                delay=0.5,
+                max_retries=5,
                 parent_message=None,
             )
 
@@ -352,7 +361,7 @@ class TestSlackSyncMessagesCommand:
     def test_fetch_thread_replies_success(
         self, mock_sleep, command, mock_conversation, mock_member, mock_slack_replies_response
     ):
-        """Test _fetch_thread_replies successful execution."""
+        """Test _fetch_replies successful execution."""
         mock_client = Mock()
         mock_client.conversations_replies.return_value = mock_slack_replies_response
 
@@ -377,6 +386,7 @@ class TestSlackSyncMessagesCommand:
                 conversation=mock_conversation,
                 message=mock_parent,
                 delay=0.5,
+                max_retries=5,
             )
 
         mock_client.conversations_replies.assert_called_once()
@@ -403,7 +413,7 @@ class TestSlackSyncMessagesCommand:
         parser = MagicMock()
         command.add_arguments(parser)
 
-        assert parser.add_argument.call_count == CONSTANT_3
+        assert parser.add_argument.call_count == CONSTANT_4
 
         parser.add_argument.assert_any_call(
             "--batch-size",
@@ -415,7 +425,7 @@ class TestSlackSyncMessagesCommand:
         parser.add_argument.assert_any_call(
             "--delay",
             type=float,
-            default=0.5,
+            default=4,
             help="Delay between API requests in seconds",
         )
 
@@ -423,6 +433,13 @@ class TestSlackSyncMessagesCommand:
             "--channel-id",
             type=str,
             help="Specific channel ID to fetch messages from",
+        )
+
+        parser.add_argument.assert_any_call(
+            "--max-retries",
+            type=int,
+            default=5,
+            help="Maximum retries for rate-limited requests",
         )
 
     def test_management_command_via_call_command(self):

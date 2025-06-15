@@ -22,9 +22,9 @@ clean-docker: \
 	clean-frontend-docker
 
 check: \
+	check-spelling \
 	check-backend \
-	check-frontend \
-	check-spelling
+	check-frontend
 
 check-backend: \
 	pre-commit
