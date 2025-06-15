@@ -1,6 +1,6 @@
 import { Skeleton } from '@heroui/skeleton'
 import type React from 'react'
-import { CardSkeletonProps } from 'types/skeleton'
+import type { CardSkeletonProps } from 'types/skeleton'
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({
   showLevel = true,

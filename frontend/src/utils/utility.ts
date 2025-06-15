@@ -3,12 +3,12 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
 import { fetchCsrfToken } from 'server/fetchCsrfToken'
-import { ChapterTypeGraphQL } from 'types/chapter'
 
-import { CommitteeTypeAlgolia } from 'types/committee'
-import { IconType } from 'types/icon'
-import { IssueType } from 'types/issue'
-import { ProjectTypeAlgolia, ProjectTypeGraphql } from 'types/project'
+import type { Chapter } from 'types/chapter'
+import type { Committee } from 'types/committee'
+import type { Icon } from 'types/icon'
+import type { Issue } from 'types/issue'
+import type { Project } from 'types/project'
 import { IconKeys, Icons, urlMappings } from 'utils/data'
 
 dayjs.extend(relativeTime)
@@ -17,33 +17,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type projectType = ProjectTypeAlgolia | IssueType | CommitteeTypeAlgolia
+type projectType = Project | Issue | Committee | Chapter
 
-export const getFilteredIcons = (project: projectType, params: string[]): IconType => {
-  const filteredIcons = params.reduce((acc: IconType, key) => {
-    if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
-      if (key === 'created_at') {
-        acc[key] = dayjs.unix(project[key as keyof projectType] as number).fromNow()
-      } else {
-        acc[key] = project[key as keyof typeof project] as number
-      }
-    }
-    return acc
-  }, {})
-
-  return filteredIcons
-}
-
-export const getFilteredIconsGraphql = (
-  project: ProjectTypeGraphql | ChapterTypeGraphQL,
-  params: string[]
-): IconType => {
-  const filteredIcons = params.reduce((acc: IconType, key) => {
+export const getFilteredIcons = (project: projectType, params: string[]): Icon => {
+  const filteredIcons = params.reduce((acc: Icon, key) => {
     if (Icons[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       if (key === 'createdAt') {
-        acc[key] = dayjs.unix(project[key as keyof projectType] as number).fromNow()
+        acc[key] = dayjs.unix(project[key as keyof projectType] as unknown as number).fromNow()
       } else {
-        acc[key] = project[key as keyof typeof project] as number
+        acc[key] = project[key as keyof typeof project] as unknown as number
       }
     }
     return acc

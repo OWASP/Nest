@@ -1,17 +1,17 @@
-export interface OrganizationTypeAlgolia {
-  avatar_url: string
-  collaborators_count: number
+export type Organization = {
+  avatarUrl: string
+  collaboratorsCount: number
   company?: string
-  created_at: number
+  createdAt: number
   description?: string
   email?: string
-  followers_count: number
+  followersCount: number
   key: string
   location?: string
   login: string
   name: string
   objectID: string
-  public_repositories_count: number
-  updated_at: number
+  publicRepositoriesCount: number
+  updatedAt: number
   url: string
 }

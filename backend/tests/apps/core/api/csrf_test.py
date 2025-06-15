@@ -1,9 +1,9 @@
 import json
+from http import HTTPStatus
 
 import pytest
 from django.contrib.sessions.backends.cache import SessionStore
 from django.test import RequestFactory
-from requests import codes
 
 from apps.core.api.csrf import get_csrf_token
 
@@ -22,7 +22,7 @@ class TestGetCSRFTokenView:
         return request
 
     def _assert_valid_csrf_response(self, response):
-        assert response.status_code == codes.ok
+        assert response.status_code == HTTPStatus.OK
         assert response["Content-Type"] == "application/json"
 
         data = json.loads(response.content)
