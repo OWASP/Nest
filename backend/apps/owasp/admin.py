@@ -164,6 +164,30 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     custom_field_name.short_description = "Name"
 
 
+class ProjectHealthMetricsAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("project",)
+    list_filter = (
+        "project__level",
+        "nest_created_at",
+    )
+    list_display = (
+        "project",
+        "nest_created_at",
+        "score",
+        "contributors_count",
+        "stars_count",
+        "forks_count",
+        "open_issues_count",
+        "open_pull_requests_count",
+        "recent_releases_count",
+    )
+    search_fields = ("project__name",)
+
+    def project(self, obj):
+        """Display project name."""
+        return obj.project.name if obj.project else "N/A"
+
+
 class SnapshotAdmin(admin.ModelAdmin):
     autocomplete_fields = (
         "new_chapters",
@@ -229,7 +253,7 @@ admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Project, ProjectAdmin)
-admin.site.register(ProjectHealthMetrics)
+admin.site.register(ProjectHealthMetrics, ProjectHealthMetricsAdmin)
 admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Sponsor, SponsorAdmin)
