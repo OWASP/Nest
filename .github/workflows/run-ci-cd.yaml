@@ -342,16 +342,12 @@ jobs:
 
       - name: Summarize Docker image sizes
         run: |
-          echo "## Docker Images Size Report"
-          echo ""
-          echo "Backend: ${{ steps.size-backend.outputs.hr_size }} (${{ steps.size-backend.outputs.raw_size }} bytes)"
-          echo "Frontend: ${{ steps.size-frontend.outputs.hr_size }} (${{ steps.size-frontend.outputs.raw_size }} bytes)"
           {
             echo "## Docker Images Size Report"
             echo ""
             echo "**Backend:** ${{ steps.size-backend.outputs.hr_size }} (${{ steps.size-backend.outputs.raw_size }} bytes)"
             echo "**Frontend:** ${{ steps.size-frontend.outputs.hr_size }} (${{ steps.size-frontend.outputs.raw_size }} bytes)"
-          } >> $GITHUB_STEP_SUMMARY
+          } | tee /dev/tty >> $GITHUB_STEP_SUMMARY
 
   scan-staging-images:
     name: Scan Staging Images
@@ -564,16 +560,12 @@ jobs:
 
       - name: Summarize Docker image sizes
         run: |
-          echo "## Docker Images Size Report"
-          echo ""
-          echo "Backend: ${{ steps.size-backend.outputs.hr_size }} (${{ steps.size-backend.outputs.raw_size }} bytes)"
-          echo "Frontend: ${{ steps.size-frontend.outputs.hr_size }} (${{ steps.size-frontend.outputs.raw_size }} bytes)"
           {
             echo "## Docker Images Size Report"
             echo ""
             echo "**Backend:** ${{ steps.size-backend.outputs.hr_size }} (${{ steps.size-backend.outputs.raw_size }} bytes)"
             echo "**Frontend:** ${{ steps.size-frontend.outputs.hr_size }} (${{ steps.size-frontend.outputs.raw_size }} bytes)"
-          } >> $GITHUB_STEP_SUMMARY
+          } | tee /dev/tty >> $GITHUB_STEP_SUMMARY
 
   scan-production-images:
     name: Scan Production Images
