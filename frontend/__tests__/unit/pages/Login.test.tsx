@@ -3,7 +3,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
-import LoginPage from 'app/login/page'
+import LoginPage from 'app/auth/login/page'
 
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
