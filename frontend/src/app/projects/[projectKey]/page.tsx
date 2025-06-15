@@ -12,8 +12,8 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { TopContributorsTypeGraphql } from 'types/contributor'
-import { ProjectTypeGraphql } from 'types/project'
+import type { Contributor } from 'types/contributor'
+import type { Project } from 'types/project'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -21,8 +21,8 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
+  const [project, setProject] = useState<Project | null>(null)
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })
@@ -91,16 +91,16 @@ const ProjectDetailsPage = () => {
   return (
     <DetailsCard
       details={projectDetails}
-      is_active={project.isActive}
+      isActive={project.isActive}
       languages={project.languages}
       pullRequests={project.recentPullRequests}
       recentIssues={project.recentIssues}
+      recentMilestones={project.recentMilestones}
       recentReleases={project.recentReleases}
       repositories={project.repositories}
       stats={projectStats}
       summary={project.summary}
       title={project.name}
-      recentMilestones={project.recentMilestones}
       topContributors={topContributors}
       topics={project.topics}
       type="project"

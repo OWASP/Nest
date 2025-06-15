@@ -1,7 +1,7 @@
 'use client'
 import L, { MarkerClusterGroup } from 'leaflet'
-import React, { useEffect, useMemo, useRef } from 'react'
-import { GeoLocDataAlgolia, GeoLocDataGraphQL } from 'types/chapter'
+import React, { useEffect, useRef } from 'react'
+import type { Chapter } from 'types/chapter'
 import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
@@ -13,24 +13,14 @@ const ChapterMap = ({
   showLocal,
   style,
 }: {
-  geoLocData: GeoLocDataGraphQL[] | GeoLocDataAlgolia[]
+  geoLocData: Chapter[]
   showLocal: boolean
   style: React.CSSProperties
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
 
-  const chapters = useMemo(() => {
-    return geoLocData.map((chapter) => ({
-      lat: '_geoloc' in chapter ? chapter._geoloc.lat : chapter.geoLocation.lat,
-      lng: '_geoloc' in chapter ? chapter._geoloc.lng : chapter.geoLocation.lng,
-      key: chapter.key,
-      name: chapter.name,
-    }))
-  }, [geoLocData])
-
   useEffect(() => {
-    if (typeof window === 'undefined') return
     if (!mapRef.current) {
       mapRef.current = L.map('chapter-map', {
         worldCopyJump: false,
@@ -58,7 +48,7 @@ const ChapterMap = ({
 
     const markerClusterGroup = markerClusterRef.current
 
-    const markers = chapters.map((chapter) => {
+    const markers = geoLocData.map((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
@@ -69,7 +59,13 @@ const ChapterMap = ({
         shadowUrl: '/img/marker-shadow.png',
       })
 
-      const marker = L.marker([chapter.lat, chapter.lng], { icon: markerIcon })
+      const marker = L.marker(
+        [
+          chapter._geoloc?.lat || chapter.geoLocation?.lat,
+          chapter._geoloc?.lng || chapter.geoLocation?.lng,
+        ],
+        { icon: markerIcon }
+      )
       const popup = L.popup()
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
@@ -84,16 +80,27 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
-    if (showLocal && chapters.length > 0) {
+    if (showLocal && geoLocData.length > 0) {
       const maxNearestChapters = 5
-      const localChapters = chapters.slice(0, maxNearestChapters - 1)
-      const localBounds = L.latLngBounds(localChapters.map((ch) => [ch.lat, ch.lng]))
+      const localChapters = geoLocData.slice(0, maxNearestChapters - 1)
+      const localBounds = L.latLngBounds(
+        localChapters.map((chapter) => [
+          chapter._geoloc?.lat || chapter.geoLocation?.lat,
+          chapter._geoloc?.lng || chapter.geoLocation?.lng,
+        ])
+      )
       const maxZoom = 7
-      const nearestChapter = chapters[0]
-      map.setView([nearestChapter.lat, nearestChapter.lng], maxZoom)
+      const nearestChapter = geoLocData[0]
+      map.setView(
+        [
+          nearestChapter._geoloc?.lat || nearestChapter.geoLocation?.lat,
+          nearestChapter._geoloc?.lng || nearestChapter.geoLocation?.lng,
+        ],
+        maxZoom
+      )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
-  }, [chapters, showLocal])
+  }, [geoLocData, showLocal])
 
   return <div id="chapter-map" style={style} />
 }

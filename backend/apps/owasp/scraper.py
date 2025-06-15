@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from http import HTTPStatus
 from urllib.parse import urlparse
 
 import requests
@@ -41,7 +42,7 @@ class OwaspScraper:
             logger.exception("Request failed", extra={"url": url})
             return
 
-        if page_response.status_code == requests.codes.not_found:
+        if page_response.status_code == HTTPStatus.NOT_FOUND:
             return
 
         try:
@@ -73,15 +74,15 @@ class OwaspScraper:
             logger.exception("Request failed", extra={"url": url})
             return None
 
-        if response.status_code == requests.codes.ok:
+        if response.status_code == HTTPStatus.OK:
             return url
 
         if response.status_code in {
-            requests.codes.moved_permanently,  # 301
-            requests.codes.found,  # 302
-            requests.codes.see_other,  # 303
-            requests.codes.temporary_redirect,  # 307
-            requests.codes.permanent_redirect,  # 308
+            HTTPStatus.MOVED_PERMANENTLY,  # 301
+            HTTPStatus.FOUND,  # 302
+            HTTPStatus.SEE_OTHER,  # 303
+            HTTPStatus.TEMPORARY_REDIRECT,  # 307
+            HTTPStatus.PERMANENT_REDIRECT,  # 308
         }:
             return self.verify_url(response.headers["Location"])
 
