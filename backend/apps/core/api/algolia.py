@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
+from http import HTTPStatus
 from typing import Any
 
-import requests
 from algoliasearch.http.exceptions import AlgoliaException
 from django.conf import settings
 from django.core.cache import cache
@@ -14,7 +14,7 @@ from django.http import HttpRequest, HttpResponseNotAllowed, JsonResponse
 
 from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
-from apps.core.utils.index import get_params_for_index
+from apps.core.utils.index import deep_camelize, get_params_for_index
 from apps.core.validators import validate_search_params
 
 CACHE_PREFIX = "algolia_proxy"
@@ -59,7 +59,7 @@ def get_search_results(
     search_result = response.results[0].to_dict()
 
     return {
-        "hits": search_result.get("hits", []),
+        "hits": deep_camelize(search_result["hits"]),
         "nbPages": search_result.get("nbPages", 0),
     }
 
@@ -77,7 +77,7 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
     if request.method != "POST":
         return JsonResponse(
             {"error": f"Method {request.method} is not allowed"},
-            status=requests.codes.method_not_allowed,
+            status=HTTPStatus.METHOD_NOT_ALLOWED,
         )
 
     try:
