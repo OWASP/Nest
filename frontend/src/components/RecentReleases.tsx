@@ -24,6 +24,14 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
 }) => {
   const router = useRouter()
 
+  // Convert publishedAt to number if it's a string
+  const normalizedData = data?.map(item => ({
+    ...item,
+    publishedAt: typeof item.publishedAt === 'string' 
+      ? new Date(item.publishedAt).getTime() / 1000 
+      : item.publishedAt
+  })) || []
+
   return (
     <SecondaryCard
       icon={faTag}
@@ -33,18 +41,18 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
         </div>
       }
     >
-      {data && data.length > 0 ? (
+      {normalizedData && normalizedData.length > 0 ? (
         <div
           className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
         >
-          {data.map((item, index) => (
+          {normalizedData.map((item, index) => (
             <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
-                  {showAvatar && (
+                  {showAvatar && item?.author && (
                     <Tooltip
                       closeDelay={100}
-                      content={item?.author?.name || item?.author?.login}
+                      content={item?.author?.name ?? item?.author?.login}
                       id={`avatar-tooltip-${index}`}
                       delay={100}
                       placement="bottom"
@@ -52,13 +60,17 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     >
                       <Link
                         className="flex-shrink-0 text-blue-400 hover:underline"
-                        href={`/members/${item?.author?.login}`}
+                        href={
+                          item?.author?.login
+                            ? `/members/${item?.author?.login}`
+                            : "#"
+                        }
                       >
                         <Image
-                          alt={item?.author?.name || 'author'}
+                          alt={item?.author?.name ?? 'author'}
                           className="mr-2 h-6 w-6 rounded-full"
                           height={24}
-                          src={item?.author?.avatarUrl || ''}
+                          src={item?.author?.avatarUrl ?? ''}
                           width={24}
                         />
                       </Link>
@@ -67,11 +79,11 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                     <Link
                       className="text-blue-400 hover:underline"
-                      href={item.url}
+                      href={item.url ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <TruncatedText text={item?.name || item?.tagName} />
+                      <TruncatedText text={item?.name ?? item?.tagName} />
                     </Link>
                   </h3>
                 </div>
@@ -86,7 +98,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                       className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                       onClick={() =>
                         router.push(
-                          `/organizations/${item?.organizationName}/repositories/${item.repositoryName || ''}`
+                          `/organizations/${item?.organizationName}/repositories/${item.repositoryName ?? ''}`
                         )
                       }
                     >
