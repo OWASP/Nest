@@ -18,7 +18,7 @@ export default function Footer() {
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
 
-  const frontendVersion = process.env.NEXT_PUBLIC_RELEASE_VERSION || null
+  const releaseVersion = process.env.NEXT_PUBLIC_RELEASE_VERSION || null
 
   return (
     <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
@@ -91,9 +91,9 @@ export default function Footer() {
               © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
             </p>
           </div>
-          {frontendVersion && (
+          {releaseVersion && (
             <div className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
-              Release Version: <span className="font-mono">{frontendVersion}</span>
+              Release Version: <span className="font-mono">{releaseVersion}</span>
             </div>
           )}
         </div>

@@ -35,6 +35,14 @@ test.describe('Footer - Desktop (Chrome)', () => {
     await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
   })
+
+  test('should display version when available', async ({ page }) => {
+    const versionElement = page.locator('text=Release Version:')
+    if (await versionElement.isVisible()) {
+      await expect(versionElement).toBeVisible()
+      await expect(page.locator('.font-mono')).toBeVisible()
+    }
+  })
 })
 
 // Mobile tests (iPhone 13)
@@ -75,5 +83,14 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
+  })
+
+  test('should display version when available', async ({ page }) => {
+    // Check if version is displayed when NEXT_PUBLIC_RELEASE_VERSION is set
+    const versionElement = page.locator('text=Release Version:')
+    if (await versionElement.isVisible()) {
+      await expect(versionElement).toBeVisible()
+      await expect(page.locator('.font-mono')).toBeVisible()
+    }
   })
 })
