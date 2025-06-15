@@ -3,7 +3,7 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Link from 'next/link'
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import type { Section } from 'types/section'
 import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
@@ -17,6 +17,8 @@ export default function Footer() {
     // If the section is already open, close it, otherwise open it
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
+
+  const frontendVersion = process.env.NEXT_PUBLIC_RELEASE_VERSION || null
 
   return (
     <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
@@ -89,6 +91,11 @@ export default function Footer() {
               © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
             </p>
           </div>
+          {frontendVersion && (
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-center">
+              Release Version: <span className="font-mono">{frontendVersion}</span>
+            </div>
+          )}
         </div>
       </div>
     </footer>
