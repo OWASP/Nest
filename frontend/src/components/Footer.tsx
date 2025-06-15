@@ -92,7 +92,7 @@ export default function Footer() {
             </p>
           </div>
           {frontendVersion && (
-            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-center">
+            <div className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
               Release Version: <span className="font-mono">{frontendVersion}</span>
             </div>
           )}
