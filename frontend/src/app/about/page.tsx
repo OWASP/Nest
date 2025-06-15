@@ -122,11 +122,13 @@ const About = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             {keyFeatures.map((feature) => (
               <div
-                key={`${feature.title}-${feature.description.slice(0, 10)}`}
+                key={`${feature.title}-${feature.description}`}
                 className="overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
               >
                 <h3 className="mb-2 text-xl font-semibold text-blue-400">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                <p className="line-clamp-3 text-gray-600 dark:text-gray-300">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -249,8 +251,8 @@ const About = () => {
           <div className="space-y-4">
             <p className="text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
             <ul className="space-y-2">
-              {getInvolvedContent.ways.map((way) => (
-                <li key={way.slice(0, 32)} className="flex items-start gap-2">
+              {getInvolvedContent.ways.map((way, index) => (
+                <li key={index} className="flex items-start gap-2">
                   <span className="mt-1 text-blue-400">•</span>
                   <span className="text-gray-600 dark:text-gray-300">{way}</span>
                 </li>
