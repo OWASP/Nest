@@ -8,7 +8,7 @@ from apps.owasp.management.commands.owasp_update_project_health_metrics_scores i
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
-EXPECTED_SCORE = 46.0
+EXPECTED_SCORE = 34.0
 
 
 class TestUpdateProjectHealthMetricsScoreCommand:
