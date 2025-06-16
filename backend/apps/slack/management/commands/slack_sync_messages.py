@@ -322,12 +322,14 @@ class Command(BaseCommand):
         parent_message: Message | None = None,
     ) -> Message | None:
         """Create Message instance using from_slack pattern."""
-        if not [
-            message_data.get("text"),
-            message_data.get("attachments"),
-            message_data.get("files"),
-            message_data.get("blocks"),
-        ]:
+        if not any(
+            [
+                message_data.get("text"),
+                message_data.get("attachments"),
+                message_data.get("files"),
+                message_data.get("blocks"),
+            ]
+        ):
             return None
 
         try:

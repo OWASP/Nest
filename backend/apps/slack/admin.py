@@ -134,7 +134,7 @@ class MessageAdmin(admin.ModelAdmin):
         "text",
         "has_replies",
         "author",
-        "message_body",
+        "raw_data",
     )
     search_fields = (
         "slack_message_id",
