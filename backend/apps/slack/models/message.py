@@ -22,6 +22,7 @@ class Message(TimestampedModel):
     has_replies = models.BooleanField(verbose_name="Has replies", default=False)
     slack_message_id = models.CharField(verbose_name="Slack message ID", max_length=50)
     text = models.TextField(verbose_name="Text")
+    message_body = models.JSONField(verbose_name="Message body", default=dict)
 
     # FKs.
     author = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="messages")
@@ -53,6 +54,7 @@ class Message(TimestampedModel):
         self.has_replies = message_data.get("reply_count", 0) > 0
         self.slack_message_id = message_data.get("ts", "")
         self.text = message_data.get("text", "")
+        self.message_body = message_data
 
         self.author = author
         self.conversation = conversation
