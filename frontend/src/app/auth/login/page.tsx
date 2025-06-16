@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { useEffect } from 'react'
 import { userAuthStatus } from 'utils/constants'
+import { IS_AUTH_ENABLED } from 'utils/credentials'
 
 export default function LoginPage() {
   const { status } = useSession()
@@ -27,22 +28,32 @@ export default function LoginPage() {
     }
   }, [status, router])
 
-  if (status === userAuthStatus.LOADING) {
+  if (!IS_AUTH_ENABLED) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <FontAwesomeIcon icon={faSpinner} height={16} width={16} />
+        <span className="text-lg text-gray-500">Authentication is not enabled.</span>
+      </div>
+    )
+  }
+
+  if (status === userAuthStatus.LOADING) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center gap-2">
+        <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
         <span className="text-lg text-gray-500">Checking session...</span>
       </div>
     )
   }
+
   if (status === userAuthStatus.AUTHENTICATED) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <FontAwesomeIcon icon={faSpinner} height={16} width={16} />
+      <div className="flex min-h-[80vh] items-center justify-center gap-2">
+        <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
         <span className="text-lg text-gray-500">Redirecting...</span>
       </div>
     )
   }
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center">
       <div className="w-full max-w-sm space-y-6 rounded-2xl border border-gray-200 bg-owasp-blue p-8 shadow-xl dark:border-slate-700 dark:bg-slate-800">

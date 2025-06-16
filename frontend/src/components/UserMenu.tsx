@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
+import { IS_AUTH_ENABLED } from 'utils/credentials'
 
 export default function UserMenu() {
   const { data: session, status } = useSession()
@@ -11,7 +12,6 @@ export default function UserMenu() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
 
-  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -21,6 +21,10 @@ export default function UserMenu() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  if (!IS_AUTH_ENABLED) {
+    return null
+  }
 
   if (status === userAuthStatus.LOADING) {
     return (

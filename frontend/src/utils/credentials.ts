@@ -2,6 +2,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL
 export const CSRF_URL = process.env.NEXT_PUBLIC_CSRF_URL
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 export const GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL
+export const IS_AUTH_ENABLED = process.env.NEXT_PUBLIC_IS_AUTH_ENABLED === 'true'
 export const GITHUB_CLIENT_ID = process.env.NEXT_SERVER_GITHUB_CLIENT_ID
 export const GITHUB_CLIENT_SECRET = process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET
 export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
