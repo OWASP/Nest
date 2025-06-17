@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=${NPM_CACHE} \
 
 WORKDIR /home/owasp
 
-COPY --chmod=444 --chown=node:node package.json pnpm-lock.yaml ./
+COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
@@ -50,7 +50,7 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
 RUN --mount=type=cache,target=${NPM_CACHE} \
     npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
 
-COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
+COPY --from=builder --chmod=755 --chown=root:root /home/owasp/node_modules /home/owasp/node_modules
 
 EXPOSE 3000
 
