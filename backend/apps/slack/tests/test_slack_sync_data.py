@@ -37,10 +37,12 @@ class SlackSyncDataCommandTests(TestCase):
         # Mock Slack's users_list response with 2 pages
         self.mock_web_client.users_list.side_effect = [
             {
+                "ok": True,
                 "members": [{"id": "U1"}, {"id": "U2"}],
                 "response_metadata": {"next_cursor": "next-123"}
             },
             {
+                "ok": True,
                 "members": [{"id": "U3"}],
                 "response_metadata": {"next_cursor": ""}
             }
@@ -48,8 +50,15 @@ class SlackSyncDataCommandTests(TestCase):
 
         # Mock Slack's conversations_list response
         self.mock_web_client.conversations_list.return_value = {
+            "ok": True,
             "channels": [{"id": "C1", "name": "general"}, {"id": "C2", "name": "random"}],
             "response_metadata": {"next_cursor": ""}
+        }
+        
+        # Mock conversations.info for member count fetching
+        self.mock_web_client.conversations_info.return_value = {
+            "ok": True,
+            "channel": {"num_members": 10}
         }
 
         # Call the Django management command
@@ -58,5 +67,12 @@ class SlackSyncDataCommandTests(TestCase):
         # Refresh from DB in case command saves anything
         self.workspace.refresh_from_db()
 
-        # Replace this with real assertions if you're storing data
-        self.assertTrue(True)  # CI-safe dummy assertion
+        # Verify members were created
+        from apps.slack.models import Member, Conversation
+        self.assertEqual(Member.objects.count(), 3)
+        self.assertEqual(Conversation.objects.count(), 2)
+        
+        # Verify API calls were made correctly
+        self.assertEqual(self.mock_web_client.users_list.call_count, 2)
+        self.assertEqual(self.mock_web_client.conversations_list.call_count, 1)
+        self.assertEqual(self.mock_web_client.conversations_info.call_count, 2)
