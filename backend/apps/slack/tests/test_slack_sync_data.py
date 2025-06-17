@@ -22,8 +22,13 @@ class SlackSyncDataCommandTests(TestCase):
         self.mock_web_client.auth_test.return_value = {"ok": True, "user_id": "BOT123"}
 
         # Create a fake workspace object in DB
-        self.workspace = Workspace.objects.create(name="Test Workspace")
-
+        self.workspace = Workspace.objects.create(
+            name="Test Workspace",
+            slack_workspace_id="TEST123"
+        )
+        # Set up bot token in environment for the test
+        import os
+        os.environ["DJANGO_SLACK_BOT_TOKEN"] = "xoxb-test-token"
     def tearDown(self):
         self.app_patcher.stop()
         self.web_client_patcher.stop()
