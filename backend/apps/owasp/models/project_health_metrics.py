@@ -24,17 +24,6 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
     forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
 
-    # The next boolean fields are used for filtering
-    has_no_recent_commits = models.BooleanField(
-        verbose_name="Has no recent commits", default=False
-    )
-    has_long_open_issues = models.BooleanField(verbose_name="Has long open issues", default=False)
-    has_long_unanswered_issues = models.BooleanField(
-        verbose_name="Has long unanswered issues", default=False
-    )
-    has_long_unassigned_issues = models.BooleanField(
-        verbose_name="Has long unassigned issues", default=False
-    )
     is_funding_requirements_compliant = models.BooleanField(
         verbose_name="Is funding requirements compliant", default=False
     )

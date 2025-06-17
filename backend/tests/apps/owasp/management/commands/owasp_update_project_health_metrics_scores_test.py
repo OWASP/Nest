@@ -77,14 +77,8 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             [mock_metric],
             fields=[
                 "score",
-                "has_long_open_issues",
-                "has_long_unanswered_issues",
-                "has_long_unassigned_issues",
             ],
         )
         assert mock_metric.score == EXPECTED_SCORE
-        assert mock_metric.has_long_open_issues is True
-        assert mock_metric.has_long_unanswered_issues is True
-        assert mock_metric.has_long_unassigned_issues is True
         assert "Updated projects health metrics score successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
