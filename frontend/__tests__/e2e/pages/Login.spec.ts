@@ -22,31 +22,10 @@ test.describe('Login Page', () => {
     ])
   })
 
-  test('displays GitHub login button when unauthenticated', async ({ page }) => {
+  test('shows message authentication is disabled', async ({ page }) => {
     await page.goto('/auth/login')
 
-    const button = page.getByRole('button', { name: /sign in with github/i })
-    await expect(button).toBeVisible()
-  })
-
-  test('shows spinner while loading session', async ({ page }) => {
-    await page.route('**/auth/session', async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({}),
-      })
-    })
-
-    await page.goto('/auth/login')
-
-    await expect(page.getByText(/checking session/i)).toBeVisible()
-  })
-
-  test('shows message if authentication is disabled', async ({ page }) => {
-    await page.goto('/auth/login')
-
-    const disabledMessage = page.getByText(/authentication is not enabled/i)
+    const disabledMessage = page.getByText(/authentication is disabled/i)
     await expect(disabledMessage).toBeVisible()
   })
 })

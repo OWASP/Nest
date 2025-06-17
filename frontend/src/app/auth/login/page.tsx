@@ -31,7 +31,7 @@ export default function LoginPage() {
   if (!IS_AUTH_ENABLED) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <span className="text-lg text-gray-500">Authentication is not enabled.</span>
+        <span className="text-lg text-gray-500">Authentication is disabled.</span>
       </div>
     )
   }
