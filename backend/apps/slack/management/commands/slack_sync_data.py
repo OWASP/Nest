@@ -1,6 +1,5 @@
 import logging
 import time
-import random
 import os
 import secrets
 from django.core.management.base import BaseCommand
