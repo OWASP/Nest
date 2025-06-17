@@ -7,7 +7,7 @@ import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
 import type { Milestone } from 'types/milestone'
-import type { RepositoryCardProps } from 'types/project'
+import type { RepositoryCardProps, HealthMetricsProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 
@@ -37,6 +37,7 @@ export interface DetailsCardProps {
   details?: { label: string; value: string | JSX.Element }[]
   geolocationData?: Chapter[]
   heatmap?: JSX.Element
+  healthMetricsData?: HealthMetricsProps[]
   isActive?: boolean
   languages?: string[]
   pullRequests?: PullRequest[]

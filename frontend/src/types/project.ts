@@ -18,6 +18,7 @@ export type Project = {
   contributorsCount: number
   description: string
   forksCount: number
+  healthMetrics?: HealthMetricsProps[]
   isActive: boolean
   issuesCount: number
   key: string
@@ -40,6 +41,18 @@ export type Project = {
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
   recentMilestones?: Milestone[]
+}
+
+export type HealthMetricsProps = {
+  forksCount: number
+  lastCommitDays: number
+  lastReleaseDays: number
+  openIssuesCount: number
+  openPullRequestsCount: number
+  score: number
+  starsCount: number
+  unassignedIssuesCount: number
+  unansweredIssuesCount: number
 }
 
 export type RepositoriesCardProps = {

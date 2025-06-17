@@ -14,6 +14,7 @@ import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import HealthMetricsCharts from 'components/HealthMetricsCharts'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
 import Milestones from 'components/Milestones'
@@ -31,6 +32,7 @@ const DetailsCard = ({
   summary,
   description,
   heatmap,
+  healthMetricsData,
   stats,
   details,
   socialLinks,
@@ -199,6 +201,7 @@ const DetailsCard = ({
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
+        {type === 'project' && <HealthMetricsCharts data={healthMetricsData} />}
       </div>
     </div>
   )

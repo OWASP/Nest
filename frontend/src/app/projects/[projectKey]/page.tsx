@@ -91,6 +91,7 @@ const ProjectDetailsPage = () => {
   return (
     <DetailsCard
       details={projectDetails}
+      healthMetricsData={project.healthMetrics}
       isActive={project.isActive}
       languages={project.languages}
       pullRequests={project.recentPullRequests}
