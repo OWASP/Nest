@@ -20,12 +20,15 @@ class Message(TimestampedModel):
 
     created_at = models.DateTimeField(verbose_name="Created at")
     has_replies = models.BooleanField(verbose_name="Has replies", default=False)
+    is_bot = models.BooleanField(verbose_name="Is bot", default=False)
     raw_data = models.JSONField(verbose_name="Raw data", default=dict)
     slack_message_id = models.CharField(verbose_name="Slack message ID", max_length=50)
     text = models.TextField(verbose_name="Text")
 
     # FKs.
-    author = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="messages")
+    author = models.ForeignKey(
+        Member, on_delete=models.CASCADE, related_name="messages", blank=True, null=True
+    )
     conversation = models.ForeignKey(
         Conversation, on_delete=models.CASCADE, related_name="messages"
     )
@@ -45,13 +48,14 @@ class Message(TimestampedModel):
         self,
         message_data: dict,
         conversation: Conversation,
-        author: Member,
+        author: "Member | None" = None,
         *,
         parent_message: "Message | None" = None,
     ) -> None:
         """Update instance based on Slack message data."""
         self.created_at = datetime.fromtimestamp(float(message_data["ts"]), tz=UTC)
         self.has_replies = message_data.get("reply_count", 0) > 0
+        self.is_bot = message_data.get("bot_id", "") != ""
         self.raw_data = message_data
         self.slack_message_id = message_data.get("ts", "")
         self.text = message_data.get("text", "")
@@ -69,7 +73,7 @@ class Message(TimestampedModel):
     def update_data(
         data: dict,
         conversation: Conversation,
-        author: Member,
+        author: Member | None = None,
         *,
         parent_message: "Message | None" = None,
         save: bool = True,
