@@ -42,4 +42,11 @@ test.describe('Login Page', () => {
 
     await expect(page.getByText(/checking session/i)).toBeVisible()
   })
+
+  test('shows message if authentication is disabled', async ({ page }) => {
+    await page.goto('/auth/login')
+
+    const disabledMessage = page.getByText(/authentication is not enabled/i)
+    await expect(disabledMessage).toBeVisible()
+  })
 })
