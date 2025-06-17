@@ -46,7 +46,6 @@ class TestProjectHealthMetricsNode:
     @pytest.mark.parametrize(
         ("field_name", "expected_type"),
         [
-            ("project_name", str),
             ("age_days", int),
             ("contributors_count", int),
             ("forks_count", int),
