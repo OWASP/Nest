@@ -14,6 +14,7 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
         "is_funding_requirements_compliant",
         "is_leader_requirements_compliant",
         "open_issues_count",
+        "open_pull_requests_count",
         "recent_releases_count",
         "score",
         "stars_count",
@@ -48,8 +49,3 @@ class ProjectHealthMetricsNode:
     def owasp_page_last_update_days(self) -> int:
         """Resolve OWASP page last update age in days."""
         return self.owasp_page_last_update_days
-
-    @strawberry.field
-    def project_name(self) -> str:
-        """Resolve project node."""
-        return self.project.name
