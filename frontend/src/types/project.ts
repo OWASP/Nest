@@ -1,4 +1,5 @@
 import type { Contributor } from 'types/contributor'
+import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { Organization } from 'types/organization'
@@ -41,18 +42,6 @@ export type Project = {
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
   recentMilestones?: Milestone[]
-}
-
-export type HealthMetricsProps = {
-  forksCount: number
-  lastCommitDays: number
-  lastReleaseDays: number
-  openIssuesCount: number
-  openPullRequestsCount: number
-  score: number
-  starsCount: number
-  unassignedIssuesCount: number
-  unansweredIssuesCount: number
 }
 
 export type RepositoriesCardProps = {

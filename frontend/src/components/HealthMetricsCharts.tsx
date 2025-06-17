@@ -1,30 +1,39 @@
-import dynamic from 'next/dynamic'
 import React from 'react'
-import type { HealthMetricsProps } from 'types/project'
-
-const Chart = dynamic(() => import('react-apexcharts'), {
-  ssr: false,
-})
+import type { HealthMetricsProps } from 'types/healthMetrics'
+import GeneralChart from 'components/GeneralChart'
 
 const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
+  const openIssuesCountArray = data.map((item) => item.openIssuesCount)
+  const xAxisArray = data.map((item, index) => (data.length - index).toString())
   return (
-    <div>
-      <h2>Health Metrics Charts</h2>
-      <Chart
-        options={{
-          chart: {
-            type: 'line',
-          },
-          xaxis: {
-            categories: ['Open Issues', 'Unassigned Issues'],
-          },
-        }}
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <GeneralChart
+        title="Issues Health Trend"
         series={[
           {
-            name: 'Health Metrics',
-            data: [data[0].openIssuesCount, data[0].unassignedIssuesCount],
+            name: 'Open Issues',
+            data: openIssuesCountArray,
+          },
+          {
+            name: 'Unassigned Issues',
+            data: data.map((item) => item.unassignedIssuesCount),
           },
         ]}
+        xAxis={xAxisArray}
+      />
+      <GeneralChart
+        title="Unanswered Issues Trend"
+        series={[
+          {
+            name: 'Open Issues',
+            data: openIssuesCountArray,
+          },
+          {
+            name: 'Unanswered Issues',
+            data: data.map((item) => item.unansweredIssuesCount),
+          },
+        ]}
+        xAxis={xAxisArray}
       />
     </div>
   )
