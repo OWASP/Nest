@@ -303,7 +303,6 @@ jobs:
           echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_IS_AUTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_AUTH_ENABLED }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
@@ -499,7 +498,6 @@ jobs:
           echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_IS_AUTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_AUTH_ENABLED }}" >> frontend/.env
           echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env

@@ -10,10 +10,10 @@ import { FC, useEffect } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
 type Props = {
-  isAuthEnabled: boolean
+  isGitHubAuthEnabled: boolean
 }
 
-const LoginPageContent: FC<Props> = ({ isAuthEnabled }) => {
+const LoginPageContent: FC<Props> = ({ isGitHubAuthEnabled }) => {
   const { status } = useSession()
   const router = useRouter()
 
@@ -31,7 +31,7 @@ const LoginPageContent: FC<Props> = ({ isAuthEnabled }) => {
     }
   }, [status, router])
 
-  if (!isAuthEnabled) {
+  if (!isGitHubAuthEnabled) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
         <span className="text-lg text-gray-500">Authentication is disabled.</span>

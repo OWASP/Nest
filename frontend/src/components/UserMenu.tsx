@@ -6,10 +6,10 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
 type UserMenuProps = {
-  isAuthEnabled: boolean
+  isGitHubAuthEnabled: boolean
 }
 
-export default function UserMenu({ isAuthEnabled }: UserMenuProps) {
+export default function UserMenu({ isGitHubAuthEnabled }: UserMenuProps) {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -25,7 +25,7 @@ export default function UserMenu({ isAuthEnabled }: UserMenuProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  if (!isAuthEnabled) {
+  if (!isGitHubAuthEnabled) {
     return null
   }
 

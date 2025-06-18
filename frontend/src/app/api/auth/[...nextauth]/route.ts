@@ -8,10 +8,10 @@ import {
   NEXTAUTH_SECRET,
   NEXTAUTH_URL,
 } from 'utils/credentials'
-import { IS_AUTH_ENABLED } from 'utils/credentials'
+import { IS_GITHUB_AUTH_ENABLED } from 'utils/credentials'
 
 const providers = []
-if (IS_AUTH_ENABLED && GITHUB_CLIENT_ID && GITHUB_CLIENT_SECRET) {
+if (IS_GITHUB_AUTH_ENABLED) {
   providers.push(
     GitHubProvider({
       clientId: GITHUB_CLIENT_ID,
