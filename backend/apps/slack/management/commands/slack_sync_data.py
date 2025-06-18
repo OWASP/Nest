@@ -53,13 +53,12 @@ class Command(BaseCommand):
     def _call_slack_api(self, func, *args, **kwargs):
         def _raise_max_retries():
             raise RuntimeError("Max retries exceeded while calling Slack API")
-
         retries = 0
         while retries < MAX_RETRIES:
             try:
                 response = func(*args, **kwargs)
                 if not response.get("ok", False):
-                    raise SlackApiError(f"{func.__name__} failed", response)
+                    raise RuntimeError(f"{func.__name__} returned ok=False: {response!r}")
                 return response
             except SlackApiError as e:
                 if e.response.status_code == 429:
@@ -73,8 +72,8 @@ class Command(BaseCommand):
             retries += 1
             backoff = 2**retries + secrets.randbelow(1000) / 1000
             time.sleep(backoff)
-
         _raise_max_retries()
+        return  # explicit return to satisfy RET503
 
     def _fetch_conversations(self, client, workspace, batch_size, delay):
         self.stdout.write(f"Fetching conversations for {workspace}...")
