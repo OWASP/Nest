@@ -22,7 +22,7 @@ jest.mock('react-apexcharts', () => {
   return {
     __esModule: true,
     default: () => {
-      return <div data-testid="mock-apexchart">Mock ApexChart</div>
+      return <div data-testid="mock-apexcharts">Mock ApexChart</div>
     },
   }
 })
