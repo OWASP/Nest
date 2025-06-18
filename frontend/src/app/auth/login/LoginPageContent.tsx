@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import { FC, useEffect } from 'react';
-import { useSession, signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { addToast } from '@heroui/toast';
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { userAuthStatus } from 'utils/constants';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { addToast } from '@heroui/toast'
+import { useRouter } from 'next/navigation'
+import { useSession, signIn } from 'next-auth/react'
+import { FC, useEffect } from 'react'
+import { userAuthStatus } from 'utils/constants'
 
 type Props = {
-  isAuthEnabled: boolean;
-};
+  isAuthEnabled: boolean
+}
 
 const LoginPageContent: FC<Props> = ({ isAuthEnabled }) => {
-  const { status } = useSession();
-  const router = useRouter();
+  const { status } = useSession()
+  const router = useRouter()
 
   useEffect(() => {
     if (status === userAuthStatus.AUTHENTICATED) {
@@ -26,17 +26,17 @@ const LoginPageContent: FC<Props> = ({ isAuthEnabled }) => {
         shouldShowTimeoutProgress: true,
         color: 'default',
         variant: 'solid',
-      });
-      router.push('/');
+      })
+      router.push('/')
     }
-  }, [status, router]);
+  }, [status, router])
 
   if (!isAuthEnabled) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
         <span className="text-lg text-gray-500">Authentication is disabled.</span>
       </div>
-    );
+    )
   }
 
   if (status === userAuthStatus.LOADING) {
@@ -45,7 +45,7 @@ const LoginPageContent: FC<Props> = ({ isAuthEnabled }) => {
         <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
         <span className="text-lg text-gray-500">Checking session...</span>
       </div>
-    );
+    )
   }
 
   if (status === userAuthStatus.AUTHENTICATED) {
@@ -54,7 +54,7 @@ const LoginPageContent: FC<Props> = ({ isAuthEnabled }) => {
         <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
         <span className="text-lg text-gray-500">Redirecting...</span>
       </div>
-    );
+    )
   }
 
   return (
@@ -76,7 +76,7 @@ const LoginPageContent: FC<Props> = ({ isAuthEnabled }) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPageContent;
+export default LoginPageContent

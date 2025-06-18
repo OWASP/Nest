@@ -6,8 +6,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
 type UserMenuProps = {
-  isAuthEnabled: boolean;
-};
+  isAuthEnabled: boolean
+}
 
 export default function UserMenu({ isAuthEnabled }: UserMenuProps) {
   const { data: session, status } = useSession()

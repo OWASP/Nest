@@ -61,8 +61,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const isAuthEnabled =
-    !!process.env.NEXT_SERVER_GITHUB_CLIENT_ID &&
-    !!process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET;
+    !!process.env.NEXT_SERVER_GITHUB_CLIENT_ID && !!process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -71,7 +70,7 @@ export default function RootLayout({
         style={{ minHeight: '100vh' }}
       >
         <Providers>
-          <Header isAuthEnabled={isAuthEnabled}/>
+          <Header isAuthEnabled={isAuthEnabled} />
           <BreadCrumbs />
           {children}
           <Footer />

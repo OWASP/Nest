@@ -80,7 +80,7 @@ describe('LoginPage', () => {
 })
 
 test('does not show login button if GitHub credentials are missing', () => {
-  ; (useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
+  ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
   render(<LoginPage />)
 
   expect(screen.queryByText(/Sign in with GitHub/i)).not.toBeInTheDocument()
