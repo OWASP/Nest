@@ -23,7 +23,6 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
     created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
     forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
-
     is_funding_requirements_compliant = models.BooleanField(
         verbose_name="Is funding requirements compliant", default=False
     )
