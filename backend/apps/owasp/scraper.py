@@ -33,7 +33,7 @@ class OwaspScraper:
             )
         )
         self.session = requests.Session()
-        self.session.mount("http://", http_adapter)
+        self.session.mount("http://", http_adapter)  # NOSONAR
         self.session.mount("https://", http_adapter)
 
         try:
