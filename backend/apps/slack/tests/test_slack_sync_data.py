@@ -33,7 +33,6 @@ class SlackSyncDataCommandTests(TestCase):
             slack_workspace_id="TEST123"
         )
         # Set up bot token in environment for the test
-        import os
         os.environ["DJANGO_SLACK_BOT_TOKEN"] = "xoxb-test-token"
     def tearDown(self):
         self.app_patcher.stop()
