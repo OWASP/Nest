@@ -2,43 +2,82 @@ import { middleware } from 'middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
+// Mock the external dependencies
 jest.mock('next-auth/jwt', () => ({
   getToken: jest.fn(),
 }))
 
-jest.mock('next/server', () => {
-  return {
-    NextResponse: {
-      redirect: jest.fn((url) => ({ redirect: url })),
-      next: jest.fn(() => ({ next: true })),
-    },
-  }
-})
+jest.mock('next/server', () => ({
+  NextResponse: {
+    redirect: jest.fn((url) => ({
+      type: 'redirect',
+      url: url, // Keep as URL object
+    })),
+    next: jest.fn(() => ({ type: 'next' })),
+  },
+}))
 
-describe('middleware', () => {
-  const createRequest = (url = 'http://localhost/') => ({ url }) as NextRequest
+describe('Authentication Middleware', () => {
+  const mockRequest = (url = 'http://localhost/'): NextRequest =>
+    ({
+      url,
+      headers: new Headers(),
+      cookies: {},
+    }) as unknown as NextRequest
 
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  test('should redirect to /login if no token is found', async () => {
-    ;(getToken as jest.Mock).mockResolvedValue(null)
-    const request = createRequest()
-    const result = await middleware(request)
+  describe('When no authentication token exists', () => {
+    const testCases = [
+      { description: 'root path', url: 'http://localhost/' },
+      { description: 'protected path', url: 'http://localhost/protected' },
+      { description: 'with query params', url: 'http://localhost/dashboard?page=1' },
+    ]
 
-    expect(getToken).toHaveBeenCalledWith({ req: request })
-    expect(NextResponse.redirect).toHaveBeenCalledWith(new URL('/login', request.url))
-    expect(result).toEqual({ redirect: new URL('/login', request.url) })
+    testCases.forEach(({ description, url }) => {
+      it(`should redirect to login from ${description}`, async () => {
+        ;(getToken as jest.Mock).mockResolvedValue(null)
+        const request = mockRequest(url)
+        const expectedRedirectUrl = new URL('/login', url)
+
+        const result = await middleware(request)
+
+        expect(getToken).toHaveBeenCalledWith({ req: request })
+        expect(NextResponse.redirect).toHaveBeenCalledWith(expectedRedirectUrl)
+
+        expect(result.url.toString()).toBe(expectedRedirectUrl.toString())
+        expect(result).toEqual({
+          type: 'redirect',
+          url: expectedRedirectUrl,
+        })
+      })
+    })
   })
 
-  test('should call NextResponse.next if token is present', async () => {
-    ;(getToken as jest.Mock).mockResolvedValue({ name: 'User' })
-    const request = createRequest()
-    const result = await middleware(request)
+  describe('When authentication token exists', () => {
+    const testUser = { name: 'Test User', email: 'user@example.com' }
 
-    expect(getToken).toHaveBeenCalledWith({ req: request })
-    expect(NextResponse.next).toHaveBeenCalled()
-    expect(result).toEqual({ next: true })
+    it('should allow access to protected routes', async () => {
+      ;(getToken as jest.Mock).mockResolvedValue(testUser)
+      const request = mockRequest('http://localhost/dashboard')
+
+      const result = await middleware(request)
+
+      expect(getToken).toHaveBeenCalledWith({ req: request })
+      expect(NextResponse.next).toHaveBeenCalled()
+      expect(result).toEqual({ type: 'next' })
+    })
+
+    it('should allow access to root path', async () => {
+      ;(getToken as jest.Mock).mockResolvedValue(testUser)
+      const request = mockRequest()
+
+      const result = await middleware(request)
+
+      expect(NextResponse.next).toHaveBeenCalled()
+      expect(result).toEqual({ type: 'next' })
+    })
   })
 })
