@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
 type UserMenuProps = {
-  isGitHubAuthEnabled: boolean
+  readonly isGitHubAuthEnabled: boolean
 }
 
 export default function UserMenu({ isGitHubAuthEnabled }: UserMenuProps) {

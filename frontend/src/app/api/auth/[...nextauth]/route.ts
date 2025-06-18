@@ -5,10 +5,10 @@ import { apolloClient } from 'server/apolloClient'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
+  IS_GITHUB_AUTH_ENABLED,
   NEXTAUTH_SECRET,
   NEXTAUTH_URL,
 } from 'utils/credentials'
-import { IS_GITHUB_AUTH_ENABLED } from 'utils/credentials'
 
 const providers = []
 if (IS_GITHUB_AUTH_ENABLED) {
