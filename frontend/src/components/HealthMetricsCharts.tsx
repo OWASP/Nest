@@ -9,17 +9,16 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
 import type { HealthMetricsProps } from 'types/healthMetrics'
-import GeneralChart from 'components/GeneralChart'
+import { LineChart, RadialChart } from 'components/GeneralCharts'
 
 const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
   const openIssuesCountArray = data.map((item) => item.openIssuesCount)
-  const xAxisArray = data.map((item, index) => (index + 1).toString())
+  const labels = data.map((item, index) => `Day ${index + 1}`)
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GeneralChart
+        <LineChart
           title="Issues Health Trend"
-          type="line"
           series={[
             {
               name: 'Open Issues',
@@ -30,12 +29,11 @@ const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data })
               data: data.map((item) => item.unassignedIssuesCount),
             },
           ]}
-          xAxis={xAxisArray}
+          labels={labels}
           icon={faExclamationCircle}
         />
-        <GeneralChart
+        <LineChart
           title="Unanswered Issues Trend"
-          type="line"
           series={[
             {
               name: 'Open Issues',
@@ -46,74 +44,57 @@ const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data })
               data: data.map((item) => item.unansweredIssuesCount),
             },
           ]}
-          xAxis={xAxisArray}
+          labels={labels}
           icon={faQuestionCircle}
         />
       </div>
-      <div className="grid grid-cols-1">
-        <GeneralChart
-          title="Activity Trend"
-          type="line"
-          series={[
-            {
-              name: 'Open Pull Requests',
-              data: data.map((item) => item.openPullRequestsCount),
-            },
-          ]}
-          xAxis={xAxisArray}
-          icon={faCodePullRequest}
-        />
-      </div>
+      <LineChart
+        title="Activity Trend"
+        series={[
+          {
+            name: 'Open Pull Requests',
+            data: data.map((item) => item.openPullRequestsCount),
+          },
+        ]}
+        labels={labels}
+        icon={faCodePullRequest}
+      />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GeneralChart
+        <LineChart
           title="Stars Trend"
-          type="line"
           series={[
             {
               name: 'Stars',
               data: data.map((item) => item.starsCount),
             },
           ]}
-          xAxis={xAxisArray}
+          labels={labels}
           icon={faStar}
         />
-        <GeneralChart
+        <LineChart
           title="Forks Trend"
-          type="line"
           series={[
             {
               name: 'Forks',
               data: data.map((item) => item.forksCount),
             },
           ]}
-          xAxis={xAxisArray}
+          labels={labels}
           icon={faCodeFork}
         />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GeneralChart
+        <RadialChart
           title="Days Since Last Commit"
-          type="radialBar"
-          series={[
-            {
-              name: 'Last Commit Days',
-              data: data.map((item) => item.lastCommitDays),
-            },
-          ]}
-          xAxis={xAxisArray}
           icon={faCodeCommit}
+          series={data.map((item) => item.lastCommitDays)}
+          labels={labels}
         />
-        <GeneralChart
+        <RadialChart
           title="Days Since Last Release"
-          type="radialBar"
-          series={[
-            {
-              name: 'Last Release Days',
-              data: data.map((item) => item.lastReleaseDays),
-            },
-          ]}
-          xAxis={xAxisArray}
           icon={faTag}
+          series={data.map((item) => item.lastReleaseDays)}
+          labels={labels}
         />
       </div>
     </>

@@ -10,7 +10,7 @@ export type HealthMetricsProps = {
   unansweredIssuesCount: number
 }
 
-export type ApexChartSeries = {
+export type ApexChartLabelSeries = {
   name: string
   data: number[]
 }
