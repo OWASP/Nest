@@ -40,7 +40,7 @@ describe('Authentication Middleware', () => {
       it(`should redirect to login from ${description}`, async () => {
         ;(getToken as jest.Mock).mockResolvedValue(null)
         const request = mockRequest(url)
-        const expectedRedirectUrl = new URL('/login', url)
+        const expectedRedirectUrl = new URL('/auth/login', url)
 
         const result = await middleware(request)
 
