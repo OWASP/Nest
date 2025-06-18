@@ -20,14 +20,23 @@ jest.mock('utils/credentials', () => ({
 }))
 describe('LoginPage', () => {
   const pushMock = jest.fn()
+  const OLD_ENV = process.env
 
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue({ push: pushMock })
+    jest.resetModules()
+    process.env = { ...OLD_ENV }
+  })
+
+  afterEach(() => {
+    process.env = OLD_ENV
   })
 
   test('renders loading state', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'loading' })
+    process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET = 'mock-secret'
+    process.env.NEXT_SERVER_GITHUB_CLIENT_ID = 'mock-id'
 
     render(<LoginPage />)
     expect(screen.getByText(/Checking session/i)).toBeInTheDocument()
@@ -35,6 +44,8 @@ describe('LoginPage', () => {
 
   test('shows redirect spinner if authenticated and calls router.push and addToast', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
+    process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET = 'mock-secret'
+    process.env.NEXT_SERVER_GITHUB_CLIENT_ID = 'mock-id'
 
     render(<LoginPage />)
     expect(screen.getByText(/Redirecting/i)).toBeInTheDocument()
@@ -49,13 +60,16 @@ describe('LoginPage', () => {
 
   test('shows login button if unauthenticated', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
-
+    process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET = 'mock-secret'
+    process.env.NEXT_SERVER_GITHUB_CLIENT_ID = 'mock-id'
     render(<LoginPage />)
 
     expect(screen.getByText(/Sign in with GitHub/i)).toBeInTheDocument()
   })
 
   test('calls signIn on GitHub login button click', () => {
+    process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET = 'mock-secret'
+    process.env.NEXT_SERVER_GITHUB_CLIENT_ID = 'mock-id'
     ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
 
     render(<LoginPage />)
@@ -63,4 +77,11 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByText(/Sign in with GitHub/i))
     expect(signIn).toHaveBeenCalledWith('github', { callbackUrl: '/' })
   })
+})
+
+test('does not show login button if GitHub credentials are missing', () => {
+  ; (useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
+  render(<LoginPage />)
+
+  expect(screen.queryByText(/Sign in with GitHub/i)).not.toBeInTheDocument()
 })

@@ -4,9 +4,12 @@ import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
-import { IS_AUTH_ENABLED } from 'utils/credentials'
 
-export default function UserMenu() {
+type UserMenuProps = {
+  isAuthEnabled: boolean;
+};
+
+export default function UserMenu({ isAuthEnabled }: UserMenuProps) {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -22,7 +25,7 @@ export default function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  if (!IS_AUTH_ENABLED) {
+  if (!isAuthEnabled) {
     return null
   }
 
