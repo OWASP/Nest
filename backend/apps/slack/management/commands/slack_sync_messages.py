@@ -322,95 +322,87 @@ class Command(BaseCommand):
         parent_message: Message | None = None,
     ) -> Message | None:
         """Create Message instance using from_slack pattern."""
-        try:
-            slack_user_id = message_data.get("user")
-            bot_id = message_data.get("bot_id")
-            author = None
+        slack_user_id = message_data.get("user")
+        bot_id = message_data.get("bot_id")
+        author = None
 
-            if slack_user_id:
-                try:
-                    author = Member.objects.get(
-                        slack_user_id=slack_user_id, workspace=conversation.workspace
-                    )
-                except Member.DoesNotExist:
-                    retry_count = 0
-                    while retry_count < max_retries:
-                        try:
-                            time.sleep(delay)
+        if slack_user_id:
+            try:
+                author = Member.objects.get(
+                    slack_user_id=slack_user_id, workspace=conversation.workspace
+                )
+            except Member.DoesNotExist:
+                retry_count = 0
+                while retry_count < max_retries:
+                    try:
+                        time.sleep(delay)
 
-                            user_info = client.users_info(user=slack_user_id)
-                            self._handle_slack_response(user_info, "users_info")
+                        user_info = client.users_info(user=slack_user_id)
+                        self._handle_slack_response(user_info, "users_info")
 
-                            author = Member.update_data(
-                                user_info["user"], conversation.workspace, save=True
-                            )
+                        author = Member.update_data(
+                            user_info["user"], conversation.workspace, save=True
+                        )
+                        self.stdout.write(
+                            self.style.SUCCESS(f"Created new member: {slack_user_id}")
+                        )
+                        break
+
+                    except SlackApiError as e:
+                        if e.response.get("error") == "ratelimited":
+                            retry_after = int(e.response.headers.get("Retry-After", delay))
+                            retry_count += 1
+                            self.stdout.write(self.style.WARNING("Rate limited on user info"))
+                            time.sleep(retry_after)
+                        else:
                             self.stdout.write(
-                                self.style.SUCCESS(f"Created new member: {slack_user_id}")
+                                self.style.ERROR(
+                                    f"Failed to fetch user data for {slack_user_id}: {e!s}"
+                                )
                             )
                             break
 
-                        except SlackApiError as e:
-                            if e.response.get("error") == "ratelimited":
-                                retry_after = int(e.response.headers.get("Retry-After", delay))
-                                retry_count += 1
-                                self.stdout.write(self.style.WARNING("Rate limited on user info"))
-                                time.sleep(retry_after)
-                            else:
-                                self.stdout.write(
-                                    self.style.ERROR(
-                                        f"Failed to fetch user data for {slack_user_id}: {e!s}"
-                                    )
-                                )
-                                break
+        elif bot_id:
+            try:
+                author = Member.objects.get(slack_user_id=bot_id, workspace=conversation.workspace)
+            except Member.DoesNotExist:
+                retry_count = 0
+                while retry_count < max_retries:
+                    try:
+                        time.sleep(delay)
+                        bot_info = client.bots_info(bot=bot_id)
+                        self._handle_slack_response(bot_info, "bots_info")
 
-            elif bot_id:
-                try:
-                    author = Member.objects.get(
-                        slack_user_id=bot_id, workspace=conversation.workspace
-                    )
-                except Member.DoesNotExist:
-                    retry_count = 0
-                    while retry_count < max_retries:
-                        try:
-                            time.sleep(delay)
-                            bot_info = client.bots_info(bot=bot_id)
-                            self._handle_slack_response(bot_info, "bots_info")
+                        bot_data = {
+                            "id": bot_id,
+                            "is_bot": True,
+                            "name": bot_info["bot"].get("name"),
+                            "real_name": bot_info["bot"].get("name"),
+                        }
 
-                            bot_data = {
-                                "id": bot_id,
-                                "is_bot": True,
-                                "name": bot_info["bot"].get("name"),
-                                "real_name": bot_info["bot"].get("name"),
-                            }
+                        author = Member.update_data(bot_data, conversation.workspace, save=True)
+                        self.stdout.write(self.style.SUCCESS(f"Created bot member: {bot_id}"))
+                        break
 
-                            author = Member.update_data(
-                                bot_data, conversation.workspace, save=True
+                    except SlackApiError as e:
+                        if e.response.get("error") == "ratelimited":
+                            retry_after = int(e.response.headers.get("Retry-After", delay))
+                            retry_count += 1
+                            self.stdout.write(self.style.WARNING("Rate limited on bot info"))
+                            time.sleep(retry_after)
+                        else:
+                            self.stdout.write(
+                                self.style.WARNING(f"Failed to fetch bot data for {bot_id}.")
                             )
-                            self.stdout.write(self.style.SUCCESS(f"Created bot member: {bot_id}"))
                             break
 
-                        except SlackApiError as e:
-                            if e.response.get("error") == "ratelimited":
-                                retry_after = int(e.response.headers.get("Retry-After", delay))
-                                retry_count += 1
-                                self.stdout.write(self.style.WARNING("Rate limited on bot info"))
-                                time.sleep(retry_after)
-                            else:
-                                self.stdout.write(
-                                    self.style.WARNING(f"Failed to fetch bot data for {bot_id}.")
-                                )
-                                break
-
-            return Message.update_data(
-                data=message_data,
-                conversation=conversation,
-                author=author if isinstance(author, Member) else None,
-                parent_message=parent_message,
-                save=False,
-            )
-        except Exception:
-            logger.exception("Error creating message from data")
-            return None
+        return Message.update_data(
+            data=message_data,
+            conversation=conversation,
+            author=author,
+            parent_message=parent_message,
+            save=False,
+        )
 
     def _handle_slack_response(self, response, api_method):
         """Handle Slack API response and raise exception if needed."""

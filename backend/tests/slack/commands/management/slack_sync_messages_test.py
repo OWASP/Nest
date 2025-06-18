@@ -231,63 +231,27 @@ class TestSlackSyncMessagesCommand:
         assert "Processing channel: general" in output
         assert "Finished processing all workspaces" in output
 
-    def test_create_message_from_data_channel_join_subtype(self, command, mock_conversation):
-        """Test _create_message_from_data with channel_join subtype."""
-        message_data = {
-            "ts": TEST_MESSAGE_TS,
-            "subtype": "channel_join",
-            "text": "User joined channel",
-        }
-
-        mock_client = Mock()
-        result = command._create_message_from_data(
-            client=mock_client,
-            message_data=message_data,
-            conversation=mock_conversation,
-            delay=0.5,
-            max_retries=5,
-            parent_message=None,
-        )
-
-        assert result is None
-
-    def test_create_message_from_data_no_content(self, command, mock_conversation):
-        """Test _create_message_from_data with no text, attachments, or files."""
-        message_data = {
-            "ts": TEST_MESSAGE_TS,
-            "user": "U12345",
-        }
-
-        mock_client = Mock()
-        result = command._create_message_from_data(
-            client=mock_client,
-            message_data=message_data,
-            conversation=mock_conversation,
-            delay=0.5,
-            max_retries=5,
-            parent_message=None,
-        )
-
-        assert result is None
-
-    def test_create_message_from_data_no_user(self, command, mock_conversation):
-        """Test _create_message_from_data with no user or bot_id."""
+    def test_create_message_from_data_no_user_or_bot(self, command, mock_conversation):
+        """Test _create_message_from_data when no user or bot_id is provided."""
         message_data = {
             "ts": TEST_MESSAGE_TS,
             "text": "Hello world!",
         }
 
         mock_client = Mock()
-        result = command._create_message_from_data(
-            client=mock_client,
-            message_data=message_data,
-            conversation=mock_conversation,
-            delay=0.5,
-            max_retries=5,
-            parent_message=None,
-        )
+        mock_message = Mock(spec=Message)
 
-        assert result is None
+        with patch.object(Message, "update_data", return_value=mock_message):
+            result = command._create_message_from_data(
+                client=mock_client,
+                message_data=message_data,
+                conversation=mock_conversation,
+                delay=0.5,
+                max_retries=5,
+                parent_message=None,
+            )
+
+        assert result is not None
 
     @patch("apps.slack.management.commands.slack_sync_messages.time.sleep")
     def test_create_message_from_data_member_not_found(
