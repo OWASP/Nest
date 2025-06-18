@@ -17,7 +17,7 @@ import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
 
-export default function Header() {
+export default function Header({ isGitHubAuthEnabled }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
@@ -120,7 +120,7 @@ export default function Header() {
             text="Sponsor"
             className="hidden"
           />
-          <UserMenu />
+          <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           <ModeToggle />
           <div className="md:hidden">
             <Button

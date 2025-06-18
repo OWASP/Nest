@@ -6,10 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
-import { useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
-export default function LoginPage() {
+type LoginPageContentProps = {
+  readonly isGitHubAuthEnabled: boolean
+}
+
+const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) => {
   const { status } = useSession()
   const router = useRouter()
 
@@ -27,22 +31,32 @@ export default function LoginPage() {
     }
   }, [status, router])
 
-  if (status === userAuthStatus.LOADING) {
+  if (!isGitHubAuthEnabled) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <FontAwesomeIcon icon={faSpinner} height={16} width={16} />
+        <span className="text-lg text-gray-500">Authentication is disabled.</span>
+      </div>
+    )
+  }
+
+  if (status === userAuthStatus.LOADING) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center gap-2">
+        <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
         <span className="text-lg text-gray-500">Checking session...</span>
       </div>
     )
   }
+
   if (status === userAuthStatus.AUTHENTICATED) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <FontAwesomeIcon icon={faSpinner} height={16} width={16} />
+      <div className="flex min-h-[80vh] items-center justify-center gap-2">
+        <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
         <span className="text-lg text-gray-500">Redirecting...</span>
       </div>
     )
   }
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center">
       <div className="w-full max-w-sm space-y-6 rounded-2xl border border-gray-200 bg-owasp-blue p-8 shadow-xl dark:border-slate-700 dark:bg-slate-800">
@@ -64,3 +78,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+export default LoginPageContent
