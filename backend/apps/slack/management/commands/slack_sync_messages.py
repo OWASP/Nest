@@ -26,7 +26,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--delay",
             type=float,
-            default=0.5,
+            default=4,
             help="Delay between API requests in seconds",
         )
         parser.add_argument(
@@ -34,11 +34,18 @@ class Command(BaseCommand):
             type=str,
             help="Specific channel ID to fetch messages from",
         )
+        parser.add_argument(
+            "--max-retries",
+            type=int,
+            default=5,
+            help="Maximum retries for rate-limited requests",
+        )
 
     def handle(self, *args, **options):
         batch_size = options["batch_size"]
         channel_id = options["channel_id"]
         delay = options["delay"]
+        max_retries = options["max_retries"]
 
         workspaces = Workspace.objects.all()
         if not workspaces.exists():
@@ -66,6 +73,7 @@ class Command(BaseCommand):
                     client=client,
                     conversation=conversation,
                     delay=delay,
+                    max_retries=max_retries,
                     include_replies=True,
                 )
 
@@ -77,6 +85,7 @@ class Command(BaseCommand):
         conversation: Conversation,
         batch_size: int,
         delay: float,
+        max_retries: int,
         *,
         include_replies: bool = True,
     ):
@@ -85,7 +94,11 @@ class Command(BaseCommand):
 
         try:
             messages = self._fetch_messages(
-                client=client, conversation=conversation, batch_size=batch_size, delay=delay
+                client=client,
+                conversation=conversation,
+                batch_size=batch_size,
+                delay=delay,
+                max_retries=max_retries,
             )
 
             if include_replies:
@@ -95,7 +108,9 @@ class Command(BaseCommand):
                         conversation=conversation,
                         message=message,
                         delay=delay,
+                        max_retries=max_retries,
                     )
+                    time.sleep(delay)
 
             self.stdout.write(
                 self.style.SUCCESS(f"Finished processing messages from {conversation.name}")
@@ -109,13 +124,19 @@ class Command(BaseCommand):
             )
 
     def _fetch_messages(
-        self, client: WebClient, conversation: Conversation, batch_size: int, delay: float
+        self,
+        client: WebClient,
+        conversation: Conversation,
+        batch_size: int,
+        delay: float,
+        max_retries: int,
     ) -> list[Message]:
         """Fetch all parent messages (non-thread) for a conversation."""
         cursor = None
         has_more = True
         batch_messages = []
         all_threaded_parents = []
+        retry_count = 0
 
         latest_message = (
             Message.objects.filter(conversation=conversation).order_by("-created_at").first()
@@ -140,6 +161,8 @@ class Command(BaseCommand):
                     message = self._create_message_from_data(
                         client=client,
                         conversation=conversation,
+                        delay=delay,
+                        max_retries=max_retries,
                         message_data=message_data,
                     )
 
@@ -158,7 +181,25 @@ class Command(BaseCommand):
                 if delay and has_more:
                     time.sleep(delay)
 
+                retry_count = 0
+
             except SlackApiError as e:
+                if e.response["error"] == "ratelimited":
+                    if retry_count >= max_retries:
+                        self.stdout.write(
+                            self.style.ERROR(f"Max retries ({max_retries}) exceeded for history")
+                        )
+                        break
+
+                    retry_after = int(
+                        e.response.headers.get("Retry-After", delay * (retry_count + 1))
+                    )
+                    retry_count += 1
+                    self.stdout.write(
+                        self.style.WARNING(f"Rate limited. Retrying after {retry_after} seconds")
+                    )
+                    time.sleep(retry_after)
+                    continue
                 self.stdout.write(
                     self.style.ERROR(f"Error fetching messages: {e.response['error']}")
                 )
@@ -172,6 +213,7 @@ class Command(BaseCommand):
         conversation: Conversation,
         message: Message,
         delay: float,
+        max_retries: int,
     ):
         """Fetch all thread replies for parent messages."""
         if not message:
@@ -192,47 +234,74 @@ class Command(BaseCommand):
 
             cursor = None
             has_more = True
-            thread_reply_count = 0
+            retry_count = 0
 
             while has_more:
-                params = {
-                    "channel": conversation.slack_channel_id,
-                    "ts": message.slack_message_id,
-                    "cursor": cursor,
-                    "limit": 100,
-                    "inclusive": True,
-                }
-                if oldest_ts:
-                    params["oldest"] = str(oldest_ts)
+                try:
+                    params = {
+                        "channel": conversation.slack_channel_id,
+                        "ts": message.slack_message_id,
+                        "cursor": cursor,
+                        "limit": 100,
+                        "inclusive": True,
+                    }
+                    if oldest_ts:
+                        params["oldest"] = str(oldest_ts)
 
-                response = client.conversations_replies(**params)
-                self._handle_slack_response(response, "conversations_replies")
+                    response = client.conversations_replies(**params)
+                    self._handle_slack_response(response, "conversations_replies")
 
-                messages_in_response = response.get("messages", [])
-                if not messages_in_response:
-                    break
+                    messages_in_response = response.get("messages", [])
+                    if not messages_in_response:
+                        break
 
-                for reply_data in messages_in_response[1:]:
-                    reply = self._create_message_from_data(
-                        client=client,
-                        message_data=reply_data,
-                        conversation=conversation,
-                        parent_message=message,
-                    )
-                    if reply:
-                        replies_to_save.append(reply)
-                        thread_reply_count += 1
+                    for reply_data in messages_in_response[1:]:
+                        reply = self._create_message_from_data(
+                            client=client,
+                            message_data=reply_data,
+                            conversation=conversation,
+                            delay=delay,
+                            max_retries=max_retries,
+                            parent_message=message,
+                        )
+                        if reply:
+                            replies_to_save.append(reply)
 
-                cursor = response.get("response_metadata", {}).get("next_cursor")
-                has_more = bool(cursor)
+                    cursor = response.get("response_metadata", {}).get("next_cursor")
+                    has_more = bool(cursor)
 
-                if delay and has_more:
-                    time.sleep(delay)
+                    if delay and has_more:
+                        time.sleep(delay)
+
+                    retry_count = 0
+
+                except SlackApiError as e:
+                    if e.response["error"] == "ratelimited":
+                        if retry_count >= max_retries:
+                            self.stdout.write(
+                                self.style.ERROR(
+                                    f"Max retries ({max_retries}) exceeded for thread"
+                                )
+                            )
+                            break
+
+                        retry_after = int(
+                            e.response.headers.get("Retry-After", delay * (retry_count + 1))
+                        )
+                        retry_count += 1
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"Rate limited. Retrying after {retry_after} seconds"
+                            )
+                        )
+                        time.sleep(retry_after)
+                        continue
+                    raise
 
         except SlackApiError as e:
             self.stdout.write(
                 self.style.ERROR(
-                    f"Failed to fetch thread replies for message {e.response['error']}"
+                    f"Failed to fetch thread replies for message: {e.response['error']}"
                 )
             )
 
@@ -247,14 +316,17 @@ class Command(BaseCommand):
         client: WebClient,
         message_data: dict,
         conversation: Conversation,
+        delay: float,
+        max_retries: int,
         *,
         parent_message: Message | None = None,
     ) -> Message | None:
         """Create Message instance using from_slack pattern."""
-        if message_data.get("subtype") in {"channel_join", "channel_leave", "bot_message"}:
-            return None
-
-        if not any(
+        if message_data.get("subtype") in {
+            "channel_join",
+            "channel_leave",
+            "bot_message",
+        } or not any(
             [
                 message_data.get("text"),
                 message_data.get("attachments"),
@@ -273,18 +345,48 @@ class Command(BaseCommand):
                     slack_user_id=slack_user_id, workspace=conversation.workspace
                 )
             except Member.DoesNotExist:
-                try:
-                    user_info = client.users_info(user=slack_user_id)
-                    self._handle_slack_response(user_info, "users_info")
+                author = None
+                retry_count = 0
 
-                    author = Member.update_data(
-                        user_info["user"], conversation.workspace, save=True
-                    )
-                    self.stdout.write(self.style.SUCCESS(f"Created new member: {slack_user_id}"))
-                except SlackApiError as e:
+                while retry_count < max_retries:
+                    try:
+                        time.sleep(delay)
+
+                        user_info = client.users_info(user=slack_user_id)
+                        self._handle_slack_response(user_info, "users_info")
+
+                        author = Member.update_data(
+                            user_info["user"], conversation.workspace, save=True
+                        )
+                        self.stdout.write(
+                            self.style.SUCCESS(f"Created new member: {slack_user_id}")
+                        )
+                        break
+                    except SlackApiError as e:
+                        if e.response["error"] == "ratelimited":
+                            retry_after = int(
+                                e.response.headers.get("Retry-After", delay * (retry_count + 1))
+                            )
+
+                            retry_count += 1
+                            self.stdout.write(
+                                self.style.WARNING(
+                                    f"Rate limited on user info. Retrying after {retry_after}s"
+                                )
+                            )
+                            time.sleep(retry_after)
+                        else:
+                            self.stdout.write(
+                                self.style.WARNING(
+                                    f"Failed to fetch user data for {slack_user_id}"
+                                )
+                            )
+                            return None
+
+                if not author:
                     self.stdout.write(
                         self.style.WARNING(
-                            f"Failed to fetch user data for {slack_user_id}: {e.response['error']}"
+                            f"Could not fetch user {slack_user_id}, skipping message"
                         )
                     )
                     return None
