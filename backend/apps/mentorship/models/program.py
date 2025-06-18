@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.mentorship.models.common import MenteeLevelChoices
 from apps.mentorship.models.mentor import Mentor
 
 
@@ -15,11 +16,10 @@ class Program(TimestampedModel):
         db_table = "mentorship_programs"
         verbose_name_plural = "Programs"
 
-    STATUS_CHOICES = [
-        ("draft", "Draft"),
-        ("published", "Published"),
-        ("completed", "Completed"),
-    ]
+    class ProgramStatus(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        PUBLISHED = "published", "Published"
+        COMPLETED = "completed", "Completed"
 
     name = models.CharField(
         max_length=200,
@@ -30,6 +30,31 @@ class Program(TimestampedModel):
         verbose_name="Program description",
         blank=True,
         default="",
+    )
+
+    preferred_mentee_level = models.CharField(
+        max_length=20,
+        choices=MenteeLevelChoices.choices,
+        default=MenteeLevelChoices.BEGINNER,
+        verbose_name="Skill level in this program",
+    )
+
+    mentee_limit = models.PositiveIntegerField(
+        verbose_name="Mentee limit",
+        default=1,
+        help_text="Maximum number of mentees allowed in this program",
+    )
+
+    active_mentees = models.PositiveIntegerField(
+        verbose_name="Active mentees",
+        default=0,
+        help_text="Current number of active mentees enrolled",
+    )
+
+    is_available = models.BooleanField(
+        verbose_name="Currently available",
+        default=True,
+        help_text="Whether this program is currently accepting new mentees",
     )
     # M2M
     owners = models.ManyToManyField(
@@ -59,10 +84,10 @@ class Program(TimestampedModel):
     )
 
     status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="draft",
         verbose_name="Program status",
+        max_length=20,
+        choices=ProgramStatus.choices,
+        default=ProgramStatus.DRAFT,
     )
 
     start_date = models.DateField(

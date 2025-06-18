@@ -32,26 +32,6 @@ class Mentor(TimestampedModel):
         verbose_name="Primary domain(s)",
     )
 
-    preferred_mentee_level = models.PositiveIntegerField(
-        verbose_name="Preferred mentee level",
-        default=1,
-    )
-
-    mentee_limit = models.PositiveIntegerField(
-        verbose_name="Mentee limit",
-        default=1,
-    )
-
-    active_mentees = models.PositiveIntegerField(
-        verbose_name="Active mentees",
-        default=0,
-    )
-
-    is_available = models.BooleanField(
-        verbose_name="Currently available",
-        default=True,
-    )
-
     def __str__(self) -> str:
         """Return a human-readable representation of the mentor.
 
@@ -60,13 +40,3 @@ class Mentor(TimestampedModel):
 
         """
         return self.user.login
-
-    @property
-    def is_full(self) -> bool:
-        """Check if the mentor has reached their mentee limit.
-
-        Returns:
-            bool: True if the mentor cannot take more mentees.
-
-        """
-        return self.active_mentees >= self.mentee_limit

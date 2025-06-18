@@ -2,11 +2,18 @@
 
 from django.contrib import admin
 
+from apps.mentorship.models.enrollment import Enrollment
 from apps.mentorship.models.mentee import Mentee
 from apps.mentorship.models.mentor import Mentor
 from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
 from apps.mentorship.models.programmodule import ProgramModule
+
+
+class EnrollmentAdmin(admin.ModelAdmin):
+    """Admin view for Enrollment model."""
+
+    list_display = ("level",)
 
 
 class MenteeAdmin(admin.ModelAdmin):
@@ -15,15 +22,9 @@ class MenteeAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "user",
-        "level",
-        "issues_worked_on",
-        "prs_opened",
-        "prs_merged",
     )
 
     search_fields = ("user__name",)
-
-    list_filter = ("level",)
 
 
 class MentorAdmin(admin.ModelAdmin):
@@ -33,9 +34,6 @@ class MentorAdmin(admin.ModelAdmin):
         "id",
         "user",
         "years_of_experience",
-        "mentee_limit",
-        "active_mentees",
-        "is_available",
     )
 
     search_fields = (
@@ -101,6 +99,7 @@ class ProgramModuleAdmin(admin.ModelAdmin):
     list_filter = ("program",)
 
 
+admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)
 admin.site.register(Module, ModuleAdmin)
