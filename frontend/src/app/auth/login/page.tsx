@@ -1,4 +1,4 @@
-import LoginPageContent from 'LoginPageContent'
+import LoginPageContent from 'components/LoginPageContent'
 
 export default function LoginPage() {
   const isAuthEnabled =
