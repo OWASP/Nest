@@ -1,7 +1,12 @@
+"""Management command to sync Slack workspaces, channels, and members."""
+
 import logging
 import time
 import os
+import random
 import secrets
+import time
+
 from django.core.management.base import BaseCommand
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -30,9 +35,10 @@ class Command(BaseCommand):
 
         for workspace in workspaces:
             self.stdout.write(f"\nProcessing workspace: {workspace}")
-            # Updated logic: fallback to env var if missing or empty
-            bot_token = (getattr(workspace, "bot_token", "") or "").strip() or os.environ.get("DJANGO_SLACK_BOT_TOKEN")
-
+            bot_token = (
+                (getattr(workspace, "bot_token", "") or "").strip()
+                or os.environ.get("DJANGO_SLACK_BOT_TOKEN")
+            )
             if not bot_token:
                 self.stdout.write(self.style.ERROR(f"No bot token found for {workspace}"))
                 continue
@@ -44,10 +50,10 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("\nFinished processing all workspaces"))
 
-# This method performs member pagination AND generic API call (e.g. conversations.info).
-# It's not just a simple wrapper. Do not auto-refactor.
-
     def _call_slack_api(self, func, *args, **kwargs):
+        def _raise_max_retries():
+            raise RuntimeError("Max retries exceeded while calling Slack API")
+
         retries = 0
         while retries < MAX_RETRIES:
             try:
@@ -58,15 +64,18 @@ class Command(BaseCommand):
             except SlackApiError as e:
                 if e.response.status_code == 429:
                     retry_after = int(e.response.headers.get("Retry-After", 1))
-                    self.stdout.write(self.style.WARNING(f"Rate limited. Sleeping {retry_after}s..."))
+                    self.stdout.write(
+                        self.style.WARNING(f"Rate limited. Sleeping {retry_after}s...")
+                    )
                     time.sleep(retry_after)
-                    retries += 1
                 else:
-                    raise e
+                    raise
             retries += 1
-            backoff = 2 ** retries + secrets.randbelow(1000) / 1000
+            backoff = 2**retries + secrets.randbelow(1000) / 1000
             time.sleep(backoff)
-        raise SlackApiError("Max retries exceeded", {})
+
+        _raise_max_retries()
+
     def _fetch_conversations(self, client, workspace, batch_size, delay):
         self.stdout.write(f"Fetching conversations for {workspace}...")
         conversations = []
@@ -94,7 +103,9 @@ class Command(BaseCommand):
                             conversation_data["num_members"] = info["channel"].get("num_members")
                         except SlackApiError as e:
                             self.stdout.write(
-                                self.style.WARNING(f"Failed to get member count for {conversation_data['id']}: {e}")
+                                self.style.WARNING(
+                                    f"Failed to get member count for {conversation_data['id']}: {e}"
+                                )
                             )
                             conversation_data["num_members"] = None
 
