@@ -9,11 +9,11 @@ import { useSession, signIn } from 'next-auth/react'
 import { FC, useEffect } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
-type Props = {
-  isGitHubAuthEnabled: boolean
+type LoginPageContentProps = {
+  readonly isGitHubAuthEnabled: boolean
 }
 
-const LoginPageContent: FC<Props> = ({ isGitHubAuthEnabled }) => {
+const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) => {
   const { status } = useSession()
   const router = useRouter()
 

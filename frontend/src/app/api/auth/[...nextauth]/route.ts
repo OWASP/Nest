@@ -11,6 +11,7 @@ import {
 } from 'utils/credentials'
 
 const providers = []
+
 if (IS_GITHUB_AUTH_ENABLED) {
   providers.push(
     GitHubProvider({
