@@ -5,13 +5,14 @@ import { apolloClient } from 'server/apolloClient'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
+  IS_GITHUB_AUTH_ENABLED,
   NEXTAUTH_SECRET,
   NEXTAUTH_URL,
 } from 'utils/credentials'
 
 const providers = []
 
-if (GITHUB_CLIENT_ID && GITHUB_CLIENT_SECRET) {
+if (IS_GITHUB_AUTH_ENABLED) {
   providers.push(
     GitHubProvider({
       clientId: GITHUB_CLIENT_ID,

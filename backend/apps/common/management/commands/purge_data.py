@@ -15,5 +15,5 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             for nest_app in nest_apps:
                 for model in apps.get_app_config(nest_app).get_models():
-                    cursor.execute(f"TRUNCATE TABLE {model._meta.db_table} CASCADE")
+                    cursor.execute(f"TRUNCATE TABLE {model._meta.db_table} CASCADE")  # NOSONAR
                     print(f"Purged GitHub {model._meta.verbose_name_plural}")

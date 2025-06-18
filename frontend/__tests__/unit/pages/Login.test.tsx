@@ -3,7 +3,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
-import LoginPage from 'app/login/page'
+import LoginPage from 'app/auth/login/page'
 
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
@@ -15,23 +15,29 @@ jest.mock('next/navigation', () => ({
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
-
+jest.mock('utils/credentials', () => ({
+  IS_GITHUB_AUTH_ENABLED: true,
+}))
 describe('LoginPage', () => {
   const pushMock = jest.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue({ push: pushMock })
   })
 
-  it('renders loading state', () => {
+  afterEach(() => {
+    jest.clearAllMocks()
+    jest.resetModules()
+  })
+
+  test('renders loading state', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'loading' })
 
     render(<LoginPage />)
     expect(screen.getByText(/Checking session/i)).toBeInTheDocument()
   })
 
-  it('shows redirect spinner if authenticated and calls router.push and addToast', () => {
+  test('shows redirect spinner if authenticated and calls router.push and addToast', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
 
     render(<LoginPage />)
@@ -45,15 +51,14 @@ describe('LoginPage', () => {
     expect(pushMock).toHaveBeenCalledWith('/')
   })
 
-  it('shows login button if unauthenticated', () => {
+  test('shows login button if unauthenticated', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
-
     render(<LoginPage />)
 
     expect(screen.getByText(/Sign in with GitHub/i)).toBeInTheDocument()
   })
 
-  it('calls signIn on GitHub login button click', () => {
+  test('calls signIn on GitHub login button click', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
 
     render(<LoginPage />)

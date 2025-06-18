@@ -12,6 +12,7 @@ GTM
 Héllo
 Kateryna
 NETTACKER
+NOSONAR
 Nadu
 Nominatim
 PLR
@@ -27,6 +28,7 @@ WSL
 Whistleblower
 Wörld
 a2eeef
+ahmedxgouda
 algoliasearch
 ansa
 apk
