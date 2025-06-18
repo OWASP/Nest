@@ -18,6 +18,15 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
+jest.mock('react-apexcharts', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      return <div data-testid="mock-apexchart">Mock ApexChart</div>
+    },
+  }
+})
+
 const mockRouter = {
   push: jest.fn(),
 }
