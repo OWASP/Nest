@@ -241,7 +241,19 @@ class TestSlackSyncMessagesCommand:
         mock_client = Mock()
         mock_message = Mock(spec=Message)
 
-        with patch.object(Message, "update_data", return_value=mock_message):
+        # Mock the bots_info response to return a proper dictionary
+        mock_client.bots_info.return_value = {
+            "ok": True,
+            "bot": {
+                "id": "B12345",
+                "name": "testbot",
+            },
+        }
+
+        with (
+            patch.object(Message, "update_data", return_value=mock_message),
+            patch.object(Member, "update_data", return_value=Mock(spec=Member)),
+        ):
             result = command._create_message_from_data(
                 client=mock_client,
                 message_data=message_data,
@@ -266,11 +278,12 @@ class TestSlackSyncMessagesCommand:
 
         mock_client = Mock()
         mock_client.users_info.return_value = mock_user_info_response
+        mock_member = Mock(spec=Member)
 
         stdout = StringIO()
         with (
             patch.object(Member.objects, "get", side_effect=Member.DoesNotExist),
-            patch.object(Member, "update_data", return_value=Mock(spec=Member)),
+            patch.object(Member, "update_data", return_value=mock_member),
             patch.object(Message, "update_data", return_value=Mock(spec=Message)),
         ):
             command.stdout = stdout
