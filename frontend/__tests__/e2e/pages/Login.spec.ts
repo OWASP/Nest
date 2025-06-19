@@ -22,10 +22,10 @@ test.describe('Login Page', () => {
     ])
   })
 
-  test('shows message authentication is disabled', async ({ page }) => {
+  test('shows message authentication is not enabled', async ({ page }) => {
     await page.goto('/auth/login')
 
-    const disabledMessage = page.getByText(/authentication is disabled/i)
+    const disabledMessage = page.getByText(/with GitHub is not enabled/i)
     await expect(disabledMessage).toBeVisible()
   })
 })

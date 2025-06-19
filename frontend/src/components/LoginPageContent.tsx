@@ -6,8 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
-import { useCallback } from 'react'
-import { FC, useEffect } from 'react'
+import { FC, useCallback, useEffect } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
 type LoginPageContentProps = {
@@ -28,6 +27,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
     })
     router.push('/')
   }, [router])
+
   useEffect(() => {
     if (status === userAuthStatus.AUTHENTICATED) {
       handleRedirect()
@@ -37,7 +37,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
   if (!isGitHubAuthEnabled) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <span className="text-lg text-gray-500">Authentication is disabled.</span>
+        <span className="text-lg text-gray-500">Signing In with GitHub is not enabled.</span>
       </div>
     )
   }
@@ -75,7 +75,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-gray-900/90"
         >
           <FontAwesomeIcon icon={faGithub} />
-          Sign in with GitHub
+          Sign In with GitHub
         </button>
       </div>
     </div>

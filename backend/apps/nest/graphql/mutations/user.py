@@ -34,6 +34,7 @@ class UserMutations:
                 (e.email for e in gh_user.get_emails() if e.primary and e.verified), ""
             )
             if not gh_user_email:
+                # TODO(arkid15r): let user know that primary verified email is required.
                 return GitHubAuthResult(auth_user=None)
 
             github_user = GithubUser.update_data(gh_user, email=gh_user_email)

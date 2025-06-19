@@ -1,4 +1,4 @@
-import { middleware } from 'middleware'
+import authenticationMiddleware from 'middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
@@ -42,7 +42,7 @@ describe('Authentication Middleware', () => {
         const request = mockRequest(url)
         const expectedRedirectUrl = new URL('/auth/login', url)
 
-        const result = await middleware(request)
+        const result = await authenticationMiddleware(request)
 
         expect(getToken).toHaveBeenCalledWith({ req: request })
         expect(NextResponse.redirect).toHaveBeenCalledWith(expectedRedirectUrl)
@@ -63,7 +63,7 @@ describe('Authentication Middleware', () => {
       ;(getToken as jest.Mock).mockResolvedValue(testUser)
       const request = mockRequest('http://localhost/dashboard')
 
-      const result = await middleware(request)
+      const result = await authenticationMiddleware(request)
 
       expect(getToken).toHaveBeenCalledWith({ req: request })
       expect(NextResponse.next).toHaveBeenCalled()
@@ -74,7 +74,7 @@ describe('Authentication Middleware', () => {
       ;(getToken as jest.Mock).mockResolvedValue(testUser)
       const request = mockRequest()
 
-      const result = await middleware(request)
+      const result = await authenticationMiddleware(request)
 
       expect(NextResponse.next).toHaveBeenCalled()
       expect(result).toEqual({ type: 'next' })

@@ -17,10 +17,11 @@ import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
 
-export default function Header({ isGitHubAuthEnabled }) {
+export default function Header({ isGitHubAuthEnabled }: { isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= desktopViewMinWidth) {
