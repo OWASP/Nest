@@ -1,15 +1,17 @@
 'use client'
 
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
-type UserMenuProps = {
+export default function UserMenu({
+  isGitHubAuthEnabled,
+}: {
   readonly isGitHubAuthEnabled: boolean
-}
-
-export default function UserMenu({ isGitHubAuthEnabled }: UserMenuProps) {
+}) {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -41,9 +43,10 @@ export default function UserMenu({ isGitHubAuthEnabled }: UserMenuProps) {
     return (
       <button
         onClick={() => signIn('github', { callbackUrl: '/', prompt: 'login' })}
-        className="group relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 overflow-hidden whitespace-pre rounded-md bg-[#87a1bc] px-4 py-2 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
+        className="group relative flex h-10 cursor-pointer items-center justify-center gap-2 overflow-hidden whitespace-pre rounded-md bg-[#87a1bc] p-4 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b] md:flex"
       >
-        Sign in
+        <FontAwesomeIcon icon={faGithub} />
+        Sign In
       </button>
     )
   }
@@ -59,7 +62,7 @@ export default function UserMenu({ isGitHubAuthEnabled }: UserMenuProps) {
       >
         <div className="h-10 w-10 overflow-hidden rounded-full">
           <Image
-            src={session.user?.image || '/default-avatar.png'}
+            src={session.user?.image ?? '/default-avatar.png'}
             height={40}
             width={40}
             alt="User avatar"

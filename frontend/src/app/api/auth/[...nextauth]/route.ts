@@ -44,11 +44,11 @@ const authOptions = {
               accessToken: account.access_token,
             },
           })
-          if (!data.githubAuth.authUser) throw new Error('User sync failed')
+          if (!data?.githubAuth?.authUser) throw new Error('User sync failed')
           return true
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-          throw new Error('githubAuth failed')
+          throw new Error('GitHub authentication failed')
         }
       }
       return true

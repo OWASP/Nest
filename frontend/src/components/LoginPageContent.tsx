@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
-import { FC, useEffect } from 'react'
+import { FC, useCallback, useEffect } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
 type LoginPageContentProps = {
@@ -16,25 +16,28 @@ type LoginPageContentProps = {
 const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) => {
   const { status } = useSession()
   const router = useRouter()
+  const handleRedirect = useCallback(() => {
+    addToast({
+      description: 'You are already logged in.',
+      title: 'Already logged in',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'default',
+      variant: 'solid',
+    })
+    router.push('/')
+  }, [router])
 
   useEffect(() => {
     if (status === userAuthStatus.AUTHENTICATED) {
-      addToast({
-        description: 'You are already logged in.',
-        title: 'Already logged in',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'default',
-        variant: 'solid',
-      })
-      router.push('/')
+      handleRedirect()
     }
-  }, [status, router])
+  }, [status, handleRedirect])
 
   if (!isGitHubAuthEnabled) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <span className="text-lg text-gray-500">Authentication is disabled.</span>
+        <span className="text-lg text-gray-500">Signing In with GitHub is not enabled.</span>
       </div>
     )
   }
@@ -72,7 +75,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-gray-900/90"
         >
           <FontAwesomeIcon icon={faGithub} />
-          Sign in with GitHub
+          Sign In with GitHub
         </button>
       </div>
     </div>
