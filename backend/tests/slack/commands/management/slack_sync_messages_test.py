@@ -241,12 +241,11 @@ class TestSlackSyncMessagesCommand:
         mock_client = Mock()
         mock_message = Mock(spec=Message)
 
-        # Mock the bots_info response to return a proper dictionary
         mock_client.bots_info.return_value = {
             "ok": True,
             "bot": {
                 "id": "B12345",
-                "name": "testbot",
+                "name": "TestBot",
             },
         }
 
