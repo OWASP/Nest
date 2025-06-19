@@ -1,5 +1,7 @@
 """Nest user GraphQL Mutations."""
 
+import logging
+
 import requests
 import strawberry
 from github import Github
@@ -7,6 +9,8 @@ from github import Github
 from apps.github.models import User as GithubUser
 from apps.nest.graphql.nodes.user import AuthUserNode
 from apps.nest.models import User
+
+logger = logging.getLogger(__name__)
 
 
 @strawberry.type
@@ -29,6 +33,8 @@ class UserMutations:
             gh_user_email = next(
                 (e.email for e in gh_user.get_emails() if e.primary and e.verified), ""
             )
+            if not gh_user_email:
+                return GitHubAuthResult(auth_user=None)
 
             github_user = GithubUser.update_data(gh_user, email=gh_user_email)
             if not github_user:
@@ -44,5 +50,6 @@ class UserMutations:
 
             return GitHubAuthResult(auth_user=auth_user)
 
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            logger.warning("GitHub authentication failed: %s", e)
             return GitHubAuthResult(auth_user=None)

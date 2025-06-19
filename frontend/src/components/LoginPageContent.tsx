@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
+import { useCallback } from 'react'
 import { FC, useEffect } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
@@ -16,20 +17,22 @@ type LoginPageContentProps = {
 const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) => {
   const { status } = useSession()
   const router = useRouter()
-
+  const handleRedirect = useCallback(() => {
+    addToast({
+      description: 'You are already logged in.',
+      title: 'Already logged in',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'default',
+      variant: 'solid',
+    })
+    router.push('/')
+  }, [router])
   useEffect(() => {
     if (status === userAuthStatus.AUTHENTICATED) {
-      addToast({
-        description: 'You are already logged in.',
-        title: 'Already logged in',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'default',
-        variant: 'solid',
-      })
-      router.push('/')
+      handleRedirect()
     }
-  }, [status, router])
+  }, [status, handleRedirect])
 
   if (!isGitHubAuthEnabled) {
     return (
