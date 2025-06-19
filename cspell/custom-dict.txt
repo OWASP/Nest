@@ -12,6 +12,7 @@ GTM
 Héllo
 Kateryna
 NETTACKER
+NOSONAR
 Nadu
 Nominatim
 PLR
