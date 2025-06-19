@@ -1,4 +1,4 @@
-FROM python:3.13.4-alpine AS builder
+FROM python:3.13.5-alpine AS builder
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
@@ -25,7 +25,7 @@ WORKDIR /home/owasp
 
 USER owasp
 
-COPY --chmod=444 --chown=owasp:owasp poetry.lock pyproject.toml ./
+COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --no-root --without dev --without test
 
@@ -36,7 +36,7 @@ COPY settings settings
 COPY static static
 COPY templates templates
 
-FROM python:3.13.4-alpine
+FROM python:3.13.5-alpine
 
 RUN apk update && \
     addgroup -S owasp && \
@@ -48,7 +48,7 @@ ENV FORCE_COLOR=1 \
 
 WORKDIR /home/owasp
 
-COPY --from=builder --chmod=555 --chown=owasp:owasp /home/owasp /home/owasp
+COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
 RUN rm -rf /home/owasp/.cache && \
     rm -rf /home/owasp/.local && \
     chmod +x /home/owasp/entrypoint.sh

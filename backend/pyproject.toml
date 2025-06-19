@@ -130,6 +130,7 @@ ignore = [
     "PD",
     "PERF203",
     "PLC0414",
+    "PLC0415",  # TODO(arkid15r): remove when all imports are at the top level.
     "PLR0912",
     "PLR0913",
     "PLR0915",
@@ -151,7 +152,7 @@ select = ["ALL"]
 "**/migrations/*.py" = ["D100", "D101", "D104"]
 "**/models.py" = ["D106"]
 "**/models/*.py" = ["D106"]
-"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
+"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "PLR2004", "S101"]
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

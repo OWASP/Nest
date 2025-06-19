@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import millify from 'millify'
 import Image from 'next/image'
-import { UserCardProps } from 'types/card'
+import type { UserCardProps } from 'types/card'
 
 const UserCard = ({
   avatar,
@@ -12,10 +12,10 @@ const UserCard = ({
   company,
   description,
   email,
-  followers_count,
+  followersCount,
   location,
   name,
-  repositories_count,
+  repositoriesCount,
 }: UserCardProps) => {
   return (
     <Button
@@ -49,16 +49,16 @@ const UserCard = ({
             </p>
           )}
           <div className="flex justify-center gap-3">
-            {followers_count > 0 && (
+            {followersCount > 0 && (
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
                 <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
-                {millify(followers_count, { precision: 1 })}
+                {millify(followersCount, { precision: 1 })}
               </p>
             )}
-            {repositories_count > 0 && (
+            {repositoriesCount > 0 && (
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
                 <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
-                {millify(repositories_count, { precision: 1 })}
+                {millify(repositoriesCount, { precision: 1 })}
               </p>
             )}
           </div>

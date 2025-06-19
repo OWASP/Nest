@@ -6,6 +6,7 @@ from apps.github.graphql.nodes.pull_request import PullRequestNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.project import ProjectNode
+from apps.owasp.graphql.nodes.project_health_metrics import ProjectHealthMetricsNode
 
 
 class TestProjectNode:
@@ -42,6 +43,11 @@ class TestProjectNode:
         return next(
             (f for f in ProjectNode.__strawberry_definition__.fields if f.name == name), None
         )
+
+    def test_resolve_health_metrics(self):
+        field = self._get_field_by_name("health_metrics")
+        assert field is not None
+        assert field.type.of_type is ProjectHealthMetricsNode
 
     def test_resolve_issues_count(self):
         field = self._get_field_by_name("issues_count")

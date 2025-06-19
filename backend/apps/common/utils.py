@@ -12,6 +12,26 @@ from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
 
+def convert_to_camel_case(text: str) -> str:
+    """Convert a string to camelCase.
+
+    Args:
+        text (str): The input string.
+
+    Returns:
+        str: The converted string in camelCase.
+
+    """
+    parts = text.split("_")
+    offset = 1 if text.startswith("_") else 0
+    head = parts[offset : offset + 1] or [text]
+
+    segments = [f"_{head[0]}" if offset else head[0]]
+    segments.extend(word.capitalize() for word in parts[offset + 1 :])
+
+    return "".join(segments)
+
+
 def convert_to_snake_case(text: str) -> str:
     """Convert a string to snake_case.
 

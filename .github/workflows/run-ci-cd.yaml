@@ -171,7 +171,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
       - name: Build backend test image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -202,7 +202,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
       - name: Build frontend unit-testing image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -233,7 +233,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -270,7 +270,7 @@ jobs:
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
       - name: Login to Docker Hub
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
@@ -400,7 +400,7 @@ jobs:
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
-          echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "GITHUB_TOKEN=${{ secrets.NEST_GITHUB_TOKEN }}" >> .env.backend
           echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
@@ -463,7 +463,7 @@ jobs:
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
       - name: Login to Docker Hub
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
@@ -591,7 +591,7 @@ jobs:
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
-          echo "GITHUB_TOKEN=${{ secrets.DJANGO_GITHUB_TOKEN }}" >> .env.backend
+          echo "GITHUB_TOKEN=${{ secrets.NEST_GITHUB_TOKEN }}" >> .env.backend
           echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
