@@ -100,8 +100,8 @@ class TestUtils:
     @pytest.mark.parametrize(
         ("mock_request", "expected"),
         [
-            ({"HTTP_X_FORWARDED_FOR": "8.8.8.8"}, "8.8.8.8"),
-            ({"REMOTE_ADDR": "192.168.1.2"}, "192.168.1.2"),
+            ({"HTTP_X_FORWARDED_FOR": "172.16.1.100"}, "172.16.1.100"),  # NOSONAR
+            ({"REMOTE_ADDR": "192.168.1.200"}, "192.168.1.200"),  # NOSONAR
         ],
     )
     def test_get_user_ip_address(self, mock_request, expected):
@@ -114,9 +114,12 @@ class TestUtils:
         request.META = {}
 
         mocker.patch.object(settings, "ENVIRONMENT", "Local")
-        mocker.patch.dict(settings._wrapped.__dict__, {"PUBLIC_IP_ADDRESS": "1.1.1.1"})
+        mocker.patch.dict(
+            settings._wrapped.__dict__,
+            {"PUBLIC_IP_ADDRESS": "10.0.0.100"},  # NOSONAR
+        )
 
-        assert get_user_ip_address(request) == "1.1.1.1"
+        assert get_user_ip_address(request) == "10.0.0.100"  # NOSONAR
 
     @pytest.mark.parametrize(
         ("value", "base", "expected"),

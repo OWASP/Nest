@@ -60,7 +60,12 @@ class Command(BaseCommand):
             metric.score = score
             project_health_metrics.append(metric)
 
-        ProjectHealthMetrics.bulk_save(project_health_metrics, fields=["score"])
+        ProjectHealthMetrics.bulk_save(
+            project_health_metrics,
+            fields=[
+                "score",
+            ],
+        )
         self.stdout.write(
             self.style.SUCCESS("Updated projects health metrics score successfully.")
         )
