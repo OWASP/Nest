@@ -9,7 +9,9 @@ from apps.github.graphql.nodes.pull_request import PullRequestNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository import RepositoryNode
 from apps.owasp.graphql.nodes.common import GenericEntityNode
+from apps.owasp.graphql.nodes.project_health_metrics import ProjectHealthMetricsNode
 from apps.owasp.models.project import Project
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
@@ -33,6 +35,15 @@ RECENT_PULL_REQUESTS_LIMIT = 5
 )
 class ProjectNode(GenericEntityNode):
     """Project node."""
+
+    @strawberry.field
+    def health_metrics(self, limit: int = 30) -> list[ProjectHealthMetricsNode]:
+        """Resolve project health metrics."""
+        return ProjectHealthMetrics.objects.filter(
+            project=self,
+        ).order_by(
+            "-nest_created_at",
+        )[:limit]
 
     @strawberry.field
     def issues_count(self) -> int:
