@@ -7,11 +7,11 @@ import { useSession, signIn, signOut } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
-type UserMenuProps = {
+export default function UserMenu({
+  isGitHubAuthEnabled,
+}: {
   readonly isGitHubAuthEnabled: boolean
-}
-
-export default function UserMenu({ isGitHubAuthEnabled }: UserMenuProps) {
+}) {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)

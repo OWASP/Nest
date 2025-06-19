@@ -17,7 +17,7 @@ import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
 
-export default function Header({ isGitHubAuthEnabled }: { isGitHubAuthEnabled: boolean }) {
+export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
