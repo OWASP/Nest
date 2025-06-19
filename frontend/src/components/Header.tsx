@@ -104,8 +104,8 @@ export default function Header() {
             href="https://github.com/OWASP/Nest"
             defaultIcon={faRegularStar}
             hoverIcon={faSolidStar}
-            defaultIconColor="text-white"
-            hoverIconColor="text-yellow-400"
+            defaultIconColor="#FDCE2D"
+            hoverIconColor="#FDCE2D"
             text="Star"
             className="hidden"
           />
@@ -212,7 +212,7 @@ export default function Header() {
               defaultIcon={faRegularStar}
               hoverIcon={faSolidStar}
               defaultIconColor="#FDCE2D"
-              hoverIconColor="text-yellow-400"
+              hoverIconColor="#FDCE2D"
               text="Star On Github"
             />
             <NavButton

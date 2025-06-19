@@ -35,27 +35,23 @@ class TestUpdateProjectHealthRequirementsCommand:
                 "Created health requirements for Incubator projects",
                 "Incubator",
             ),
-            (None, "Created default health requirements for Flagship projects", "Flagship"),
         ],
     )
     def test_handle_successful_creation(self, level, expected_output, display_name):
         """Test successful requirements creation."""
         mock_requirements = MagicMock(spec=ProjectHealthRequirements)
         mock_requirements.get_level_display.return_value = display_name
-        self.mock_requirements.get_or_create.return_value = (mock_requirements, True)
+        self.mock_requirements.update_or_create.return_value = (mock_requirements, True)
 
         with patch("sys.stdout", new=StringIO()) as fake_out:
-            if level:
-                call_command("owasp_update_project_health_requirements", level=level)
-            else:
-                call_command("owasp_update_project_health_requirements")
+            call_command("owasp_update_project_health_requirements")
 
-            assert expected_output in fake_out.getvalue()
+        assert expected_output in fake_out.getvalue()
 
     def test_handle_exception(self):
         """Test handling of exceptions during update."""
         error_message = "Database error"
-        self.mock_requirements.get_or_create.side_effect = CommandError(error_message)
+        self.mock_requirements.update_or_create.side_effect = CommandError(error_message)
 
         with pytest.raises(CommandError, match=error_message) as exc_info:
             call_command("owasp_update_project_health_requirements")
