@@ -90,7 +90,7 @@
       - name: Copy directory recursively
         copy:
           src: '{{ github_workspace }}/backend/data'
-          dest: ~/backend/data
+          dest: ~/backend
           mode: '0755'
 
       - name: Copy .env.backend
