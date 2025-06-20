@@ -76,15 +76,15 @@ const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data })
         <GradientRadialChart
           title="Days Since Last Commit"
           icon={faCodeCommit}
-          series={[data.map((item) => item.lastCommitDays)[0]]}
-          requirements={[data.map((item) => item.lastCommitDaysRequirement)[0]]}
+          days={data.map((item) => item.lastCommitDays)[0]}
+          requirement={data.map((item) => item.lastCommitDaysRequirement)[0]}
           labels={['Last Commit Days']}
         />
         <GradientRadialChart
           title="Days Since Last Release"
           icon={faTag}
-          series={[data.map((item) => item.lastReleaseDays)[0]]}
-          requirements={[data.map((item) => item.lastReleaseDaysRequirement)[0]]}
+          days={data.map((item) => item.lastReleaseDays)[0]}
+          requirement={data.map((item) => item.lastReleaseDaysRequirement)[0]}
           labels={['Last Release Days']}
         />
       </div>

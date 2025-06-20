@@ -13,29 +13,60 @@ const GradientRadialChart: React.FC<{
   title: string
   icon?: IconProp
   labels: string[]
-  series: number[]
-  requirements: number[]
-}> = ({ title, series, icon, labels, requirements }) => {
+  days: number
+  requirement: number
+}> = ({ title, days, icon, labels, requirement }) => {
   const { theme } = useTheme()
-  const colors = series.map((days, index) => {
-    if (days < requirements[index]) return '#00E396' // Green
+  const redColor = '#FF4560'
+  const greenColor = '#00E396'
 
-    return '#FF4560' // Red
-  })
+  let checkpoint = requirement
+  if (days > requirement) {
+    checkpoint = days
+  }
+  const normalizedDays = (days / checkpoint) * 100
+  const normalizedRequirement = (requirement / checkpoint) * 100
+
+  const showRed = days > requirement
+  const colorStops = [
+    {
+      offset: 0,
+      color: greenColor,
+      opacity: 1,
+    },
+  ]
+  const stops = [0, 100]
+
+  if (showRed) {
+    stops[0] = normalizedRequirement
+    colorStops.push({
+      offset: normalizedRequirement,
+      color: redColor,
+      opacity: 1,
+    })
+  }
+
   return (
     <SecondaryCard title={title} icon={icon}>
       <Chart
         key={theme}
         options={{
+          chart: {
+            animations: {
+              enabled: true,
+              speed: 1000,
+            },
+          },
           labels: labels,
-          colors: colors,
           plotOptions: {
             radialBar: {
+              startAngle: -90,
+              endAngle: 90,
               dataLabels: {
                 show: true,
                 value: {
-                  formatter: (val) => {
-                    return `${val} days`
+                  formatter: () => {
+                    return `${days} days`
                   },
                   color: theme === 'dark' ? '#fff' : '#000',
                   fontSize: '16px',
@@ -43,7 +74,6 @@ const GradientRadialChart: React.FC<{
               },
               track: {
                 background: theme === 'dark' ? '#1E1E2C' : '#ececec',
-                strokeWidth: '97%',
               },
             },
           },
@@ -53,15 +83,13 @@ const GradientRadialChart: React.FC<{
               shade: 'dark',
               type: 'horizontal',
               shadeIntensity: 0.5,
-              gradientToColors: colors,
-              inverseColors: true,
-              opacityFrom: 1,
-              opacityTo: 1,
-              stops: [0, 100],
+              gradientToColors: [redColor],
+              stops: stops,
+              colorStops: colorStops,
             },
           },
         }}
-        series={series}
+        series={[normalizedDays]}
         height={450}
         type="radialBar"
       />
