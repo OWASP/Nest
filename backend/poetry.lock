@@ -137,14 +137,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.20.0"
+version = "4.21.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.20.0-py3-none-any.whl", hash = "sha256:1963d4a2b03d01307a2ae38943048bbd681b66edb0b5004c66914b03723e1ef8"},
-    {file = "algoliasearch-4.20.0.tar.gz", hash = "sha256:340d7747dd7905ced51a5ea571a028c81c4fb09735babb7fe56df317dedd4ff7"},
+    {file = "algoliasearch-4.21.0-py3-none-any.whl", hash = "sha256:e8cc41462ec3b7574759ad1b65a1a129c7a4ea0acdcf432f3fff93d0ab03d667"},
+    {file = "algoliasearch-4.21.0.tar.gz", hash = "sha256:1ccd40e876ed511a539822636df171cad75994d294152a54944ed409d4dabc27"},
 ]
 
 [package.dependencies]
@@ -252,18 +252,18 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "boto3"
-version = "1.38.38"
+version = "1.38.40"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.38.38-py3-none-any.whl", hash = "sha256:6f4163cd9e030afd1059e8a6daa178835165b79eb0b5325a8cd447020b895921"},
-    {file = "boto3-1.38.38.tar.gz", hash = "sha256:0fe6b7d1974851588ec1edd39c66d9525d539133e02c7f985f9ebec5e222c0db"},
+    {file = "boto3-1.38.40-py3-none-any.whl", hash = "sha256:a43cad12c18607ae9addfc0a98366aae5762b1a4880529f82295b21473686433"},
+    {file = "boto3-1.38.40.tar.gz", hash = "sha256:fcef3e08513d276c97d72d5e7ab8f3ce9950170784b9b5cf4fab327cdb577503"},
 ]
 
 [package.dependencies]
-botocore = ">=1.38.38,<1.39.0"
+botocore = ">=1.38.40,<1.39.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -272,14 +272,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.38.38"
+version = "1.38.40"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.38.38-py3-none-any.whl", hash = "sha256:aa5cc63bf885819d862852edb647d6276fe423c60113e8db375bb7ad8d88a5d9"},
-    {file = "botocore-1.38.38.tar.gz", hash = "sha256:acf9ae5b2d99c1f416f94fa5b4f8c044ecb76ffcb7fb1b1daec583f36892a8e2"},
+    {file = "botocore-1.38.40-py3-none-any.whl", hash = "sha256:7528f47945502bf4226e629337c2ac2e454e661ac8fd1dc0fbf7f38082930f3f"},
+    {file = "botocore-1.38.40.tar.gz", hash = "sha256:aefbfe835a7ebe9bbdd88df3999b0f8f484dd025af4ebb3f3387541316ce4349"},
 ]
 
 [package.dependencies]
@@ -1545,14 +1545,14 @@ source = ["Cython (>=3.0.11,<3.1.0)"]
 
 [[package]]
 name = "markdown"
-version = "3.8.1"
+version = "3.8.2"
 description = "Python implementation of John Gruber's Markdown."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "markdown-3.8.1-py3-none-any.whl", hash = "sha256:46cc0c0f1e5211ab2e9d453582f0b28a1bfaf058a9f7d5c50386b99b588d8811"},
-    {file = "markdown-3.8.1.tar.gz", hash = "sha256:a2e2f01cead4828ee74ecca9623045f62216aef2212a7685d6eb9163f590b8c1"},
+    {file = "markdown-3.8.2-py3-none-any.whl", hash = "sha256:5c83764dbd4e00bdd94d85a19b8d55ccca20fe35b2e678a1422b380324dd5f24"},
+    {file = "markdown-3.8.2.tar.gz", hash = "sha256:247b9a70dd12e27f67431ce62523e675b866d254f900c4fe75ce3dda62237c45"},
 ]
 
 [package.extras]
