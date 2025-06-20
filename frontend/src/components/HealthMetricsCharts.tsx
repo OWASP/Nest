@@ -3,13 +3,13 @@ import {
   faCodeCommit,
   faCodeFork,
   faCodePullRequest,
-  faQuestionCircle,
   faStar,
   faTag,
 } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
 import type { HealthMetricsProps } from 'types/healthMetrics'
-import { LineChart, RadialChart } from 'components/GeneralCharts'
+import GradientRadialChart from 'components/GradientRadialChart'
+import LineChart from 'components/LineChart'
 
 const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
   const openIssuesCountArray = data.map((item) => item.openIssuesCount)
@@ -18,7 +18,7 @@ const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data })
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <LineChart
-          title="Issues Health Trend"
+          title="Issues Trend"
           series={[
             {
               name: 'Open Issues',
@@ -28,37 +28,26 @@ const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data })
               name: 'Unassigned Issues',
               data: data.map((item) => item.unassignedIssuesCount),
             },
-          ]}
-          labels={labels}
-          icon={faExclamationCircle}
-        />
-        <LineChart
-          title="Unanswered Issues Trend"
-          series={[
-            {
-              name: 'Open Issues',
-              data: openIssuesCountArray,
-            },
             {
               name: 'Unanswered Issues',
               data: data.map((item) => item.unansweredIssuesCount),
             },
           ]}
           labels={labels}
-          icon={faQuestionCircle}
+          icon={faExclamationCircle}
+        />
+        <LineChart
+          title="Pull Requests Trend"
+          series={[
+            {
+              name: 'Open Pull Requests',
+              data: data.map((item) => item.openPullRequestsCount),
+            },
+          ]}
+          labels={labels}
+          icon={faCodePullRequest}
         />
       </div>
-      <LineChart
-        title="Activity Trend"
-        series={[
-          {
-            name: 'Open Pull Requests',
-            data: data.map((item) => item.openPullRequestsCount),
-          },
-        ]}
-        labels={labels}
-        icon={faCodePullRequest}
-      />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <LineChart
           title="Stars Trend"
@@ -84,17 +73,17 @@ const HealthMetricsCharts: React.FC<{ data: HealthMetricsProps[] }> = ({ data })
         />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <RadialChart
+        <GradientRadialChart
           title="Days Since Last Commit"
           icon={faCodeCommit}
-          series={data.map((item) => item.lastCommitDays)}
-          labels={labels}
+          series={[data.map((item) => item.lastCommitDays)[0]]}
+          labels={['Last Commit Days']}
         />
-        <RadialChart
+        <GradientRadialChart
           title="Days Since Last Release"
           icon={faTag}
-          series={data.map((item) => item.lastReleaseDays)}
-          labels={labels}
+          series={[data.map((item) => item.lastReleaseDays)[0]]}
+          labels={['Last Release Days']}
         />
       </div>
     </>

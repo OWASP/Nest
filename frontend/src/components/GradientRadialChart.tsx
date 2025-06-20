@@ -1,7 +1,7 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
+import { useTheme } from 'next-themes'
 import React from 'react'
-import type { ApexChartLabelSeries } from 'types/healthMetrics'
 import SecondaryCard from 'components/SecondaryCard'
 
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
@@ -9,33 +9,13 @@ const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
-const LineChart: React.FC<{
-  title: string
-  series: ApexChartLabelSeries[]
-  labels?: string[]
-  icon?: IconProp
-}> = ({ title, series, labels, icon }) => {
-  return (
-    <SecondaryCard title={title} icon={icon}>
-      <Chart
-        options={{
-          xaxis: {
-            categories: labels,
-          },
-        }}
-        series={series}
-        height={450}
-      />
-    </SecondaryCard>
-  )
-}
-
-const RadialChart: React.FC<{
+const GradientRadialChart: React.FC<{
   title: string
   icon?: IconProp
   labels: string[]
   series: number[]
 }> = ({ title, series, icon, labels }) => {
+  const { theme } = useTheme()
   const colors = series.map((days) => {
     if (days < 3)
       return '#00E396' // Green
@@ -46,6 +26,7 @@ const RadialChart: React.FC<{
   return (
     <SecondaryCard title={title} icon={icon}>
       <Chart
+        key={theme}
         options={{
           labels: labels,
           colors: colors,
@@ -57,20 +38,27 @@ const RadialChart: React.FC<{
                   formatter: (val) => {
                     return `${val} days`
                   },
-                },
-                name: {
-                  show: true,
-                },
-                total: {
-                  show: true,
-                  label: 'Average Days',
-                  color: '#FF4560',
-                  formatter: (w) => {
-                    const total = w.globals.series.reduce((a, b) => a + b, 0)
-                    return `${(total / w.globals.series.length).toFixed(0)} days`
-                  },
+                  color: theme === 'dark' ? '#fff' : '#000',
+                  fontSize: '16px',
                 },
               },
+              track: {
+                background: theme === 'dark' ? '#1E1E2C' : '#ececec',
+                strokeWidth: '97%',
+              },
+            },
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: theme === 'dark' ? 'dark' : 'light',
+              type: 'horizontal',
+              shadeIntensity: 0.5,
+              gradientToColors: colors,
+              inverseColors: false,
+              opacityFrom: 1,
+              opacityTo: 1,
+              stops: [0, 100],
             },
           },
         }}
@@ -82,4 +70,4 @@ const RadialChart: React.FC<{
   )
 }
 
-export { RadialChart, LineChart }
+export default GradientRadialChart
