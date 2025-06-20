@@ -12,22 +12,29 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 const GradientRadialChart: React.FC<{
   title: string
   icon?: IconProp
-  labels: string[]
+  label: string
   days: number
   requirement: number
-}> = ({ title, days, icon, labels, requirement }) => {
+}> = ({ title, days, icon, label, requirement }) => {
   const { theme } = useTheme()
   const redColor = '#FF4560'
   const greenColor = '#00E396'
 
   let checkpoint = requirement
+  let showRed = false
+
   if (days > requirement) {
     checkpoint = days
+    showRed = true
   }
+
+  if (checkpoint === 0) {
+    checkpoint = 1 // Avoid division by zero
+  }
+  // Normalize days and requirement based on the checkpoint
   const normalizedDays = (days / checkpoint) * 100
   const normalizedRequirement = (requirement / checkpoint) * 100
 
-  const showRed = days > requirement
   const colorStops = [
     {
       offset: 0,
@@ -57,7 +64,7 @@ const GradientRadialChart: React.FC<{
               speed: 1000,
             },
           },
-          labels: labels,
+          labels: [label],
           plotOptions: {
             radialBar: {
               startAngle: -90,
