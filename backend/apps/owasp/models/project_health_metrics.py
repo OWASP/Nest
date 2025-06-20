@@ -5,6 +5,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 
 class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
@@ -79,6 +80,11 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         return (timezone.now() - self.last_committed_at).days if self.last_committed_at else 0
 
     @property
+    def last_commit_days_requirement(self) -> int:
+        """Get the last commit requirement for the project."""
+        return self.project_requirements.last_commit_days
+
+    @property
     def last_pull_request_days(self) -> int:
         """Calculate days since last pull request."""
         return (
@@ -93,6 +99,11 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         return (timezone.now() - self.last_released_at).days if self.last_released_at else 0
 
     @property
+    def last_release_days_requirement(self) -> int:
+        """Get the last release requirement for the project."""
+        return self.project_requirements.last_release_days
+
+    @property
     def owasp_page_last_update_days(self) -> int:
         """Calculate days since OWASP page last update."""
         return (
@@ -100,6 +111,11 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             if self.owasp_page_last_updated_at
             else 0
         )
+
+    @property
+    def project_requirements(self) -> ProjectHealthRequirements:
+        """Get the project health requirements for the project's level."""
+        return ProjectHealthRequirements.objects.get(level=self.project.level)
 
     @staticmethod
     def bulk_save(metrics: list, fields: list | None = None) -> None:  # type: ignore[override]

@@ -36,6 +36,11 @@ class ProjectHealthMetricsNode:
         return self.last_commit_days
 
     @strawberry.field
+    def last_commit_days_requirement(self) -> int:
+        """Resolve last commit age requirement in days."""
+        return self.last_commit_days_requirement
+
+    @strawberry.field
     def last_pull_request_days(self) -> int:
         """Resolve last pull request age in days."""
         return self.last_pull_request_days
@@ -44,6 +49,11 @@ class ProjectHealthMetricsNode:
     def last_release_days(self) -> int:
         """Resolve last release age in days."""
         return self.last_release_days
+
+    @strawberry.field
+    def last_release_days_requirement(self) -> int:
+        """Resolve last release age requirement in days."""
+        return self.last_release_days_requirement
 
     @strawberry.field
     def owasp_page_last_update_days(self) -> int:
