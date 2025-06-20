@@ -88,7 +88,7 @@ const ProjectDetailsPage = () => {
       pluralizedName: 'Repositories',
     },
   ]
-  // TODO(ahmedxgouda): Add score on the top of the page
+
   return (
     <DetailsCard
       details={projectDetails}

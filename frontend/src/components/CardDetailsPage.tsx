@@ -14,7 +14,7 @@ import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
-import HealthMetricsCharts from 'components/HealthMetricsCharts'
+import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
 import Milestones from 'components/Milestones'
@@ -192,7 +192,7 @@ const DetailsCard = ({
           </div>
         )}
         {type === 'project' && healthMetricsData.length > 0 && (
-          <HealthMetricsCharts data={healthMetricsData} />
+          <HealthMetrics data={healthMetricsData} />
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
