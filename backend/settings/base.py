@@ -19,7 +19,6 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     AUTH_USER_MODEL = "nest.User"
-    AUTH_USER_MODEL = "nest.User"
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
@@ -48,7 +47,6 @@ class Base(Configuration):
         "apps.core",
         "apps.github",
         "apps.mentorship",
-        "apps.nest",
         "apps.nest",
         "apps.owasp",
         "apps.slack",
