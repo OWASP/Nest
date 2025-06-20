@@ -18,6 +18,7 @@ class Base(Configuration):
         load_dotenv(BASE_DIR / ".env.example")
 
     ALLOWED_HOSTS = values.ListValue()
+    AUTH_USER_MODEL = "nest.User"
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
@@ -45,6 +46,7 @@ class Base(Configuration):
         "apps.common",
         "apps.core",
         "apps.github",
+        "apps.nest",
         "apps.owasp",
         "apps.slack",
     )
