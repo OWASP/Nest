@@ -14,14 +14,13 @@ const GradientRadialChart: React.FC<{
   icon?: IconProp
   labels: string[]
   series: number[]
-}> = ({ title, series, icon, labels }) => {
+  requirements: number[]
+}> = ({ title, series, icon, labels, requirements }) => {
   const { theme } = useTheme()
-  const colors = series.map((days) => {
-    if (days < 3)
-      return '#00E396' // Green
-    else if (days <= 20)
-      return '#FFEA00' // Yellow
-    else return '#FF4560' // Red
+  const colors = series.map((days, index) => {
+    if (days < requirements[index]) return '#00E396' // Green
+
+    return '#FF4560' // Red
   })
   return (
     <SecondaryCard title={title} icon={icon}>
@@ -51,11 +50,11 @@ const GradientRadialChart: React.FC<{
           fill: {
             type: 'gradient',
             gradient: {
-              shade: theme === 'dark' ? 'dark' : 'light',
+              shade: 'dark',
               type: 'horizontal',
               shadeIntensity: 0.5,
               gradientToColors: colors,
-              inverseColors: false,
+              inverseColors: true,
               opacityFrom: 1,
               opacityTo: 1,
               stops: [0, 100],
