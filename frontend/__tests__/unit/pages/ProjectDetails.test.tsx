@@ -151,6 +151,24 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
+  test('Displays health metrics section', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Health Metrics')).toBeInTheDocument()
+      expect(screen.getByText('Score: 85')).toBeInTheDocument()
+      expect(screen.getByText('Issues Trend')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
+      expect(screen.getByText('Stars Trend')).toBeInTheDocument()
+      expect(screen.getByText('Forks Trend')).toBeInTheDocument()
+      expect(screen.getByText('Days Since Last Commit')).toBeInTheDocument()
+      expect(screen.getByText('Days Since Last Release')).toBeInTheDocument()
+    })
+  })
+
   test('Handles case when no data is available', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: { repository: null },
