@@ -15,11 +15,13 @@ import { cn } from 'utils/utility'
 import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
+import UserMenu from 'components/UserMenu'
 
-export default function Header() {
+export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= desktopViewMinWidth) {
@@ -119,6 +121,7 @@ export default function Header() {
             text="Sponsor"
             className="hidden"
           />
+          <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           <ModeToggle />
           <div className="md:hidden">
             <Button
