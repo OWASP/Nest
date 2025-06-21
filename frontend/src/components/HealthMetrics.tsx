@@ -91,14 +91,12 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
           icon={faCodeCommit}
           days={data[0]?.lastCommitDays ?? 0}
           requirement={data[0]?.lastCommitDaysRequirement ?? 0}
-          label="Last Commit Days"
         />
         <GradientRadialChart
           title="Days Since Last Release"
           icon={faTag}
           days={data[0]?.lastReleaseDays ?? 0}
           requirement={data[0]?.lastReleaseDaysRequirement ?? 0}
-          label="Last Release Days"
         />
       </div>
     </>

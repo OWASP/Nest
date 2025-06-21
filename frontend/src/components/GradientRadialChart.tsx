@@ -12,46 +12,16 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 const GradientRadialChart: React.FC<{
   title: string
   icon?: IconProp
-  label: string
   days: number
   requirement: number
-}> = ({ title, days, icon, label, requirement }) => {
+}> = ({ title, days, icon, requirement }) => {
   const { theme } = useTheme()
-  const redColor = '#FF4560'
-  const greenColor = '#00E396'
-
-  let checkpoint = requirement
-  let showRed = false
-
-  if (days > requirement) {
-    checkpoint = days
-    showRed = true
-  }
-
+  let checkpoint = days > requirement ? days : requirement
   if (checkpoint === 0) {
     checkpoint = 1 // Avoid division by zero
   }
   // Normalize days and requirement based on the checkpoint
   const normalizedDays = (days / checkpoint) * 100
-  const normalizedRequirement = (requirement / checkpoint) * 100
-
-  const colorStops = [
-    {
-      offset: 0,
-      color: greenColor,
-      opacity: 1,
-    },
-  ]
-  const stops = [0, 100]
-
-  if (showRed) {
-    stops[0] = normalizedRequirement
-    colorStops.push({
-      offset: normalizedRequirement,
-      color: redColor,
-      opacity: 1,
-    })
-  }
 
   return (
     <SecondaryCard title={title} icon={icon}>
@@ -64,19 +34,20 @@ const GradientRadialChart: React.FC<{
               speed: 1000,
             },
           },
-          labels: [label],
           plotOptions: {
             radialBar: {
               startAngle: -90,
               endAngle: 90,
               dataLabels: {
                 show: true,
+                name: {
+                  show: false,
+                },
                 value: {
-                  formatter: () => {
-                    return `${days} days`
-                  },
-                  color: theme === 'dark' ? '#fff' : '#000',
-                  fontSize: '16px',
+                  formatter: () => `${days} days`,
+                  color: theme === 'dark' ? '#ececec' : '#1E1E2C',
+                  fontSize: '24px',
+                  show: true,
                 },
               },
               track: {
@@ -85,19 +56,14 @@ const GradientRadialChart: React.FC<{
             },
           },
           fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'dark',
-              type: 'horizontal',
-              shadeIntensity: 0.5,
-              gradientToColors: [redColor],
-              stops: stops,
-              colorStops: colorStops,
-            },
+            type: 'image',
+            image: {
+              src: ['/img/gradient.png'],
+            }
           },
         }}
         series={[normalizedDays]}
-        height={450}
+        height={400}
         type="radialBar"
       />
     </SecondaryCard>
