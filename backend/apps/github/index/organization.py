@@ -61,4 +61,4 @@ class OrganizationIndex(IndexBase):
           QuerySet: A queryset of Organization objects.
 
         """
-        return Organization.objects.filter(is_owasp_organization=True)
+        return Organization.objects.filter(is_owasp_related_organization=True)
