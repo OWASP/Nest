@@ -25,7 +25,9 @@ class Organization(
     description = models.CharField(
         verbose_name="Description", max_length=1000, blank=True, default=""
     )
-    is_owasp_organization = models.BooleanField(verbose_name="Is OWASP organization", default=True)
+    is_owasp_related_organization = models.BooleanField(
+        verbose_name="Is OWASP related organization", default=True
+    )
 
     def __str__(self) -> str:
         """Return a human-readable representation of the organization.
@@ -34,7 +36,7 @@ class Organization(
             str: The name of the organization.
 
         """
-        return f"{self.name}"
+        return self.name
 
     def from_github(self, gh_organization) -> None:
         """Update the instance based on GitHub organization data.
