@@ -1,29 +1,30 @@
 """Issue API."""
 
-from rest_framework import serializers, viewsets
+from datetime import datetime
+
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.github.models.issue import Issue
 
-
-# Serializers define the API representation.
-class IssueSerializer(serializers.HyperlinkedModelSerializer):
-    """Issue serializer."""
-
-    class Meta:
-        model = Issue
-        fields = (
-            "title",
-            "body",
-            "state",
-            "url",
-            "created_at",
-            "updated_at",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class IssueViewSet(viewsets.ReadOnlyModelViewSet):
-    """Issue view set."""
+class IssueSchema(BaseModel):
+    """Schema for Issue."""
 
-    queryset = Issue.objects.all()
-    serializer_class = IssueSerializer
+    model_config = {"from_attributes": True}
+
+    body: str
+    created_at: datetime
+    title: str
+    state: str
+    updated_at: datetime
+    url: str
+
+
+@router.get("/", response=list[IssueSchema])
+def get_issue(request: HttpRequest) -> list[IssueSchema]:
+    """Get all issues."""
+    return Issue.objects.all()

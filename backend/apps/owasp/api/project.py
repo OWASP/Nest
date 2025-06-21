@@ -1,28 +1,29 @@
 """Project API."""
 
-from rest_framework import serializers, viewsets
+from datetime import datetime
+
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.owasp.models.project import Project
 
-
-# Serializers define the API representation.
-class ProjectSerializer(serializers.HyperlinkedModelSerializer):
-    """Project serializer."""
-
-    class Meta:
-        model = Project
-        fields = (
-            "name",
-            "description",
-            "level",
-            "created_at",
-            "updated_at",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
-    """Project view set."""
+class ProjectSchema(BaseModel):
+    """Schema for Project."""
 
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
+    model_config = {"from_attributes": True}
+
+    created_at: datetime
+    description: str
+    level: str
+    name: str
+    updated_at: datetime
+
+
+@router.get("/", response=list[ProjectSchema])
+def list_projects(request: HttpRequest) -> list[ProjectSchema]:
+    """Get all projects."""
+    return Project.objects.all()

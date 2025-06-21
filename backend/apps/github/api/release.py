@@ -1,28 +1,29 @@
 """Release API."""
 
-from rest_framework import serializers, viewsets
+from datetime import datetime
+
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.github.models.release import Release
 
-
-# Serializers define the API representation.
-class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
-    """Release serializer."""
-
-    class Meta:
-        model = Release
-        fields = (
-            "name",
-            "tag_name",
-            "description",
-            "created_at",
-            "published_at",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class ReleaseViewSet(viewsets.ReadOnlyModelViewSet):
-    """Release view set."""
+class ReleaseSchema(BaseModel):
+    """Schema for Release."""
 
-    queryset = Release.objects.all()
-    serializer_class = ReleaseSerializer
+    model_config = {"from_attributes": True}
+
+    created_at: datetime
+    description: str
+    name: str
+    published_at: datetime
+    tag_name: str
+
+
+@router.get("/", response=list[ReleaseSchema])
+def get_release(request: HttpRequest) -> list[ReleaseSchema]:
+    """Get all releases."""
+    return Release.objects.all()

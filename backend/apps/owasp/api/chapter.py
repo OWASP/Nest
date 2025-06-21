@@ -1,28 +1,29 @@
 """Chapter API."""
 
-from rest_framework import serializers, viewsets
+from datetime import datetime
+
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.owasp.models.chapter import Chapter
 
-
-# Serializers define the API representation.
-class ChapterSerializer(serializers.HyperlinkedModelSerializer):
-    """Chapter serializer."""
-
-    class Meta:
-        model = Chapter
-        fields = (
-            "name",
-            "country",
-            "region",
-            "created_at",
-            "updated_at",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class ChapterViewSet(viewsets.ReadOnlyModelViewSet):
-    """Chapter view set."""
+class ChapterSchema(BaseModel):
+    """Schema for Chapter."""
 
-    queryset = Chapter.objects.all()
-    serializer_class = ChapterSerializer
+    model_config = {"from_attributes": True}
+
+    country: str
+    created_at: datetime
+    name: str
+    region: str
+    updated_at: datetime
+
+
+@router.get("/", response=list[ChapterSchema])
+def list_chapters(request: HttpRequest) -> list[ChapterSchema]:
+    """Get all chapters."""
+    return Chapter.objects.all()

@@ -25,7 +25,7 @@ class SlackConfig(AppConfig):
 if SlackConfig.app:
 
     @SlackConfig.app.error
-    def error_handler(error, body, *args, **kwargs) -> None:  # noqa: ARG001
+    def error_handler(error, body, *args, **kwargs) -> None:
         """Handle Slack application errors.
 
         Args:
@@ -39,7 +39,7 @@ if SlackConfig.app:
 
     @SlackConfig.app.use
     def log_events(
-        client: WebClient,  # noqa: ARG001
+        client: WebClient,
         context: dict,
         logger: logging.Logger,
         payload: dict,

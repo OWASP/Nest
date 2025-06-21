@@ -1,26 +1,25 @@
 """Event API."""
 
-from rest_framework import serializers, viewsets
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.owasp.models.event import Event
 
-
-# Serializers define the API representation.
-class EventSerializer(serializers.HyperlinkedModelSerializer):
-    """Event serializer."""
-
-    class Meta:
-        model = Event
-        fields = (
-            "name",
-            "description",
-            "url",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class EventViewSet(viewsets.ReadOnlyModelViewSet):
-    """Event view set."""
+class EventSchema(BaseModel):
+    """Schema for Event."""
 
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
+    model_config = {"from_attributes": True}
+
+    description: str
+    name: str
+    url: str
+
+
+@router.get("/", response=list[EventSchema])
+def list_events(request: HttpRequest) -> list[EventSchema]:
+    """Get all events."""
+    return Event.objects.all()

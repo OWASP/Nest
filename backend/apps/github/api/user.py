@@ -1,60 +1,49 @@
 """User API."""
 
-from rest_framework import serializers, viewsets
-from rest_framework.decorators import action
+from datetime import datetime
+
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 from rest_framework.response import Response
 
 from apps.github.models.user import User
 
-
-# Serializers define the API representation.
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    """User serializer."""
-
-    class Meta:
-        model = User
-        fields = (
-            "avatar_url",
-            "bio",
-            "company",
-            "email",
-            "followers_count",
-            "following_count",
-            "location",
-            "login",
-            "name",
-            "public_repositories_count",
-            "title",
-            "twitter_username",
-            "url",
-            "created_at",
-            "updated_at",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    """User view set."""
+class UserSchema(BaseModel):
+    """Schema for User."""
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    model_config = {"from_attributes": True}
 
-    @action(detail=False, methods=["get"], url_path="login/(?P<login>[^/.]+)")
-    def get_user_by_login(self, request, login=None):
-        """Retrieve a user by their login.
+    avatar_url: str
+    bio: str
+    company: str
+    created_at: datetime
+    email: str
+    followers_count: int
+    following_count: int
+    location: str
+    login: str
+    name: str
+    public_repositories_count: int
+    title: str
+    twitter_username: str
+    updated_at: datetime
+    url: str
 
-        Args:
-            request (Request): The HTTP request object.
-            login (str, optional): The login of the user to retrieve.
 
-        Returns:
-            Response: The serialized user data or a 404 error if the user is not found.
+@router.get("/", response=list[UserSchema])
+def get_user(request: HttpRequest) -> list[UserSchema]:
+    """Get all users."""
+    return User.objects.all()
 
-        """
-        try:
-            user = User.objects.get(login=login)
-            serializer = self.get_serializer(user)
-            data = serializer.data
-            return Response(data)
-        except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=404)
+
+@router.get("/login/{login}", response=UserSchema)
+def get_user_by_login(request: HttpRequest, login: str) -> UserSchema | None:
+    """Get user by login."""
+    try:
+        return User.objects.get(login=login)
+    except User.DoesNotExist:
+        return Response({"detail": "User not found."}, status=404)

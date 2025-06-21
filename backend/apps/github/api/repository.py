@@ -1,27 +1,28 @@
 """Repository API."""
 
-from rest_framework import serializers, viewsets
+from datetime import datetime
+
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.github.models.repository import Repository
 
-
-# Serializers define the API representation.
-class RepositorySerializer(serializers.HyperlinkedModelSerializer):
-    """Repository serializer."""
-
-    class Meta:
-        model = Repository
-        fields = (
-            "name",
-            "description",
-            "created_at",
-            "updated_at",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class RepositoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """Repository view set."""
+class RepositorySchema(BaseModel):
+    """Schema for Repository."""
 
-    queryset = Repository.objects.all()
-    serializer_class = RepositorySerializer
+    model_config = {"from_attributes": True}
+
+    created_at: datetime
+    description: str
+    name: str
+    updated_at: datetime
+
+
+@router.get("/", response=list[RepositorySchema])
+def get_repository(request: HttpRequest) -> list[RepositorySchema]:
+    """Get all repositories."""
+    return Repository.objects.all()

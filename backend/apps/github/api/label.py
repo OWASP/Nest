@@ -1,26 +1,25 @@
 """Label API."""
 
-from rest_framework import serializers, viewsets
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.github.models.label import Label
 
-
-# Serializers define the API representation.
-class LabelSerializer(serializers.HyperlinkedModelSerializer):
-    """Label serializer."""
-
-    class Meta:
-        model = Label
-        fields = (
-            "name",
-            "description",
-            "color",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class LabelViewSet(viewsets.ReadOnlyModelViewSet):
-    """Label view set."""
+class LabelSchema(BaseModel):
+    """Schema for Label."""
 
-    queryset = Label.objects.all()
-    serializer_class = LabelSerializer
+    model_config = {"from_attributes": True}
+
+    color: str
+    description: str
+    name: str
+
+
+@router.get("/", response=list[LabelSchema])
+def get_label(request: HttpRequest) -> list[LabelSchema]:
+    """Get all labels."""
+    return Label.objects.all()
