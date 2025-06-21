@@ -60,7 +60,12 @@ class TestHandleMethod:
 
     def test_handle_with_filtered_sponsors(self, mock_sponsor, mock_get_content, command):
         """Test handle when some sponsors are filtered out by update_data returning None."""
-        mock_get_content.return_value = "- name: Valid Sponsor\n  url: https://valid.com\n- name: Invalid Sponsor\n  url: https://invalid.com\n"
+        mock_get_content.return_value = (
+            "- name: Valid Sponsor\n"
+            "  url: https://valid.com\n"
+            "- name: Invalid Sponsor\n"
+            "  url: https://invalid.com\n"
+        )
         mock_valid_sponsor = MagicMock()
         mock_sponsor.update_data.side_effect = [mock_valid_sponsor, None]
         command.handle()

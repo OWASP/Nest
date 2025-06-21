@@ -1,6 +1,6 @@
 """Tests for the owasp_update_events Django management command."""
 
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 from django.core.management.base import BaseCommand
@@ -64,13 +64,28 @@ class TestHandleMethod:
         mock_get_content.assert_called_once_with(
             "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/events.yml"
         )
-        
+
         assert mock_event.update_data.call_count == 3
-        mock_event.update_data.assert_has_calls([
-            call("Global Events", {'name': 'Global AppSec', 'url': 'https://globalappsec.com'}, save=False),
-            call("Regional Events", {'name': 'AppSec Conference', 'url': 'https://appsecconf.org'}, save=False),
-            call("Regional Events", {'name': 'AppSec EU', 'url': 'https://appseceu.org'}, save=False),
-        ], any_order=True)
+        mock_event.update_data.assert_has_calls(
+            [
+                call(
+                    "Global Events",
+                    {"name": "Global AppSec", "url": "https://globalappsec.com"},
+                    save=False,
+                ),
+                call(
+                    "Regional Events",
+                    {"name": "AppSec Conference", "url": "https://appsecconf.org"},
+                    save=False,
+                ),
+                call(
+                    "Regional Events",
+                    {"name": "AppSec EU", "url": "https://appseceu.org"},
+                    save=False,
+                ),
+            ],
+            any_order=True,
+        )
 
         mock_event.bulk_save.assert_called_once_with([mock_event1, mock_event2, mock_event3])
 

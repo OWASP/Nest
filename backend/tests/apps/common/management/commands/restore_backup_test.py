@@ -1,6 +1,9 @@
 """Tests for the restore_backup Django management command."""
 
+from contextlib import suppress
 from unittest.mock import MagicMock, patch
+
+from django.core.management.base import BaseCommand
 
 from apps.common.management.commands.restore_backup import Command
 
@@ -54,16 +57,14 @@ class TestRestoreBackupCommand:
         mock_call_command.side_effect = Exception("Loaddata failed")
 
         command = Command()
-        try:
+        with suppress(Exception):
             command.handle()
-        except Exception:
-            pass
 
         mock_unregister.assert_called_once()
-        
+
         mock_atomic.return_value.__enter__.assert_called_once()
         mock_atomic.return_value.__exit__.assert_called_once()
-        
+
         mock_register.assert_called_once()
 
     @patch("apps.common.management.commands.restore_backup.unregister_indexes")
@@ -82,13 +83,11 @@ class TestRestoreBackupCommand:
         mock_register.return_value = None
 
         command = Command()
-        try:
+        with suppress(Exception):
             command.handle()
-        except Exception:
-            pass
 
         mock_unregister.assert_called_once()
-        
+
         mock_atomic.assert_not_called()
         mock_call_command.assert_not_called()
         mock_register.assert_not_called()
@@ -112,10 +111,8 @@ class TestRestoreBackupCommand:
         mock_call_command.return_value = None
 
         command = Command()
-        try:
+        with suppress(Exception):
             command.handle()
-        except Exception:
-            pass
 
         mock_unregister.assert_called_once()
         mock_atomic.assert_called_once()
@@ -133,5 +130,5 @@ class TestRestoreBackupCommand:
     def test_command_inheritance(self):
         """Test that the command inherits from BaseCommand."""
         command = Command()
-        from django.core.management.base import BaseCommand
+
         assert isinstance(command, BaseCommand)

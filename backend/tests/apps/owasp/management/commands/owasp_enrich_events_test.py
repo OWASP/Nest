@@ -1,6 +1,6 @@
 """Tests for the owasp_enrich_events Django management command."""
 
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.management.base import BaseCommand
@@ -51,11 +51,11 @@ class TestHandleMethod:
     def test_full_enrichment(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
         """Test full enrichment for an event with no data."""
         mock_event_instance = MagicMock(
-            url="http://example.com/event",
+            url="https://example.com/event",
             summary=None,
             suggested_location=None,
             latitude=None,
-            longitude=None
+            longitude=None,
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]
@@ -68,7 +68,9 @@ class TestHandleMethod:
         command.handle(offset=0)
 
         mock_event_instance.generate_summary.assert_called_once_with(mock_summary_prompt)
-        mock_event_instance.generate_suggested_location.assert_called_once_with(prompt=mock_location_prompt)
+        mock_event_instance.generate_suggested_location.assert_called_once_with(
+            prompt=mock_location_prompt
+        )
         mock_event_instance.generate_geo_location.assert_called_once()
         mock_sleep.assert_called_once_with(5)
         mock_event.bulk_save.assert_called_once_with(
@@ -76,14 +78,16 @@ class TestHandleMethod:
             fields=("latitude", "longitude", "suggested_location", "summary"),
         )
 
-    def test_partial_enrichment_summary_exists(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
+    def test_partial_enrichment_summary_exists(
+        self, mock_logger, mock_sleep, mock_prompt, mock_event, command
+    ):
         """Test enrichment when summary already exists."""
         mock_event_instance = MagicMock(
-            url="http://example.com/event",
+            url="https://example.com/event",
             summary="Already summarized.",
             suggested_location=None,
             latitude=None,
-            longitude=None
+            longitude=None,
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]
@@ -99,7 +103,9 @@ class TestHandleMethod:
         mock_prompt.get_owasp_event_summary.return_value = None
         mock_prompt.get_owasp_event_suggested_location.return_value = None
 
-        mock_event_instance = MagicMock(summary=None, suggested_location=None, latitude=None, longitude=None)
+        mock_event_instance = MagicMock(
+            summary=None, suggested_location=None, latitude=None, longitude=None
+        )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]
 
@@ -108,15 +114,17 @@ class TestHandleMethod:
         mock_event_instance.generate_summary.assert_not_called()
         mock_event_instance.generate_suggested_location.assert_not_called()
         mock_event_instance.generate_geo_location.assert_called_once()
-    
-    def test_geolocation_exception(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
+
+    def test_geolocation_exception(
+        self, mock_logger, mock_sleep, mock_prompt, mock_event, command
+    ):
         """Test that an exception in generate_geo_location is logged."""
         mock_event_instance = MagicMock(
-            url="http://example.com/event",
+            url="https://example.com/event",
             summary=None,
             suggested_location=None,
             latitude=None,
-            longitude=None
+            longitude=None,
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]
@@ -125,17 +133,16 @@ class TestHandleMethod:
         mock_event_instance.generate_geo_location.side_effect = exception_to_raise
 
         command.handle(offset=0)
-        
+
         mock_logger.exception.assert_called_once_with(
-            "Could not get geo data for event",
-            extra={"url": mock_event_instance.url}
+            "Could not get geo data for event", extra={"url": mock_event_instance.url}
         )
         mock_sleep.assert_not_called()
 
     def test_no_events(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
         """Test command execution with no events."""
         mock_event.objects.order_by.return_value.__getitem__.return_value = []
-        
+
         command.handle(offset=0)
 
         mock_event.bulk_save.assert_called_once_with(
@@ -147,11 +154,13 @@ class TestHandleMethod:
     def test_offset_argument(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
         """Test that the offset argument is correctly applied."""
         mock_event.objects.order_by.return_value.count.return_value = 5
-        mock_event.objects.order_by.return_value.__getitem__.return_value = [] # Assume offset slices to empty
+        mock_event.objects.order_by.return_value.__getitem__.return_value = []
 
         command.handle(offset=2)
 
-        mock_event.objects.order_by.return_value.__getitem__.assert_called_once_with(slice(2, None))
+        mock_event.objects.order_by.return_value.__getitem__.assert_called_once_with(
+            slice(2, None)
+        )
 
     def test_all_data_exists(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
         """Test that no generation methods are called if all data exists."""
@@ -159,7 +168,7 @@ class TestHandleMethod:
             summary="Existing summary",
             suggested_location="Existing location",
             latitude=1.23,
-            longitude=4.56
+            longitude=4.56,
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]

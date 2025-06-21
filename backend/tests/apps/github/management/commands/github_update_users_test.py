@@ -15,15 +15,16 @@ class TestGithubUpdateUsersCommand:
         """Test that the command inherits from BaseCommand."""
         command = Command()
         from django.core.management.base import BaseCommand
+
         assert isinstance(command, BaseCommand)
 
     def test_add_arguments(self):
         """Test that the command adds the correct arguments."""
         command = Command()
         parser = MagicMock()
-        
+
         command.add_arguments(parser)
-        
+
         parser.add_argument.assert_called_once_with(
             "--offset", default=0, required=False, type=int
         )
@@ -36,13 +37,13 @@ class TestGithubUpdateUsersCommand:
         mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
         mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
         mock_user3 = MagicMock(id=3, title="User 3", contributions_count=0)
-        
+
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
         mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2, mock_user3]
-        
+
         mock_user.objects.order_by.return_value = mock_users_queryset
-        
+
         mock_contributions_queryset = MagicMock()
         mock_contributions_queryset.values.return_value.annotate.return_value = [
             {"user_id": 1, "total_contributions": 10},
@@ -53,7 +54,7 @@ class TestGithubUpdateUsersCommand:
 
         with patch("builtins.print") as mock_print:
             command = Command()
-            command.handle(**{"offset": 0})
+            command.handle(offset=0)
 
         mock_user.objects.order_by.assert_called_once_with("-created_at")
         mock_users_queryset.count.assert_called_once()
@@ -72,10 +73,6 @@ class TestGithubUpdateUsersCommand:
         assert mock_user3.contributions_count == 30
 
         assert mock_user.bulk_save.call_count == 2
-        calls = [
-            (([mock_user1, mock_user2],), {'fields': ('contributions_count',)}),
-            (([mock_user1, mock_user2, mock_user3],), {'fields': ('contributions_count',)})
-        ]
         assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2, mock_user3]
 
     @patch("apps.github.management.commands.github_update_users.User")
@@ -85,11 +82,11 @@ class TestGithubUpdateUsersCommand:
         """Test command execution with custom offset."""
         mock_user1 = MagicMock(id=2, title="User 2", contributions_count=0)
         mock_user2 = MagicMock(id=3, title="User 3", contributions_count=0)
-        
+
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
         mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2]
-        
+
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_contributions_queryset = MagicMock()
@@ -101,7 +98,7 @@ class TestGithubUpdateUsersCommand:
 
         with patch("builtins.print") as mock_print:
             command = Command()
-            command.handle(**{"offset": 1})
+            command.handle(offset=1)
 
         mock_user.objects.order_by.assert_called_once_with("-created_at")
         mock_users_queryset.count.assert_called_once()
@@ -120,15 +117,17 @@ class TestGithubUpdateUsersCommand:
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 3)
-    def test_handle_with_users_having_no_contributions(self, mock_repository_contributor, mock_user):
+    def test_handle_with_users_having_no_contributions(
+        self, mock_repository_contributor, mock_user
+    ):
         """Test command execution when users have no contributions."""
         mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
         mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
-        
+
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
         mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2]
-        
+
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_contributions_queryset = MagicMock()
@@ -137,7 +136,7 @@ class TestGithubUpdateUsersCommand:
 
         with patch("builtins.print") as mock_print:
             command = Command()
-            command.handle(**{"offset": 0})
+            command.handle(offset=0)
 
         assert mock_print.call_count == 2
         mock_print.assert_any_call("1 of 2     User 1")
@@ -155,11 +154,11 @@ class TestGithubUpdateUsersCommand:
     def test_handle_with_single_user(self, mock_repository_contributor, mock_user):
         """Test command execution with single user."""
         mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        
+
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 1
         mock_users_queryset.__getitem__.return_value = [mock_user1]
-        
+
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_contributions_queryset = MagicMock()
@@ -170,7 +169,7 @@ class TestGithubUpdateUsersCommand:
 
         with patch("builtins.print") as mock_print:
             command = Command()
-            command.handle(**{"offset": 0})
+            command.handle(offset=0)
 
         mock_print.assert_called_once_with("1 of 1     User 1")
 
@@ -187,7 +186,7 @@ class TestGithubUpdateUsersCommand:
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 0
         mock_users_queryset.__getitem__.return_value = []
-        
+
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_contributions_queryset = MagicMock()
@@ -196,7 +195,7 @@ class TestGithubUpdateUsersCommand:
 
         with patch("builtins.print") as mock_print:
             command = Command()
-            command.handle(**{"offset": 0})
+            command.handle(offset=0)
 
         mock_print.assert_not_called()
 
@@ -210,13 +209,13 @@ class TestGithubUpdateUsersCommand:
         """Test command execution when user count equals batch size."""
         mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
         mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
-        
+
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
         mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2]
-        
+
         mock_user.objects.order_by.return_value = mock_users_queryset
-        
+
         mock_contributions_queryset = MagicMock()
         mock_contributions_queryset.values.return_value.annotate.return_value = [
             {"user_id": 1, "total_contributions": 10},
@@ -226,7 +225,7 @@ class TestGithubUpdateUsersCommand:
 
         with patch("builtins.print") as mock_print:
             command = Command()
-            command.handle(**{"offset": 0})
+            command.handle(offset=0)
 
         assert mock_print.call_count == 2
         mock_print.assert_any_call("1 of 2     User 1")
