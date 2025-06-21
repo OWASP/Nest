@@ -288,8 +288,8 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           context: backend
           file: backend/docker/Dockerfile
-          platforms: linux/amd64
           load: true
+          platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
@@ -326,8 +326,8 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           context: frontend
           file: frontend/docker/Dockerfile
-          platforms: linux/amd64
           load: true
+          platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
 
@@ -508,8 +508,8 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           context: backend
           file: backend/docker/Dockerfile
-          platforms: linux/amd64
           load: true
+          platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
 
@@ -544,8 +544,8 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           context: frontend
           file: frontend/docker/Dockerfile
-          platforms: linux/amd64
           load: true
+          platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
 
