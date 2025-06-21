@@ -64,64 +64,66 @@ const GradientRadialChart: React.FC<{
 
   return (
     <SecondaryCard title={title} icon={icon}>
-      <Chart
-        key={theme}
-        options={{
-          chart: {
-            animations: {
-              enabled: true,
-              speed: 1000,
+      <div className="relative h-[200px] w-full">
+        <Chart
+          key={theme}
+          options={{
+            chart: {
+              animations: {
+                enabled: true,
+                speed: 1000,
+              },
             },
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: -135,
-              endAngle: 135,
-              dataLabels: {
-                show: true,
-                name: {
-                  show: false,
-                },
-                value: {
-                  formatter: () => `${days} ${pluralize(days, 'day', 'days')}`,
-                  color: theme === 'dark' ? '#ececec' : '#1E1E2C',
-                  fontSize: '20px',
+            plotOptions: {
+              radialBar: {
+                startAngle: -90,
+                endAngle: 90,
+                dataLabels: {
                   show: true,
-                  offsetY: 0,
+                  name: {
+                    show: false,
+                  },
+                  value: {
+                    formatter: () => `${days} ${pluralize(days, 'day', 'days')}`,
+                    color: theme === 'dark' ? '#ececec' : '#1E1E2C',
+                    fontSize: '20px',
+                    show: true,
+                    offsetY: 0,
+                  },
+                },
+                track: {
+                  background: theme === 'dark' ? '#1E1E2C' : '#ececec',
+                  margin: 0,
                 },
               },
-              track: {
-                background: theme === 'dark' ? '#1E1E2C' : '#ececec',
-                margin: 0,
+            },
+            fill: {
+              type: 'gradient',
+              gradient: {
+                shade: theme,
+                type: 'horizontal',
+                shadeIntensity: 0.5,
+                stops: stops,
+                colorStops: colorStops,
               },
             },
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: theme,
-              type: 'horizontal',
-              shadeIntensity: 0.5,
-              stops: stops,
-              colorStops: colorStops,
-            },
-          },
-        }}
-        series={[requirement ? normalizedDays : 0]}
-        height={400}
-        type="radialBar"
-      />
-      <div className="mt-0 flex justify-around">
-        <span className="text-md text-gray-800 dark:text-white md:ml-4">Active</span>
-        <span className="text-md text-gray-800 dark:text-white md:mr-4">Stale</span>
-      </div>
-      {requirement > 0 && (
-        <div className="mt-2 flex justify-center">
-          <span className="text-md text-center text-gray-800 dark:text-white">
-            {`Required: ${requirement} ${pluralize(requirement, 'day', 'days')}`}
-          </span>
+          }}
+          series={[requirement ? normalizedDays : 0]}
+          height={300}
+          type="radialBar"
+        />
+        <div className="pointer-events-none absolute bottom-4 left-0 right-0 flex justify-around">
+          <span className="text-md leading-none text-gray-800 dark:text-white">Active</span>
+          <span className="text-md leading-none text-gray-800 dark:text-white">Stale</span>
         </div>
-      )}
+        {requirement > 0 && (
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex justify-center">
+            <span className="text-md text-center text-gray-800 dark:text-white">
+              {`Required: ${requirement} ${pluralize(requirement, 'day', 'days')}`}
+            </span>
+          </div>
+        )}
+      </div>
     </SecondaryCard>
   )
 }
