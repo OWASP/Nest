@@ -59,7 +59,7 @@ const GradientRadialChart: React.FC<{
             type: 'image',
             image: {
               src: ['/img/gradient.png'],
-            }
+            },
           },
         }}
         series={[normalizedDays]}
