@@ -31,7 +31,7 @@ class Command(BaseCommand):
             "unassigned_issues_count": "unassigned_issues_count",
         }
         project_health_metrics = []
-        for project in Project.objects.all():
+        for project in Project.objects.filter(is_active=True):
             self.stdout.write(self.style.NOTICE(f"Evaluating metrics for project: {project.name}"))
             metrics = ProjectHealthMetrics(project=project)
 
