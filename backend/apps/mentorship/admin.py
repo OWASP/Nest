@@ -1,0 +1,107 @@
+"""Mentorship app admin."""
+
+from django.contrib import admin
+
+from apps.mentorship.models.enrollment import Enrollment
+from apps.mentorship.models.mentee import Mentee
+from apps.mentorship.models.mentor import Mentor
+from apps.mentorship.models.module import Module
+from apps.mentorship.models.program import Program
+from apps.mentorship.models.programmodule import ProgramModule
+
+
+class EnrollmentAdmin(admin.ModelAdmin):
+    """Admin view for Enrollment model."""
+
+    list_display = ("level",)
+
+
+class MenteeAdmin(admin.ModelAdmin):
+    """Admin view for Mentee model."""
+
+    list_display = (
+        "id",
+        "user",
+    )
+
+    search_fields = ("user__name",)
+
+
+class MentorAdmin(admin.ModelAdmin):
+    """Admin view for Mentor model."""
+
+    list_display = (
+        "id",
+        "user",
+        "years_of_experience",
+    )
+
+    search_fields = (
+        "user__name",
+        "domain",
+    )
+
+
+class ModuleAdmin(admin.ModelAdmin):
+    """Admin view for Module model."""
+
+    list_display = (
+        "name",
+        "project",
+    )
+
+    search_fields = (
+        "name",
+        "project__name",
+    )
+
+    filter_horizontal = ("mentors", "mentees")
+
+
+class ProgramAdmin(admin.ModelAdmin):
+    """Admin view for Program model."""
+
+    list_display = (
+        "id",
+        "name",
+        "status",
+        "start_date",
+        "end_date",
+    )
+
+    search_fields = (
+        "name",
+        "description",
+    )
+
+    list_filter = (
+        "status",
+        "start_date",
+        "end_date",
+    )
+
+    filter_horizontal = ("owners",)
+
+
+class ProgramModuleAdmin(admin.ModelAdmin):
+    """Admin view for ProgramModule model."""
+
+    list_display = (
+        "program",
+        "module",
+        "start_date",
+        "end_date",
+    )
+    search_fields = (
+        "program__name",
+        "module__name",
+    )
+    list_filter = ("program",)
+
+
+admin.site.register(Enrollment, EnrollmentAdmin)
+admin.site.register(Mentee, MenteeAdmin)
+admin.site.register(Mentor, MentorAdmin)
+admin.site.register(Module, ModuleAdmin)
+admin.site.register(Program, ProgramAdmin)
+admin.site.register(ProgramModule, ProgramModuleAdmin)
