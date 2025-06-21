@@ -19,6 +19,7 @@ class Conversation(TimestampedModel):
         db_table = "slack_conversations"
         verbose_name_plural = "Conversations"
 
+    # Slack conversation attributes.
     created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
     is_archived = models.BooleanField(verbose_name="Is archived", default=False)
     is_channel = models.BooleanField(verbose_name="Is channel", default=False)
@@ -35,6 +36,9 @@ class Conversation(TimestampedModel):
     topic = models.TextField(verbose_name="Topic", blank=True, default="")
     total_members_count = models.PositiveIntegerField(verbose_name="Members count", default=0)
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="channels")
+
+    # Additional attributes.
+    sync_messages = models.BooleanField(verbose_name="Sync messages", default=False)
 
     def __str__(self):
         """Channel human readable representation."""

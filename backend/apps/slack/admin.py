@@ -67,6 +67,10 @@ class ConversationAdmin(admin.ModelAdmin):
                 )
             },
         ),
+        (
+            "Additional attributes",
+            {"fields": ("sync_messages",)},
+        ),
     )
 
 
