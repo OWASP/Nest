@@ -2,6 +2,7 @@
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -14,6 +15,14 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     class Meta:
         db_table = "owasp_project_health_metrics"
         verbose_name_plural = "Project Health Metrics"
+
+        constraints = (
+            models.UniqueConstraint(
+                TruncDate("nest_created_at"),
+                models.F("project"),
+                name="unique_daily_project_health_metrics",
+            ),
+        )
 
     project = models.ForeignKey(
         "owasp.Project",
