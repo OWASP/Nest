@@ -15,6 +15,7 @@ class TestProjectHealthMetricsNode:
         }
         expected_field_names = {
             "age_days",
+            "created_at",
             "contributors_count",
             "forks_count",
             "is_funding_requirements_compliant",
@@ -49,6 +50,7 @@ class TestProjectHealthMetricsNode:
         ("field_name", "expected_type"),
         [
             ("age_days", int),
+            ("created_at", "datetime"),
             ("contributors_count", int),
             ("forks_count", int),
             ("is_funding_requirements_compliant", bool),

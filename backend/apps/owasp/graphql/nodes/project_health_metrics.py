@@ -1,5 +1,7 @@
 """OWASP Project Health Metrics Node."""
 
+from datetime import datetime
+
 import strawberry
 import strawberry_django
 
@@ -29,6 +31,11 @@ class ProjectHealthMetricsNode:
     def age_days(self) -> int:
         """Resolve project age in days."""
         return self.age_days
+
+    @strawberry.field
+    def created_at(self) -> datetime:
+        """Resolve metrics creation date."""
+        return self.nest_created_at
 
     @strawberry.field
     def last_commit_days(self) -> int:
