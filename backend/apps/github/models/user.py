@@ -76,7 +76,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         # Direct fields.
         for model_field, gh_field in field_mapping.items():
-            value = getattr(gh_user, gh_field)
+            value = getattr(gh_user, gh_field, None)
             if value is not None:
                 setattr(self, model_field, value)
 
@@ -102,12 +102,13 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         }
 
     @staticmethod
-    def update_data(gh_user, *, save: bool = True) -> User | None:
+    def update_data(gh_user, *, save: bool = True, **kwargs) -> User | None:
         """Update GitHub user data.
 
         Args:
             gh_user (github.NamedUser.NamedUser): The GitHub user object.
             save (bool, optional): Whether to save the instance.
+            **kwargs: optional extra attributes.
 
         Returns:
             User: The updated or created user instance.
@@ -123,6 +124,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             user = User(node_id=user_node_id)
 
         user.from_github(gh_user)
+
+        for name, value in kwargs.items():
+            setattr(user, name, value)
+
         if save:
             user.save()
 

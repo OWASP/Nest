@@ -5,6 +5,8 @@ clean-backend-dependencies:
 
 clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
+	@docker container rm -f nest-cache >/dev/null 2>&1 || true
+	@docker container rm -f nest-db >/dev/null 2>&1 || true
 	@docker image rm -f docker-backend >/dev/null 2>&1 || true
 	@docker volume rm -f docker_backend-venv >/dev/null 2>&1 || true
 
@@ -146,6 +148,15 @@ recreate-schema:
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
 	  	$(MAKE) exec-db-command-it 2>/dev/null
 	$(MAKE) migrate
+
+restore-backup:
+	@echo "Restoring Nest backup"
+	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
+
+save-backup:
+	@echo "Saving Nest backup"
+	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
+	@gzip backend/data/backup.json
 
 setup:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it

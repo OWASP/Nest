@@ -51,8 +51,8 @@ prune:
 
 run:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose -f docker/docker-compose-local.yaml build && \
-	docker compose -f docker/docker-compose-local.yaml up --remove-orphans
+	docker compose -f docker-compose/local.yaml build && \
+	docker compose -f docker-compose/local.yaml --project-name nest-local up --remove-orphans
 
 test: \
 	test-nest-app \

@@ -5,7 +5,7 @@ const config: Config = {
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/api/**',
+    '!src/app/api/**',
     '!src/app/**/layout.tsx',
     '!src/components/**',
     '!src/hooks/**',
