@@ -42,8 +42,7 @@ const GradientRadialChart: React.FC<{
 
   if (showRed) {
     const orangeStop = normalizedRequirement / 2
-    stops[1] = orangeStop
-    stops.push(normalizedRequirement, 100)
+    stops.splice(1, 0, orangeStop, normalizedRequirement)
     colorStops.push(
       {
         offset: orangeStop,
@@ -52,6 +51,11 @@ const GradientRadialChart: React.FC<{
       },
       {
         offset: normalizedRequirement,
+        color: redColor,
+        opacity: 1,
+      },
+      {
+        offset: 100,
         color: redColor,
         opacity: 1,
       }
