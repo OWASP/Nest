@@ -47,7 +47,8 @@ class ProgramModule(models.Model):
 
     def save(self, *args, **kwargs):
         """Set default dates from program if not provided."""
-        self.start_date = self.start_date or self.program.start_date
+        if self.program:
+            self.start_date = self.start_date or self.program.start_date
         self.end_date = self.end_date or self.program.end_date
         super().save(*args, **kwargs)
 

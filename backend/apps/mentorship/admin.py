@@ -13,7 +13,9 @@ from apps.mentorship.models.programmodule import ProgramModule
 class EnrollmentAdmin(admin.ModelAdmin):
     """Admin view for Enrollment model."""
 
-    list_display = ("level",)
+    list_display = ("mentee", "program", "level")
+    search_fields = ("mentee__user__login", "program__name")
+    list_filter = ("level", "program")
 
 
 class MenteeAdmin(admin.ModelAdmin):

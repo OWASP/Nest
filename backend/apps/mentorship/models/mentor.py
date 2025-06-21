@@ -39,4 +39,4 @@ class Mentor(TimestampedModel):
             str: The GitHub username of the mentor.
 
         """
-        return self.user.login
+        return self.user.login if self.user else "Unlinked Mentor"
