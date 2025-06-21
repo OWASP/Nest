@@ -17,11 +17,46 @@ const GradientRadialChart: React.FC<{
   requirement: number
 }> = ({ title, days, icon, requirement }) => {
   const { theme } = useTheme()
-  let checkpoint = days > requirement ? days : requirement
+  let checkpoint = requirement
+  let showRed = false
+  const stops = [0, 100]
+  const greenColor = '#0ef94e'
+  const redColor = '#f94e0e' // Red color for the end of the gradient
+  const orangeColor = '#f9b90e' // Orange color for the middle of the gradient
+  const colorStops = [
+    {
+      offset: 0,
+      color: greenColor,
+      opacity: 1,
+    },
+  ]
+  if (days > requirement) {
+    checkpoint = days
+    showRed = true
+  }
   // Ensure checkpoint is at least 1 to avoid division by zero
   checkpoint = checkpoint || 1
   // Normalize days based on the checkpoint
   const normalizedDays = (days / checkpoint) * 100
+  const normalizedRequirement = (requirement / checkpoint) * 100
+
+  if (showRed) {
+    const orangeStop = normalizedRequirement / 2
+    stops[1] = orangeStop
+    stops.push(normalizedRequirement, 100)
+    colorStops.push(
+      {
+        offset: orangeStop,
+        color: orangeColor,
+        opacity: 1,
+      },
+      {
+        offset: normalizedRequirement,
+        color: redColor,
+        opacity: 1,
+      }
+    )
+  }
 
   return (
     <SecondaryCard title={title} icon={icon}>
@@ -61,13 +96,17 @@ const GradientRadialChart: React.FC<{
             },
           },
           fill: {
-            type: 'image',
-            image: {
-              src: ['/img/gradient.png'],
+            type: 'gradient',
+            gradient: {
+              shade: theme,
+              type: 'horizontal',
+              shadeIntensity: 0.5,
+              stops: stops,
+              colorStops: colorStops,
             },
           },
         }}
-        series={[normalizedDays]}
+        series={[requirement ? normalizedDays : 0]}
         height={400}
         type="radialBar"
       />
