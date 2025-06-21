@@ -231,8 +231,8 @@ class TestSlackSyncMessagesCommand:
         assert "Processing channel: general" in output
         assert "Finished processing all workspaces" in output
 
-    def test_create_message_from_data_no_user_or_bot(self, command, mock_conversation):
-        """Test _create_message_from_data when no user or bot_id is provided."""
+    def test_create_message_no_user_or_bot(self, command, mock_conversation):
+        """Test _create_message when no user or bot_id is provided."""
         message_data = {
             "ts": TEST_MESSAGE_TS,
             "text": "Hello world!",
@@ -253,7 +253,7 @@ class TestSlackSyncMessagesCommand:
             patch.object(Message, "update_data", return_value=mock_message),
             patch.object(Member, "update_data", return_value=Mock(spec=Member)),
         ):
-            result = command._create_message_from_data(
+            result = command._create_message(
                 client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
@@ -265,10 +265,10 @@ class TestSlackSyncMessagesCommand:
         assert result is not None
 
     @patch("apps.slack.management.commands.slack_sync_messages.time.sleep")
-    def test_create_message_from_data_member_not_found(
+    def test_create_message_member_not_found(
         self, mock_sleep, command, mock_conversation, mock_user_info_response
     ):
-        """Test _create_message_from_data when member is not found."""
+        """Test _create_message when member is not found."""
         message_data = {
             "ts": TEST_MESSAGE_TS,
             "text": "Hello world!",
@@ -286,7 +286,7 @@ class TestSlackSyncMessagesCommand:
             patch.object(Message, "update_data", return_value=Mock(spec=Message)),
         ):
             command.stdout = stdout
-            result = command._create_message_from_data(
+            result = command._create_message(
                 client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
@@ -297,13 +297,13 @@ class TestSlackSyncMessagesCommand:
 
         assert result is not None
         output = stdout.getvalue()
-        assert "Created new member: U12345" in output
+        assert "Created a new member: U12345" in output
 
     @patch("apps.slack.management.commands.slack_sync_messages.Message.update_data")
-    def test_create_message_from_data_regular_message(
+    def test_create_message_regular_message(
         self, mock_update_data, command, mock_conversation, mock_member
     ):
-        """Test _create_message_from_data with regular message."""
+        """Test _create_message with regular message."""
         message_data = {
             "ts": TEST_MESSAGE_TS,
             "text": "Hello world!",
@@ -315,7 +315,7 @@ class TestSlackSyncMessagesCommand:
 
         mock_client = Mock()
         with patch.object(Member.objects, "get", return_value=mock_member):
-            result = command._create_message_from_data(
+            result = command._create_message(
                 client=mock_client,
                 message_data=message_data,
                 conversation=mock_conversation,
@@ -394,7 +394,7 @@ class TestSlackSyncMessagesCommand:
         parser.add_argument.assert_any_call(
             "--batch-size",
             type=int,
-            default=200,
+            default=999,
             help="Number of messages to retrieve per request",
         )
 

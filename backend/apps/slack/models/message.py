@@ -22,7 +22,6 @@ class Message(TimestampedModel):
     has_replies = models.BooleanField(verbose_name="Has replies", default=False)
     raw_data = models.JSONField(verbose_name="Raw data", default=dict)
     slack_message_id = models.CharField(verbose_name="Slack message ID", max_length=50)
-    text = models.TextField(verbose_name="Text")
 
     # FKs.
     author = models.ForeignKey(
@@ -41,7 +40,23 @@ class Message(TimestampedModel):
 
     def __str__(self):
         """Human readable representation."""
-        return truncate(self.text, 50)
+        return (
+            f"{self.raw_data['channel']} huddle"
+            if self.raw_data.get("subtype") == "huddle_thread"
+            else truncate(self.raw_data["text"], 50)
+        )
+
+    @property
+    def latest_reply(self) -> "Message | None":
+        """Get the latest reply to this message."""
+        return (
+            Message.objects.filter(
+                conversation=self.conversation,
+                parent_message=self,
+            )
+            .order_by("-created_at")
+            .first()
+        )
 
     def from_slack(
         self,
@@ -54,9 +69,9 @@ class Message(TimestampedModel):
         """Update instance based on Slack message data."""
         self.created_at = datetime.fromtimestamp(float(message_data["ts"]), tz=UTC)
         self.has_replies = message_data.get("reply_count", 0) > 0
+        self.is_bot = message_data.get("bot_id") is not None
         self.raw_data = message_data
         self.slack_message_id = message_data.get("ts", "")
-        self.text = message_data.get("text", "")
 
         self.author = author
         self.conversation = conversation
