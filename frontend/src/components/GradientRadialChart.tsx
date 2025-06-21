@@ -75,11 +75,8 @@ const GradientRadialChart: React.FC<{
           },
           plotOptions: {
             radialBar: {
-              hollow: {
-                margin: 0,
-              },
-              startAngle: -90,
-              endAngle: 90,
+              startAngle: -135,
+              endAngle: 135,
               dataLabels: {
                 show: true,
                 name: {
@@ -118,6 +115,13 @@ const GradientRadialChart: React.FC<{
         <span className="text-md text-gray-800 dark:text-white md:ml-4">Active</span>
         <span className="text-md text-gray-800 dark:text-white md:mr-4">Stale</span>
       </div>
+      {requirement > 0 && (
+        <div className="mt-2 flex justify-center">
+          <span className="text-md text-center text-gray-800 dark:text-white">
+            {`Required: ${requirement} ${pluralize(requirement, 'day', 'days')}`}
+          </span>
+        </div>
+      )}
     </SecondaryCard>
   )
 }
