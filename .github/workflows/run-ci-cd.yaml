@@ -351,7 +351,7 @@ jobs:
             echo ""
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }} (${{ steps.backend-size.outputs.raw }} bytes)"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }} (${{ steps.frontend-size.outputs.raw }} bytes)"
-          } | tee /dev/tty >> $GITHUB_STEP_SUMMARY
+          } >> $GITHUB_STEP_SUMMARY
 
   scan-staging-images:
     name: Scan Staging Images
@@ -573,7 +573,7 @@ jobs:
             echo ""
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }} (${{ steps.backend-size.outputs.raw }} bytes)"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }} (${{ steps.frontend-size.outputs.raw }} bytes)"
-          } | tee /dev/tty >> $GITHUB_STEP_SUMMARY
+          } >> $GITHUB_STEP_SUMMARY
 
   scan-production-images:
     name: Scan Production Images
