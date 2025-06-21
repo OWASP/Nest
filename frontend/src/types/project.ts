@@ -1,4 +1,5 @@
 import type { Contributor } from 'types/contributor'
+import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { Organization } from 'types/organization'
@@ -18,6 +19,7 @@ export type Project = {
   contributorsCount: number
   description: string
   forksCount: number
+  healthMetrics?: HealthMetricsProps[]
   isActive: boolean
   issuesCount: number
   key: string
