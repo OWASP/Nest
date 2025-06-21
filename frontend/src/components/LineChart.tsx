@@ -30,6 +30,9 @@ const LineChart: React.FC<{
             },
             foreColor: color,
           },
+          tooltip: {
+            theme: theme,
+          },
           xaxis: {
             categories: labels,
           },
