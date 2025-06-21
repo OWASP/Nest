@@ -288,6 +288,7 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           context: backend
           file: backend/docker/Dockerfile
+          load: true
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
@@ -310,6 +311,15 @@ jobs:
           echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> frontend/.env
           echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
 
+      - name: Get backend image size
+        id: backend-size
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging"
+          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          HR_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "raw=$RAW_SIZE" >> $GITHUB_OUTPUT
+          echo "human_readable=$HR_SIZE" >> $GITHUB_OUTPUT
+
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
@@ -320,9 +330,28 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           context: frontend
           file: frontend/docker/Dockerfile
+          load: true
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging
+
+      - name: Get frontend image size
+        id: frontend-size
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging"
+          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          HR_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "raw=$RAW_SIZE" >> $GITHUB_OUTPUT
+          echo "human_readable=$HR_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Summarize Docker image sizes
+        run: |
+          {
+            echo "## Docker Images Size Report"
+            echo ""
+            echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }} (${{ steps.backend-size.outputs.raw }} bytes)"
+            echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }} (${{ steps.frontend-size.outputs.raw }} bytes)"
+          } | tee /dev/tty >> $GITHUB_STEP_SUMMARY
 
   scan-staging-images:
     name: Scan Staging Images
@@ -483,9 +512,19 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging-cache
           context: backend
           file: backend/docker/Dockerfile
+          load: true
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production
+
+      - name: Get backend image size
+        id: backend-size
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:production"
+          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          HR_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "raw=$RAW_SIZE" >> $GITHUB_OUTPUT
+          echo "human_readable=$HR_SIZE" >> $GITHUB_OUTPUT
 
       - name: Prepare frontend environment
         run: |
@@ -513,9 +552,28 @@ jobs:
             type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:staging-cache
           context: frontend
           file: frontend/docker/Dockerfile
+          load: true
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production
+
+      - name: Get frontend image size
+        id: frontend-size
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/owasp-nest-frontend:production"
+          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          HR_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "raw=$RAW_SIZE" >> $GITHUB_OUTPUT
+          echo "human_readable=$HR_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Summarize Docker image sizes
+        run: |
+          {
+            echo "## Docker Images Size Report"
+            echo ""
+            echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }} (${{ steps.backend-size.outputs.raw }} bytes)"
+            echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }} (${{ steps.frontend-size.outputs.raw }} bytes)"
+          } | tee /dev/tty >> $GITHUB_STEP_SUMMARY
 
   scan-production-images:
     name: Scan Production Images
