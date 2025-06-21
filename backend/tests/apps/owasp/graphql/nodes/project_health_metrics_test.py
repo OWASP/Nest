@@ -1,5 +1,7 @@
 """Test cases for ProjectHealthMetricsNode."""
 
+from datetime import datetime
+
 import pytest
 
 from apps.owasp.graphql.nodes.project_health_metrics import ProjectHealthMetricsNode
@@ -50,7 +52,7 @@ class TestProjectHealthMetricsNode:
         ("field_name", "expected_type"),
         [
             ("age_days", int),
-            ("created_at", "datetime"),
+            ("created_at", datetime),
             ("contributors_count", int),
             ("forks_count", int),
             ("is_funding_requirements_compliant", bool),
