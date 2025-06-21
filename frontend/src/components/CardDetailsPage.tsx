@@ -52,7 +52,7 @@ const DetailsCard = ({
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <h1 className="text-4xl font-bold">{title}</h1>
-          {isActive && (
+          {!isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive
             </span>
