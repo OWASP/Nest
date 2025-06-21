@@ -50,9 +50,9 @@ const DetailsCard = ({
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-row items-center">
-          <h1 className="mb-6 mt-4 text-4xl font-bold">{title}</h1>
-          {!isActive && (
+        <div className="mt-4 flex flex-row items-center">
+          <h1 className="text-4xl font-bold">{title}</h1>
+          {isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive
             </span>
