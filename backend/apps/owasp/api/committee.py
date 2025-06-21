@@ -1,27 +1,28 @@
 """Committee API."""
 
-from rest_framework import serializers, viewsets
+from datetime import datetime
+
+from django.http import HttpRequest
+from ninja import Router
+from pydantic import BaseModel
 
 from apps.owasp.models.committee import Committee
 
-
-# Serializers define the API representation.
-class CommitteeSerializer(serializers.HyperlinkedModelSerializer):
-    """Committee serializer."""
-
-    class Meta:
-        model = Committee
-        fields = (
-            "name",
-            "description",
-            "created_at",
-            "updated_at",
-        )
+router = Router()
 
 
-# ViewSets define the view behavior.
-class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
-    """Committee view set."""
+class CommitteeSchema(BaseModel):
+    """Schema for Committee."""
 
-    queryset = Committee.objects.all()
-    serializer_class = CommitteeSerializer
+    model_config = {"from_attributes": True}
+
+    name: str
+    description: str
+    created_at: datetime
+    updated_at: datetime
+
+
+@router.get("/", response=list[CommitteeSchema])
+def list_committees(request: HttpRequest) -> list[CommitteeSchema]:
+    """Get all committees."""
+    return Committee.objects.all()

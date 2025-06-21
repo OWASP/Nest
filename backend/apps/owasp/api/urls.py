@@ -1,15 +1,15 @@
 """GitHub API URLs."""
 
-from rest_framework import routers
+from ninja import Router
 
-from apps.owasp.api.chapter import ChapterViewSet
-from apps.owasp.api.committee import CommitteeViewSet
-from apps.owasp.api.event import EventViewSet
-from apps.owasp.api.project import ProjectViewSet
+from apps.owasp.api.chapter import router as chapter_router
+from apps.owasp.api.committee import router as committee_router
+from apps.owasp.api.event import router as event_router
+from apps.owasp.api.project import router as project_router
 
-router = routers.SimpleRouter()
+router = Router()
 
-router.register(r"owasp/chapters", ChapterViewSet)
-router.register(r"owasp/committees", CommitteeViewSet)
-router.register(r"owasp/events", EventViewSet)
-router.register(r"owasp/projects", ProjectViewSet)
+router.add_router(r"/chapters", chapter_router)
+router.add_router(r"/committees", committee_router)
+router.add_router(r"/events", event_router)
+router.add_router(r"/projects", project_router)
