@@ -67,6 +67,10 @@ class ConversationAdmin(admin.ModelAdmin):
                 )
             },
         ),
+        (
+            "Additional attributes",
+            {"fields": ("sync_messages",)},
+        ),
     )
 
 
@@ -90,6 +94,10 @@ class MemberAdmin(admin.ModelAdmin):
     actions = ("approve_suggested_users",)
     autocomplete_fields = ("user",)
     filter_horizontal = ("suggested_users",)
+    list_filter = (
+        "is_bot",
+        "workspace",
+    )
     search_fields = (
         "slack_user_id",
         "username",
@@ -129,15 +137,24 @@ class MemberAdmin(admin.ModelAdmin):
 
 
 class MessageAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("author", "conversation", "parent_message")
+    autocomplete_fields = (
+        "author",
+        "conversation",
+        "parent_message",
+    )
     list_display = (
-        "text",
+        "created_at",
         "has_replies",
         "author",
+        "conversation",
+    )
+    list_filter = (
+        "has_replies",
+        "conversation",
     )
     search_fields = (
         "slack_message_id",
-        "text",
+        "raw_data__text",
     )
 
 
