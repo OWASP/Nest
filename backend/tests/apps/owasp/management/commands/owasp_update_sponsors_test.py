@@ -39,11 +39,11 @@ class TestHandleMethod:
     def test_handle_with_valid_data(self, mock_sponsor, mock_get_content, command):
         """Test handle with valid YAML data from the repository."""
         mock_yaml_content = """
-- name: Sponsor One
-  url: https://sponsor.one
-- name: Sponsor Two
-  url: https://sponsor.two
-"""
+        - name: Sponsor One
+        url: https://sponsor.one
+        - name: Sponsor Two
+        url: https://sponsor.two
+        """
         mock_get_content.return_value = mock_yaml_content
 
         mock_sponsor1 = MagicMock()
