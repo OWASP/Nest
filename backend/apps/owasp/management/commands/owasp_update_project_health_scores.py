@@ -7,7 +7,7 @@ from apps.owasp.models.project_health_requirements import ProjectHealthRequireme
 
 
 class Command(BaseCommand):
-    help = "Update OWASP project health metrics score."
+    help = "Update OWASP project health scores."
 
     def handle(self, *args, **options):
         forward_fields = {
@@ -60,7 +60,10 @@ class Command(BaseCommand):
             metric.score = score
             project_health_metrics.append(metric)
 
-        ProjectHealthMetrics.bulk_save(project_health_metrics, fields=["score"])
-        self.stdout.write(
-            self.style.SUCCESS("Updated projects health metrics score successfully.")
+        ProjectHealthMetrics.bulk_save(
+            project_health_metrics,
+            fields=[
+                "score",
+            ],
         )
+        self.stdout.write(self.style.SUCCESS("Updated project health scores successfully."))

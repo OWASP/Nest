@@ -17,7 +17,7 @@ class TestUpdateProjectHealthMetricsCommand:
         self.stdout = StringIO()
         self.command = Command()
         with (
-            patch("apps.owasp.models.project.Project.objects.all") as projects_patch,
+            patch("apps.owasp.models.project.Project.objects.filter") as projects_patch,
             patch(
                 "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
             ) as bulk_save_patch,

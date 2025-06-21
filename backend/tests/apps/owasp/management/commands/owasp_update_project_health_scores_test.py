@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.management import call_command
 
-from apps.owasp.management.commands.owasp_update_project_health_metrics_scores import Command
+from apps.owasp.management.commands.owasp_update_project_health_scores import Command
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
-EXPECTED_SCORE = 52.0
+EXPECTED_SCORE = 34.0
 
 
 class TestUpdateProjectHealthMetricsScoreCommand:
@@ -41,7 +41,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             "forks_count": (5, 6),
             "last_release_days": (5, 6),
             "last_commit_days": (5, 6),
-            "open_issues_count": (5, 6),
+            "open_issues_count": (7, 6),
             "open_pull_requests_count": (5, 6),
             "owasp_page_last_update_days": (5, 6),
             "last_pull_request_days": (5, 6),
@@ -49,8 +49,8 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             "stars_count": (5, 6),
             "total_pull_requests_count": (5, 6),
             "total_releases_count": (5, 6),
-            "unanswered_issues_count": (5, 6),
-            "unassigned_issues_count": (5, 6),
+            "unanswered_issues_count": (7, 6),
+            "unassigned_issues_count": (7, 6),
         }
 
         # Create mock metrics with test data
@@ -68,12 +68,17 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_requirements.level = "test_level"
         # Execute command
         with patch("sys.stdout", new=self.stdout):
-            call_command("owasp_update_project_health_metrics_scores")
+            call_command("owasp_update_project_health_scores")
 
         self.mock_requirements.assert_called_once()
 
         # Check if score was calculated correctly
-        self.mock_bulk_save.assert_called_once_with([mock_metric], fields=["score"])
+        self.mock_bulk_save.assert_called_once_with(
+            [mock_metric],
+            fields=[
+                "score",
+            ],
+        )
         assert mock_metric.score == EXPECTED_SCORE
-        assert "Updated projects health metrics score successfully." in self.stdout.getvalue()
+        assert "Updated project health scores successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
