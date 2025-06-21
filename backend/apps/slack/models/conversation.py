@@ -1,11 +1,15 @@
 """Slack app conversation model."""
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.slack.models.workspace import Workspace
+
+if TYPE_CHECKING:  # pragma: no cover
+    from apps.slack.models.message import Message
 
 
 class Conversation(TimestampedModel):
@@ -35,6 +39,11 @@ class Conversation(TimestampedModel):
     def __str__(self):
         """Channel human readable representation."""
         return f"{self.name} - {self.workspace}"
+
+    @property
+    def latest_message(self) -> "Message | None":
+        """Get the latest message in the conversation."""
+        return self.messages.order_by("-created_at").first()
 
     def from_slack(self, conversation_data, workspace: Workspace) -> None:
         """Update instance based on Slack conversation data."""
