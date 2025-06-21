@@ -46,16 +46,17 @@ class TestHandleMethod:
         """Return a command instance with mocked stdout."""
         command = Command()
         command.stdout = MagicMock()
+
         return command
 
     def test_full_enrichment(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
         """Test full enrichment for an event with no data."""
         mock_event_instance = MagicMock(
-            url="https://example.com/event",
-            summary=None,
-            suggested_location=None,
             latitude=None,
             longitude=None,
+            suggested_location=None,
+            summary=None,
+            url="https://example.com/event",
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]
@@ -83,11 +84,11 @@ class TestHandleMethod:
     ):
         """Test enrichment when summary already exists."""
         mock_event_instance = MagicMock(
-            url="https://example.com/event",
-            summary="Already summarized.",
-            suggested_location=None,
             latitude=None,
             longitude=None,
+            suggested_location=None,
+            summary="Already summarized.",
+            url="https://example.com/event",
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]
@@ -120,11 +121,11 @@ class TestHandleMethod:
     ):
         """Test that an exception in generate_geo_location is logged."""
         mock_event_instance = MagicMock(
-            url="https://example.com/event",
-            summary=None,
-            suggested_location=None,
             latitude=None,
             longitude=None,
+            suggested_location=None,
+            summary=None,
+            url="https://example.com/event",
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]
@@ -165,10 +166,10 @@ class TestHandleMethod:
     def test_all_data_exists(self, mock_logger, mock_sleep, mock_prompt, mock_event, command):
         """Test that no generation methods are called if all data exists."""
         mock_event_instance = MagicMock(
-            summary="Existing summary",
-            suggested_location="Existing location",
             latitude=1.23,
             longitude=4.56,
+            suggested_location="Existing location",
+            summary="Existing summary",
         )
         mock_event.objects.order_by.return_value.count.return_value = 1
         mock_event.objects.order_by.return_value.__getitem__.return_value = [mock_event_instance]

@@ -40,9 +40,9 @@ class TestHandleMethod:
         """Test handle with valid YAML data from the repository."""
         mock_yaml_content = """
         - name: Sponsor One
-        url: https://sponsor.one
+          url: https://sponsor.one
         - name: Sponsor Two
-        url: https://sponsor.two
+          url: https://sponsor.two
         """
         mock_get_content.return_value = mock_yaml_content
 
@@ -68,30 +68,38 @@ class TestHandleMethod:
         )
         mock_valid_sponsor = MagicMock()
         mock_sponsor.update_data.side_effect = [mock_valid_sponsor, None]
+
         command.handle()
+
         assert mock_sponsor.update_data.call_count == 2
         mock_sponsor.bulk_save.assert_called_once_with([mock_valid_sponsor, None])
 
     def test_handle_with_no_sponsors_in_yaml(self, mock_sponsor, mock_get_content, command):
         """Test handle with YAML data that contains no sponsors."""
         mock_get_content.return_value = "[]"
+
         with patch("yaml.safe_load", return_value=[]):
             command.handle()
+
         mock_sponsor.update_data.assert_not_called()
         mock_sponsor.bulk_save.assert_called_once_with([])
 
     def test_handle_with_empty_yaml_data(self, mock_sponsor, mock_get_content, command):
         """Test handle with empty YAML data."""
         mock_get_content.return_value = ""
+
         with patch("yaml.safe_load", return_value=[]):
             command.handle()
+
         mock_sponsor.update_data.assert_not_called()
         mock_sponsor.bulk_save.assert_called_once_with([])
 
     def test_handle_with_no_data_from_repo(self, mock_sponsor, mock_get_content, command):
         """Test handle when the repository file is empty."""
         mock_get_content.return_value = ""
+
         with patch("yaml.safe_load", return_value=[]):
             command.handle()
+
         mock_sponsor.update_data.assert_not_called()
         mock_sponsor.bulk_save.assert_called_once_with([])

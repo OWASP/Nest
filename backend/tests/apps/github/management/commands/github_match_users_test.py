@@ -75,6 +75,7 @@ class TestProcessLeaders:
         """Return a command instance."""
         command = Command()
         command.stdout = MagicMock()
+
         return command
 
     @pytest.fixture
@@ -90,6 +91,7 @@ class TestProcessLeaders:
     def test_no_leaders(self, command):
         """Test with no leaders provided."""
         exact, fuzzy, unmatched = command.process_leaders([], 75, {})
+
         assert exact == []
         assert fuzzy == []
         assert unmatched == []
@@ -136,9 +138,7 @@ class TestProcessLeaders:
         with patch("apps.github.management.commands.github_match_users.fuzz") as mock_fuzz:
 
             def ratio(s1, s2):
-                if "peter" in s2.lower() and "pete" in s1.lower():
-                    return 85
-                return 50
+                return 85 if "peter" in s2.lower() and "pete" in s1.lower() else 50
 
             mock_fuzz.token_sort_ratio.side_effect = ratio
             exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 80, mock_users)
@@ -153,6 +153,7 @@ class TestProcessLeaders:
         """Test with duplicate leaders in raw list."""
         leaders_raw = ["john_doe", "john_doe"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 75, mock_users)
+
         assert len(exact) == 1
         assert mock_users[1] in exact
         assert fuzzy == []
@@ -162,6 +163,7 @@ class TestProcessLeaders:
         """Test with empty string and None in leaders raw list."""
         leaders_raw = ["", None, "john_doe"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 75, mock_users)
+
         assert len(exact) == 1
         assert mock_users[1] in exact
         assert fuzzy == []
@@ -175,6 +177,7 @@ class TestProcessLeaders:
         }
         leaders_raw = ["JohnDoe"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 75, users)
+
         assert len(exact) == 2
         assert users[1] in exact
         assert users[2] in exact
@@ -195,6 +198,7 @@ class TestHandleMethod:
         """Return a command instance with mocked stdout."""
         command = Command()
         command.stdout = MagicMock()
+
         return command
 
     def test_invalid_model_name(
@@ -279,6 +283,7 @@ class TestHandleMethod:
         unmatched_call = [
             c for c in command.stdout.write.call_args_list if "Unmatched" in c.args[0]
         ]
+
         assert len(unmatched_call) == 1
         assert "['some_leader']" in unmatched_call[0].args[0]
 
@@ -301,6 +306,7 @@ class TestHandleMethod:
         unmatched_call = [
             c for c in command.stdout.write.call_args_list if "Unmatched" in c.args[0]
         ]
+
         assert len(unmatched_call) == 0
 
         mock_chapter_instance.suggested_leaders.set.assert_called_once_with(set())

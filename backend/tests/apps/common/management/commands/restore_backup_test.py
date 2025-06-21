@@ -49,12 +49,12 @@ class TestRestoreBackupCommand:
         mock_register,
         mock_unregister,
     ):
-        """Test that indexing is re-enabled even if loaddata fails."""
+        """Test that indexing is re-enabled even if data loading fails."""
         mock_atomic.return_value.__enter__ = MagicMock()
         mock_atomic.return_value.__exit__ = MagicMock()
         mock_unregister.return_value = None
         mock_register.return_value = None
-        mock_call_command.side_effect = Exception("Loaddata failed")
+        mock_call_command.side_effect = Exception("Data loading failed")
 
         command = Command()
         with suppress(Exception):
@@ -71,7 +71,7 @@ class TestRestoreBackupCommand:
     @patch("apps.common.management.commands.restore_backup.register_indexes")
     @patch("apps.common.management.commands.restore_backup.call_command")
     @patch("apps.common.management.commands.restore_backup.transaction.atomic")
-    def test_handle_with_exception_during_unregister(
+    def test_handle_with_exception_during_unregister_indexing(
         self,
         mock_atomic,
         mock_call_command,
@@ -79,7 +79,7 @@ class TestRestoreBackupCommand:
         mock_unregister,
     ):
         """Test behavior when unregister_indexes fails."""
-        mock_unregister.side_effect = Exception("Unregister failed")
+        mock_unregister.side_effect = Exception("Unregister indexing failed")
         mock_register.return_value = None
 
         command = Command()
@@ -96,7 +96,7 @@ class TestRestoreBackupCommand:
     @patch("apps.common.management.commands.restore_backup.register_indexes")
     @patch("apps.common.management.commands.restore_backup.call_command")
     @patch("apps.common.management.commands.restore_backup.transaction.atomic")
-    def test_handle_with_exception_during_register(
+    def test_handle_with_exception_during_register_indexing(
         self,
         mock_atomic,
         mock_call_command,
@@ -107,7 +107,7 @@ class TestRestoreBackupCommand:
         mock_atomic.return_value.__enter__ = MagicMock()
         mock_atomic.return_value.__exit__ = MagicMock()
         mock_unregister.return_value = None
-        mock_register.side_effect = Exception("Register failed")
+        mock_register.side_effect = Exception("Register indexing failed")
         mock_call_command.return_value = None
 
         command = Command()

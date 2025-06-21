@@ -2,6 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
+from django.core.management.base import BaseCommand
+
 from apps.github.management.commands.github_update_users import Command
 
 
@@ -14,7 +16,6 @@ class TestGithubUpdateUsersCommand:
     def test_command_inheritance(self):
         """Test that the command inherits from BaseCommand."""
         command = Command()
-        from django.core.management.base import BaseCommand
 
         assert isinstance(command, BaseCommand)
 
