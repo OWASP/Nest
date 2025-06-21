@@ -2,6 +2,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
+import { pluralize } from 'utils/pluralize'
 import SecondaryCard from 'components/SecondaryCard'
 
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
@@ -17,10 +18,9 @@ const GradientRadialChart: React.FC<{
 }> = ({ title, days, icon, requirement }) => {
   const { theme } = useTheme()
   let checkpoint = days > requirement ? days : requirement
-  if (checkpoint === 0) {
-    checkpoint = 1 // Avoid division by zero
-  }
-  // Normalize days and requirement based on the checkpoint
+  // Ensure checkpoint is at least 1 to avoid division by zero
+  checkpoint = checkpoint || 1
+  // Normalize days based on the checkpoint
   const normalizedDays = (days / checkpoint) * 100
 
   return (
@@ -36,6 +36,9 @@ const GradientRadialChart: React.FC<{
           },
           plotOptions: {
             radialBar: {
+              hollow: {
+                margin: 0,
+              },
               startAngle: -90,
               endAngle: 90,
               dataLabels: {
@@ -44,14 +47,16 @@ const GradientRadialChart: React.FC<{
                   show: false,
                 },
                 value: {
-                  formatter: () => `${days} days`,
+                  formatter: () => `${days} ${pluralize(days, 'day', 'days')}`,
                   color: theme === 'dark' ? '#ececec' : '#1E1E2C',
-                  fontSize: '24px',
+                  fontSize: '20px',
                   show: true,
+                  offsetY: 0,
                 },
               },
               track: {
                 background: theme === 'dark' ? '#1E1E2C' : '#ececec',
+                margin: 0,
               },
             },
           },
@@ -66,6 +71,10 @@ const GradientRadialChart: React.FC<{
         height={400}
         type="radialBar"
       />
+      <div className="mt-0 flex justify-around">
+        <span className="text-md text-gray-800 dark:text-white md:ml-4">Active</span>
+        <span className="text-md text-gray-800 dark:text-white md:mr-4">Stale</span>
+      </div>
     </SecondaryCard>
   )
 }

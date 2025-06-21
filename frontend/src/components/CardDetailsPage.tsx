@@ -191,9 +191,6 @@ const DetailsCard = ({
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
         )}
-        {type === 'project' && healthMetricsData.length > 0 && (
-          <HealthMetrics data={healthMetricsData} />
-        )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard
@@ -204,6 +201,9 @@ const DetailsCard = ({
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
+        {type === 'project' && healthMetricsData.length > 0 && (
+          <HealthMetrics data={healthMetricsData} />
+        )}
       </div>
     </div>
   )

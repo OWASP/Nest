@@ -1,5 +1,6 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
+import { useTheme } from 'next-themes'
 import React from 'react'
 import type { ApexChartLabelSeries } from 'types/healthMetrics'
 import SecondaryCard from 'components/SecondaryCard'
@@ -15,16 +16,29 @@ const LineChart: React.FC<{
   labels?: string[]
   icon?: IconProp
 }> = ({ title, series, labels, icon }) => {
+  const { theme } = useTheme()
+  const color = theme === 'dark' ? '#ececec' : '#1E1E2C'
+
   return (
     <SecondaryCard title={title} icon={icon}>
       <Chart
+        key={theme}
         options={{
+          chart: {
+            toolbar: {
+              show: false,
+            },
+            foreColor: color,
+          },
           xaxis: {
             categories: labels,
           },
+          stroke: {
+            curve: 'smooth',
+          },
         }}
         series={series}
-        height={450}
+        height={200}
       />
     </SecondaryCard>
   )
