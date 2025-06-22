@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 )
                 for text, embedding in zip(chunk_texts, embeddings, strict=True)
             ]
-        except openai.error.OpenAIError as e:
+        except openai.OpenAIError as e:
             self.stdout.write(
                 self.style.ERROR(f"OpenAI API error for message {message.slack_message_id}: {e}")
             )
