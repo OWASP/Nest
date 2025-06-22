@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 from django.db import models
 
-from apps.slack.models.chunk import Chunk
+from apps.ai.models.chunk import Chunk
 from apps.slack.models.message import Message
 
 
@@ -99,11 +99,11 @@ class TestChunkModel:
         embedding = [0.1, 0.2, 0.3]
 
         mocker.patch(
-            "apps.slack.models.chunk.Chunk.objects.filter",
+            "apps.ai.models.chunk.Chunk.objects.filter",
             return_value=Mock(exists=Mock(return_value=False)),
         )
 
-        patched_save = mocker.patch("apps.slack.models.chunk.Chunk.save")
+        patched_save = mocker.patch("apps.ai.models.chunk.Chunk.save")
 
         with patch.object(Chunk, "message", create=True):
             result = Chunk.update_data(
@@ -124,7 +124,7 @@ class TestChunkModel:
         embedding = [0.1, 0.2, 0.3]
 
         mocker.patch(
-            "apps.slack.models.chunk.Chunk.objects.filter",
+            "apps.ai.models.chunk.Chunk.objects.filter",
             return_value=Mock(exists=Mock(return_value=True)),
         )
 
@@ -141,11 +141,11 @@ class TestChunkModel:
         embedding = [0.1, 0.2, 0.3]
 
         mocker.patch(
-            "apps.slack.models.chunk.Chunk.objects.filter",
+            "apps.ai.models.chunk.Chunk.objects.filter",
             return_value=Mock(exists=Mock(return_value=False)),
         )
 
-        patched_save = mocker.patch("apps.slack.models.chunk.Chunk.save")
+        patched_save = mocker.patch("apps.ai.models.chunk.Chunk.save")
 
         with patch.object(Chunk, "message", create=True):
             result = Chunk.update_data(

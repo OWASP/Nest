@@ -7,7 +7,7 @@ import openai
 from django.core.management.base import BaseCommand
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-from apps.slack.models.chunk import Chunk
+from apps.ai.models.chunk import Chunk
 from apps.slack.models.message import Message
 
 
@@ -26,7 +26,7 @@ class Command(BaseCommand):
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
         total_messages = Message.objects.count()
-        print(f"Found {total_messages} messages to process")
+        self.stdout.write(f"Found {total_messages} messages to process")
 
         batch_size = 1000
         processed_count = 0
@@ -104,7 +104,6 @@ class Command(BaseCommand):
             "\U0001f680-\U0001f6ff"
             "\U0001f1e0-\U0001f1ff"
             "\U00002500-\U00002bef"
-            "\U00002702-\U000027b0"
             "\U00002702-\U000027b0"
             "\U000024c2-\U0001f251"
             "\U0001f926-\U0001f937"
