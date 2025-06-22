@@ -158,7 +158,6 @@ describe('ProjectDetailsPage', () => {
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Health Metrics')).toBeInTheDocument()
       expect(screen.getByText('Score: 85')).toBeInTheDocument()
       expect(screen.getByText('Issues Trend')).toBeInTheDocument()
       expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()

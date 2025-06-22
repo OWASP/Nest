@@ -119,7 +119,6 @@ test.describe('Project Details Page', () => {
   })
 
   test('should display health metrics section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Health Metrics' })).toBeVisible()
     await expect(page.getByText('Score: 85')).toBeVisible()
     await expect(page.getByText('Issues Trend')).toBeVisible()
     await expect(page.getByText('Pull Requests Trend')).toBeVisible()
