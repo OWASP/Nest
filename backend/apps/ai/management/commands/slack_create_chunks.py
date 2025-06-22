@@ -2,7 +2,10 @@
 
 import os
 import re
+import time
+from datetime import UTC, datetime, timedelta
 
+import emoji
 import openai
 from django.core.management.base import BaseCommand
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -63,9 +66,16 @@ class Command(BaseCommand):
             return []
 
         try:
+            last_request_time = datetime.now(UTC)
+            time_since_last_request = datetime.now(UTC) - last_request_time
+
+            if time_since_last_request < timedelta(seconds=1.2):
+                time.sleep(1.2 - time_since_last_request.total_seconds())
+
             response = self.openai_client.embeddings.create(
                 model="text-embedding-3-small", input=chunk_texts
             )
+            last_request_time = datetime.now(UTC)
             embeddings = [d.embedding for d in response.data]
             return [
                 Chunk.update_data(
@@ -97,33 +107,10 @@ class Command(BaseCommand):
         if not message_text:
             return ""
 
-        emoji_pattern = re.compile(
-            "["
-            "\U0001f600-\U0001f64f"
-            "\U0001f300-\U0001f5ff"
-            "\U0001f680-\U0001f6ff"
-            "\U0001f1e0-\U0001f1ff"
-            "\U00002500-\U00002bef"
-            "\U00002702-\U000027b0"
-            "\U000024c2-\U0001f251"
-            "\U0001f926-\U0001f937"
-            "\U00010000-\U0010ffff"
-            "\u2640-\u2642"
-            "\u2600-\u2b55"
-            "\u200d"
-            "\u23cf"
-            "\u23e9"
-            "\u231a"
-            "\ufe0f"
-            "\u3030"
-            "]+",
-            flags=re.UNICODE,
-        )
-
+        cleaned_text = emoji.demojize(message_text, delimiters=("", ""))
         cleaned_text = re.sub(r"<@U[A-Z0-9]+>", "", message_text)
         cleaned_text = re.sub(r"<https?://[^>]+>", "", cleaned_text)
         cleaned_text = re.sub(r":\w+:", "", cleaned_text)
-        cleaned_text = emoji_pattern.sub("", cleaned_text)
         cleaned_text = re.sub(r"\s+", " ", cleaned_text)
 
         return cleaned_text.strip()

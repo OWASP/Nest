@@ -45,6 +45,7 @@ csrfguard
 csrfprotector
 csrftoken
 cva
+demojize
 dismissable
 dsn
 env
