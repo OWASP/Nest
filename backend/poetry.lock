@@ -863,21 +863,6 @@ s3 = ["boto3 (>=1.4.4)"]
 sftp = ["paramiko (>=1.15)"]
 
 [[package]]
-name = "djangorestframework"
-version = "3.16.0"
-description = "Web APIs for Django, made easy."
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-files = [
-    {file = "djangorestframework-3.16.0-py3-none-any.whl", hash = "sha256:bea7e9f6b96a8584c5224bfb2e4348dfb3f8b5e34edbecb98da258e892089361"},
-    {file = "djangorestframework-3.16.0.tar.gz", hash = "sha256:f022ff46613584de994c0c6a4aebbace5fd700555fbe9d33b865ebf173eba6c9"},
-]
-
-[package.dependencies]
-django = ">=4.2"
-
-[[package]]
 name = "djlint"
 version = "1.36.4"
 description = "HTML Template Linter and Formatter"
@@ -3305,4 +3290,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "b50b0bc3834b509969e0be7f6ad05578b8035cc7273395ad793c648fa5fa590c"
+content-hash = "0520c730c8c383728dbc57ca53a296588312be3223cc2e965d7c2bf8f3db4c50"
