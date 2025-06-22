@@ -51,7 +51,7 @@ const DetailsCard = ({
   repositories = [],
 }: DetailsCardProps) => {
   let scoreStyle = 'bg-green-200 text-green-800'
-  if (healthMetricsData.length > 0) {
+  if (type === 'project' && healthMetricsData.length > 0) {
     const score = healthMetricsData[0].score
     if (score < 50) {
       scoreStyle = 'bg-red-200 text-red-800'
