@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
 import { pluralize } from 'utils/pluralize'
+import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
@@ -17,12 +18,17 @@ const GradientRadialChart: React.FC<{
   requirement: number
 }> = ({ title, days, icon, requirement }) => {
   const { theme } = useTheme()
-  let checkpoint = requirement
-  let showRed = false
   const stops = [0, 100]
   const greenColor = '#0ef94e'
   const redColor = '#f94e0e' // Red color for the end of the gradient
   const orangeColor = '#f9b90e' // Orange color for the middle of the gradient
+  const orangeStop = requirement * 0.75
+  const showOrange = days >= orangeStop
+
+  let checkpoint = requirement
+  let showRed = false
+  let endColor = redColor
+
   const colorStops = [
     {
       offset: 0,
@@ -30,40 +36,51 @@ const GradientRadialChart: React.FC<{
       opacity: 1,
     },
   ]
+
   if (days > requirement) {
     checkpoint = days
     showRed = true
   }
+
   // Ensure checkpoint is at least 1 to avoid division by zero
   checkpoint = checkpoint || 1
   // Normalize days based on the checkpoint
   const normalizedDays = (days / checkpoint) * 100
   const normalizedRequirement = (requirement / checkpoint) * 100
 
+  if (showOrange) {
+    const normalizedOrangeStop = (orangeStop / checkpoint) * 100
+    stops.splice(1, 0, normalizedOrangeStop)
+    colorStops.push({
+      offset: normalizedOrangeStop,
+      color: orangeColor,
+      opacity: 1,
+    })
+    endColor = orangeColor
+  }
+
   if (showRed) {
-    const orangeStop = normalizedRequirement / 2
-    stops.splice(1, 0, orangeStop, normalizedRequirement)
-    colorStops.push(
-      {
-        offset: orangeStop,
-        color: orangeColor,
-        opacity: 1,
-      },
-      {
-        offset: normalizedRequirement,
-        color: redColor,
-        opacity: 1,
-      },
-      {
-        offset: 100,
-        color: redColor,
-        opacity: 1,
-      }
-    )
+    stops.splice(stops.length - 2, 0, normalizedRequirement)
+    colorStops.push({
+      offset: normalizedRequirement,
+      color: redColor,
+      opacity: 1,
+    })
+    endColor = redColor
+  }
+
+  // Always add the end color at 100% if we have orange or red
+  if (showOrange || showRed) {
+    stops.push(100)
+    colorStops.push({
+      offset: 100,
+      color: endColor,
+      opacity: 1,
+    })
   }
 
   return (
-    <SecondaryCard title={title} icon={icon}>
+    <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
       <div className="relative h-[200px] w-full">
         <Chart
           key={theme}

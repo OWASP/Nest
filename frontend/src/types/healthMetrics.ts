@@ -1,4 +1,5 @@
 export type HealthMetricsProps = {
+  createdAt: string
   forksCount: number
   lastCommitDays: number
   lastCommitDaysRequirement: number

@@ -13,6 +13,7 @@ export const GET_PROJECT_DATA = gql`
       level
       name
       healthMetrics(limit: 30) {
+        createdAt
         forksCount
         lastCommitDays
         lastCommitDaysRequirement

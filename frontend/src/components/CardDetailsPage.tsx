@@ -9,6 +9,7 @@ import {
   faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Link from 'next/link'
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -49,11 +50,27 @@ const DetailsCard = ({
   geolocationData = null,
   repositories = [],
 }: DetailsCardProps) => {
+  let scoreStyle = 'bg-green-200 text-green-800'
+  if (healthMetricsData.length > 0) {
+    const score = healthMetricsData[0].score
+    if (score < 50) {
+      scoreStyle = 'bg-red-200 text-red-800'
+    } else if (score < 75) {
+      scoreStyle = 'bg-yellow-200 text-yellow-800'
+    }
+  }
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <h1 className="text-4xl font-bold">{title}</h1>
+          {type === 'project' && healthMetricsData.length > 0 && (
+            <Link href="#issues-trend">
+              <span className={`ml-4 rounded px-2 py-1 text-sm font-bold ${scoreStyle}`}>
+                {`Score ${healthMetricsData[0].score}`}
+              </span>
+            </Link>
+          )}
           {!isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive

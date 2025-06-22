@@ -3,8 +3,8 @@ import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
 import type { ApexChartLabelSeries } from 'types/healthMetrics'
+import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
-
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -20,7 +20,7 @@ const LineChart: React.FC<{
   const color = theme === 'dark' ? '#ececec' : '#1E1E2C'
 
   return (
-    <SecondaryCard title={title} icon={icon}>
+    <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
       <Chart
         key={theme}
         options={{
