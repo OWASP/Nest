@@ -64,7 +64,7 @@ class Command(BaseCommand):
             conversations = (
                 Conversation.objects.filter(slack_channel_id=channel_id)
                 if channel_id
-                else Conversation.objects.filter(workspace=workspace)
+                else Conversation.objects.filter(sync_messages=True, workspace=workspace)
             )
 
             for conversation in conversations:
