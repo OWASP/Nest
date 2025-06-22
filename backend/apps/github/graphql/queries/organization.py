@@ -26,6 +26,6 @@ class OrganizationQuery:
 
         """
         try:
-            return Organization.objects.get(is_owasp_organization=True, login=login)
+            return Organization.objects.get(is_owasp_related_organization=True, login=login)
         except Organization.DoesNotExist:
             return None

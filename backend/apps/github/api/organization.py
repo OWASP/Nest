@@ -27,4 +27,4 @@ class OrganizationSchema(BaseModel):
 @router.get("/", response=list[OrganizationSchema])
 def get_organization(request: HttpRequest) -> list[OrganizationSchema]:
     """Get all organizations."""
-    return Organization.objects.filter(is_owasp_organization=True)
+    return Organization.objects.filter(is_owasp_related_organization=True)
