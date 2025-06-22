@@ -2,20 +2,24 @@
 
 from django.contrib import admin
 
-from apps.mentorship.models.enrollment import Enrollment
 from apps.mentorship.models.mentee import Mentee
+from apps.mentorship.models.mentee_program import MenteeProgram
 from apps.mentorship.models.mentor import Mentor
 from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
-from apps.mentorship.models.programmodule import ProgramModule
+from apps.mentorship.models.program_module import ProgramModule
 
 
-class EnrollmentAdmin(admin.ModelAdmin):
-    """Admin view for Enrollment model."""
+class MenteeProgramAdmin(admin.ModelAdmin):
+    """Admin view for MenteeProgram model."""
 
-    list_display = ("mentee", "program", "level")
+    list_display = (
+        "mentee",
+        "program",
+        "experience_level",
+    )
+    list_filter = ("experience_level", "program")
     search_fields = ("mentee__user__login", "program__name")
-    list_filter = ("level", "program")
 
 
 class MenteeAdmin(admin.ModelAdmin):
@@ -35,12 +39,11 @@ class MentorAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "user",
-        "years_of_experience",
     )
 
     search_fields = (
         "user__name",
-        "domain",
+        "domains",
     )
 
 
@@ -56,8 +59,6 @@ class ModuleAdmin(admin.ModelAdmin):
         "name",
         "project__name",
     )
-
-    filter_horizontal = ("mentors", "mentees")
 
 
 class ProgramAdmin(admin.ModelAdmin):
@@ -101,7 +102,7 @@ class ProgramModuleAdmin(admin.ModelAdmin):
     list_filter = ("program",)
 
 
-admin.site.register(Enrollment, EnrollmentAdmin)
+admin.site.register(MenteeProgram, MenteeProgramAdmin)
 admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)
 admin.site.register(Module, ModuleAdmin)

@@ -5,40 +5,31 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.github.models import User
+from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes
+from apps.nest.models import User
 
 
-class Mentee(TimestampedModel):
+class Mentee(TimestampedModel, ExperienceLevel, MatchingAttributes):
     """Mentee model."""
 
     class Meta:
         db_table = "mentorship_mentees"
         verbose_name_plural = "Mentees"
 
+    # FKs.
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name="mentee",
-        verbose_name="GitHub user",
+        verbose_name="Nest user",
     )
 
+    # M2Ms.
     programs = models.ManyToManyField(
-        "Program",
-        through="mentorship.Enrollment",
+        "mentorship.Program",
+        through="mentorship.MenteeProgram",
         related_name="mentees",
         verbose_name="Enrolled programs",
-        blank=True,
-    )
-
-    tags = models.JSONField(
-        verbose_name="Technology tags (e.g., languages, frameworks)",
-        default=list,
-        blank=True,
-    )
-
-    domains = models.JSONField(
-        verbose_name="Relevant domains or topics",
-        default=list,
         blank=True,
     )
 

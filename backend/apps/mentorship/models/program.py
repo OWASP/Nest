@@ -5,11 +5,10 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import MenteeLevelChoices
-from apps.mentorship.models.mentor import Mentor
+from apps.mentorship.models.common import ExperienceLevel
 
 
-class Program(TimestampedModel):
+class Program(TimestampedModel, ExperienceLevel):
     """Program model representing an overarching mentorship initiative."""
 
     class Meta:
@@ -21,81 +20,50 @@ class Program(TimestampedModel):
         PUBLISHED = "published", "Published"
         COMPLETED = "completed", "Completed"
 
-    name = models.CharField(
-        max_length=200,
-        verbose_name="Program name",
-    )
-
     description = models.TextField(
-        verbose_name="Program description",
+        verbose_name="Description",
         blank=True,
         default="",
     )
 
-    preferred_mentee_level = models.CharField(
-        max_length=20,
-        choices=MenteeLevelChoices.choices,
-        default=MenteeLevelChoices.BEGINNER,
-        verbose_name="Skill level in this program",
-    )
+    end_date = models.DateField(verbose_name="End date")
 
-    mentee_limit = models.PositiveIntegerField(
-        verbose_name="Mentee limit",
-        default=1,
+    mentees_limit = models.PositiveIntegerField(
+        verbose_name="Mentees limit",
+        blank=True,
+        null=True,
         help_text="Maximum number of mentees allowed in this program",
     )
 
-    active_mentees = models.PositiveIntegerField(
-        verbose_name="Active mentees",
-        default=0,
-        help_text="Current number of active mentees enrolled",
+    name = models.CharField(
+        max_length=200,
+        unique=True,
+        verbose_name="Name",
     )
 
-    is_available = models.BooleanField(
-        verbose_name="Currently available",
-        default=True,
-        help_text="Whether this program is currently accepting new mentees",
-    )
-    # M2M
-    owners = models.ManyToManyField(
-        Mentor,
-        related_name="owned_programs",
-        verbose_name="Program owners",
-        blank=True,
-    )
-    modules = models.ManyToManyField(
-        "Module",
-        through="mentorship.ProgramModule",
-        related_name="linked_programs",
-        verbose_name="Modules",
-        blank=True,
-    )
-
-    tags = models.JSONField(
-        verbose_name="Technology tags (e.g., languages, frameworks)",
-        default=list,
-        blank=True,
-    )
-
-    domains = models.JSONField(
-        verbose_name="Relevant domains or topics",
-        default=list,
-        blank=True,
-    )
+    start_date = models.DateField(verbose_name="Start date")
 
     status = models.CharField(
-        verbose_name="Program status",
-        max_length=20,
+        verbose_name="Status",
+        max_length=9,
         choices=ProgramStatus.choices,
         default=ProgramStatus.DRAFT,
     )
 
-    start_date = models.DateField(
-        verbose_name="Start date",
+    # M2Ms.
+    modules = models.ManyToManyField(
+        "mentorship.Module",
+        through="mentorship.ProgramModule",
+        related_name="programs",
+        verbose_name="Modules",
+        blank=True,
     )
 
-    end_date = models.DateField(
-        verbose_name="End date",
+    owners = models.ManyToManyField(
+        "mentorship.Mentor",
+        related_name="owned_programs",
+        verbose_name="Owners",
+        blank=True,
     )
 
     def __str__(self) -> str:
