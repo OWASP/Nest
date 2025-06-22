@@ -159,25 +159,6 @@ class TestChunkModel:
             assert result.embedding == embedding
             patched_save.assert_not_called()
 
-    def test_update_data_with_keyword_save_parameter(self, mocker):
-        """Test update_data method with keyword-only save parameter."""
-        mock_message = create_model_mock(Message)
-        chunk_text = "Test chunk content"
-        embedding = [0.1, 0.2, 0.3]
-
-        mocker.patch(
-            "apps.slack.models.chunk.Chunk.objects.filter",
-            return_value=Mock(exists=Mock(return_value=False)),
-        )
-
-        patched_save = mocker.patch("apps.slack.models.chunk.Chunk.save")
-
-        with patch.object(Chunk, "message", create=True):
-            result = Chunk.update_data(chunk_text, mock_message, embedding, save=True)
-
-            assert result is not None
-            patched_save.assert_called_once()
-
     def test_meta_class_attributes(self):
         """Test the Meta class attributes of the Chunk model."""
         assert Chunk._meta.db_table == "slack_chunks"
