@@ -1,28 +1,26 @@
-# import pytest
+import pytest
 
-# from apps.github.api.label import LabelSerializer
+from apps.github.api.label import LabelSchema
 
 
-# class TestLabelSerializer:
-#     @pytest.mark.parametrize(
-#         "label_data",
-#         [
-#             {
-#                 "name": "bug",
-#                 "description": "Indicates a bug in the project",
-#                 "color": "f29513",
-#             },
-#             {
-#                 "name": "enhancement",
-#                 "description": "Indicates a new feature or enhancement",
-#                 "color": "a2eeef",
-#             },
-#         ],
-#     )
-#     def test_label_serializer(self, label_data):
-#         serializer = LabelSerializer(data=label_data)
-#         assert serializer.is_valid(), serializer.errors
-#         validated_data = serializer.validated_data
-#         assert validated_data["name"] == label_data["name"]
-#         assert validated_data["description"] == label_data["description"]
-#         assert validated_data["color"] == label_data["color"]
+class TestLabelSchema:
+    @pytest.mark.parametrize(
+        "label_data",
+        [
+            {
+                "color": "f29513",
+                "description": "Indicates a bug in the project",
+                "name": "bug",
+            },
+            {
+                "color": "a2eeef",
+                "description": "Indicates a new feature or enhancement",
+                "name": "enhancement",
+            },
+        ],
+    )
+    def test_label_schema(self, label_data):
+        label = LabelSchema(**label_data)
+        assert label.name == label_data["name"]
+        assert label.description == label_data["description"]
+        assert label.color == label_data["color"]

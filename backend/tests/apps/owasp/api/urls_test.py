@@ -1,31 +1,35 @@
-# import pytest
+import pytest
 
-# from apps.owasp.api.chapter import ChapterViewSet
-# from apps.owasp.api.committee import CommitteeViewSet
-# from apps.owasp.api.event import EventViewSet
-# from apps.owasp.api.project import ProjectViewSet
-# from apps.owasp.api.urls import router
+from apps.owasp.api.chapter import router as chapter_router
+from apps.owasp.api.committee import router as committee_router
+from apps.owasp.api.event import router as event_router
+from apps.owasp.api.project import router as project_router
+from apps.owasp.api.urls import router as main_router
 
 
-# @pytest.mark.parametrize(
-#     ("url_name", "expected_prefix", "viewset_class"),
-#     [
-#         ("chapter-list", "owasp/chapters", ChapterViewSet),
-#         ("committee-list", "owasp/committees", CommitteeViewSet),
-#         ("event-list", "owasp/events", EventViewSet),
-#         ("project-list", "owasp/projects", ProjectViewSet),
-#     ],
-# )
-# def test_router_registration(url_name, expected_prefix, viewset_class):
-#     matching_routes = [route for route in router.urls if route.name == url_name]
-#     assert matching_routes, f"Route '{url_name}' not found in router."
+class TestRouterRegistration:
+    """Test the urls registration."""
 
-#     for route in matching_routes:
-#         assert expected_prefix in route.pattern.describe(), (
-#             f"Prefix '{expected_prefix}' not found in route '{route.name}'."
-#         )
+    EXPECTED_ROUTERS = {
+        "/chapters": chapter_router,
+        "/committees": committee_router,
+        "/events": event_router,
+        "/projects": project_router,
+    }
 
-#         viewset = route.callback.cls
-#         assert issubclass(viewset, viewset_class), (
-#             f"Viewset for '{route.name}' does not match {viewset_class}."
-#         )
+    def test_all_routers_are_registered(self):
+        """Verifies that the main router has the correct number of registered sub-routers."""
+        registered_sub_routers = main_router._routers
+        assert len(registered_sub_routers) == len(self.EXPECTED_ROUTERS)
+
+    @pytest.mark.parametrize(
+        ("prefix", "expected_router_instance"), list(EXPECTED_ROUTERS.items())
+    )
+    def test_sub_router_registration(self, prefix, expected_router_instance):
+        """Tests that each specific router is registered with the correct prefix."""
+        registered_router_map = dict(main_router._routers)
+
+        assert prefix in registered_router_map
+        actual_router = registered_router_map[prefix]
+
+        assert actual_router is expected_router_instance

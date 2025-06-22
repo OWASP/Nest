@@ -1,63 +1,48 @@
-# from unittest.mock import MagicMock, patch
+from datetime import datetime
 
-# import pytest
+import pytest
 
-# from apps.github.api.user import UserSerializer
-# from apps.github.models.user import User
+from apps.github.api.user import UserSchema
 
 
-# class TestUserSerializer:
-#     @pytest.mark.parametrize(
-#         "user_data",
-#         [
-#             {
-#                 "name": "John Doe",
-#                 "login": "johndoe",
-#                 "company": "GitHub",
-#                 "location": "San Francisco",
-#                 "created_at": "2024-12-30T00:00:00Z",
-#                 "updated_at": "2024-12-30T00:00:00Z",
-#             },
-#             {
-#                 "name": "Jane Smith",
-#                 "login": "jane-smith",
-#                 "company": "Microsoft",
-#                 "location": "Redmond",
-#                 "created_at": "2024-12-29T00:00:00Z",
-#                 "updated_at": "2024-12-30T00:00:00Z",
-#             },
-#         ],
-#     )
-#     # Ensures that test runs without actual database access by simulating behavior of a queryset.
-#     @patch("apps.github.models.user.User.objects.filter")
-#     def test_user_serializer(self, mock_filter, user_data):
-#         mock_qs = MagicMock()
-#         # To mimic a queryset where no matching objects are found.
-#         mock_qs.exists.return_value = False
-#         mock_filter.return_value = mock_qs
+class TestUserSchema:
+    @pytest.mark.parametrize(
+        "user_data",
+        [
+            {
+                "name": "John Doe",
+                "login": "johndoe",
+                "company": "GitHub",
+                "location": "San Francisco",
+                "avatar_url": "https://github.com/images/johndoe.png",
+                "bio": "Developer advocate",
+                "email": "john@example.com",
+                "followers_count": 10,
+                "following_count": 5,
+                "public_repositories_count": 3,
+                "title": "Senior Engineer",
+                "twitter_username": "johndoe",
+                "url": "https://github.com/johndoe",
+                "created_at": "2024-12-30T00:00:00Z",
+                "updated_at": "2024-12-30T00:00:00Z",
+            },
+        ],
+    )
+    def test_user_schema(self, user_data):
+        user = UserSchema(**user_data)
 
-#         serializer = UserSerializer(data=user_data)
-#         assert serializer.is_valid()
-#         validated_data = serializer.validated_data
-
-#         validated_data["created_at"] = (
-#             validated_data["created_at"].isoformat().replace("+00:00", "Z")
-#         )
-#         validated_data["updated_at"] = (
-#             validated_data["updated_at"].isoformat().replace("+00:00", "Z")
-#         )
-#         assert validated_data == user_data
-
-#     @pytest.mark.parametrize(
-#         ("login", "organization_logins", "expected_result"),
-#         [
-#             ("johndoe", ["github", "microsoft"], True),  # Normal user
-#             ("github", ["github", "microsoft"], False),  # Organization login
-#             ("ghost", ["github", "microsoft"], False),  # Special 'ghost' user
-#         ],
-#     )
-#     @patch("apps.github.models.organization.Organization.get_logins")
-#     def test_is_indexable(self, mock_get_logins, login, organization_logins, expected_result):
-#         mock_get_logins.return_value = organization_logins
-#         user = User(login=login)
-#         assert user.is_indexable == expected_result
+        assert user.name == user_data["name"]
+        assert user.login == user_data["login"]
+        assert user.company == user_data["company"]
+        assert user.location == user_data["location"]
+        assert user.avatar_url == user_data["avatar_url"]
+        assert user.bio == user_data["bio"]
+        assert user.email == user_data["email"]
+        assert user.followers_count == user_data["followers_count"]
+        assert user.following_count == user_data["following_count"]
+        assert user.public_repositories_count == user_data["public_repositories_count"]
+        assert user.title == user_data["title"]
+        assert user.twitter_username == user_data["twitter_username"]
+        assert user.url == user_data["url"]
+        assert user.created_at == datetime.fromisoformat(user_data["created_at"])
+        assert user.updated_at == datetime.fromisoformat(user_data["updated_at"])

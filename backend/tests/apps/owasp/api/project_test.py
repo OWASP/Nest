@@ -1,35 +1,39 @@
-# import pytest
+from datetime import datetime
 
-# from apps.owasp.api.project import ProjectSerializer
+import pytest
+
+from apps.owasp.api.project import ProjectSchema
 
 
-# @pytest.mark.parametrize(
-#     ("data", "expected"),
-#     [
-#         (
-#             {
-#                 "name": "another project",
-#                 "description": "A test project by owasp",
-#                 "level": "other",
-#                 "created_at": "2023-01-01T00:00:00Z",
-#                 "updated_at": "2023-01-02T00:00:00Z",
-#             },
-#             True,
-#         ),
-#         (
-#             {
-#                 "name": "this is a project",
-#                 "description": "this is not a project, this is just a file",
-#                 "level": "Hello",
-#                 "created_at": "2023-01-01T00:00:00Z",
-#                 "updated_at": "2023-01-02T00:00:00Z",
-#             },
-#             False,
-#         ),
-#     ],
-# )
-# def test_project_serializer_validation(data, expected):
-#     serializer = ProjectSerializer(data=data)
-#     is_valid = serializer.is_valid()
-
-#     assert is_valid == expected
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        (
+            {
+                "name": "another project",
+                "description": "A test project by owasp",
+                "level": "other",
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-02T00:00:00Z",
+            },
+            True,
+        ),
+        (
+            {
+                "name": "this is a project",
+                "description": "this is not a project, this is just a file",
+                "level": "Hello",
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-02T00:00:00Z",
+            },
+            False,
+        ),
+    ],
+)
+def test_project_serializer_validation(data, expected):
+    project = ProjectSchema(**data)
+    assert project.name == data["name"]
+    assert project.description == data["description"]
+    assert project.level == data["level"]
+    assert project.created_at == datetime.fromisoformat(data["created_at"])
+    assert project.updated_at == datetime.fromisoformat(data["updated_at"])
