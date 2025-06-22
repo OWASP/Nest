@@ -66,8 +66,9 @@ class Command(BaseCommand):
             return []
 
         try:
-            last_request_time = datetime.now(UTC)
-            time_since_last_request = datetime.now(UTC) - last_request_time
+            time_since_last_request = datetime.now(UTC) - getattr(
+                self, "last_request_time", datetime.now(UTC) - timedelta(seconds=2)
+            )
 
             if time_since_last_request < timedelta(seconds=1.2):
                 time.sleep(1.2 - time_since_last_request.total_seconds())
@@ -75,7 +76,7 @@ class Command(BaseCommand):
             response = self.openai_client.embeddings.create(
                 model="text-embedding-3-small", input=chunk_texts
             )
-            last_request_time = datetime.now(UTC)
+            self.last_request_time = datetime.now(UTC)
             embeddings = [d.embedding for d in response.data]
             return [
                 Chunk.update_data(
@@ -108,7 +109,7 @@ class Command(BaseCommand):
             return ""
 
         cleaned_text = emoji.demojize(message_text, delimiters=("", ""))
-        cleaned_text = re.sub(r"<@U[A-Z0-9]+>", "", message_text)
+        cleaned_text = re.sub(r"<@U[A-Z0-9]+>", "", cleaned_text)
         cleaned_text = re.sub(r"<https?://[^>]+>", "", cleaned_text)
         cleaned_text = re.sub(r":\w+:", "", cleaned_text)
         cleaned_text = re.sub(r"\s+", " ", cleaned_text)
