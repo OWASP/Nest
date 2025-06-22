@@ -20,6 +20,6 @@ class EventSchema(BaseModel):
 
 
 @router.get("/", response=list[EventSchema])
-def list_events(request: HttpRequest) -> list[EventSchema]:
+def get_events(request: HttpRequest) -> list[EventSchema]:
     """Get all events."""
     return Event.objects.all()

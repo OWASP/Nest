@@ -24,6 +24,6 @@ class ProjectSchema(BaseModel):
 
 
 @router.get("/", response=list[ProjectSchema])
-def list_projects(request: HttpRequest) -> list[ProjectSchema]:
+def get_projects(request: HttpRequest) -> list[ProjectSchema]:
     """Get all projects."""
     return Project.objects.all()

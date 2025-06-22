@@ -23,6 +23,6 @@ class CommitteeSchema(BaseModel):
 
 
 @router.get("/", response=list[CommitteeSchema])
-def list_committees(request: HttpRequest) -> list[CommitteeSchema]:
+def get_committees(request: HttpRequest) -> list[CommitteeSchema]:
     """Get all committees."""
     return Committee.objects.all()

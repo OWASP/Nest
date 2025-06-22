@@ -24,6 +24,6 @@ class ChapterSchema(BaseModel):
 
 
 @router.get("/", response=list[ChapterSchema])
-def list_chapters(request: HttpRequest) -> list[ChapterSchema]:
+def get_chapters(request: HttpRequest) -> list[ChapterSchema]:
     """Get all chapters."""
     return Chapter.objects.all()

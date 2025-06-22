@@ -4,8 +4,8 @@ from datetime import datetime
 
 from django.http import HttpRequest
 from ninja import Router
+from ninja.responses import Response
 from pydantic import BaseModel
-from rest_framework.response import Response
 
 from apps.github.models.user import User
 
@@ -46,4 +46,4 @@ def get_user_by_login(request: HttpRequest, login: str) -> UserSchema | None:
     try:
         return User.objects.get(login=login)
     except User.DoesNotExist:
-        return Response({"detail": "User not found."}, status=404)
+        return Response({"detail": "User not found."}, status=200)
