@@ -50,27 +50,33 @@ const DetailsCard = ({
   geolocationData = null,
   repositories = [],
 }: DetailsCardProps) => {
-  let scoreStyle = 'bg-green-200 text-green-800'
+  let scoreStyle = 'bg-green-400 text-green-900'
   if (type === 'project' && healthMetricsData.length > 0) {
     const score = healthMetricsData[0].score
     if (score < 50) {
-      scoreStyle = 'bg-red-200 text-red-800'
+      scoreStyle = 'bg-red-400 text-red-900'
     } else if (score < 75) {
-      scoreStyle = 'bg-yellow-200 text-yellow-800'
+      scoreStyle = 'bg-yellow-400 text-yellow-900'
     }
   }
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
-          <h1 className="text-4xl font-bold">{title}</h1>
-          {type === 'project' && healthMetricsData.length > 0 && (
-            <Link href="#issues-trend">
-              <span className={`ml-4 rounded px-2 py-1 text-sm font-bold ${scoreStyle}`}>
-                {`Score ${healthMetricsData[0].score}`}
-              </span>
-            </Link>
-          )}
+          <div className="flex w-full items-center justify-between">
+            <h1 className="text-4xl font-bold">{title}</h1>
+            {type === 'project' && healthMetricsData.length > 0 && (
+              <Link href="#issues-trend">
+                <div
+                  className={`flex flex-col items-center justify-center rounded-full px-4 py-2 text-sm font-bold ${scoreStyle}`}
+                >
+                  <span>Health</span>
+                  <span>{healthMetricsData[0].score}</span>
+                  <span>Score</span>
+                </div>
+              </Link>
+            )}
+          </div>
           {!isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive

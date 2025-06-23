@@ -19,6 +19,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
       day: 'numeric',
     })
   })
+  const length = data.length
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -81,14 +82,14 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
         <GradientRadialChart
           title="Days Since Last Commit"
           icon={faCodeCommit}
-          days={data[0]?.lastCommitDays ?? 0}
-          requirement={data[0]?.lastCommitDaysRequirement ?? 0}
+          days={data[length - 1]?.lastCommitDays ?? 0}
+          requirement={data[length - 1]?.lastCommitDaysRequirement ?? 0}
         />
         <GradientRadialChart
           title="Days Since Last Release"
           icon={faTag}
-          days={data[0]?.lastReleaseDays ?? 0}
-          requirement={data[0]?.lastReleaseDaysRequirement ?? 0}
+          days={data[length - 1]?.lastReleaseDays ?? 0}
+          requirement={data[length - 1]?.lastReleaseDaysRequirement ?? 0}
         />
       </div>
     </>

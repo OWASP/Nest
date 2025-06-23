@@ -35,6 +35,14 @@ const LineChart: React.FC<{
           },
           xaxis: {
             categories: labels,
+            tickAmount: 10,
+          },
+          yaxis: {
+            labels: {
+              formatter: (value: number) => {
+                return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : `${value.toFixed(0)}`
+              },
+            },
           },
           stroke: {
             curve: 'smooth',

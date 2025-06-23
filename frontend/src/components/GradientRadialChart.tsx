@@ -23,10 +23,10 @@ const GradientRadialChart: React.FC<{
   const redColor = '#f94e0e' // Red color for the end of the gradient
   const orangeColor = '#f9b90e' // Orange color for the middle of the gradient
   const orangeStop = requirement * 0.75
-  const showOrange = days >= orangeStop
+  let showOrange = days >= orangeStop
 
   let checkpoint = requirement
-  let showRed = false
+  let showRedAtEnd = false
   let endColor = redColor
 
   const colorStops = [
@@ -39,7 +39,12 @@ const GradientRadialChart: React.FC<{
 
   if (days > requirement) {
     checkpoint = days
-    showRed = true
+    showRedAtEnd = true
+  }
+
+  if (days >= requirement * 3) {
+    colorStops[0].color = redColor
+    showRedAtEnd = showOrange = false
   }
 
   // Ensure checkpoint is at least 1 to avoid division by zero
@@ -59,7 +64,7 @@ const GradientRadialChart: React.FC<{
     endColor = orangeColor
   }
 
-  if (showRed) {
+  if (showRedAtEnd) {
     stops.splice(stops.length - 2, 0, normalizedRequirement)
     colorStops.push({
       offset: normalizedRequirement,
@@ -70,7 +75,7 @@ const GradientRadialChart: React.FC<{
   }
 
   // Always add the end color at 100% if we have orange or red
-  if (showOrange || showRed) {
+  if (showOrange || showRedAtEnd) {
     stops.push(100)
     colorStops.push({
       offset: 100,
