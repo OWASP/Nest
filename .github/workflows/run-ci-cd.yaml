@@ -293,24 +293,6 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-backend:staging
 
-      - name: Prepare frontend environment
-        run: |
-          touch frontend/.env
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
-          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
-          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
-          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
-          echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
-          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
-          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
-          echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
-          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> frontend/.env
-          echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
-
       - name: Get backend image size
         id: backend-size
         run: |
@@ -444,6 +426,23 @@ jobs:
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
 
+          # Frontend
+          touch .env.frontend
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> .env.frontend
+          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> .env.frontend
+          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.frontend
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> .env.frontend
+          echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env.frontend
+          echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> .env.frontend
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.frontend
+          echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
+
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
@@ -522,24 +521,6 @@ jobs:
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
-
-      - name: Prepare frontend environment
-        run: |
-          touch frontend/.env
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
-          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
-          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
-          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
-          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
-          echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> frontend/.env
-          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> frontend/.env
-          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> frontend/.env
-          echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> frontend/.env
-          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> frontend/.env
-          echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -665,6 +646,23 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.DJANGO_DB_NAME }}" >> .env.db
           echo "POSTGRES_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.db
           echo "POSTGRES_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.db
+
+          # Frontend
+          touch .env.frontend
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> .env.frontend
+          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> .env.frontend
+          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> .env.frontend
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.frontend
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> .env.frontend
+          echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env.frontend
+          echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> .env.frontend
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.frontend
+          echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
 
       - name: Run Nest deploy
         working-directory: .github/ansible

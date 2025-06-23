@@ -111,6 +111,12 @@
           dest: ~/
           mode: '0400'
 
+      - name: Copy .env.frontend
+        copy:
+          src: '{{ github_workspace }}/.env.frontend'
+          dest: ~/
+          mode: '0400'
+
       - name: Copy crontab
         copy:
           src: '{{ github_workspace }}/cron/staging'
