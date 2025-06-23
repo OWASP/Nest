@@ -43,7 +43,7 @@
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.6",
     "dotenv": "^16.5.0",
-    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-import": "^2.32.0",
     "framer-motion": "^12.18.1",
     "graphql": "^16.11.0",
     "leaflet": "^1.9.4",
