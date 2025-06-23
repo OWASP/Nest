@@ -45,7 +45,6 @@ class TestMessageModel:
             assert result is not None
             assert isinstance(result, Message)
             assert result.slack_message_id == "123456.789"
-            assert result.text == "Test message"
             assert result.conversation == mock_conversation
             assert result.author == mock_author
             patched_message_save.assert_called_once()
@@ -61,7 +60,6 @@ class TestMessageModel:
 
         mock_message_instance = create_model_mock(Message)
         mock_message_instance.slack_message_id = "123456.789"
-        mock_message_instance.text = "Updated message"
 
         mocker.patch(
             "apps.slack.models.message.Message.objects.get",
@@ -73,7 +71,6 @@ class TestMessageModel:
         )
 
         assert result is mock_message_instance
-        assert result.text == "Updated message"
 
         mock_message_instance.from_slack.assert_called_once_with(
             message_data,
@@ -110,7 +107,6 @@ class TestMessageModel:
             assert result is not None
             assert isinstance(result, Message)
             assert result.slack_message_id == "123456.789"
-            assert result.text == "Test message"
             assert result.conversation == mock_conversation
             assert result.author == mock_author
             patched_save_method.assert_not_called()
@@ -147,7 +143,6 @@ class TestMessageModel:
             assert result is not None
             assert isinstance(result, Message)
             assert result.slack_message_id == "123456.789"
-            assert result.text == "Reply message"
             assert result.parent_message == mock_parent
             assert not result.has_replies
             patched_message_save.assert_called_once()
@@ -179,10 +174,9 @@ class TestMessageModel:
             assert result is not None
             assert isinstance(result, Message)
             assert result.slack_message_id == "123456.789"
-            assert result.text == "Parent message"
             assert result.has_replies
             patched_message_save.assert_called_once()
 
     def test_str_method(self):
-        message = Message(text="Short message")
+        message = Message(raw_data={"text": "Short message"})
         assert str(message) == "Short message"
