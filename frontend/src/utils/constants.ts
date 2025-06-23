@@ -117,3 +117,9 @@ export const themeToggleTooltip = {
 }
 
 export const desktopViewMinWidth = 768
+
+export const userAuthStatus = {
+  AUTHENTICATED: 'authenticated',
+  LOADING: 'loading',
+  UNAUTHENTICATED: 'unauthenticated',
+}

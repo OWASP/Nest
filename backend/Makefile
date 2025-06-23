@@ -5,6 +5,8 @@ clean-backend-dependencies:
 
 clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
+	@docker container rm -f nest-cache >/dev/null 2>&1 || true
+	@docker container rm -f nest-db >/dev/null 2>&1 || true
 	@docker image rm -f docker-backend >/dev/null 2>&1 || true
 	@docker volume rm -f docker_backend-venv >/dev/null 2>&1 || true
 
@@ -107,13 +109,13 @@ owasp-update-project-health-metrics:
 	@echo "Updating OWASP project health metrics"
 	@CMD="python manage.py owasp_update_project_health_metrics" $(MAKE) exec-backend-command
 
-owasp-update-project-health-metrics-scores:
-	@echo "Updating OWASP project health metrics score"
-	@CMD="python manage.py owasp_update_project_health_metrics_scores" $(MAKE) exec-backend-command
-
 owasp-update-project-health-requirements:
 	@echo "Updating OWASP project health requirements"
 	@CMD="python manage.py owasp_update_project_health_requirements" $(MAKE) exec-backend-command
+
+owasp-update-project-health-scores:
+	@echo "Updating OWASP project health scores"
+	@CMD="python manage.py owasp_update_project_health_scores" $(MAKE) exec-backend-command
 
 owasp-scrape-chapters:
 	@echo "Scraping OWASP site chapters data"
@@ -146,6 +148,15 @@ recreate-schema:
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
 	  	$(MAKE) exec-db-command-it 2>/dev/null
 	$(MAKE) migrate
+
+restore-backup:
+	@echo "Restoring Nest backup"
+	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
+
+save-backup:
+	@echo "Saving Nest backup"
+	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
+	@gzip backend/data/backup.json
 
 setup:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it

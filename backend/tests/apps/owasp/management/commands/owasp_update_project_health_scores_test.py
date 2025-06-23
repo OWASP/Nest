@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.management import call_command
 
-from apps.owasp.management.commands.owasp_update_project_health_metrics_scores import Command
+from apps.owasp.management.commands.owasp_update_project_health_scores import Command
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
@@ -68,7 +68,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_requirements.level = "test_level"
         # Execute command
         with patch("sys.stdout", new=self.stdout):
-            call_command("owasp_update_project_health_metrics_scores")
+            call_command("owasp_update_project_health_scores")
 
         self.mock_requirements.assert_called_once()
 
@@ -80,5 +80,5 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             ],
         )
         assert mock_metric.score == EXPECTED_SCORE
-        assert "Updated projects health metrics score successfully." in self.stdout.getvalue()
+        assert "Updated project health scores successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
