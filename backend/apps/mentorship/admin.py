@@ -7,7 +7,6 @@ from apps.mentorship.models.mentee_program import MenteeProgram
 from apps.mentorship.models.mentor import Mentor
 from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
-from apps.mentorship.models.program_module import ProgramModule
 
 
 class MenteeProgramAdmin(admin.ModelAdmin):
@@ -27,7 +26,7 @@ class MenteeAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
-        "user",
+        "github_user",
     )
 
     search_fields = ("user__name",)
@@ -38,7 +37,7 @@ class MentorAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
-        "user",
+        "github_user",
     )
 
     search_fields = (
@@ -68,8 +67,8 @@ class ProgramAdmin(admin.ModelAdmin):
         "id",
         "name",
         "status",
-        "start_date",
-        "end_date",
+        "started_at",
+        "ended_at",
     )
 
     search_fields = (
@@ -79,11 +78,11 @@ class ProgramAdmin(admin.ModelAdmin):
 
     list_filter = (
         "status",
-        "start_date",
-        "end_date",
+        "started_at",
+        "ended_at",
     )
 
-    filter_horizontal = ("owners",)
+    filter_horizontal = ("admins",)
 
 
 class ProgramModuleAdmin(admin.ModelAdmin):
@@ -107,4 +106,3 @@ admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Program, ProgramAdmin)
-admin.site.register(ProgramModule, ProgramModuleAdmin)

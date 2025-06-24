@@ -5,10 +5,10 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes
+from apps.mentorship.models.common import ExperienceLevel, StartEndRange
 
 
-class MenteeProgram(TimestampedModel, ExperienceLevel, MatchingAttributes):
+class MenteeProgram(ExperienceLevel, StartEndRange, TimestampedModel):
     """Mentee program enrollment."""
 
     class Meta:
@@ -18,13 +18,13 @@ class MenteeProgram(TimestampedModel, ExperienceLevel, MatchingAttributes):
 
     # FKs.
     mentee = models.ForeignKey(
-        "Mentee",
+        "mentorship.Mentee",
         on_delete=models.CASCADE,
         verbose_name="Mentee",
     )
 
     program = models.ForeignKey(
-        "Program",
+        "mentorship.Program",
         on_delete=models.CASCADE,
         verbose_name="Program",
     )

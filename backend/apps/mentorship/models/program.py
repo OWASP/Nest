@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import ExperienceLevel
+from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes, StartEndRange
 
 
-class Program(TimestampedModel, ExperienceLevel):
+class Program(MatchingAttributes, StartEndRange, TimestampedModel):
     """Program model representing an overarching mentorship initiative."""
 
     class Meta:
@@ -26,7 +27,15 @@ class Program(TimestampedModel, ExperienceLevel):
         default="",
     )
 
-    end_date = models.DateField(verbose_name="End date")
+    experience_levels = ArrayField(
+        base_field=models.CharField(
+            max_length=12,
+            choices=ExperienceLevel.ExperienceLevelChoices.choices,
+        ),
+        blank=True,
+        default=list,
+        verbose_name="Experience levels",
+    )
 
     mentees_limit = models.PositiveIntegerField(
         verbose_name="Mentees limit",
@@ -41,8 +50,6 @@ class Program(TimestampedModel, ExperienceLevel):
         verbose_name="Name",
     )
 
-    start_date = models.DateField(verbose_name="Start date")
-
     status = models.CharField(
         verbose_name="Status",
         max_length=9,
@@ -51,18 +58,9 @@ class Program(TimestampedModel, ExperienceLevel):
     )
 
     # M2Ms.
-    modules = models.ManyToManyField(
-        "mentorship.Module",
-        through="mentorship.ProgramModule",
-        related_name="programs",
-        verbose_name="Modules",
-        blank=True,
-    )
-
-    owners = models.ManyToManyField(
+    admins = models.ManyToManyField(
         "mentorship.Mentor",
-        related_name="owned_programs",
-        verbose_name="Owners",
+        verbose_name="Admins",
         blank=True,
     )
 

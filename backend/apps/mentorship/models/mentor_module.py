@@ -8,7 +8,7 @@ from apps.common.models import TimestampedModel
 from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes
 
 
-class MentorModule(TimestampedModel, ExperienceLevel, MatchingAttributes):
+class MentorModule(ExperienceLevel, MatchingAttributes, TimestampedModel):
     """Mentor module model."""
 
     class Meta:
@@ -16,6 +16,13 @@ class MentorModule(TimestampedModel, ExperienceLevel, MatchingAttributes):
         unique_together = ("mentor", "module")
         verbose_name = "Mentor module"
         verbose_name_plural = "Mentor modules"
+
+    role = models.CharField(
+        max_length=100,
+        verbose_name="Role",
+        blank=True,
+        default="Mentor",
+    )
 
     # FKs.
     mentor = models.ForeignKey(

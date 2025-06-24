@@ -6,10 +6,9 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes
-from apps.nest.models import User
 
 
-class Mentee(TimestampedModel, ExperienceLevel, MatchingAttributes):
+class Mentee(ExperienceLevel, MatchingAttributes, TimestampedModel):
     """Mentee model."""
 
     class Meta:
@@ -17,10 +16,17 @@ class Mentee(TimestampedModel, ExperienceLevel, MatchingAttributes):
         verbose_name_plural = "Mentees"
 
     # FKs.
-    user = models.OneToOneField(
-        User,
+    github_user = models.OneToOneField(
+        "github.User",
         on_delete=models.CASCADE,
-        related_name="mentee",
+        verbose_name="GitHub user",
+    )
+
+    nest_user = models.OneToOneField(
+        "nest.User",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
         verbose_name="Nest user",
     )
 

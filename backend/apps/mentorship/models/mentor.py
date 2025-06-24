@@ -6,10 +6,9 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes
-from apps.nest.models import User
 
 
-class Mentor(TimestampedModel, ExperienceLevel, MatchingAttributes):
+class Mentor(ExperienceLevel, MatchingAttributes, TimestampedModel):
     """Mentor model."""
 
     class Meta:
@@ -17,19 +16,18 @@ class Mentor(TimestampedModel, ExperienceLevel, MatchingAttributes):
         verbose_name_plural = "Mentors"
 
     # FKs.
-    user = models.OneToOneField(
-        User,
+    github_user = models.OneToOneField(
+        "github.User",
         on_delete=models.CASCADE,
-        related_name="mentor",
-        verbose_name="Nest user",
+        verbose_name="GitHub user",
     )
 
-    # M2Ms.
-    modules = models.ManyToManyField(
-        "mentorship.Module",
-        through="mentorship.MentorModule",
-        verbose_name="Modules",
+    nest_user = models.OneToOneField(
+        "nest.User",
         blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name="Nest user",
     )
 
     def __str__(self) -> str:

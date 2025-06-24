@@ -5,11 +5,11 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes
+from apps.mentorship.models.common import StartEndRange
 
 
-class MenteeModule(TimestampedModel, ExperienceLevel, MatchingAttributes):
-    """Mentee program enrollment."""
+class MenteeModule(StartEndRange, TimestampedModel):
+    """Mentee module enrollment."""
 
     class Meta:
         db_table = "mentorship_mentee_modules"

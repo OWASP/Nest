@@ -5,9 +5,10 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes, StartEndRange
 
 
-class Module(TimestampedModel):
+class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
     """Module model representing a program unit."""
 
     class Meta:
@@ -28,11 +29,27 @@ class Module(TimestampedModel):
     )
 
     # FKs.
+    program = models.ForeignKey(
+        "mentorship.Program",
+        related_name="modules",
+        on_delete=models.CASCADE,
+        verbose_name="Program",
+    )
+
     project = models.ForeignKey(
         "owasp.Project",
         on_delete=models.CASCADE,
-        related_name="modules",
         verbose_name="Project",
+    )
+
+    # M2Ms.
+    mentors = models.ManyToManyField(
+        "mentorship.Mentor",
+        verbose_name="Mentors",
+        related_name="modules",
+        through="mentorship.MentorModule",
+        blank=True,
+        null=True,
     )
 
     def __str__(self) -> str:
@@ -43,3 +60,12 @@ class Module(TimestampedModel):
 
         """
         return self.name
+
+    def save(self, *args, **kwargs):
+        """Save module."""
+        if self.program:
+            # Set default dates from program if not provided.
+            self.start_date = self.start_date or self.program.start_date
+            self.end_date = self.end_date or self.program.end_date
+
+        super().save(*args, **kwargs)
