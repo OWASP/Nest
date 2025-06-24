@@ -220,11 +220,7 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard
-              icon={faFolderOpen}
-              title={<AnchorTitle title="Repositories" />}
-              className="mt-6"
-            >
+            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
