@@ -46,4 +46,4 @@ class Mentee(ExperienceLevel, MatchingAttributes, TimestampedModel):
             str: The GitHub username of the mentee.
 
         """
-        return self.user.login if self.user else "Unlinked Mentee"
+        return self.github_user.login

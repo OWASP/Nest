@@ -49,7 +49,6 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         related_name="modules",
         through="mentorship.MentorModule",
         blank=True,
-        null=True,
     )
 
     def __str__(self) -> str:

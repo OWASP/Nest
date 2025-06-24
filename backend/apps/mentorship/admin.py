@@ -9,6 +9,17 @@ from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
 
 
+class MenteeAdmin(admin.ModelAdmin):
+    """Admin view for Mentee model."""
+
+    list_display = ("github_user",)
+
+    search_fields = (
+        "github_user__login",
+        "github_user__name",
+    )
+
+
 class MenteeProgramAdmin(admin.ModelAdmin):
     """Admin view for MenteeProgram model."""
 
@@ -17,31 +28,25 @@ class MenteeProgramAdmin(admin.ModelAdmin):
         "program",
         "experience_level",
     )
-    list_filter = ("experience_level", "program")
-    search_fields = ("mentee__user__login", "program__name")
-
-
-class MenteeAdmin(admin.ModelAdmin):
-    """Admin view for Mentee model."""
-
-    list_display = (
-        "id",
-        "github_user",
+    list_filter = (
+        "experience_level",
+        "program",
     )
-
-    search_fields = ("user__name",)
+    search_fields = (
+        "mentee__github_user__login",
+        "mentee__github_user__name",
+        "program__name",
+    )
 
 
 class MentorAdmin(admin.ModelAdmin):
     """Admin view for Mentor model."""
 
-    list_display = (
-        "id",
-        "github_user",
-    )
+    list_display = ("github_user",)
 
     search_fields = (
-        "user__name",
+        "github_user__login",
+        "github_user__name",
         "domains",
     )
 
@@ -51,6 +56,7 @@ class ModuleAdmin(admin.ModelAdmin):
 
     list_display = (
         "name",
+        "program",
         "project",
     )
 
@@ -64,7 +70,6 @@ class ProgramAdmin(admin.ModelAdmin):
     """Admin view for Program model."""
 
     list_display = (
-        "id",
         "name",
         "status",
         "started_at",
@@ -76,29 +81,9 @@ class ProgramAdmin(admin.ModelAdmin):
         "description",
     )
 
-    list_filter = (
-        "status",
-        "started_at",
-        "ended_at",
-    )
+    list_filter = ("status",)
 
     filter_horizontal = ("admins",)
-
-
-class ProgramModuleAdmin(admin.ModelAdmin):
-    """Admin view for ProgramModule model."""
-
-    list_display = (
-        "program",
-        "module",
-        "start_date",
-        "end_date",
-    )
-    search_fields = (
-        "program__name",
-        "module__name",
-    )
-    list_filter = ("program",)
 
 
 admin.site.register(MenteeProgram, MenteeProgramAdmin)

@@ -37,4 +37,4 @@ class Mentor(ExperienceLevel, MatchingAttributes, TimestampedModel):
             str: The GitHub username of the mentor.
 
         """
-        return self.user.login if self.user else "Unlinked Mentor"
+        return self.github_user.login
