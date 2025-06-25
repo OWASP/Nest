@@ -9,25 +9,19 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from django.views.decorators.csrf import csrf_protect
-from ninja import NinjaAPI
 from strawberry.django.views import GraphQLView
 
 from apps.core.api.algolia import algolia_search
 from apps.core.api.csrf import get_csrf_token
-from apps.github.api.urls import router as github_router
-from apps.owasp.api.urls import router as owasp_router
 from apps.slack.apps import SlackConfig
+from settings.api_v1 import api as api_v1
 from settings.graphql import schema
-
-api = NinjaAPI()
-api.add_router("github/", github_router)
-api.add_router("owasp/", owasp_router)
 
 urlpatterns = [
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
-    path("api/v1/", api.urls),
+    path("api/v1/", api_v1.urls),
     path("a/", admin.site.urls),
 ]
 

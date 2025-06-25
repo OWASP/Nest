@@ -40,8 +40,8 @@ def get_user(request: HttpRequest) -> list[UserSchema]:
     return User.objects.all()
 
 
-@router.get("/login/{login}", response=UserSchema)
-def get_user_by_login(request: HttpRequest, login: str) -> UserSchema | None:
+@router.get("/{login}", response=UserSchema)
+def get_user(request: HttpRequest, login: str) -> UserSchema | None:
     """Get user by login."""
     try:
         return User.objects.get(login=login)
