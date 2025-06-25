@@ -68,11 +68,23 @@ const DetailsCard = ({
             {type === 'project' && healthMetricsData.length > 0 && (
               <Link href="#issues-trend">
                 <div
-                  className={`flex flex-col items-center justify-center rounded-full px-4 py-2 text-sm font-bold ${scoreStyle}`}
+                  className={`group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl ${scoreStyle}`}
                 >
-                  <span>Health</span>
-                  <span>{healthMetricsData[0].score}</span>
-                  <span>Score</span>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                  <div className="relative z-10 flex flex-col items-center text-center">
+                    <span className="text-xs font-semibold uppercase tracking-wide opacity-90">
+                      Health
+                    </span>
+                    <span className="text-xl font-black leading-none">
+                      {healthMetricsData[0].score}
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-wide opacity-90">
+                      Score
+                    </span>
+                  </div>
+                  {healthMetricsData[0].score < 30 && (
+                    <div className="animate-pulse absolute inset-0 rounded-full bg-red-400/20"></div>
+                  )}
                 </div>
               </Link>
             )}
