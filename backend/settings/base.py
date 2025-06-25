@@ -47,6 +47,7 @@ class Base(Configuration):
         "apps.common",
         "apps.core",
         "apps.github",
+        "apps.mentorship",
         "apps.nest",
         "apps.owasp",
         "apps.slack",

@@ -1,5 +1,7 @@
 """Test cases for ProjectHealthMetricsNode."""
 
+from datetime import datetime
+
 import pytest
 
 from apps.owasp.graphql.nodes.project_health_metrics import ProjectHealthMetricsNode
@@ -15,13 +17,16 @@ class TestProjectHealthMetricsNode:
         }
         expected_field_names = {
             "age_days",
+            "created_at",
             "contributors_count",
             "forks_count",
             "is_funding_requirements_compliant",
             "is_leader_requirements_compliant",
             "last_commit_days",
+            "last_commit_days_requirement",
             "last_pull_request_days",
             "last_release_days",
+            "last_release_days_requirement",
             "open_issues_count",
             "open_pull_requests_count",
             "owasp_page_last_update_days",
@@ -47,13 +52,16 @@ class TestProjectHealthMetricsNode:
         ("field_name", "expected_type"),
         [
             ("age_days", int),
+            ("created_at", datetime),
             ("contributors_count", int),
             ("forks_count", int),
             ("is_funding_requirements_compliant", bool),
             ("is_leader_requirements_compliant", bool),
             ("last_commit_days", int),
+            ("last_commit_days_requirement", int),
             ("last_pull_request_days", int),
             ("last_release_days", int),
+            ("last_release_days_requirement", int),
             ("open_issues_count", int),
             ("open_pull_requests_count", int),
             ("owasp_page_last_update_days", int),
