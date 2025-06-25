@@ -98,6 +98,11 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         return self.repositories.count()
 
     @property
+    def idx_health_score(self) -> float | None:
+        """Return score for indexing."""
+        return self.health_score
+
+    @property
     def idx_stars_count(self) -> int:
         """Return stars count for indexing."""
         return self.stars_count

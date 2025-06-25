@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from apps.owasp.management.commands.owasp_update_project_health_requirements import Command
-from apps.owasp.models.project import Project
+from apps.owasp.models.enums import ProjectLevel
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 
@@ -61,11 +61,11 @@ class TestUpdateProjectHealthRequirementsCommand:
     @pytest.mark.parametrize(
         "level",
         [
-            Project.ProjectLevel.FLAGSHIP,
-            Project.ProjectLevel.INCUBATOR,
-            Project.ProjectLevel.LAB,
-            Project.ProjectLevel.PRODUCTION,
-            Project.ProjectLevel.OTHER,
+            ProjectLevel.FLAGSHIP,
+            ProjectLevel.INCUBATOR,
+            ProjectLevel.LAB,
+            ProjectLevel.PRODUCTION,
+            ProjectLevel.OTHER,
         ],
     )
     def test_get_level_requirements(self, level):

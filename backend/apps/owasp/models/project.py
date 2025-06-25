@@ -17,8 +17,10 @@ from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
+from apps.owasp.models.enums import ProjectLevel, ProjectType
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
 class Project(
@@ -38,31 +40,6 @@ class Project(
             models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
         ]
         verbose_name_plural = "Projects"
-
-    class ProjectLevel(models.TextChoices):
-        OTHER = "other", "Other"
-        INCUBATOR = "incubator", "Incubator"
-        LAB = "lab", "Lab"
-        PRODUCTION = "production", "Production"
-        FLAGSHIP = "flagship", "Flagship"
-
-    class ProjectType(models.TextChoices):
-        # These projects provide tools, libraries, and frameworks that can be leveraged by
-        # developers to enhance the security of their applications.
-        CODE = "code", "Code"
-
-        # These projects seek to communicate information or raise awareness about a topic in
-        # application security. Note that documentation projects should focus on an online-first
-        # deliverable, where appropriate, but can take any media form.
-        DOCUMENTATION = "documentation", "Documentation"
-
-        # Some projects fall outside the above categories. Most are created to offer OWASP
-        # operational support.
-        OTHER = "other", "Other"
-
-        # These are typically software or utilities that help developers and security
-        # professionals test, secure, or monitor applications.
-        TOOL = "tool", "Tool"
 
     level = models.CharField(
         verbose_name="Level",
@@ -133,14 +110,19 @@ class Project(
         return f"{self.name or self.key}"
 
     @property
+    def health_score(self) -> float | None:
+        """Return project health score."""
+        return self.last_health_metrics.score if self.last_health_metrics else None
+
+    @property
     def is_code_type(self) -> bool:
         """Indicate whether project has CODE type."""
-        return self.type == self.ProjectType.CODE
+        return self.type == ProjectType.CODE
 
     @property
     def is_documentation_type(self) -> bool:
         """Indicate whether project has DOCUMENTATION type."""
-        return self.type == self.ProjectType.DOCUMENTATION
+        return self.type == ProjectType.DOCUMENTATION
 
     @property
     def is_funding_requirements_compliant(self) -> bool:
@@ -157,7 +139,7 @@ class Project(
     @property
     def is_tool_type(self) -> bool:
         """Indicate whether project has TOOL type."""
-        return self.type == self.ProjectType.TOOL
+        return self.type == ProjectType.TOOL
 
     @property
     def issues(self):
@@ -182,6 +164,17 @@ class Project(
     def nest_url(self) -> str:
         """Get Nest URL for project."""
         return get_absolute_url(f"projects/{self.nest_key}")
+
+    @property
+    def last_health_metrics(self) -> ProjectHealthMetrics | None:
+        """Return last health metrics for the project."""
+        return (
+            ProjectHealthMetrics.objects.filter(project=self)
+            .order_by(
+                "-nest_created_at",
+            )
+            .first()
+        )
 
     @property
     def leaders_count(self) -> int:
@@ -298,20 +291,18 @@ class Project(
         project_level = project_metadata.get("level")
         if project_level:
             level_mapping = {
-                2: self.ProjectLevel.INCUBATOR,
-                3: self.ProjectLevel.LAB,
-                3.5: self.ProjectLevel.PRODUCTION,
-                4: self.ProjectLevel.FLAGSHIP,
+                2: ProjectLevel.INCUBATOR,
+                3: ProjectLevel.LAB,
+                3.5: ProjectLevel.PRODUCTION,
+                4: ProjectLevel.FLAGSHIP,
             }
-            self.level = level_mapping.get(project_level) or self.ProjectLevel.OTHER
+            self.level = level_mapping.get(project_level) or ProjectLevel.OTHER
             self.level_raw = project_level
 
         # Type.
         project_type = project_metadata.get("type")
         if project_type:
-            self.type = (
-                project_type if project_type in self.ProjectType.values else self.ProjectType.OTHER
-            )
+            self.type = project_type if project_type in ProjectType.values else ProjectType.OTHER
             self.type_raw = project_type
 
         self.created_at = repository.created_at

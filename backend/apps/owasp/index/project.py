@@ -27,6 +27,7 @@ class ProjectIndex(IndexBase):
         "idx_organizations",
         "idx_repositories",
         "idx_repositories_count",
+        "idx_health_score",
         "idx_stars_count",
         "idx_summary",
         "idx_tags",
@@ -48,6 +49,7 @@ class ProjectIndex(IndexBase):
         "indexLanguages": ["en"],
         "customRanking": [
             "desc(idx_level_raw)",
+            "desc(idx_health_score)",
             "desc(idx_stars_count)",
             "desc(idx_contributors_count)",
             "desc(idx_forks_count)",
