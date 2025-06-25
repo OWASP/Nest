@@ -9,9 +9,9 @@ clean-frontend-dependencies:
 
 clean-frontend-docker:
 	@docker container rm -f nest-frontend >/dev/null 2>&1 || true
-	@docker image rm -f docker-frontend >/dev/null 2>&1 || true
-	@docker volume rm -f docker_frontend-next >/dev/null 2>&1 || true
-	@docker volume rm -f docker_frontend-node-modules >/dev/null 2>&1 || true
+	@docker image rm -f nest-local-frontend >/dev/null 2>&1 || true
+	@docker volume rm -f nest-local_frontend-next >/dev/null 2>&1 || true
+	@docker volume rm -f nest-local_frontend-node-modules >/dev/null 2>&1 || true
 
 exec-frontend-command:
 	@docker exec -t nest-frontend $(CMD)
