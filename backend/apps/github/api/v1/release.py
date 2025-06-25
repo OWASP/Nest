@@ -3,18 +3,15 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router
-from pydantic import BaseModel
+from ninja import Router, Schema
 
 from apps.github.models.release import Release
 
 router = Router()
 
 
-class ReleaseSchema(BaseModel):
+class ReleaseSchema(Schema):
     """Schema for Release."""
-
-    model_config = {"from_attributes": True}
 
     created_at: datetime
     description: str
@@ -24,6 +21,6 @@ class ReleaseSchema(BaseModel):
 
 
 @router.get("/", response=list[ReleaseSchema])
-def get_release(request: HttpRequest) -> list[ReleaseSchema]:
+def list_release(request: HttpRequest) -> list[ReleaseSchema]:
     """Get all releases."""
     return Release.objects.all()

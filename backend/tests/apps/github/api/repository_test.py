@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.github.api.repository import RepositorySchema
+from apps.github.api.v1.repository import RepositorySchema
 
 
 class TestRepositorySchema:

@@ -1,18 +1,15 @@
 """Event API."""
 
 from django.http import HttpRequest
-from ninja import Router
-from pydantic import BaseModel
+from ninja import Router, Schema
 
 from apps.owasp.models.event import Event
 
 router = Router()
 
 
-class EventSchema(BaseModel):
+class EventSchema(Schema):
     """Schema for Event."""
-
-    model_config = {"from_attributes": True}
 
     description: str
     name: str
@@ -20,6 +17,6 @@ class EventSchema(BaseModel):
 
 
 @router.get("/", response=list[EventSchema])
-def get_events(request: HttpRequest) -> list[EventSchema]:
+def list_events(request: HttpRequest) -> list[EventSchema]:
     """Get all events."""
     return Event.objects.all()

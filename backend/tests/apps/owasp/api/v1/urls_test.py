@@ -1,10 +1,10 @@
 import pytest
 
-from apps.owasp.api.chapter import router as chapter_router
-from apps.owasp.api.committee import router as committee_router
-from apps.owasp.api.event import router as event_router
-from apps.owasp.api.project import router as project_router
-from apps.owasp.api.urls import router as main_router
+from apps.owasp.api.v1.chapter import router as chapter_router
+from apps.owasp.api.v1.committee import router as committee_router
+from apps.owasp.api.v1.event import router as event_router
+from apps.owasp.api.v1.project import router as project_router
+from apps.owasp.api.v1.urls import router as main_router
 
 
 class TestRouterRegistration:

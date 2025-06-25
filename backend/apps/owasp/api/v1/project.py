@@ -3,18 +3,15 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router
-from pydantic import BaseModel
+from ninja import Router, Schema
 
 from apps.owasp.models.project import Project
 
 router = Router()
 
 
-class ProjectSchema(BaseModel):
+class ProjectSchema(Schema):
     """Schema for Project."""
-
-    model_config = {"from_attributes": True}
 
     created_at: datetime
     description: str
@@ -24,6 +21,6 @@ class ProjectSchema(BaseModel):
 
 
 @router.get("/", response=list[ProjectSchema])
-def get_projects(request: HttpRequest) -> list[ProjectSchema]:
+def list_projects(request: HttpRequest) -> list[ProjectSchema]:
     """Get all projects."""
     return Project.objects.all()

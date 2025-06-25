@@ -3,18 +3,15 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router
-from pydantic import BaseModel
+from ninja import Router, Schema
 
 from apps.github.models.repository import Repository
 
 router = Router()
 
 
-class RepositorySchema(BaseModel):
+class RepositorySchema(Schema):
     """Schema for Repository."""
-
-    model_config = {"from_attributes": True}
 
     created_at: datetime
     description: str
@@ -23,6 +20,6 @@ class RepositorySchema(BaseModel):
 
 
 @router.get("/", response=list[RepositorySchema])
-def get_repository(request: HttpRequest) -> list[RepositorySchema]:
+def list_repository(request: HttpRequest) -> list[RepositorySchema]:
     """Get all repositories."""
     return Repository.objects.all()

@@ -3,19 +3,16 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router
-from ninja.responses import Response
-from pydantic import BaseModel
+from ninja import Router, Schema
+from ninja.errors import HttpError
 
 from apps.github.models.user import User
 
 router = Router()
 
 
-class UserSchema(BaseModel):
+class UserSchema(Schema):
     """Schema for User."""
-
-    model_config = {"from_attributes": True}
 
     avatar_url: str
     bio: str
@@ -41,9 +38,9 @@ def list_users(request: HttpRequest) -> list[UserSchema]:
 
 
 @router.get("/{login}", response=UserSchema)
-def get_user(request: HttpRequest, login: str) -> UserSchema | None:
+def get_user(request: HttpRequest, login: str) -> UserSchema | HttpError:
     """Get user by login."""
-    try:
-        return User.objects.get(login=login)
-    except User.DoesNotExist:
-        return Response({"detail": "User not found."}, status=200)
+    user = User.objects.filter(login=login).first()
+    if not user:
+        raise HttpError(404, "User not found")
+    return user

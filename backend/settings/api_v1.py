@@ -2,8 +2,8 @@
 
 from ninja import NinjaAPI
 
-from apps.github.api.urls import router as github_router
-from apps.owasp.api.urls import router as owasp_router
+from apps.github.api.v1.urls import router as github_router
+from apps.owasp.api.v1.urls import router as owasp_router
 
 api = NinjaAPI(
     description="API for OWASP related entities",

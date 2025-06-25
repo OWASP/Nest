@@ -3,18 +3,15 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router
-from pydantic import BaseModel
+from ninja import Router, Schema
 
 from apps.owasp.models.chapter import Chapter
 
 router = Router()
 
 
-class ChapterSchema(BaseModel):
+class ChapterSchema(Schema):
     """Schema for Chapter."""
-
-    model_config = {"from_attributes": True}
 
     country: str
     created_at: datetime
@@ -24,6 +21,6 @@ class ChapterSchema(BaseModel):
 
 
 @router.get("/", response=list[ChapterSchema])
-def get_chapters(request: HttpRequest) -> list[ChapterSchema]:
+def list_chapters(request: HttpRequest) -> list[ChapterSchema]:
     """Get all chapters."""
     return Chapter.objects.all()

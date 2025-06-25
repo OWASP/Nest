@@ -1,12 +1,12 @@
 import pytest
 
-from apps.github.api.issue import router as issue_router
-from apps.github.api.label import router as label_router
-from apps.github.api.organization import router as organization_router
-from apps.github.api.release import router as release_router
-from apps.github.api.repository import router as repository_router
-from apps.github.api.urls import router as main_router
-from apps.github.api.user import router as user_router
+from apps.github.api.v1.issue import router as issue_router
+from apps.github.api.v1.label import router as label_router
+from apps.github.api.v1.organization import router as organization_router
+from apps.github.api.v1.release import router as release_router
+from apps.github.api.v1.repository import router as repository_router
+from apps.github.api.v1.urls import router as main_router
+from apps.github.api.v1.user import router as user_router
 
 
 class TestRouterRegistration:

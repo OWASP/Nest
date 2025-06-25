@@ -1,6 +1,6 @@
 import pytest
 
-from apps.github.api.label import LabelSchema
+from apps.github.api.v1.label import LabelSchema
 
 
 class TestLabelSchema:

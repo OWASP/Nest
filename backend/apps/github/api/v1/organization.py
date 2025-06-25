@@ -3,18 +3,15 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router
-from pydantic import BaseModel
+from ninja import Router, Schema
 
 from apps.github.models.organization import Organization
 
 router = Router()
 
 
-class OrganizationSchema(BaseModel):
+class OrganizationSchema(Schema):
     """Schema for Organization."""
-
-    model_config = {"from_attributes": True}
 
     company: str
     created_at: datetime
@@ -25,6 +22,6 @@ class OrganizationSchema(BaseModel):
 
 
 @router.get("/", response=list[OrganizationSchema])
-def get_organization(request: HttpRequest) -> list[OrganizationSchema]:
+def list_organization(request: HttpRequest) -> list[OrganizationSchema]:
     """Get all organizations."""
     return Organization.objects.filter(is_owasp_related_organization=True)

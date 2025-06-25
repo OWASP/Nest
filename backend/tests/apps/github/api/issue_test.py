@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.github.api.issue import IssueSchema
+from apps.github.api.v1.issue import IssueSchema
 
 
 class TestIssueSchema:

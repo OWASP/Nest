@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.owasp.api.chapter import ChapterSchema
+from apps.owasp.api.v1.chapter import ChapterSchema
 
 
 @pytest.mark.parametrize(

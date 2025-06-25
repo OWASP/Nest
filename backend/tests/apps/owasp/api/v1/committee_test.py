@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.owasp.api.committee import CommitteeSchema
+from apps.owasp.api.v1.committee import CommitteeSchema
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.github.api.organization import OrganizationSchema
+from apps.github.api.v1.organization import OrganizationSchema
 
 
 class TestOrganizationSchema:

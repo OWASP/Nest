@@ -1,6 +1,6 @@
 import pytest
 
-from apps.owasp.api.event import EventSchema
+from apps.owasp.api.v1.event import EventSchema
 
 
 @pytest.mark.parametrize(

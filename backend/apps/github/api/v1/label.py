@@ -1,18 +1,15 @@
 """Label API."""
 
 from django.http import HttpRequest
-from ninja import Router
-from pydantic import BaseModel
+from ninja import Router, Schema
 
 from apps.github.models.label import Label
 
 router = Router()
 
 
-class LabelSchema(BaseModel):
+class LabelSchema(Schema):
     """Schema for Label."""
-
-    model_config = {"from_attributes": True}
 
     color: str
     description: str
@@ -20,6 +17,6 @@ class LabelSchema(BaseModel):
 
 
 @router.get("/", response=list[LabelSchema])
-def get_label(request: HttpRequest) -> list[LabelSchema]:
+def list_label(request: HttpRequest) -> list[LabelSchema]:
     """Get all labels."""
     return Label.objects.all()

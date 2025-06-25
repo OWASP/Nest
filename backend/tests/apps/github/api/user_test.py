@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.github.api.user import UserSchema
+from apps.github.api.v1.user import UserSchema
 
 
 class TestUserSchema:

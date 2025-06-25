@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.owasp.api.project import ProjectSchema
+from apps.owasp.api.v1.project import ProjectSchema
 
 
 @pytest.mark.parametrize(

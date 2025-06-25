@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.github.api.release import ReleaseSchema
+from apps.github.api.v1.release import ReleaseSchema
 
 
 class TestReleaseSchema:
