@@ -117,4 +117,13 @@ test.describe('Project Details Page', () => {
     await page.getByText('Repo One').click()
     await expect(page).toHaveURL('organizations/OWASP/repositories/repo-1')
   })
+
+  test('should display health metrics section', async ({ page }) => {
+    await expect(page.getByText('Issues Trend')).toBeVisible()
+    await expect(page.getByText('Pull Requests Trend')).toBeVisible()
+    await expect(page.getByText('Stars Trend')).toBeVisible()
+    await expect(page.getByText('Forks Trend')).toBeVisible()
+    await expect(page.getByText('Days Since Last Commit')).toBeVisible()
+    await expect(page.getByText('Days Since Last Release')).toBeVisible()
+  })
 })
