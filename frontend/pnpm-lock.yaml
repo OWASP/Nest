@@ -181,8 +181,8 @@ importers:
         specifier: ^29.5.14
         version: 29.5.14
       '@types/leaflet':
-        specifier: ^1.9.18
-        version: 1.9.18
+        specifier: ^1.9.19
+        version: 1.9.19
       '@types/markdown-it':
         specifier: ^14.1.2
         version: 14.1.2
@@ -2458,7 +2458,6 @@ packages:
 
   '@swc/core-darwin-arm64@1.12.6':
     resolution: {integrity: sha512-yLiw+XzG+MilfFh0ON7qt67bfIr7UxB9JprhYReVOmLTBDmDVQSC3T4/vIuc+GwlX08ydnHy0ud4lIjTNW4uWg==}
-
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [darwin]
@@ -2745,8 +2744,8 @@ packages:
   '@types/leaflet.markercluster@1.5.5':
     resolution: {integrity: sha512-TkWOhSHDM1ANxmLi+uK0PjsVcjIKBr8CLV2WoF16dIdeFmC0Cj5P5axkI3C1Xsi4+ht6EU8+BfEbbqEF9icPrg==}
 
-  '@types/leaflet@1.9.18':
-    resolution: {integrity: sha512-ht2vsoPjezor5Pmzi5hdsA7F++v5UGq9OlUduWHmMZiuQGIpJ2WS5+Gg9HaAA79gNh1AIPtCqhzejcIZ3lPzXQ==}
+  '@types/leaflet@1.9.19':
+    resolution: {integrity: sha512-pB+n2daHcZPF2FDaWa+6B0a0mSDf4dPU35y5iTXsx7x/PzzshiX5atYiS1jlBn43X7XvM8AP+AB26lnSk0J4GA==}
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
@@ -2765,6 +2764,9 @@ packages:
 
   '@types/node@22.15.32':
     resolution: {integrity: sha512-3jigKqgSjsH6gYZv2nEsqdXfZqIFGAV36XYYjf9KGZ3PSG+IhLecqPnI310RvjutyMwifE2hhhNEklOUrvx/wA==}
+
+  '@types/node@22.15.33':
+    resolution: {integrity: sha512-wzoocdnnpSxZ+6CjW4ADCK1jVmd1S/J3ArNWfn8FDDQtRm8dkDg7TA+mvek2wNrfCgwuZxqEOiB9B1XCJ6+dbw==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -9537,9 +9539,9 @@ snapshots:
 
   '@types/leaflet.markercluster@1.5.5':
     dependencies:
-      '@types/leaflet': 1.9.18
+      '@types/leaflet': 1.9.19
 
-  '@types/leaflet@1.9.18':
+  '@types/leaflet@1.9.19':
     dependencies:
       '@types/geojson': 7946.0.16
 
@@ -9559,6 +9561,10 @@ snapshots:
       '@types/node': 22.15.32
 
   '@types/node@22.15.32':
+    dependencies:
+      undici-types: 6.21.0
+
+  '@types/node@22.15.33':
     dependencies:
       undici-types: 6.21.0
 
@@ -11663,7 +11669,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 22.15.32
+      '@types/node': 22.15.33
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
