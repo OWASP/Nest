@@ -29,31 +29,6 @@ class TestChunkModel:
         assert "Chunk 1 for Message 123456.789:" in result
         assert "This is a test chunk with some content that" in result
 
-    def test_from_chunk_method(self):
-        """Test the from_chunk method updates chunk properties."""
-        chunk = Chunk()
-        mock_message = create_model_mock(Message)
-        test_text = "Test chunk content"
-        test_embedding = [0.1, 0.2, 0.3]
-
-        chunk.from_chunk(test_text, mock_message, test_embedding)
-
-        assert chunk.chunk_text == test_text
-        assert chunk.message == mock_message
-        assert chunk.embedding == test_embedding
-
-    def test_from_chunk_method_without_embedding(self):
-        """Test from_chunk method with None embedding."""
-        chunk = Chunk()
-        mock_message = create_model_mock(Message)
-        test_text = "Test chunk content"
-
-        chunk.from_chunk(test_text, mock_message)
-
-        assert chunk.chunk_text == test_text
-        assert chunk.message == mock_message
-        assert chunk.embedding is None
-
     def test_bulk_save_with_chunks(self):
         """Test bulk_save method with valid chunks."""
         mock_chunks = [Mock(), Mock(), Mock()]
@@ -161,7 +136,7 @@ class TestChunkModel:
 
     def test_meta_class_attributes(self):
         """Test the Meta class attributes of the Chunk model."""
-        assert Chunk._meta.db_table == "slack_chunks"
+        assert Chunk._meta.db_table == "ai_chunks"
         assert Chunk._meta.verbose_name == "Chunks"
         assert ("message", "chunk_text") in Chunk._meta.unique_together
 

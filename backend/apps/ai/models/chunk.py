@@ -12,7 +12,7 @@ class Chunk(TimestampedModel):
     """Slack Chunk model."""
 
     class Meta:
-        db_table = "slack_chunks"
+        db_table = "ai_chunks"
         verbose_name = "Chunks"
         unique_together = ("message", "chunk_text")
 
@@ -24,12 +24,6 @@ class Chunk(TimestampedModel):
         """Human readable representation."""
         text_preview = truncate(self.chunk_text, 50)
         return f"Chunk {self.id} for Message {self.message.slack_message_id}: {text_preview}"
-
-    def from_chunk(self, chunk_text: str, message: Message, embedding=None) -> None:
-        """Update instance based on chunk data."""
-        self.chunk_text = chunk_text
-        self.message = message
-        self.embedding = embedding
 
     @staticmethod
     def bulk_save(chunks, fields=None):
@@ -61,8 +55,7 @@ class Chunk(TimestampedModel):
         if Chunk.objects.filter(message=message, chunk_text=chunk_text).exists():
             return None
 
-        chunk = Chunk(message=message)
-        chunk.from_chunk(chunk_text, message, embedding)
+        chunk = Chunk(message=message, chunk_text=chunk_text, embedding=embedding)
 
         if save:
             chunk.save()

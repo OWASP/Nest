@@ -13,6 +13,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from apps.ai.models.chunk import Chunk
 from apps.slack.models.message import Message
 
+MIN_REQUEST_INTERVAL_SECONDS = 1.2
+DEFAULT_LAST_REQUEST_OFFSET_SECONDS = 2
+
 
 class Command(BaseCommand):
     help = "Create chunks for Slack messages"
@@ -50,11 +53,9 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Completed processing all {total_messages} messages")
 
-    def create_chunks_from_message(
-        self, message: Message, cleaned_text: str
-    ) -> list[Chunk | None]:
+    def create_chunks_from_message(self, message: Message, cleaned_text: str) -> list[Chunk]:
         """Create chunks from a message."""
-        if message.raw_data.get("subtype") in ["channel_join", "channel_leave"]:
+        if message.subtype in ["channel_join", "channel_leave"]:
             return []
 
         chunk_texts = self.split_message_text(cleaned_text)
@@ -67,18 +68,20 @@ class Command(BaseCommand):
 
         try:
             time_since_last_request = datetime.now(UTC) - getattr(
-                self, "last_request_time", datetime.now(UTC) - timedelta(seconds=2)
+                self,
+                "last_request_time",
+                datetime.now(UTC) - timedelta(seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS),
             )
 
-            if time_since_last_request < timedelta(seconds=1.2):
-                time.sleep(1.2 - time_since_last_request.total_seconds())
+            if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
+                time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
 
             response = self.openai_client.embeddings.create(
                 model="text-embedding-3-small", input=chunk_texts
             )
             self.last_request_time = datetime.now(UTC)
             embeddings = [d.embedding for d in response.data]
-            return [
+            chunks = [
                 Chunk.update_data(
                     chunk_text=text,
                     message=message,
@@ -87,6 +90,7 @@ class Command(BaseCommand):
                 )
                 for text, embedding in zip(chunk_texts, embeddings, strict=True)
             ]
+            return [chunk for chunk in chunks if chunk is not None]
         except openai.OpenAIError as e:
             self.stdout.write(
                 self.style.ERROR(f"OpenAI API error for message {message.slack_message_id}: {e}")

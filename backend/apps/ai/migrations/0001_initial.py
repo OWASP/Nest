@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "verbose_name": "Chunks",
-                "db_table": "slack_chunks",
+                "db_table": "ai_chunks",
                 "unique_together": {("message", "chunk_text")},
             },
         ),

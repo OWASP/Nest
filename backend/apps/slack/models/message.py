@@ -58,6 +58,11 @@ class Message(TimestampedModel):
             .first()
         )
 
+    @property
+    def subtype(self) -> str | None:
+        """Get the subtype of the message if it exists."""
+        return self.raw_data.get("subtype")
+
     def from_slack(
         self,
         message_data: dict,
