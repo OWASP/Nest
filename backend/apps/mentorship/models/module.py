@@ -64,7 +64,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         """Save module."""
         if self.program:
             # Set default dates from program if not provided.
-            self.start_date = self.start_date or self.program.start_date
-            self.end_date = self.end_date or self.program.end_date
+            self.started_at = self.started_at or self.program.started_at
+            self.ended_at = self.ended_at or self.program.ended_at
 
         super().save(*args, **kwargs)
