@@ -35,7 +35,7 @@ class UserSchema(BaseModel):
 
 
 @router.get("/", response=list[UserSchema])
-def get_user(request: HttpRequest) -> list[UserSchema]:
+def list_users(request: HttpRequest) -> list[UserSchema]:
     """Get all users."""
     return User.objects.all()
 
