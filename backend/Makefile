@@ -1,3 +1,7 @@
+ai-create-slack-message-chunks:
+	@echo "Creating Slack message chunks"
+	@CMD="python manage.py ai_create_slack_message_chunks" $(MAKE) exec-backend-command
+
 clean-backend-dependencies:
 	@rm -rf backend/.cache
 	@rm -rf backend/.local
@@ -174,10 +178,6 @@ slack-sync-data:
 slack-sync-messages:
 	@echo "Syncing Slack messages"
 	@CMD="python manage.py slack_sync_messages" $(MAKE) exec-backend-command
-
-slack-create-message-chunks:
-	@echo "creating message chunks"
-	@CMD="python manage.py slack_create_chunks" $(MAKE) exec-backend-command
 
 sync-data: \
 	update-data \

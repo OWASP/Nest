@@ -9,11 +9,11 @@ class ChunkAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "message",
-        "chunk_text",
+        "text",
     )
     search_fields = (
         "message__slack_message_id",
-        "chunk_text",
+        "text",
     )
 
 

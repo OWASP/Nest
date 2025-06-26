@@ -1,6 +1,7 @@
 """Slack app chunk model."""
 
 from django.db import models
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -13,28 +14,38 @@ class Chunk(TimestampedModel):
 
     class Meta:
         db_table = "ai_chunks"
-        verbose_name = "Chunks"
-        unique_together = ("message", "chunk_text")
+        verbose_name = "Chunk"
+        unique_together = ("message", "text")
 
+    embedding = VectorField(verbose_name="Embedding", dimensions=1536)
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="chunks")
-    chunk_text = models.TextField(verbose_name="Chunk Text")
-    embedding = VectorField(verbose_name="Chunk Embedding", dimensions=1536)
+    text = models.TextField(verbose_name="Text")
 
     def __str__(self):
         """Human readable representation."""
-        text_preview = truncate(self.chunk_text, 50)
-        return f"Chunk {self.id} for Message {self.message.slack_message_id}: {text_preview}"
+        return (
+            f"Chunk {self.id} for Message {self.message.slack_message_id}: "
+            f"{truncate(self.text, 50)}"
+        )
 
     @staticmethod
     def bulk_save(chunks, fields=None):
         """Bulk save chunks."""
-        chunks = [chunk for chunk in chunks if chunk is not None]
-        if chunks:
-            BulkSaveModel.bulk_save(Chunk, chunks, fields=fields)
+        BulkSaveModel.bulk_save(Chunk, chunks, fields=fields)
+
+    @staticmethod
+    def split_text(text: str) -> list[str]:
+        """Split text into chunks."""
+        return RecursiveCharacterTextSplitter(
+            chunk_size=300,
+            chunk_overlap=40,
+            length_function=len,
+            separators=["\n\n", "\n", " ", ""],
+        ).split_text(text)
 
     @staticmethod
     def update_data(
-        chunk_text: str,
+        text: str,
         message: Message,
         embedding,
         *,
@@ -43,7 +54,7 @@ class Chunk(TimestampedModel):
         """Update chunk data.
 
         Args:
-          chunk_text (str): The text content of the chunk.
+          text (str): The text content of the chunk.
           message (Message): The message this chunk belongs to.
           embedding (list): The embedding vector for the chunk.
           save (bool): Whether to save the chunk to the database.
@@ -52,10 +63,10 @@ class Chunk(TimestampedModel):
           Chunk: The updated chunk instance.
 
         """
-        if Chunk.objects.filter(message=message, chunk_text=chunk_text).exists():
+        if Chunk.objects.filter(message=message, text=text).exists():
             return None
 
-        chunk = Chunk(message=message, chunk_text=chunk_text, embedding=embedding)
+        chunk = Chunk(message=message, text=text, embedding=embedding)
 
         if save:
             chunk.save()

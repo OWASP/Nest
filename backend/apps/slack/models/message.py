@@ -1,7 +1,9 @@
 """Slack app message model."""
 
+import re
 from datetime import UTC, datetime
 
+import emoji
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -47,6 +49,20 @@ class Message(TimestampedModel):
         )
 
     @property
+    def cleaned_text(self) -> str:
+        """Get cleaned text from the message."""
+        if not self.text:
+            return ""
+
+        text = emoji.demojize(self.text)  # Remove emojis.
+        text = re.sub(r"<@U[A-Z0-9]+>", "", text)  # Remove user mentions.
+        text = re.sub(r"<https?://[^>]+>", "", text)  # Remove links.
+        text = re.sub(r":\w+:", "", text)  # Remove emoji aliases.
+        text = re.sub(r"\s+", " ", text)  # Normalize whitespace.
+
+        return text.strip()
+
+    @property
     def latest_reply(self) -> "Message | None":
         """Get the latest reply to this message."""
         return (
@@ -62,6 +78,11 @@ class Message(TimestampedModel):
     def subtype(self) -> str | None:
         """Get the subtype of the message if it exists."""
         return self.raw_data.get("subtype")
+
+    @property
+    def text(self) -> str:
+        """Get the text of the message."""
+        return self.raw_data.get("text", "")
 
     def from_slack(
         self,
