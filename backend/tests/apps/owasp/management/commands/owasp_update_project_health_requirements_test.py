@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from apps.owasp.management.commands.owasp_update_project_health_requirements import Command
-from apps.owasp.models.enums import ProjectLevel
+from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 

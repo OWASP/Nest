@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from django.conf import settings
+
 from apps.common.utils import join_values
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
@@ -33,6 +35,12 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     def idx_forks_count(self) -> int:
         """Return forks count for indexing."""
         return self.forks_count
+
+    @property
+    def idx_health_score(self) -> float | None:
+        """Return health score for indexing."""
+        # TODO(arkid15r): Enable real health score in production when ready.
+        return 100 if settings.ENVIRONMENT == "Production" else self.health_score
 
     @property
     def idx_is_active(self) -> bool:
@@ -96,11 +104,6 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     def idx_repositories_count(self) -> int:
         """Return repositories count for indexing."""
         return self.repositories.count()
-
-    @property
-    def idx_health_score(self) -> float | None:
-        """Return score for indexing."""
-        return self.health_score
 
     @property
     def idx_stars_count(self) -> int:

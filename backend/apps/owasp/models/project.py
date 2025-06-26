@@ -17,7 +17,7 @@ from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
-from apps.owasp.models.enums import ProjectLevel, ProjectType
+from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
@@ -156,16 +156,6 @@ class Project(
         return self.issues.count()
 
     @property
-    def nest_key(self) -> str:
-        """Get Nest key."""
-        return self.key.replace("www-project-", "")
-
-    @property
-    def nest_url(self) -> str:
-        """Get Nest URL for project."""
-        return get_absolute_url(f"projects/{self.nest_key}")
-
-    @property
     def last_health_metrics(self) -> ProjectHealthMetrics | None:
         """Return last health metrics for the project."""
         return (
@@ -176,6 +166,16 @@ class Project(
     def leaders_count(self) -> int:
         """Return the count of leaders."""
         return len(self.leaders_raw)
+
+    @property
+    def nest_key(self) -> str:
+        """Get Nest key."""
+        return self.key.replace("www-project-", "")
+
+    @property
+    def nest_url(self) -> str:
+        """Get Nest URL for project."""
+        return get_absolute_url(f"projects/{self.nest_key}")
 
     @property
     def open_issues(self):

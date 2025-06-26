@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.owasp.models.enums import ProjectLevel
+from apps.owasp.models.enums.project import ProjectLevel
 
 
 class ProjectHealthRequirements(TimestampedModel):

@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.owasp.models.enums import ProjectLevel
+from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 

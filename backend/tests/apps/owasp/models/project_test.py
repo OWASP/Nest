@@ -4,7 +4,7 @@ import pytest
 
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
-from apps.owasp.models.enums import ProjectLevel, ProjectType
+from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project
 
 

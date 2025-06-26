@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from apps.owasp.models.enums import ProjectLevel
+from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 
