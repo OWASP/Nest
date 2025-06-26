@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.owasp.models.project import Project
+from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 
@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = "Set project health requirements for each level."
 
     LEVEL_REQUIREMENTS = {
-        Project.ProjectLevel.INCUBATOR: {
+        ProjectLevel.INCUBATOR: {
             "age_days": 15,
             "contributors_count": 1,
             "forks_count": 2,
@@ -30,7 +30,7 @@ class Command(BaseCommand):
             "unanswered_issues_count": 5,
             "unassigned_issues_count": 5,
         },
-        Project.ProjectLevel.LAB: {
+        ProjectLevel.LAB: {
             "age_days": 20,
             "contributors_count": 3,
             "forks_count": 5,
@@ -50,7 +50,7 @@ class Command(BaseCommand):
             "unanswered_issues_count": 4,
             "unassigned_issues_count": 4,
         },
-        Project.ProjectLevel.PRODUCTION: {
+        ProjectLevel.PRODUCTION: {
             "age_days": 30,
             "contributors_count": 4,
             "forks_count": 7,
@@ -70,7 +70,7 @@ class Command(BaseCommand):
             "unanswered_issues_count": 2,
             "unassigned_issues_count": 2,
         },
-        Project.ProjectLevel.FLAGSHIP: {
+        ProjectLevel.FLAGSHIP: {
             "age_days": 30,
             "contributors_count": 5,
             "forks_count": 10,
@@ -120,7 +120,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         """Handle the command execution."""
-        for level_code, level_name in sorted(Project.ProjectLevel.choices):
+        for level_code, level_name in sorted(ProjectLevel.choices):
             _, created = ProjectHealthRequirements.objects.update_or_create(
                 level=level_code,
                 defaults=self.get_level_requirements(level_code),
