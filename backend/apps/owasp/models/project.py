@@ -169,11 +169,7 @@ class Project(
     def last_health_metrics(self) -> ProjectHealthMetrics | None:
         """Return last health metrics for the project."""
         return (
-            ProjectHealthMetrics.objects.filter(project=self)
-            .order_by(
-                "-nest_created_at",
-            )
-            .first()
+            ProjectHealthMetrics.objects.filter(project=self).order_by("-nest_created_at").first()
         )
 
     @property
