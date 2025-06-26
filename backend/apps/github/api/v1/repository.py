@@ -3,11 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Schema
+from ninja.errors import HttpError
+from ninja.pagination import RouterPaginated
 
 from apps.github.models.repository import Repository
 
-router = Router()
+router = RouterPaginated()
 
 
 class RepositorySchema(Schema):
@@ -20,6 +22,9 @@ class RepositorySchema(Schema):
 
 
 @router.get("/", response=list[RepositorySchema])
-def list_repository(request: HttpRequest) -> list[RepositorySchema]:
+def list_repository(request: HttpRequest) -> list[RepositorySchema] | HttpError:
     """Get all repositories."""
-    return Repository.objects.all()
+    repositories = Repository.objects.all()
+    if not repositories:
+        raise HttpError(404, "Repositories not found")
+    return repositories

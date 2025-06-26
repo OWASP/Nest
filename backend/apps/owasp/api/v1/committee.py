@@ -3,11 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Schema
+from ninja.errors import HttpError
+from ninja.pagination import RouterPaginated
 
 from apps.owasp.models.committee import Committee
 
-router = Router()
+router = RouterPaginated()
 
 
 class CommitteeSchema(Schema):
@@ -20,6 +22,9 @@ class CommitteeSchema(Schema):
 
 
 @router.get("/", response=list[CommitteeSchema])
-def list_committees(request: HttpRequest) -> list[CommitteeSchema]:
+def list_committees(request: HttpRequest) -> list[CommitteeSchema] | HttpError:
     """Get all committees."""
-    return Committee.objects.all()
+    committees = Committee.objects.all()
+    if not committees:
+        raise HttpError(404, "Committees not found")
+    return committees

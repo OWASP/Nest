@@ -3,11 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Schema
+from ninja.errors import HttpError
+from ninja.pagination import RouterPaginated
 
 from apps.github.models.organization import Organization
 
-router = Router()
+router = RouterPaginated()
 
 
 class OrganizationSchema(Schema):
@@ -22,6 +24,9 @@ class OrganizationSchema(Schema):
 
 
 @router.get("/", response=list[OrganizationSchema])
-def list_organization(request: HttpRequest) -> list[OrganizationSchema]:
+def list_organization(request: HttpRequest) -> list[OrganizationSchema] | HttpError:
     """Get all organizations."""
-    return Organization.objects.filter(is_owasp_related_organization=True)
+    organizations = Organization.objects.filter(is_owasp_related_organization=True)
+    if not organizations:
+        raise HttpError(404, "Organizations not found")
+    return organizations

@@ -3,11 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Schema
+from ninja.errors import HttpError
+from ninja.pagination import RouterPaginated
 
 from apps.github.models.release import Release
 
-router = Router()
+router = RouterPaginated()
 
 
 class ReleaseSchema(Schema):
@@ -21,6 +23,9 @@ class ReleaseSchema(Schema):
 
 
 @router.get("/", response=list[ReleaseSchema])
-def list_release(request: HttpRequest) -> list[ReleaseSchema]:
+def list_release(request: HttpRequest) -> list[ReleaseSchema] | HttpError:
     """Get all releases."""
-    return Release.objects.all()
+    releases = Release.objects.all()
+    if not releases:
+        raise HttpError(404, "Releases not found")
+    return releases

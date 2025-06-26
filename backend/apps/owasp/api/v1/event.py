@@ -1,11 +1,13 @@
 """Event API."""
 
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Schema
+from ninja.errors import HttpError
+from ninja.pagination import RouterPaginated
 
 from apps.owasp.models.event import Event
 
-router = Router()
+router = RouterPaginated()
 
 
 class EventSchema(Schema):
@@ -17,6 +19,9 @@ class EventSchema(Schema):
 
 
 @router.get("/", response=list[EventSchema])
-def list_events(request: HttpRequest) -> list[EventSchema]:
+def list_events(request: HttpRequest) -> list[EventSchema] | HttpError:
     """Get all events."""
-    return Event.objects.all()
+    events = Event.objects.all()
+    if not events:
+        raise HttpError(404, "Events not found")
+    return events

@@ -3,11 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Schema
+from ninja.errors import HttpError
+from ninja.pagination import RouterPaginated
 
 from apps.github.models.issue import Issue
 
-router = Router()
+router = RouterPaginated()
 
 
 class IssueSchema(Schema):
@@ -22,6 +24,9 @@ class IssueSchema(Schema):
 
 
 @router.get("/", response=list[IssueSchema])
-def list_issues(request: HttpRequest) -> list[IssueSchema]:
+def list_issues(request: HttpRequest) -> list[IssueSchema] | HttpError:
     """Get all issues."""
-    return Issue.objects.all()
+    issues = Issue.objects.all()
+    if not issues:
+        raise HttpError(404, "Issues not found")
+    return issues

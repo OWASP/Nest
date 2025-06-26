@@ -3,11 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Schema
+from ninja.errors import HttpError
+from ninja.pagination import RouterPaginated
 
 from apps.owasp.models.project import Project
 
-router = Router()
+router = RouterPaginated()
 
 
 class ProjectSchema(Schema):
@@ -21,6 +23,9 @@ class ProjectSchema(Schema):
 
 
 @router.get("/", response=list[ProjectSchema])
-def list_projects(request: HttpRequest) -> list[ProjectSchema]:
+def list_projects(request: HttpRequest) -> list[ProjectSchema] | HttpError:
     """Get all projects."""
-    return Project.objects.all()
+    projects = Project.objects.all()
+    if not projects:
+        raise HttpError(404, "Projects not found")
+    return projects
