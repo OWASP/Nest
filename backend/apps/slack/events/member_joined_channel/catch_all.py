@@ -6,7 +6,7 @@ from apps.slack.apps import SlackConfig
 from apps.slack.constants import OWASP_CONTRIBUTE_CHANNEL_ID, OWASP_GSOC_CHANNEL_ID
 
 
-def catch_all_handler(event: dict, client: WebClient, ack) -> None:
+def catch_all_handler(event: dict, client: WebClient, ack) -> None:  # noqa: ARG001
     """Slack new member cache all handler.
 
     Args:

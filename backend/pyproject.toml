@@ -119,7 +119,6 @@ target-version = "py313"
 extend-select = ["I"]
 ignore = [
     "ANN",  # TODO(arkid15r): remove when all annotations are added.
-    "ARG001",
     "ARG002",
     "C901",
     "COM812",
@@ -144,7 +143,7 @@ select = ["ALL"]
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["D104", "F401"]
 "**/admin.py" = ["D100", "D101", "D104"]
-"**/api/*.py" = ["D106"]
+"**/api/*.py" = ["ARG001", "D106"]
 "**/apps.py" = ["D100", "D101", "D104"]
 "**/graphql/**/nodes.py" = ["D106"]
 "**/graphql/nodes/*.py" = ["D106"]
