@@ -35,7 +35,7 @@
     "@sentry/nextjs": "^9.32.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/leaflet.markercluster": "^1.5.5",
-    "@types/lodash": "^4.17.18",
+    "@types/lodash": "^4.17.19",
     "apexcharts": "^4.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
