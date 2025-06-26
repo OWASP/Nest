@@ -9,11 +9,14 @@ import {
   faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Link from 'next/link'
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
+import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
 import Milestones from 'components/Milestones'
@@ -31,6 +34,7 @@ const DetailsCard = ({
   summary,
   description,
   heatmap,
+  healthMetricsData,
   stats,
   details,
   socialLinks,
@@ -47,11 +51,45 @@ const DetailsCard = ({
   geolocationData = null,
   repositories = [],
 }: DetailsCardProps) => {
+  let scoreStyle = 'bg-green-400 text-green-900'
+  if (type === 'project' && healthMetricsData.length > 0) {
+    const score = healthMetricsData[0].score
+    if (score < 50) {
+      scoreStyle = 'bg-red-400 text-red-900'
+    } else if (score < 75) {
+      scoreStyle = 'bg-yellow-400 text-yellow-900'
+    }
+  }
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
-          <h1 className="text-4xl font-bold">{title}</h1>
+          <div className="flex w-full items-center justify-between">
+            <h1 className="text-4xl font-bold">{title}</h1>
+            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+              <Link href="#issues-trend">
+                <div
+                  className={`group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl ${scoreStyle}`}
+                >
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                  <div className="relative z-10 flex flex-col items-center text-center">
+                    <span className="text-xs font-semibold uppercase tracking-wide opacity-90">
+                      Health
+                    </span>
+                    <span className="text-xl font-black leading-none">
+                      {healthMetricsData[0].score}
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-wide opacity-90">
+                      Score
+                    </span>
+                  </div>
+                  {healthMetricsData[0].score < 30 && (
+                    <div className="animate-pulse absolute inset-0 rounded-full bg-red-400/20"></div>
+                  )}
+                </div>
+              </Link>
+            )}
+          </div>
           {!isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive
@@ -195,14 +233,13 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard
-              icon={faFolderOpen}
-              title={<AnchorTitle title="Repositories" />}
-              className="mt-6"
-            >
+            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
+        {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+          <HealthMetrics data={healthMetricsData} />
+        )}
       </div>
     </div>
   )

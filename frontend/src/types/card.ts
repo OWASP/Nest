@@ -3,6 +3,7 @@ import type { JSX } from 'react'
 import type { Button } from 'types/button'
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
+import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
@@ -37,6 +38,7 @@ export interface DetailsCardProps {
   details?: { label: string; value: string | JSX.Element }[]
   geolocationData?: Chapter[]
   heatmap?: JSX.Element
+  healthMetricsData?: HealthMetricsProps[]
   isActive?: boolean
   languages?: string[]
   pullRequests?: PullRequest[]
