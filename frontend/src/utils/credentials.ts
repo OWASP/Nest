@@ -11,5 +11,6 @@ export const IS_GITHUB_AUTH_ENABLED = Boolean(
 )
 export const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
 export const NEXTAUTH_URL = process.env.NEXTAUTH_URL
+export const PROJECT_HEALTH_ENABLED = process.env.NEXT_PUBLIC_PROJECT_HEALTH_ENABLED === 'true'
 export const RELEASE_VERSION = process.env.NEXT_PUBLIC_RELEASE_VERSION
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
