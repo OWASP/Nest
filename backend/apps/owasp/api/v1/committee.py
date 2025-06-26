@@ -22,7 +22,7 @@ class CommitteeSchema(Schema):
 
 
 @router.get("/", response=list[CommitteeSchema])
-def list_committees(request: HttpRequest) -> list[CommitteeSchema] | HttpError:
+def list_committees(request: HttpRequest) -> list[CommitteeSchema]:
     """Get all committees."""
     committees = Committee.objects.all()
     if not committees:

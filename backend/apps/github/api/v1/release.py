@@ -23,7 +23,7 @@ class ReleaseSchema(Schema):
 
 
 @router.get("/", response=list[ReleaseSchema])
-def list_release(request: HttpRequest) -> list[ReleaseSchema] | HttpError:
+def list_release(request: HttpRequest) -> list[ReleaseSchema]:
     """Get all releases."""
     releases = Release.objects.all()
     if not releases:

@@ -19,7 +19,7 @@ class LabelSchema(Schema):
 
 
 @router.get("/", response=list[LabelSchema])
-def list_label(request: HttpRequest) -> list[LabelSchema] | HttpError:
+def list_label(request: HttpRequest) -> list[LabelSchema]:
     """Get all labels."""
     labels = Label.objects.all()
     if not labels:

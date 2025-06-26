@@ -23,7 +23,7 @@ class ProjectSchema(Schema):
 
 
 @router.get("/", response=list[ProjectSchema])
-def list_projects(request: HttpRequest) -> list[ProjectSchema] | HttpError:
+def list_projects(request: HttpRequest) -> list[ProjectSchema]:
     """Get all projects."""
     projects = Project.objects.all()
     if not projects:

@@ -33,7 +33,7 @@ class UserSchema(Schema):
 
 
 @router.get("/", response=list[UserSchema])
-def list_users(request: HttpRequest) -> list[UserSchema] | HttpError:
+def list_users(request: HttpRequest) -> list[UserSchema]:
     """Get all users."""
     users = User.objects.all()
     if not users:
@@ -42,7 +42,7 @@ def list_users(request: HttpRequest) -> list[UserSchema] | HttpError:
 
 
 @router.get("/{login}", response=UserSchema)
-def get_user(request: HttpRequest, login: str) -> UserSchema | HttpError:
+def get_user(request: HttpRequest, login: str) -> UserSchema:
     """Get user by login."""
     user = User.objects.filter(login=login).first()
     if not user:

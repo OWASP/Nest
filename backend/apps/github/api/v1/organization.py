@@ -24,7 +24,7 @@ class OrganizationSchema(Schema):
 
 
 @router.get("/", response=list[OrganizationSchema])
-def list_organization(request: HttpRequest) -> list[OrganizationSchema] | HttpError:
+def list_organization(request: HttpRequest) -> list[OrganizationSchema]:
     """Get all organizations."""
     organizations = Organization.objects.filter(is_owasp_related_organization=True)
     if not organizations:

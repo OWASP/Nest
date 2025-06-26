@@ -24,7 +24,7 @@ class IssueSchema(Schema):
 
 
 @router.get("/", response=list[IssueSchema])
-def list_issues(request: HttpRequest) -> list[IssueSchema] | HttpError:
+def list_issues(request: HttpRequest) -> list[IssueSchema]:
     """Get all issues."""
     issues = Issue.objects.all()
     if not issues:

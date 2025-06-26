@@ -23,7 +23,7 @@ class ChapterSchema(Schema):
 
 
 @router.get("/", response=list[ChapterSchema])
-def list_chapters(request: HttpRequest) -> list[ChapterSchema] | HttpError:
+def list_chapters(request: HttpRequest) -> list[ChapterSchema]:
     """Get all chapters."""
     chapters = Chapter.objects.all()
     if not chapters:

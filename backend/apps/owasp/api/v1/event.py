@@ -19,7 +19,7 @@ class EventSchema(Schema):
 
 
 @router.get("/", response=list[EventSchema])
-def list_events(request: HttpRequest) -> list[EventSchema] | HttpError:
+def list_events(request: HttpRequest) -> list[EventSchema]:
     """Get all events."""
     events = Event.objects.all()
     if not events:

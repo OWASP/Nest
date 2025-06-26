@@ -22,7 +22,7 @@ class RepositorySchema(Schema):
 
 
 @router.get("/", response=list[RepositorySchema])
-def list_repository(request: HttpRequest) -> list[RepositorySchema] | HttpError:
+def list_repository(request: HttpRequest) -> list[RepositorySchema]:
     """Get all repositories."""
     repositories = Repository.objects.all()
     if not repositories:
