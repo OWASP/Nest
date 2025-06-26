@@ -43,8 +43,9 @@ class UserIndex(IndexBase):
         "minProximity": 4,
         "customRanking": [
             "desc(idx_contributions_count)",
-            "desc(idx_created_at)",
             "desc(idx_followers_count)",
+            "desc(idx_public_repositories_count)",
+            "asc(idx_created_at)",
         ],
         "ranking": [
             "typo",
