@@ -92,9 +92,6 @@ importers:
       dompurify:
         specifier: ^3.2.6
         version: 3.2.6
-      dotenv:
-        specifier: ^16.6.0
-        version: 16.6.0
       eslint-plugin-import:
         specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@8.35.0(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.29.0(jiti@2.4.2))
