@@ -29,7 +29,7 @@ class TestProjectHealthMetricsQuery:
             if field.name == "health_stats"
         )
 
-        assert health_stats_field.type.of_type is HealthStatsNode
+        assert health_stats_field.type is HealthStatsNode
 
     @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects")
     def test_resolve_health_stats(self, mock_metrics_objects):
@@ -41,7 +41,9 @@ class TestProjectHealthMetricsQuery:
                 stars_count=1000,
                 forks_count=200,
                 contributors_count=50,
-                nest_created_at=timezone.make_aware(timezone.datetime(2025, 1, 1), timezone.get_default_timezone()),
+                nest_created_at=timezone.make_aware(
+                    timezone.datetime(2025, 1, 1), timezone.get_default_timezone()
+                ),
                 project=MagicMock(
                     name="Healthy Project",
                 ),
@@ -52,7 +54,9 @@ class TestProjectHealthMetricsQuery:
                 stars_count=1500,
                 forks_count=300,
                 contributors_count=75,
-                nest_created_at=timezone.make_aware(timezone.datetime(2025, 1, 2), timezone.get_default_timezone()),
+                nest_created_at=timezone.make_aware(
+                    timezone.datetime(2025, 1, 2), timezone.get_default_timezone()
+                ),
                 project=MagicMock(
                     name="Project Needing Attention",
                 ),
@@ -63,7 +67,9 @@ class TestProjectHealthMetricsQuery:
                 stars_count=1200,
                 forks_count=250,
                 contributors_count=60,
-                nest_created_at=timezone.make_aware(timezone.datetime(2025, 2, 3), timezone.get_default_timezone()),
+                nest_created_at=timezone.make_aware(
+                    timezone.datetime(2025, 2, 3), timezone.get_default_timezone()
+                ),
                 project=MagicMock(
                     name="Another Project Needing Attention",
                 ),
@@ -74,13 +80,16 @@ class TestProjectHealthMetricsQuery:
                 stars_count=800,
                 forks_count=150,
                 contributors_count=30,
-                nest_created_at=timezone.make_aware(timezone.datetime(2025, 3, 4), timezone.get_default_timezone()),
+                nest_created_at=timezone.make_aware(
+                    timezone.datetime(2025, 3, 4), timezone.get_default_timezone()
+                ),
                 project=MagicMock(
                     name="Unhealthy Project",
                 ),
             ),
         ]
-        mock_metrics_objects.return_value.values.return_value.order_by.return_value.distinct.return_value = mock_metrics
+        mock_values = mock_metrics_objects.return_value.values.return_value
+        mock_values.order_by.return_value.distinct.return_value = mock_metrics
         query = ProjectHealthMetricsQuery()
         result = query.health_stats()
         assert isinstance(result, HealthStatsNode)
