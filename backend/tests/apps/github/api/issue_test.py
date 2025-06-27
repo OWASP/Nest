@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import pytest
 
-from apps.github.api.issue import IssueSerializer
+from apps.github.api.v1.issue import IssueSchema
 
 
-class TestIssueSerializer:
+class TestIssueSchema:
     @pytest.mark.parametrize(
         "issue_data",
         [
@@ -25,14 +27,13 @@ class TestIssueSerializer:
             },
         ],
     )
-    def test_issue_serializer(self, issue_data):
-        serializer = IssueSerializer(data=issue_data)
-        assert serializer.is_valid()
-        validated_data = serializer.validated_data
-        validated_data["created_at"] = (
-            validated_data["created_at"].isoformat().replace("+00:00", "Z")
-        )
-        validated_data["updated_at"] = (
-            validated_data["updated_at"].isoformat().replace("+00:00", "Z")
-        )
-        assert validated_data == issue_data
+    def test_issue_schema(self, issue_data):
+        schema = IssueSchema(**issue_data)
+
+        assert schema.title == issue_data["title"]
+        assert schema.body == issue_data["body"]
+        assert schema.state == issue_data["state"]
+        assert schema.url == issue_data["url"]
+
+        assert schema.created_at == datetime.fromisoformat(issue_data["created_at"])
+        assert schema.updated_at == datetime.fromisoformat(issue_data["updated_at"])

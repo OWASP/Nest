@@ -1,24 +1,20 @@
 import pytest
 
-from apps.github.api.v1.issue import router as issue_router
-from apps.github.api.v1.label import router as label_router
-from apps.github.api.v1.organization import router as organization_router
-from apps.github.api.v1.release import router as release_router
-from apps.github.api.v1.repository import router as repository_router
-from apps.github.api.v1.urls import router as main_router
-from apps.github.api.v1.user import router as user_router
+from apps.owasp.api.v1.chapter import router as chapter_router
+from apps.owasp.api.v1.committee import router as committee_router
+from apps.owasp.api.v1.event import router as event_router
+from apps.owasp.api.v1.project import router as project_router
+from apps.owasp.api.v1.urls import router as main_router
 
 
 class TestRouterRegistration:
     """Test the urls registration."""
 
     EXPECTED_ROUTERS = {
-        "/issues": issue_router,
-        "/labels": label_router,
-        "/organizations": organization_router,
-        "/releases": release_router,
-        "/repositories": repository_router,
-        "/users": user_router,
+        "/chapters": chapter_router,
+        "/committees": committee_router,
+        "/events": event_router,
+        "/projects": project_router,
     }
 
     def test_all_routers_are_registered(self):
@@ -35,4 +31,5 @@ class TestRouterRegistration:
 
         assert prefix in registered_router_map
         actual_router = registered_router_map[prefix]
+
         assert actual_router is expected_router_instance

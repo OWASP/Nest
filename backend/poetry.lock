@@ -799,19 +799,25 @@ asgiref = ">=3.6"
 django = ">=4.2"
 
 [[package]]
-name = "django-filter"
-version = "25.1"
-description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
+name = "django-ninja"
+version = "1.4.3"
+description = "Django Ninja - Fast Django REST framework"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "django_filter-25.1-py3-none-any.whl", hash = "sha256:4fa48677cf5857b9b1347fed23e355ea792464e0fe07244d1fdfb8a806215b80"},
-    {file = "django_filter-25.1.tar.gz", hash = "sha256:1ec9eef48fa8da1c0ac9b411744b16c3f4c31176c867886e4c48da369c407153"},
+    {file = "django_ninja-1.4.3-py3-none-any.whl", hash = "sha256:f3204137a059437b95677049474220611f1cf9efedba9213556474b75168fa01"},
+    {file = "django_ninja-1.4.3.tar.gz", hash = "sha256:e46d477ca60c228d2a5eb3cc912094928ea830d364501f966661eeada67cb038"},
 ]
 
 [package.dependencies]
-Django = ">=4.2"
+Django = ">=3.1"
+pydantic = ">=2.0,<3.0.0"
+
+[package.extras]
+dev = ["pre-commit"]
+doc = ["markdown-include", "mkdocs", "mkdocs-material", "mkdocstrings"]
+test = ["django-stubs", "mypy (==1.7.1)", "psycopg2-binary", "pytest", "pytest-asyncio", "pytest-cov", "pytest-django", "ruff (==0.5.7)"]
 
 [[package]]
 name = "django-redis"
@@ -856,21 +862,6 @@ google = ["google-cloud-storage (>=1.36.1)"]
 libcloud = ["apache-libcloud"]
 s3 = ["boto3 (>=1.4.4)"]
 sftp = ["paramiko (>=1.15)"]
-
-[[package]]
-name = "djangorestframework"
-version = "3.16.0"
-description = "Web APIs for Django, made easy."
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-files = [
-    {file = "djangorestframework-3.16.0-py3-none-any.whl", hash = "sha256:bea7e9f6b96a8584c5224bfb2e4348dfb3f8b5e34edbecb98da258e892089361"},
-    {file = "djangorestframework-3.16.0.tar.gz", hash = "sha256:f022ff46613584de994c0c6a4aebbace5fd700555fbe9d33b865ebf173eba6c9"},
-]
-
-[package.dependencies]
-django = ">=4.2"
 
 [[package]]
 name = "djlint"
@@ -1291,14 +1282,14 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "httpx-sse"
-version = "0.4.0"
+version = "0.4.1"
 description = "Consume Server-Sent Event (SSE) messages with HTTPX."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "httpx-sse-0.4.0.tar.gz", hash = "sha256:1e81a3a3070ce322add1d3529ed42eb5f70817f45ed6ec915ab753f961139721"},
-    {file = "httpx_sse-0.4.0-py3-none-any.whl", hash = "sha256:f329af6eae57eaa2bdfd962b42524764af68075ea87370a2de920af5341e318f"},
+    {file = "httpx_sse-0.4.1-py3-none-any.whl", hash = "sha256:cba42174344c3a5b06f255ce65b350880f962d99ead85e776f23c6618a377a37"},
+    {file = "httpx_sse-0.4.1.tar.gz", hash = "sha256:8f44d34414bc7b21bf3602713005c5df4917884f76072479b21f68befa4ea26e"},
 ]
 
 [[package]]
@@ -1637,21 +1628,21 @@ langchain-core = ">=0.3.51,<1.0.0"
 
 [[package]]
 name = "langsmith"
-version = "0.4.1"
+version = "0.4.3"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.4.1-py3-none-any.whl", hash = "sha256:19c4c40bbb6735cb1136c453b2edcde265ca5ba1b108b7e0e3583ec4bda28625"},
-    {file = "langsmith-0.4.1.tar.gz", hash = "sha256:ae8ec403fb2b9cabcfc3b0c54556d65555598c85879dac83b009576927f7eb1d"},
+    {file = "langsmith-0.4.3-py3-none-any.whl", hash = "sha256:b8ed57fb21fb3370bc7e4e8c4a3003017040336df694a66a34afe6f9872e68da"},
+    {file = "langsmith-0.4.3.tar.gz", hash = "sha256:151d8cbf3d26a49f67bd720462eae20d3282196958f86b59d1ac1aad484c52f1"},
 ]
 
 [package.dependencies]
 httpx = ">=0.23.0,<1"
 orjson = {version = ">=3.9.14,<4.0.0", markers = "platform_python_implementation != \"PyPy\""}
 packaging = ">=23.2"
-pydantic = {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""}
+pydantic = ">=1,<3"
 requests = ">=2,<3"
 requests-toolbelt = ">=1.0.0,<2.0.0"
 zstandard = ">=0.23.0,<0.24.0"
@@ -2647,14 +2638,14 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pydantic-settings"
-version = "2.10.0"
+version = "2.10.1"
 description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pydantic_settings-2.10.0-py3-none-any.whl", hash = "sha256:33781dfa1c7405d5ed2b6f150830a93bb58462a847357bd8f162f8bacb77c027"},
-    {file = "pydantic_settings-2.10.0.tar.gz", hash = "sha256:7a12e0767ba283954f3fd3fefdd0df3af21b28aa849c40c35811d52d682fa876"},
+    {file = "pydantic_settings-2.10.1-py3-none-any.whl", hash = "sha256:a60952460b99cf661dc25c29c0ef171721f98bfcb52ef8d9ea4c943d7c8cc796"},
+    {file = "pydantic_settings-2.10.1.tar.gz", hash = "sha256:06f0062169818d0f5524420a360d632d5857b83cffd4d42fe29597807a1614ee"},
 ]
 
 [package.dependencies]
@@ -4011,4 +4002,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "50c9bfb1cba43fb146a8818efcb20b79636efd34c8e86b93cca0b9a7603598d1"
+content-hash = "f9fb65bde2722d0de24cb1ac91d3d519efb2ec397ffd5e13ca7bd6a83239d724"

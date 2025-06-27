@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import pytest
 
-from apps.github.api.repository import RepositorySerializer
+from apps.github.api.v1.repository import RepositorySchema
 
 
-class TestRepositorySerializer:
+class TestRepositorySchema:
     @pytest.mark.parametrize(
         "repository_data",
         [
@@ -21,15 +23,10 @@ class TestRepositorySerializer:
             },
         ],
     )
-    def test_repository_serializer(self, repository_data):
-        serializer = RepositorySerializer(data=repository_data)
-        assert serializer.is_valid()
-        validated_data = serializer.validated_data
+    def test_repository_schema(self, repository_data):
+        repository = RepositorySchema(**repository_data)
 
-        validated_data["created_at"] = (
-            validated_data["created_at"].isoformat().replace("+00:00", "Z")
-        )
-        validated_data["updated_at"] = (
-            validated_data["updated_at"].isoformat().replace("+00:00", "Z")
-        )
-        assert validated_data == repository_data
+        assert repository.name == repository_data["name"]
+        assert repository.description == repository_data["description"]
+        assert repository.created_at == datetime.fromisoformat(repository_data["created_at"])
+        assert repository.updated_at == datetime.fromisoformat(repository_data["updated_at"])
