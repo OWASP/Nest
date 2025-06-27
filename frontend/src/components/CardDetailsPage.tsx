@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
+import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
@@ -65,7 +66,7 @@ const DetailsCard = ({
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
-            {type === 'project' && healthMetricsData.length > 0 && (
+            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
               <Link href="#issues-trend">
                 <div
                   className={`group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl ${scoreStyle}`}
@@ -236,7 +237,7 @@ const DetailsCard = ({
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
-        {type === 'project' && healthMetricsData.length > 0 && (
+        {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
       </div>
