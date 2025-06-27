@@ -146,8 +146,12 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             list[ProjectHealthMetrics]: List of distinct project health metrics.
 
         """
-        return (
-            ProjectHealthMetrics.objects.values("project").order_by("-nest_created_at").distinct()
+        return ProjectHealthMetrics.objects.filter(
+            nest_created_at=models.Subquery(
+                ProjectHealthMetrics.objects.filter(project=models.OuterRef("project"))
+                .order_by("-nest_created_at")
+                .values("nest_created_at")[:1]
+            )
         )
 
     @staticmethod
