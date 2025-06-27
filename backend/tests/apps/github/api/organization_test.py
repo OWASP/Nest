@@ -1,12 +1,11 @@
-from unittest.mock import MagicMock, patch
+from datetime import datetime
 
 import pytest
 
-from apps.github.api.organization import OrganizationSerializer
-from apps.github.models.organization import Organization
+from apps.github.api.v1.organization import OrganizationSchema
 
 
-class TestOrganizationSerializer:
+class TestOrganizationSchema:
     @pytest.mark.parametrize(
         "organization_data",
         [
@@ -28,27 +27,12 @@ class TestOrganizationSerializer:
             },
         ],
     )
-    # Ensures that test runs without actual database access by simulating behavior of a queryset.
-    @patch("apps.github.models.organization.Organization.objects.filter")
-    def test_organization_serializer(self, mock_filter, organization_data):
-        mock_qs = MagicMock()
-        # To mimic a queryset where no matching objects are found.
-        mock_qs.exists.return_value = False
-        mock_filter.return_value = mock_qs
+    def test_organization_schema(self, organization_data):
+        schema = OrganizationSchema(**organization_data)
+        assert schema.created_at == datetime.fromisoformat(organization_data["created_at"])
+        assert schema.updated_at == datetime.fromisoformat(organization_data["updated_at"])
 
-        serializer = OrganizationSerializer(data=organization_data)
-        assert serializer.is_valid()
-        validated_data = serializer.validated_data
-        validated_data["created_at"] = (
-            validated_data["created_at"].isoformat().replace("+00:00", "Z")
-        )
-        validated_data["updated_at"] = (
-            validated_data["updated_at"].isoformat().replace("+00:00", "Z")
-        )
-        assert validated_data == organization_data
-
-    @patch("apps.github.models.organization.Organization.objects.values_list")
-    def test_get_logins(self, mock_values_list):
-        mock_values_list.return_value = ["github", "microsoft"]
-        assert Organization.get_logins() == {"github", "microsoft"}
-        mock_values_list.assert_called_once_with("login", flat=True)
+        assert schema.name == organization_data["name"]
+        assert schema.login == organization_data["login"]
+        assert schema.company == organization_data["company"]
+        assert schema.location == organization_data["location"]

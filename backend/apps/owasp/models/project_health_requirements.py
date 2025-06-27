@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.owasp.models.project import Project
+from apps.owasp.models.enums.project import ProjectLevel
 
 
 class ProjectHealthRequirements(TimestampedModel):
@@ -16,7 +16,7 @@ class ProjectHealthRequirements(TimestampedModel):
 
     level = models.CharField(
         max_length=10,
-        choices=Project.ProjectLevel.choices,
+        choices=ProjectLevel.choices,
         unique=True,
         verbose_name="Project Level",
     )

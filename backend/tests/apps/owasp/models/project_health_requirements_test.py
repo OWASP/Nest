@@ -1,14 +1,14 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from apps.owasp.models.project import Project
+from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 
 class TestProjectHealthRequirementsModel:
     """Unit tests for ProjectHealthRequirements model validation and behavior."""
 
-    VALID_LEVELS = Project.ProjectLevel.values
+    VALID_LEVELS = ProjectLevel.values
     INVALID_LEVEL = "invalid_level"
     POSITIVE_INTEGER_FIELDS = [
         "contributors_count",
@@ -32,11 +32,11 @@ class TestProjectHealthRequirementsModel:
     @pytest.mark.parametrize(
         ("level", "expected"),
         [
-            (Project.ProjectLevel.FLAGSHIP, "Health Requirements for Flagship Projects"),
-            (Project.ProjectLevel.INCUBATOR, "Health Requirements for Incubator Projects"),
-            (Project.ProjectLevel.LAB, "Health Requirements for Lab Projects"),
-            (Project.ProjectLevel.OTHER, "Health Requirements for Other Projects"),
-            (Project.ProjectLevel.PRODUCTION, "Health Requirements for Production Projects"),
+            (ProjectLevel.FLAGSHIP, "Health Requirements for Flagship Projects"),
+            (ProjectLevel.INCUBATOR, "Health Requirements for Incubator Projects"),
+            (ProjectLevel.LAB, "Health Requirements for Lab Projects"),
+            (ProjectLevel.OTHER, "Health Requirements for Other Projects"),
+            (ProjectLevel.PRODUCTION, "Health Requirements for Production Projects"),
             ("", "Health Requirements for  Projects"),
         ],
     )
