@@ -18,11 +18,11 @@ class LabelSchema(Schema):
     name: str
 
 
-@router.get("/", response=list[LabelSchema])
+@router.get("/", response={200: list[LabelSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
-def list_label(request: HttpRequest) -> list[LabelSchema]:
+def list_label(request: HttpRequest) -> list[LabelSchema] | dict:
     """Get all labels."""
     labels = Label.objects.all()
-    if not labels:
+    if not labels.exists():
         raise HttpError(404, "Labels not found")
     return labels

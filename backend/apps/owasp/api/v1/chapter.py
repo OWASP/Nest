@@ -22,11 +22,11 @@ class ChapterSchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response=list[ChapterSchema])
+@router.get("/", response={200: list[ChapterSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
 def list_chapters(request: HttpRequest) -> list[ChapterSchema]:
     """Get all chapters."""
     chapters = Chapter.objects.all()
-    if not chapters:
+    if not chapters.exists():
         raise HttpError(404, "Chapters not found")
     return chapters

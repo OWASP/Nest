@@ -21,11 +21,11 @@ class RepositorySchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response=list[RepositorySchema])
+@router.get("/", response={200: list[RepositorySchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
 def list_repository(request: HttpRequest) -> list[RepositorySchema]:
     """Get all repositories."""
     repositories = Repository.objects.all()
-    if not repositories:
+    if not repositories.exists():
         raise HttpError(404, "Repositories not found")
     return repositories

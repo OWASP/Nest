@@ -21,11 +21,11 @@ class CommitteeSchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response=list[CommitteeSchema])
+@router.get("/", response={200: list[CommitteeSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
 def list_committees(request: HttpRequest) -> list[CommitteeSchema]:
     """Get all committees."""
     committees = Committee.objects.all()
-    if not committees:
+    if not committees.exists():
         raise HttpError(404, "Committees not found")
     return committees

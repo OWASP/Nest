@@ -22,11 +22,11 @@ class ReleaseSchema(Schema):
     tag_name: str
 
 
-@router.get("/", response=list[ReleaseSchema])
+@router.get("/", response={200: list[ReleaseSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
 def list_release(request: HttpRequest) -> list[ReleaseSchema]:
     """Get all releases."""
     releases = Release.objects.all()
-    if not releases:
+    if not releases.exists():
         raise HttpError(404, "Releases not found")
     return releases

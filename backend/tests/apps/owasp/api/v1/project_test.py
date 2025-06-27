@@ -6,34 +6,28 @@ from apps.owasp.api.v1.project import ProjectSchema
 
 
 @pytest.mark.parametrize(
-    ("data", "expected"),
+    "project_data",
     [
-        (
-            {
-                "name": "another project",
-                "description": "A test project by owasp",
-                "level": "other",
-                "created_at": "2023-01-01T00:00:00Z",
-                "updated_at": "2023-01-02T00:00:00Z",
-            },
-            True,
-        ),
-        (
-            {
-                "name": "this is a project",
-                "description": "this is not a project, this is just a file",
-                "level": "Hello",
-                "created_at": "2023-01-01T00:00:00Z",
-                "updated_at": "2023-01-02T00:00:00Z",
-            },
-            False,
-        ),
+        {
+            "name": "another project",
+            "description": "A test project by owasp",
+            "level": "other",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-02T00:00:00Z",
+        },
+        {
+            "name": "this is a project",
+            "description": "this is not a project, this is just a file",
+            "level": "Hello",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-02T00:00:00Z",
+        },
     ],
 )
-def test_project_serializer_validation(data, expected):
-    project = ProjectSchema(**data)
-    assert project.name == data["name"]
-    assert project.description == data["description"]
-    assert project.level == data["level"]
-    assert project.created_at == datetime.fromisoformat(data["created_at"])
-    assert project.updated_at == datetime.fromisoformat(data["updated_at"])
+def test_project_serializer_validation(project_data):
+    project = ProjectSchema(**project_data)
+    assert project.name == project_data["name"]
+    assert project.description == project_data["description"]
+    assert project.level == project_data["level"]
+    assert project.created_at == datetime.fromisoformat(project_data["created_at"])
+    assert project.updated_at == datetime.fromisoformat(project_data["updated_at"])

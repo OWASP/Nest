@@ -23,11 +23,11 @@ class IssueSchema(Schema):
     url: str
 
 
-@router.get("/", response=list[IssueSchema])
+@router.get("/", response={200: list[IssueSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
-def list_issues(request: HttpRequest) -> list[IssueSchema]:
+def list_issues(request: HttpRequest) -> list[IssueSchema] | dict:
     """Get all issues."""
     issues = Issue.objects.all()
-    if not issues:
+    if not issues.exists():
         raise HttpError(404, "Issues not found")
     return issues

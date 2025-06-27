@@ -32,17 +32,17 @@ class UserSchema(Schema):
     url: str
 
 
-@router.get("/", response=list[UserSchema])
+@router.get("/", response={200: list[UserSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
 def list_users(request: HttpRequest) -> list[UserSchema]:
     """Get all users."""
     users = User.objects.all()
-    if not users:
+    if not users.exists():
         raise HttpError(404, "Users not found")
     return users
 
 
-@router.get("/{login}", response=UserSchema)
+@router.get("/{login}", response={200: UserSchema, 404: dict})
 def get_user(request: HttpRequest, login: str) -> UserSchema:
     """Get user by login."""
     user = User.objects.filter(login=login).first()

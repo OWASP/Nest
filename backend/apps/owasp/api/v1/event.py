@@ -18,11 +18,11 @@ class EventSchema(Schema):
     url: str
 
 
-@router.get("/", response=list[EventSchema])
+@router.get("/", response={200: list[EventSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
 def list_events(request: HttpRequest) -> list[EventSchema]:
     """Get all events."""
     events = Event.objects.all()
-    if not events:
+    if not events.exists():
         raise HttpError(404, "Events not found")
     return events

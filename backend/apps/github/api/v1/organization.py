@@ -23,11 +23,11 @@ class OrganizationSchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response=list[OrganizationSchema])
+@router.get("/", response={200: list[OrganizationSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
-def list_organization(request: HttpRequest) -> list[OrganizationSchema]:
+def list_organization(request: HttpRequest) -> list[OrganizationSchema] | dict:
     """Get all organizations."""
     organizations = Organization.objects.filter(is_owasp_related_organization=True)
-    if not organizations:
+    if not organizations.exists():
         raise HttpError(404, "Organizations not found")
     return organizations

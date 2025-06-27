@@ -22,11 +22,11 @@ class ProjectSchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response=list[ProjectSchema])
+@router.get("/", response={200: list[ProjectSchema], 404: dict})
 @paginate(PageNumberPagination, page_size=100)
 def list_projects(request: HttpRequest) -> list[ProjectSchema]:
     """Get all projects."""
     projects = Project.objects.all()
-    if not projects:
+    if not projects.exists():
         raise HttpError(404, "Projects not found")
     return projects
