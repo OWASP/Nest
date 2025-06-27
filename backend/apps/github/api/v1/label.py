@@ -1,13 +1,13 @@
 """Label API."""
 
 from django.http import HttpRequest
-from ninja import Schema
+from ninja import Router, Schema
 from ninja.errors import HttpError
-from ninja.pagination import RouterPaginated
+from ninja.pagination import PageNumberPagination, paginate
 
 from apps.github.models.label import Label
 
-router = RouterPaginated()
+router = Router()
 
 
 class LabelSchema(Schema):
@@ -19,6 +19,7 @@ class LabelSchema(Schema):
 
 
 @router.get("/", response=list[LabelSchema])
+@paginate(PageNumberPagination, page_size=100)
 def list_label(request: HttpRequest) -> list[LabelSchema]:
     """Get all labels."""
     labels = Label.objects.all()

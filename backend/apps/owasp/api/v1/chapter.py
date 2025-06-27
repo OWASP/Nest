@@ -3,13 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Schema
+from ninja import Router, Schema
 from ninja.errors import HttpError
-from ninja.pagination import RouterPaginated
+from ninja.pagination import PageNumberPagination, paginate
 
 from apps.owasp.models.chapter import Chapter
 
-router = RouterPaginated()
+router = Router()
 
 
 class ChapterSchema(Schema):
@@ -23,6 +23,7 @@ class ChapterSchema(Schema):
 
 
 @router.get("/", response=list[ChapterSchema])
+@paginate(PageNumberPagination, page_size=100)
 def list_chapters(request: HttpRequest) -> list[ChapterSchema]:
     """Get all chapters."""
     chapters = Chapter.objects.all()

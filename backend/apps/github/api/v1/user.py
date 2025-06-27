@@ -3,13 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
-from ninja import Schema
+from ninja import Router, Schema
 from ninja.errors import HttpError
-from ninja.pagination import RouterPaginated
+from ninja.pagination import PageNumberPagination, paginate
 
 from apps.github.models.user import User
 
-router = RouterPaginated()
+router = Router()
 
 
 class UserSchema(Schema):
@@ -33,6 +33,7 @@ class UserSchema(Schema):
 
 
 @router.get("/", response=list[UserSchema])
+@paginate(PageNumberPagination, page_size=100)
 def list_users(request: HttpRequest) -> list[UserSchema]:
     """Get all users."""
     users = User.objects.all()
