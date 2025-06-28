@@ -123,4 +123,15 @@ describe('CommitteeDetailsPage Component', () => {
       expect(screen.getByText('Committee not found')).toBeInTheDocument()
     })
   })
+
+  test('does not render sponsor block', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockCommitteeDetailsData,
+      error: null,
+    })
+    render(<CommitteeDetailsPage />)
+    await waitFor(() => {
+      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+    })
+  })
 })

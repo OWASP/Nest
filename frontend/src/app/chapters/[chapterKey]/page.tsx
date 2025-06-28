@@ -69,6 +69,7 @@ export default function ChapterDetailsPage() {
       title={chapter.name}
       topContributors={topContributors}
       type="chapter"
+      sponsorKey={data.chapter?.key}
     />
   )
 }

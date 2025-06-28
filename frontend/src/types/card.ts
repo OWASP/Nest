@@ -50,6 +50,7 @@ export interface DetailsCardProps {
   stats?: stats[]
   summary?: string
   showAvatar?: boolean
+  sponsorKey?: string
   title?: string
   topContributors?: Contributor[]
   topics?: string[]

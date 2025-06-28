@@ -200,4 +200,14 @@ describe('OrganizationDetailsPage', () => {
       })
     })
   })
+  test('does not render sponsor block', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockOrganizationDetailsData,
+      error: null,
+    })
+    render(<OrganizationDetailsPage />)
+    await waitFor(() => {
+      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+    })
+  })
 })

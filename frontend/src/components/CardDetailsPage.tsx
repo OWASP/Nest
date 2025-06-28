@@ -25,6 +25,7 @@ import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
+import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -50,6 +51,7 @@ const DetailsCard = ({
   userSummary,
   geolocationData = null,
   repositories = [],
+  sponsorKey = '',
 }: DetailsCardProps) => {
   let scoreStyle = 'bg-green-400 text-green-900'
   if (type === 'project' && healthMetricsData.length > 0) {
@@ -240,6 +242,7 @@ const DetailsCard = ({
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
+        {sponsorKey && <SponsorCard type={type} target={sponsorKey} title={title} />}
       </div>
     </div>
   )

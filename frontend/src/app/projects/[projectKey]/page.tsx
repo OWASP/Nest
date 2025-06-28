@@ -26,7 +26,6 @@ const ProjectDetailsPage = () => {
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })
-
   useEffect(() => {
     if (data) {
       setProject(data.project)
@@ -106,6 +105,7 @@ const ProjectDetailsPage = () => {
       topContributors={topContributors}
       topics={project.topics}
       type="project"
+      sponsorKey={data.project?.key}
     />
   )
 }
