@@ -143,7 +143,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         """Get distinct project health metrics.
 
         Returns:
-            list[ProjectHealthMetrics]: List of distinct project health metrics.
+            QuerySet[ProjectHealthMetrics]: QuerySet of distinct project health metrics.
 
         """
         return ProjectHealthMetrics.objects.filter(
@@ -163,10 +163,20 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
 
         """
         metrics = ProjectHealthMetrics.get_distinct_health_metrics()
+        total_projects_count = metrics.count()
+        healthy_projects_count = metrics.filter(score__gte=75).count()
+        projects_needing_attention_count = metrics.filter(score__lt=75, score__gte=50).count()
+        unhealthy_projects_count = metrics.filter(score__lt=50).count()
         return HealthStatsNode(
-            healthy_projects_count=metrics.filter(score__gte=75).count(),
-            projects_needing_attention_count=metrics.filter(score__lt=75, score__gte=50).count(),
-            unhealthy_projects_count=metrics.filter(score__lt=50).count(),
+            healthy_projects_count=healthy_projects_count,
+            healthy_projects_percentage=(healthy_projects_count / total_projects_count) * 100,
+            projects_needing_attention_count=projects_needing_attention_count,
+            projects_needing_attention_percentage=(
+                projects_needing_attention_count / total_projects_count
+            )
+            * 100,
+            unhealthy_projects_count=unhealthy_projects_count,
+            unhealthy_projects_percentage=(unhealthy_projects_count / total_projects_count) * 100,
             average_score=metrics.aggregate(average_score=models.Avg("score"))["average_score"]
             or 0.0,
             total_stars=metrics.aggregate(total_stars=models.Sum("stars_count"))["total_stars"]

@@ -13,8 +13,11 @@ class TestHealthStatsNode:
         field_names = {field.name for field in HealthStatsNode.__strawberry_definition__.fields}
         expected_field_names = {
             "healthy_projects_count",
+            "healthy_projects_percentage",
             "projects_needing_attention_count",
+            "projects_needing_attention_percentage",
             "unhealthy_projects_count",
+            "unhealthy_projects_percentage",
             "average_score",
             "total_stars",
             "total_forks",
@@ -37,8 +40,11 @@ class TestHealthStatsNode:
         ("field_name", "expected_type"),
         [
             ("healthy_projects_count", int),
+            ("healthy_projects_percentage", float),
             ("projects_needing_attention_count", int),
+            ("projects_needing_attention_percentage", float),
             ("unhealthy_projects_count", int),
+            ("unhealthy_projects_percentage", float),
             ("average_score", float),
             ("total_stars", int),
             ("total_forks", int),
