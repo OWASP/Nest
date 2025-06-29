@@ -3,19 +3,23 @@
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
+import _ from 'lodash'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { capitalize } from 'utils/capitalize'
 
-export default function BreadCrumbs() {
-  const homeRoute = '/'
-  const pathname = usePathname()
-  const segments = pathname.split(homeRoute).filter(Boolean)
+export interface BreadCrumbItem {
+  title: string
+  path: string
+}
 
-  if (pathname === homeRoute) return null
+export interface BreadCrumbsProps {
+  breadcrumbItems: BreadCrumbItem[]
+}
+
+export default function BreadCrumbs({ breadcrumbItems }: BreadCrumbsProps) {
+  if (_.isEmpty(breadcrumbItems)) return null
 
   return (
-    <div className="mt-16 w-full pt-4">
+    <div className="mt-16 w-full pt-4 dark:bg-[#212529]">
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
         <Breadcrumbs
           aria-label="breadcrumb"
@@ -33,31 +37,25 @@ export default function BreadCrumbs() {
           }}
         >
           <BreadcrumbItem>
-            <Link
-              href={homeRoute}
-              className="hover:text-blue-700 hover:underline dark:text-blue-400"
-            >
+            <Link href="/" className="hover:text-blue-700 hover:underline dark:text-blue-400">
               Home
             </Link>
           </BreadcrumbItem>
 
-          {segments.map((segment, index) => {
-            const href = homeRoute + segments.slice(0, index + 1).join(homeRoute)
-            const label = capitalize(segment).replace(/-/g, ' ')
-            const isLast = index === segments.length - 1
-
+          {breadcrumbItems.map((item, index) => {
+            const isLast = index === breadcrumbItems.length - 1
             return (
-              <BreadcrumbItem key={href} isDisabled={isLast}>
+              <BreadcrumbItem key={`${item.title}-${index}`} isDisabled={isLast}>
                 {isLast ? (
                   <span className="cursor-default font-semibold text-gray-600 dark:text-gray-300">
-                    {label}
+                    {item.title}
                   </span>
                 ) : (
                   <Link
-                    href={href}
+                    href={item.path}
                     className="hover:text-blue-700 hover:underline dark:text-blue-400"
                   >
-                    {label}
+                    {item.title}
                   </Link>
                 )}
               </BreadcrumbItem>
