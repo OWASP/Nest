@@ -1,12 +1,9 @@
 """Test Cases for Project Health Metrics GraphQL Queries."""
 
-from unittest.mock import MagicMock, patch
-
-from django.utils import timezone
+from unittest.mock import patch
 
 from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
 from apps.owasp.graphql.queries.project_health_metrics import ProjectHealthMetricsQuery
-from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
 class TestProjectHealthMetricsQuery:
@@ -31,77 +28,25 @@ class TestProjectHealthMetricsQuery:
 
         assert health_stats_field.type is HealthStatsNode
 
-    @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects")
-    def test_resolve_health_stats(self, mock_metrics_objects):
+    @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_overall_stats")
+    def test_resolve_health_stats(self, mock_get_overall_stats):
         """Test resolving the health stats."""
-        mock_metrics = [
-            MagicMock(
-                spec=ProjectHealthMetrics,
-                score=85.0,
-                stars_count=1000,
-                forks_count=200,
-                contributors_count=50,
-                nest_created_at=timezone.make_aware(
-                    timezone.datetime(2025, 1, 1), timezone.get_default_timezone()
-                ),
-                project=MagicMock(
-                    name="Healthy Project",
-                ),
-            ),
-            MagicMock(
-                spec=ProjectHealthMetrics,
-                score=70.0,
-                stars_count=1500,
-                forks_count=300,
-                contributors_count=75,
-                nest_created_at=timezone.make_aware(
-                    timezone.datetime(2025, 1, 2), timezone.get_default_timezone()
-                ),
-                project=MagicMock(
-                    name="Project Needing Attention",
-                ),
-            ),
-            MagicMock(
-                spec=ProjectHealthMetrics,
-                score=60.0,
-                stars_count=1200,
-                forks_count=250,
-                contributors_count=60,
-                nest_created_at=timezone.make_aware(
-                    timezone.datetime(2025, 2, 3), timezone.get_default_timezone()
-                ),
-                project=MagicMock(
-                    name="Another Project Needing Attention",
-                ),
-            ),
-            MagicMock(
-                spec=ProjectHealthMetrics,
-                score=40.0,
-                stars_count=800,
-                forks_count=150,
-                contributors_count=30,
-                nest_created_at=timezone.make_aware(
-                    timezone.datetime(2025, 3, 4), timezone.get_default_timezone()
-                ),
-                project=MagicMock(
-                    name="Unhealthy Project",
-                ),
-            ),
-        ]
-        mock_values = mock_metrics_objects.return_value.values.return_value
-        mock_values.order_by.return_value.distinct.return_value = mock_metrics
+        expected_stats = HealthStatsNode(
+            healthy_projects_count=1,
+            healthy_projects_percentage=25.0,
+            projects_needing_attention_count=2,
+            projects_needing_attention_percentage=50.0,
+            unhealthy_projects_count=1,
+            unhealthy_projects_percentage=25.0,
+            average_score=65.0,
+            total_stars=4500,
+            total_forks=900,
+            total_contributors=215,
+            monthly_overall_scores=[77.5, 60.0, 40.0],
+        )
+        mock_get_overall_stats.return_value = expected_stats
+
         query = ProjectHealthMetricsQuery()
         result = query.health_stats()
-        assert isinstance(result, HealthStatsNode)
-        assert result.healthy_projects_count == 1
-        assert result.projects_needing_attention_count == 2
-        assert result.unhealthy_projects_count == 1
-        assert result.average_score == sum(m.score for m in mock_metrics) / len(mock_metrics)
-        assert result.total_stars == sum(m.stars_count for m in mock_metrics)
-        assert result.total_forks == sum(m.forks_count for m in mock_metrics)
-        assert result.total_contributors == sum(m.contributors_count for m in mock_metrics)
-        assert result.monthly_overall_scores == [
-            (85.0 + 70.0) / 2,
-            60.0,
-            40.0,
-        ]
+        mock_get_overall_stats.assert_called_once()
+        assert result == expected_stats
