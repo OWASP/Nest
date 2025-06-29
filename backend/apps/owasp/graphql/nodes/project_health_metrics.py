@@ -5,6 +5,7 @@ from datetime import datetime
 import strawberry
 import strawberry_django
 
+from apps.owasp.graphql.filters.project_health_metrics import ProjectHealthMetricsFilter
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
@@ -23,6 +24,8 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
         "unanswered_issues_count",
         "unassigned_issues_count",
     ],
+    filters=ProjectHealthMetricsFilter,
+    pagination=True,
 )
 class ProjectHealthMetricsNode:
     """Project health metrics node."""
@@ -61,6 +64,11 @@ class ProjectHealthMetricsNode:
     def last_release_days_requirement(self) -> int:
         """Resolve last release age requirement in days."""
         return self.last_release_days_requirement
+
+    @strawberry.field
+    def project_name(self) -> str:
+        """Resolve project name."""
+        return self.project.name
 
     @strawberry.field
     def owasp_page_last_update_days(self) -> int:
