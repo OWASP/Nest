@@ -72,15 +72,24 @@ class TestProjectHealthMetricsQuery:
     def test_resolve_project_health_metrics(self):
         """Test resolving project health metrics."""
         metrics = [
-            ProjectHealthMetrics(
-                score=85.0,
+            ProjectHealthMetricsNode(
                 stars_count=1000,
                 forks_count=200,
+                score=85.0,
+                contributors_count=50,
+                open_issues_count=10,
+                open_pull_requests_count=5,
+                unanswered_issues_count=2,
+                unassigned_issues_count=1,
+                is_funding_requirements_compliant=True,
+                is_leader_requirements_compliant=True,
+                recent_releases_count=3,
             )
         ]
         query = ProjectHealthMetricsQuery(project_health_metrics=metrics)
         result = query.project_health_metrics
         assert isinstance(result, list)
+        assert isinstance(result[0], ProjectHealthMetricsNode)
         assert len(result) == 1
         assert result[0].stars_count == 1000
-        assert result[0].score == 85.0
+        assert result[0].forks_count == 200
