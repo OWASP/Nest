@@ -1,7 +1,7 @@
 services:
   staging-nest-backend:
     container_name: staging-nest-backend
-    image: owasp/nest-backend-staging
+    image: owasp/nest:backend-staging
     env_file: .env.backend
     depends_on:
       staging-nest-cache:
