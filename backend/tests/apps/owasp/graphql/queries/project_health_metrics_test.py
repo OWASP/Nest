@@ -1,9 +1,8 @@
 """Test Cases for Project Health Metrics GraphQL Queries."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-from django.utils import timezone
 
 from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.graphql.queries.project_health_metrics import ProjectHealthMetricsQuery
@@ -64,9 +63,8 @@ class TestProjectHealthMetricsQuery:
         mock_get_stats.return_value = expected_stats
 
         query = ProjectHealthMetricsQuery()
-        result = query.project_health_stats()
+        result = query.health_stats()
         mock_get_stats.assert_called_once()
-
         assert result == expected_stats
 
     def test_resolve_project_health_metrics(self):
