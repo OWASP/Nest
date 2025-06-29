@@ -1,7 +1,7 @@
 services:
   production-nest-backend:
     container_name: production-nest-backend
-    image: arkid15r/owasp-nest-backend:production
+    image: owasp/nest:backend-production
     env_file: .env.backend
     depends_on:
       production-nest-cache:
@@ -53,7 +53,7 @@ services:
   production-nest-frontend:
     container_name: production-nest-frontend
     env_file: .env.frontend
-    image: arkid15r/owasp-nest-frontend:production
+    image: owasp/nest:frontend-production
     restart: unless-stopped
     networks:
       - nest-app-network
