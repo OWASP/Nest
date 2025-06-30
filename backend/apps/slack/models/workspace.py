@@ -41,4 +41,4 @@ class Workspace(TimestampedModel):
             str: The bot token for the workspace.
 
         """
-        return os.getenv(f"SLACK_BOT_TOKEN_{self.slack_workspace_id.upper()}", "")
+        return os.getenv(f"DJANGO_SLACK_BOT_TOKEN_{self.slack_workspace_id.upper()}", "")
