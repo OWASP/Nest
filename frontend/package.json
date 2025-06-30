@@ -44,7 +44,7 @@
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.6",
     "eslint-plugin-import": "^2.32.0",
-    "framer-motion": "^12.19.2",
+    "framer-motion": "^12.20.1",
     "graphql": "^16.11.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
