@@ -16,7 +16,7 @@ reviews:
   high_level_summary_in_walkthrough: true
   labeling_instructions: []
   poem: false
-  profile: chill
+  profile: assertive
   request_changes_workflow: false
   review_status: true
   sequence_diagrams: false
