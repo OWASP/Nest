@@ -18,6 +18,7 @@ import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -90,23 +91,25 @@ const ProjectDetailsPage = () => {
   ]
 
   return (
-    <DetailsCard
-      details={projectDetails}
-      healthMetricsData={project.healthMetrics}
-      isActive={project.isActive}
-      languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
-      stats={projectStats}
-      summary={project.summary}
-      title={project.name}
-      topContributors={topContributors}
-      topics={project.topics}
-      type="project"
-    />
+    <PageLayout breadcrumbItems={{ title: project.name }}>
+      <DetailsCard
+        details={projectDetails}
+        healthMetricsData={project.healthMetrics}
+        isActive={project.isActive}
+        languages={project.languages}
+        pullRequests={project.recentPullRequests}
+        recentIssues={project.recentIssues}
+        recentMilestones={project.recentMilestones}
+        recentReleases={project.recentReleases}
+        repositories={project.repositories}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={topContributors}
+        topics={project.topics}
+        type="project"
+      />
+    </PageLayout>
   )
 }
 

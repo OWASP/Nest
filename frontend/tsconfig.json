@@ -24,6 +24,7 @@
     "paths": {
       "@e2e/*": ["__tests__/e2e/*"],
       "@unit/*": ["__tests__/unit/*"],
+      "@testUtils/*": ["__tests__/testUtils/*"],
       "*": ["./src/*"],
       "app/*": ["src/app/*"],
       "components/*": ["src/components/*"],
@@ -35,6 +36,6 @@
     },
     "strict": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src", "__tests__"],
   "exclude": ["node_modules"]
 }

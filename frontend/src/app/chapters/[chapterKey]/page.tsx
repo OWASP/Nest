@@ -10,6 +10,7 @@ import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
@@ -60,15 +61,17 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <DetailsCard
-      details={details}
-      geolocationData={[chapter]}
-      isActive={chapter.isActive}
-      socialLinks={chapter.relatedUrls}
-      summary={chapter.summary}
-      title={chapter.name}
-      topContributors={topContributors}
-      type="chapter"
-    />
+    <PageLayout breadcrumbItems={{ title: chapter.name }}>
+      <DetailsCard
+        details={details}
+        geolocationData={[chapter]}
+        isActive={chapter.isActive}
+        socialLinks={chapter.relatedUrls}
+        summary={chapter.summary}
+        title={chapter.name}
+        topContributors={topContributors}
+        type="chapter"
+      />
+    </PageLayout>
   )
 }

@@ -8,15 +8,18 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
+import _ from 'lodash'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
+import { GET_ORGANIZATION_METADATA } from 'server/queries/organizationQueries'
 import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
 import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams()
@@ -24,9 +27,14 @@ const RepositoryDetailsPage = () => {
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [recentPullRequests, setRecentPullRequests] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [organizationMetaData, setOrganizationMetaData] = useState(null)
   const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
+  const { data: organizationData } = useQuery(GET_ORGANIZATION_METADATA, {
+    variables: { login: organizationKey },
+  })
+
   useEffect(() => {
     if (data) {
       setRepository(data.repository)
@@ -34,11 +42,14 @@ const RepositoryDetailsPage = () => {
       setRecentPullRequests(data.recentPullRequests)
       setIsLoading(false)
     }
+    if (organizationData) {
+      setOrganizationMetaData(organizationData)
+    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
       setIsLoading(false)
     }
-  }, [data, graphQLRequestError, repositoryKey])
+  }, [data, graphQLRequestError, repositoryKey, organizationData])
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -106,20 +117,29 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      languages={repository.languages}
-      pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={topContributors}
-      topics={repository.topics}
-      recentMilestones={repository.recentMilestones}
-      type="repository"
-    />
+    <PageLayout
+      breadcrumbItems={[
+        { title: 'Organizations' },
+        { title: _.get(organizationMetaData, 'organization.name', organizationKey) },
+        { title: 'Repositories' },
+        { title: _.get(repository, 'name', repositoryKey) },
+      ]}
+    >
+      <DetailsCard
+        details={repositoryDetails}
+        languages={repository.languages}
+        pullRequests={recentPullRequests}
+        recentIssues={repository.issues}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={topContributors}
+        topics={repository.topics}
+        recentMilestones={repository.recentMilestones}
+        type="repository"
+      />
+    </PageLayout>
   )
 }
 export default RepositoryDetailsPage

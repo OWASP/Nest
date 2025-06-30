@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { assertContributorToggle } from '@testUtils/sharedAssertions'
 import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
 import { act } from 'react'
@@ -207,29 +208,12 @@ describe('About Component', () => {
     })
   })
 
+  // eslint-disable-next-line jest/expect-expect
   test('toggles contributors list when show more/less is clicked', async () => {
     await act(async () => {
       render(<About />)
     })
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
-    })
-
-    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
-    fireEvent.click(showMoreButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
-    })
-
-    const showLessButton = screen.getByRole('button', { name: /Show less/i })
-    fireEvent.click(showLessButton)
-
-    await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
-    })
+    await assertContributorToggle('Contributor 6', ['Contributor 7', 'Contributor 8'])
   })
 
   test('renders technologies section correctly', async () => {
