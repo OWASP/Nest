@@ -1,7 +1,7 @@
 services:
   staging-nest-backend:
     container_name: staging-nest-backend
-    image: arkid15r/owasp-nest-backend:staging
+    image: owasp/nest:backend-staging
     env_file: .env.backend
     depends_on:
       staging-nest-cache:
@@ -53,7 +53,7 @@ services:
   staging-nest-frontend:
     container_name: staging-nest-frontend
     env_file: .env.frontend
-    image: arkid15r/owasp-nest-frontend:staging
+    image: owasp/nest:frontend-staging
     restart: unless-stopped
     networks:
       - nest-app-network
