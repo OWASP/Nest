@@ -1,5 +1,7 @@
 """GitHub repository GraphQL node."""
 
+from typing import TYPE_CHECKING, Annotated
+
 import strawberry
 import strawberry_django
 
@@ -9,6 +11,9 @@ from apps.github.graphql.nodes.organization import OrganizationNode
 from apps.github.graphql.nodes.release import ReleaseNode
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository import Repository
+
+if TYPE_CHECKING:
+    from apps.owasp.graphql.nodes.project import ProjectNode
 
 RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
@@ -60,6 +65,13 @@ class RepositoryNode:
     def owner_key(self) -> str:
         """Resolve owner key."""
         return self.owner_key
+
+    @strawberry.field
+    def project(
+        self,
+    ) -> Annotated["ProjectNode", strawberry.lazy("apps.owasp.graphql.nodes.project")] | None:
+        """Resolve project."""
+        return self.project
 
     @strawberry.field
     def recent_milestones(self, limit: int = 5) -> list[MilestoneNode]:

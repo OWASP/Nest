@@ -118,4 +118,15 @@ describe('chapterDetailsPage Component', () => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
   })
+  test('renders chapter sponsor block correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockChapterDetailsData,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText(`Sponsor ${mockChapterDetailsData.chapter.name}`)).toBeInTheDocument()
+    })
+  })
 })
