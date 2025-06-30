@@ -108,9 +108,9 @@ const RepositoryDetailsPage = () => {
   return (
     <DetailsCard
       details={repositoryDetails}
-      entityKey={repository.project.key}
+      entityKey={repository.project?.key}
       languages={repository.languages}
-      projectName={repository.project.name}
+      projectName={repository.project?.name}
       pullRequests={recentPullRequests}
       recentIssues={repository.issues}
       recentMilestones={repository.recentMilestones}
