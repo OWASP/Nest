@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import pytest
 
-from apps.github.api.release import ReleaseSerializer
+from apps.github.api.v1.release import ReleaseSchema
 
 
-class TestReleaseSerializer:
+class TestReleaseSchema:
     @pytest.mark.parametrize(
         "release_data",
         [
@@ -23,15 +25,11 @@ class TestReleaseSerializer:
             },
         ],
     )
-    def test_release_serializer(self, release_data):
-        serializer = ReleaseSerializer(data=release_data)
-        assert serializer.is_valid()
-        validated_data = serializer.validated_data
+    def test_release_schema(self, release_data):
+        schema = ReleaseSchema(**release_data)
+        assert schema.created_at == datetime.fromisoformat(release_data["created_at"])
+        assert schema.published_at == datetime.fromisoformat(release_data["published_at"])
 
-        validated_data["created_at"] = (
-            validated_data["created_at"].isoformat().replace("+00:00", "Z")
-        )
-        validated_data["published_at"] = (
-            validated_data["published_at"].isoformat().replace("+00:00", "Z")
-        )
-        assert validated_data == release_data
+        assert schema.name == release_data["name"]
+        assert schema.tag_name == release_data["tag_name"]
+        assert schema.description == release_data["description"]

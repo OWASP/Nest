@@ -12,6 +12,20 @@ export const GET_PROJECT_DATA = gql`
       leaders
       level
       name
+      healthMetrics(limit: 30) {
+        createdAt
+        forksCount
+        lastCommitDays
+        lastCommitDaysRequirement
+        lastReleaseDays
+        lastReleaseDaysRequirement
+        openIssuesCount
+        openPullRequestsCount
+        score
+        starsCount
+        unassignedIssuesCount
+        unansweredIssuesCount
+      }
       recentIssues {
         author {
           avatarUrl

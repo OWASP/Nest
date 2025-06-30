@@ -38,14 +38,15 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
-        "rest_framework",
         "storages",
     )
 
     LOCAL_APPS = (
+        "apps.ai",
         "apps.common",
         "apps.core",
         "apps.github",
+        "apps.mentorship",
         "apps.nest",
         "apps.owasp",
         "apps.slack",
@@ -80,16 +81,6 @@ class Base(Configuration):
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
     ]
-
-    REST_FRAMEWORK = {
-        # Use Django's standard `django.contrib.auth` permissions,
-        # or allow read-only access for unauthenticated users.
-        "DEFAULT_PERMISSION_CLASSES": [
-            "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
-        ],
-        "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-        "PAGE_SIZE": 100,
-    }
 
     ROOT_URLCONF = "settings.urls"
 

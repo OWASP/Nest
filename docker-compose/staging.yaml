@@ -1,7 +1,7 @@
 services:
   staging-nest-backend:
     container_name: staging-nest-backend
-    image: arkid15r/owasp-nest-backend:staging
+    image: owasp/nest:backend-staging
     env_file: .env.backend
     depends_on:
       staging-nest-cache:
@@ -37,7 +37,7 @@ services:
 
   staging-nest-db:
     container_name: staging-nest-db
-    image: postgres:16.4
+    image: pgvector/pgvector:pg16
     env_file: .env.db
     healthcheck:
       interval: 5s
@@ -52,7 +52,8 @@ services:
 
   staging-nest-frontend:
     container_name: staging-nest-frontend
-    image: arkid15r/owasp-nest-frontend:staging
+    env_file: .env.frontend
+    image: owasp/nest:frontend-staging
     restart: unless-stopped
     networks:
       - nest-app-network

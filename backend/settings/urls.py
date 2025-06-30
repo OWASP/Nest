@@ -7,27 +7,21 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import path
 from django.views.decorators.csrf import csrf_protect
-from rest_framework import routers
 from strawberry.django.views import GraphQLView
 
 from apps.core.api.algolia import algolia_search
 from apps.core.api.csrf import get_csrf_token
-from apps.github.api.urls import router as github_router
-from apps.owasp.api.urls import router as owasp_router
 from apps.slack.apps import SlackConfig
+from settings.api_v1 import api as api_v1
 from settings.graphql import schema
-
-router = routers.DefaultRouter()
-router.registry.extend(github_router.registry)
-router.registry.extend(owasp_router.registry)
 
 urlpatterns = [
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
-    path("api/v1/", include(router.urls)),
+    path("api/v1/", api_v1.urls),
     path("a/", admin.site.urls),
 ]
 
