@@ -6,6 +6,7 @@ from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 
@@ -136,3 +137,62 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
 
         """
         BulkSaveModel.bulk_save(ProjectHealthMetrics, metrics, fields=fields)
+
+    @staticmethod
+    def get_distinct_health_metrics() -> models.QuerySet["ProjectHealthMetrics"]:
+        """Get distinct project health metrics.
+
+        Returns:
+            QuerySet[ProjectHealthMetrics]: QuerySet of distinct project health metrics.
+
+        """
+        return ProjectHealthMetrics.objects.filter(
+            nest_created_at=models.Subquery(
+                ProjectHealthMetrics.objects.filter(project=models.OuterRef("project"))
+                .order_by("-nest_created_at")
+                .values("nest_created_at")[:1]
+            )
+        )
+
+    @staticmethod
+    def get_overall_stats() -> HealthStatsNode:
+        """Get overall project health stats.
+
+        Returns:
+            dict: The overall health stats of all projects.
+
+        """
+        metrics = ProjectHealthMetrics.get_distinct_health_metrics()
+        total_projects_count = metrics.count()
+        healthy_projects_count = metrics.filter(score__gte=75).count()
+        projects_needing_attention_count = metrics.filter(score__lt=75, score__gte=50).count()
+        unhealthy_projects_count = metrics.filter(score__lt=50).count()
+        return HealthStatsNode(
+            healthy_projects_count=healthy_projects_count,
+            healthy_projects_percentage=(healthy_projects_count / total_projects_count) * 100,
+            projects_needing_attention_count=projects_needing_attention_count,
+            projects_needing_attention_percentage=(
+                projects_needing_attention_count / total_projects_count
+            )
+            * 100,
+            unhealthy_projects_count=unhealthy_projects_count,
+            unhealthy_projects_percentage=(unhealthy_projects_count / total_projects_count) * 100,
+            average_score=metrics.aggregate(average_score=models.Avg("score"))["average_score"]
+            or 0.0,
+            total_stars=metrics.aggregate(total_stars=models.Sum("stars_count"))["total_stars"]
+            or 0,
+            total_forks=metrics.aggregate(total_forks=models.Sum("forks_count"))["total_forks"]
+            or 0,
+            total_contributors=metrics.aggregate(
+                total_contributors=models.Sum("contributors_count")
+            )["total_contributors"]
+            or 0,
+            monthly_overall_scores=list(
+                metrics.annotate(month=models.functions.ExtractMonth("nest_created_at"))
+                .order_by("month")
+                .values("month")
+                .distinct()
+                .annotate(score=models.Avg("score"))
+                .values_list("score", flat=True)
+            ),
+        )
