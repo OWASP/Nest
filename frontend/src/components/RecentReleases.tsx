@@ -24,16 +24,6 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
 }) => {
   const router = useRouter()
 
-  // Convert publishedAt to number if it's a string
-  const normalizedData =
-    data?.map((item) => ({
-      ...item,
-      publishedAt:
-        typeof item.publishedAt === 'string'
-          ? new Date(item.publishedAt).getTime() / 1000
-          : item.publishedAt,
-    })) || []
-
   return (
     <SecondaryCard
       icon={faTag}
@@ -43,11 +33,11 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
         </div>
       }
     >
-      {normalizedData && normalizedData.length > 0 ? (
+      {data && data.length > 0 ? (
         <div
           className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
         >
-          {normalizedData.map((item, index) => (
+          {data.map((item, index) => (
             <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
