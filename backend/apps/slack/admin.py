@@ -24,7 +24,7 @@ class ConversationAdmin(admin.ModelAdmin):
         "slack_creator_id",
     )
     list_filter = (
-        "created_at",
+        "sync_messages",
         "is_archived",
         "is_channel",
         "is_general",

@@ -151,6 +151,7 @@ class Command(BaseCommand):
                         )
                     )
                 ]
+                print(f"Saved {len(messages)} messages")
                 cursor = response.get("response_metadata", {}).get("next_cursor")
                 has_more = bool(cursor)
             except SlackApiError as e:
@@ -177,7 +178,8 @@ class Command(BaseCommand):
                 break
 
             Message.bulk_save(messages.copy())
-            if include_replies:
+            if include_replies and messages:
+                print("Fetching message replies...")
                 for message in messages:
                     if not message.has_replies:
                         continue
