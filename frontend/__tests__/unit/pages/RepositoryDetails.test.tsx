@@ -219,14 +219,13 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('No Stars')).toBeInTheDocument()
     })
   })
-  test('does not render sponsor block', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
-      data: mockRepositoryData,
-      error: null,
-    })
+
+  test('renders repository sponsor block correctly', async () => {
     render(<RepositoryDetailsPage />)
+
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)).toBeInTheDocument()
     })
   })
 })

@@ -91,6 +91,7 @@ const ProjectDetailsPage = () => {
   return (
     <DetailsCard
       details={projectDetails}
+      entityKey={project.key}
       healthMetricsData={project.healthMetrics}
       isActive={project.isActive}
       languages={project.languages}
@@ -105,7 +106,6 @@ const ProjectDetailsPage = () => {
       topContributors={topContributors}
       topics={project.topics}
       type="project"
-      sponsorKey={data.project?.key}
     />
   )
 }

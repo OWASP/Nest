@@ -36,21 +36,22 @@ type stats = {
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
+  entityKey?: string
   geolocationData?: Chapter[]
-  heatmap?: JSX.Element
   healthMetricsData?: HealthMetricsProps[]
+  heatmap?: JSX.Element
   isActive?: boolean
   languages?: string[]
+  projectName?: string
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
-  recentReleases?: Release[]
   recentMilestones?: Milestone[]
+  recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
+  showAvatar?: boolean
   socialLinks?: string[]
   stats?: stats[]
   summary?: string
-  showAvatar?: boolean
-  sponsorKey?: string
   title?: string
   topContributors?: Contributor[]
   topics?: string[]

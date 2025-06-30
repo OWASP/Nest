@@ -30,28 +30,29 @@ import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
 const DetailsCard = ({
-  title,
-  isActive = true,
-  summary,
   description,
-  heatmap,
-  healthMetricsData,
-  stats,
   details,
-  socialLinks,
-  type,
-  topContributors,
-  languages,
-  pullRequests,
-  topics,
-  recentIssues,
-  recentReleases,
-  recentMilestones,
-  showAvatar = true,
-  userSummary,
+  entityKey,
   geolocationData = null,
+  healthMetricsData,
+  heatmap,
+  isActive = true,
+  languages,
+  projectName,
+  pullRequests,
+  recentIssues,
+  recentMilestones,
+  recentReleases,
   repositories = [],
-  sponsorKey = '',
+  showAvatar = true,
+  socialLinks,
+  stats,
+  summary,
+  title,
+  topContributors,
+  topics,
+  type,
+  userSummary,
 }: DetailsCardProps) => {
   let scoreStyle = 'bg-green-400 text-green-900'
   if (type === 'project' && healthMetricsData.length > 0) {
@@ -242,7 +243,13 @@ const DetailsCard = ({
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
-        {sponsorKey && <SponsorCard type={type} target={sponsorKey} title={title} />}
+        {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
+          <SponsorCard
+            type={type === 'chapter' ? 'chapter' : 'project'}
+            target={entityKey}
+            title={projectName || title}
+          />
+        )}
       </div>
     </div>
   )

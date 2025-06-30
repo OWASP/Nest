@@ -286,7 +286,7 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
-      expect(screen.getByText(`${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
+      expect(screen.getByText(`Sponsor ${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
     })
   })
 })
