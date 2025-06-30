@@ -52,7 +52,7 @@ services:
 
   db:
     container_name: nest-db
-    image: postgres:16.4
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_dev}
       POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}

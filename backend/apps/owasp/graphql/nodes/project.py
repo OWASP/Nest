@@ -42,7 +42,7 @@ class ProjectNode(GenericEntityNode):
         return ProjectHealthMetrics.objects.filter(
             project=self,
         ).order_by(
-            "-nest_created_at",
+            "nest_created_at",
         )[:limit]
 
     @strawberry.field

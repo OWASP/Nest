@@ -16,8 +16,9 @@ class ProjectIndex(IndexBase):
         "idx_custom_tags",
         "idx_description",
         "idx_forks_count",
-        "idx_issues_count",
+        "idx_health_score",
         "idx_is_active",
+        "idx_issues_count",
         "idx_key",
         "idx_languages",
         "idx_leaders",
@@ -48,6 +49,7 @@ class ProjectIndex(IndexBase):
         "indexLanguages": ["en"],
         "customRanking": [
             "desc(idx_level_raw)",
+            "desc(idx_health_score)",
             "desc(idx_stars_count)",
             "desc(idx_contributors_count)",
             "desc(idx_forks_count)",

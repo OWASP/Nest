@@ -18,6 +18,15 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
+jest.mock('react-apexcharts', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      return <div data-testid="mock-apexcharts">Mock ApexChart</div>
+    },
+  }
+})
+
 const mockRouter = {
   push: jest.fn(),
 }
@@ -139,6 +148,22 @@ describe('ProjectDetailsPage', () => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
         expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
       })
+    })
+  })
+
+  test('Displays health metrics section', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Issues Trend')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
+      expect(screen.getByText('Stars Trend')).toBeInTheDocument()
+      expect(screen.getByText('Forks Trend')).toBeInTheDocument()
+      expect(screen.getByText('Days Since Last Commit')).toBeInTheDocument()
+      expect(screen.getByText('Days Since Last Release')).toBeInTheDocument()
     })
   })
 

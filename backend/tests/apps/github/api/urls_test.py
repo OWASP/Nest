@@ -1,36 +1,38 @@
 import pytest
 
-from apps.github.api.issue import IssueViewSet
-from apps.github.api.label import LabelViewSet
-from apps.github.api.organization import OrganizationViewSet
-from apps.github.api.release import ReleaseViewSet
-from apps.github.api.repository import RepositoryViewSet
-from apps.github.api.urls import router
-from apps.github.api.user import UserViewSet
+from apps.github.api.v1.issue import router as issue_router
+from apps.github.api.v1.label import router as label_router
+from apps.github.api.v1.organization import router as organization_router
+from apps.github.api.v1.release import router as release_router
+from apps.github.api.v1.repository import router as repository_router
+from apps.github.api.v1.urls import router as main_router
+from apps.github.api.v1.user import router as user_router
 
 
 class TestRouterRegistration:
+    """Test the urls registration."""
+
+    EXPECTED_ROUTERS = {
+        "/issues": issue_router,
+        "/labels": label_router,
+        "/organizations": organization_router,
+        "/releases": release_router,
+        "/repositories": repository_router,
+        "/users": user_router,
+    }
+
+    def test_all_routers_are_registered(self):
+        """Verifies that the main router has the correct number of registered sub-routers."""
+        registered_sub_routers = main_router._routers
+        assert len(registered_sub_routers) == len(self.EXPECTED_ROUTERS)
+
     @pytest.mark.parametrize(
-        ("url_name", "viewset_class", "expected_prefix"),
-        [
-            ("issue-list", IssueViewSet, "github/issues"),
-            ("label-list", LabelViewSet, "github/labels"),
-            ("organization-list", OrganizationViewSet, "github/organizations"),
-            ("release-list", ReleaseViewSet, "github/releases"),
-            ("repository-list", RepositoryViewSet, "github/repositories"),
-            ("user-list", UserViewSet, "github/users"),
-        ],
+        ("prefix", "expected_router_instance"), list(EXPECTED_ROUTERS.items())
     )
-    def test_router_registration(self, url_name, expected_prefix, viewset_class):
-        matching_routes = [route for route in router.urls if route.name == url_name]
-        assert matching_routes, f"Route '{url_name}' not found in router."
+    def test_sub_router_registration(self, prefix, expected_router_instance):
+        """Tests that each specific router is registered with the correct prefix."""
+        registered_router_map = dict(main_router._routers)
 
-        for route in matching_routes:
-            assert expected_prefix in route.pattern.describe(), (
-                f"Prefix '{expected_prefix}' not found in route '{route.name}'."
-            )
-
-            viewset = route.callback.cls
-            assert issubclass(viewset, viewset_class), (
-                f"Viewset for '{route.name}' does not match {viewset_class}."
-            )
+        assert prefix in registered_router_map
+        actual_router = registered_router_map[prefix]
+        assert actual_router is expected_router_instance
