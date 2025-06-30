@@ -9,6 +9,7 @@ from github import Github
 from apps.github.models import User as GithubUser
 from apps.nest.graphql.nodes.user import AuthUserNode
 from apps.nest.models import User
+from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
 
@@ -41,16 +42,34 @@ class UserMutations:
             if not github_user:
                 return GitHubAuthResult(auth_user=None)
 
-            auth_user, _ = User.objects.get_or_create(
+            role = "contributor"
+            gh_username = gh_user.login.lower()
+            gh_full_name = (gh_user.name or "").lower()
+
+            for project in Project.objects.all():
+                for leader in project.leaders_raw or []:
+                    if leader.lower() in {gh_username, gh_full_name}:
+                        role = "mentor"
+                        break
+                if role == "mentor":
+                    break
+
+            auth_user, created = User.objects.get_or_create(
+                username=gh_user.login,
                 defaults={
                     "email": gh_user_email,
                     "github_user": github_user,
+                    "role": role,
                 },
-                username=gh_user.login,
             )
+
+            if not created and auth_user.role != role:
+                auth_user.role = role
+                auth_user.save(update_fields=["role"])
 
             return GitHubAuthResult(auth_user=auth_user)
 
         except requests.exceptions.RequestException as e:
-            logger.warning("GitHub authentication failed: %s", e)
-            return GitHubAuthResult(auth_user=None)
+            logger.warning("GitHub request failed: %s", e)
+
+        return GitHubAuthResult(auth_user=None)

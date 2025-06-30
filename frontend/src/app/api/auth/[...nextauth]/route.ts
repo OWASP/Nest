@@ -21,6 +21,17 @@ if (IS_GITHUB_AUTH_ENABLED) {
   )
 }
 
+const GITHUB_AUTH_MUTATION = gql`
+  mutation GitHubAuth($accessToken: String!) {
+    githubAuth(accessToken: $accessToken) {
+      authUser {
+        username
+        role
+      }
+    }
+  }
+`
+
 const authOptions = {
   providers,
   session: {
@@ -31,15 +42,7 @@ const authOptions = {
       if (account?.provider === 'github' && account.access_token) {
         try {
           const { data } = await apolloClient.mutate({
-            mutation: gql`
-              mutation GitHubAuth($accessToken: String!) {
-                githubAuth(accessToken: $accessToken) {
-                  authUser {
-                    username
-                  }
-                }
-              }
-            `,
+            mutation: GITHUB_AUTH_MUTATION,
             variables: {
               accessToken: account.access_token,
             },
@@ -54,9 +57,26 @@ const authOptions = {
       return true
     },
 
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       if (account?.access_token) {
         token.accessToken = account.access_token
+
+        // Fetch user data including role from GraphQL
+        try {
+          const { data } = await apolloClient.mutate({
+            mutation: GITHUB_AUTH_MUTATION,
+            variables: {
+              accessToken: account.access_token,
+            },
+          })
+
+          if (data?.githubAuth?.authUser) {
+            token.username = data.githubAuth.authUser.username
+            token.role = data.githubAuth.authUser.role
+          }
+        } catch (error) {
+          console.error('Failed to fetch user data:', error)
+        }
       }
       return token
     },
@@ -65,6 +85,13 @@ const authOptions = {
       if (token?.accessToken) {
         session.accessToken = token.accessToken
       }
+      if (token?.role) {
+        session.user.role = token.role
+      }
+      if (token?.username) {
+        session.user.username = token.username
+      }
+
       return session
     },
   },

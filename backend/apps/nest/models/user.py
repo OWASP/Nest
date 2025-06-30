@@ -9,6 +9,11 @@ from django.db import models
 class User(AbstractUser):
     """User model for GitHub-authenticated users."""
 
+    ROLE_CHOICES = [
+        ("contributor", "Contributor"),
+        ("mentor", "Mentor"),
+    ]
+
     class Meta:
         db_table = "nest_users"
         verbose_name_plural = "Users"
@@ -23,6 +28,13 @@ class User(AbstractUser):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
+    )
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default="contributor",
+        verbose_name="User Role",
     )
 
     def __str__(self) -> str:

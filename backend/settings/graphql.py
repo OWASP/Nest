@@ -3,11 +3,13 @@
 import strawberry
 
 from apps.github.graphql.queries import GithubQuery
-from apps.nest.graphql.mutations.user import UserMutations
+from apps.mentorship.graphql.mutations import ProgramMutation
+from apps.nest.graphql.mutations import UserMutations
 from apps.owasp.graphql.queries import OwaspQuery
 
 
-class Mutation(UserMutations):
+@strawberry.type
+class Mutation(ProgramMutation, UserMutations):
     """Schema mutations."""
 
 
