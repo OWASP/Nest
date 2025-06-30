@@ -103,7 +103,7 @@ class MemberAdmin(admin.ModelAdmin):
         "username",
         "real_name",
         "email",
-        "user",
+        "user__login",
     )
 
     def approve_suggested_users(self, request, queryset):

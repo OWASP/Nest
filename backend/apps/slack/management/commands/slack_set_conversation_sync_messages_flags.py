@@ -14,6 +14,7 @@ SYNC_MESSAGES_CONVERSATIONS = {
     "events-committee",
     "gsoc",
     "leaders",
+    "owasp-community",
     "project-committee",
     "project-nest",
     "projects",
