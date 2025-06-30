@@ -225,7 +225,9 @@ describe('RepositoryDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
-      expect(screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)).toBeInTheDocument()
+      expect(
+        screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)
+      ).toBeInTheDocument()
     })
   })
 })
