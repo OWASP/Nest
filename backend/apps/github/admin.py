@@ -177,7 +177,10 @@ class OrganizationAdmin(admin.ModelAdmin):
         "followers_count",
     )
     list_filter = ("is_owasp_related_organization",)
-    search_fields = ("name",)
+    search_fields = (
+        "login",
+        "name",
+    )
 
 
 class ReleaseAdmin(admin.ModelAdmin):
