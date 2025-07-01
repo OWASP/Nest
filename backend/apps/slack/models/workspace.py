@@ -24,14 +24,14 @@ class Workspace(TimestampedModel):
         return f"{self.name or self.slack_workspace_id}"
 
     @staticmethod
-    def get_default_workspace() -> "Workspace":
+    def get_default_workspace() -> "Workspace | None":
         """Get the default workspace.
 
         Returns:
-            Workspace: The default workspace.
+            Workspace: The default workspace or None.
 
         """
-        return Workspace.objects.get(slack_workspace_id=OWASP_WORKSPACE_ID)
+        return Workspace.objects.filter(slack_workspace_id=OWASP_WORKSPACE_ID).first()
 
     @property
     def bot_token(self) -> str:
