@@ -67,9 +67,9 @@ test.describe('Contribute Page', () => {
     const contributeButton = await page.getByRole('button', { name: 'Read More' })
     await expect(contributeButton).toBeVisible()
     await contributeButton.click()
-    const CloseButton = await page.getByRole('button', { name: 'close-modal' })
-    await expect(CloseButton).toBeVisible()
-    await CloseButton.click()
+    const closeButton = await page.getByRole('button', { name: 'close-modal' })
+    await expect(closeButton).toBeVisible()
+    await closeButton.click()
     await expect(contributeButton).toBeVisible()
   })
   test('breadcrumb renders correct segments on /contribute', async ({ page }) => {

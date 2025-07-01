@@ -152,7 +152,7 @@ const About = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {name}
+                          {name.charAt(0).toUpperCase() + name.slice(1)}
                         </Link>
                       </li>
                     ))}

@@ -8,15 +8,15 @@ export const technologies = [
   {
     section: 'Backend',
     tools: {
-      Python: {
+      python: {
         icon: '/images/icons/python.svg',
         url: 'https://www.python.org/',
       },
-      Django: {
+      django: {
         icon: '/images/icons/django.svg',
         url: 'https://www.djangoproject.com/',
       },
-      PostgreSQL: {
+      postgreSQL: {
         icon: '/images/icons/postgresql.svg',
         url: 'https://www.postgresql.org/',
       },
@@ -25,7 +25,7 @@ export const technologies = [
   {
     section: 'Frontend',
     tools: {
-      Typescript: {
+      typescript: {
         icon: '/images/icons/typescript.svg',
         url: 'https://www.typescriptlang.org/',
       },
@@ -42,15 +42,15 @@ export const technologies = [
   {
     section: 'Tests',
     tools: {
-      Jest: {
+      jest: {
         icon: '/images/icons/jest.svg',
         url: 'https://jestjs.io/',
       },
-      PlayWright: {
+      playWright: {
         icon: '/images/icons/playwright.svg',
         url: 'https://playwright.dev/',
       },
-      Pytest: {
+      pytest: {
         icon: '/images/icons/pytest.svg',
         url: 'https://docs.pytest.org/',
       },
@@ -59,15 +59,15 @@ export const technologies = [
   {
     section: 'Tools',
     tools: {
-      Ansible: {
+      ansible: {
         icon: '/images/icons/ansible.svg',
         url: 'https://www.ansible.com/',
       },
-      GitHub: {
+      gitHub: {
         icon: '/images/icons/github.svg',
         url: 'https://www.github.com/',
       },
-      Docker: {
+      docker: {
         icon: '/images/icons/docker.svg',
         url: 'https://www.docker.com/',
       },
