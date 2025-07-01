@@ -18,14 +18,6 @@ def command():
 
 
 @pytest.fixture
-def mock_gh_repository():
-    repo = mock.Mock()
-    repo.name = "test-repo"
-    repo.html_url = "https://github.com/TestOrg/test-repo"
-    return repo
-
-
-@pytest.fixture
 def mock_logger():
     with mock.patch(
         "apps.github.management.commands.github_update_owasp_related_organizations.logger"
