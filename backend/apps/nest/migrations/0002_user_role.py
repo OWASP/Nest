@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('nest', '0001_initial'),
+        ("nest", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='role',
-            field=models.CharField(choices=[('contributor', 'Contributor'), ('mentor', 'Mentor')], default='contributor', max_length=20, verbose_name='User Role'),
+            model_name="user",
+            name="role",
+            field=models.CharField(
+                choices=[("contributor", "Contributor"), ("mentor", "Mentor")],
+                default="contributor",
+                max_length=20,
+                verbose_name="User Role",
+            ),
         ),
     ]

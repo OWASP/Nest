@@ -1,8 +1,8 @@
 export type Contributor = {
   avatarUrl: string
-  contributionsCount: number
+  contributionsCount?: number
   login: string
   name: string
-  projectKey: string
+  projectKey?: string
   projectName?: string
 }

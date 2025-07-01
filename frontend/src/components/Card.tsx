@@ -1,3 +1,4 @@
+import { faCalendarDays } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
@@ -22,6 +23,7 @@ const Card = ({
   projectLink,
   social,
   tooltipLabel,
+  timeline,
 }: CardProps) => {
   return (
     <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white p-4 dark:bg-[#212529] md:max-w-6xl">
@@ -71,6 +73,15 @@ const Card = ({
                 />
               ) : null
             )}
+          </div>
+        )}
+
+        {/* Timeline Section (Optional) */}
+        {timeline?.start && timeline?.end && (
+          <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <FontAwesomeIcon icon={faCalendarDays} className="mr-1 inline-block h-4 w-4" />
+            {new Date(timeline.start).toLocaleDateString()} &rarr;{' '}
+            {new Date(timeline.end).toLocaleDateString()}
           </div>
         )}
       </div>

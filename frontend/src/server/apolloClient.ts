@@ -1,16 +1,16 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
-import { getSession } from 'next-auth/react'
 import { cookies } from 'next/headers'
+import { getSession } from 'next-auth/react'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 
 async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
     let csrfToken = null
     const cookieValue = await getCsrfTokenOnServer()
-    const session = await getSession();
+    const session = await getSession()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const accessToken = (session as any)?.accessToken;
+    const accessToken = (session as any)?.accessToken
     csrfToken = cookieValue
     return {
       headers: {

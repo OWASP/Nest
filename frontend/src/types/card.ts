@@ -22,6 +22,10 @@ export type CardProps = {
   social?: { title: string; icon: string; url: string }[]
   summary: string
   title: string
+  timeline?: {
+    start: string | Date
+    end: string | Date
+  }
   tooltipLabel?: string
   topContributors?: Contributor[]
   url: string
@@ -36,11 +40,13 @@ type stats = {
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
+  domains?: string[]
   geolocationData?: Chapter[]
   heatmap?: JSX.Element
   healthMetricsData?: HealthMetricsProps[]
   isActive?: boolean
   languages?: string[]
+  admins?: any
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
   recentReleases?: Release[]
@@ -53,6 +59,7 @@ export interface DetailsCardProps {
   title?: string
   topContributors?: Contributor[]
   topics?: string[]
+  tags?: string[]
   type: string
   userSummary?: JSX.Element
 }

@@ -1,11 +1,14 @@
+import strawberry
 from github import Github
 
-import strawberry
 from apps.github.models import User as GithubUser
-from apps.nest.models import User as NestUser
+from apps.mentorship.graphql.nodes.program import (
+    CreateProgramInput,
+    ProgramNode,
+    UpdateProgramInput,
+)
 from apps.mentorship.models import Mentor, Program
-from apps.mentorship.graphql.nodes.program import CreateProgramInput
-from apps.mentorship.graphql.nodes.program import ProgramNode
+from apps.nest.models import User as NestUser
 
 
 def get_authenticated_user(request) -> NestUser:
@@ -19,7 +22,7 @@ def get_authenticated_user(request) -> NestUser:
         gh_user = github.get_user()
         login = gh_user.login
         name = gh_user.name
-    except Exception as e:
+    except Exception:
         raise Exception("GitHub token is invalid or expired")
 
     try:
@@ -71,3 +74,57 @@ class ProgramMutation:
         program.admins.add(mentor)
 
         return program
+
+    @strawberry.mutation
+    def update_program(
+        self, info: strawberry.Info, input: UpdateProgramInput
+    ) -> ProgramNode:
+        request = info.context.request
+        user = get_authenticated_user(request)
+
+        try:
+            program = Program.objects.get(id=input.id)
+        except Program.DoesNotExist:
+            raise Exception("Program not found")
+
+        try:
+            mentor = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist:
+            raise Exception("You must be a mentor to update a program")
+
+        if mentor not in program.admins.all():
+            raise Exception("You must be an admin of this program to update it")
+
+        for field, value in input.__dict__.items():
+            if field in ["admin_logins", "id"]:
+                continue
+            setattr(program, field, value)
+
+        program.save()
+
+        resolved_mentors = []
+
+        for login in input.admin_logins:
+            try:
+                github_user = GithubUser.objects.get(login=login)
+            except GithubUser.DoesNotExist:
+                raise Exception(f"GitHub user with login '{login}' not found.")
+
+            mentor, created = Mentor.objects.get_or_create(github_user=github_user)
+            resolved_mentors.append(mentor)
+
+        program.admins.set(resolved_mentors)
+
+        return ProgramNode(
+            id=program.id,
+            name=program.name,
+            description=program.description,
+            experience_levels=program.experience_levels,
+            mentees_limit=program.mentees_limit,
+            started_at=program.started_at,
+            ended_at=program.ended_at,
+            domains=program.domains,
+            tags=program.tags,
+            status=program.status,
+            admins=list(program.admins.all()),
+        )
