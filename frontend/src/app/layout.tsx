@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 import { Providers } from 'wrappers/provider'
 import { GTM_ID, IS_GITHUB_AUTH_ENABLED } from 'utils/credentials'
+import AutoScrollToTop from 'components/AutoScrollToTop'
 import BreadCrumbs from 'components/BreadCrumbs'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
@@ -67,6 +68,7 @@ export default function RootLayout({
         style={{ minHeight: '100vh' }}
       >
         <Providers>
+          <AutoScrollToTop />
           <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
           <BreadCrumbs />
           {children}
