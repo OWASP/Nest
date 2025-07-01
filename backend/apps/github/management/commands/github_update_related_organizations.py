@@ -1,4 +1,4 @@
-"""A command to update external OWASP repositories from GitHub data."""
+"""A command to update OWASP related organizations."""
 
 import logging
 import os
@@ -16,9 +16,9 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Fetch external OWASP GitHub repositories and update relevant entities."""
+    """Fetch external organizations and update relevant entities."""
 
-    help = "Fetch external OWASP GitHub repositories and update relevant entities."
+    help = "Fetch external organizations and update relevant entities."
 
     def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
@@ -48,11 +48,11 @@ class Command(BaseCommand):
             gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
         except BadCredentialsException:
             logger.warning(
-                "Invalid GitHub token. Please create and update .env file with a valid token."
+                "Invalid GitHub token. Please create or update .env file with a valid token."
             )
             return
 
-        organizations = Organization.related_organizations
+        organizations = Organization.related_organizations.all()
         if organization := options["organization"]:
             organizations = organizations.filter(login__iexact=organization)
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
         organizations_count = organizations.count()
         for idx, organization in enumerate(organizations):
             prefix = f"{idx + 1} of {organizations_count}"
-            print(f"{prefix:<10} {organization.url}")
+            print(f"{prefix:<10} {organization.url}\n")
 
             if organization.related_projects.count() != 1:
                 logger.error(

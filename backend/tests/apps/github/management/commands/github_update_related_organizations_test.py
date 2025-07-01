@@ -4,12 +4,10 @@ from unittest import mock
 import pytest
 from github.GithubException import BadCredentialsException
 
-from apps.github.management.commands.github_update_owasp_related_organizations import (
+from apps.github.management.commands.github_update_related_organizations import (
     Command,
     Organization,
 )
-
-BUILTINS_PRINT = "builtins.print"
 
 
 @pytest.fixture
@@ -20,7 +18,7 @@ def command():
 @pytest.fixture
 def mock_logger():
     with mock.patch(
-        "apps.github.management.commands.github_update_owasp_related_organizations.logger"
+        "apps.github.management.commands.github_update_related_organizations.logger"
     ) as mock_logger:
         yield mock_logger
 
@@ -28,7 +26,7 @@ def mock_logger():
 @pytest.fixture
 def mock_github_class():
     with mock.patch(
-        "apps.github.management.commands.github_update_owasp_related_organizations.github.Github"
+        "apps.github.management.commands.github_update_related_organizations.github.Github"
     ) as mock_github:
         yield mock_github
 
@@ -97,19 +95,19 @@ class TestGithubUpdateExternalRepositories:
         self.mock_gh = mock.Mock()
         gh_factory = mock.Mock(return_value=self.mock_gh)
         monkeypatch.setattr(
-            "apps.github.management.commands.github_update_owasp_related_organizations.github.Github",
+            "apps.github.management.commands.github_update_related_organizations.github.Github",
             gh_factory,
         )
 
         self.mock_sync_repository = mock.Mock()
         monkeypatch.setattr(
-            "apps.github.management.commands.github_update_owasp_related_organizations.sync_repository",
+            "apps.github.management.commands.github_update_related_organizations.sync_repository",
             self.mock_sync_repository,
         )
 
         self.mock_unregister_indexes = mock.Mock()
         monkeypatch.setattr(
-            "apps.github.management.commands.github_update_owasp_related_organizations.unregister_indexes",
+            "apps.github.management.commands.github_update_related_organizations.unregister_indexes",
             self.mock_unregister_indexes,
         )
 
@@ -124,6 +122,7 @@ class TestGithubUpdateExternalRepositories:
         self.mock_related_orgs.exists.return_value = exists
         self.mock_related_orgs.count.return_value = len(orgs)
         self.mock_related_orgs.__iter__.return_value = orgs
+        self.mock_related_orgs.all.return_value = self.mock_related_orgs
         self.mock_related_orgs.filter.return_value = self.mock_related_orgs
 
     @pytest.mark.parametrize(
@@ -152,7 +151,7 @@ class TestGithubUpdateExternalRepositories:
         self._setup_organizations_mock(orgs)
         self.mock_gh.get_organization.side_effect = gh_orgs
 
-        with mock.patch(BUILTINS_PRINT):
+        with mock.patch("builtins.print"):
             self.command.handle(organization=None)
 
         assert self.mock_unregister_indexes.called
@@ -169,7 +168,7 @@ class TestGithubUpdateExternalRepositories:
         self._setup_organizations_mock([org])
         self.mock_gh.get_organization.return_value = gh_org
 
-        with mock.patch(BUILTINS_PRINT):
+        with mock.patch("builtins.print"):
             self.command.handle(organization="TestOrg")
 
         self.mock_related_orgs.filter.assert_called_with(login__iexact="TestOrg")
@@ -182,7 +181,7 @@ class TestGithubUpdateExternalRepositories:
         """Test command execution when no organizations are found."""
         self._setup_organizations_mock([], exists=False)
 
-        with mock.patch(BUILTINS_PRINT):
+        with mock.patch("builtins.print"):
             self.command.handle(organization=None)
 
         mock_logger.error.assert_called_once_with("No OWASP related organizations found")
@@ -193,11 +192,11 @@ class TestGithubUpdateExternalRepositories:
         """Test command execution with invalid GitHub token."""
         mock_github_class.side_effect = BadCredentialsException(401, "Invalid token")
 
-        with mock.patch(BUILTINS_PRINT):
+        with mock.patch("builtins.print"):
             self.command.handle(organization=None)
 
         mock_logger.warning.assert_called_once_with(
-            "Invalid GitHub token. Please create and update .env file with a valid token."
+            "Invalid GitHub token. Please create or update .env file with a valid token."
         )
         assert not self.mock_sync_repository.called
 
@@ -206,7 +205,7 @@ class TestGithubUpdateExternalRepositories:
         org = create_mock_organization("TestOrg", num_related_projects=0)
         self._setup_organizations_mock([org])
 
-        with mock.patch(BUILTINS_PRINT):
+        with mock.patch("builtins.print"):
             self.command.handle(organization=None)
 
         mock_logger.error.assert_called_once_with(
@@ -227,7 +226,7 @@ class TestGithubUpdateExternalRepositories:
         self.mock_gh.get_organization.return_value = gh_org
         self.mock_sync_repository.side_effect = Exception("Sync failed")
 
-        with mock.patch(BUILTINS_PRINT):
+        with mock.patch("builtins.print"):
             self.command.handle(organization=None)
 
         mock_logger.exception.assert_called_once_with(

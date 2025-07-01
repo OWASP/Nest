@@ -114,8 +114,8 @@ update-data: \
 	owasp-scrape-chapters \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
-	github-update-project-related-repositories \
-	github-update-owasp-related-organizations \
+	github-add-related-repositories \
+	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \

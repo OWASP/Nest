@@ -9,7 +9,7 @@ class RelatedOrganizationsManager(models.Manager):
     """OWASP related organizations manager."""
 
     def get_queryset(self):
-        """Get open milestones."""
+        """Get OWASP related organizations."""
         return (
             super()
             .get_queryset()
