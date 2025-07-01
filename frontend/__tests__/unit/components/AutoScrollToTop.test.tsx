@@ -7,12 +7,15 @@ jest.mock('next/navigation', () => ({
 }))
 
 describe('AutoScrollToTop', () => {
+  const originalScrollTo = window.scrollTo
+
   beforeEach(() => {
     window.scrollTo = jest.fn()
   })
 
   afterEach(() => {
     jest.clearAllMocks()
+    window.scrollTo = originalScrollTo
   })
 
   it('calls window.scrollTo on mount', () => {
