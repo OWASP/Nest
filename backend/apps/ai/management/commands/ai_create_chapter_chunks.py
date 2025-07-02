@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 
 from apps.ai.common.constants import (
     DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
+    DELIMITER,
     MIN_REQUEST_INTERVAL_SECONDS,
 )
 from apps.ai.models.chunk import Chunk
@@ -22,9 +23,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--chapter-key", type=str, help="Process only the chapter with this key"
         )
-        parser.add_argument(
-            "--active-only", action="store_true", help="Process only active chapters"
-        )
+        parser.add_argument("--all", action="store_true", help="Process all the chapters")
         parser.add_argument(
             "--batch-size",
             type=int,
@@ -41,13 +40,12 @@ class Command(BaseCommand):
 
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
-        queryset = Chapter.objects.all()
-
         if options["chapter_key"]:
-            queryset = queryset.filter(key=options["chapter_key"])
-
-        if options["active_only"]:
-            queryset = queryset.filter(is_active=True)
+            queryset = Chapter.objects.filter(key=options["chapter_key"])
+        elif options["all"]:
+            queryset = Chapter.objects.all()
+        else:
+            queryset = Chapter.objects.filter(is_active=True)
 
         total_chapters = queryset.count()
         self.stdout.write(f"Found {total_chapters} chapters to process")
@@ -67,10 +65,9 @@ class Command(BaseCommand):
                 batch_chunks.extend(chunks)
 
             if batch_chunks:
+                chunks_count = len(batch_chunks)
                 Chunk.bulk_save(batch_chunks)
-                self.stdout.write(
-                    f"Saved {len(batch_chunks)} chunks for batch starting at offset {offset}"
-                )
+                self.stdout.write(f"Saved {len(chunks_count)} chunks")
 
         self.stdout.write(f"Completed processing all {total_chapters} chapters")
 
@@ -147,6 +144,8 @@ class Command(BaseCommand):
             repo = chapter.owasp_repository
             if repo.description:
                 prose_parts.append(f"Repository Description: {repo.description}")
+            if repo.topics:
+                metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
 
         if chapter.name:
             metadata_parts.append(f"Chapter Name: {chapter.name}")
@@ -203,14 +202,9 @@ class Command(BaseCommand):
             if valid_urls:
                 metadata_parts.append(f"Related URLs: {', '.join(valid_urls)}")
 
-        if hasattr(chapter, "owasp_repository") and chapter.owasp_repository:
-            repo = chapter.owasp_repository
-            if repo.topics:
-                metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
-
         metadata_parts.append(f"Active Chapter: {'Yes' if chapter.is_active else 'No'}")
 
-        prose_content = "\n\n".join(filter(None, prose_parts))
-        metadata_content = "\n\n".join(filter(None, metadata_parts))
+        prose_content = DELIMITER.join(filter(None, prose_parts))
+        metadata_content = DELIMITER.join(filter(None, metadata_parts))
 
         return prose_content, metadata_content
