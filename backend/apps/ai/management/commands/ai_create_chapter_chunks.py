@@ -67,7 +67,7 @@ class Command(BaseCommand):
             if batch_chunks:
                 chunks_count = len(batch_chunks)
                 Chunk.bulk_save(batch_chunks)
-                self.stdout.write(f"Saved {len(chunks_count)} chunks")
+                self.stdout.write(f"Saved {chunks_count} chunks")
 
         self.stdout.write(f"Completed processing all {total_chapters} chapters")
 
