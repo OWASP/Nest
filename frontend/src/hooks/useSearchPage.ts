@@ -28,7 +28,6 @@ interface UseSearchPageReturn<T> {
 
 export function useSearchPage<T>({
   indexName,
-  pageTitle,
   defaultSortBy = '',
   defaultOrder = '',
   hitsPerPage,
@@ -48,18 +47,16 @@ export function useSearchPage<T>({
   useEffect(() => {
     if (searchParams) {
       const searchQueryParam = searchParams.get('q') || ''
-      const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'desc'
-      if (
-        indexName === 'projects' &&
-        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
-      ) {
-        setCurrentPage(1)
-      } else if (searchQuery !== searchQueryParam) {
-        setCurrentPage(1)
-      }
+      const sortByParam = searchParams.get('sortBy') || defaultSortBy
+      const orderParam = searchParams.get('order') || defaultOrder
+      const pageParam = parseInt(searchParams.get('page') || '1')
+
+      setSearchQuery(searchQueryParam)
+      setSortBy(sortByParam)
+      setOrder(orderParam)
+      setCurrentPage(pageParam)
     }
-  }, [searchParams, order, searchQuery, sortBy, indexName])
+  }, [searchParams, defaultSortBy, defaultOrder])
   // Sync URL with state changes
   useEffect(() => {
     const params = new URLSearchParams()
@@ -104,7 +101,7 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [currentPage, searchQuery, sortBy, order, hitsPerPage, indexName])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
