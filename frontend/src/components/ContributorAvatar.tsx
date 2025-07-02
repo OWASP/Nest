@@ -14,7 +14,7 @@ const isAlgoliaContributor = (contributor: Contributor): contributor is Contribu
     typeof contributor === 'object' &&
     contributor !== null &&
     'avatarUrl' in contributor &&
-    'contributions_count' in contributor
+    'contributionsCount' in contributor
   )
 }
 
