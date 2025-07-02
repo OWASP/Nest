@@ -87,7 +87,7 @@ const eslintConfig = [
         {
           selector: 'property',
           filter: {
-            regex: '^_+',
+            regex: '^_{1,2}',
             match: true,
           },
           format: null,
