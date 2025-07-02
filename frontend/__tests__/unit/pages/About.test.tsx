@@ -35,6 +35,78 @@ jest.mock('utils/aboutData', () => ({
     'This is a test paragraph about the project.',
     'This is another paragraph about the project history.',
   ],
+  leaders: {
+    arkid15r: 'CCSP, CISSP, CSSLP',
+    kasya: 'CC',
+    mamicidal: 'CISSP',
+  },
+  missionContent: {
+    mission:
+      'OWASP Nest is a comprehensive platform designed to empower developers, security professionals, and organizations in their journey toward building secure applications.',
+    whoItsFor:
+      'OWASP Nest is designed for developers, security professionals, project leaders, and organizations looking to integrate security best practices into their development workflows.',
+  },
+  keyFeatures: [
+    {
+      title: 'Advanced Search Capabilities',
+      description:
+        'Find OWASP projects, tools, and resources with precision using our intelligent search functionality.',
+    },
+    {
+      title: 'Slack Integration',
+      description: 'Stay connected with the OWASP community through seamless Slack integration.',
+    },
+    {
+      title: 'OWASP Chapters Proximity Page',
+      description:
+        'Discover local OWASP chapters and events near you to engage with the community.',
+    },
+    {
+      title: 'AI-Generated Insights',
+      description:
+        'Leverage AI-powered insights to better understand project relationships and recommendations.',
+    },
+  ],
+  getInvolvedContent: {
+    description:
+      'OWASP Nest thrives thanks to community-driven contributions. Here are ways you can get involved:',
+    ways: [
+      'Code Contributions – Fix bugs or build new features.',
+      'Code Review – Improve quality by reviewing pull requests.',
+      'Documentation – Help improve our guides and tutorials.',
+      'Testing – Report bugs and help test new features.',
+      'Community Engagement – Share your experiences and help others.',
+    ],
+    callToAction:
+      'To get started, visit the OWASP Nest Repository, explore the Contributing Guidelines, and review the Code of Conduct.',
+  },
+  projectHistory: [
+    {
+      year: '2023',
+      title: 'Project Inception',
+      description: 'The project was started and initial planning began.',
+    },
+    {
+      year: '2023',
+      title: 'Backend MVP',
+      description: 'The backend MVP was released.',
+    },
+    {
+      year: '2024',
+      title: 'Frontend Development',
+      description: 'Frontend development kicked off.',
+    },
+    {
+      year: '2024',
+      title: 'Platform Integrations',
+      description: 'Integrated with several platforms.',
+    },
+    {
+      year: '2024',
+      title: 'GSoC Integration',
+      description: 'Google Summer of Code integration completed.',
+    },
+  ],
   technologies: [
     {
       section: 'Backend',
@@ -42,6 +114,14 @@ jest.mock('utils/aboutData', () => ({
         Python: {
           icon: '/images/icons/python.svg',
           url: 'https://www.python.org/',
+        },
+        Django: {
+          icon: '/images/icons/django.svg',
+          url: 'https://www.djangoproject.com/',
+        },
+        PostgreSQL: {
+          icon: '/images/icons/postgresql.svg',
+          url: 'https://www.postgresql.org/',
         },
       },
     },
@@ -51,6 +131,14 @@ jest.mock('utils/aboutData', () => ({
         'Next.js': {
           icon: '/images/icons/nextjs.svg',
           url: 'https://nextjs.org/',
+        },
+        'Tailwind CSS': {
+          icon: '/images/icons/tailwind.svg',
+          url: 'https://tailwindcss.com/',
+        },
+        Typescript: {
+          icon: '/images/icons/typescript.svg',
+          url: 'https://www.typescriptlang.org/',
         },
       },
     },
@@ -65,6 +153,10 @@ jest.mock('utils/aboutData', () => ({
           icon: '/images/icons/pytest.svg',
           url: 'https://docs.pytest.org/',
         },
+        PlayWright: {
+          icon: '/images/icons/playwright.svg',
+          url: 'https://playwright.dev/',
+        },
       },
     },
     {
@@ -73,6 +165,10 @@ jest.mock('utils/aboutData', () => ({
         Ansible: {
           icon: '/images/icons/ansible.svg',
           url: 'https://www.ansible.com/',
+        },
+        Docker: {
+          icon: '/images/icons/docker.svg',
+          url: 'https://www.docker.com/',
         },
         GitHub: {
           icon: '/images/icons/github.svg',
@@ -138,20 +234,70 @@ describe('About Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders project history correctly', async () => {
+  test('renders mission and who its for sections correctly', async () => {
     await act(async () => {
       render(<About />)
     })
 
-    const historySection = screen.getByText('History').closest('div')
-    expect(historySection).toBeInTheDocument()
+    const missionSection = screen.getByText('Mission').closest('div')
+    expect(missionSection).toBeInTheDocument()
+    expect(screen.getByText(/OWASP Nest is a comprehensive platform/)).toBeInTheDocument()
 
-    const markdownContents = await screen.findAllByTestId('markdown-content')
-    expect(markdownContents.length).toBe(2)
-    expect(markdownContents[0].textContent).toBe('This is a test paragraph about the project.')
-    expect(markdownContents[1].textContent).toBe(
-      'This is another paragraph about the project history.'
-    )
+    const whoItsForSection = screen.getByText("Who It's For").closest('div')
+    expect(whoItsForSection).toBeInTheDocument()
+    expect(screen.getByText(/OWASP Nest is designed for developers/)).toBeInTheDocument()
+  })
+
+  test('renders key features section correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const keyFeaturesSection = screen.getByText('Key Features').closest('div')
+    expect(keyFeaturesSection).toBeInTheDocument()
+
+    expect(screen.getByText('Advanced Search Capabilities')).toBeInTheDocument()
+    expect(screen.getByText('Slack Integration')).toBeInTheDocument()
+    expect(screen.getByText('OWASP Chapters Proximity Page')).toBeInTheDocument()
+    expect(screen.getByText('AI-Generated Insights')).toBeInTheDocument()
+  })
+
+  test('renders get involved section correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const getInvolvedSection = screen.getByText('Get Involved').closest('div')
+    expect(getInvolvedSection).toBeInTheDocument()
+
+    expect(
+      screen.getByText(/OWASP Nest thrives thanks to community-driven contributions/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Code Contributions – Fix bugs or build new features/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Code Review – Improve quality by reviewing pull requests/)
+    ).toBeInTheDocument()
+  })
+
+  test('renders project history timeline correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const projectHistorySection = screen.getByText('Project History').closest('div')
+    expect(projectHistorySection).toBeInTheDocument()
+
+    expect(screen.getByText('Project Inception')).toBeInTheDocument()
+    expect(screen.getByText('Backend MVP')).toBeInTheDocument()
+    expect(screen.getByText('Frontend Development')).toBeInTheDocument()
+    expect(screen.getByText('Platform Integrations')).toBeInTheDocument()
+    expect(screen.getByText('GSoC Integration')).toBeInTheDocument()
+
+    // Check for year indicators
+    expect(screen.getAllByText('23')).toHaveLength(2) // 2023 entries
+    expect(screen.getAllByText('24')).toHaveLength(3) // 2024 entries
   })
 
   test('renders leaders section with three leaders', async () => {
@@ -575,5 +721,59 @@ describe('About Component', () => {
         variant: 'solid',
       })
     })
+  })
+
+  test('renders mission section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Mission')).toBeInTheDocument()
+    expect(screen.getByText(/empower developers, security professionals/)).toBeInTheDocument()
+  })
+
+  test("renders 'Who It's For' section", async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText("Who It's For")).toBeInTheDocument()
+    expect(
+      screen.getByText(/developers, security professionals, project leaders/)
+    ).toBeInTheDocument()
+  })
+
+  test('renders key features section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Key Features')).toBeInTheDocument()
+    expect(screen.getByText('Advanced Search Capabilities')).toBeInTheDocument()
+    expect(screen.getByText('Slack Integration')).toBeInTheDocument()
+    expect(screen.getByText('OWASP Chapters Proximity Page')).toBeInTheDocument()
+    expect(screen.getByText('AI-Generated Insights')).toBeInTheDocument()
+  })
+
+  test('renders get involved section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Get Involved')).toBeInTheDocument()
+    expect(screen.getByText(/community-driven contributions/)).toBeInTheDocument()
+    expect(screen.getByText(/Code Contributions/)).toBeInTheDocument()
+    expect(screen.getByText(/Code Review/)).toBeInTheDocument()
+    expect(screen.getByText(/Documentation/)).toBeInTheDocument()
+    expect(screen.getByText(/Testing/)).toBeInTheDocument()
+    expect(screen.getByText(/Community Engagement/)).toBeInTheDocument()
+  })
+
+  test('renders project history timeline section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Project History')).toBeInTheDocument()
+    expect(screen.getByText('Project Inception')).toBeInTheDocument()
+    expect(screen.getByText('Backend MVP')).toBeInTheDocument()
+    expect(screen.getByText('Frontend Development')).toBeInTheDocument()
+    expect(screen.getByText('Platform Integrations')).toBeInTheDocument()
+    expect(screen.getByText('GSoC Integration')).toBeInTheDocument()
   })
 })
