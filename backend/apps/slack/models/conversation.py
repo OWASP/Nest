@@ -69,6 +69,7 @@ class Conversation(TimestampedModel):
         self.purpose = conversation_data.get("purpose", {}).get("value", "")
         self.slack_creator_id = conversation_data.get("creator", "")
         self.topic = conversation_data.get("topic", {}).get("value", "")
+        self.total_members_count = conversation_data.get("num_members", 0)
 
         self.workspace = workspace
 
