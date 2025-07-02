@@ -27,7 +27,7 @@ export type CardProps = {
   url: string
 }
 
-type stats = {
+type Stats = {
   icon: IconDefinition
   pluralizedName?: string
   unit?: string
@@ -50,7 +50,7 @@ export interface DetailsCardProps {
   repositories?: RepositoryCardProps[]
   showAvatar?: boolean
   socialLinks?: string[]
-  stats?: stats[]
+  stats?: Stats[]
   summary?: string
   title?: string
   topContributors?: Contributor[]

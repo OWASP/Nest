@@ -39,7 +39,7 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Backend',
       tools: {
-        Python: {
+        python: {
           icon: '/images/icons/python.svg',
           url: 'https://www.python.org/',
         },
@@ -57,11 +57,11 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tests',
       tools: {
-        Jest: {
+        jest: {
           icon: '/images/icons/jest.svg',
           url: 'https://jestjs.io/',
         },
-        Pytest: {
+        pytest: {
           icon: '/images/icons/pytest.svg',
           url: 'https://docs.pytest.org/',
         },
@@ -70,11 +70,11 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tools',
       tools: {
-        Ansible: {
+        ansible: {
           icon: '/images/icons/ansible.svg',
           url: 'https://www.ansible.com/',
         },
-        GitHub: {
+        gitHub: {
           icon: '/images/icons/github.svg',
           url: 'https://www.github.com/',
         },

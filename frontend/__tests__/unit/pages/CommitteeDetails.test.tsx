@@ -88,7 +88,6 @@ describe('CommitteeDetailsPage Component', () => {
           contributionsCount: 30,
           login: 'Contributor 1',
           name: '',
-          __typename: 'UserNode',
         },
       ],
     }
