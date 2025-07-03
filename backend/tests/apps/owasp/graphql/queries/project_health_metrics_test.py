@@ -2,6 +2,9 @@
 
 from unittest.mock import patch
 
+import pytest
+
+from apps.owasp.graphql.nodes.project_health_metrics import ProjectHealthMetricsNode
 from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.graphql.queries.project_health_metrics import ProjectHealthMetricsQuery
 
@@ -9,24 +12,38 @@ from apps.owasp.graphql.queries.project_health_metrics import ProjectHealthMetri
 class TestProjectHealthMetricsQuery:
     """Test cases for ProjectHealthMetricsQuery class."""
 
-    def test_health_stats_query_has_strawberry_definition(self):
+    @pytest.mark.parametrize(
+        "field_name",
+        [
+            "project_health_stats",
+            "project_health_metrics",
+        ],
+    )
+    def test_field_query_has_strawberry_definition(self, field_name):
         """Check if ProjectHealthMetricsQuery has valid Strawberry definition."""
         assert hasattr(ProjectHealthMetricsQuery, "__strawberry_definition__")
 
         field_names = {
             field.name for field in ProjectHealthMetricsQuery.__strawberry_definition__.fields
         }
-        assert "project_health_stats" in field_names
+        assert field_name in field_names
 
-    def test_health_stats_field_configuration(self):
-        """Test if 'project_health_stats' field is configured properly."""
-        health_stats_field = next(
+    @pytest.mark.parametrize(
+        ("field_name", "expected_type"),
+        [
+            ("project_health_metrics", ProjectHealthMetricsNode),
+            ("project_health_stats", ProjectHealthStatsNode),
+        ],
+    )
+    def test_field_configuration(self, field_name, expected_type):
+        """Test if the field has the correct type in Strawberry definition."""
+        query_field = next(
             field
             for field in ProjectHealthMetricsQuery.__strawberry_definition__.fields
-            if field.name == "project_health_stats"
+            if field.name == field_name
         )
 
-        assert health_stats_field.type is ProjectHealthStatsNode
+        assert query_field.type is expected_type or query_field.type.of_type is expected_type
 
     @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_stats")
     def test_resolve_health_stats(self, mock_get_stats):
@@ -46,8 +63,32 @@ class TestProjectHealthMetricsQuery:
         )
         mock_get_stats.return_value = expected_stats
 
-        query = ProjectHealthMetricsQuery()
+        query = ProjectHealthMetricsQuery(project_health_metrics=[])
         result = query.project_health_stats()
         mock_get_stats.assert_called_once()
-
         assert result == expected_stats
+
+    def test_resolve_project_health_metrics(self):
+        """Test resolving project health metrics."""
+        metrics = [
+            ProjectHealthMetricsNode(
+                stars_count=1000,
+                forks_count=200,
+                score=85.0,
+                contributors_count=50,
+                open_issues_count=10,
+                open_pull_requests_count=5,
+                unanswered_issues_count=2,
+                unassigned_issues_count=1,
+                is_funding_requirements_compliant=True,
+                is_leader_requirements_compliant=True,
+                recent_releases_count=3,
+            )
+        ]
+        query = ProjectHealthMetricsQuery(project_health_metrics=metrics)
+        result = query.project_health_metrics
+        assert isinstance(result, list)
+        assert isinstance(result[0], ProjectHealthMetricsNode)
+        assert len(result) == 1
+        assert result[0].stars_count == 1000
+        assert result[0].forks_count == 200
