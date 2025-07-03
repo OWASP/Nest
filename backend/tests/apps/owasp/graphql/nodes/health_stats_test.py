@@ -12,17 +12,17 @@ class TestHealthStatsNode:
     def test_meta_configuration(self):
         field_names = {field.name for field in HealthStatsNode.__strawberry_definition__.fields}
         expected_field_names = {
-            "healthy_projects_count",
-            "healthy_projects_percentage",
-            "projects_needing_attention_count",
-            "projects_needing_attention_percentage",
-            "unhealthy_projects_count",
-            "unhealthy_projects_percentage",
             "average_score",
-            "total_stars",
-            "total_forks",
-            "total_contributors",
             "monthly_overall_scores",
+            "projects_count_healthy",
+            "projects_count_need_attention",
+            "projects_count_unhealthy",
+            "projects_percentage_healthy",
+            "projects_percentage_need_attention",
+            "projects_percentage_unhealthy",
+            "total_contributors",
+            "total_forks",
+            "total_stars",
         }
         assert expected_field_names.issubset(field_names)
 
@@ -39,21 +39,22 @@ class TestHealthStatsNode:
     @pytest.mark.parametrize(
         ("field_name", "expected_type"),
         [
-            ("healthy_projects_count", int),
-            ("healthy_projects_percentage", float),
-            ("projects_needing_attention_count", int),
-            ("projects_needing_attention_percentage", float),
-            ("unhealthy_projects_count", int),
-            ("unhealthy_projects_percentage", float),
             ("average_score", float),
-            ("total_stars", int),
-            ("total_forks", int),
-            ("total_contributors", int),
             ("monthly_overall_scores", list[float]),
+            ("projects_count_healthy", int),
+            ("projects_count_need_attention", int),
+            ("projects_count_unhealthy", int),
+            ("projects_percentage_healthy", float),
+            ("projects_percentage_need_attention", float),
+            ("projects_percentage_unhealthy", float),
+            ("total_contributors", int),
+            ("total_forks", int),
+            ("total_stars", int),
         ],
     )
     def test_field_types(self, field_name, expected_type):
         field = self._get_field_by_name(field_name)
+
         assert field is not None, f"Field {field_name} not found in HealthStatsNode."
         assert field.type == expected_type, (
             f"Field {field_name} has type {field.type}, expected {expected_type}."

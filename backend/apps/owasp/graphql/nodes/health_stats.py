@@ -7,14 +7,14 @@ import strawberry
 class HealthStatsNode:
     """Node representing overall health stats of OWASP projects."""
 
-    healthy_projects_count: int
-    healthy_projects_percentage: float
-    projects_needing_attention_count: int
-    projects_needing_attention_percentage: float
-    unhealthy_projects_count: int
-    unhealthy_projects_percentage: float
     average_score: float
-    total_stars: int
-    total_forks: int
-    total_contributors: int
     monthly_overall_scores: list[float]
+    projects_count_healthy: int
+    projects_count_need_attention: int
+    projects_count_unhealthy: int
+    projects_percentage_healthy: float
+    projects_percentage_need_attention: float
+    projects_percentage_unhealthy: float
+    total_contributors: int
+    total_forks: int
+    total_stars: int

@@ -2,7 +2,7 @@
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.functions import TruncDate
+from django.db.models.functions import ExtractMonth, TruncDate
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -139,11 +139,11 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         BulkSaveModel.bulk_save(ProjectHealthMetrics, metrics, fields=fields)
 
     @staticmethod
-    def get_distinct_health_metrics() -> models.QuerySet["ProjectHealthMetrics"]:
-        """Get distinct project health metrics.
+    def get_latest_health_metrics() -> models.QuerySet["ProjectHealthMetrics"]:
+        """Get latest health metrics for each project.
 
         Returns:
-            QuerySet[ProjectHealthMetrics]: QuerySet of distinct project health metrics.
+            QuerySet[ProjectHealthMetrics]: QuerySet of project health metrics.
 
         """
         return ProjectHealthMetrics.objects.filter(
@@ -155,44 +155,50 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
 
     @staticmethod
-    def get_overall_stats() -> HealthStatsNode:
+    def get_stats() -> HealthStatsNode:
         """Get overall project health stats.
 
         Returns:
-            dict: The overall health stats of all projects.
+            HealthStatsNode: The overall health stats of all projects.
 
         """
-        metrics = ProjectHealthMetrics.get_distinct_health_metrics()
-        total_projects_count = metrics.count()
-        healthy_projects_count = metrics.filter(score__gte=75).count()
-        projects_needing_attention_count = metrics.filter(score__lt=75, score__gte=50).count()
-        unhealthy_projects_count = metrics.filter(score__lt=50).count()
+        metrics = ProjectHealthMetrics.get_latest_health_metrics()
+
+        projects_count_healthy = metrics.filter(score__gte=75).count()
+        projects_count_need_attention = metrics.filter(score__lt=75, score__gte=50).count()
+        projects_count_total = metrics.count()
+        projects_count_unhealthy = metrics.filter(score__lt=50).count()
+
         return HealthStatsNode(
-            healthy_projects_count=healthy_projects_count,
-            healthy_projects_percentage=(healthy_projects_count / total_projects_count) * 100,
-            projects_needing_attention_count=projects_needing_attention_count,
-            projects_needing_attention_percentage=(
-                projects_needing_attention_count / total_projects_count
-            )
-            * 100,
-            unhealthy_projects_count=unhealthy_projects_count,
-            unhealthy_projects_percentage=(unhealthy_projects_count / total_projects_count) * 100,
-            average_score=metrics.aggregate(average_score=models.Avg("score"))["average_score"]
-            or 0.0,
-            total_stars=metrics.aggregate(total_stars=models.Sum("stars_count"))["total_stars"]
-            or 0,
-            total_forks=metrics.aggregate(total_forks=models.Sum("forks_count"))["total_forks"]
-            or 0,
-            total_contributors=metrics.aggregate(
-                total_contributors=models.Sum("contributors_count")
-            )["total_contributors"]
-            or 0,
+            average_score=metrics.aggregate(
+                average_score=(models.Avg("score"))["average_score"] or 0.0
+            ),
             monthly_overall_scores=list(
-                metrics.annotate(month=models.functions.ExtractMonth("nest_created_at"))
+                metrics.annotate(month=ExtractMonth("nest_created_at"))
                 .order_by("month")
                 .values("month")
                 .distinct()
                 .annotate(score=models.Avg("score"))
                 .values_list("score", flat=True)
+            ),
+            projects_count_healthy=projects_count_healthy,
+            projects_count_need_attention=projects_count_need_attention,
+            projects_count_unhealthy=projects_count_unhealthy,
+            projects_percentage_healthy=(projects_count_healthy / projects_count_total) * 100,
+            projects_percentage_need_attention=(
+                (projects_count_need_attention / projects_count_total) * 100
+            ),
+            projects_percentage_unhealthy=(projects_count_unhealthy / projects_count_total) * 100,
+            total_contributors=(
+                metrics.aggregate(total_contributors=models.Sum("contributors_count"))[
+                    "total_contributors"
+                ]
+                or 0
+            ),
+            total_forks=(
+                metrics.aggregate(total_forks=models.Sum("forks_count"))["total_forks"] or 0
+            ),
+            total_stars=(
+                metrics.aggregate(total_stars=models.Sum("stars_count"))["total_stars"] or 0
             ),
         )

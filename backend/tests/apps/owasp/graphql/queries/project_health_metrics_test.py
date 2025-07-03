@@ -28,25 +28,26 @@ class TestProjectHealthMetricsQuery:
 
         assert health_stats_field.type is HealthStatsNode
 
-    @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_overall_stats")
-    def test_resolve_health_stats(self, mock_get_overall_stats):
+    @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_stats")
+    def test_resolve_health_stats(self, mock_get_stats):
         """Test resolving the health stats."""
         expected_stats = HealthStatsNode(
-            healthy_projects_count=1,
-            healthy_projects_percentage=25.0,
-            projects_needing_attention_count=2,
-            projects_needing_attention_percentage=50.0,
-            unhealthy_projects_count=1,
-            unhealthy_projects_percentage=25.0,
             average_score=65.0,
-            total_stars=4500,
-            total_forks=900,
-            total_contributors=215,
             monthly_overall_scores=[77.5, 60.0, 40.0],
+            projects_count_healthy=1,
+            projects_count_need_attention=2,
+            projects_count_unhealthy=1,
+            projects_percentage_healthy=25.0,
+            projects_percentage_need_attention=50.0,
+            projects_percentage_unhealthy=25.0,
+            total_contributors=215,
+            total_forks=900,
+            total_stars=4500,
         )
-        mock_get_overall_stats.return_value = expected_stats
+        mock_get_stats.return_value = expected_stats
 
         query = ProjectHealthMetricsQuery()
         result = query.health_stats()
-        mock_get_overall_stats.assert_called_once()
+        mock_get_stats.assert_called_once()
+
         assert result == expected_stats

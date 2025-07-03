@@ -18,4 +18,4 @@ class ProjectHealthMetricsQuery:
             HealthStatsNode: The overall health stats of all projects.
 
         """
-        return ProjectHealthMetrics.get_overall_stats()
+        return ProjectHealthMetrics.get_stats()
