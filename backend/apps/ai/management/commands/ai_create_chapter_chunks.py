@@ -21,9 +21,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--chapter-key", type=str, help="Process only the chapter with this key"
+            "--chapter",
+            type=str,
+            help="Process only the chapter with this key",
         )
-        parser.add_argument("--all", action="store_true", help="Process all the chapters")
+        parser.add_argument(
+            "--all",
+            action="store_true",
+            help="Process all the chapters",
+        )
         parser.add_argument(
             "--batch-size",
             type=int,
@@ -40,34 +46,30 @@ class Command(BaseCommand):
 
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
-        if options["chapter_key"]:
-            queryset = Chapter.objects.filter(key=options["chapter_key"])
+        if chapter := options["chapter"]:
+            queryset = Chapter.objects.filter(key=chapter)
         elif options["all"]:
             queryset = Chapter.objects.all()
         else:
             queryset = Chapter.objects.filter(is_active=True)
 
-        total_chapters = queryset.count()
-        self.stdout.write(f"Found {total_chapters} chapters to process")
-
-        if total_chapters == 0:
+        if not (total_chapters := queryset.count()):
             self.stdout.write("No chapters found to process")
             return
 
-        batch_size = options["batch_size"]
+        self.stdout.write(f"Found {total_chapters} chapters to process")
 
+        batch_size = options["batch_size"]
         for offset in range(0, total_chapters, batch_size):
             batch_chapters = queryset[offset : offset + batch_size]
 
             batch_chunks = []
             for chapter in batch_chapters:
-                chunks = self.create_chunks(chapter)
-                batch_chunks.extend(chunks)
+                batch_chunks.extend(self.create_chunks(chapter))
 
             if batch_chunks:
-                chunks_count = len(batch_chunks)
                 Chunk.bulk_save(batch_chunks)
-                self.stdout.write(f"Saved {chunks_count} chunks")
+                self.stdout.write(f"Saved {len(batch_chunks)} chunks")
 
         self.stdout.write(f"Completed processing all {total_chapters} chapters")
 
@@ -81,8 +83,7 @@ class Command(BaseCommand):
             all_chunk_texts.append(metadata_content)
 
         if prose_content.strip():
-            prose_chunks = Chunk.split_text(prose_content)
-            all_chunk_texts.extend(prose_chunks)
+            all_chunk_texts.extend(Chunk.split_text(prose_content))
 
         if not all_chunk_texts:
             self.stdout.write(f"No content to chunk for chapter {chapter.key}")
@@ -191,7 +192,7 @@ class Command(BaseCommand):
                         leaders_info.append(leader_text)
 
             if leaders_info:
-                metadata_parts.append("Chapter Leaders: " + ", ".join(leaders_info))
+                metadata_parts.append(f"Location Information: {', '.join(location_parts)}")
 
         if chapter.related_urls:
             valid_urls = [
@@ -204,7 +205,7 @@ class Command(BaseCommand):
 
         metadata_parts.append(f"Active Chapter: {'Yes' if chapter.is_active else 'No'}")
 
-        prose_content = DELIMITER.join(filter(None, prose_parts))
-        metadata_content = DELIMITER.join(filter(None, metadata_parts))
-
-        return prose_content, metadata_content
+        return (
+            DELIMITER.join(filter(None, prose_parts)),
+            DELIMITER.join(filter(None, metadata_parts)),
+        )

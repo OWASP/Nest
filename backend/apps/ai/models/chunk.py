@@ -18,10 +18,10 @@ class Chunk(TimestampedModel):
         verbose_name = "Chunk"
         unique_together = ("content_type", "object_id", "text")
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
-    object_id = models.PositiveIntegerField(default=0)
     content_object = GenericForeignKey("content_type", "object_id")
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     embedding = VectorField(verbose_name="Embedding", dimensions=1536)
+    object_id = models.PositiveIntegerField(default=0)
     text = models.TextField(verbose_name="Text")
 
     def __str__(self):
