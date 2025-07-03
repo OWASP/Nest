@@ -14,7 +14,7 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 const BarChart: React.FC<{
   title: string
   icon?: IconProp
-  labels?: string[]
+  labels: string[]
   days: number[]
   requirements: number[]
 }> = ({ title, days, icon, requirements, labels }) => {
