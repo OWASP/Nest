@@ -139,7 +139,7 @@ describe('UsersPage Component', () => {
         {
           key: 'user_3',
           login: 'fallback_login',
-          avatar_url: 'https://example.com/avatar.jpg',
+          avatarUrl: 'https://example.com/avatar.jpg',
           company: 'Some Company',
         },
       ],

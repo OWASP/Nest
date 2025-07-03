@@ -1,5 +1,5 @@
 export const mockChapterData = {
-  active_chapters_count: 0,
+  activeChaptersCount: 0,
   chapters: [
     {
       createdAt: 1568320077,
