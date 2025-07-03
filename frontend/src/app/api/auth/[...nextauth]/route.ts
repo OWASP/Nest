@@ -46,9 +46,8 @@ const authOptions = {
           })
           if (!data?.githubAuth?.authUser) throw new Error('User sync failed')
           return true
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-          throw new Error('GitHub authentication failed')
+          throw new Error('GitHub authentication failed' + error.message)
         }
       }
       return true
