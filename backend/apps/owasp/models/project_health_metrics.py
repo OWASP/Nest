@@ -169,7 +169,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
 
         projects_count_healthy = metrics.filter(score__gte=HEALTHY_SCORE_THRESHOLD).count()
         projects_count_need_attention = metrics.filter(
-            score__lt=NEED_ATTENTION_SCORE_THRESHOLD, score__gte=HEALTHY_SCORE_THRESHOLD
+            score__lt=HEALTHY_SCORE_THRESHOLD, score__gte=NEED_ATTENTION_SCORE_THRESHOLD
         ).count()
         projects_count_total = metrics.count() or 1  # Avoid division by zero
         projects_count_unhealthy = metrics.filter(score__lt=NEED_ATTENTION_SCORE_THRESHOLD).count()
