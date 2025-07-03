@@ -29,7 +29,7 @@ const createApolloClient = () => {
     return {
       headers: {
         ...headers,
-        Authorization: accessToken ? `Bearer ${accessToken}` : '',
+        authorization: accessToken ? `Bearer ${accessToken}` : '',
         'X-CSRFToken': csrfToken || '',
       },
     }

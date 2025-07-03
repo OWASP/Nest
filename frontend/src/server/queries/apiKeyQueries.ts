@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client'
 
 export const GET_API_KEYS = gql`
   query GetApiKeys($includeRevoked: Boolean!) {
