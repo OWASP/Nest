@@ -2,6 +2,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
+import { ApexBarChartDataSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
@@ -29,7 +30,7 @@ const BarChart: React.FC<{
     orangeColor = '#faad14'
   }
 
-  const seriesData = days.map((day, index) => ({
+  const seriesData: ApexBarChartDataSeries[] = days.map((day, index) => ({
     x: labels[index],
     y: days[index],
     goals: [
