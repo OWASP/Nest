@@ -9,6 +9,9 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
+HEALTHY_SCORE_THRESHOLD = 75
+NEED_ATTENTION_SCORE_THRESHOLD = 50
+
 
 class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     """Project health metrics model."""
@@ -164,10 +167,12 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         """
         metrics = ProjectHealthMetrics.get_latest_health_metrics()
 
-        projects_count_healthy = metrics.filter(score__gte=75).count()
-        projects_count_need_attention = metrics.filter(score__lt=75, score__gte=50).count()
+        projects_count_healthy = metrics.filter(score__gte=HEALTHY_SCORE_THRESHOLD).count()
+        projects_count_need_attention = metrics.filter(
+            score__lt=NEED_ATTENTION_SCORE_THRESHOLD, score__gte=HEALTHY_SCORE_THRESHOLD
+        ).count()
         projects_count_total = metrics.count()
-        projects_count_unhealthy = metrics.filter(score__lt=50).count()
+        projects_count_unhealthy = metrics.filter(score__lt=NEED_ATTENTION_SCORE_THRESHOLD).count()
 
         return HealthStatsNode(
             average_score=metrics.aggregate(
