@@ -1,27 +1,18 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
-import { getSession } from 'next-auth/react'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
-
-interface ExtendedSession {
-  accessToken?: string
-}
 
 async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
     let csrfToken = null
     const cookieValue = await getCsrfTokenOnServer()
-    const session = await getSession()
-    const accessToken = (session as ExtendedSession)?.accessToken
     csrfToken = cookieValue
     return {
       headers: {
         ...headers,
         'X-CSRFToken': csrfToken ?? '',
         Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
-
-        Authorization: accessToken ? `Bearer ${accessToken}` : '',
       },
     }
   })

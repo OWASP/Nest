@@ -1,8 +1,13 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
+import { getSession } from 'next-auth/react'
 import { AppError, handleAppError } from 'app/global-error'
 import { GRAPHQL_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
+
+type ExtendedSession = {
+  accessToken?: string
+}
 
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
@@ -17,10 +22,15 @@ const createApolloClient = () => {
   })
 
   const authLink = setContext(async (_, { headers }) => {
+    const session = await getSession()
+    const accessToken = (session as ExtendedSession)?.accessToken
+    const csrfToken = await getCsrfToken()
+
     return {
       headers: {
         ...headers,
-        'X-CSRFToken': (await getCsrfToken()) || '',
+        Authorization: accessToken ? `Bearer ${accessToken}` : '',
+        'X-CSRFToken': csrfToken || '',
       },
     }
   })
@@ -30,6 +40,6 @@ const createApolloClient = () => {
     link: authLink.concat(httpLink),
   })
 }
-const apolloClient = createApolloClient()
+const apolloClientPromise = createApolloClient()
 
-export default apolloClient
+export default apolloClientPromise
