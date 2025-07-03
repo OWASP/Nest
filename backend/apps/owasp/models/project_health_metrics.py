@@ -162,7 +162,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         """Get overall project health stats.
 
         Returns:
-            HealthStatsNode: The overall health stats of all projects.
+            ProjectHealthStatsNode: The overall health stats of all projects.
 
         """
         metrics = ProjectHealthMetrics.get_latest_health_metrics()
