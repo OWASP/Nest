@@ -12,8 +12,8 @@ class APIKey(models.Model):
     """API key model."""
 
     key_hash = models.CharField(max_length=64, unique=True, db_index=True)
-    key_suffix = models.CharField(max_length=8, blank=True)
-    name = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    key_suffix = models.CharField(max_length=4, blank=True)
+    name = models.CharField(max_length=100, null=False, blank=False)
     revoked = models.BooleanField(default=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="api_keys", db_index=True

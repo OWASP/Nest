@@ -1,5 +1,7 @@
 """Nest API key GraphQL Mutations."""
 
+from datetime import datetime
+
 import strawberry
 
 from apps.nest.graphql.nodes.apikey import APIKeyNode
@@ -20,12 +22,17 @@ class APIKeyMutations:
     """GraphQL mutation class for API keys."""
 
     @strawberry.mutation
-    def create_api_key(self, info, name: str, expires_at: str | None = None) -> CreateAPIKeyResult:
+    def create_api_key(
+        self, info, name: str, expires_at: datetime | None = None
+    ) -> CreateAPIKeyResult:
         """Create a new API key for the authenticated user."""
         request = info.context.request
         user = get_authenticated_user(request)
-        instance, raw_key = APIKey.create(user=user, name=name, expires_at=expires_at)
-        return CreateAPIKeyResult(api_key=instance, raw_key=raw_key)
+        try:
+            instance, raw_key = APIKey.create(user=user, name=name, expires_at=expires_at)
+            return CreateAPIKeyResult(api_key=instance, raw_key=raw_key)
+        except Exception as err:
+            raise Exception("API key name already exists") from err
 
     @strawberry.mutation
     def revoke_api_key(self, info, key_id: int) -> bool:

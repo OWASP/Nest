@@ -25,7 +25,5 @@ class APIKeyQueries:
         """
         request = info.context.request
         user = get_authenticated_user(request)
-        if user is None:
-            return []
         keys = APIKey.objects.filter(user=user).order_by("-created_at")
-        return keys.filter(revoked=True) if include_revoked else keys.filter(revoked=False)
+        return keys.filter(revoked=include_revoked)
