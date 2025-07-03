@@ -92,11 +92,11 @@ const EditProgramPage = () => {
             id: program.id,
             name: program.name,
             description: program.description,
-            status: program.status.toLowerCase(), // ⬅️ Fix here
+            status: program.status.toLowerCase(),
             startedAt: program.startedAt,
             endedAt: program.endedAt,
             menteesLimit: Number(program.menteesLimit),
-            experienceLevels: program.experienceLevels.map((level: string) => level.toLowerCase()), // ⬅️ Fix here
+            experienceLevels: program.experienceLevels.map((level: string) => level.toLowerCase()),
             tags: program.tags,
             domains: program.domains,
             adminLogins: program.admins.map((a: any) => a.login),

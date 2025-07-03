@@ -25,4 +25,18 @@ export interface Program {
   domains: string[]
   tags: string[]
   admins: Contributor[]
+  modules: Module[]
+}
+
+export interface Module {
+  id: string
+  name: string
+  description: string
+  status: ProgramStatusEnum
+  experienceLevel: ExperienceLevelEnum
+  mentors: Contributor[]
+  startedAt: string
+  endedAt: string
+  domains: string[]
+  tags: string[]
 }

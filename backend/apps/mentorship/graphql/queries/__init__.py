@@ -1,3 +1,4 @@
 """Core Mentorship mutations."""
 
-from .get_programs import ProgramQuery
+from .module import ModuleQuery
+from .program import ProgramQuery

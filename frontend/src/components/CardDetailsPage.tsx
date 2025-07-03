@@ -22,6 +22,7 @@ import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
 import Milestones from 'components/Milestones'
+import ModuleCard from 'components/ModuleCard'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -43,6 +44,8 @@ const DetailsCard = ({
   type,
   tags,
   domains,
+  modules,
+  mentors,
   topContributors,
   admins,
   languages,
@@ -74,18 +77,27 @@ const DetailsCard = ({
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
             {type === 'program' &&
-               
               admins?.some(
                 (admin) => admin.login === ((data?.user as any)?.username as string)
               ) && (
-                <button
-                  className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
-                  onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
-                  }}
-                >
-                  Edit Program
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                    onClick={() => {
+                      router.push(`${window.location.pathname}/edit`)
+                    }}
+                  >
+                    Edit Program
+                  </button>
+                  <button
+                    className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                    onClick={() => {
+                      router.push(`${window.location.pathname}/createModule`)
+                    }}
+                  >
+                    Add Module
+                  </button>
+                </div>
               )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
               <Link href="#issues-trend">
@@ -143,7 +155,7 @@ const DetailsCard = ({
             icon={faRectangleList}
             title={<AnchorTitle title={`${capitalize(type)} Details`} />}
             className={
-              type === 'program'
+              type === 'program' || type === 'module'
                 ? 'gap-2 md:col-span-7'
                 : type !== 'chapter'
                   ? 'gap-2 md:col-span-5'
@@ -221,9 +233,9 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {type === 'program' && (
+        {(type === 'program' || type === 'module') && (
           <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${tags.length === 0 || domains.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            className={`mb-8 grid grid-cols-1 gap-6 ${tags?.length === 0 || domains?.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
             {tags.length !== 0 && (
               <ToggleableList items={tags} icon={faTags} label={<AnchorTitle title="Tags" />} />
@@ -245,13 +257,22 @@ const DetailsCard = ({
             type="contributor"
           />
         )}
-        {admins && (
+        {admins && admins.length > 0 && (
           <TopContributorsList
             icon={faUsers}
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
             type="admin"
+          />
+        )}
+        {mentors && mentors.length > 0 && (
+          <TopContributorsList
+            icon={faUsers}
+            contributors={mentors}
+            maxInitialDisplay={6}
+            label="Mentors"
+            type="mentor"
           />
         )}
         {(type === 'project' ||
@@ -289,6 +310,11 @@ const DetailsCard = ({
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
+        {type === 'program' && modules.length > 0 && (
+          <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Modules" />}>
+            <ModuleCard modules={modules} />
+          </SecondaryCard>
+        )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
@@ -299,7 +325,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

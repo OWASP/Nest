@@ -1,8 +1,10 @@
 'use client'
 
 import { useQuery } from '@apollo/client'
+import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
@@ -14,6 +16,7 @@ import SearchPageLayout from 'components/SearchPageLayout'
 const ProgramsSearchPage: React.FC = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { data: session } = useSession()
 
   const initialPage = parseInt(searchParams.get('page') || '1', 10)
   const initialQuery = searchParams.get('q') || ''
@@ -21,6 +24,7 @@ const ProgramsSearchPage: React.FC = () => {
   const [page, setPage] = useState(initialPage)
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [programs, setPrograms] = useState<Program[]>([])
+  const [mentor, setMentor] = useState<string>('')
 
   // Update URL on state changes
   useEffect(() => {
@@ -28,17 +32,24 @@ const ProgramsSearchPage: React.FC = () => {
     if (searchQuery) params.set('q', searchQuery)
     if (page > 1) params.set('page', page.toString())
 
-    router.push(`?${params.toString()}`)
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    // Only update URL if it's different from current URL
+    if (window.location.search !== (queryString ? `?${queryString}` : '')) {
+      router.push(newUrl, { scroll: false })
+    }
   }, [page, searchQuery, router])
 
   // Query with current page and search query
   const { data, loading, error } = useQuery(GET_PROGRAM_DATA, {
-    variables: { page, search: searchQuery },
+    variables: { page, search: searchQuery, mentorUsername: mentor },
     fetchPolicy: 'cache-and-network',
+    errorPolicy: 'all',
   })
 
   const totalPages = data?.allPrograms?.totalPages || 1
-  const currentPage = data?.allPrograms?.currentPage || 1
+  const currentPage = data?.allPrograms?.currentPage || page
 
   useEffect(() => {
     if (data?.allPrograms?.programs) {
@@ -57,6 +68,20 @@ const ProgramsSearchPage: React.FC = () => {
       })
     }
   }, [error])
+
+  const handleMyProgramsClick = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const username = (session?.user as any)?.username
+    if (username) {
+      setMentor(username)
+      setPage(1)
+    }
+  }
+
+  const handleShowAllPrograms = () => {
+    setMentor('')
+    setPage(1) // Reset to first page when clearing filter
+  }
 
   const renderProgramCard = (program: Program) => {
     const handleButtonClick = () => {
@@ -84,6 +109,9 @@ const ProgramsSearchPage: React.FC = () => {
     )
   }
 
+  function handleCreateButton(): void {
+    router.push('/mentorship/programs/create')
+  }
   return (
     <SearchPageLayout
       isLoaded={!loading}
@@ -102,7 +130,30 @@ const ProgramsSearchPage: React.FC = () => {
       indexName="programs"
       empty="No programs found"
     >
-      {programs.map(renderProgramCard)}
+      <div>
+        <div className="mt-8 flex justify-end gap-4">
+          {(session?.user as any)?.role === 'mentor' && (
+            <>
+              <div>
+                <Button className="rounded-lg" onPress={handleCreateButton}>
+                  Create
+                </Button>
+              </div>
+
+              {!mentor ? (
+                <Button className="rounded-lg" onPress={handleMyProgramsClick}>
+                  My Programs
+                </Button>
+              ) : (
+                <Button className="rounded-lg" onPress={handleShowAllPrograms}>
+                  All Programs
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+        {programs.map(renderProgramCard)}
+      </div>
     </SearchPageLayout>
   )
 }

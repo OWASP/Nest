@@ -131,6 +131,9 @@ ignore = [
     "FBT002",
     "FIX002",
     "PD",
+    "EM101",
+    "TRY002",
+    "TRY003",
     "PERF203",
     "PLC0414",
     "PLC0415",  # TODO(arkid15r): remove when all imports are at the top level.

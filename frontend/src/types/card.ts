@@ -8,6 +8,7 @@ import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
 import type { Milestone } from 'types/milestone'
+import { Module } from 'types/program'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
@@ -46,13 +47,15 @@ export interface DetailsCardProps {
   healthMetricsData?: HealthMetricsProps[]
   isActive?: boolean
   languages?: string[]
-  admins?: any
+  mentors?: Contributor[]
+  admins?: Contributor[]
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
   recentReleases?: Release[]
   recentMilestones?: Milestone[]
   repositories?: RepositoryCardProps[]
   socialLinks?: string[]
+  modules?: Module[]
   stats?: stats[]
   summary?: string
   showAvatar?: boolean

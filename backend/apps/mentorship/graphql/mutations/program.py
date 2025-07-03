@@ -1,5 +1,6 @@
+"""Mentorship Program GraphQL Mutations."""
+
 import strawberry
-from github import Github
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.graphql.nodes.program import (
@@ -8,34 +9,7 @@ from apps.mentorship.graphql.nodes.program import (
     UpdateProgramInput,
 )
 from apps.mentorship.models import Mentor, Program
-from apps.nest.models import User as NestUser
-
-
-def get_authenticated_user(request) -> NestUser:
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise Exception("Missing or invalid Authorization header")
-
-    access_token = auth_header.removeprefix("Bearer ").strip()
-    try:
-        github = Github(access_token)
-        gh_user = github.get_user()
-        login = gh_user.login
-        name = gh_user.name
-    except Exception:
-        raise Exception("GitHub token is invalid or expired")
-
-    try:
-        github_user = GithubUser.objects.get(login=login)
-    except GithubUser.DoesNotExist:
-        raise Exception("No GithubUser found for this login")
-
-    try:
-        user = NestUser.objects.get(github_user=github_user)
-    except NestUser.DoesNotExist:
-        raise Exception("No linked Nest user found for this GitHub account")
-
-    return user
+from apps.mentorship.utils.user import get_authenticated_user
 
 
 @strawberry.type
@@ -43,16 +17,15 @@ class ProgramMutation:
     """GraphQL mutations related to program."""
 
     @strawberry.mutation
-    def create_program(
-        self, info: strawberry.Info, input: CreateProgramInput
-    ) -> ProgramNode:
+    def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
+        """Create a new mentorship program if the user is a mentor."""
         request = info.context.request
         user = get_authenticated_user(request)
 
         if user.role != "mentor":
-            raise Exception("you must be a mentor to create a program")
+            raise Exception("You must be a mentor to create a program")
 
-        if input.ended_at <= input.started_at:
+        if input_data.ended_at <= input_data.started_at:
             raise Exception("End date must be after start date")
 
         mentor, _ = Mentor.objects.get_or_create(
@@ -60,58 +33,107 @@ class ProgramMutation:
         )
 
         program = Program.objects.create(
-            name=input.name,
-            description=input.description,
-            experience_levels=[lvl.value for lvl in input.experience_levels],
-            mentees_limit=input.mentees_limit,
-            started_at=input.started_at,
-            ended_at=input.ended_at,
-            domains=input.domains,
-            tags=input.tags,
-            status=input.status.value,
+            name=input_data.name,
+            description=input_data.description,
+            experience_levels=[lvl.value for lvl in input_data.experience_levels],
+            mentees_limit=input_data.mentees_limit,
+            started_at=input_data.started_at,
+            ended_at=input_data.ended_at,
+            domains=input_data.domains,
+            tags=input_data.tags,
+            status=input_data.status.value,
         )
 
-        program.admins.add(mentor)
+        resolved_mentors = {mentor}
 
-        return program
+        for login in input_data.admin_logins:
+            try:
+                github_user = GithubUser.objects.get(login__iexact=login.lower())
+            except GithubUser.DoesNotExist as err:
+                raise Exception("GitHub user with username not found.") from err
+            m, _ = Mentor.objects.get_or_create(github_user=github_user)
+            resolved_mentors.add(m)
+
+        program.admins.set(resolved_mentors)
+
+        return ProgramNode(
+            id=program.id,
+            name=program.name,
+            description=program.description,
+            experience_levels=program.experience_levels,
+            mentees_limit=program.mentees_limit,
+            started_at=program.started_at,
+            ended_at=program.ended_at,
+            domains=program.domains,
+            tags=program.tags,
+            status=program.status,
+            admins=list(program.admins.all()),
+        )
 
     @strawberry.mutation
-    def update_program(
-        self, info: strawberry.Info, input: UpdateProgramInput
-    ) -> ProgramNode:
+    def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
+        """Update an existing mentorship program. Only admins can update."""
         request = info.context.request
         user = get_authenticated_user(request)
 
         try:
-            program = Program.objects.get(id=input.id)
-        except Program.DoesNotExist:
-            raise Exception("Program not found")
+            program = Program.objects.get(id=input_data.id)
+        except Program.DoesNotExist as err:
+            raise Exception("Program not found") from err
 
         try:
-            mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist:
-            raise Exception("You must be a mentor to update a program")
+            admin = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist as err:
+            raise Exception("You must be a mentor to update a program") from err
 
-        if mentor not in program.admins.all():
+        if admin not in program.admins.all():
             raise Exception("You must be an admin of this program to update it")
 
-        for field, value in input.__dict__.items():
-            if field in ["admin_logins", "id"]:
-                continue
-            setattr(program, field, value)
+        # Map of input values to model fields
+        updates = {
+            "name": input_data.name,
+            "description": input_data.description,
+            "mentees_limit": input_data.mentees_limit,
+            "started_at": input_data.started_at,
+            "ended_at": input_data.ended_at,
+            "domains": input_data.domains,
+            "tags": input_data.tags,
+            "experience_levels": (
+                [lvl.value for lvl in input_data.experience_levels]
+                if input_data.experience_levels
+                else None
+            ),
+            "status": input_data.status.value if input_data.status else None,
+        }
+
+        if updates["experience_levels"] is not None:
+            program.experience_levels = updates["experience_levels"]
+        if updates["status"] is not None:
+            program.status = updates["status"]
+
+        for field in [
+            "name",
+            "description",
+            "mentees_limit",
+            "started_at",
+            "ended_at",
+            "domains",
+            "tags",
+        ]:
+            value = updates[field]
+            if value is not None:
+                setattr(program, field, value)
 
         program.save()
 
         resolved_mentors = []
-
-        for login in input.admin_logins:
+        for login in input_data.admin_logins:
             try:
-                github_user = GithubUser.objects.get(login=login)
-            except GithubUser.DoesNotExist:
-                raise Exception(f"GitHub user with login '{login}' not found.")
-
-            mentor, created = Mentor.objects.get_or_create(github_user=github_user)
-            resolved_mentors.append(mentor)
+                github_user = GithubUser.objects.get(login__iexact=login.lower())
+            except GithubUser.DoesNotExist as err:
+                raise Exception("GitHub user with username not found.") from err
+            m, _ = Mentor.objects.get_or_create(github_user=github_user)
+            resolved_mentors.append(m)
 
         program.admins.set(resolved_mentors)
 

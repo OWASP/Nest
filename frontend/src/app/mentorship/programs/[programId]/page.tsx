@@ -4,8 +4,8 @@ import { useQuery } from '@apollo/client'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROGRAM_DETAILS } from 'server/queries/getProgramsQueries'
-import type { Program } from 'types/program'
+import { GET_PROGRAM_AND_MODULES } from 'server/queries/getProgramsQueries'
+import { Module, type Program } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -15,13 +15,15 @@ const ProgramDetailsPage = () => {
   const { programId } = useParams()
   const [isLoading, setIsLoading] = useState(true)
   const [program, setProgram] = useState<Program | null>(null)
+  const [modules, setModules] = useState<Module[]>(null)
 
-  const { data, error } = useQuery(GET_PROGRAM_DETAILS, {
+  const { data, error } = useQuery(GET_PROGRAM_AND_MODULES, {
     variables: { id: programId },
   })
 
   useEffect(() => {
     if (data?.program) {
+      setModules(data?.modulesByProgram)
       setProgram(data.program)
       setIsLoading(false)
     } else if (error) {
@@ -55,6 +57,7 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
+      modules={modules}
       details={programDetails}
       admins={program.admins}
       tags={program.tags}

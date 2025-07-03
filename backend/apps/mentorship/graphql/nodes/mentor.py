@@ -1,17 +1,25 @@
+"""GraphQL node for Mentor model."""
+
 import strawberry
-from apps.github.graphql.nodes.user import UserNode
 
 
 @strawberry.type
 class MentorNode:
-    @strawberry.field
-    def login(self) -> str:
-        return self.github_user.login
+    """A GraphQL node representing a mentorship mentor."""
 
-    @strawberry.field
-    def name(self) -> str:
-        return self.github_user.name
+    id: strawberry.ID
 
     @strawberry.field
     def avatar_url(self) -> str:
+        """Get the GitHub avatar url of the mentor."""
         return self.github_user.avatar_url
+
+    @strawberry.field
+    def name(self) -> str:
+        """Get the GitHub name of the mentor."""
+        return self.github_user.name
+
+    @strawberry.field
+    def login(self) -> str:
+        """Get the GitHub login of the mentor."""
+        return self.github_user.login
