@@ -78,11 +78,11 @@ const BarChart: React.FC<{
             },
           },
           colors: [
-            function ({ value, seriesIndex, _ }) {
-              const requirement = requirements[seriesIndex]
+            function ({ value, dataPointIndex, _ }) {
+              const requirement = requirements[dataPointIndex]
               if (value > requirement) {
                 return redColor
-              } else if (value > requirement * 0.8) {
+              } else if (value > requirement * 0.75) {
                 return orangeColor
               }
               return greenColor
