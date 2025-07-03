@@ -219,4 +219,15 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('No Stars')).toBeInTheDocument()
     })
   })
+
+  test('renders repository sponsor block correctly', async () => {
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(
+        screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)
+      ).toBeInTheDocument()
+    })
+  })
 })

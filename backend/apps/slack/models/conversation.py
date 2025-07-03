@@ -42,7 +42,7 @@ class Conversation(TimestampedModel):
 
     def __str__(self):
         """Channel human readable representation."""
-        return f"{self.name} - {self.workspace}"
+        return f"{self.workspace} #{self.name}"
 
     @property
     def latest_message(self) -> "Message | None":

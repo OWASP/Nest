@@ -13,8 +13,8 @@ const isAlgoliaContributor = (contributor: Contributor): contributor is Contribu
   return (
     typeof contributor === 'object' &&
     contributor !== null &&
-    'avatar_url' in contributor &&
-    'contributions_count' in contributor
+    'avatarUrl' in contributor &&
+    'contributionsCount' in contributor
   )
 }
 
