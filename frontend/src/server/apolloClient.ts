@@ -20,6 +20,7 @@ async function createApolloClient() {
         ...headers,
         'X-CSRFToken': csrfToken ?? '',
         Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         Authorization: accessToken ? `Bearer ${accessToken}` : '',
       },
     }
