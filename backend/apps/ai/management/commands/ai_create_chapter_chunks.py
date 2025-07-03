@@ -162,7 +162,7 @@ class Command(BaseCommand):
             location_parts.append(f"Location: {chapter.suggested_location}")
 
         if location_parts:
-            metadata_parts.append("Location Information: " + ", ".join(location_parts))
+            metadata_parts.append(f"Location Information: {', '.join(location_parts)}")
 
         if chapter.level:
             metadata_parts.append(f"Chapter Level: {chapter.level}")
@@ -192,7 +192,7 @@ class Command(BaseCommand):
                         leaders_info.append(leader_text)
 
             if leaders_info:
-                metadata_parts.append(f"Location Information: {', '.join(location_parts)}")
+                metadata_parts.append(f"Chapter Leaders: {', '.join(leaders_info)}")
 
         if chapter.related_urls:
             valid_urls = [
