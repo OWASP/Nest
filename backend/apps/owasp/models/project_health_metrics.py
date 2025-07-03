@@ -171,13 +171,17 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         projects_count_need_attention = metrics.filter(
             score__lt=NEED_ATTENTION_SCORE_THRESHOLD, score__gte=HEALTHY_SCORE_THRESHOLD
         ).count()
-        projects_count_total = metrics.count()
+        projects_count_total = metrics.count() or 1  # Avoid division by zero
         projects_count_unhealthy = metrics.filter(score__lt=NEED_ATTENTION_SCORE_THRESHOLD).count()
 
+        aggregation = metrics.aggregate(
+            average_score=models.Avg("score"),
+            total_contributors=models.Sum("contributors_count"),
+            total_forks=models.Sum("forks_count"),
+            total_stars=models.Sum("stars_count"),
+        )
         return HealthStatsNode(
-            average_score=metrics.aggregate(
-                average_score=(models.Avg("score"))["average_score"] or 0.0
-            ),
+            average_score=aggregation.get("average_score", 0.0),
             monthly_overall_scores=list(
                 metrics.annotate(month=ExtractMonth("nest_created_at"))
                 .order_by("month")
@@ -194,16 +198,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
                 (projects_count_need_attention / projects_count_total) * 100
             ),
             projects_percentage_unhealthy=(projects_count_unhealthy / projects_count_total) * 100,
-            total_contributors=(
-                metrics.aggregate(total_contributors=models.Sum("contributors_count"))[
-                    "total_contributors"
-                ]
-                or 0
-            ),
-            total_forks=(
-                metrics.aggregate(total_forks=models.Sum("forks_count"))["total_forks"] or 0
-            ),
-            total_stars=(
-                metrics.aggregate(total_stars=models.Sum("stars_count"))["total_stars"] or 0
-            ),
+            total_contributors=(aggregation.get("total_contributors", 0)),
+            total_forks=(aggregation.get("total_forks", 0)),
+            total_stars=(aggregation.get("total_stars", 0)),
         )

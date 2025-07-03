@@ -1,6 +1,9 @@
 """Test Cases for Health Stats GraphQL Node."""
 
+from typing import get_args, get_origin
+
 import pytest
+from strawberry.types.base import StrawberryList
 
 from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
 
@@ -24,7 +27,7 @@ class TestHealthStatsNode:
             "total_forks",
             "total_stars",
         }
-        assert expected_field_names.issubset(field_names)
+        assert expected_field_names == field_names
 
     def _get_field_by_name(self, name):
         return next(
@@ -54,8 +57,20 @@ class TestHealthStatsNode:
     )
     def test_field_types(self, field_name, expected_type):
         field = self._get_field_by_name(field_name)
-
         assert field is not None, f"Field {field_name} not found in HealthStatsNode."
-        assert field.type == expected_type, (
-            f"Field {field_name} has type {field.type}, expected {expected_type}."
-        )
+
+        origin = get_origin(expected_type)
+        if origin is list:
+            # list field: ensure StrawberryList with correct inner type
+            inner_type = get_args(expected_type)[0]
+            assert isinstance(field.type, StrawberryList), (
+                f"Field {field_name} should be a StrawberryList, got {type(field.type)}"
+            )
+            assert field.type.of_type is inner_type, (
+                f"Field {field_name} has inner type {field.type.of_type}, expected {inner_type}"
+            )
+        else:
+            # scalar field: direct comparison
+            assert field.type is expected_type, (
+                f"Field {field_name} has type {field.type}, expected {expected_type}"
+            )
