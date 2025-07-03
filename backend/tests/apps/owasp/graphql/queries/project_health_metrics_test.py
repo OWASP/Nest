@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
+from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.graphql.queries.project_health_metrics import ProjectHealthMetricsQuery
 
 
@@ -13,25 +13,25 @@ class TestProjectHealthMetricsQuery:
         """Check if ProjectHealthMetricsQuery has valid Strawberry definition."""
         assert hasattr(ProjectHealthMetricsQuery, "__strawberry_definition__")
 
-        field_names = [
+        field_names = {
             field.name for field in ProjectHealthMetricsQuery.__strawberry_definition__.fields
-        ]
-        assert "health_stats" in field_names
+        }
+        assert "project_health_stats" in field_names
 
     def test_health_stats_field_configuration(self):
-        """Test if 'health_stats' field is configured properly."""
+        """Test if 'project_health_stats' field is configured properly."""
         health_stats_field = next(
             field
             for field in ProjectHealthMetricsQuery.__strawberry_definition__.fields
-            if field.name == "health_stats"
+            if field.name == "project_health_stats"
         )
 
-        assert health_stats_field.type is HealthStatsNode
+        assert health_stats_field.type is ProjectHealthStatsNode
 
     @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_stats")
     def test_resolve_health_stats(self, mock_get_stats):
         """Test resolving the health stats."""
-        expected_stats = HealthStatsNode(
+        expected_stats = ProjectHealthStatsNode(
             average_score=65.0,
             monthly_overall_scores=[77.5, 60.0, 40.0],
             projects_count_healthy=1,
@@ -47,7 +47,7 @@ class TestProjectHealthMetricsQuery:
         mock_get_stats.return_value = expected_stats
 
         query = ProjectHealthMetricsQuery()
-        result = query.health_stats()
+        result = query.project_health_stats()
         mock_get_stats.assert_called_once()
 
         assert result == expected_stats

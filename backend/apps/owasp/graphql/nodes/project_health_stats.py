@@ -4,7 +4,7 @@ import strawberry
 
 
 @strawberry.type
-class HealthStatsNode:
+class ProjectHealthStatsNode:
     """Node representing overall health stats of OWASP projects."""
 
     average_score: float

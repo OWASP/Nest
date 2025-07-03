@@ -5,15 +5,17 @@ from typing import get_args, get_origin
 import pytest
 from strawberry.types.base import StrawberryList
 
-from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
+from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
 
 
 class TestHealthStatsNode:
-    def test_health_stats_node_inheritance(self):
-        assert hasattr(HealthStatsNode, "__strawberry_definition__")
+    def test_project_health_stats_node_inheritance(self):
+        assert hasattr(ProjectHealthStatsNode, "__strawberry_definition__")
 
     def test_meta_configuration(self):
-        field_names = {field.name for field in HealthStatsNode.__strawberry_definition__.fields}
+        field_names = {
+            field.name for field in ProjectHealthStatsNode.__strawberry_definition__.fields
+        }
         expected_field_names = {
             "average_score",
             "monthly_overall_scores",
@@ -33,7 +35,7 @@ class TestHealthStatsNode:
         return next(
             (
                 field
-                for field in HealthStatsNode.__strawberry_definition__.fields
+                for field in ProjectHealthStatsNode.__strawberry_definition__.fields
                 if field.name == name
             ),
             None,

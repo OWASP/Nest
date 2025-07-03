@@ -2,7 +2,7 @@
 
 import strawberry
 
-from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
+from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
@@ -11,7 +11,7 @@ class ProjectHealthMetricsQuery:
     """Project health metrics queries."""
 
     @strawberry.field
-    def health_stats(self) -> HealthStatsNode:
+    def project_health_stats(self) -> ProjectHealthStatsNode:
         """Resolve overall project health stats.
 
         Returns:

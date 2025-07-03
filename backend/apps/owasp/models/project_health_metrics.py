@@ -6,11 +6,11 @@ from django.db.models.functions import ExtractMonth, TruncDate
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.owasp.graphql.nodes.health_stats import HealthStatsNode
+from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
-HEALTHY_SCORE_THRESHOLD = 75
-NEED_ATTENTION_SCORE_THRESHOLD = 50
+HEALTH_SCORE_THRESHOLD_HEALTHY = 75
+HEALTH_SCORE_THRESHOLD_NEED_ATTENTION = 50
 
 
 class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
@@ -158,7 +158,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
 
     @staticmethod
-    def get_stats() -> HealthStatsNode:
+    def get_stats() -> ProjectHealthStatsNode:
         """Get overall project health stats.
 
         Returns:
@@ -167,12 +167,18 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         """
         metrics = ProjectHealthMetrics.get_latest_health_metrics()
 
-        projects_count_healthy = metrics.filter(score__gte=HEALTHY_SCORE_THRESHOLD).count()
-        projects_count_need_attention = metrics.filter(
-            score__lt=HEALTHY_SCORE_THRESHOLD, score__gte=NEED_ATTENTION_SCORE_THRESHOLD
+        projects_count_healthy = metrics.filter(
+            score__gte=HEALTH_SCORE_THRESHOLD_HEALTHY,
         ).count()
+        projects_count_need_attention = metrics.filter(
+            score__lt=HEALTH_SCORE_THRESHOLD_HEALTHY,
+            score__gte=HEALTH_SCORE_THRESHOLD_NEED_ATTENTION,
+        ).count()
+        projects_count_unhealthy = metrics.filter(
+            score__lt=HEALTH_SCORE_THRESHOLD_NEED_ATTENTION
+        ).count()
+
         projects_count_total = metrics.count() or 1  # Avoid division by zero
-        projects_count_unhealthy = metrics.filter(score__lt=NEED_ATTENTION_SCORE_THRESHOLD).count()
 
         aggregation = metrics.aggregate(
             average_score=models.Avg("score"),
@@ -180,7 +186,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             total_forks=models.Sum("forks_count"),
             total_stars=models.Sum("stars_count"),
         )
-        return HealthStatsNode(
+        return ProjectHealthStatsNode(
             average_score=aggregation.get("average_score", 0.0),
             monthly_overall_scores=list(
                 metrics.annotate(month=ExtractMonth("nest_created_at"))
