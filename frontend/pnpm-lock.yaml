@@ -54,8 +54,8 @@ importers:
         specifier: ^2.2.19
         version: 2.2.19(@heroui/system@2.4.18(@heroui/theme@2.4.17(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.12.9(@swc/helpers@0.5.17))(@types/node@22.16.0)(typescript@5.8.3))))(framer-motion@12.23.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@heroui/theme@2.4.17(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.12.9(@swc/helpers@0.5.17))(@types/node@22.16.0)(typescript@5.8.3))))(framer-motion@12.23.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@next/eslint-plugin-next':
-        specifier: ^15.3.4
-        version: 15.3.4
+        specifier: ^15.3.5
+        version: 15.3.5
       '@next/third-parties':
         specifier: ^15.3.4
         version: 15.3.4(next@15.3.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.53.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
@@ -1441,6 +1441,9 @@ packages:
 
   '@next/eslint-plugin-next@15.3.4':
     resolution: {integrity: sha512-lBxYdj7TI8phbJcLSAqDt57nIcobEign5NYIKCiy0hXQhrUbTqLqOaSDi568U6vFg4hJfBdZYsG4iP/uKhCqgg==}
+
+  '@next/eslint-plugin-next@15.3.5':
+    resolution: {integrity: sha512-BZwWPGfp9po/rAnJcwUBaM+yT/+yTWIkWdyDwc74G9jcfTrNrmsHe+hXHljV066YNdVs8cxROxX5IgMQGX190w==}
 
   '@next/swc-darwin-arm64@15.3.4':
     resolution: {integrity: sha512-z0qIYTONmPRbwHWvpyrFXJd5F9YWLCsw3Sjrzj2ZvMYy9NPQMPZ1NjOJh4ojr4oQzcGYwgJKfidzehaNa1BpEg==}
@@ -7864,6 +7867,10 @@ snapshots:
   '@next/env@15.3.4': {}
 
   '@next/eslint-plugin-next@15.3.4':
+    dependencies:
+      fast-glob: 3.3.1
+
+  '@next/eslint-plugin-next@15.3.5':
     dependencies:
       fast-glob: 3.3.1
 
