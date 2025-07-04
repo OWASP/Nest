@@ -37,6 +37,7 @@ export const GET_REPOSITORY_DATA = gql`
           name
           login
         }
+        url
         isPreRelease
         name
         organizationName
