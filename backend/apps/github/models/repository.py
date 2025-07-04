@@ -88,6 +88,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     organization = models.ForeignKey(
         "github.Organization",
         verbose_name="Organization",
+        related_name="repositories",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,

@@ -21,6 +21,7 @@ venv/
 *.code-workspace
 *.log
 backend/.venv
+backend/data/backup*
 backend/staticfiles
 cspell/node_modules
 frontend/blob-report/

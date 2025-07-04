@@ -136,4 +136,4 @@ class TestConversationModel:
         )
 
         # Check __str__ returns the name
-        assert str(conversation) == "test-channel - test-workspace"
+        assert str(conversation) == "test-workspace #test-channel"

@@ -77,6 +77,34 @@ const eslintConfig = [
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-unused-expressions': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'property',
+          modifiers: ['requiresQuotes'],
+          format: null,
+        },
+        {
+          selector: 'property',
+          filter: {
+            regex: '^_{1,2}',
+            match: true,
+          },
+          format: null,
+        },
+        {
+          selector: 'property',
+          filter: {
+            regex: '^(NextResponse|Cookie)$',
+            match: true,
+          },
+          format: null,
+        },
+        {
+          selector: 'property',
+          format: ['camelCase', 'UPPER_CASE'],
+        },
+      ],
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',
       'react/prop-types': 'off',

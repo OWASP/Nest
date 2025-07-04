@@ -14,6 +14,39 @@ from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 
 
+class IssueAdmin(admin.ModelAdmin):
+    autocomplete_fields = (
+        "repository",
+        "author",
+        "assignees",
+        "labels",
+    )
+    list_display = (
+        "repository",
+        "title",
+        "custom_field_github_url",
+    )
+    list_filter = (
+        "state",
+        "is_locked",
+    )
+    search_fields = ("title",)
+
+    def custom_field_github_url(self, obj) -> str:
+        """Issue GitHub URL.
+
+        Args:
+            obj (Issue): The issue instance.
+
+        Returns:
+            str: A safe HTML link to the issue on GitHub.
+
+        """
+        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
+
+    custom_field_github_url.short_description = "GitHub 🔗"
+
+
 class LabelAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
 
@@ -27,6 +60,20 @@ class MilestoneAdmin(admin.ModelAdmin):
     search_fields = (
         "body",
         "title",
+    )
+
+
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "created_at",
+        "updated_at",
+        "followers_count",
+    )
+    list_filter = ("is_owasp_related_organization",)
+    search_fields = (
+        "login",
+        "name",
     )
 
 
@@ -70,37 +117,15 @@ class PullRequestAdmin(admin.ModelAdmin):
     custom_field_github_url.short_description = "GitHub 🔗"
 
 
-class IssueAdmin(admin.ModelAdmin):
+class ReleaseAdmin(admin.ModelAdmin):
     autocomplete_fields = (
-        "repository",
         "author",
-        "assignees",
-        "labels",
-    )
-    list_display = (
         "repository",
-        "title",
-        "custom_field_github_url",
     )
-    list_filter = (
-        "state",
-        "is_locked",
+    search_fields = (
+        "node_id",
+        "repository__name",
     )
-    search_fields = ("title",)
-
-    def custom_field_github_url(self, obj) -> str:
-        """Issue GitHub URL.
-
-        Args:
-            obj (Issue): The issue instance.
-
-        Returns:
-            str: A safe HTML link to the issue on GitHub.
-
-        """
-        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
-
-    custom_field_github_url.short_description = "GitHub 🔗"
 
 
 class RepositoryAdmin(admin.ModelAdmin):
@@ -167,28 +192,6 @@ class RepositoryContributorAdmin(admin.ModelAdmin):
         "user",
     )
     search_fields = ("user__login", "user__name")
-
-
-class OrganizationAdmin(admin.ModelAdmin):
-    list_display = (
-        "title",
-        "created_at",
-        "updated_at",
-        "followers_count",
-    )
-    list_filter = ("is_owasp_related_organization",)
-    search_fields = ("name",)
-
-
-class ReleaseAdmin(admin.ModelAdmin):
-    autocomplete_fields = (
-        "author",
-        "repository",
-    )
-    search_fields = (
-        "node_id",
-        "repository__name",
-    )
 
 
 class UserAdmin(admin.ModelAdmin):

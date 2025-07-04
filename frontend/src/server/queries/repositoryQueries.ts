@@ -27,6 +27,10 @@ export const GET_REPOSITORY_DATA = gql`
       organization {
         login
       }
+      project {
+        key
+        name
+      }
       releases {
         author {
           avatarUrl

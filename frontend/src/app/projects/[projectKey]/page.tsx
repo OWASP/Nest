@@ -26,7 +26,6 @@ const ProjectDetailsPage = () => {
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
     variables: { key: projectKey },
   })
-
   useEffect(() => {
     if (data) {
       setProject(data.project)
@@ -92,6 +91,7 @@ const ProjectDetailsPage = () => {
   return (
     <DetailsCard
       details={projectDetails}
+      entityKey={project.key}
       healthMetricsData={project.healthMetrics}
       isActive={project.isActive}
       languages={project.languages}

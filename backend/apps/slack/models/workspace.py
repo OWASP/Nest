@@ -5,6 +5,7 @@ import os
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.slack.constants import OWASP_WORKSPACE_ID
 
 
 class Workspace(TimestampedModel):
@@ -23,14 +24,14 @@ class Workspace(TimestampedModel):
         return f"{self.name or self.slack_workspace_id}"
 
     @staticmethod
-    def get_default_workspace() -> "Workspace":
+    def get_default_workspace() -> "Workspace | None":
         """Get the default workspace.
 
         Returns:
-            Workspace: The default workspace.
+            Workspace: The default workspace or None.
 
         """
-        return Workspace.objects.first()
+        return Workspace.objects.filter(slack_workspace_id=OWASP_WORKSPACE_ID).first()
 
     @property
     def bot_token(self) -> str:

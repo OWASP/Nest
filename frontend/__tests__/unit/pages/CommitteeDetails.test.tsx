@@ -88,7 +88,6 @@ describe('CommitteeDetailsPage Component', () => {
           contributionsCount: 30,
           login: 'Contributor 1',
           name: '',
-          __typename: 'UserNode',
         },
       ],
     }
@@ -121,6 +120,17 @@ describe('CommitteeDetailsPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Committee not found')).toBeInTheDocument()
+    })
+  })
+
+  test('does not render sponsor block', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockCommitteeDetailsData,
+      error: null,
+    })
+    render(<CommitteeDetailsPage />)
+    await waitFor(() => {
+      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
     })
   })
 })
