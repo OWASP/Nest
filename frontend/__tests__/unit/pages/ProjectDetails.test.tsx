@@ -162,8 +162,7 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
       expect(screen.getByText('Stars Trend')).toBeInTheDocument()
       expect(screen.getByText('Forks Trend')).toBeInTheDocument()
-      expect(screen.getByText('Days Since Last Commit')).toBeInTheDocument()
-      expect(screen.getByText('Days Since Last Release')).toBeInTheDocument()
+      expect(screen.getByText('Days Since Last Commit and Release')).toBeInTheDocument()
     })
   })
 
