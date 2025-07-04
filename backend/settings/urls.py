@@ -13,6 +13,7 @@ from strawberry.django.views import GraphQLView
 
 from apps.core.api.algolia import algolia_search
 from apps.core.api.csrf import get_csrf_token
+from apps.core.api.status import get_status
 from apps.slack.apps import SlackConfig
 from settings.api_v1 import api as api_v1
 from settings.graphql import schema
@@ -23,6 +24,7 @@ urlpatterns = [
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v1/", api_v1.urls),
     path("a/", admin.site.urls),
+    path("status/", get_status),
 ]
 
 if SlackConfig.app:
