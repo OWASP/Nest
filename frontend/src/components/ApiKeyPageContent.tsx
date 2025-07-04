@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { FetchResult, useMutation, useQuery } from '@apollo/client'
 import {
   faSpinner,
   faKey,
@@ -32,6 +32,12 @@ const ApiKeyPageContent: FC<ApiKeyPageContentProps> = ({ isGitHubAuthEnabled }) 
   const [showNewKey, setShowNewKey] = useState(false)
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
   const [includeRevoked, setIncludeRevoked] = useState(false)
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => Promise<FetchResult<unknown>>
+  } | null>(null)
 
   const { loading, error, data, refetch } = useQuery(GET_API_KEYS, {
     variables: { includeRevoked },
@@ -118,9 +124,12 @@ const ApiKeyPageContent: FC<ApiKeyPageContentProps> = ({ isGitHubAuthEnabled }) 
   }
 
   const handleRevokeKey = (keyId: number) => {
-    if (confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
-      revokeApiKey({ variables: { keyId } })
-    }
+    setConfirmationModal({
+      isOpen: true,
+      title: 'Revoke API Key',
+      message: 'Are you sure you want to revoke this API key? This action cannot be undone.',
+      onConfirm: () => revokeApiKey({ variables: { keyId } }),
+    })
   }
 
   const handleCopyKey = () => {
@@ -398,6 +407,36 @@ const ApiKeyPageContent: FC<ApiKeyPageContentProps> = ({ isGitHubAuthEnabled }) 
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {/* Confirmation Modal */}
+      {confirmationModal?.isOpen && (
+        <Modal
+          isOpen={confirmationModal.isOpen}
+          onClose={() => setConfirmationModal(null)}
+          size="md"
+        >
+          <ModalContent>
+            <ModalHeader>{confirmationModal.title}</ModalHeader>
+            <ModalBody>
+              <p>{confirmationModal.message}</p>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onPress={() => setConfirmationModal(null)}>
+                Cancel
+              </Button>
+              <Button
+                color="danger"
+                onPress={async () => {
+                  await confirmationModal.onConfirm()
+                  setConfirmationModal(null)
+                }}
+              >
+                Confirm
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </div>
   )
 }
