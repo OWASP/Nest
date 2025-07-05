@@ -12,7 +12,7 @@ export default function ProjectsDashboardNavBar() {
   return (
     <Navbar
       classNames={{
-        base: 'h-full w-64 flex-col items-start justify-start py-4',
+        base: 'flex md:w-64 md:flex-col flex-row items-start justify-start py-4',
         item: [
           'data-[active=true]:bg-gray-200',
           'data-[active=true]:dark:bg-gray-800',
@@ -21,8 +21,9 @@ export default function ProjectsDashboardNavBar() {
           'data-[active=true]:rounded',
         ],
       }}
+      position="static"
     >
-      <NavbarContent className="flex h-full flex-col items-start justify-start">
+      <NavbarContent className="flex h-full justify-center md:flex-col md:items-start">
         <NavbarItem isActive={isActive('/projects/dashboard')}>
           <Link href="/projects/dashboard">
             <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">

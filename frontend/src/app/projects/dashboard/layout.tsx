@@ -5,7 +5,7 @@ const ProjectsHealthDashboardLayout: React.FC<{ readonly children: React.ReactNo
   children,
 }) => {
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row">
       <ProjectsDashboardNavBar />
       <div className="flex-1 p-4">{children}</div>
     </div>
