@@ -15,6 +15,7 @@ import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
 import DashboardCard from 'components/DashboardCard'
+import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
@@ -76,6 +77,17 @@ export default function ProjectsDashboardPage() {
         />
         <DashboardCard title="Total Forks" icon={faCodeBranch} stats={millify(stats.totalForks)} />
         <DashboardCard title="Total Stars" icon={faStar} stats={millify(stats.totalStars)} />
+      </div>
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <LineChart
+          title="Overall Project Health Monthly Trend"
+          series={[
+            {
+              name: 'Project Health Score',
+              data: stats.monthlyOverallScores,
+            }
+          ]}
+        />
       </div>
     </>
   )
