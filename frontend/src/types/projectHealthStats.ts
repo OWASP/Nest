@@ -1,6 +1,7 @@
 export type ProjectHealthStats = {
   averageScore: number
   monthlyOverallScores: number[]
+  monthlyOverallScoresMonths: number[]
   projectsCountHealthy: number
   projectsCountNeedAttention: number
   projectsCountUnhealthy: number

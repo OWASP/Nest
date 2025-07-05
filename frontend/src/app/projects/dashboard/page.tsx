@@ -8,6 +8,8 @@ import {
   faUsers,
   faStar,
   faCodeBranch,
+  faChartColumn,
+  faHeart,
 } from '@fortawesome/free-solid-svg-icons'
 import millify from 'millify'
 import { useState, useEffect } from 'react'
@@ -15,6 +17,7 @@ import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
 import DashboardCard from 'components/DashboardCard'
+import DonutBarChart from 'components/DonutBarChart'
 import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
@@ -81,12 +84,25 @@ export default function ProjectsDashboardPage() {
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <LineChart
           title="Overall Project Health Monthly Trend"
+          icon={faChartColumn}
           series={[
             {
               name: 'Project Health Score',
               data: stats.monthlyOverallScores,
-            }
+            },
           ]}
+          labels={stats.monthlyOverallScoresMonths.map((month) => {
+            const date = new Date()
+            date.setMonth(month - 1) // Adjust month to 0-indexed
+            return date.toLocaleString('default', { month: 'short' })
+          })}
+        />
+        <DonutBarChart
+          title="Project Health Distribution"
+          icon={faHeart}
+          projectsPercentageHealthy={stats.projectsPercentageHealthy}
+          projectsPercentageNeedAttention={stats.projectsPercentageNeedAttention}
+          projectsPercentageUnhealthy={stats.projectsPercentageUnhealthy}
         />
       </div>
     </>
