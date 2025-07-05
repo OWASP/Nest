@@ -1,7 +1,9 @@
 import React from 'react'
 import ProjectsDashboardNavBar from 'components/ProjectsDashboardNavBar'
 
-export default function ProjectsHealthDashboardLayout({ children }: { children: React.ReactNode }) {
+const ProjectsHealthDashboardLayout: React.FC<{ readonly children: React.ReactNode }> = ({
+  children,
+}) => {
   return (
     <div className="flex">
       <ProjectsDashboardNavBar />
@@ -9,3 +11,5 @@ export default function ProjectsHealthDashboardLayout({ children }: { children: 
     </div>
   )
 }
+
+export default ProjectsHealthDashboardLayout
