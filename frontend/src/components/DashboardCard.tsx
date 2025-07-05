@@ -1,15 +1,13 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import React from 'react'
 import SecondaryCard from 'components/SecondaryCard'
-export default function DashboardCard({
-  title,
-  icon,
-  stats,
-}: {
-  title: string
-  icon: IconProp
-  stats: number | string
-}) {
+
+const DashboardCard: React.FC<{
+  readonly title: string
+  readonly icon: IconProp
+  readonly stats: string
+}> = ({ title, icon, stats }) => {
   return (
     <SecondaryCard
       title={title}
@@ -22,3 +20,5 @@ export default function DashboardCard({
     </SecondaryCard>
   )
 }
+
+export default DashboardCard
