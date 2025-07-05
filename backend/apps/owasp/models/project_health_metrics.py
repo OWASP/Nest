@@ -188,13 +188,14 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
         return ProjectHealthStatsNode(
             average_score=aggregation.get("average_score", 0.0),
+            # We used all metrics instead of latest metrics to get the monthly trend
             monthly_overall_scores=list(
-                metrics.annotate(month=ExtractMonth("nest_created_at"))
+                ProjectHealthMetrics.objects.annotate(month=ExtractMonth("nest_created_at"))
                 .order_by("month")
                 .values("month")
                 .distinct()
                 .annotate(score=models.Avg("score"))
-                .values_list("score", flat=True)
+                .values_list("month", "score")
             ),
             projects_count_healthy=projects_count_healthy,
             projects_count_need_attention=projects_count_need_attention,
