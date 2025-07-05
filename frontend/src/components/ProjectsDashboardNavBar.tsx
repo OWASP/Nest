@@ -25,7 +25,7 @@ export default function ProjectsDashboardNavBar() {
       <NavbarContent className="flex h-full flex-col items-start justify-start">
         <NavbarItem isActive={isActive('/projects/dashboard')}>
           <Link href="/projects/dashboard">
-            <div className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-800">
+            <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
               <FontAwesomeIcon icon={faChartLine} className="text-xl" />
               <span className="text-sm font-semibold">Overview</span>
             </div>
@@ -33,7 +33,7 @@ export default function ProjectsDashboardNavBar() {
         </NavbarItem>
         <NavbarItem isActive={isActive('/projects/dashboard/metrics')}>
           <Link href="/projects/dashboard/metrics">
-            <div className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-800">
+            <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
               <FontAwesomeIcon icon={faChartBar} className="text-xl" />
               <span className="text-sm font-semibold">Metrics</span>
             </div>
