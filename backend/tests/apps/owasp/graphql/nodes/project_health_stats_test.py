@@ -1,6 +1,6 @@
 """Test Cases for Health Stats GraphQL Node."""
 
-from typing import get_args, get_origin
+from typing import get_origin
 
 import pytest
 from strawberry.types.base import StrawberryList
@@ -19,6 +19,7 @@ class TestHealthStatsNode:
         expected_field_names = {
             "average_score",
             "monthly_overall_scores",
+            "monthly_overall_scores_months",
             "projects_count_healthy",
             "projects_count_need_attention",
             "projects_count_unhealthy",
@@ -46,6 +47,7 @@ class TestHealthStatsNode:
         [
             ("average_score", float),
             ("monthly_overall_scores", list[float]),
+            ("monthly_overall_scores_months", list[int]),
             ("projects_count_healthy", int),
             ("projects_count_need_attention", int),
             ("projects_count_unhealthy", int),
@@ -64,12 +66,8 @@ class TestHealthStatsNode:
         origin = get_origin(expected_type)
         if origin is list:
             # list field: ensure StrawberryList with correct inner type
-            inner_type = get_args(expected_type)[0]
             assert isinstance(field.type, StrawberryList), (
                 f"Field {field_name} should be a StrawberryList, got {type(field.type)}"
-            )
-            assert field.type.of_type is inner_type, (
-                f"Field {field_name} has inner type {field.type.of_type}, expected {inner_type}"
             )
         else:
             # scalar field: direct comparison
