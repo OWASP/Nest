@@ -8,7 +8,7 @@ class ProjectHealthStatsNode:
     """Node representing overall health stats of OWASP projects."""
 
     average_score: float
-    monthly_overall_scores: list[float]
+    monthly_overall_scores: list[tuple[int, float]]
     projects_count_healthy: int
     projects_count_need_attention: int
     projects_count_unhealthy: int
