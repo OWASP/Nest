@@ -42,6 +42,14 @@ const ProjectsDashboardPage: React.FC = () => {
   if (isLoading) {
     return <LoadingSpinner />
   }
+
+  if (!stats) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-lg text-gray-500">No project health data available</p>
+      </div>
+    )
+  }
   return (
     <>
       <h1 className="font-semibold">Project Health Dashboard Overview</h1>
