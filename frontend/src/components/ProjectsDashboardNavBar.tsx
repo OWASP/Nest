@@ -5,8 +5,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navbar, NavbarItem, NavbarContent } from '@heroui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import React from 'react'
 
-export default function ProjectsDashboardNavBar() {
+const NAVIGATION_ITEMS = [
+  {
+    label: 'Overview',
+    icon: faChartLine,
+    href: '/projects/dashboard',
+  },
+  {
+    label: 'Metrics',
+    icon: faChartBar,
+    href: '/projects/dashboard/metrics',
+  },
+] as const
+
+const ProjectsDashboardNavBar: React.FC = () => {
   const pathname = usePathname()
   const isActive = (path: string) => pathname === path
   return (
@@ -24,23 +38,18 @@ export default function ProjectsDashboardNavBar() {
       position="static"
     >
       <NavbarContent className="flex h-full justify-center md:flex-col md:items-start">
-        <NavbarItem isActive={isActive('/projects/dashboard')}>
-          <Link href="/projects/dashboard">
-            <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
-              <FontAwesomeIcon icon={faChartLine} className="text-xl" />
-              <span className="text-sm font-semibold">Overview</span>
-            </div>
-          </Link>
-        </NavbarItem>
-        <NavbarItem isActive={isActive('/projects/dashboard/metrics')}>
-          <Link href="/projects/dashboard/metrics">
-            <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
-              <FontAwesomeIcon icon={faChartBar} className="text-xl" />
-              <span className="text-sm font-semibold">Metrics</span>
-            </div>
-          </Link>
-        </NavbarItem>
+        {NAVIGATION_ITEMS.map(({ href, label, icon }) => (
+          <NavbarItem key={href} isActive={isActive(href)}>
+            <Link href={href} aria-current={isActive(href) ? 'page' : undefined}>
+              <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
+                <FontAwesomeIcon icon={icon} className="text-xl" aria-hidden="true" />
+                <span className="text-sm font-semibold">{label}</span>
+              </div>
+            </Link>
+          </NavbarItem>
+        ))}
       </NavbarContent>
     </Navbar>
   )
 }
+export default ProjectsDashboardNavBar

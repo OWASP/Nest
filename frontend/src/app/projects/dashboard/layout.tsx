@@ -7,7 +7,9 @@ const ProjectsHealthDashboardLayout: React.FC<{ readonly children: React.ReactNo
   return (
     <div className="flex flex-col md:flex-row">
       <ProjectsDashboardNavBar />
-      <div className="flex-1 p-4">{children}</div>
+      <main className="flex-1 p-4" role="main">
+        {children}
+      </main>
     </div>
   )
 }
