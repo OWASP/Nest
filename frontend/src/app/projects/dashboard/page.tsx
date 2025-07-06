@@ -12,8 +12,7 @@ import {
   faHeart,
 } from '@fortawesome/free-solid-svg-icons'
 import millify from 'millify'
-import { useState, useEffect } from 'react'
-import React from 'react'
+import { useState, useEffect, FC } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
@@ -23,7 +22,7 @@ import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
-const ProjectsDashboardPage: React.FC = () => {
+const ProjectsDashboardPage: FC = () => {
   const [stats, setStats] = useState<ProjectHealthStats>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_HEALTH_STATS)
