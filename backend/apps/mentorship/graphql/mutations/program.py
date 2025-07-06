@@ -17,9 +17,7 @@ class ProgramMutation:
     """GraphQL mutations related to program."""
 
     @strawberry.mutation
-    def create_program(
-        self, info: strawberry.Info, input_data: CreateProgramInput
-    ) -> ProgramNode:
+    def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program if the user is a mentor."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -73,9 +71,7 @@ class ProgramMutation:
         )
 
     @strawberry.mutation
-    def update_program(
-        self, info: strawberry.Info, input_data: UpdateProgramInput
-    ) -> ProgramNode:
+    def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -93,6 +89,13 @@ class ProgramMutation:
         if admin not in program.admins.all():
             raise Exception("You must be an admin of this program to update it")
 
+        if (
+            input_data.ended_at is not None
+            and input_data.started_at is not None
+            and input_data.ended_at <= input_data.started_at
+        ):
+            raise Exception("End date must be after start date")
+
         simple_fields = {
             "name": input_data.name,
             "description": input_data.description,
@@ -108,9 +111,7 @@ class ProgramMutation:
                 setattr(program, field, value)
 
         if input_data.experience_levels is not None:
-            program.experience_levels = [
-                lvl.value for lvl in input_data.experience_levels
-            ]
+            program.experience_levels = [lvl.value for lvl in input_data.experience_levels]
 
         if input_data.status is not None:
             program.status = input_data.status.value
@@ -123,7 +124,7 @@ class ProgramMutation:
                 try:
                     github_user = GithubUser.objects.get(login__iexact=login.lower())
                 except GithubUser.DoesNotExist as err:
-                    raise Exception(f"GitHub user '{login}' not found.") from err
+                    raise Exception("GitHub user not found.") from err
 
                 mentor, _ = Mentor.objects.get_or_create(github_user=github_user)
                 resolved_mentors.append(mentor)

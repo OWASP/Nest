@@ -19,9 +19,7 @@ class ModuleMutation:
     """GraphQL mutations related to module."""
 
     @strawberry.mutation
-    def create_module(
-        self, info: strawberry.Info, input_data: CreateModuleInput
-    ) -> ModuleNode:
+    def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
         """Create a new mentorship module if the user is a admin."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -43,6 +41,13 @@ class ModuleMutation:
 
         if admin not in program.admins.all():
             raise Exception("You must be an admin of this program to create a module")
+
+        if (
+            input_data.ended_at is not None
+            and input_data.started_at is not None
+            and input_data.ended_at <= input_data.started_at
+        ):
+            raise Exception("End date must be after start date")
 
         module = Module.objects.create(
             name=input_data.name,
@@ -83,9 +88,7 @@ class ModuleMutation:
         )
 
     @strawberry.mutation
-    def update_module(
-        self, info: strawberry.Info, input_data: UpdateModuleInput
-    ) -> ModuleNode:
+    def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. Only admins can update."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -102,6 +105,13 @@ class ModuleMutation:
 
         if admin not in module.program.admins.all():
             raise Exception("You must be an admin of the module's program to edit it")
+
+        if (
+            input_data.ended_at is not None
+            and input_data.started_at is not None
+            and input_data.ended_at <= input_data.started_at
+        ):
+            raise Exception("End date must be after start date")
 
         if input_data.experience_level:
             module.experience_level = input_data.experience_level.value
