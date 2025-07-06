@@ -3,9 +3,10 @@
 import { useQuery } from '@apollo/client'
 import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
+import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_PROGRAM_DATA } from 'server/queries/programsQueries'
@@ -14,8 +15,8 @@ import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ProgramsSearchPage: React.FC = () => {
-  const searchParams = useSearchParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
 
   const initialPage = parseInt(searchParams.get('page') || '1', 10)
@@ -23,8 +24,22 @@ const ProgramsSearchPage: React.FC = () => {
 
   const [page, setPage] = useState(initialPage)
   const [searchQuery, setSearchQuery] = useState(initialQuery)
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [programs, setPrograms] = useState<Program[]>([])
   const [mentor, setMentor] = useState<string>('')
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debounceSearch = useCallback(
+    debounce((query: string) => {
+      setDebouncedQuery(query)
+    }, 500),
+    []
+  )
+
+  useEffect(() => {
+    debounceSearch(searchQuery)
+    return debounceSearch.cancel
+  }, [searchQuery, debounceSearch])
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -40,13 +55,17 @@ const ProgramsSearchPage: React.FC = () => {
   }, [page, searchQuery, router])
 
   const { data, loading, error } = useQuery(GET_PROGRAM_DATA, {
-    variables: { page, search: searchQuery, mentorUsername: mentor },
+    variables: {
+      page,
+      search: debouncedQuery,
+      mentorUsername: mentor,
+    },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
 
-  const totalPages = data?.allPrograms?.totalPages || 1
-  const currentPage = data?.allPrograms?.currentPage || page
+  const totalPages = data?.allPrograms?.totalPages
+  const currentPage = data?.allPrograms?.currentPage
 
   useEffect(() => {
     if (data?.allPrograms?.programs) {
@@ -79,35 +98,28 @@ const ProgramsSearchPage: React.FC = () => {
     setPage(1)
   }
 
-  const renderProgramCard = (program: Program) => {
-    const handleButtonClick = () => {
-      router.push(`/mentorship/programs/${program.key}`)
-    }
-
-    const submitButton = {
-      label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-      onclick: handleButtonClick,
-    }
-
-    return (
-      <Card
-        key={program.id}
-        title={program.name}
-        summary={program.description}
-        button={submitButton}
-        timeline={{
-          start: program.startedAt,
-          end: program.endedAt,
-        }}
-        url={`/mentorship/programs/${program.id}`}
-      />
-    )
-  }
-
-  function handleCreateButton(): void {
+  const handleCreateButton = () => {
     router.push('/mentorship/programs/create')
   }
+
+  const renderProgramCard = (program: Program) => (
+    <Card
+      key={program.id}
+      title={program.name}
+      summary={program.description}
+      button={{
+        label: 'View Details',
+        icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+        onclick: () => router.push(`/mentorship/programs/${program.key}`),
+      }}
+      timeline={{
+        start: program.startedAt,
+        end: program.endedAt,
+      }}
+      url={`/mentorship/programs/${program.key}`}
+    />
+  )
+
   return (
     <SearchPageLayout
       isLoaded={!loading}
@@ -124,30 +136,29 @@ const ProgramsSearchPage: React.FC = () => {
       searchQuery={searchQuery}
       searchPlaceholder="Search Programs"
       indexName="programs"
-      empty="No programs found"
     >
       <div>
         <div className="mt-8 flex justify-end gap-4">
           {(session as SessionWithRole)?.user?.role === 'mentor' && (
             <>
-              <div>
-                <Button className="rounded-lg" onPress={handleCreateButton}>
-                  Create
-                </Button>
-              </div>
-
-              {!mentor ? (
-                <Button className="rounded-lg" onPress={handleMyProgramsClick}>
-                  My Programs
-                </Button>
-              ) : (
+              <Button className="rounded-lg" onPress={handleCreateButton}>
+                Create
+              </Button>
+              {mentor ? (
                 <Button className="rounded-lg" onPress={handleShowAllPrograms}>
                   All Programs
+                </Button>
+              ) : (
+                <Button className="rounded-lg" onPress={handleMyProgramsClick}>
+                  My Programs
                 </Button>
               )}
             </>
           )}
         </div>
+        {totalPages === 0 && (
+          <div className="text m-4 flex text-xl dark:text-white">No programs found.</div>
+        )}
         {programs.map(renderProgramCard)}
       </div>
     </SearchPageLayout>

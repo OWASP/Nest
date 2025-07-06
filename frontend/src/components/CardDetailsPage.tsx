@@ -17,6 +17,7 @@ import { SessionWithRole } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
+import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
@@ -84,29 +85,21 @@ const DetailsCard = ({
                 (admin) => admin.login === ((data as SessionWithRole)?.user?.username as string)
               ) && (
                 <div className="flex gap-2">
-                  <button
-                    className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                  <ActionButton
                     onClick={() => {
                       router.push(`${window.location.pathname}/edit`)
                     }}
-                  >
-                    Edit Program
-                  </button>
-                  <button
-                    className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                    children="Edit Program"
+                  />
+
+                  <ActionButton
+                    children=" Add Module"
                     onClick={() => {
                       router.push(`${window.location.pathname}/createModule`)
                     }}
-                  >
-                    Add Module
-                  </button>
+                  />
                   {isDraft && (
-                    <button
-                      className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-green-600 bg-transparent px-2 py-2 text-green-600 transition-all hover:bg-green-600 hover:text-white"
-                      onClick={() => setPublish && setPublish()}
-                    >
-                      Publish
-                    </button>
+                    <ActionButton children="Publish" onClick={() => setPublish && setPublish()} />
                   )}
                 </div>
               )}
