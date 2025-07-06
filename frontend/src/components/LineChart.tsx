@@ -41,9 +41,10 @@ const LineChart: React.FC<{
           yaxis: {
             labels: {
               formatter: (value: number) => {
-                return value >= 1000
-                  ? `${(value / 1000).toFixed(1)}K`
-                  : `${value.toFixed(round ? 0 : 2)}`
+                if (value >= 1000) {
+                  return `${(value / 1000).toFixed(1)}K`
+                }
+                return `${value.toFixed(round ? 0 : 2)}`
               },
             },
           },

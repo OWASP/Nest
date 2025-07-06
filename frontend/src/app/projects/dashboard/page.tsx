@@ -24,7 +24,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
 const ProjectsDashboardPage: React.FC = () => {
-  const [stats, setStats] = useState<ProjectHealthStats | null>(null)
+  const [stats, setStats] = useState<ProjectHealthStats>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_HEALTH_STATS)
 
@@ -72,7 +72,7 @@ const ProjectsDashboardPage: React.FC = () => {
         <DashboardCard
           title="Average Score"
           icon={faChartLine}
-          stats={`%${stats.averageScore.toFixed(0)}`}
+          stats={`%${stats.averageScore.toFixed(1)}`}
         />
         <DashboardCard
           title="Total Contributors"
