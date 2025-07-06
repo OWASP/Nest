@@ -4,22 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mentorship', '0001_initial'),
+        ("mentorship", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='module',
-            name='key',
-            field=models.CharField(default='temp-key', max_length=100, unique=True, verbose_name='Key'),
+            model_name="module",
+            name="key",
+            field=models.CharField(
+                default="temp-key", max_length=100, unique=True, verbose_name="Key"
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='program',
-            name='key',
-            field=models.CharField(default='temp-key', max_length=100, unique=True, verbose_name='Key'),
+            model_name="program",
+            name="key",
+            field=models.CharField(
+                default="temp-key", max_length=100, unique=True, verbose_name="Key"
+            ),
             preserve_default=False,
         ),
     ]
