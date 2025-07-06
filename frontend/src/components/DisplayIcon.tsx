@@ -2,7 +2,7 @@ import { Tooltip } from '@heroui/tooltip'
 import { millify } from 'millify'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import type { Icon } from 'types/icon'
-import { IconKeys, Icons } from 'utils/data'
+import { IconKeys, ICONS } from 'utils/data'
 
 export default function DisplayIcon({ item, icons }: { item: string; icons: Icon }) {
   // className for the container
@@ -35,7 +35,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
 
   return icons[item] ? (
     <Tooltip
-      content={`${Icons[item as keyof typeof Icons]?.label}`}
+      content={`${ICONS[item as keyof typeof ICONS]?.label}`}
       delay={150}
       closeDelay={100}
       showArrow
@@ -51,7 +51,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
         <span>
           <FontAwesomeIconWrapper
             className={iconClassName}
-            icon={Icons[item as IconKeys]?.icon} // Display corresponding icon
+            icon={ICONS[item as IconKeys]?.icon} // Display corresponding icon
           />
         </span>
       </div>

@@ -108,16 +108,18 @@ const RepositoryDetailsPage = () => {
   return (
     <DetailsCard
       details={repositoryDetails}
+      entityKey={repository.project?.key}
       languages={repository.languages}
+      projectName={repository.project?.name}
       pullRequests={recentPullRequests}
       recentIssues={repository.issues}
+      recentMilestones={repository.recentMilestones}
       recentReleases={repository.releases}
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}
       topContributors={topContributors}
       topics={repository.topics}
-      recentMilestones={repository.recentMilestones}
       type="repository"
     />
   )

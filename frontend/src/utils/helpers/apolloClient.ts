@@ -2,9 +2,9 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { getSession } from 'next-auth/react'
 import { AppError, handleAppError } from 'app/global-error'
+import { SessionWithRole } from 'types/program'
 import { GRAPHQL_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
-
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
     const error = new AppError(500, 'Missing GraphQL URL')
@@ -19,13 +19,13 @@ const createApolloClient = () => {
 
   const authLink = setContext(async (_, { headers }) => {
     const session = await getSession()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const accessToken = (session as any)?.accessToken
+    const accessToken = (session as SessionWithRole)?.accessToken
     const csrfToken = await getCsrfToken()
 
     return {
       headers: {
         ...headers,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         Authorization: accessToken ? `Bearer ${accessToken}` : '',
         'X-CSRFToken': csrfToken || '',
       },

@@ -3,20 +3,21 @@ import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
 import { getSession } from 'next-auth/react'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
+import { SessionWithRole } from 'types/program'
 
 async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
     let csrfToken = null
     const cookieValue = await getCsrfTokenOnServer()
     const session = await getSession()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const accessToken = (session as any)?.accessToken
+    const accessToken = (session as SessionWithRole)?.accessToken
     csrfToken = cookieValue
     return {
       headers: {
         ...headers,
         'X-CSRFToken': csrfToken ?? '',
         Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         Authorization: accessToken ? `Bearer ${accessToken}` : '',
       },
     }

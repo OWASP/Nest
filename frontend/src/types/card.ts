@@ -32,7 +32,7 @@ export type CardProps = {
   url: string
 }
 
-type stats = {
+type Stats = {
   icon: IconDefinition
   pluralizedName?: string
   unit?: string
@@ -42,25 +42,27 @@ export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   domains?: string[]
+  entityKey?: string
   geolocationData?: Chapter[]
-  heatmap?: JSX.Element
   healthMetricsData?: HealthMetricsProps[]
+  heatmap?: JSX.Element
   isActive?: boolean
   isDraft?: boolean
   setPublish?: () => void
   languages?: string[]
   mentors?: Contributor[]
   admins?: Contributor[]
+  projectName?: string
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
-  recentReleases?: Release[]
   recentMilestones?: Milestone[]
+  recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
-  socialLinks?: string[]
   modules?: Module[]
-  stats?: stats[]
-  summary?: string
   showAvatar?: boolean
+  socialLinks?: string[]
+  stats?: Stats[]
+  summary?: string
   title?: string
   topContributors?: Contributor[]
   topics?: string[]

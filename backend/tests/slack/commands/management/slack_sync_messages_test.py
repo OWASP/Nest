@@ -359,7 +359,6 @@ class TestSlackSyncMessagesCommand:
 
             command._fetch_replies(
                 client=mock_client,
-                conversation=mock_conversation,
                 message=mock_parent,
                 delay=0.5,
                 max_retries=5,

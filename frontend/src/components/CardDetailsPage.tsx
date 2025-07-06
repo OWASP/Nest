@@ -30,38 +30,41 @@ import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
+import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
 const DetailsCard = ({
-  title,
-  isActive = true,
-  summary,
   description,
-  heatmap,
-  healthMetricsData,
-  stats,
   details,
   isDraft,
   setPublish,
-  socialLinks,
-  type,
   tags,
   domains,
   modules,
   mentors,
-  topContributors,
   admins,
-  languages,
-  pullRequests,
-  topics,
-  recentIssues,
-  recentReleases,
-  recentMilestones,
-  showAvatar = true,
-  userSummary,
+  entityKey,
   geolocationData = null,
+  healthMetricsData,
+  heatmap,
+  isActive = true,
+  languages,
+  projectName,
+  pullRequests,
+  recentIssues,
+  recentMilestones,
+  recentReleases,
   repositories = [],
+  showAvatar = true,
+  socialLinks,
+  stats,
+  summary,
+  title,
+  topContributors,
+  topics,
+  type,
+  userSummary,
 }: DetailsCardProps) => {
   const { data } = useSession()
   const router = useRouter()
@@ -332,6 +335,13 @@ const DetailsCard = ({
         )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
+        )}
+        {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
+          <SponsorCard
+            target={entityKey}
+            title={projectName || title}
+            type={type === 'chapter' ? 'chapter' : 'project'}
+          />
         )}
       </div>
     </div>

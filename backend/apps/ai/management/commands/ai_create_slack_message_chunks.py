@@ -7,11 +7,12 @@ from datetime import UTC, datetime, timedelta
 import openai
 from django.core.management.base import BaseCommand
 
+from apps.ai.common.constants import (
+    DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
+    MIN_REQUEST_INTERVAL_SECONDS,
+)
 from apps.ai.models.chunk import Chunk
 from apps.slack.models.message import Message
-
-MIN_REQUEST_INTERVAL_SECONDS = 1.2
-DEFAULT_LAST_REQUEST_OFFSET_SECONDS = 2
 
 
 class Command(BaseCommand):
@@ -78,10 +79,10 @@ class Command(BaseCommand):
                 )
                 if (
                     chunk := Chunk.update_data(
-                        embedding=embedding,
-                        message=message,
-                        save=False,
                         text=text,
+                        content_object=message,
+                        embedding=embedding,
+                        save=False,
                     )
                 )
             ]

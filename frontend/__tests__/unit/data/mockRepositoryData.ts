@@ -26,6 +26,10 @@ export const mockRepositoryData = {
         },
       },
     ],
+    project: {
+      key: 'test-project',
+      name: 'Test Project',
+    },
     releases: [
       {
         name: 'v1.0.0',

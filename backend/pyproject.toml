@@ -93,6 +93,7 @@ filterwarnings = [
     "ignore::DeprecationWarning:pytest_cov",
     "ignore::DeprecationWarning:xdist",
     "ignore::django.conf.RemovedInDjango60Warning:django",
+    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
 log_level = "INFO"
 

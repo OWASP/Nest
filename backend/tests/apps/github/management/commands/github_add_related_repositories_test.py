@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from apps.github.management.commands.github_update_project_related_repositories import (
+from apps.github.management.commands.github_add_related_repositories import (
     GITHUB_ITEMS_PER_PAGE,
     Command,
     Project,
@@ -33,15 +33,9 @@ def mock_project():
     ],
 )
 @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
-@mock.patch(
-    "apps.github.management.commands.github_update_project_related_repositories.github.Github"
-)
-@mock.patch(
-    "apps.github.management.commands.github_update_project_related_repositories.sync_repository"
-)
-@mock.patch(
-    "apps.github.management.commands.github_update_project_related_repositories.get_repository_path"
-)
+@mock.patch("apps.github.management.commands.github_add_related_repositories.github.Github")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.sync_repository")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.get_repository_path")
 def test_handle(
     mock_get_repository_path,
     mock_sync_repository,

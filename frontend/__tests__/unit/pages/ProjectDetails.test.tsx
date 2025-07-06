@@ -276,4 +276,17 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
     })
   })
+  test('renders project sponsor block correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText(`Sponsor ${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
+    })
+  })
 })
