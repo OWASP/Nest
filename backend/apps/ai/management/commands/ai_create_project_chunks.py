@@ -47,15 +47,13 @@ class Command(BaseCommand):
         else:
             queryset = Project.objects.filter(is_active=True)
 
-        total_projects = queryset.count()
-        self.stdout.write(f"Found {total_projects} projects to process")
-
-        if total_projects == 0:
+        if not (total_projects := queryset.count()):
             self.stdout.write("No projects found to process")
             return
+        
+        self.stdout.write(f"Found {total_projects} projects to process")
 
         batch_size = options["batch_size"]
-
         for offset in range(0, total_projects, batch_size):
             batch_projects = queryset[offset : offset + batch_size]
 
@@ -130,11 +128,7 @@ class Command(BaseCommand):
         if project.name:
             metadata_parts.append(f"Project Name: {project.name}")
 
-        if (
-            project.description
-            and project.description
-            != "Description: A very brief, one-line description of your project"
-        ):
+        if project.description :
             prose_parts.append(f"Description: {project.description}")
 
         if project.summary:
@@ -148,11 +142,8 @@ class Command(BaseCommand):
 
         if hasattr(project, "owasp_repository") and project.owasp_repository:
             repo = project.owasp_repository
-            if (
-                repo.description
-                and repo.description != "Repository Description: OWASP Foundation web repository"
-            ):
-                prose_parts.append(f"Repository Description: {repo.description}")
+            if repo.description :
+              prose_parts.append(f"Repository Description: {repo.description}")
             if repo.topics:
                 metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
 
@@ -228,7 +219,7 @@ class Command(BaseCommand):
             f"Issue Tracking: {'Enabled' if project.track_issues else 'Disabled'}"
         )
 
-        prose_content = DELIMITER.join(filter(None, prose_parts))
-        metadata_content = DELIMITER.join(filter(None, metadata_parts))
-
-        return prose_content, metadata_content
+        return (
+            DELIMITER.join(filter(None, prose_parts)),
+            DELIMITER.join(filter(None, metadata_parts)),
+        )
