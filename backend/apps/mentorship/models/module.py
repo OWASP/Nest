@@ -5,7 +5,11 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes, StartEndRange
+from apps.mentorship.models.common import (
+    ExperienceLevel,
+    MatchingAttributes,
+    StartEndRange,
+)
 
 
 class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
@@ -27,6 +31,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
+    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
 
     # FKs.
     program = models.ForeignKey(

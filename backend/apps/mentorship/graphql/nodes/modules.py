@@ -14,6 +14,7 @@ class ModuleNode:
     """A GraphQL node representing a mentorship module."""
 
     id: strawberry.ID
+    key: str
     name: str
     description: str
     domains: list[str] | None = None
@@ -36,7 +37,7 @@ class CreateModuleInput:
     ended_at: datetime | None = None
     experience_level: ExperienceLevelEnum
     mentor_logins: list[str] | None = None
-    program_id: strawberry.ID
+    program_key: str
     project_id: strawberry.ID
     started_at: datetime | None = None
     tags: list[str] = strawberry.field(default_factory=list)
@@ -46,8 +47,8 @@ class CreateModuleInput:
 class UpdateModuleInput:
     """Input for updating a mentorship module."""
 
-    id: strawberry.ID
-    name: str | None = None
+    key: str
+    name: str
     description: str | None = None
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime | None = None

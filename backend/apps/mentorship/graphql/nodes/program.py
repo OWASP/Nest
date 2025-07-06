@@ -13,6 +13,7 @@ class ProgramNode:
     """A mentorship program node."""
 
     id: strawberry.ID
+    key: str
     name: str
     description: str
     admins: list[MentorNode] | None = None
@@ -54,8 +55,8 @@ class CreateProgramInput:
 class UpdateProgramInput:
     """Input for updating a mentorship program."""
 
-    id: strawberry.ID
-    name: str | None = None
+    key: str
+    name: str
     description: str | None = None
     admin_logins: list[str] | None = None
     domains: list[str] | None = None

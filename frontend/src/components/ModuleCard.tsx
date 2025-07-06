@@ -51,7 +51,7 @@ const ModuleCard = ({ modules }: { modules: Module[] }) => {
 const ModuleItem = ({ details }: { details: Module }) => {
   const router = useRouter()
   const handleClick = () => {
-    router.push(`${window.location.pathname}/modules/${details.id}`)
+    router.push(`${window.location.pathname}/modules/${details.key}`)
   }
 
   return (

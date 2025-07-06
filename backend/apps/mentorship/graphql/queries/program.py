@@ -39,6 +39,7 @@ class ProgramQuery:
         programs = [
             ProgramNode(
                 id=program.id,
+                key=program.key,
                 name=program.name,
                 description=program.description,
                 admins=list(program.admins.all()),
@@ -64,15 +65,16 @@ class ProgramQuery:
         )
 
     @strawberry.field
-    def program(self, program_id: strawberry.ID) -> ProgramNode:
+    def program(self, program_key: str) -> ProgramNode:
         """Get a program by ID."""
         try:
-            program = Program.objects.prefetch_related("admins__github_user").get(id=program_id)
+            program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
         except Program.DoesNotExist as err:
             raise Exception("Program not found") from err
 
         return ProgramNode(
             id=program.id,
+            key=program.key,
             name=program.name,
             description=program.description,
             admins=list(program.admins.all()),

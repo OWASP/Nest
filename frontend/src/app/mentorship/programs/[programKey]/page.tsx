@@ -17,15 +17,15 @@ import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
-  const { programId } = useParams() as { programId: string }
+  const { programKey } = useParams() as { programKey: string }
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(true)
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
 
   const { data, error } = useQuery(GET_PROGRAM_AND_MODULES, {
-    variables: { programId },
-    skip: !programId,
+    variables: { programKey },
+    skip: !programKey,
   })
 
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
@@ -72,7 +72,8 @@ const ProgramDetailsPage = () => {
     await updateProgram({
       variables: {
         inputData: {
-          id: program.id,
+          key: program.key,
+          name: program.name,
           status: 'PUBLISHED',
         },
       },

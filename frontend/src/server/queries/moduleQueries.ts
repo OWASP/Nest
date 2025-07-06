@@ -1,9 +1,10 @@
 import { gql } from '@apollo/client'
 
 export const GET_MODULES_BY_PROGRAM = gql`
-  query ModulesByProgram($programId: ID!) {
-    modulesByProgram(programId: $programId) {
+  query ModulesByProgram($programKey: String!) {
+    modulesByProgram(programKey: $programKey) {
       id
+      key
       name
       description
       experienceLevel
@@ -23,9 +24,10 @@ export const GET_MODULES_BY_PROGRAM = gql`
 `
 
 export const GET_MODULE_BY_ID = gql`
-  query GetModule($id: ID!) {
-    getModule(moduleId: $id) {
+  query GetModule($moduleKey: String!) {
+    getModule(moduleKey: $moduleKey) {
       id
+      key
       name
       description
       tags
@@ -46,6 +48,7 @@ export const UPDATE_MODULE = gql`
   mutation UpdateModule($input: UpdateModuleInput!) {
     updateModule(inputData: $input) {
       id
+      key
       name
       description
       experienceLevel
@@ -67,6 +70,7 @@ export const CREATE_MODULE = gql`
   mutation CreateModule($input: CreateModuleInput!) {
     createModule(inputData: $input) {
       id
+      key
       name
       description
       experienceLevel
@@ -85,8 +89,8 @@ export const CREATE_MODULE = gql`
 `
 
 export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
-  query GetProgramAndModules($programId: ID!, $moduleId: ID!) {
-    program(programId: $programId) {
+  query GetProgramAndModules($programKey: String!, $moduleKey: String!) {
+    program(programKey: $programKey) {
       id
       admins {
         login
@@ -94,7 +98,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         avatarUrl
       }
     }
-    getModule(moduleId: $moduleId) {
+    getModule(moduleKey: $moduleKey) {
       id
       name
       description

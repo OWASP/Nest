@@ -81,7 +81,7 @@ const ProgramsSearchPage: React.FC = () => {
 
   const renderProgramCard = (program: Program) => {
     const handleButtonClick = () => {
-      router.push(`/mentorship/programs/${program.id}`)
+      router.push(`/mentorship/programs/${program.key}`)
     }
 
     const submitButton = {

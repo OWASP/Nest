@@ -15,6 +15,7 @@ export enum ProgramStatusEnum {
 // Main Program type
 export interface Program {
   id: string
+  key: string
   name: string
   description: string
   status: ProgramStatusEnum
@@ -30,6 +31,7 @@ export interface Program {
 
 export interface Module {
   id: string
+  key: string
   name: string
   description: string
   status: ProgramStatusEnum

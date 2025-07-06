@@ -15,7 +15,7 @@ import ProgramForm from 'components/programCard'
 
 const EditProgramPage = () => {
   const router = useRouter()
-  const { programId } = useParams() as { programId: string }
+  const { programKey } = useParams() as { programKey: string }
   const { data: session, status: sessionStatus } = useSession()
   const [updateProgram, { loading }] = useMutation(UPDATE_PROGRAM)
 
@@ -24,8 +24,8 @@ const EditProgramPage = () => {
     error,
     loading: queryLoading,
   } = useQuery(GET_PROGRAM_DETAILS, {
-    variables: { programId },
-    skip: !programId,
+    variables: { programKey },
+    skip: !programKey,
   })
 
   const [formData, setFormData] = useState({
@@ -101,7 +101,7 @@ const EditProgramPage = () => {
 
     try {
       const input = {
-        id: programId,
+        key: programKey,
         name: formData.name,
         description: formData.description,
         menteesLimit: Number(formData.menteesLimit),

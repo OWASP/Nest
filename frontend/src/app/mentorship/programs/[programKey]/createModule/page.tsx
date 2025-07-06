@@ -13,13 +13,13 @@ import ModuleForm from 'components/mainmoduleCard'
 
 const CreateModulePage = () => {
   const router = useRouter()
-  const { programId } = useParams()
+  const { programKey } = useParams()
   const { data: sessionData, status: sessionStatus } = useSession()
 
   const [createModule, { loading }] = useMutation(CREATE_MODULE)
   const { data, loading: queryLoading } = useQuery(GET_PROGRAM_ADMIN_DETAILS, {
-    variables: { programId },
-    skip: !programId,
+    variables: { programKey },
+    skip: !programKey,
   })
 
   const [formData, setFormData] = useState({
@@ -59,9 +59,9 @@ const CreateModulePage = () => {
         timeout: 3000,
         shouldShowTimeoutProgress: true,
       })
-      router.replace(`/mentorship/programs/${programId}`)
+      router.replace(`/mentorship/programs/${programKey}`)
     }
-  }, [sessionStatus, queryLoading, data, currentUserLogin, router, programId])
+  }, [sessionStatus, queryLoading, data, currentUserLogin, router, programKey])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,7 +81,7 @@ const CreateModulePage = () => {
           .split(',')
           .map((t) => t.trim())
           .filter(Boolean),
-        programId: programId as string,
+        programKey: programKey,
         projectId: formData.projectId,
         mentorLogins: formData.mentorLogins
           .split(',')
@@ -90,7 +90,7 @@ const CreateModulePage = () => {
       }
 
       await createModule({ variables: { input } })
-      router.push(`/mentorship/programs/${programId}`)
+      router.push(`/mentorship/programs/${programKey}`)
     } catch (err) {
       addToast({
         title: 'Creation Failed',

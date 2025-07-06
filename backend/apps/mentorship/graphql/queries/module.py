@@ -12,10 +12,10 @@ class ModuleQuery:
     """Module queries."""
 
     @strawberry.field
-    def modules_by_program(self, program_id: strawberry.ID) -> list[ModuleNode]:
+    def modules_by_program(self, program_key: str) -> list[ModuleNode]:
         """Get all modules by program Id."""
         try:
-            program = Program.objects.get(id=program_id)
+            program = Program.objects.get(key=program_key)
         except Program.DoesNotExist as err:
             raise Exception("Program not found") from err
 
@@ -28,6 +28,7 @@ class ModuleQuery:
         return [
             ModuleNode(
                 id=module.id,
+                key=module.key,
                 name=module.name,
                 description=module.description,
                 domains=module.domains,
@@ -42,10 +43,10 @@ class ModuleQuery:
         ]
 
     @strawberry.field
-    def modules_by_project(self, project_id: strawberry.ID) -> list[ModuleNode]:
+    def modules_by_project(self, project_key: str) -> list[ModuleNode]:
         """Get all modules by project Id."""
         try:
-            project = Project.objects.get(id=project_id)
+            project = Project.objects.get(key=project_key)
         except Project.DoesNotExist as err:
             raise Exception("Project not found") from err
 
@@ -58,6 +59,7 @@ class ModuleQuery:
         return [
             ModuleNode(
                 id=module.id,
+                key=module.key,
                 name=module.name,
                 description=module.description,
                 domains=module.domains,
@@ -72,19 +74,20 @@ class ModuleQuery:
         ]
 
     @strawberry.field
-    def get_module(self, module_id: strawberry.ID) -> ModuleNode:
+    def get_module(self, module_key: str) -> ModuleNode:
         """Get module by module Id."""
         try:
             module = (
                 Module.objects.select_related("program", "project")
                 .prefetch_related("mentors__github_user")
-                .get(id=module_id)
+                .get(key=module_key)
             )
         except Module.DoesNotExist as err:
             raise Exception("Module not found") from err
 
         return ModuleNode(
             id=module.id,
+            key=module.key,
             name=module.name,
             description=module.description,
             domains=module.domains,

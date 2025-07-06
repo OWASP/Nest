@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
 from apps.mentorship.graphql.nodes.program import (
     CreateProgramInput,
@@ -34,6 +35,7 @@ class ProgramMutation:
 
         program = Program.objects.create(
             name=input_data.name,
+            key=slugify(input_data.name),
             description=input_data.description,
             experience_levels=[lvl.value for lvl in input_data.experience_levels],
             mentees_limit=input_data.mentees_limit,
@@ -58,6 +60,7 @@ class ProgramMutation:
 
         return ProgramNode(
             id=program.id,
+            key=program.key,
             name=program.name,
             description=program.description,
             experience_levels=program.experience_levels,
@@ -77,7 +80,7 @@ class ProgramMutation:
         user = get_authenticated_user(request)
 
         try:
-            program = Program.objects.get(id=input_data.id)
+            program = Program.objects.get(key=input_data.key)
         except Program.DoesNotExist as err:
             raise Exception("Program not found") from err
 
@@ -97,6 +100,7 @@ class ProgramMutation:
             raise Exception("End date must be after start date")
 
         simple_fields = {
+            "key": slugify(input_data.name),
             "name": input_data.name,
             "description": input_data.description,
             "mentees_limit": input_data.mentees_limit,
@@ -133,6 +137,7 @@ class ProgramMutation:
 
         return ProgramNode(
             id=program.id,
+            key=program.key,
             name=program.name,
             description=program.description,
             experience_levels=program.experience_levels,

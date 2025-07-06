@@ -14,13 +14,13 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
 
 const EditModulePage = () => {
-  const { programId, moduleId } = useParams() as { programId: string; moduleId: string }
+  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
   const currentUserLogin = (sessionData as SessionWithRole)?.user?.username || ''
 
   type ModuleFormData = {
-    id: string
+    key: string
     name: string
     description: string
     experienceLevel: string
@@ -43,8 +43,8 @@ const EditModulePage = () => {
     loading: queryLoading,
     error,
   } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
-    variables: { programId, moduleId },
-    skip: !programId || !moduleId,
+    variables: { programKey, moduleKey },
+    skip: !programKey || !moduleKey,
   })
 
   useEffect(() => {
@@ -67,15 +67,15 @@ const EditModulePage = () => {
         timeout: 3000,
         shouldShowTimeoutProgress: true,
       })
-      router.replace(`/mentorship/programs/${programId}`)
+      router.replace(`/mentorship/programs/${programKey}`)
     }
-  }, [sessionStatus, queryLoading, data, currentUserLogin, programId, router])
+  }, [sessionStatus, queryLoading, data, currentUserLogin, programKey, router])
 
   useEffect(() => {
     if (data?.getModule) {
       const m = data.getModule
       setFormData({
-        id: m.id,
+        key: moduleKey,
         name: m.name,
         description: m.description,
         experienceLevel: m.experienceLevel || 'BEGINNER',
@@ -89,14 +89,14 @@ const EditModulePage = () => {
     } else if (error) {
       handleAppError(error)
     }
-  }, [data, error])
+  }, [data, error, moduleKey])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData) return
 
     const input = {
-      id: formData.id,
+      key: moduleKey,
       name: formData.name,
       description: formData.description,
       experienceLevel: formData.experienceLevel,

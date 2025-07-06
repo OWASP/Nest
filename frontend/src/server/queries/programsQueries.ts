@@ -7,6 +7,7 @@ export const GET_PROGRAM_DATA = gql`
       currentPage
       programs {
         id
+        key
         name
         description
         status
@@ -18,9 +19,10 @@ export const GET_PROGRAM_DATA = gql`
 `
 
 export const GET_PROGRAM_DETAILS = gql`
-  query GetProgramDetails($programId: ID!) {
-    program(programId: $programId) {
+  query GetProgramDetails($programKey: String!) {
+    program(programKey: $programKey) {
       id
+      key
       name
       description
       status
@@ -39,9 +41,10 @@ export const GET_PROGRAM_DETAILS = gql`
   }
 `
 export const GET_PROGRAM_AND_MODULES = gql`
-  query GetProgramAndModules($programId: ID!) {
-    program(programId: $programId) {
+  query GetProgramAndModules($programKey: String!) {
+    program(programKey: $programKey) {
       id
+      key
       name
       description
       status
@@ -57,8 +60,9 @@ export const GET_PROGRAM_AND_MODULES = gql`
         avatarUrl
       }
     }
-    modulesByProgram(programId: $programId) {
+    modulesByProgram(programKey: $programKey) {
       id
+      key
       name
       description
       experienceLevel
@@ -71,7 +75,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
 export const UPDATE_PROGRAM = gql`
   mutation UpdateProgram($input: UpdateProgramInput!) {
     updateProgram(inputData: $input) {
-      id
+      key
       name
       description
       status
@@ -92,6 +96,7 @@ export const CREATE_PROGRAM = gql`
   mutation CreateProgram($input: CreateProgramInput!) {
     createProgram(inputData: $input) {
       id
+      key
       name
       description
       menteesLimit
@@ -111,9 +116,10 @@ export const CREATE_PROGRAM = gql`
 `
 
 export const GET_PROGRAM_ADMIN_DETAILS = gql`
-  query GetProgramDetails($programId: ID!) {
-    program(programId: $programId) {
+  query GetProgramDetails($programKey: String!) {
+    program(programKey: $programKey) {
       id
+      key
       name
       admins {
         login
@@ -127,7 +133,7 @@ export const GET_PROGRAM_ADMIN_DETAILS = gql`
 export const UPDATE_PROGRAM_STATUS_MUTATION = gql`
   mutation UpdateProgram($inputData: UpdateProgramInput!) {
     updateProgram(inputData: $inputData) {
-      id
+      key
       status
     }
   }

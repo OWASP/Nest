@@ -13,14 +13,14 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
-  const { programId, moduleId } = useParams()
+  const { programKey, moduleKey } = useParams()
   const [module, setModule] = useState<Module | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const { data, error } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
     variables: {
-      programId,
-      moduleId,
+      programKey,
+      moduleKey,
     },
   })
 

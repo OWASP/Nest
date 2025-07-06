@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
 from apps.mentorship.graphql.nodes.modules import (
     CreateModuleInput,
@@ -23,9 +24,8 @@ class ModuleMutation:
         """Create a new mentorship module if the user is a admin."""
         request = info.context.request
         user = get_authenticated_user(request)
-
         try:
-            program = Program.objects.get(id=input_data.program_id)
+            program = Program.objects.get(key=input_data.program_key)
         except Program.DoesNotExist as err:
             raise Exception("Program not found") from err
 
@@ -51,6 +51,7 @@ class ModuleMutation:
 
         module = Module.objects.create(
             name=input_data.name,
+            key=slugify(input_data.name),
             description=input_data.description or "",
             experience_level=input_data.experience_level.value,
             started_at=input_data.started_at or program.started_at,
@@ -75,6 +76,7 @@ class ModuleMutation:
 
         return ModuleNode(
             id=module.id,
+            key=module.key,
             name=module.name,
             description=module.description,
             domains=module.domains,
@@ -94,7 +96,7 @@ class ModuleMutation:
         user = get_authenticated_user(request)
 
         try:
-            module = Module.objects.select_related("program").get(id=input_data.id)
+            module = Module.objects.select_related("program").get(key=input_data.key)
         except Module.DoesNotExist as err:
             raise Exception("Module not found") from err
 
@@ -124,6 +126,7 @@ class ModuleMutation:
                 raise Exception("Project not found") from err
 
         update_fields = {
+            "key": slugify(input_data.name),
             "name": input_data.name,
             "description": input_data.description,
             "started_at": input_data.started_at,
@@ -153,6 +156,7 @@ class ModuleMutation:
 
         return ModuleNode(
             id=module.id,
+            key=module.key,
             name=module.name,
             description=module.description,
             domains=module.domains,
