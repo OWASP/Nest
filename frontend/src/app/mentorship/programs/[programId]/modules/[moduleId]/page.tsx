@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_MODULE_BY_ID } from 'server/queries/moduleQueries'
+import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
 import type { Module } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
@@ -13,11 +13,15 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
-  const { moduleId } = useParams()
+  const { programId, moduleId } = useParams()
   const [module, setModule] = useState<Module | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const { data, error } = useQuery(GET_MODULE_BY_ID, {
-    variables: { id: moduleId },
+
+  const { data, error } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+    variables: {
+      programId,
+      moduleId,
+    },
   })
 
   useEffect(() => {

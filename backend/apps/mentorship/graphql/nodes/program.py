@@ -43,7 +43,9 @@ class CreateProgramInput:
     admin_logins: list[str] = strawberry.field(default_factory=list)
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime
-    experience_levels: list[ExperienceLevelEnum] = strawberry.field(default_factory=list)
+    experience_levels: list[ExperienceLevelEnum] = strawberry.field(
+        default_factory=list
+    )
     mentees_limit: int | None = None
     started_at: datetime
     status: ProgramStatusEnum
@@ -55,13 +57,13 @@ class UpdateProgramInput:
     """Input for updating a mentorship program."""
 
     id: strawberry.ID
-    name: str
-    description: str
-    admin_logins: list[str]
-    domains: list[str]
-    ended_at: datetime
-    experience_levels: list[ExperienceLevelEnum]
+    name: str | None = None
+    description: str | None = None
+    admin_logins: list[str] | None = None
+    domains: list[str] | None = None
+    ended_at: datetime | None = None
+    experience_levels: list[ExperienceLevelEnum] | None = None
     mentees_limit: int | None = None
-    started_at: datetime
-    status: ProgramStatusEnum
-    tags: list[str]
+    started_at: datetime | None = None
+    status: ProgramStatusEnum | None = None
+    tags: list[str] | None = None

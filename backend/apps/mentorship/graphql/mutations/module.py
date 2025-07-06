@@ -19,7 +19,9 @@ class ModuleMutation:
     """GraphQL mutations related to module."""
 
     @strawberry.mutation
-    def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
+    def create_module(
+        self, info: strawberry.Info, input_data: CreateModuleInput
+    ) -> ModuleNode:
         """Create a new mentorship module if the user is a admin."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -54,7 +56,7 @@ class ModuleMutation:
             project=project,
         )
 
-        resolved_mentors = []
+        resolved_mentors = [admin]
         for login in input_data.mentor_logins or []:
             try:
                 github_user = GithubUser.objects.get(login=login)
@@ -81,7 +83,9 @@ class ModuleMutation:
         )
 
     @strawberry.mutation
-    def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
+    def update_module(
+        self, info: strawberry.Info, input_data: UpdateModuleInput
+    ) -> ModuleNode:
         """Update an existing mentorship module. Only admins can update."""
         request = info.context.request
         user = get_authenticated_user(request)

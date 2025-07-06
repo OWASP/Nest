@@ -1,13 +1,18 @@
 'use client'
 
 import { useMutation } from '@apollo/client'
-import { useToast } from '@heroui/toast'
+import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 import { CREATE_PROGRAM } from 'server/queries/getProgramsQueries'
+import LoadingSpinner from 'components/LoadingSpinner'
+import ProgramForm from 'components/programCard'
 
 const CreateProgramPage = () => {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
 
   const [formData, setFormData] = useState({
@@ -16,19 +21,27 @@ const CreateProgramPage = () => {
     menteesLimit: 5,
     startedAt: '',
     endedAt: '',
-    experienceLevels: '',
+    experienceLevels: [] as string[],
     tags: '',
     domains: '',
     adminLogins: '',
     status: 'DRAFT',
   })
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  useEffect(() => {
+    if (status === 'loading') return
+    if (!session || session.user.role !== 'mentor') {
+      addToast({
+        title: 'Access Denied',
+        description: 'You must be a mentor to create a program.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+      router.push('/mentorship/programs')
+    }
+  }, [session, status, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,10 +53,7 @@ const CreateProgramPage = () => {
         menteesLimit: Number(formData.menteesLimit),
         startedAt: formData.startedAt,
         endedAt: formData.endedAt,
-        experienceLevels: formData.experienceLevels
-          .split(',')
-          .map((e) => e.trim())
-          .filter(Boolean),
+        experienceLevels: formData.experienceLevels,
         tags: formData.tags
           .split(',')
           .map((t) => t.trim())
@@ -56,152 +66,44 @@ const CreateProgramPage = () => {
           .split(',')
           .map((login) => login.trim())
           .filter(Boolean),
-        status: formData.status, // enum should match backend e.g. "draft"
+        status: formData.status,
       }
 
       await createProgram({ variables: { input } })
-      //   toast.success('Program created successfully!')
+
+      addToast({
+        description: 'Program created successfully!',
+        title: 'Success',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+        variant: 'solid',
+      })
+
       router.push('/mentorship/programs')
-    } catch (err: any) {
-      //   toast.error(err.message || 'Failed to create program')
+    } catch (err) {
+      addToast({
+        description: err?.message || 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
+      })
     }
   }
 
+  if (status === 'loading' || !session) return <LoadingSpinner />
+
   return (
-    <div className="mx-auto mt-10 max-w-3xl rounded-2xl bg-white p-8 text-gray-600 shadow-lg dark:bg-[#212529] dark:text-gray-300">
-      <h2 className="mb-6 text-2xl font-bold">Create New Program</h2>
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="mb-1 block">Program Name</label>
-          <input
-            type="text"
-            name="name"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block">Description</label>
-          <textarea
-            name="description"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            value={formData.description}
-            onChange={handleChange}
-            rows={4}
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-1 block">Start Date</label>
-            <input
-              type="datetime-local"
-              name="startedAt"
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-              value={formData.startedAt}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label className="mb-1 block">End Date</label>
-            <input
-              type="datetime-local"
-              name="endedAt"
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-              value={formData.endedAt}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-1 block">Mentees Limit</label>
-            <input
-              type="number"
-              name="menteesLimit"
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-              value={formData.menteesLimit}
-              onChange={handleChange}
-              required
-              min={1}
-            />
-          </div>
-          <div>
-            <label className="mb-1 block">Status</label>
-            <select
-              name="status"
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-              value={formData.status}
-              onChange={handleChange}
-            >
-              <option value="DRAFT">Draft</option>
-              <option value="ACTIVE">Active</option>
-              <option value="ARCHIVED">Archived</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1 block">Experience Levels (comma separated)</label>
-          <input
-            type="text"
-            name="experienceLevels"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            value={formData.experienceLevels}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block">Tags (comma separated)</label>
-          <input
-            type="text"
-            name="tags"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            value={formData.tags}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block">Domains (comma separated)</label>
-          <input
-            type="text"
-            name="domains"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            value={formData.domains}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block">Mentor GitHub Usernames (comma separated)</label>
-          <input
-            type="text"
-            name="adminLogins"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            value={formData.adminLogins}
-            onChange={handleChange}
-            placeholder="e.g. johndoe, janedoe"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="mt-4 rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-          disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create Program'}
-        </button>
-      </form>
-    </div>
+    <ProgramForm
+      formData={formData}
+      setFormData={setFormData}
+      onSubmit={handleSubmit}
+      loading={loading}
+      title="Create Program"
+      isEdit={false}
+    />
   )
 }
 

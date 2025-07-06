@@ -26,7 +26,6 @@ const ProgramsSearchPage: React.FC = () => {
   const [programs, setPrograms] = useState<Program[]>([])
   const [mentor, setMentor] = useState<string>('')
 
-  // Update URL on state changes
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
@@ -35,13 +34,11 @@ const ProgramsSearchPage: React.FC = () => {
     const queryString = params.toString()
     const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-    // Only update URL if it's different from current URL
     if (window.location.search !== (queryString ? `?${queryString}` : '')) {
       router.push(newUrl, { scroll: false })
     }
   }, [page, searchQuery, router])
 
-  // Query with current page and search query
   const { data, loading, error } = useQuery(GET_PROGRAM_DATA, {
     variables: { page, search: searchQuery, mentorUsername: mentor },
     fetchPolicy: 'cache-and-network',
@@ -80,7 +77,7 @@ const ProgramsSearchPage: React.FC = () => {
 
   const handleShowAllPrograms = () => {
     setMentor('')
-    setPage(1) // Reset to first page when clearing filter
+    setPage(1)
   }
 
   const renderProgramCard = (program: Program) => {
@@ -123,7 +120,7 @@ const ProgramsSearchPage: React.FC = () => {
       }}
       onSearch={(q) => {
         setSearchQuery(q)
-        setPage(1) // reset to page 1 on search
+        setPage(1)
       }}
       searchQuery={searchQuery}
       searchPlaceholder="Search Programs"

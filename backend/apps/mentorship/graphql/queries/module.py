@@ -91,6 +91,7 @@ class ModuleQuery:
             ended_at=module.ended_at,
             experience_level=module.experience_level,
             mentors=list(module.mentors.all()),
+            project_id=module.project_id,
             program=module.program,
             started_at=module.started_at,
             tags=module.tags,

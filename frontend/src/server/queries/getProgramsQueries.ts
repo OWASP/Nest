@@ -18,8 +18,8 @@ export const GET_PROGRAM_DATA = gql`
 `
 
 export const GET_PROGRAM_DETAILS = gql`
-  query GetProgramDetails($id: ID!) {
-    program(id: $id) {
+  query GetProgramDetails($programId: ID!) {
+    program(programId: $programId) {
       id
       name
       description
@@ -38,10 +38,9 @@ export const GET_PROGRAM_DETAILS = gql`
     }
   }
 `
-
 export const GET_PROGRAM_AND_MODULES = gql`
-  query GetProgramAndModules($id: ID!) {
-    program(id: $id) {
+  query GetProgramAndModules($programId: ID!) {
+    program(programId: $programId) {
       id
       name
       description
@@ -58,7 +57,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
         avatarUrl
       }
     }
-    modulesByProgram(programId: $id) {
+    modulesByProgram(programId: $programId) {
       id
       name
       description
@@ -71,7 +70,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
 
 export const UPDATE_PROGRAM = gql`
   mutation UpdateProgram($input: UpdateProgramInput!) {
-    updateProgram(input: $input) {
+    updateProgram(inputData: $input) {
       id
       name
       description
@@ -91,7 +90,7 @@ export const UPDATE_PROGRAM = gql`
 
 export const CREATE_PROGRAM = gql`
   mutation CreateProgram($input: CreateProgramInput!) {
-    createProgram(input: $input) {
+    createProgram(inputData: $input) {
       id
       name
       description
@@ -107,6 +106,29 @@ export const CREATE_PROGRAM = gql`
         name
         avatarUrl
       }
+    }
+  }
+`
+
+export const GET_PROGRAM_MENTOR_DETAILS = gql`
+  query GetProgramDetails($programId: ID!) {
+    program(programId: $programId) {
+      id
+      name
+      admins {
+        login
+        name
+        avatarUrl
+      }
+    }
+  }
+`
+
+export const UPDATE_PROGRAM_STATUS_MUTATION = gql`
+  mutation UpdateProgram($inputData: UpdateProgramInput!) {
+    updateProgram(inputData: $inputData) {
+      id
+      status
     }
   }
 `

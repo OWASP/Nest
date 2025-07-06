@@ -24,7 +24,7 @@ export const GET_MODULES_BY_PROGRAM = gql`
 
 export const GET_MODULE_BY_ID = gql`
   query GetModule($id: ID!) {
-    getModule(id: $id) {
+    getModule(moduleId: $id) {
       id
       name
       description
@@ -44,7 +44,7 @@ export const GET_MODULE_BY_ID = gql`
 
 export const UPDATE_MODULE = gql`
   mutation UpdateModule($input: UpdateModuleInput!) {
-    updateModule(input: $input) {
+    updateModule(inputData: $input) {
       id
       name
       description
@@ -65,7 +65,7 @@ export const UPDATE_MODULE = gql`
 
 export const CREATE_MODULE = gql`
   mutation CreateModule($input: CreateModuleInput!) {
-    createModule(input: $input) {
+    createModule(inputData: $input) {
       id
       name
       description
@@ -75,6 +75,35 @@ export const CREATE_MODULE = gql`
       domains
       tags
       projectId
+      mentors {
+        login
+        name
+        avatarUrl
+      }
+    }
+  }
+`
+
+export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
+  query GetProgramAndModules($programId: ID!, $moduleId: ID!) {
+    program(programId: $programId) {
+      id
+      admins {
+        login
+        name
+        avatarUrl
+      }
+    }
+    getModule(moduleId: $moduleId) {
+      id
+      name
+      description
+      tags
+      projectId
+      domains
+      experienceLevel
+      startedAt
+      endedAt
       mentors {
         login
         name

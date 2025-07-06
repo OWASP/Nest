@@ -46,6 +46,8 @@ export interface DetailsCardProps {
   heatmap?: JSX.Element
   healthMetricsData?: HealthMetricsProps[]
   isActive?: boolean
+  isDraft?: boolean
+  setPublish?: () => void
   languages?: string[]
   mentors?: Contributor[]
   admins?: Contributor[]

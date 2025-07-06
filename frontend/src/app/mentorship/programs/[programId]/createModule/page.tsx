@@ -1,16 +1,25 @@
 'use client'
 
-import { useMutation } from '@apollo/client'
-import type React from 'react'
+import { useMutation, useQuery } from '@apollo/client'
+import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
-import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import React, { useEffect, useState } from 'react'
+import { GET_PROGRAM_MENTOR_DETAILS } from 'server/queries/getProgramsQueries'
 import { CREATE_MODULE } from 'server/queries/moduleQueries'
+import LoadingSpinner from 'components/LoadingSpinner'
+import ModuleForm from 'components/mainmoduleCard'
 
 const CreateModulePage = () => {
   const router = useRouter()
   const { programId } = useParams()
+  const { data: sessionData, status: sessionStatus } = useSession()
 
   const [createModule, { loading }] = useMutation(CREATE_MODULE)
+  const { data, loading: queryLoading } = useQuery(GET_PROGRAM_MENTOR_DETAILS, {
+    variables: { programId },
+    skip: !programId,
+  })
 
   const [formData, setFormData] = useState({
     name: '',
@@ -24,12 +33,34 @@ const CreateModulePage = () => {
     mentorLogins: '',
   })
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const currentUserLogin = (sessionData?.user as any)?.username || ''
+
+  const [checkedAccess, setCheckedAccess] = useState(false)
+  const [hasAccess, setHasAccess] = useState(false)
+
+  useEffect(() => {
+    if (sessionStatus === 'loading' || queryLoading) return
+
+    const programAdmins = data?.program?.admins || []
+    const isAdmin = programAdmins.some(
+      (admin: { name: string; login: string }) => admin.login === currentUserLogin
+    )
+
+    setHasAccess(isAdmin)
+    setCheckedAccess(true)
+
+    if (!isAdmin) {
+      addToast({
+        title: 'Access Denied',
+        description: 'Only program admins can create modules.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+      router.replace(`/mentorship/programs/${programId}`)
+    }
+  }, [sessionStatus, queryLoading, data, currentUserLogin, router, programId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,134 +89,33 @@ const CreateModulePage = () => {
       }
 
       await createModule({ variables: { input } })
-      //   toast.success('Module created!')
       router.push(`/mentorship/programs/${programId}`)
     } catch (err: any) {
-      //   toast.error(err.message || 'Failed to create module')
+      addToast({
+        title: 'Creation Failed',
+        description: err.message || 'Something went wrong while creating the module.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
     }
   }
 
+  if (sessionStatus === 'loading' || queryLoading || !checkedAccess || !hasAccess) {
+    return <LoadingSpinner />
+  }
+
   return (
-    <div className="mx-auto mt-10 max-w-3xl rounded-2xl bg-white p-8 text-gray-600 shadow-lg dark:bg-[#212529] dark:text-gray-300">
-      <h2 className="mb-6 text-2xl font-bold">Create New Module</h2>
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="mb-1 block">Module Name</label>
-          <input
-            type="text"
-            name="name"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block">Description</label>
-          <textarea
-            name="description"
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            rows={4}
-            value={formData.description}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-1 block">Experience Level</label>
-            <select
-              name="experienceLevel"
-              value={formData.experienceLevel}
-              onChange={handleChange}
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            >
-              <option value="BEGINNER">Beginner</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="ADVANCED">Advanced</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block">Mentor GitHub Logins (comma separated)</label>
-            <input
-              type="text"
-              name="mentorLogins"
-              value={formData.mentorLogins}
-              onChange={handleChange}
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-              placeholder="e.g. johndoe, janedoe"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-1 block">Start Date</label>
-            <input
-              type="datetime-local"
-              name="startedAt"
-              value={formData.startedAt}
-              onChange={handleChange}
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block">End Date</label>
-            <input
-              type="datetime-local"
-              name="endedAt"
-              value={formData.endedAt}
-              onChange={handleChange}
-              className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1 block">Domains (comma separated)</label>
-          <input
-            type="text"
-            name="domains"
-            value={formData.domains}
-            onChange={handleChange}
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block">Tags (comma separated)</label>
-          <input
-            type="text"
-            name="tags"
-            value={formData.tags}
-            onChange={handleChange}
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block">Project ID</label>
-          <input
-            type="text"
-            name="projectId"
-            value={formData.projectId}
-            onChange={handleChange}
-            className="w-full rounded border border-zinc-700 bg-gray-100 p-2 dark:bg-zinc-800"
-            placeholder="Project UUID"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="mt-6 rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-          disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create Module'}
-        </button>
-      </form>
-    </div>
+    <ModuleForm
+      title="Create New Module"
+      submitText="Create Module"
+      formData={formData}
+      setFormData={setFormData}
+      onSubmit={handleSubmit}
+      loading={loading}
+      isEdit={false}
+    />
   )
 }
 

@@ -17,7 +17,9 @@ class ProgramMutation:
     """GraphQL mutations related to program."""
 
     @strawberry.mutation
-    def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
+    def create_program(
+        self, info: strawberry.Info, input_data: CreateProgramInput
+    ) -> ProgramNode:
         """Create a new mentorship program if the user is a mentor."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -71,7 +73,9 @@ class ProgramMutation:
         )
 
     @strawberry.mutation
-    def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
+    def update_program(
+        self, info: strawberry.Info, input_data: UpdateProgramInput
+    ) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -89,8 +93,7 @@ class ProgramMutation:
         if admin not in program.admins.all():
             raise Exception("You must be an admin of this program to update it")
 
-        # Map of input values to model fields
-        updates = {
+        simple_fields = {
             "name": input_data.name,
             "description": input_data.description,
             "mentees_limit": input_data.mentees_limit,
@@ -98,44 +101,34 @@ class ProgramMutation:
             "ended_at": input_data.ended_at,
             "domains": input_data.domains,
             "tags": input_data.tags,
-            "experience_levels": (
-                [lvl.value for lvl in input_data.experience_levels]
-                if input_data.experience_levels
-                else None
-            ),
-            "status": input_data.status.value if input_data.status else None,
         }
 
-        if updates["experience_levels"] is not None:
-            program.experience_levels = updates["experience_levels"]
-        if updates["status"] is not None:
-            program.status = updates["status"]
-
-        for field in [
-            "name",
-            "description",
-            "mentees_limit",
-            "started_at",
-            "ended_at",
-            "domains",
-            "tags",
-        ]:
-            value = updates[field]
+        for field, value in simple_fields.items():
             if value is not None:
                 setattr(program, field, value)
 
+        if input_data.experience_levels is not None:
+            program.experience_levels = [
+                lvl.value for lvl in input_data.experience_levels
+            ]
+
+        if input_data.status is not None:
+            program.status = input_data.status.value
+
         program.save()
 
-        resolved_mentors = []
-        for login in input_data.admin_logins:
-            try:
-                github_user = GithubUser.objects.get(login__iexact=login.lower())
-            except GithubUser.DoesNotExist as err:
-                raise Exception("GitHub user with username not found.") from err
-            m, _ = Mentor.objects.get_or_create(github_user=github_user)
-            resolved_mentors.append(m)
+        if input_data.admin_logins is not None:
+            resolved_mentors = []
+            for login in input_data.admin_logins:
+                try:
+                    github_user = GithubUser.objects.get(login__iexact=login.lower())
+                except GithubUser.DoesNotExist as err:
+                    raise Exception(f"GitHub user '{login}' not found.") from err
 
-        program.admins.set(resolved_mentors)
+                mentor, _ = Mentor.objects.get_or_create(github_user=github_user)
+                resolved_mentors.append(mentor)
+
+            program.admins.set(resolved_mentors)
 
         return ProgramNode(
             id=program.id,

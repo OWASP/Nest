@@ -1,319 +1,168 @@
 'use client'
 
 import { useQuery, useMutation } from '@apollo/client'
-import {
-  faCalendarAlt,
-  faInfoCircle,
-  faPieChart,
-  faPlus,
-  faSave,
-  faSpinner,
-  faTags,
-  faTimes,
-  faUsers,
-  faUserShield,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useParams } from 'next/navigation'
+import { addToast } from '@heroui/toast'
+import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/getProgramsQueries'
-import { Contributor } from 'types/contributor'
 import LoadingSpinner from 'components/LoadingSpinner'
-
-const experienceOptions = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT']
-const statusOptions = ['DRAFT', 'ACTIVE', 'COMPLETED']
+import ProgramForm from 'components/programCard'
 
 const EditProgramPage = () => {
-  const { data: sessionData } = useSession()
+  const router = useRouter()
   const { programId } = useParams() as { programId: string }
-  const [program, setProgram] = useState<any | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
+  const { data: sessionData, status: sessionStatus } = useSession()
+  const [updateProgram, { loading }] = useMutation(UPDATE_PROGRAM)
 
-  const { data, error } = useQuery(GET_PROGRAM_DETAILS, {
-    variables: { id: programId },
+  const {
+    data,
+    error,
+    loading: queryLoading,
+  } = useQuery(GET_PROGRAM_DETAILS, {
+    variables: { programId },
+    skip: !programId,
   })
 
-  const [updateProgram] = useMutation(UPDATE_PROGRAM)
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    menteesLimit: 5,
+    startedAt: '',
+    endedAt: '',
+    experienceLevels: [] as string[],
+    tags: '',
+    domains: '',
+    adminLogins: '',
+    status: 'DRAFT',
+  })
+
+  const [checkedAccess, setCheckedAccess] = useState(false)
+  const [hasAccess, setHasAccess] = useState(false)
+
+  useEffect(() => {
+    if (sessionStatus === 'loading' || queryLoading) return
+
+    const isMentor = (sessionData?.user as any)?.role === 'mentor'
+    const isAdmin = data?.program?.admins?.some(
+      (admin: any) => admin.login === (sessionData?.user as any)?.username
+    )
+
+    if (!isMentor || !isAdmin) {
+      addToast({
+        title: 'Access Denied',
+        description: 'Only mentors listed as program admins can edit this program.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+      router.replace('/mentorship/programs')
+    } else {
+      setHasAccess(true)
+    }
+
+    setCheckedAccess(true)
+  }, [sessionStatus, sessionData, data, queryLoading, router])
 
   useEffect(() => {
     if (data?.program) {
-      const p = data.program
-      setProgram({
-        ...p,
-        experienceLevels: (p.experienceLevels ?? []).map((v: string) =>
-          v.includes('.') ? v.split('.').pop()?.toUpperCase() : v.toUpperCase()
+      const program = data.program
+
+      const formatDateForInput = (dateStr: string) => {
+        if (!dateStr) return ''
+        const date = new Date(dateStr)
+        return date.toISOString().slice(0, 10)
+      }
+
+      setFormData({
+        name: program.name || '',
+        description: program.description || '',
+        menteesLimit: program.menteesLimit || 5,
+        startedAt: formatDateForInput(program.startedAt),
+        endedAt: formatDateForInput(program.endedAt),
+        experienceLevels: (program.experienceLevels || []).map((lvl: string) =>
+          lvl.includes('.') ? lvl.split('.').pop()?.toUpperCase() : lvl.toUpperCase()
         ),
-        status: p.status.includes('.')
-          ? p.status.split('.').pop()?.toUpperCase()
-          : p.status.toUpperCase(),
+        tags: (program.tags || []).join(', '),
+        domains: (program.domains || []).join(', '),
+        adminLogins: (program.admins || []).map((admin: any) => admin.login).join(', '),
+        status: program.status.includes('.')
+          ? program.status.split('.').pop()?.toUpperCase()
+          : program.status.toUpperCase(),
       })
     } else if (error) {
       handleAppError(error)
     }
   }, [data, error])
 
-  const handleChange = (field: string, value: any) => {
-    setProgram((prev: any) => ({ ...prev, [field]: value }))
-  }
-
-  const handleArrayChange = (field: string, index: number, value: string) => {
-    const updated = [...program[field]]
-    updated[index] = value
-    handleChange(field, updated)
-  }
-
-  const handleArrayAdd = (field: string) => {
-    handleChange(field, [...program[field], ''])
-  }
-
-  const handleArrayRemove = (field: string, index: number) => {
-    const updated = [...program[field]]
-    updated.splice(index, 1)
-    handleChange(field, updated)
-  }
-
-  const handleExperienceToggle = (level: string) => {
-    const updated = program.experienceLevels.includes(level)
-      ? program.experienceLevels.filter((l: string) => l !== level)
-      : [...program.experienceLevels, level]
-    handleChange('experienceLevels', updated)
-  }
-
-  const handleSave = async () => {
-    if (!program) return
-    setIsSaving(true)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
     try {
-      await updateProgram({
-        variables: {
-          input: {
-            id: program.id,
-            name: program.name,
-            description: program.description,
-            status: program.status.toLowerCase(),
-            startedAt: program.startedAt,
-            endedAt: program.endedAt,
-            menteesLimit: Number(program.menteesLimit),
-            experienceLevels: program.experienceLevels.map((level: string) => level.toLowerCase()),
-            tags: program.tags,
-            domains: program.domains,
-            adminLogins: program.admins.map((a: any) => a.login),
-          },
-        },
+      const input = {
+        id: programId,
+        name: formData.name,
+        description: formData.description,
+        menteesLimit: Number(formData.menteesLimit),
+        startedAt: formData.startedAt,
+        endedAt: formData.endedAt,
+        experienceLevels: formData.experienceLevels,
+        tags: formData.tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+        domains: formData.domains
+          .split(',')
+          .map((d) => d.trim())
+          .filter(Boolean),
+        adminLogins: formData.adminLogins
+          .split(',')
+          .map((login) => login.trim())
+          .filter(Boolean),
+        status: formData.status,
+      }
+
+      await updateProgram({ variables: { input } })
+
+      addToast({
+        title: 'Program Updated',
+        description: 'The program has been successfully updated.',
+        color: 'success',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
       })
+
+      router.push('/mentorship/programs')
     } catch (err) {
+      addToast({
+        title: 'Update Failed',
+        description: 'There was an error updating the program.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
       handleAppError(err)
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  if (!program) return <LoadingSpinner />
-
-  if (
-    !program.admins.some(
-      (admin: Contributor) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        admin.login === (sessionData?.user as any)?.username
-    )
-  ) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-xl font-semibold text-red-600 dark:text-red-400">
-        You don't have access to this content.
-      </div>
-    )
+  if (sessionStatus === 'loading' || queryLoading || !checkedAccess || !hasAccess) {
+    return <LoadingSpinner />
   }
+
   return (
-    <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
-      <div className="mx-auto max-w-4xl space-y-10">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Edit Program</h1>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 rounded-md border border-[#0D6EFD] px-4 py-2 text-[#0D6EFD] hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:hover:bg-sky-600 dark:hover:text-white"
-          >
-            <FontAwesomeIcon icon={faSave} />
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-
-        {/* Basic Info */}
-        <div className="space-y-6">
-          <h2 className="flex items-center gap-2 text-xl font-semibold">
-            <FontAwesomeIcon icon={faInfoCircle} /> Basic Information
-          </h2>
-
-          <input
-            className="w-full rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-            placeholder="Program Name"
-            value={program.name}
-            onChange={(e) => handleChange('name', e.target.value)}
-          />
-
-          <textarea
-            rows={4}
-            className="w-full rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-            placeholder="Program Description"
-            value={program.description}
-            onChange={(e) => handleChange('description', e.target.value)}
-          />
-
-          <select
-            className="w-full rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-            value={program.status}
-            onChange={(e) => handleChange('status', e.target.value)}
-          >
-            {statusOptions.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Schedule */}
-        <div className="space-y-6">
-          <h2 className="flex items-center gap-2 text-xl font-semibold">
-            <FontAwesomeIcon icon={faCalendarAlt} /> Schedule
-          </h2>
-
-          <input
-            type="date"
-            value={program.startedAt}
-            onChange={(e) => handleChange('startedAt', e.target.value)}
-            className="w-full rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-          />
-
-          <input
-            type="date"
-            value={program.endedAt}
-            onChange={(e) => handleChange('endedAt', e.target.value)}
-            className="w-full rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-          />
-        </div>
-
-        {/* Participants */}
-        <div className="space-y-6">
-          <h2 className="flex items-center gap-2 text-xl font-semibold">
-            <FontAwesomeIcon icon={faUsers} /> Participants
-          </h2>
-
-          <input
-            type="number"
-            value={program.menteesLimit || ''}
-            onChange={(e) => handleChange('menteesLimit', e.target.value)}
-            className="w-full rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-            placeholder="Mentees Limit"
-          />
-
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-            {experienceOptions.map((level) => (
-              <button
-                key={level}
-                onClick={() => handleExperienceToggle(level)}
-                className={`rounded border-2 px-4 py-2 font-medium capitalize ${
-                  program.experienceLevels.includes(level)
-                    ? 'border-sky-500 bg-sky-100 dark:bg-sky-900 dark:text-sky-200'
-                    : 'border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300'
-                }`}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tags and Domains */}
-        {['tags', 'domains'].map((field) => (
-          <div key={field} className="space-y-4">
-            <h2 className="flex items-center gap-2 text-xl font-semibold">
-              <FontAwesomeIcon icon={field === 'tags' ? faTags : faPieChart} />
-              {field.charAt(0).toUpperCase() + field.slice(1)}
-            </h2>
-
-            {program[field].map((item: string, idx: number) => (
-              <div key={idx} className="flex gap-3">
-                <input
-                  value={item}
-                  onChange={(e) => handleArrayChange(field, idx, e.target.value)}
-                  className="flex-1 rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-                  placeholder={`Enter ${field.slice(0, -1)}`}
-                />
-                <button
-                  onClick={() => handleArrayRemove(field, idx)}
-                  className="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900"
-                >
-                  <FontAwesomeIcon icon={faTimes} />
-                </button>
-              </div>
-            ))}
-
-            <button
-              onClick={() => handleArrayAdd(field)}
-              className="flex items-center gap-2 font-medium text-sky-600"
-            >
-              <FontAwesomeIcon icon={faPlus} /> Add {field.slice(0, -1)}
-            </button>
-          </div>
-        ))}
-
-        {/* Admins */}
-        <div className="space-y-6">
-          <h2 className="flex items-center gap-2 text-xl font-semibold">
-            <FontAwesomeIcon icon={faUserShield} /> Administrators
-          </h2>
-
-          {program.admins.map((admin: any, idx: number) => (
-            <div key={idx} className="flex gap-3">
-              <input
-                value={admin.login}
-                onChange={(e) =>
-                  handleChange('admins', [
-                    ...program.admins.slice(0, idx),
-                    { login: e.target.value },
-                    ...program.admins.slice(idx + 1),
-                  ])
-                }
-                className="flex-1 rounded border px-4 py-2 dark:border-gray-600 dark:bg-gray-800"
-                placeholder="GitHub username"
-              />
-              <button
-                onClick={() =>
-                  handleChange(
-                    'admins',
-                    program.admins.filter((_, i) => i !== idx)
-                  )
-                }
-                className="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900"
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-            </div>
-          ))}
-
-          <button
-            onClick={() => handleChange('admins', [...program.admins, { login: '' }])}
-            className="flex items-center gap-2 font-medium text-sky-600 hover:text-sky-700"
-          >
-            <FontAwesomeIcon icon={faPlus} />
-            Add Administrator
-          </button>
-        </div>
-      </div>
-
-      {isSaving && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="flex items-center gap-4 rounded bg-white p-6 dark:bg-gray-800">
-            <FontAwesomeIcon icon={faSpinner} spin className="text-sky-600" />
-            <span className="font-medium">Saving changes...</span>
-          </div>
-        </div>
-      )}
-    </div>
+    <ProgramForm
+      formData={formData}
+      setFormData={setFormData}
+      onSubmit={handleSubmit}
+      loading={loading}
+      title="Edit Program"
+      submitText="Save Changes"
+      isEdit={true}
+    />
   )
 }
 
