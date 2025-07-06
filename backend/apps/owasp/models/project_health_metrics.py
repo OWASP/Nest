@@ -188,6 +188,9 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
         monthly_overall_metrics = (
             ProjectHealthMetrics.objects.annotate(month=ExtractMonth("nest_created_at"))
+            .filter(
+                nest_created_at__gte=timezone.now() - timezone.timedelta(days=365)
+            )  # Last year data
             .order_by("month")
             .values("month")
             .distinct()
