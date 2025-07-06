@@ -17,3 +17,14 @@ export const GET_PROJECT_HEALTH_STATS = gql`
     }
   }
 `
+export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
+  query GetProjectHealthMetrics($filters: ProjectHealthMetricsFiltersInput) {
+    projectHealthMetrics(filters: $filters) {
+      projectName
+      score
+      createdAt
+      openIssuesCount
+      openPullRequestsCount
+    }
+  }
+`
