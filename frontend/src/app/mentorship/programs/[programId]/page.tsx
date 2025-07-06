@@ -9,7 +9,7 @@ import {
   GET_PROGRAM_AND_MODULES,
   UPDATE_PROGRAM_STATUS_MUTATION,
 } from 'server/queries/getProgramsQueries'
-import { Module, type Program } from 'types/program'
+import { Module, type Program, ProgramStatusEnum } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -25,7 +25,7 @@ const ProgramDetailsPage = () => {
     variables: { programId: programId },
   })
 
-  const [updateProgram, { loading: publishLoading }] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
+  const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
     onCompleted: (data) => {
       setProgram((prev) => (prev ? { ...prev, status: data.updateProgram.status } : null))
       addToast({
@@ -86,11 +86,10 @@ const ProgramDetailsPage = () => {
       value: program.experienceLevels?.join(', ') || 'N/A',
     },
   ]
-  console.log(program.status)
   return (
     <DetailsCard
       modules={modules}
-      isDraft={program.status === 'DRAFT'}
+      isDraft={program.status.toLowerCase() === ProgramStatusEnum.DRAFT}
       setPublish={setPublish}
       details={programDetails}
       admins={program.admins}

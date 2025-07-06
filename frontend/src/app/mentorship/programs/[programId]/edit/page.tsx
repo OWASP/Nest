@@ -4,16 +4,18 @@ import { useQuery, useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import type React from 'react'
 import { useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/getProgramsQueries'
+import { SessionWithRole } from 'types/program'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
 
 const EditProgramPage = () => {
   const router = useRouter()
   const { programId } = useParams() as { programId: string }
-  const { data: sessionData, status: sessionStatus } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const [updateProgram, { loading }] = useMutation(UPDATE_PROGRAM)
 
   const {
@@ -44,9 +46,9 @@ const EditProgramPage = () => {
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) return
 
-    const isMentor = (sessionData?.user as any)?.role === 'mentor'
+    const isMentor = (session as SessionWithRole)?.user?.role === 'mentor'
     const isAdmin = data?.program?.admins?.some(
-      (admin: any) => admin.login === (sessionData?.user as any)?.username
+      (admin: { login: string }) => admin.login === (session as SessionWithRole)?.user?.username
     )
 
     if (!isMentor || !isAdmin) {
@@ -64,7 +66,7 @@ const EditProgramPage = () => {
     }
 
     setCheckedAccess(true)
-  }, [sessionStatus, sessionData, data, queryLoading, router])
+  }, [sessionStatus, session, data, queryLoading, router])
 
   useEffect(() => {
     if (data?.program) {
@@ -87,7 +89,9 @@ const EditProgramPage = () => {
         ),
         tags: (program.tags || []).join(', '),
         domains: (program.domains || []).join(', '),
-        adminLogins: (program.admins || []).map((admin: any) => admin.login).join(', '),
+        adminLogins: (program.admins || [])
+          .map((admin: { login: string }) => admin.login)
+          .join(', '),
         status: program.status.includes('.')
           ? program.status.split('.').pop()?.toUpperCase()
           : program.status.toUpperCase(),

@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { DetailsCardProps } from 'types/card'
+import { SessionWithRole } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -80,7 +81,7 @@ const DetailsCard = ({
             <h1 className="text-4xl font-bold">{title}</h1>
             {type === 'program' &&
               admins?.some(
-                (admin) => admin.login === ((data?.user as any)?.username as string)
+                (admin) => admin.login === ((data as SessionWithRole)?.user?.username as string)
               ) && (
                 <div className="flex gap-2">
                   <button

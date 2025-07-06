@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import { CREATE_PROGRAM } from 'server/queries/getProgramsQueries'
+import { SessionWithRole } from 'types/program'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
 
@@ -30,7 +31,8 @@ const CreateProgramPage = () => {
 
   useEffect(() => {
     if (status === 'loading') return
-    if (!session || session.user.role !== 'mentor') {
+    const userRole = (session as SessionWithRole)?.user?.role
+    if (!session || userRole !== 'mentor') {
       addToast({
         title: 'Access Denied',
         description: 'You must be a mentor to create a program.',

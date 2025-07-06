@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react'
 
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_PROGRAM_DATA } from 'server/queries/getProgramsQueries'
-import { Program } from 'types/program'
+import { Program, SessionWithRole } from 'types/program'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 
@@ -67,8 +67,7 @@ const ProgramsSearchPage: React.FC = () => {
   }, [error])
 
   const handleMyProgramsClick = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const username = (session?.user as any)?.username
+    const username = (session as SessionWithRole)?.user?.username
     if (username) {
       setMentor(username)
       setPage(1)
@@ -129,7 +128,7 @@ const ProgramsSearchPage: React.FC = () => {
     >
       <div>
         <div className="mt-8 flex justify-end gap-4">
-          {(session?.user as any)?.role === 'mentor' && (
+          {(session as SessionWithRole)?.user?.role === 'mentor' && (
             <>
               <div>
                 <Button className="rounded-lg" onPress={handleCreateButton}>

@@ -57,7 +57,7 @@ const authOptions = {
       return true
     },
 
-    async jwt({ token, account, user }) {
+    async jwt({ token, account }) {
       if (account?.access_token) {
         token.accessToken = account.access_token
 
@@ -75,7 +75,7 @@ const authOptions = {
             token.role = data.githubAuth.authUser.role
           }
         } catch (error) {
-          console.error('Failed to fetch user data:', error)
+          throw new Error('GitHub authentication failed' + error.message)
         }
       }
       return token

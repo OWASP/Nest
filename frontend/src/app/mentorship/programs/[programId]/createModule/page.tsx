@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { GET_PROGRAM_MENTOR_DETAILS } from 'server/queries/getProgramsQueries'
 import { CREATE_MODULE } from 'server/queries/moduleQueries'
+import { SessionWithRole } from 'types/program'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
 
@@ -33,7 +34,7 @@ const CreateModulePage = () => {
     mentorLogins: '',
   })
 
-  const currentUserLogin = (sessionData?.user as any)?.username || ''
+  const currentUserLogin = (sessionData as SessionWithRole)?.user?.username || ''
 
   const [checkedAccess, setCheckedAccess] = useState(false)
   const [hasAccess, setHasAccess] = useState(false)
@@ -90,7 +91,7 @@ const CreateModulePage = () => {
 
       await createModule({ variables: { input } })
       router.push(`/mentorship/programs/${programId}`)
-    } catch (err: any) {
+    } catch (err) {
       addToast({
         title: 'Creation Failed',
         description: err.message || 'Something went wrong while creating the module.',

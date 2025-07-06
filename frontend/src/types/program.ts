@@ -40,3 +40,11 @@ export interface Module {
   domains: string[]
   tags: string[]
 }
+
+export type SessionWithRole = {
+  accessToken?: string
+  user?: {
+    role?: string
+    username?: string
+  }
+}
