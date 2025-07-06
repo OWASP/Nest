@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { GET_PROGRAM_DATA } from 'server/queries/getProgramsQueries'
+import { GET_PROGRAM_DATA } from 'server/queries/programsQueries'
 import { Program, SessionWithRole } from 'types/program'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'

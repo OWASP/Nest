@@ -7,8 +7,9 @@ import { useSession } from 'next-auth/react'
 import type React from 'react'
 import { useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
-import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/getProgramsQueries'
+import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/programsQueries'
 import { SessionWithRole } from 'types/program'
+import { formatDateForInput } from 'utils/dateFormatter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
 
@@ -71,12 +72,6 @@ const EditProgramPage = () => {
   useEffect(() => {
     if (data?.program) {
       const program = data.program
-
-      const formatDateForInput = (dateStr: string) => {
-        if (!dateStr) return ''
-        const date = new Date(dateStr)
-        return date.toISOString().slice(0, 10)
-      }
 
       setFormData({
         name: program.name || '',

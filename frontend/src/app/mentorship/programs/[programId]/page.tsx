@@ -3,34 +3,37 @@
 import { useQuery, useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
   GET_PROGRAM_AND_MODULES,
   UPDATE_PROGRAM_STATUS_MUTATION,
-} from 'server/queries/getProgramsQueries'
-import { Module, type Program, ProgramStatusEnum } from 'types/program'
+} from 'server/queries/programsQueries'
+import { Module, type Program, ProgramStatusEnum, SessionWithRole } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
-  const { programId } = useParams()
+  const { programId } = useParams() as { programId: string }
+  const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(true)
   const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>(null)
+  const [modules, setModules] = useState<Module[]>([])
 
   const { data, error } = useQuery(GET_PROGRAM_AND_MODULES, {
-    variables: { programId: programId },
+    variables: { programId },
+    skip: !programId,
   })
 
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
     onCompleted: (data) => {
       setProgram((prev) => (prev ? { ...prev, status: data.updateProgram.status } : null))
       addToast({
-        title: 'Program published',
-        description: 'The program is published right now.',
+        title: 'Program Published',
+        description: 'The program is now live.',
         variant: 'solid',
         color: 'success',
         timeout: 3000,
@@ -41,8 +44,31 @@ const ProgramDetailsPage = () => {
     },
   })
 
+  const username = (session as SessionWithRole)?.user?.username
+  const isAdmin = useMemo(
+    () => !!program?.admins?.some((admin) => admin.login === username),
+    [program, username]
+  )
+
+  const canPublish = useMemo(
+    () => isAdmin && program?.status?.toLowerCase() === ProgramStatusEnum.DRAFT,
+    [isAdmin, program]
+  )
+
   const setPublish = async () => {
     if (!program) return
+
+    if (!isAdmin) {
+      addToast({
+        title: 'Permission Denied',
+        description: 'Only admins can publish this program.',
+        variant: 'solid',
+        color: 'danger',
+        timeout: 3000,
+      })
+      return
+    }
+
     await updateProgram({
       variables: {
         inputData: {
@@ -55,11 +81,13 @@ const ProgramDetailsPage = () => {
 
   useEffect(() => {
     if (data?.program) {
-      setModules(data?.modulesByProgram)
       setProgram(data.program)
-      setIsLoading(false)
+      setModules(data.modulesByProgram || [])
     } else if (error) {
       handleAppError(error)
+    }
+
+    if (data || error) {
       setIsLoading(false)
     }
   }, [data, error])
@@ -86,10 +114,11 @@ const ProgramDetailsPage = () => {
       value: program.experienceLevels?.join(', ') || 'N/A',
     },
   ]
+
   return (
     <DetailsCard
       modules={modules}
-      isDraft={program.status.toLowerCase() === ProgramStatusEnum.DRAFT}
+      isDraft={canPublish}
       setPublish={setPublish}
       details={programDetails}
       admins={program.admins}

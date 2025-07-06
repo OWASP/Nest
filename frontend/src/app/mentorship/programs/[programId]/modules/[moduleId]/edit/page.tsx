@@ -9,6 +9,7 @@ import type React from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROGRAM_ADMINS_AND_MODULES, UPDATE_MODULE } from 'server/queries/moduleQueries'
 import { SessionWithRole } from 'types/program'
+import { formatDateForInput } from 'utils/dateFormatter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
 
@@ -45,12 +46,6 @@ const EditModulePage = () => {
     variables: { programId, moduleId },
     skip: !programId || !moduleId,
   })
-
-  const formatDateForInput = (dateStr: string) => {
-    if (!dateStr) return ''
-    const date = new Date(dateStr)
-    return date.toISOString().slice(0, 10)
-  }
 
   useEffect(() => {
     if (sessionStatus !== 'authenticated' || queryLoading) return

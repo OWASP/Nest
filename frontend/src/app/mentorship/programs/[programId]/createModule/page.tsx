@@ -5,8 +5,8 @@ import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { GET_PROGRAM_MENTOR_DETAILS } from 'server/queries/getProgramsQueries'
 import { CREATE_MODULE } from 'server/queries/moduleQueries'
+import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
 import { SessionWithRole } from 'types/program'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
@@ -17,7 +17,7 @@ const CreateModulePage = () => {
   const { data: sessionData, status: sessionStatus } = useSession()
 
   const [createModule, { loading }] = useMutation(CREATE_MODULE)
-  const { data, loading: queryLoading } = useQuery(GET_PROGRAM_MENTOR_DETAILS, {
+  const { data, loading: queryLoading } = useQuery(GET_PROGRAM_ADMIN_DETAILS, {
     variables: { programId },
     skip: !programId,
   })

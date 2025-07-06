@@ -110,7 +110,7 @@ export const CREATE_PROGRAM = gql`
   }
 `
 
-export const GET_PROGRAM_MENTOR_DETAILS = gql`
+export const GET_PROGRAM_ADMIN_DETAILS = gql`
   query GetProgramDetails($programId: ID!) {
     program(programId: $programId) {
       id
