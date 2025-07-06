@@ -1,6 +1,7 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
+import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
 const DashboardCard: React.FC<{
@@ -10,7 +11,7 @@ const DashboardCard: React.FC<{
 }> = ({ title, icon, stats }) => {
   return (
     <SecondaryCard
-      title={title}
+      title={<AnchorTitle title={title} />}
       className="overflow-hidden transition-colors duration-300 hover:bg-blue-200 dark:hover:bg-blue-700"
     >
       <span className="flex items-start gap-2 text-3xl font-light">

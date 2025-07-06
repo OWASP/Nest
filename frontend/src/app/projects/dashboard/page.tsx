@@ -13,6 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import millify from 'millify'
 import { useState, useEffect } from 'react'
+import React from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
@@ -22,7 +23,7 @@ import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
-export default function ProjectsDashboardPage() {
+const ProjectsDashboardPage: React.FC = () => {
   const [stats, setStats] = useState<ProjectHealthStats | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_HEALTH_STATS)
@@ -81,7 +82,7 @@ export default function ProjectsDashboardPage() {
         <DashboardCard title="Total Forks" icon={faCodeBranch} stats={millify(stats.totalForks)} />
         <DashboardCard title="Total Stars" icon={faStar} stats={millify(stats.totalStars)} />
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
         <LineChart
           title="Overall Project Health Monthly Trend"
           icon={faChartColumn}
@@ -100,11 +101,15 @@ export default function ProjectsDashboardPage() {
         <DonutBarChart
           title="Project Health Distribution"
           icon={faHeart}
-          projectsPercentageHealthy={stats.projectsPercentageHealthy}
-          projectsPercentageNeedAttention={stats.projectsPercentageNeedAttention}
-          projectsPercentageUnhealthy={stats.projectsPercentageUnhealthy}
+          series={[
+            stats.projectsPercentageHealthy,
+            stats.projectsPercentageNeedAttention,
+            stats.projectsPercentageUnhealthy,
+          ]}
         />
       </div>
     </>
   )
 }
+
+export default ProjectsDashboardPage

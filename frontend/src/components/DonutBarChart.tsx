@@ -12,22 +12,14 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 })
 
 const DonutBarChart: React.FC<{
-  title: string
   icon: IconProp
-  projectsPercentageHealthy: number
-  projectsPercentageNeedAttention: number
-  projectsPercentageUnhealthy: number
-}> = ({
-  title,
-  projectsPercentageHealthy,
-  projectsPercentageNeedAttention,
-  projectsPercentageUnhealthy,
-  icon,
-}) => {
+  title: string
+  series: number[]
+}> = ({ icon, title, series }) => {
   const { theme } = useTheme()
   const greenColor = '#0ef94e'
-  const redColor = '#f94e0e' // Red color for the end of the gradient
-  const orangeColor = '#f9b90e' // Orange color for the middle of the gradient
+  const redColor = '#f94e0e'
+  const orangeColor = '#f9b90e'
 
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
@@ -47,20 +39,11 @@ const DonutBarChart: React.FC<{
               labels: {
                 colors: theme === 'dark' ? '#ececec' : '#1E1E2C',
               },
-              customLegendItems: [
-                'Healthy Projects',
-                'Projects Needing Attention',
-                'Unhealthy Projects',
-              ],
             },
             colors: [greenColor, orangeColor, redColor],
             labels: ['Healthy Projects', 'Projects Needing Attention', 'Unhealthy Projects'],
           }}
-          series={[
-            round(projectsPercentageHealthy, 1),
-            round(projectsPercentageNeedAttention, 1),
-            round(projectsPercentageUnhealthy, 1),
-          ]}
+          series={series.map((value) => round(value, 1))}
           height={250}
           type="donut"
         />
