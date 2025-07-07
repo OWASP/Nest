@@ -7,7 +7,7 @@ import { useState, useCallback } from 'react'
 import type { Section } from 'types/section'
 import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
-import { RELEASE_VERSION } from 'utils/credentials'
+import { ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
 
 export default function Footer() {
   // State to keep track of the open section in the footer
@@ -91,14 +91,18 @@ export default function Footer() {
             </p>
             {RELEASE_VERSION && (
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                <Link
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-                  href={`https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  v{RELEASE_VERSION}
-                </Link>
+                {ENVIRONMENT === 'production' ? (
+                  <Link
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                    href={`https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <span>v{RELEASE_VERSION}</span>
+                  </Link>
+                ) : (
+                  <span>v{RELEASE_VERSION}</span>
+                )}
               </p>
             )}
           </div>

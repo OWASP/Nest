@@ -250,8 +250,24 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
 
+  set-release-version:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.set.outputs.release_version }}
+    steps:
+      - name: Set release version
+        id: set
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          fi
+
   build-staging-images:
     name: Build Staging Images
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -260,6 +276,7 @@ jobs:
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
+      - set-release-version
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -302,7 +319,7 @@ jobs:
           echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}" >> frontend/.env
-          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Get backend image size
@@ -419,7 +436,7 @@ jobs:
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
           echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
-          echo "DJANGO_RELEASE_VERSION=$(date '+%y.%-m.%-d')-${GITHUB_SHA:0:7}" >> .env.backend
+          echo "DJANGO_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
@@ -478,8 +495,10 @@ jobs:
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
-  build-docker-production-images:
-    name: Build Docker Production Images
+  build-production-images:
+    name: Build Production Images
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: production
     if: |
       github.event_name == 'release' &&
@@ -488,6 +507,7 @@ jobs:
       - run-backend-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
+      - set-release-version
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -536,7 +556,7 @@ jobs:
           echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
           echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
           echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}" >> frontend/.env
-          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> frontend/.env
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> frontend/.env
           echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
@@ -572,7 +592,7 @@ jobs:
   scan-production-images:
     name: Scan Production Images
     needs:
-      - build-docker-production-images
+      - build-production-images
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -645,7 +665,7 @@ jobs:
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
           echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
-          echo "DJANGO_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> .env.backend
+          echo "DJANGO_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> .env.backend
           echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_SENTRY_DSN=${{ secrets.DJANGO_SENTRY_DSN }}" >> .env.backend
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
