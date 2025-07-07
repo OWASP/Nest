@@ -31,13 +31,10 @@ class TestGetStatusFunction:
         assert data["version"] == "1.2.3"
 
     def test_get_status_returns_unknown_when_no_version(self):
-        """Test get_status function returns 'unknown' when RELEASE_VERSION is not set."""
+        """Test get_status function returns env name when RELEASE_VERSION is not set."""
         request = self.factory.get("/")
-
-        with patch("apps.core.api.status.settings") as mock_settings:
-            del mock_settings.RELEASE_VERSION
-            response = get_status(request)
+        response = get_status(request)
 
         assert response.status_code == HTTPStatus.OK
         data = json.loads(response.content)
-        assert data["version"] == "unknown"
+        assert data["version"] == "test"

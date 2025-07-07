@@ -91,7 +91,13 @@ export default function Footer() {
             </p>
             {RELEASE_VERSION && (
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Version {RELEASE_VERSION}
+                <Link
+                  target="_blank"
+                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                  href={`https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`}
+                >
+                  v{RELEASE_VERSION}
+                </Link>
               </p>
             )}
           </div>
