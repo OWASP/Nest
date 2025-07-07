@@ -17,7 +17,7 @@ const LineChart: React.FC<{
   icon?: IconProp
 }> = ({ title, series, labels, icon }) => {
   const { theme } = useTheme()
-  const color = theme === 'dark' ? '#ececec' : '#1E1E2C'
+  const color = theme === 'dark' ? '#ECECEC' : '#1E1E2C'
 
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>

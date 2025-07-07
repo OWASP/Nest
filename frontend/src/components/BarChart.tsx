@@ -20,14 +20,14 @@ const BarChart: React.FC<{
 }> = ({ title, days, icon, requirements, labels }) => {
   const { theme } = useTheme()
   let themeColor = '#1E1E2C'
-  let redColor = '#ff7875'
-  let greenColor = '#73d13d'
-  let orangeColor = '#ffbb33'
+  let redColor = '#FF7875'
+  let greenColor = '#73D13D'
+  let orangeColor = '#FFBB33'
   if (theme === 'dark') {
-    themeColor = '#ececec'
-    redColor = '#ff4d4f'
-    greenColor = '#52c41a'
-    orangeColor = '#faad14'
+    themeColor = '#ECECEC'
+    redColor = '#FF4D4F'
+    greenColor = '#52C41A'
+    orangeColor = '#FAAD14'
   }
 
   const seriesData: ApexBarChartDataSeries[] = days.map((day, index) => ({
