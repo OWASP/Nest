@@ -65,13 +65,13 @@ const MetricsPage: FC = () => {
           </DropdownMenu>
         </Dropdown>
       </div>
-      <div className="grid grid-cols-8 p-4">
-        <div className="col-span-3 truncate font-semibold">Project Name</div>
-        <div className="col-span-1 truncate font-semibold">Score</div>
-        <div className="col-span-1 truncate font-semibold">Stars</div>
-        <div className="col-span-1 truncate font-semibold">Forks</div>
-        <div className="col-span-1 truncate font-semibold">Contributors</div>
-        <div className="col-span-1 truncate font-semibold">Created At</div>
+      <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] p-4">
+        <div className="truncate font-semibold">Project Name</div>
+        <div className="truncate font-semibold">Stars</div>
+        <div className="truncate font-semibold">Forks</div>
+        <div className="truncate font-semibold">Contributors</div>
+        <div className="truncate text-center font-semibold">Created At</div>
+        <div className="truncate text-center font-semibold">Score</div>
       </div>
       <div className="grid grid-cols-1 gap-2">
         {metrics.map((metric) => (
