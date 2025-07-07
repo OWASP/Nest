@@ -16,6 +16,7 @@ class ProjectHealthMetricsQuery:
     project_health_metrics: list[ProjectHealthMetricsNode] = strawberry_django.field(
         filters=ProjectHealthMetricsFilter,
         description="List of project health metrics.",
+        pagination=True,
     )
 
     @strawberry.field
