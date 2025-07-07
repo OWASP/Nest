@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { Module } from 'types/program'
-import { capitalize } from 'utils/capitalize'
+import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
 import { TruncatedText } from 'components/TruncatedText'
@@ -62,7 +62,11 @@ const ModuleItem = ({ details }: { details: Module }) => {
       >
         <TruncatedText text={details?.name} />
       </button>
-      <TextInfoItem icon={faLevelUpAlt} label="Level" value={capitalize(details.experienceLevel)} />
+      <TextInfoItem
+        icon={faLevelUpAlt}
+        label="Level"
+        value={titleCaseWord(details.experienceLevel)}
+      />
       <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(details.startedAt)} />
       <TextInfoItem
         icon={faHourglassHalf}

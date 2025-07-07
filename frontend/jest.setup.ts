@@ -1,3 +1,5 @@
+// jest.setup.ts or jest.setup.js
+
 import '@testing-library/jest-dom'
 import { TextEncoder } from 'util'
 import React from 'react'
@@ -5,6 +7,20 @@ import 'core-js/actual/structured-clone'
 
 global.React = React
 global.TextEncoder = TextEncoder
+
+// ✅ Mock next-auth globally (must be top-level)
+jest.mock('next-auth/react', () => {
+  return {
+    ...jest.requireActual('next-auth/react'),
+    useSession: () => ({
+      data: {
+        user: { name: 'Test User', email: 'test@example.com' },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    }),
+  }
+})
 
 if (!global.structuredClone) {
   global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
@@ -57,6 +73,7 @@ beforeEach(() => {
       dispatchEvent: jest.fn(),
     })),
   })
+
   global.runAnimationFrameCallbacks = jest.fn()
   global.removeAnimationFrameCallbacks = jest.fn()
 })

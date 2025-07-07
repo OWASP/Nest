@@ -11,7 +11,7 @@ import {
   UPDATE_PROGRAM_STATUS_MUTATION,
 } from 'server/queries/programsQueries'
 import { Module, type Program, ProgramStatusEnum, SessionWithRole } from 'types/program'
-import { capitalize } from 'utils/capitalize'
+import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -77,8 +77,8 @@ const ProgramDetailsPage = () => {
           status: 'PUBLISHED',
         },
       },
+      refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
     })
-    window.location.reload()
   }
 
   useEffect(() => {
@@ -107,7 +107,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: capitalize(program.status) },
+    { label: 'Status', value: titleCaseWord(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
