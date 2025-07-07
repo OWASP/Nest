@@ -21,10 +21,8 @@ class TestGetStatusFunction:
 
     def test_get_status_with_release_version(self):
         """Test get_status function when RELEASE_VERSION is set."""
-        request = self.factory.get("/")
-
         with patch.object(settings, "RELEASE_VERSION", "1.2.3"):
-            response = get_status(request)
+            response = get_status(self.factory.get("/"))
 
         assert response.status_code == HTTPStatus.OK
         data = json.loads(response.content)
@@ -32,8 +30,11 @@ class TestGetStatusFunction:
 
     def test_get_status_returns_unknown_when_no_version(self):
         """Test get_status function returns env name when RELEASE_VERSION is not set."""
-        request = self.factory.get("/")
-        response = get_status(request)
+        with (
+            patch.object(settings, "ENVIRONMENT", "test"),
+            patch.object(settings, "RELEASE_VERSION", None),
+        ):
+            response = get_status(self.factory.get("/"))
 
         assert response.status_code == HTTPStatus.OK
         data = json.loads(response.content)
