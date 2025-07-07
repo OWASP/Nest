@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react'
 import type { Section } from 'types/section'
 import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
+import { RELEASE_VERSION } from 'utils/credentials'
 
 export default function Footer() {
   // State to keep track of the open section in the footer
@@ -82,12 +83,24 @@ export default function Footer() {
             </Link>
           ))}
         </div>
-        {/* Footer bottom section with copyright and links */}
+        {/* Footer bottom section with copyright and version */}
         <div className="grid w-full place-content-center">
-          <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:text-left">
+          <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">
             <p className="text-sm text-slate-600 dark:text-slate-400">
               © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
             </p>
+            {RELEASE_VERSION && (
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                  href={`https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  v{RELEASE_VERSION}
+                </Link>
+              </p>
+            )}
           </div>
         </div>
       </div>
