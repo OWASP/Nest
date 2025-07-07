@@ -11,6 +11,8 @@ import { HealthMetricsProps, HealthMetricsFilter } from 'types/healthMetrics'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
 
+const PAGINATION_LIMIT = 10
+
 const MetricsPage: FC = () => {
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [filters, setFilters] = useState<HealthMetricsFilter>({})
@@ -22,7 +24,7 @@ const MetricsPage: FC = () => {
   } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
     variables: {
       filters,
-      pagination: { offset: 0, limit: 10 },
+      pagination: { offset: 0, limit: PAGINATION_LIMIT },
     },
   })
   useEffect(() => {
@@ -51,9 +53,10 @@ const MetricsPage: FC = () => {
           </DropdownTrigger>
           <DropdownMenu
             onAction={async (key: string) => {
-              setFilters((prev) => ({ ...prev, level: key }))
+              const newFilters = { ...filters, level: key }
+              setFilters(newFilters)
               await refetch({
-                filters: { ...filters, level: key },
+                filters: newFilters,
                 pagination: { offset: 0, limit: 10 },
               })
             }}
@@ -74,9 +77,13 @@ const MetricsPage: FC = () => {
         <div className="truncate text-center font-semibold">Score</div>
       </div>
       <div className="grid grid-cols-1 gap-2">
-        {metrics.map((metric) => (
-          <MetricsCard key={metric.id} metric={metric} />
-        ))}
+        {metrics.length === 0 ? (
+          <div className="py-8 text-center text-gray-500">
+            No metrics found. Try adjusting your filters.
+          </div>
+        ) : (
+          metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
+        )}
       </div>
     </>
   )
