@@ -78,6 +78,7 @@ const ProgramDetailsPage = () => {
         },
       },
     })
+    window.location.reload()
   }
 
   useEffect(() => {
