@@ -15,7 +15,11 @@ const MetricsPage: FC = () => {
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [filters, setFilters] = useState<HealthMetricsFilter>({})
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError, refetch } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
+  const {
+    data,
+    error: graphQLRequestError,
+    refetch,
+  } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
     variables: {
       filters,
       pagination: { offset: 0, limit: 10 },
@@ -36,7 +40,7 @@ const MetricsPage: FC = () => {
   }
   return (
     <>
-      <div className='flex justify-between items-center mb-4'>
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Project Health Metrics</h1>
         <Dropdown>
           <DropdownTrigger>
@@ -45,35 +49,29 @@ const MetricsPage: FC = () => {
               Filter by Level
             </Button>
           </DropdownTrigger>
-          <DropdownMenu onAction={async (key: string) =>{
-            setFilters((prev) => ({ ...prev, level: key }))
-            await refetch({
-              filters: { ...filters, level: key },
-              pagination: { offset: 0, limit: 10 },
-            })
-          }}>
-            <DropdownItem key="incubator">
-              Incubator
-            </DropdownItem>
-            <DropdownItem key="lab">
-              Lab
-            </DropdownItem>
-            <DropdownItem key="production">
-              Production
-            </DropdownItem>
-            <DropdownItem key="flagship">
-              Flagship
-            </DropdownItem>
+          <DropdownMenu
+            onAction={async (key: string) => {
+              setFilters((prev) => ({ ...prev, level: key }))
+              await refetch({
+                filters: { ...filters, level: key },
+                pagination: { offset: 0, limit: 10 },
+              })
+            }}
+          >
+            <DropdownItem key="incubator">Incubator</DropdownItem>
+            <DropdownItem key="lab">Lab</DropdownItem>
+            <DropdownItem key="production">Production</DropdownItem>
+            <DropdownItem key="flagship">Flagship</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </div>
       <div className="grid grid-cols-8 p-4">
-        <div className="font-semibold col-span-3 truncate">Project Name</div>
-        <div className="font-semibold col-span-1 truncate">Score</div>
-        <div className="font-semibold col-span-1 truncate">Stars</div>
-        <div className="font-semibold col-span-1 truncate">Forks</div>
-        <div className="font-semibold col-span-1 truncate">Contributors</div>
-        <div className="font-semibold col-span-1 truncate">Created At</div>
+        <div className="col-span-3 truncate font-semibold">Project Name</div>
+        <div className="col-span-1 truncate font-semibold">Score</div>
+        <div className="col-span-1 truncate font-semibold">Stars</div>
+        <div className="col-span-1 truncate font-semibold">Forks</div>
+        <div className="col-span-1 truncate font-semibold">Contributors</div>
+        <div className="col-span-1 truncate font-semibold">Created At</div>
       </div>
       <div className="grid grid-cols-1 gap-2">
         {metrics.map((metric) => (
