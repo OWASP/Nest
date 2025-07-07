@@ -19,13 +19,18 @@ export const GET_PROJECT_HEALTH_STATS = gql`
   }
 `
 export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
-  query GetProjectHealthMetrics($filters: ProjectHealthMetricsFiltersInput) {
-    projectHealthMetrics(filters: $filters) {
+  query GetProjectHealthMetrics(
+    $filters: ProjectHealthMetricsFilter
+    $pagination: OffsetPaginationInput
+  ) {
+    projectHealthMetrics(filters: $filters, pagination: $pagination) {
+      createdAt
+      contributorsCount
+      forksCount
+      id
       projectName
       score
-      createdAt
-      openIssuesCount
-      openPullRequestsCount
+      starsCount
     }
   }
 `
