@@ -4,6 +4,7 @@ import logging
 
 import requests
 import strawberry
+from django.db.models import Q
 from github import Github
 
 from apps.github.models import User as GithubUser
@@ -41,18 +42,15 @@ class UserMutations:
             github_user = GithubUser.update_data(gh_user, email=gh_user_email)
             if not github_user:
                 return GitHubAuthResult(auth_user=None)
-
             role = "contributor"
-            gh_username = gh_user.login.lower()
-            gh_full_name = (gh_user.name or "").lower()
 
-            for project in Project.objects.all():
-                for leader in project.leaders_raw or []:
-                    if leader.lower() in {gh_username, gh_full_name}:
-                        role = "mentor"
-                        break
-                if role == "mentor":
-                    break
+            is_mentor = Project.objects.filter(
+                Q(leaders_raw__icontains=gh_user.login)
+                | Q(leaders_raw__icontains=gh_user.name or "")
+            ).exists()
+
+            if is_mentor:
+                role = "mentor"
 
             auth_user, created = User.objects.get_or_create(
                 username=gh_user.login,

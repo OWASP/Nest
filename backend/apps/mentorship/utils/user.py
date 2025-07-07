@@ -18,14 +18,11 @@ def get_authenticated_user(request) -> NestUser:
         github = Github(access_token)
         gh_user = github.get_user()
         login = gh_user.login
-        name = gh_user.name
     except Exception as err:
         raise Exception("GitHub token is invalid or expired") from err
 
     try:
-        github_user = GithubUser.objects.get(
-            models.Q(login__iexact=login.lower()) | models.Q(name__iexact=name.lower())
-        )
+        github_user = GithubUser.objects.get(models.Q(login__iexact=login.lower()))
     except GithubUser.DoesNotExist as err:
         raise Exception("No GithubUser found matching this login or name") from err
 

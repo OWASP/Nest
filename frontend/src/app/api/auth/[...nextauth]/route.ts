@@ -75,7 +75,7 @@ const authOptions = {
             token.role = data.githubAuth.authUser.role
           }
         } catch (error) {
-          throw new Error('GitHub authentication failed' + error.message)
+          throw new Error(`GitHub authentication failed ${error.message}`)
         }
       }
       return token

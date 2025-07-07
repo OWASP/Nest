@@ -22,8 +22,8 @@ const ModuleCard = ({ modules }: { modules: Module[] }) => {
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {displayedModule.map((module, index) => {
-          return <ModuleItem key={index} details={module} />
+        {displayedModule.map((module) => {
+          return <ModuleItem key={module.key || module.id} details={module} />
         })}
       </div>
       {modules.length > 4 && (

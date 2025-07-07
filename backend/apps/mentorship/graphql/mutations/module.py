@@ -145,7 +145,7 @@ class ModuleMutation:
             resolved_mentors = []
             for login in input_data.mentor_logins:
                 try:
-                    github_user = GithubUser.objects.get(login=login)
+                    github_user = GithubUser.objects.get(login__iexact=login.lower())
                 except GithubUser.DoesNotExist as err:
                     raise Exception("GitHub user not found") from err
 

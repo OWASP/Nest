@@ -42,6 +42,7 @@ const CreateProgramPage = () => {
         shouldShowTimeoutProgress: true,
       })
       router.push('/mentorship/programs')
+      return
     }
   }, [session, status, router])
 

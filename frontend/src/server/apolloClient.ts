@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
-import { getSession } from 'next-auth/react'
+import { getServerSession } from 'next-auth/next'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 import { SessionWithRole } from 'types/program'
 
@@ -9,7 +9,7 @@ async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
     let csrfToken = null
     const cookieValue = await getCsrfTokenOnServer()
-    const session = await getSession()
+    const session = await getServerSession()
     const accessToken = (session as SessionWithRole)?.accessToken
     csrfToken = cookieValue
     return {

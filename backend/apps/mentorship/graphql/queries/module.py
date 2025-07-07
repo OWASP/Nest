@@ -36,6 +36,7 @@ class ModuleQuery:
                 experience_level=module.experience_level,
                 mentors=list(module.mentors.all()),
                 program=module.program,
+                project_id=module.project_id,
                 started_at=module.started_at,
                 tags=module.tags,
             )
@@ -67,6 +68,7 @@ class ModuleQuery:
                 experience_level=module.experience_level,
                 mentors=list(module.mentors.all()),
                 program=module.program,
+                project_id=module.project_id,
                 started_at=module.started_at,
                 tags=module.tags,
             )
