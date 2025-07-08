@@ -103,6 +103,7 @@ class UserIndexMixin:
                 "repository_stars_count": rc.repository.stars_count,
             }
             for rc in RepositoryContributor.objects.filter(
+                repository__is_fork=False,
                 repository__organization__is_owasp_related_organization=True,
                 user=self,
             )
