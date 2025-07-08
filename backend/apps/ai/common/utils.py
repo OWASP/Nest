@@ -1,30 +1,38 @@
+"""AI utils."""
+
+import logging
 import time
 from datetime import UTC, datetime, timedelta
 
-from apps.ai.models.chunk import Chunk
 from apps.ai.common.constants import (
     DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
     MIN_REQUEST_INTERVAL_SECONDS,
 )
+from apps.ai.models.chunk import Chunk
+
+logger: logging.Logger = logging.getLogger(__name__)
+
 
 def create_chunks_and_embeddings(
     all_chunk_texts: list[str],
     content_object,
     openai_client,
 ) -> list[Chunk]:
-    """
-    Creates chunks and embeddings from given texts using OpenAI embeddings.
+    """Create chunks and embeddings from given texts using OpenAI embeddings.
 
     Args:
-        all_chunk_texts (list[str]): List of text chunks to embed.
-        content_object: The object to associate the chunks with.
-        openai_client: Initialized OpenAI client instance.
+      all_chunk_texts (list[str]): List of text chunks to embed.
+      content_object: The object to associate the chunks with.
+      openai_client: Initialized OpenAI client instance.
 
     Returns:
-        list[Chunk]: List of Chunk instances (not saved).
+      list[Chunk]: List of Chunk instances (not saved).
+
     """
     try:
-        last_request_time = datetime.now(UTC) - timedelta(seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS)
+        last_request_time = datetime.now(UTC) - timedelta(
+            seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS
+        )
         time_since_last_request = datetime.now(UTC) - last_request_time
 
         if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
@@ -51,6 +59,6 @@ def create_chunks_and_embeddings(
                 )
             )
         ]
-    except Exception as e:
-        print(f"OpenAI API error: {e}")
+    except Exception:
+        logger.exception("OpenAI API error")
         return []

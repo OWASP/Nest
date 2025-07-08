@@ -6,7 +6,7 @@ import openai
 from django.core.management.base import BaseCommand
 
 from apps.ai.common.constants import DELIMITER
-from apps.ai.common.create_chunks_and_embeddings import create_chunks_and_embeddings
+from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
 from apps.owasp.models.event import Event
 
