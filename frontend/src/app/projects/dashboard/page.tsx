@@ -54,16 +54,19 @@ const ProjectsDashboardPage: FC = () => {
       type: 'healthy',
       count: stats.projectsCountHealthy,
       icon: faCheck,
+      color: 'green',
     },
     {
       type: 'needsAttention',
       count: stats.projectsCountNeedAttention,
       icon: faWarning,
+      color: 'yellow',
     },
     {
       type: 'unhealthy',
       count: stats.projectsCountUnhealthy,
       icon: faRectangleXmark,
+      color: 'red',
     },
   ]
   return (
@@ -76,6 +79,7 @@ const ProjectsDashboardPage: FC = () => {
             type={item.type}
             count={item.count}
             icon={item.icon}
+            color={item.color}
           />
         ))}
       </div>
