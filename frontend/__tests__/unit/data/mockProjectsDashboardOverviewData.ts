@@ -3,7 +3,7 @@ export const mockProjectsDashboardOverviewData = {
     projectsCountHealthy: 542,
     projectsCountNeedAttention: 164,
     projectsCountUnhealthy: 252,
-    averageScore: 75,
+    averageScore: 78.5,
     totalContributors: 95848,
     totalForks: 48428,
     totalStars: 123456,
