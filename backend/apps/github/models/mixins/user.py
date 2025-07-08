@@ -11,7 +11,11 @@ class UserIndexMixin:
     @property
     def is_indexable(self):
         """Users to index."""
-        return not self.is_bot and self.login not in self.get_non_indexable_logins()
+        return (
+            not self.is_bot
+            and not self.login.endswith(("Bot", "-bot"))
+            and self.login not in self.get_non_indexable_logins()
+        )
 
     @property
     def idx_avatar_url(self) -> str:
@@ -98,7 +102,10 @@ class UserIndexMixin:
                 "repository_owner_key": rc.repository.owner.login.lower(),
                 "repository_stars_count": rc.repository.stars_count,
             }
-            for rc in RepositoryContributor.objects.filter(user=self)
+            for rc in RepositoryContributor.objects.filter(
+                repository__organization__is_owasp_related_organization=True,
+                user=self,
+            )
             .order_by("-contributions_count")
             .select_related("repository")[:TOP_REPOSITORY_CONTRIBUTORS_LIMIT]
         ]

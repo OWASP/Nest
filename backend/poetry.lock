@@ -137,14 +137,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.22.0"
+version = "4.22.1"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.22.0-py3-none-any.whl", hash = "sha256:f8161aa2c30da63f2ca782858f875a3f43dddad0b903746d6e042c0dd87935cc"},
-    {file = "algoliasearch-4.22.0.tar.gz", hash = "sha256:ab13fd7214eee6dce4f442ee35cd296fc3c74ece4337a0f9e1c25d8757b1ad41"},
+    {file = "algoliasearch-4.22.1-py3-none-any.whl", hash = "sha256:383db71f33b9a9499f527b77748e010a89d4c910771001ca082d4e54f7ae7db6"},
+    {file = "algoliasearch-4.22.1.tar.gz", hash = "sha256:78b225052247e49b3ea791e4e00aa372bc8fa09169a347397b444055c0fe6c34"},
 ]
 
 [package.dependencies]
@@ -205,14 +205,14 @@ trio = ["trio (>=0.26.1)"]
 
 [[package]]
 name = "asgiref"
-version = "3.9.0"
+version = "3.9.1"
 description = "ASGI specs, helper code, and adapters"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "asgiref-3.9.0-py3-none-any.whl", hash = "sha256:06a41250a0114d2b6f6a2cb3ab962147d355b53d1de15eebc34a9d04a7b79981"},
-    {file = "asgiref-3.9.0.tar.gz", hash = "sha256:3dd2556d0f08c4fab8a010d9ab05ef8c34565f6bf32381d17505f7ca5b273767"},
+    {file = "asgiref-3.9.1-py3-none-any.whl", hash = "sha256:f3bba7092a48005b5f5bacd747d36ee4a5a61f4a269a6df590b43144355ebd2c"},
+    {file = "asgiref-3.9.1.tar.gz", hash = "sha256:a5ab6582236218e5ef1648f242fd9f10626cfd4de8dc377db215d5d5098e3142"},
 ]
 
 [package.extras]
@@ -2116,14 +2116,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.93.0"
+version = "1.93.1"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "openai-1.93.0-py3-none-any.whl", hash = "sha256:3d746fe5498f0dd72e0d9ab706f26c91c0f646bf7459e5629af8ba7c9dbdf090"},
-    {file = "openai-1.93.0.tar.gz", hash = "sha256:988f31ade95e1ff0585af11cc5a64510225e4f5cd392698c675d0a9265b8e337"},
+    {file = "openai-1.93.1-py3-none-any.whl", hash = "sha256:a2c2946c4f21346d4902311a7440381fd8a33466ee7ca688133d1cad29a9357c"},
+    {file = "openai-1.93.1.tar.gz", hash = "sha256:11eb8932965d0f79ecc4cb38a60a0c4cef4bcd5fcf08b99fc9a399fa5f1e50ab"},
 ]
 
 [package.dependencies]

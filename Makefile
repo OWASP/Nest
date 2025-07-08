@@ -4,6 +4,8 @@ include docs/Makefile
 include frontend/Makefile
 include schema/Makefile
 
+MAKEFLAGS += --no-print-directory
+
 build:
 	@docker compose build
 

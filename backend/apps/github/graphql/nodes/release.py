@@ -35,7 +35,7 @@ class ReleaseNode:
         )
 
     @strawberry.field
-    def project_name(self) -> str:
+    def project_name(self) -> str | None:
         """Resolve project name."""
         return (
             self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
@@ -44,7 +44,7 @@ class ReleaseNode:
         )
 
     @strawberry.field
-    def repository_name(self) -> str:
+    def repository_name(self) -> str | None:
         """Resolve repository name."""
         return self.repository.name if self.repository else None
 

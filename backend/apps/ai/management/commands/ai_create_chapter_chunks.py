@@ -1,17 +1,12 @@
 """A command to create chunks of OWASP chapter data for RAG."""
 
 import os
-import time
-from datetime import UTC, datetime, timedelta
 
 import openai
 from django.core.management.base import BaseCommand
 
-from apps.ai.common.constants import (
-    DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
-    DELIMITER,
-    MIN_REQUEST_INTERVAL_SECONDS,
-)
+from apps.ai.common.constants import DELIMITER
+from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
 from apps.owasp.models.chapter import Chapter
 
@@ -65,7 +60,7 @@ class Command(BaseCommand):
 
             batch_chunks = []
             for chapter in batch_chapters:
-                batch_chunks.extend(self.create_chunks(chapter))
+                batch_chunks.extend(self.handle_chunks(chapter))
 
             if batch_chunks:
                 Chunk.bulk_save(batch_chunks)
@@ -73,7 +68,7 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Completed processing all {total_chapters} chapters")
 
-    def create_chunks(self, chapter: Chapter) -> list[Chunk]:
+    def handle_chunks(self, chapter: Chapter) -> list[Chunk]:
         """Create chunks from a chapter's data."""
         prose_content, metadata_content = self.extract_chapter_content(chapter)
 
@@ -89,41 +84,11 @@ class Command(BaseCommand):
             self.stdout.write(f"No content to chunk for chapter {chapter.key}")
             return []
 
-        try:
-            time_since_last_request = datetime.now(UTC) - getattr(
-                self,
-                "last_request_time",
-                datetime.now(UTC) - timedelta(seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS),
-            )
-
-            if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
-                time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
-
-            response = self.openai_client.embeddings.create(
-                input=all_chunk_texts,
-                model="text-embedding-3-small",
-            )
-            self.last_request_time = datetime.now(UTC)
-
-            return [
-                chunk
-                for text, embedding in zip(
-                    all_chunk_texts,
-                    [d.embedding for d in response.data],
-                    strict=True,
-                )
-                if (
-                    chunk := Chunk.update_data(
-                        text=text,
-                        content_object=chapter,
-                        embedding=embedding,
-                        save=False,
-                    )
-                )
-            ]
-        except openai.OpenAIError as e:
-            self.stdout.write(self.style.ERROR(f"OpenAI API error for chapter {chapter.key}: {e}"))
-            return []
+        return create_chunks_and_embeddings(
+            all_chunk_texts=all_chunk_texts,
+            content_object=chapter,
+            openai_client=self.openai_client,
+        )
 
     def extract_chapter_content(self, chapter: Chapter) -> tuple[str, str]:
         """Extract and separate prose content from metadata for a chapter.
@@ -164,9 +129,6 @@ class Command(BaseCommand):
         if location_parts:
             metadata_parts.append(f"Location Information: {', '.join(location_parts)}")
 
-        if chapter.level:
-            metadata_parts.append(f"Chapter Level: {chapter.level}")
-
         if chapter.currency:
             metadata_parts.append(f"Currency: {chapter.currency}")
 
@@ -180,19 +142,7 @@ class Command(BaseCommand):
             metadata_parts.append(f"Topics: {', '.join(chapter.topics)}")
 
         if chapter.leaders_raw:
-            leaders_info = []
-            for leader in chapter.leaders_raw:
-                if isinstance(leader, dict):
-                    leader_name = leader.get("name", "")
-                    leader_email = leader.get("email", "")
-                    if leader_name:
-                        leader_text = f"Leader: {leader_name}"
-                        if leader_email:
-                            leader_text += f" ({leader_email})"
-                        leaders_info.append(leader_text)
-
-            if leaders_info:
-                metadata_parts.append(f"Chapter Leaders: {', '.join(leaders_info)}")
+            metadata_parts.append(f"Chapter Leaders: {', '.join(chapter.leaders_raw)}")
 
         if chapter.related_urls:
             valid_urls = [

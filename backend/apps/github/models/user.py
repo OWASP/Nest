@@ -5,7 +5,11 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.github.constants import GITHUB_GHOST_USER_LOGIN, OWASP_FOUNDATION_LOGIN
+from apps.github.constants import (
+    GITHUB_ACTIONS_USER_LOGIN,
+    GITHUB_GHOST_USER_LOGIN,
+    OWASP_FOUNDATION_LOGIN,
+)
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.organization import Organization
@@ -96,6 +100,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         return {
+            GITHUB_ACTIONS_USER_LOGIN,
             GITHUB_GHOST_USER_LOGIN,
             OWASP_FOUNDATION_LOGIN,
             *Organization.get_logins(),
