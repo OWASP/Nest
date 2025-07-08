@@ -54,19 +54,38 @@ const ProjectsDashboardPage: FC = () => {
       type: 'healthy',
       count: stats.projectsCountHealthy,
       icon: faCheck,
-      color: 'green',
     },
     {
       type: 'needsAttention',
       count: stats.projectsCountNeedAttention,
       icon: faWarning,
-      color: 'yellow',
     },
     {
       type: 'unhealthy',
       count: stats.projectsCountUnhealthy,
       icon: faRectangleXmark,
-      color: 'red',
+    },
+  ]
+  const dashboardCardsItems = [
+    {
+      title: 'Average Score',
+      icon: faChartLine,
+      stats: `${stats.averageScore.toFixed(1)}`,
+    },
+    {
+      title: 'Total Contributors',
+      icon: faUsers,
+      stats: millify(stats.totalContributors),
+    },
+    {
+      title: 'Total Forks',
+      icon: faCodeBranch,
+      stats: millify(stats.totalForks),
+    },
+    {
+      title: 'Total Stars',
+      icon: faStar,
+      stats: millify(stats.totalStars),
     },
   ]
   return (
@@ -79,23 +98,13 @@ const ProjectsDashboardPage: FC = () => {
             type={item.type}
             count={item.count}
             icon={item.icon}
-            color={item.color}
           />
         ))}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <DashboardCard
-          title="Average Score"
-          icon={faChartLine}
-          stats={`${stats.averageScore.toFixed(1)}`}
-        />
-        <DashboardCard
-          title="Total Contributors"
-          icon={faUsers}
-          stats={millify(stats.totalContributors)}
-        />
-        <DashboardCard title="Total Forks" icon={faCodeBranch} stats={millify(stats.totalForks)} />
-        <DashboardCard title="Total Stars" icon={faStar} stats={millify(stats.totalStars)} />
+        {dashboardCardsItems.map((item) => (
+          <DashboardCard key={item.title} title={item.title} icon={item.icon} stats={item.stats} />
+        ))}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
         <LineChart
@@ -108,8 +117,7 @@ const ProjectsDashboardPage: FC = () => {
             },
           ]}
           labels={stats.monthlyOverallScoresMonths.map((month) => {
-            const date = new Date()
-            date.setMonth(month - 1) // Adjust month to 0-indexed
+            const date = new Date(2025, month - 1, 1)
             return date.toLocaleString('default', { month: 'short' })
           })}
         />
