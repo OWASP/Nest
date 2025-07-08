@@ -9,9 +9,7 @@ const ProjectsHealthDashboardLayout: React.FC<{ readonly children: React.ReactNo
     <FontLoaderWrapper>
       <div className="flex flex-col md:flex-row">
         <ProjectsDashboardNavBar />
-        <main className="flex-1 p-4" role="main">
-          {children}
-        </main>
+        <main className="flex-1 p-4">{children}</main>
       </div>
     </FontLoaderWrapper>
   )
