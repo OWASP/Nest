@@ -1,17 +1,12 @@
 """A command to create chunks of OWASP event data for RAG."""
 
 import os
-import time
-from datetime import UTC, datetime, timedelta
 
 import openai
 from django.core.management.base import BaseCommand
 
-from apps.ai.common.constants import (
-    DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
-    DELIMITER,
-    MIN_REQUEST_INTERVAL_SECONDS,
-)
+from apps.ai.common.constants import DELIMITER
+from apps.ai.common.create_chunks_and_embeddings import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
 from apps.owasp.models.event import Event
 
@@ -65,7 +60,7 @@ class Command(BaseCommand):
 
             batch_chunks = []
             for event in batch_events:
-                batch_chunks.extend(self.create_chunks(event))
+                batch_chunks.extend(self.handle_chunks(event))
 
             if batch_chunks:
                 Chunk.bulk_save(batch_chunks)
@@ -73,7 +68,7 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Completed processing all {total_events} events")
 
-    def create_chunks(self, event: Event) -> list[Chunk]:
+    def handle_chunks(self, event: Event) -> list[Chunk]:
         """Create chunks from an event's data."""
         prose_content, metadata_content = self.extract_event_content(event)
 
@@ -89,41 +84,11 @@ class Command(BaseCommand):
             self.stdout.write(f"No content to chunk for event {event.key}")
             return []
 
-        try:
-            time_since_last_request = datetime.now(UTC) - getattr(
-                self,
-                "last_request_time",
-                datetime.now(UTC) - timedelta(seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS),
-            )
-
-            if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
-                time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
-
-            response = self.openai_client.embeddings.create(
-                input=all_chunk_texts,
-                model="text-embedding-3-small",
-            )
-            self.last_request_time = datetime.now(UTC)
-
-            return [
-                chunk
-                for text, embedding in zip(
-                    all_chunk_texts,
-                    [d.embedding for d in response.data],
-                    strict=True,
-                )
-                if (
-                    chunk := Chunk.update_data(
-                        text=text,
-                        content_object=event,
-                        embedding=embedding,
-                        save=False,
-                    )
-                )
-            ]
-        except openai.OpenAIError as e:
-            self.stdout.write(self.style.ERROR(f"OpenAI API error for event {event.key}: {e}"))
-            return []
+        return create_chunks_and_embeddings(
+            all_chunk_texts,
+            content_object=event,
+            openai_client=self.openai_client,
+        )
 
     def extract_event_content(self, event: Event) -> tuple[str, str]:
         """Extract and separate prose content from metadata for an event.
