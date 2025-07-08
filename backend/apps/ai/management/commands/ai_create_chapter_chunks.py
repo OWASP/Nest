@@ -129,9 +129,6 @@ class Command(BaseCommand):
         if location_parts:
             metadata_parts.append(f"Location Information: {', '.join(location_parts)}")
 
-        if chapter.level:
-            metadata_parts.append(f"Chapter Level: {chapter.level}")
-
         if chapter.currency:
             metadata_parts.append(f"Currency: {chapter.currency}")
 
@@ -145,19 +142,7 @@ class Command(BaseCommand):
             metadata_parts.append(f"Topics: {', '.join(chapter.topics)}")
 
         if chapter.leaders_raw:
-            leaders_info = []
-            for leader in chapter.leaders_raw:
-                if isinstance(leader, dict):
-                    leader_name = leader.get("name", "")
-                    leader_email = leader.get("email", "")
-                    if leader_name:
-                        leader_text = f"Leader: {leader_name}"
-                        if leader_email:
-                            leader_text += f" ({leader_email})"
-                        leaders_info.append(leader_text)
-
-            if leaders_info:
-                metadata_parts.append(f"Chapter Leaders: {', '.join(leaders_info)}")
+            metadata_parts.append(f"Chapter Leaders: {', '.join(chapter.leaders_raw)}")
 
         if chapter.related_urls:
             valid_urls = [
