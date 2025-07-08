@@ -1,6 +1,9 @@
 """Mentorship Module GraphQL Mutations."""
 
+import logging
+
 import strawberry
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 
 from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
@@ -14,6 +17,8 @@ from apps.mentorship.models.program import Program
 from apps.mentorship.utils.user import get_authenticated_user
 from apps.owasp.models import Project
 
+logger = logging.getLogger(__name__)
+
 
 @strawberry.type
 class ModuleMutation:
@@ -26,28 +31,46 @@ class ModuleMutation:
         user = get_authenticated_user(request)
         try:
             program = Program.objects.get(key=input_data.program_key)
-        except Program.DoesNotExist as err:
-            raise Exception("Program not found") from err
+        except Program.DoesNotExist as e:
+            msg = "Program not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from e
 
         try:
             project = Project.objects.get(id=input_data.project_id)
-        except Project.DoesNotExist as err:
-            raise Exception("Project not found") from err
+        except Project.DoesNotExist as e:
+            msg = "Project with not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from e
 
         try:
             admin = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            raise Exception("Only mentors can create modules") from err
+        except Mentor.DoesNotExist as e:
+            msg = "Only mentors can create modules."
+            logger.warning(
+                "User '%s' attempted to create a module but is not a mentor.",
+                user.email,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg) from e
 
         if admin not in program.admins.all():
-            raise Exception("You must be an admin of this program to create a module")
+            msg = "You must be an admin of this program to create a module."
+            logger.warning(
+                "Permission denied for user '%s' to create module in program '%s'.",
+                user.email,
+                program.key,
+            )
+            raise PermissionDenied(msg)
 
         if (
             input_data.ended_at is not None
             and input_data.started_at is not None
             and input_data.ended_at <= input_data.started_at
         ):
-            raise Exception("End date must be after start date")
+            msg = "End date must be after start date."
+            logger.warning("Validation error creating module: %s", msg)
+            raise ValidationError(msg)
 
         module = Module.objects.create(
             name=input_data.name,
@@ -65,9 +88,11 @@ class ModuleMutation:
         resolved_mentors = [admin]
         for login in input_data.mentor_logins or []:
             try:
-                github_user = GithubUser.objects.get(login=login)
-            except GithubUser.DoesNotExist as err:
-                raise Exception("GitHub username not found.") from err
+                github_user = GithubUser.objects.get(login__iexact=login.lower())
+            except GithubUser.DoesNotExist as e:
+                msg = f"GitHub user '{login}' not found."
+                logger.warning(msg, exc_info=True)
+                raise ObjectDoesNotExist(msg) from e
 
             mentor_obj, _ = Mentor.objects.get_or_create(github_user=github_user)
             resolved_mentors.append(mentor_obj)
@@ -97,23 +122,39 @@ class ModuleMutation:
 
         try:
             module = Module.objects.select_related("program").get(key=input_data.key)
-        except Module.DoesNotExist as err:
-            raise Exception("Module not found") from err
+        except Module.DoesNotExist as e:
+            msg = "Module not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from e
 
         try:
             admin = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            raise Exception("Only mentors can edit modules") from err
+        except Mentor.DoesNotExist as e:
+            msg = "Only mentors can edit modules."
+            logger.warning(
+                "User '%s' attempted to edit a module but is not a mentor.",
+                user.email,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg) from e
 
         if admin not in module.program.admins.all():
-            raise Exception("You must be an admin of the module's program to edit it")
+            msg = "You must be an admin of the module's program to edit it."
+            logger.warning(
+                "Permission denied for user '%s' to edit module '%s'",
+                user.email,
+                module.name,
+            )
+            raise PermissionDenied(msg)
 
         if (
             input_data.ended_at is not None
             and input_data.started_at is not None
             and input_data.ended_at <= input_data.started_at
         ):
-            raise Exception("End date must be after start date")
+            msg = "End date must be after start date."
+            logger.warning("Validation error updating module '%s': %s", module.key, msg)
+            raise ValidationError(msg)
 
         if input_data.experience_level:
             module.experience_level = input_data.experience_level.value
@@ -122,8 +163,10 @@ class ModuleMutation:
             try:
                 project = Project.objects.get(id=input_data.project_id)
                 module.project = project
-            except Project.DoesNotExist as err:
-                raise Exception("Project not found") from err
+            except Project.DoesNotExist as e:
+                msg = f"Project with id '{input_data.project_id}' not found."
+                logger.warning(msg, exc_info=True)
+                raise ObjectDoesNotExist(msg) from e
 
         update_fields = {
             "key": slugify(input_data.name),
@@ -146,8 +189,10 @@ class ModuleMutation:
             for login in input_data.mentor_logins:
                 try:
                     github_user = GithubUser.objects.get(login__iexact=login.lower())
-                except GithubUser.DoesNotExist as err:
-                    raise Exception("GitHub user not found") from err
+                except GithubUser.DoesNotExist as e:
+                    msg = "GitHub user not found."
+                    logger.warning(msg, exc_info=True)
+                    raise ObjectDoesNotExist(msg) from e
 
                 mentor_obj, _ = Mentor.objects.get_or_create(github_user=github_user)
                 resolved_mentors.append(mentor_obj)

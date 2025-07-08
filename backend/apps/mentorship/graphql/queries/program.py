@@ -1,12 +1,16 @@
 """OWASP program GraphQL queries."""
 
+import logging
+
 import strawberry
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.mentorship.graphql.nodes.enum import ExperienceLevelEnum, ProgramStatusEnum
 from apps.mentorship.graphql.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 
 PAGE_SIZE = 25
+logger = logging.getLogger(__name__)
 
 
 @strawberry.type
@@ -70,7 +74,9 @@ class ProgramQuery:
         try:
             program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
         except Program.DoesNotExist as err:
-            raise Exception("Program not found") from err
+            msg = f"Program with key '{program_key}' not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from err
 
         return ProgramNode(
             id=program.id,

@@ -1,10 +1,15 @@
 """OWASP module GraphQL queries."""
 
+import logging
+
 import strawberry
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.mentorship.graphql.nodes.modules import ModuleNode
 from apps.mentorship.models import Module, Program
 from apps.owasp.models import Project
+
+logger = logging.getLogger(__name__)
 
 
 @strawberry.type
@@ -17,7 +22,9 @@ class ModuleQuery:
         try:
             program = Program.objects.get(key=program_key)
         except Program.DoesNotExist as err:
-            raise Exception("Program not found") from err
+            msg = f"Program with key '{program_key}' not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from err
 
         modules = (
             Module.objects.filter(program=program)
@@ -49,7 +56,9 @@ class ModuleQuery:
         try:
             project = Project.objects.get(key=project_key)
         except Project.DoesNotExist as err:
-            raise Exception("Project not found") from err
+            msg = f"Project with key '{project_key}' not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from err
 
         modules = (
             Module.objects.filter(project=project)
@@ -85,7 +94,9 @@ class ModuleQuery:
                 .get(key=module_key)
             )
         except Module.DoesNotExist as err:
-            raise Exception("Module not found") from err
+            msg = f"Module with key '{module_key}' not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from err
 
         return ModuleNode(
             id=module.id,

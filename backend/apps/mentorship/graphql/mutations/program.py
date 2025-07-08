@@ -1,6 +1,9 @@
 """Mentorship Program GraphQL Mutations."""
 
+import logging
+
 import strawberry
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 
 from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
@@ -11,6 +14,8 @@ from apps.mentorship.graphql.nodes.program import (
 )
 from apps.mentorship.models import Mentor, Program
 from apps.mentorship.utils.user import get_authenticated_user
+
+logger = logging.getLogger(__name__)
 
 
 @strawberry.type
@@ -23,11 +28,20 @@ class ProgramMutation:
         request = info.context.request
         user = get_authenticated_user(request)
 
+        # Use PermissionDenied for authorization checks
         if user.role != "mentor":
-            raise Exception("You must be a mentor to create a program")
+            msg = "You must be a mentor to create a program."
+            logger.warning(
+                "Permission denied for user '%s' to create a program: not a mentor.",
+                user.email,
+            )
+            raise PermissionDenied(msg)
 
+        # Use ValidationError for input validation
         if input_data.ended_at <= input_data.started_at:
-            raise Exception("End date must be after start date")
+            msg = "End date must be after start date."
+            logger.warning("Validation error creating program '%s': %s", input_data.name, msg)
+            raise ValidationError(msg)
 
         mentor, _ = Mentor.objects.get_or_create(
             nest_user=user, defaults={"github_user": user.github_user}
@@ -47,14 +61,16 @@ class ProgramMutation:
         )
 
         resolved_mentors = {mentor}
-
         for login in input_data.admin_logins:
             try:
                 github_user = GithubUser.objects.get(login__iexact=login.lower())
+                m, _ = Mentor.objects.get_or_create(github_user=github_user)
+                resolved_mentors.add(m)
             except GithubUser.DoesNotExist as err:
-                raise Exception("GitHub user with username not found.") from err
-            m, _ = Mentor.objects.get_or_create(github_user=github_user)
-            resolved_mentors.add(m)
+                # Use ObjectDoesNotExist for "not found" errors with explicit chaining
+                msg = f"GitHub user with username '{login}' not found."
+                logger.warning(msg, exc_info=True)
+                raise ObjectDoesNotExist(msg) from err
 
         program.admins.set(resolved_mentors)
 
@@ -82,22 +98,38 @@ class ProgramMutation:
         try:
             program = Program.objects.get(key=input_data.key)
         except Program.DoesNotExist as err:
-            raise Exception("Program not found") from err
+            msg = f"Program with key '{input_data.key}' not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from err
 
         try:
             admin = Mentor.objects.get(nest_user=user)
         except Mentor.DoesNotExist as err:
-            raise Exception("You must be a mentor to update a program") from err
+            msg = "You must be a mentor to update a program."
+            logger.warning(
+                "User '%s' is not a mentor and cannot update programs.",
+                user.email,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg) from err
 
         if admin not in program.admins.all():
-            raise Exception("You must be an admin of this program to update it")
+            msg = "You must be an admin of this program to update it."
+            logger.warning(
+                "Permission denied for user '%s' to update program '%s'.",
+                user.email,
+                program.key,
+            )
+            raise PermissionDenied(msg)
 
         if (
             input_data.ended_at is not None
             and input_data.started_at is not None
             and input_data.ended_at <= input_data.started_at
         ):
-            raise Exception("End date must be after start date")
+            msg = "End date must be after start date."
+            logger.warning("Validation error updating program '%s': %s", program.key, msg)
+            raise ValidationError(msg)
 
         simple_fields = {
             "key": slugify(input_data.name),
@@ -127,11 +159,12 @@ class ProgramMutation:
             for login in input_data.admin_logins:
                 try:
                     github_user = GithubUser.objects.get(login__iexact=login.lower())
+                    mentor, _ = Mentor.objects.get_or_create(github_user=github_user)
+                    resolved_mentors.append(mentor)
                 except GithubUser.DoesNotExist as err:
-                    raise Exception("GitHub user not found.") from err
-
-                mentor, _ = Mentor.objects.get_or_create(github_user=github_user)
-                resolved_mentors.append(mentor)
+                    msg = f"GitHub user '{login}' not found."
+                    logger.warning(msg, exc_info=True)
+                    raise ObjectDoesNotExist(msg) from err
 
             program.admins.set(resolved_mentors)
 
