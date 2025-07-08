@@ -123,7 +123,6 @@ test.describe('Project Details Page', () => {
     await expect(page.getByText('Pull Requests Trend')).toBeVisible()
     await expect(page.getByText('Stars Trend')).toBeVisible()
     await expect(page.getByText('Forks Trend')).toBeVisible()
-    await expect(page.getByText('Days Since Last Commit')).toBeVisible()
-    await expect(page.getByText('Days Since Last Release')).toBeVisible()
+    await expect(page.getByText('Days Since Last Commit and Release')).toBeVisible()
   })
 })
