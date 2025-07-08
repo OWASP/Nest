@@ -79,7 +79,7 @@ describe('ProjectsDashboardOverviewPage', () => {
       mockProjectsDashboardOverviewData.projectHealthStats.projectsCountUnhealthy.toString()
     )
     const averageScore = screen.getByText(
-      `%${mockProjectsDashboardOverviewData.projectHealthStats.averageScore.toFixed(1)}`
+      mockProjectsDashboardOverviewData.projectHealthStats.averageScore.toFixed(1)
     )
     const totalContributors = screen.getByText(
       millify(mockProjectsDashboardOverviewData.projectHealthStats.totalContributors)

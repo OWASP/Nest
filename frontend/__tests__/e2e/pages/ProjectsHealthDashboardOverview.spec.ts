@@ -43,9 +43,7 @@ test.describe('Projects Health Dashboard Overview', () => {
     ).toBeVisible()
     // Check for average score
     await expect(
-      page.getByText(
-        `%${mockProjectsDashboardOverviewData.projectHealthStats.averageScore.toFixed(1)}`
-      )
+      page.getByText(mockProjectsDashboardOverviewData.projectHealthStats.averageScore.toFixed(1))
     ).toBeVisible()
     // Check for total contributors
     await expect(
