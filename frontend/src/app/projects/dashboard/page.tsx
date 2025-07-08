@@ -87,7 +87,7 @@ const ProjectsDashboardPage: FC = () => {
         <DashboardCard
           title="Average Score"
           icon={faChartLine}
-          stats={`%${stats.averageScore.toFixed(1)}`}
+          stats={`${stats.averageScore.toFixed(1)}`}
         />
         <DashboardCard
           title="Total Contributors"

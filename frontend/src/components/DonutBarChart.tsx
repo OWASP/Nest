@@ -40,6 +40,9 @@ const DonutBarChart: React.FC<{
                 colors: theme === 'dark' ? '#ececec' : '#1E1E2C',
               },
             },
+            stroke: {
+              show: false,
+            },
             colors: [greenColor, orangeColor, redColor],
             labels: ['Healthy Projects', 'Projects Needing Attention', 'Unhealthy Projects'],
           }}

@@ -21,9 +21,9 @@ const ProjectTypeDashboardCard: FC<{
     <SecondaryCard
       title={title}
       icon={icon}
-      className={`transition-colors duration-300 hover:bg-${color}-200 dark:bg-${color}-800 dark:text-${color}-400 dark:hover:bg-${color}-700 text-${color}-800 bg-${color}-100 hover:text-${color}-800`}
+      className={`transition-colors duration-300 hover:bg-${color}-200 dark:bg-${color}-800 dark:text-${color}-400 dark:hover:bg-${color}-700 text-${color}-800 bg-${color}-100 hover:text-${color}-800 overflow-hidden`}
     >
-      <p className="text-3xl font-bold">{count}</p>
+      <p className="text-2xl font-bold md:text-3xl">{count}</p>
     </SecondaryCard>
   )
 }
