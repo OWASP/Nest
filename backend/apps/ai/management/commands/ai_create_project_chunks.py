@@ -1,17 +1,12 @@
 """A command to create chunks of OWASP project data for RAG."""
 
 import os
-import time
-from datetime import UTC, datetime, timedelta
 
 import openai
 from django.core.management.base import BaseCommand
 
-from apps.ai.common.constants import (
-    DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
-    DELIMITER,
-    MIN_REQUEST_INTERVAL_SECONDS,
-)
+from apps.ai.common.constants import DELIMITER
+from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
 from apps.owasp.models.project import Project
 
@@ -50,7 +45,7 @@ class Command(BaseCommand):
         if not (total_projects := queryset.count()):
             self.stdout.write("No projects found to process")
             return
-        
+
         self.stdout.write(f"Found {total_projects} projects to process")
 
         batch_size = options["batch_size"]
@@ -85,41 +80,11 @@ class Command(BaseCommand):
             self.stdout.write(f"No content to chunk for project {project.key}")
             return []
 
-        try:
-            time_since_last_request = datetime.now(UTC) - getattr(
-                self,
-                "last_request_time",
-                datetime.now(UTC) - timedelta(seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS),
-            )
-
-            if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
-                time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
-
-            response = self.openai_client.embeddings.create(
-                input=all_chunk_texts,
-                model="text-embedding-3-small",
-            )
-            self.last_request_time = datetime.now(UTC)
-
-            return [
-                chunk
-                for text, embedding in zip(
-                    all_chunk_texts,
-                    [d.embedding for d in response.data],
-                    strict=True,
-                )
-                if (
-                    chunk := Chunk.update_data(
-                        text=text,
-                        content_object=project,
-                        embedding=embedding,
-                        save=False,
-                    )
-                )
-            ]
-        except openai.OpenAIError as e:
-            self.stdout.write(self.style.ERROR(f"OpenAI API error for project {project.key}: {e}"))
-            return []
+        return create_chunks_and_embeddings(
+            all_chunk_texts=all_chunk_texts,
+            content_object=project,
+            openai_client=self.openai_client,
+        )
 
     def extract_project_content(self, project: Project) -> tuple[str, str]:
         prose_parts = []
@@ -128,7 +93,7 @@ class Command(BaseCommand):
         if project.name:
             metadata_parts.append(f"Project Name: {project.name}")
 
-        if project.description :
+        if project.description:
             prose_parts.append(f"Description: {project.description}")
 
         if project.summary:
@@ -142,8 +107,8 @@ class Command(BaseCommand):
 
         if hasattr(project, "owasp_repository") and project.owasp_repository:
             repo = project.owasp_repository
-            if repo.description :
-              prose_parts.append(f"Repository Description: {repo.description}")
+            if repo.description:
+                prose_parts.append(f"Repository Description: {repo.description}")
             if repo.topics:
                 metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
 
@@ -178,19 +143,7 @@ class Command(BaseCommand):
             metadata_parts.append("Project Statistics: " + ", ".join(stats_parts))
 
         if project.leaders_raw:
-            leaders_info = []
-            for leader in project.leaders_raw:
-                if isinstance(leader, dict):
-                    leader_name = leader.get("name", "")
-                    leader_email = leader.get("email", "")
-                    if leader_name:
-                        leader_text = f"Leader: {leader_name}"
-                        if leader_email:
-                            leader_text += f" ({leader_email})"
-                        leaders_info.append(leader_text)
-
-            if leaders_info:
-                metadata_parts.append("Project Leaders: " + ", ".join(leaders_info))
+            metadata_parts.append(f"Project Leaders: {', '.join(project.leaders_raw)}")
 
         if project.related_urls:
             valid_urls = [
