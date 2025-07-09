@@ -46,7 +46,7 @@ export interface Module {
 export type SessionWithRole = {
   accessToken?: string
   user?: {
-    role?: string
-    username?: string
+    roles?: [string]
+    login?: string
   }
 }

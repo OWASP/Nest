@@ -2,3 +2,4 @@
 
 from .module import ModuleMutation
 from .program import ProgramMutation
+from .mentorship import MentorshipMutations

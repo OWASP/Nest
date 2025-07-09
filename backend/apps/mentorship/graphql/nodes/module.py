@@ -21,10 +21,14 @@ class ModuleNode:
     ended_at: datetime
     experience_level: ExperienceLevelEnum
     program: ProgramNode | None = None
-    mentors: list[MentorNode]
     project_id: strawberry.ID | None = None
     started_at: datetime
     tags: list[str] | None = None
+
+    @strawberry.field
+    def mentors(self) -> list["MentorNode"]:
+        """Resolver to get the list of mentors for this module."""
+        return self.mentors.all()
 
 
 @strawberry.input

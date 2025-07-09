@@ -53,7 +53,7 @@ class Program(MatchingAttributes, StartEndRange, TimestampedModel):
         unique=True,
         verbose_name="Name",
     )
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    key = models.CharField(verbose_name="Key", max_length=200, unique=True)
 
     status = models.CharField(
         verbose_name="Status",

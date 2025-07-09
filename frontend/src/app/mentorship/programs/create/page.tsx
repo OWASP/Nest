@@ -25,14 +25,13 @@ const CreateProgramPage = () => {
     experienceLevels: [] as string[],
     tags: '',
     domains: '',
-    adminLogins: '',
     status: 'DRAFT',
   })
 
   useEffect(() => {
     if (status === 'loading') return
-    const userRole = (session as SessionWithRole)?.user?.role
-    if (!session || userRole !== 'mentor') {
+    const isMentor = (session as SessionWithRole)?.user?.roles.includes('mentor');
+    if (!session || !isMentor) {
       addToast({
         title: 'Access Denied',
         description: 'You must be a mentor to create a program.',
@@ -64,10 +63,6 @@ const CreateProgramPage = () => {
         domains: formData.domains
           .split(',')
           .map((d) => d.trim())
-          .filter(Boolean),
-        adminLogins: formData.adminLogins
-          .split(',')
-          .map((login) => login.trim())
           .filter(Boolean),
         status: formData.status,
       }

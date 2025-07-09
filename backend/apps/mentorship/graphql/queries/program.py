@@ -5,7 +5,6 @@ import logging
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist
 
-from apps.mentorship.graphql.nodes.enum import ExperienceLevelEnum, ProgramStatusEnum
 from apps.mentorship.graphql.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 
@@ -20,6 +19,7 @@ class ProgramQuery:
     @strawberry.field
     def all_programs(
         self,
+        info: strawberry.Info,
         page: int = 1,
         search: str = "",
         mentor_username: str | None = None,
@@ -29,7 +29,9 @@ class ProgramQuery:
 
         if mentor_username:
             mentor_username = mentor_username.strip().lower()
-            queryset = queryset.filter(admins__github_user__login__iexact=mentor_username)
+            queryset = queryset.filter(
+                admins__github_user__login__iexact=mentor_username
+            )
 
         if search:
             queryset = queryset.filter(name__icontains=search)
@@ -40,59 +42,22 @@ class ProgramQuery:
 
         programs_qs = queryset.order_by("-nest_created_at")[offset : offset + PAGE_SIZE]
 
-        programs = [
-            ProgramNode(
-                id=program.id,
-                key=program.key,
-                name=program.name,
-                description=program.description,
-                admins=list(program.admins.all()),
-                domains=program.domains,
-                ended_at=program.ended_at,
-                experience_levels=(
-                    [ExperienceLevelEnum(level) for level in program.experience_levels]
-                    if program.experience_levels
-                    else []
-                ),
-                mentees_limit=program.mentees_limit,
-                started_at=program.started_at,
-                status=ProgramStatusEnum(program.status),
-                tags=program.tags,
-            )
-            for program in programs_qs
-        ]
-
         return PaginatedPrograms(
             total_pages=total_pages,
             current_page=page,
-            programs=programs,
+            programs=programs_qs,
         )
 
     @strawberry.field
     def program(self, program_key: str) -> ProgramNode:
-        """Get a program by ID."""
+        """Get a program by Key."""
         try:
-            program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
+            program = Program.objects.prefetch_related("admins__github_user").get(
+                key=program_key
+            )
         except Program.DoesNotExist as err:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
 
-        return ProgramNode(
-            id=program.id,
-            key=program.key,
-            name=program.name,
-            description=program.description,
-            admins=list(program.admins.all()),
-            domains=program.domains,
-            ended_at=program.ended_at,
-            experience_levels=(
-                [ExperienceLevelEnum(level) for level in program.experience_levels]
-                if program.experience_levels
-                else []
-            ),
-            mentees_limit=program.mentees_limit,
-            started_at=program.started_at,
-            status=ProgramStatusEnum(program.status),
-            tags=program.tags,
-        )
+        return program

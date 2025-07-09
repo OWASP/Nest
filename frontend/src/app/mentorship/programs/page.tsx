@@ -86,9 +86,14 @@ const ProgramsSearchPage: React.FC = () => {
   }, [error])
 
   const handleMyProgramsClick = () => {
-    const username = (session as SessionWithRole)?.user?.username
-    if (username) {
-      setMentor(username)
+
+    const githubLogin = (session as SessionWithRole)?.user?.login;
+
+    // A good debugging step to confirm the data is there
+    console.log('GitHub Login from session:', githubLogin);
+
+    if (githubLogin) {
+      setMentor(githubLogin) // Set the state to trigger the GraphQL query
       setPage(1)
     }
   }
@@ -139,7 +144,7 @@ const ProgramsSearchPage: React.FC = () => {
     >
       <div>
         <div className="mt-8 flex justify-end gap-4">
-          {(session as SessionWithRole)?.user?.role === 'mentor' && (
+          {(session as SessionWithRole)?.user?.roles.includes('mentor') && (
             <>
               <Button className="rounded-lg" onPress={handleCreateButton}>
                 Create

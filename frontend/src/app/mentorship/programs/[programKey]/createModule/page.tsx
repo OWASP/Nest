@@ -5,6 +5,7 @@ import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
+import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/queries/moduleQueries'
 import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
 import { SessionWithRole } from 'types/program'
@@ -13,13 +14,19 @@ import ModuleForm from 'components/mainmoduleCard'
 
 const CreateModulePage = () => {
   const router = useRouter()
-  const { programKey } = useParams()
+  const { programKey } = useParams() as { programKey: string }
   const { data: sessionData, status: sessionStatus } = useSession()
 
-  const [createModule, { loading }] = useMutation(CREATE_MODULE)
-  const { data, loading: queryLoading } = useQuery(GET_PROGRAM_ADMIN_DETAILS, {
+  const [createModule, { loading: mutationLoading }] = useMutation(CREATE_MODULE)
+
+  const {
+    data: programData,
+    loading: queryLoading,
+    error: queryError,
+  } = useQuery(GET_PROGRAM_ADMIN_DETAILS, {
     variables: { programKey },
     skip: !programKey,
+    fetchPolicy: 'network-only',
   })
 
   const [formData, setFormData] = useState({
@@ -34,34 +41,37 @@ const CreateModulePage = () => {
     mentorLogins: '',
   })
 
-  const currentUserLogin = (sessionData as SessionWithRole)?.user?.username || ''
-
-  const [checkedAccess, setCheckedAccess] = useState(false)
-  const [hasAccess, setHasAccess] = useState(false)
+  const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
 
   useEffect(() => {
-    if (sessionStatus === 'loading' || queryLoading) return
+    if (sessionStatus === 'loading' || queryLoading) {
+      return
+    }
 
-    const programAdmins = data?.program?.admins || []
-    const isAdmin = programAdmins.some(
-      (admin: { name: string; login: string }) => admin.login === currentUserLogin
+    if (queryError || !programData?.program || sessionStatus === 'unauthenticated') {
+      setAccessStatus('denied')
+      return
+    }
+
+    const currentUserLogin = (sessionData as SessionWithRole)?.user?.login
+    const isAdmin = programData.program.admins?.some(
+      (admin: { login: string }) => admin.login === currentUserLogin
     )
 
-    setHasAccess(isAdmin)
-    setCheckedAccess(true)
-
-    if (!isAdmin) {
+    if (isAdmin) {
+      setAccessStatus('allowed')
+    } else {
+      setAccessStatus('denied')
       addToast({
         title: 'Access Denied',
         description: 'Only program admins can create modules.',
         color: 'danger',
         variant: 'solid',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
+        timeout: 4000,
       })
-      router.replace(`/mentorship/programs/${programKey}`)
+      setTimeout(() => router.replace('/mentorship/programs'), 1500)
     }
-  }, [sessionStatus, queryLoading, data, currentUserLogin, router, programKey])
+  }, [sessionStatus, sessionData, queryLoading, programData, programKey, queryError, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -90,21 +100,39 @@ const CreateModulePage = () => {
       }
 
       await createModule({ variables: { input } })
+
+      addToast({
+        title: 'Module Created',
+        description: 'The new module has been successfully created.',
+        color: 'success',
+        variant: 'solid',
+        timeout: 3000,
+      })
+
       router.push(`/mentorship/programs/${programKey}`)
-    } catch (err) {
+    } catch (err: any) {
       addToast({
         title: 'Creation Failed',
         description: err.message || 'Something went wrong while creating the module.',
         color: 'danger',
         variant: 'solid',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
+        timeout: 4000,
       })
     }
   }
 
-  if (sessionStatus === 'loading' || queryLoading || !checkedAccess || !hasAccess) {
+  if (accessStatus === 'checking') {
     return <LoadingSpinner />
+  }
+
+  if (accessStatus === 'denied') {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to perform this action. You will be redirected."
+      />
+    )
   }
 
   return (
@@ -114,7 +142,7 @@ const CreateModulePage = () => {
       formData={formData}
       setFormData={setFormData}
       onSubmit={handleSubmit}
-      loading={loading}
+      loading={mutationLoading}
       isEdit={false}
     />
   )

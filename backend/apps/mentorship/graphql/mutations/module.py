@@ -3,21 +3,36 @@
 import logging
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
+from django.db import transaction
+from strawberry.exceptions import GraphQLError
 
 from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
-from apps.mentorship.graphql.nodes.modules import (
+from apps.mentorship.graphql.nodes.module import (
     CreateModuleInput,
     ModuleNode,
     UpdateModuleInput,
 )
-from apps.mentorship.models import Mentor, Module
-from apps.mentorship.models.program import Program
+from apps.mentorship.models import Mentor, Module, Program
 from apps.mentorship.utils.user import get_authenticated_user
 from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
+    """Helper to resolve a list of GitHub logins to a set of Mentor objects."""
+    mentors = set()
+    for login in logins:
+        try:
+            github_user = GithubUser.objects.get(login__iexact=login.lower())
+            mentor, _ = Mentor.objects.get_or_create(github_user=github_user)
+            mentors.add(mentor)
+        except GithubUser.DoesNotExist as e:
+            msg = f"GitHub user '{login}' not found."
+            logger.warning(msg, exc_info=True)
+            raise GraphQLError(msg) from e
+    return mentors
 
 
 @strawberry.type
@@ -25,52 +40,35 @@ class ModuleMutation:
     """GraphQL mutations related to module."""
 
     @strawberry.mutation
-    def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
-        """Create a new mentorship module if the user is a admin."""
-        request = info.context.request
-        user = get_authenticated_user(request)
+    @transaction.atomic
+    def create_module(
+        self, info: strawberry.Info, input_data: CreateModuleInput
+    ) -> ModuleNode:
+        """Create a new mentorship module. User must be an admin of the program."""
+        user = get_authenticated_user(info.context.request)
+
         try:
             program = Program.objects.get(key=input_data.program_key)
-        except Program.DoesNotExist as e:
-            msg = "Program not found."
-            logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from e
-
-        try:
             project = Project.objects.get(id=input_data.project_id)
+            creator_as_mentor = Mentor.objects.get(nest_user=user)
+        except Program.DoesNotExist as e:
+            raise GraphQLError("Program not found.") from e
         except Project.DoesNotExist as e:
-            msg = "Project with not found."
-            logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from e
-
-        try:
-            admin = Mentor.objects.get(nest_user=user)
+            raise GraphQLError("Project not found.") from e
         except Mentor.DoesNotExist as e:
-            msg = "Only mentors can create modules."
-            logger.warning(
-                "User '%s' attempted to create a module but is not a mentor.",
-                user.email,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from e
+            raise GraphQLError("Only mentors can create modules.") from e
 
-        if admin not in program.admins.all():
-            msg = "You must be an admin of this program to create a module."
-            logger.warning(
-                "Permission denied for user '%s' to create module in program '%s'.",
-                user.email,
-                program.key,
+        if creator_as_mentor not in program.admins.all():
+            raise GraphQLError(
+                "You must be an admin of this program to create a module."
             )
-            raise PermissionDenied(msg)
 
         if (
-            input_data.ended_at is not None
-            and input_data.started_at is not None
+            input_data.ended_at
+            and input_data.started_at
             and input_data.ended_at <= input_data.started_at
         ):
-            msg = "End date must be after start date."
-            logger.warning("Validation error creating module: %s", msg)
-            raise ValidationError(msg)
+            raise GraphQLError("End date must be after start date.")
 
         module = Module.objects.create(
             name=input_data.name,
@@ -85,131 +83,68 @@ class ModuleMutation:
             project=project,
         )
 
-        resolved_mentors = [admin]
-        for login in input_data.mentor_logins or []:
-            try:
-                github_user = GithubUser.objects.get(login__iexact=login.lower())
-            except GithubUser.DoesNotExist as e:
-                msg = f"GitHub user '{login}' not found."
-                logger.warning(msg, exc_info=True)
-                raise ObjectDoesNotExist(msg) from e
+        mentors_to_set = _resolve_mentors_from_logins(input_data.mentor_logins or [])
+        mentors_to_set.add(creator_as_mentor)
+        module.mentors.set(list(mentors_to_set))
 
-            mentor_obj, _ = Mentor.objects.get_or_create(github_user=github_user)
-            resolved_mentors.append(mentor_obj)
-
-        module.mentors.set(resolved_mentors)
-
-        return ModuleNode(
-            id=module.id,
-            key=module.key,
-            name=module.name,
-            description=module.description,
-            domains=module.domains,
-            ended_at=module.ended_at,
-            experience_level=module.experience_level,
-            mentors=list(module.mentors.all()),
-            program=module.program,
-            project_id=module.project.id if module.project else None,
-            started_at=module.started_at,
-            tags=module.tags,
-        )
+        return module
 
     @strawberry.mutation
-    def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
-        """Update an existing mentorship module. Only admins can update."""
-        request = info.context.request
-        user = get_authenticated_user(request)
+    @transaction.atomic
+    def update_module(
+        self, info: strawberry.Info, input_data: UpdateModuleInput
+    ) -> ModuleNode:
+        """Update an existing mentorship module. User must be an admin of the program."""
+        user = get_authenticated_user(info.context.request)
 
         try:
             module = Module.objects.select_related("program").get(key=input_data.key)
+            creator_as_mentor = Mentor.objects.get(nest_user=user)
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from e
-
-        try:
-            admin = Mentor.objects.get(nest_user=user)
+            raise GraphQLError("Module not found.") from e
         except Mentor.DoesNotExist as e:
-            msg = "Only mentors can edit modules."
-            logger.warning(
-                "User '%s' attempted to edit a module but is not a mentor.",
-                user.email,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from e
+            raise GraphQLError("Only mentors can edit modules.") from e
 
-        if admin not in module.program.admins.all():
-            msg = "You must be an admin of the module's program to edit it."
-            logger.warning(
-                "Permission denied for user '%s' to edit module '%s'",
-                user.email,
-                module.name,
+        if creator_as_mentor not in module.program.admins.all():
+            raise GraphQLError(
+                "You must be an admin of the module's program to edit it."
             )
-            raise PermissionDenied(msg)
+
+        module.name = input_data.name
+        module.key = slugify(input_data.name)
+
+        if input_data.description is not None:
+            module.description = input_data.description
+        if input_data.experience_level is not None:
+            module.experience_level = input_data.experience_level.value
+        if input_data.started_at is not None:
+            module.started_at = input_data.started_at
+        if input_data.ended_at is not None:
+            module.ended_at = input_data.ended_at
+        if input_data.domains is not None:
+            module.domains = input_data.domains
+        if input_data.tags is not None:
+            module.tags = input_data.tags
 
         if (
-            input_data.ended_at is not None
-            and input_data.started_at is not None
-            and input_data.ended_at <= input_data.started_at
+            module.ended_at
+            and module.started_at
+            and module.ended_at <= module.started_at
         ):
-            msg = "End date must be after start date."
-            logger.warning("Validation error updating module '%s': %s", module.key, msg)
-            raise ValidationError(msg)
+            raise GraphQLError("End date must be after start date.")
 
-        if input_data.experience_level:
-            module.experience_level = input_data.experience_level.value
-
-        if input_data.project_id:
+        if input_data.project_id is not None:
             try:
-                project = Project.objects.get(id=input_data.project_id)
-                module.project = project
+                module.project = Project.objects.get(id=input_data.project_id)
             except Project.DoesNotExist as e:
-                msg = f"Project with id '{input_data.project_id}' not found."
-                logger.warning(msg, exc_info=True)
-                raise ObjectDoesNotExist(msg) from e
+                raise GraphQLError(
+                    f"Project with id '{input_data.project_id}' not found."
+                ) from e
 
-        update_fields = {
-            "key": slugify(input_data.name),
-            "name": input_data.name,
-            "description": input_data.description,
-            "started_at": input_data.started_at,
-            "ended_at": input_data.ended_at,
-            "domains": input_data.domains,
-            "tags": input_data.tags,
-        }
-
-        for field, value in update_fields.items():
-            if value is not None:
-                setattr(module, field, value)
+        if input_data.mentor_logins is not None:
+            mentors_to_set = _resolve_mentors_from_logins(input_data.mentor_logins)
+            module.mentors.set(list(mentors_to_set))
 
         module.save()
 
-        if input_data.mentor_logins is not None:
-            resolved_mentors = []
-            for login in input_data.mentor_logins:
-                try:
-                    github_user = GithubUser.objects.get(login__iexact=login.lower())
-                except GithubUser.DoesNotExist as e:
-                    msg = "GitHub user not found."
-                    logger.warning(msg, exc_info=True)
-                    raise ObjectDoesNotExist(msg) from e
-
-                mentor_obj, _ = Mentor.objects.get_or_create(github_user=github_user)
-                resolved_mentors.append(mentor_obj)
-
-            module.mentors.set(resolved_mentors)
-
-        return ModuleNode(
-            id=module.id,
-            key=module.key,
-            name=module.name,
-            description=module.description,
-            domains=module.domains,
-            ended_at=module.ended_at,
-            experience_level=module.experience_level,
-            mentors=list(module.mentors.all()),
-            program=module.program,
-            project_id=module.project.id if module.project else None,
-            started_at=module.started_at,
-            tags=module.tags,
-        )
+        return module

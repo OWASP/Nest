@@ -29,36 +29,23 @@ const ProgramDetailsPage = () => {
   })
 
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
-    onCompleted: (data) => {
-      setProgram((prev) => (prev ? { ...prev, status: data.updateProgram.status } : null))
-      addToast({
-        title: 'Program Published',
-        description: 'The program is now live.',
-        variant: 'solid',
-        color: 'success',
-        timeout: 3000,
-      })
-    },
     onError: (error) => {
       handleAppError(error)
     },
   })
 
-  const username = (session as SessionWithRole)?.user?.username
+  const username = (session as SessionWithRole)?.user?.login
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
     [program, username]
   )
-
   const canPublish = useMemo(
     () => isAdmin && program?.status?.toLowerCase() === ProgramStatusEnum.DRAFT,
     [isAdmin, program]
   )
 
   const setPublish = async () => {
-    if (!program) return
-
-    if (!isAdmin) {
+    if (!program || !isAdmin) {
       addToast({
         title: 'Permission Denied',
         description: 'Only admins can publish this program.',
@@ -68,6 +55,14 @@ const ProgramDetailsPage = () => {
       })
       return
     }
+
+    addToast({
+      title: 'Program Published',
+      description: 'The program is now live and the page will refresh.',
+      variant: 'solid',
+      color: 'success',
+      timeout: 3000,
+    })
 
     await updateProgram({
       variables: {

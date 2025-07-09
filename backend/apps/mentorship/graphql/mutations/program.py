@@ -4,7 +4,7 @@ import logging
 
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
-
+from django.db import transaction
 from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
 from apps.mentorship.graphql.nodes.program import (
@@ -23,29 +23,30 @@ class ProgramMutation:
     """GraphQL mutations related to program."""
 
     @strawberry.mutation
-    def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
-        """Create a new mentorship program if the user is a mentor."""
+    @transaction.atomic
+    def create_program(
+        self, info: strawberry.Info, input_data: CreateProgramInput
+    ) -> ProgramNode:
+        """
+        Create a new mentorship program.
+        """
         request = info.context.request
         user = get_authenticated_user(request)
-
-        # Use PermissionDenied for authorization checks
-        if user.role != "mentor":
-            msg = "You must be a mentor to create a program."
-            logger.warning(
-                "Permission denied for user '%s' to create a program: not a mentor.",
-                user.email,
-            )
-            raise PermissionDenied(msg)
-
-        # Use ValidationError for input validation
-        if input_data.ended_at <= input_data.started_at:
-            msg = "End date must be after start date."
-            logger.warning("Validation error creating program '%s': %s", input_data.name, msg)
-            raise ValidationError(msg)
-
-        mentor, _ = Mentor.objects.get_or_create(
+        mentor, created = Mentor.objects.get_or_create(
             nest_user=user, defaults={"github_user": user.github_user}
         )
+        if created:
+            logger.info("Created a new mentor profile for user '%s'.", user.email)
+
+        if input_data.ended_at <= input_data.started_at:
+            msg = "End date must be after start date."
+            logger.warning(
+                "Validation error for user '%s' creating program '%s': %s",
+                user.email,
+                input_data.name,
+                msg,
+            )
+            raise strawberry.GraphQLError(msg)
 
         program = Program.objects.create(
             name=input_data.name,
@@ -60,37 +61,21 @@ class ProgramMutation:
             status=input_data.status.value,
         )
 
-        resolved_mentors = {mentor}
-        for login in input_data.admin_logins:
-            try:
-                github_user = GithubUser.objects.get(login__iexact=login.lower())
-                m, _ = Mentor.objects.get_or_create(github_user=github_user)
-                resolved_mentors.add(m)
-            except GithubUser.DoesNotExist as err:
-                # Use ObjectDoesNotExist for "not found" errors with explicit chaining
-                msg = f"GitHub user with username '{login}' not found."
-                logger.warning(msg, exc_info=True)
-                raise ObjectDoesNotExist(msg) from err
+        program.admins.set([mentor])
 
-        program.admins.set(resolved_mentors)
-
-        return ProgramNode(
-            id=program.id,
-            key=program.key,
-            name=program.name,
-            description=program.description,
-            experience_levels=program.experience_levels,
-            mentees_limit=program.mentees_limit,
-            started_at=program.started_at,
-            ended_at=program.ended_at,
-            domains=program.domains,
-            tags=program.tags,
-            status=program.status,
-            admins=list(program.admins.all()),
+        logger.info(
+            "User '%s' successfully created program '%s' (ID: %s).",
+            user.email,
+            program.name,
+            program.id,
         )
 
+        return program
+
     @strawberry.mutation
-    def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
+    def update_program(
+        self, info: strawberry.Info, input_data: UpdateProgramInput
+    ) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -128,7 +113,9 @@ class ProgramMutation:
             and input_data.ended_at <= input_data.started_at
         ):
             msg = "End date must be after start date."
-            logger.warning("Validation error updating program '%s': %s", program.key, msg)
+            logger.warning(
+                "Validation error updating program '%s': %s", program.key, msg
+            )
             raise ValidationError(msg)
 
         simple_fields = {
@@ -147,7 +134,9 @@ class ProgramMutation:
                 setattr(program, field, value)
 
         if input_data.experience_levels is not None:
-            program.experience_levels = [lvl.value for lvl in input_data.experience_levels]
+            program.experience_levels = [
+                lvl.value for lvl in input_data.experience_levels
+            ]
 
         if input_data.status is not None:
             program.status = input_data.status.value
@@ -168,17 +157,4 @@ class ProgramMutation:
 
             program.admins.set(resolved_mentors)
 
-        return ProgramNode(
-            id=program.id,
-            key=program.key,
-            name=program.name,
-            description=program.description,
-            experience_levels=program.experience_levels,
-            mentees_limit=program.mentees_limit,
-            started_at=program.started_at,
-            ended_at=program.ended_at,
-            domains=program.domains,
-            tags=program.tags,
-            status=program.status,
-            admins=list(program.admins.all()),
-        )
+        return program

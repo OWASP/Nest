@@ -12,7 +12,7 @@ interface ProgramFormProps {
     experienceLevels: string[]
     tags: string
     domains: string
-    adminLogins: string
+    adminLogins?: string
     status: string
   }
   setFormData: React.Dispatch<
@@ -25,7 +25,7 @@ interface ProgramFormProps {
       experienceLevels: string[]
       tags: string
       domains: string
-      adminLogins: string
+      adminLogins?: string
       status: string
     }>
   >

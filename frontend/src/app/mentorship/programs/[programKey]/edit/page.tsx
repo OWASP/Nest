@@ -1,24 +1,21 @@
 'use client'
-
 import { useQuery, useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type React from 'react'
 import { useState, useEffect } from 'react'
-import { handleAppError } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/programsQueries'
 import { SessionWithRole } from 'types/program'
 import { formatDateForInput } from 'utils/dateFormatter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
-
 const EditProgramPage = () => {
   const router = useRouter()
   const { programKey } = useParams() as { programKey: string }
   const { data: session, status: sessionStatus } = useSession()
-  const [updateProgram, { loading }] = useMutation(UPDATE_PROGRAM)
-
+  const [updateProgram, { loading: mutationLoading }] = useMutation(UPDATE_PROGRAM)
   const {
     data,
     error,
@@ -26,8 +23,8 @@ const EditProgramPage = () => {
   } = useQuery(GET_PROGRAM_DETAILS, {
     variables: { programKey },
     skip: !programKey,
+    fetchPolicy: 'network-only',
   })
-
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -40,65 +37,57 @@ const EditProgramPage = () => {
     adminLogins: '',
     status: 'DRAFT',
   })
-
-  const [checkedAccess, setCheckedAccess] = useState(false)
-  const [hasAccess, setHasAccess] = useState(false)
-
+  const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
   useEffect(() => {
-    if (sessionStatus === 'loading' || queryLoading) return
-
-    const isMentor = (session as SessionWithRole)?.user?.role === 'mentor'
-    const isAdmin = data?.program?.admins?.some(
-      (admin: { login: string }) => admin.login === (session as SessionWithRole)?.user?.username
-    )
-
-    if (!isMentor || !isAdmin) {
-      addToast({
-        title: 'Access Denied',
-        description: 'Only mentors listed as program admins can edit this program.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-      })
-      router.replace('/mentorship/programs')
-    } else {
-      setHasAccess(true)
+    if (sessionStatus === 'loading' || queryLoading) {
+      return
+    }
+    if (!data?.program || sessionStatus === 'unauthenticated') {
+      setAccessStatus('denied')
+      return
     }
 
-    setCheckedAccess(true)
+    const isAdmin = data.program.admins?.some(
+      (admin: { login: string }) => admin.login === (session as SessionWithRole)?.user?.login
+    )
+
+    if (isAdmin) {
+      setAccessStatus('allowed')
+    } else {
+      setAccessStatus('denied')
+      addToast({
+        title: 'Access Denied',
+        description: 'Only program admins can edit this page.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 4000,
+      })
+      setTimeout(() => router.replace('/mentorship/programs'), 1500)
+    }
   }, [sessionStatus, session, data, queryLoading, router])
-
   useEffect(() => {
-    if (data?.program) {
-      const program = data.program
-
+    if (accessStatus === 'allowed' && data?.program) {
+      const { program } = data
       setFormData({
         name: program.name || '',
         description: program.description || '',
-        menteesLimit: program.menteesLimit || 5,
+        menteesLimit: program.menteesLimit ?? 5,
         startedAt: formatDateForInput(program.startedAt),
         endedAt: formatDateForInput(program.endedAt),
-        experienceLevels: (program.experienceLevels || []).map((lvl: string) =>
-          lvl.includes('.') ? lvl.split('.').pop()?.toUpperCase() : lvl.toUpperCase()
-        ),
+        experienceLevels: program.experienceLevels || [],
         tags: (program.tags || []).join(', '),
         domains: (program.domains || []).join(', '),
         adminLogins: (program.admins || [])
           .map((admin: { login: string }) => admin.login)
           .join(', '),
-        status: program.status.includes('.')
-          ? program.status.split('.').pop()?.toUpperCase()
-          : program.status.toUpperCase(),
+        status: program.status || 'DRAFT',
       })
     } else if (error) {
       handleAppError(error)
     }
-  }, [data, error])
-
+  }, [accessStatus, data, error])
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     try {
       const input = {
         key: programKey,
@@ -131,10 +120,9 @@ const EditProgramPage = () => {
         color: 'success',
         variant: 'solid',
         timeout: 3000,
-        shouldShowTimeoutProgress: true,
       })
 
-      router.push('/mentorship/programs')
+      router.push(`/mentorship/programs/${programKey}`)
     } catch (err) {
       addToast({
         title: 'Update Failed',
@@ -142,27 +130,32 @@ const EditProgramPage = () => {
         color: 'danger',
         variant: 'solid',
         timeout: 3000,
-        shouldShowTimeoutProgress: true,
       })
       handleAppError(err)
     }
   }
-
-  if (sessionStatus === 'loading' || queryLoading || !checkedAccess || !hasAccess) {
+  if (accessStatus === 'checking') {
     return <LoadingSpinner />
   }
-
+  if (accessStatus === 'denied') {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to view this page. You will be redirected."
+      />
+    )
+  }
   return (
     <ProgramForm
       formData={formData}
       setFormData={setFormData}
       onSubmit={handleSubmit}
-      loading={loading}
+      loading={mutationLoading}
       title="Edit Program"
       submitText="Save Changes"
       isEdit={true}
     />
   )
 }
-
 export default EditProgramPage

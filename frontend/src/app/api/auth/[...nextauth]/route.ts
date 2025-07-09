@@ -21,12 +21,20 @@ if (IS_GITHUB_AUTH_ENABLED) {
   )
 }
 
+export const GET_USER_ROLES = gql`
+  query GetUserRoles($accessToken: String!) {
+    currentUserRoles(accessToken: $accessToken) {
+      roles
+    }
+  }
+`
+
+
 const GITHUB_AUTH_MUTATION = gql`
   mutation GitHubAuth($accessToken: String!) {
     githubAuth(accessToken: $accessToken) {
       authUser {
         username
-        role
       }
     }
   }
@@ -49,7 +57,6 @@ const authOptions = {
           })
           if (!data?.githubAuth?.authUser) throw new Error('User sync failed')
           return true
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           throw new Error('GitHub authentication failed')
         }
@@ -57,27 +64,32 @@ const authOptions = {
       return true
     },
 
-    async jwt({ token, account }) {
+    async jwt({ token, account, profile }) {
       if (account?.access_token) {
         token.accessToken = account.access_token
+      }
 
-        // Fetch user data including role from GraphQL
+      if (profile) {
+        token.login = profile.login
+      }
+
+      if (token?.accessToken) {
         try {
-          const { data } = await apolloClient.mutate({
-            mutation: GITHUB_AUTH_MUTATION,
+          const { data } = await apolloClient.query({
+            query: GET_USER_ROLES,
             variables: {
-              accessToken: account.access_token,
+              accessToken: token.accessToken,
             },
           })
 
-          if (data?.githubAuth?.authUser) {
-            token.username = data.githubAuth.authUser.username
-            token.role = data.githubAuth.authUser.role
-          }
+          token.roles = data?.currentUserRoles?.roles ?? []
+          console.log(token.roles)
         } catch (error) {
-          throw new Error(`GitHub authentication failed ${error.message}`)
+          console.error('GitHub role fetch failed:', error)
+          token.roles = []
         }
       }
+
       return token
     },
 
@@ -85,11 +97,8 @@ const authOptions = {
       if (token?.accessToken) {
         session.accessToken = token.accessToken
       }
-      if (token?.role) {
-        session.user.role = token.role
-      }
-      if (token?.username) {
-        session.user.username = token.username
+      if (token?.roles) {
+        session.user.roles = token.roles
       }
 
       return session
@@ -98,6 +107,7 @@ const authOptions = {
   secret: NEXTAUTH_SECRET,
   url: NEXTAUTH_URL,
 }
+
 
 const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }

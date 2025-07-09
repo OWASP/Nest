@@ -1,12 +1,11 @@
 'use client'
 
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
-import type React from 'react'
-import { handleAppError } from 'app/global-error'
+import React, { useEffect, useState } from 'react'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_ADMINS_AND_MODULES, UPDATE_MODULE } from 'server/queries/moduleQueries'
 import { SessionWithRole } from 'types/program'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -17,10 +16,8 @@ const EditModulePage = () => {
   const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
-  const currentUserLogin = (sessionData as SessionWithRole)?.user?.username || ''
 
   type ModuleFormData = {
-    key: string
     name: string
     description: string
     experienceLevel: string
@@ -33,100 +30,121 @@ const EditModulePage = () => {
   }
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
-  const [checkedAccess, setCheckedAccess] = useState(false)
-  const [hasAccess, setHasAccess] = useState(false)
+  const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
 
   const [updateModule, { loading: mutationLoading }] = useMutation(UPDATE_MODULE)
 
   const {
     data,
     loading: queryLoading,
-    error,
+    error: queryError,
   } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
+    fetchPolicy: 'network-only',
   })
 
   useEffect(() => {
-    if (sessionStatus !== 'authenticated' || queryLoading) return
+    if (sessionStatus === 'loading' || queryLoading) {
+      return
+    }
 
-    const programAdmins = data?.program?.admins || []
-    const isAdmin = programAdmins.some(
+    if (queryError || !data?.program || !data?.getModule || sessionStatus === 'unauthenticated') {
+      setAccessStatus('denied')
+      return
+    }
+
+    const currentUserLogin = (sessionData as SessionWithRole)?.user?.login
+    const isAdmin = data.program.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
-    setHasAccess(isAdmin)
-    setCheckedAccess(true)
-
-    if (!isAdmin) {
+    if (isAdmin) {
+      setAccessStatus('allowed')
+    } else {
+      setAccessStatus('denied')
       addToast({
         title: 'Access Denied',
         description: 'Only program admins can edit modules.',
         color: 'danger',
         variant: 'solid',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
+        timeout: 4000,
       })
-      router.replace(`/mentorship/programs/${programKey}`)
+      setTimeout(() => router.replace(`/mentorship/programs/${programKey}`), 1500)
     }
-  }, [sessionStatus, queryLoading, data, currentUserLogin, programKey, router])
+  }, [sessionStatus, sessionData, queryLoading, data, programKey, queryError, router])
 
   useEffect(() => {
-    if (data?.getModule) {
+    if (accessStatus === 'allowed' && data?.getModule) {
       const m = data.getModule
       setFormData({
-        key: moduleKey,
-        name: m.name,
-        description: m.description,
+        name: m.name || '',
+        description: m.description || '',
         experienceLevel: m.experienceLevel || 'BEGINNER',
         startedAt: formatDateForInput(m.startedAt),
         endedAt: formatDateForInput(m.endedAt),
-        domains: m.domains?.join(', ') || '',
-        tags: m.tags?.join(', ') || '',
+        domains: (m.domains || []).join(', '),
+        tags: (m.tags || []).join(', '),
         projectId: m.projectId || '',
-        mentorLogins: m.mentors?.map((mentor: { login: string }) => mentor.login).join(', ') || '',
+        mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
       })
-    } else if (error) {
-      handleAppError(error)
     }
-  }, [data, error, moduleKey])
+  }, [accessStatus, data])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData) return
 
-    const input = {
-      key: moduleKey,
-      name: formData.name,
-      description: formData.description,
-      experienceLevel: formData.experienceLevel,
-      startedAt: formData.startedAt || null,
-      endedAt: formData.endedAt || null,
-      domains: formData.domains
-        .split(',')
-        .map((d: string) => d.trim())
-        .filter(Boolean),
-      tags: formData.tags
-        .split(',')
-        .map((t: string) => t.trim())
-        .filter(Boolean),
-      projectId: formData.projectId,
-      mentorLogins: formData.mentorLogins
-        .split(',')
-        .map((login: string) => login.trim())
-        .filter(Boolean),
-    }
-
     try {
+      const input = {
+        key: moduleKey,
+        name: formData.name,
+        description: formData.description,
+        experienceLevel: formData.experienceLevel,
+        startedAt: formData.startedAt || null,
+        endedAt: formData.endedAt || null,
+        domains: formData.domains
+          .split(',')
+          .map((d: string) => d.trim())
+          .filter(Boolean),
+        tags: formData.tags
+          .split(',')
+          .map((t: string) => t.trim())
+          .filter(Boolean),
+        projectId: formData.projectId,
+        mentorLogins: formData.mentorLogins
+          .split(',')
+          .map((login: string) => login.trim())
+          .filter(Boolean),
+      }
+
       await updateModule({ variables: { input } })
-      router.push(`/mentorship/programs`)
+
+      addToast({
+        title: 'Module Updated',
+        description: 'The module has been successfully updated.',
+        color: 'success',
+        variant: 'solid',
+        timeout: 3000,
+      })
+      router.push(`/mentorship/programs/${programKey}`)
     } catch (err) {
       handleAppError(err)
     }
   }
 
-  if (sessionStatus === 'loading' || queryLoading || !checkedAccess || !hasAccess || !formData) {
+  if (accessStatus === 'checking' || !formData) {
     return <LoadingSpinner />
+  }
+
+  if (accessStatus === 'denied') {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to edit this module. You will be redirected."
+      />
+    )
   }
 
   return (

@@ -5,9 +5,8 @@ import logging
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist
 
-from apps.mentorship.graphql.nodes.modules import ModuleNode
-from apps.mentorship.models import Module, Program
-from apps.owasp.models import Project
+from apps.mentorship.graphql.nodes.module import ModuleNode
+from apps.mentorship.models import Module
 
 logger = logging.getLogger(__name__)
 
@@ -18,97 +17,37 @@ class ModuleQuery:
 
     @strawberry.field
     def modules_by_program(self, program_key: str) -> list[ModuleNode]:
-        """Get all modules by program Id."""
-        try:
-            program = Program.objects.get(key=program_key)
-        except Program.DoesNotExist as err:
-            msg = f"Program with key '{program_key}' not found."
-            logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from err
-
+        """Get all modules by program Key. Returns an empty list if program is not found."""
         modules = (
-            Module.objects.filter(program=program)
-            .select_related("project")
+            Module.objects.filter(program__key=program_key)
+            .select_related("program", "project")
             .prefetch_related("mentors__github_user")
+            .order_by("started_at")
         )
-
-        return [
-            ModuleNode(
-                id=module.id,
-                key=module.key,
-                name=module.name,
-                description=module.description,
-                domains=module.domains,
-                ended_at=module.ended_at,
-                experience_level=module.experience_level,
-                mentors=list(module.mentors.all()),
-                program=module.program,
-                project_id=module.project_id,
-                started_at=module.started_at,
-                tags=module.tags,
-            )
-            for module in modules
-        ]
+        return modules
 
     @strawberry.field
     def modules_by_project(self, project_key: str) -> list[ModuleNode]:
-        """Get all modules by project Id."""
-        try:
-            project = Project.objects.get(key=project_key)
-        except Project.DoesNotExist as err:
-            msg = f"Project with key '{project_key}' not found."
-            logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from err
-
+        """Get all modules by project Key. Returns an empty list if project is not found."""
         modules = (
-            Module.objects.filter(project=project)
-            .select_related("program")
+            Module.objects.filter(project__key=project_key)
+            .select_related("program", "project")
             .prefetch_related("mentors__github_user")
+            .order_by("started_at")
         )
-
-        return [
-            ModuleNode(
-                id=module.id,
-                key=module.key,
-                name=module.name,
-                description=module.description,
-                domains=module.domains,
-                ended_at=module.ended_at,
-                experience_level=module.experience_level,
-                mentors=list(module.mentors.all()),
-                program=module.program,
-                project_id=module.project_id,
-                started_at=module.started_at,
-                tags=module.tags,
-            )
-            for module in modules
-        ]
+        return modules
 
     @strawberry.field
     def get_module(self, module_key: str) -> ModuleNode:
-        """Get module by module Id."""
+        """Get a single module by its key. Raises an error if not found."""
         try:
             module = (
                 Module.objects.select_related("program", "project")
                 .prefetch_related("mentors__github_user")
                 .get(key=module_key)
             )
+            return module
         except Module.DoesNotExist as err:
             msg = f"Module with key '{module_key}' not found."
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
-
-        return ModuleNode(
-            id=module.id,
-            key=module.key,
-            name=module.name,
-            description=module.description,
-            domains=module.domains,
-            ended_at=module.ended_at,
-            experience_level=module.experience_level,
-            mentors=list(module.mentors.all()),
-            project_id=module.project_id,
-            program=module.program,
-            started_at=module.started_at,
-            tags=module.tags,
-        )

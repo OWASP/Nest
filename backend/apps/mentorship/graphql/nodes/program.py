@@ -16,7 +16,6 @@ class ProgramNode:
     key: str
     name: str
     description: str
-    admins: list[MentorNode] | None = None
     domains: list[str] | None = None
     ended_at: datetime
     experience_levels: list[ExperienceLevelEnum] | None = None
@@ -24,6 +23,11 @@ class ProgramNode:
     started_at: datetime
     status: ProgramStatusEnum
     tags: list[str] | None = None
+
+    @strawberry.field
+    def admins(self) -> list["MentorNode"] | None:
+        """Resolver to get the list of program administrators."""
+        return self.admins.all()
 
 
 @strawberry.type
@@ -41,10 +45,11 @@ class CreateProgramInput:
 
     name: str
     description: str = ""
-    admin_logins: list[str] = strawberry.field(default_factory=list)
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime
-    experience_levels: list[ExperienceLevelEnum] = strawberry.field(default_factory=list)
+    experience_levels: list[ExperienceLevelEnum] = strawberry.field(
+        default_factory=list
+    )
     mentees_limit: int | None = None
     started_at: datetime
     status: ProgramStatusEnum
