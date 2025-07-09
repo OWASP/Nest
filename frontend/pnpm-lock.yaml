@@ -178,8 +178,8 @@ importers:
         specifier: ^29.5.14
         version: 29.5.14
       '@types/leaflet':
-        specifier: ^1.9.19
-        version: 1.9.19
+        specifier: ^1.9.20
+        version: 1.9.20
       '@types/markdown-it':
         specifier: ^14.1.2
         version: 14.1.2
@@ -2740,8 +2740,8 @@ packages:
   '@types/leaflet.markercluster@1.5.5':
     resolution: {integrity: sha512-TkWOhSHDM1ANxmLi+uK0PjsVcjIKBr8CLV2WoF16dIdeFmC0Cj5P5axkI3C1Xsi4+ht6EU8+BfEbbqEF9icPrg==}
 
-  '@types/leaflet@1.9.19':
-    resolution: {integrity: sha512-pB+n2daHcZPF2FDaWa+6B0a0mSDf4dPU35y5iTXsx7x/PzzshiX5atYiS1jlBn43X7XvM8AP+AB26lnSk0J4GA==}
+  '@types/leaflet@1.9.20':
+    resolution: {integrity: sha512-rooalPMlk61LCaLOvBF2VIf9M47HgMQqi5xQ9QRi7c8PkdIe0WrIi5IxXUXQjAdL0c+vcQ01mYWbthzmp9GHWw==}
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
@@ -2760,6 +2760,9 @@ packages:
 
   '@types/node@22.16.0':
     resolution: {integrity: sha512-B2egV9wALML1JCpv3VQoQ+yesQKAmNMBIAY7OteVrikcOcAkWm+dGL6qpeCktPjAv6N1JLnhbNiqS35UpFyBsQ==}
+
+  '@types/node@22.16.2':
+    resolution: {integrity: sha512-Cdqa/eJTvt4fC4wmq1Mcc0CPUjp/Qy2FGqLza3z3pKymsI969TcZ54diNJv8UYUgeWxyb8FSbCkhdR6WqmUFhA==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -9527,9 +9530,9 @@ snapshots:
 
   '@types/leaflet.markercluster@1.5.5':
     dependencies:
-      '@types/leaflet': 1.9.19
+      '@types/leaflet': 1.9.20
 
-  '@types/leaflet@1.9.19':
+  '@types/leaflet@1.9.20':
     dependencies:
       '@types/geojson': 7946.0.16
 
@@ -9549,6 +9552,10 @@ snapshots:
       '@types/node': 22.16.0
 
   '@types/node@22.16.0':
+    dependencies:
+      undici-types: 6.21.0
+
+  '@types/node@22.16.2':
     dependencies:
       undici-types: 6.21.0
 
@@ -11651,7 +11658,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 22.16.0
+      '@types/node': 22.16.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
