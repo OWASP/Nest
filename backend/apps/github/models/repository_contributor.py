@@ -185,8 +185,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 "user__name",
             )
             .annotate(
-                project_name=F("repository__project__name"),
-                project_key=F("repository__project__key"),
                 total_contributions=Sum("contributions_count"),
             )
             .order_by("-total_contributions")[:limit]
@@ -198,10 +196,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 "contributions_count": tc["total_contributions"],
                 "login": tc["user__login"],
                 "name": tc["user__name"],
-                "project_key": tc["project_key"].replace("www-project-", "")
-                if tc.get("project_key")
-                else None,
-                "project_name": tc.get("project_name"),
             }
             for tc in top_contributors
         ]
