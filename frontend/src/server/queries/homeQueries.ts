@@ -27,10 +27,9 @@ export const GET_MAIN_PAGE_DATA = gql`
     }
     topContributors(limit: 18) {
       avatarUrl
+      contributionsCount
       login
       name
-      projectKey
-      projectName
     }
     recentIssues(limit: 5, distinct: $distinct) {
       author {
