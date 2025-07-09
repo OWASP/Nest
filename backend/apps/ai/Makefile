@@ -2,6 +2,10 @@ ai-create-chapter-chunks:
 	@echo "Creating chapter chunks"
 	@CMD="python manage.py ai_create_chapter_chunks" $(MAKE) exec-backend-command
 
+ai-create-committee-chunks:
+	@echo "Creating committee chunks"
+	@CMD="python manage.py ai_create_committee_chunks" $(MAKE) exec-backend-command
+
 ai-create-event-chunks:
 	@echo "Creating event chunks"
 	@CMD="python manage.py ai_create_event_chunks" $(MAKE) exec-backend-command
