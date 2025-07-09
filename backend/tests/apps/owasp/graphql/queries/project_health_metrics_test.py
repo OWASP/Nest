@@ -64,12 +64,15 @@ class TestProjectHealthMetricsQuery:
         )
         mock_get_stats.return_value = expected_stats
 
-        query = ProjectHealthMetricsQuery(project_health_metrics=[])
+        query = ProjectHealthMetricsQuery()
         result = query.project_health_stats()
         mock_get_stats.assert_called_once()
         assert result == expected_stats
 
-    def test_resolve_project_health_metrics(self):
+    @patch(
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+    )
+    def test_resolve_project_health_metrics(self, mock_get_latest_metrics):
         """Test resolving project health metrics."""
         metrics = [
             ProjectHealthMetricsNode(
@@ -86,8 +89,9 @@ class TestProjectHealthMetricsQuery:
                 recent_releases_count=3,
             )
         ]
-        query = ProjectHealthMetricsQuery(project_health_metrics=metrics)
-        result = query.project_health_metrics
+        mock_get_latest_metrics.return_value = metrics
+        query = ProjectHealthMetricsQuery()
+        result = query.project_health_metrics(filters=None, pagination=None, ordering=None)
         assert isinstance(result, list)
         assert isinstance(result[0], ProjectHealthMetricsNode)
         assert len(result) == 1
