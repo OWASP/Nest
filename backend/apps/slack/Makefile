@@ -8,8 +8,9 @@ slack-export-data:
 		--indent=4 \
 		--natural-foreign \
 		--natural-primary -o data/slack-data.json" $(MAKE) exec-backend-command
-	@CMD="sed -E -i 's/\"email\": *\"[^\"]+\"/\"email\": \"\"/g' data/slack-data.json" $(MAKE) exec-backend-command
+	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/slack-data.json" $(MAKE) exec-backend-command
 	@CMD="gzip data/slack-data.json" $(MAKE) exec-backend-command
+
 
 slack-set-conversation-sync-messages-flags:
 	@echo "Setting conversation sync messages flags"
