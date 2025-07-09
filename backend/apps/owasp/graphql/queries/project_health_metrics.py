@@ -14,12 +14,30 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 class ProjectHealthMetricsQuery:
     """Project health metrics queries."""
 
-    project_health_metrics: list[ProjectHealthMetricsNode] = strawberry_django.field(
+    @strawberry_django.field(
         filters=ProjectHealthMetricsFilter,
         description="List of project health metrics.",
         pagination=True,
         ordering=ProjectHealthMetricsOrder,
     )
+    def project_health_metrics(
+        self,
+        filters: ProjectHealthMetricsFilter,
+        pagination: strawberry_django.pagination.OffsetPaginationInput,
+        ordering: list[ProjectHealthMetricsOrder] | None = None,
+    ) -> list[ProjectHealthMetricsNode]:
+        """Resolve project health metrics based on filters, pagination, and ordering.
+
+        Args:
+            filters (ProjectHealthMetricsFilter): Filters to apply on the metrics.
+            pagination (strawberry_django.pagination.OffsetPaginationInput): Pagination parameters.
+            ordering (list[ProjectHealthMetricsOrder], optional): Ordering parameters.
+
+        Returns:
+            list[ProjectHealthMetricsNode]: List of project health metrics.
+
+        """
+        return ProjectHealthMetrics.get_latest_health_metrics()
 
     @strawberry.field
     def project_health_stats(self) -> ProjectHealthStatsNode:

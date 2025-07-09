@@ -20,10 +20,11 @@ export const GET_PROJECT_HEALTH_STATS = gql`
 `
 export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
   query GetProjectHealthMetrics(
-    $filters: ProjectHealthMetricsFilter
-    $pagination: OffsetPaginationInput
+    $filters: ProjectHealthMetricsFilter!
+    $pagination: OffsetPaginationInput!
+    $ordering: [ProjectHealthMetricsOrder!]
   ) {
-    projectHealthMetrics(filters: $filters, pagination: $pagination) {
+    projectHealthMetrics(filters: $filters, pagination: $pagination, ordering: $ordering) {
       createdAt
       contributorsCount
       forksCount
