@@ -22,8 +22,8 @@ class ProjectHealthMetricsQuery:
     )
     def project_health_metrics(
         self,
-        filters: ProjectHealthMetricsFilter,
-        pagination: strawberry_django.pagination.OffsetPaginationInput,
+        filters: ProjectHealthMetricsFilter | None = None,
+        pagination: strawberry_django.pagination.OffsetPaginationInput | None = None,
         ordering: list[ProjectHealthMetricsOrder] | None = None,
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics based on filters, pagination, and ordering.
