@@ -3,8 +3,15 @@
 import { useQuery } from '@apollo/client'
 import { faFilter } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Dropdown, DropdownItem, DropdownTrigger, DropdownMenu, Button } from '@heroui/react'
-import { Select, SelectItem } from '@heroui/react'
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownTrigger,
+  DropdownMenu,
+  Button,
+  Select,
+  SelectItem,
+} from '@heroui/react'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_METRICS_LIST } from 'server/queries/projectsHealthDashboardQueries'
