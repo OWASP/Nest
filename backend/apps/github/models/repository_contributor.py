@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from django.db import models
-from django.db.models import F, Sum, Window
-from django.db.models.functions import Rank
+from django.db.models import Sum
 from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
