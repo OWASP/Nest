@@ -6,6 +6,7 @@ import strawberry_django
 from apps.owasp.graphql.filters.project_health_metrics import ProjectHealthMetricsFilter
 from apps.owasp.graphql.nodes.project_health_metrics import ProjectHealthMetricsNode
 from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
+from apps.owasp.graphql.ordering.project_health_metrics import ProjectHealthMetricsOrder
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
@@ -17,6 +18,7 @@ class ProjectHealthMetricsQuery:
         filters=ProjectHealthMetricsFilter,
         description="List of project health metrics.",
         pagination=True,
+        ordering=ProjectHealthMetricsOrder,
     )
 
     @strawberry.field
