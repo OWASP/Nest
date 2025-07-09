@@ -165,17 +165,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         # Project contributors only for main/project/organization pages.
         if not (chapter or committee or repository):
-            queryset = (
-                queryset.filter(repository__project__isnull=False)
-                .annotate(
-                    rank=Window(
-                        expression=Rank(),
-                        order_by=F("contributions_count").desc(),
-                        partition_by=F("user__login"),
-                    )
-                )
-                .filter(rank=1)
-            )
+            queryset = queryset.filter(repository__project__isnull=False)
 
         # Aggregate total contributions for users.
         top_contributors = (
