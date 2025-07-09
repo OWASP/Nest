@@ -11,13 +11,18 @@ class RepositoryContributorQuerySet(models.QuerySet):
 
     def by_humans(self):
         """Return human repository contributors only."""
-        return self.filter(user__is_bot=False).exclude(
-            user__login__in=User.get_non_indexable_logins()
+        return self.exclude(
+            user__is_bot=True,
+            user__login__in=User.get_non_indexable_logins(),
         )
 
     def to_community_repositories(self):
         """Return community repositories contributors only."""
-        return self.exclude(repository__name__in=(OWASP_GITHUB_IO,))
+        return self.exclude(
+            repository__is_fork=True,
+            repository__name__in=(OWASP_GITHUB_IO,),
+            repository__organization__is_owasp_related_organization=False,
+        )
 
 
 class RepositoryContributorManager(models.Manager):

@@ -37,9 +37,12 @@ class Command(BaseCommand):
         offset = options["offset"]
         user_contributions = {
             item["user_id"]: item["total_contributions"]
-            for item in RepositoryContributor.objects.values("user_id").annotate(
-                total_contributions=Sum("contributions_count")
+            for item in RepositoryContributor.objects.filter(
+                repository__is_fork=False,
+                repository__organization__is_owasp_related_organization=True,
             )
+            .values("user_id")
+            .annotate(total_contributions=Sum("contributions_count"))
         }
         users = []
         for idx, user in enumerate(active_users[offset:]):

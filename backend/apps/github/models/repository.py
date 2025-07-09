@@ -295,7 +295,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
                 if not is_funding_policy_compliant:
                     break
             self.is_funding_policy_compliant = is_funding_policy_compliant
-        except GithubException:
+        except (AttributeError, GithubException):
             self.has_funding_yml = False
             self.is_funding_policy_compliant = True
 
