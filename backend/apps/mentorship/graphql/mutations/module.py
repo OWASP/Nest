@@ -41,9 +41,7 @@ class ModuleMutation:
 
     @strawberry.mutation
     @transaction.atomic
-    def create_module(
-        self, info: strawberry.Info, input_data: CreateModuleInput
-    ) -> ModuleNode:
+    def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
         """Create a new mentorship module. User must be an admin of the program."""
         user = get_authenticated_user(info.context.request)
 
@@ -59,9 +57,7 @@ class ModuleMutation:
             raise GraphQLError("Only mentors can create modules.") from e
 
         if creator_as_mentor not in program.admins.all():
-            raise GraphQLError(
-                "You must be an admin of this program to create a module."
-            )
+            raise GraphQLError("You must be an admin of this program to create a module.")
 
         if (
             input_data.ended_at
@@ -91,9 +87,7 @@ class ModuleMutation:
 
     @strawberry.mutation
     @transaction.atomic
-    def update_module(
-        self, info: strawberry.Info, input_data: UpdateModuleInput
-    ) -> ModuleNode:
+    def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
         user = get_authenticated_user(info.context.request)
 
@@ -106,9 +100,7 @@ class ModuleMutation:
             raise GraphQLError("Only mentors can edit modules.") from e
 
         if creator_as_mentor not in module.program.admins.all():
-            raise GraphQLError(
-                "You must be an admin of the module's program to edit it."
-            )
+            raise GraphQLError("You must be an admin of the module's program to edit it.")
 
         module.name = input_data.name
         module.key = slugify(input_data.name)
@@ -126,20 +118,14 @@ class ModuleMutation:
         if input_data.tags is not None:
             module.tags = input_data.tags
 
-        if (
-            module.ended_at
-            and module.started_at
-            and module.ended_at <= module.started_at
-        ):
+        if module.ended_at and module.started_at and module.ended_at <= module.started_at:
             raise GraphQLError("End date must be after start date.")
 
         if input_data.project_id is not None:
             try:
                 module.project = Project.objects.get(id=input_data.project_id)
             except Project.DoesNotExist as e:
-                raise GraphQLError(
-                    f"Project with id '{input_data.project_id}' not found."
-                ) from e
+                raise GraphQLError(f"Project with id '{input_data.project_id}' not found.") from e
 
         if input_data.mentor_logins is not None:
             mentors_to_set = _resolve_mentors_from_logins(input_data.mentor_logins)

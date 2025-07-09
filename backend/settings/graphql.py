@@ -4,9 +4,9 @@ import strawberry
 
 from apps.github.graphql.queries import GithubQuery
 from apps.mentorship.graphql.mutations import (
+    MentorshipMutations,
     ModuleMutation,
     ProgramMutation,
-    MentorshipMutations,
 )
 from apps.mentorship.graphql.queries import MentorshipQuery, ModuleQuery, ProgramQuery
 from apps.nest.graphql.mutations import UserMutations

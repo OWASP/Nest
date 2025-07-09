@@ -5,6 +5,7 @@ import logging
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
+
 from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
 from apps.mentorship.graphql.nodes.program import (
@@ -24,12 +25,8 @@ class ProgramMutation:
 
     @strawberry.mutation
     @transaction.atomic
-    def create_program(
-        self, info: strawberry.Info, input_data: CreateProgramInput
-    ) -> ProgramNode:
-        """
-        Create a new mentorship program.
-        """
+    def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
+        """Create a new mentorship program."""
         request = info.context.request
         user = get_authenticated_user(request)
         mentor, created = Mentor.objects.get_or_create(
@@ -73,9 +70,7 @@ class ProgramMutation:
         return program
 
     @strawberry.mutation
-    def update_program(
-        self, info: strawberry.Info, input_data: UpdateProgramInput
-    ) -> ProgramNode:
+    def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
         request = info.context.request
         user = get_authenticated_user(request)
@@ -113,9 +108,7 @@ class ProgramMutation:
             and input_data.ended_at <= input_data.started_at
         ):
             msg = "End date must be after start date."
-            logger.warning(
-                "Validation error updating program '%s': %s", program.key, msg
-            )
+            logger.warning("Validation error updating program '%s': %s", program.key, msg)
             raise ValidationError(msg)
 
         simple_fields = {
@@ -134,9 +127,7 @@ class ProgramMutation:
                 setattr(program, field, value)
 
         if input_data.experience_levels is not None:
-            program.experience_levels = [
-                lvl.value for lvl in input_data.experience_levels
-            ]
+            program.experience_levels = [lvl.value for lvl in input_data.experience_levels]
 
         if input_data.status is not None:
             program.status = input_data.status.value

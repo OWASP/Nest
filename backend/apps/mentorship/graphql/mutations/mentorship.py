@@ -1,11 +1,12 @@
 """Mentorship role GraphQL mutations"""
 
-from apps.owasp.models.project import Project
 import strawberry
+from django.db.models import Q
+
 from apps.mentorship.models import Mentee, Mentor
 from apps.mentorship.utils.user import get_authenticated_user
 from apps.nest.graphql.nodes.user import AuthUserNode
-from django.db.models import Q
+from apps.owasp.models.project import Project
 
 
 @strawberry.type

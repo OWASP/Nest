@@ -40,9 +40,7 @@ def get_authenticated_user(request) -> NestUser:
         user = NestUser.objects.get(github_user=github_user)
     except NestUser.DoesNotExist as err:
         msg = "No linked Nest user found for this GitHub account."
-        logger.warning(
-            "Authentication failed for GitHub user '%s': %s", github_user.login, msg
-        )
+        logger.warning("Authentication failed for GitHub user '%s': %s", github_user.login, msg)
         raise PermissionDenied(msg) from err
 
     return user
@@ -70,9 +68,7 @@ def get_authenticated_user_by_token(access_token: str) -> NestUser:
         user = NestUser.objects.get(github_user=github_user)
     except NestUser.DoesNotExist as err:
         msg = "No linked Nest user found for this GitHub account."
-        logger.warning(
-            "Authentication failed for GitHub user '%s': %s", github_user.login, msg
-        )
+        logger.warning("Authentication failed for GitHub user '%s': %s", github_user.login, msg)
         raise PermissionDenied(msg) from err
 
     return user
