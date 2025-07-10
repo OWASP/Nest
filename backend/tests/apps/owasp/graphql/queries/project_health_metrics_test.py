@@ -97,3 +97,14 @@ class TestProjectHealthMetricsQuery:
         assert len(result) == 1
         assert result[0].stars_count == 1000
         assert result[0].forks_count == 200
+
+    @patch(
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+    )
+    def test_project_health_metrics_distinct_length(self, mock_get_latest_metrics):
+        """Test the distinct length of project health metrics."""
+        mock_get_latest_metrics.return_value.count.return_value = 42
+        query = ProjectHealthMetricsQuery()
+        result = query.project_health_metrics_distinct_length()
+        assert result == 42
+        mock_get_latest_metrics.return_value.count.assert_called_once()

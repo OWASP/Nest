@@ -48,3 +48,13 @@ class ProjectHealthMetricsQuery:
 
         """
         return ProjectHealthMetrics.get_stats()
+
+    @strawberry.field
+    def project_health_metrics_distinct_length(self) -> int:
+        """Get the distinct length of project health metrics.
+
+        Returns:
+            int: The count of distinct project health metrics.
+
+        """
+        return ProjectHealthMetrics.get_latest_health_metrics().count()
