@@ -32,5 +32,6 @@ export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
       score
       starsCount
     }
+    projectHealthMetricsDistinctLength
   }
 `

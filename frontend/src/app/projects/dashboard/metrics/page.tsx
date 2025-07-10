@@ -16,6 +16,7 @@ const PAGINATION_LIMIT = 10
 
 const MetricsPage: FC = () => {
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
+  const [metricsLength, setMetricsLength] = useState<number>(0)
   const [filters, setFilters] = useState<HealthMetricsFilter>({})
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [ordering, setOrdering] = useState<HealthMetricsOrdering>({
@@ -37,15 +38,12 @@ const MetricsPage: FC = () => {
   useEffect(() => {
     if (data) {
       setMetrics(data.projectHealthMetrics)
+      setMetricsLength(data.projectHealthMetricsDistinctLength)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
   }, [data, graphQLRequestError])
-
-  if (loading) {
-    return <LoadingSpinner />
-  }
 
   const orderingSections: DropDownSectionProps[] = [
     {
@@ -220,20 +218,24 @@ const MetricsPage: FC = () => {
         <div className="truncate text-center font-semibold">Created At</div>
         <div className="truncate text-center font-semibold">Score</div>
       </div>
-      <div className="grid grid-cols-1 gap-2">
-        {metrics.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
-            No metrics found. Try adjusting your filters.
-          </div>
-        ) : (
-          metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
-        )}
-      </div>
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="grid grid-cols-1 gap-2">
+          {metrics.length === 0 ? (
+            <div className="py-8 text-center text-gray-500">
+              No metrics found. Try adjusting your filters.
+            </div>
+          ) : (
+            metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
+          )}
+        </div>
+      )}
       <div className="mt-4 flex items-center justify-center">
         <Pagination
           initialPage={getCurrentPage()}
           page={getCurrentPage()}
-          total={5}
+          total={Math.ceil(metricsLength / PAGINATION_LIMIT)}
           onChange={handlePageChange}
           showControls
           color="warning"
