@@ -14,24 +14,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
-import type { User } from 'types/user'
 import { aboutText, technologies } from 'utils/aboutData'
 import { capitalize } from 'utils/capitalize'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
+import LeadersListBlock from 'components/LeadersListBlock'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributorsList from 'components/TopContributorsList'
-import UserCard from 'components/UserCard'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
@@ -112,15 +108,9 @@ const About = () => {
           ))}
         </SecondaryCard>
 
-        <SecondaryCard icon={faArrowUpRightFromSquare} title={<AnchorTitle title="Leaders" />}>
-          <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-            {Object.keys(leaders).map((username) => (
-              <div key={username}>
-                <LeaderData username={username} />
-              </div>
-            ))}
-          </div>
-        </SecondaryCard>
+        {leaders && (
+          <LeadersListBlock leaders={leaders} icon={faArrowUpRightFromSquare} label="Leaders" />
+        )}
 
         {topContributors && (
           <TopContributorsList
@@ -238,42 +228,6 @@ const About = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GET_LEADER_DATA, {
-    variables: { key: username },
-  })
-  const router = useRouter()
-
-  if (loading) return <p>Loading {username}...</p>
-  if (error) return <p>Error loading {username}'s data</p>
-
-  const user = data?.user
-
-  if (!user) {
-    return <p>No data available for {username}</p>
-  }
-
-  const handleButtonClick = (user: User) => {
-    router.push(`/members/${user.login}`)
-  }
-
-  return (
-    <UserCard
-      avatar={user.avatarUrl}
-      button={{
-        icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        label: 'View Profile',
-        onclick: () => handleButtonClick(user),
-      }}
-      className="h-64 w-40 bg-inherit"
-      company={user.company}
-      description={leaders[user.login]}
-      location={user.location}
-      name={user.name || username}
-    />
   )
 }
 

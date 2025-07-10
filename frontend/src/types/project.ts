@@ -5,6 +5,7 @@ import type { Milestone } from 'types/milestone'
 import type { Organization } from 'types/organization'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+import { User } from 'types/user'
 
 export type ProjectStats = {
   contributors: number
@@ -25,6 +26,7 @@ export type Project = {
   key: string
   languages: string[]
   leaders: string[]
+  leadersTemp: User[]
   level: string
   name: string
   openIssuesCount?: number

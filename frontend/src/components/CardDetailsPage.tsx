@@ -11,6 +11,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import type { DetailsCardProps } from 'types/card'
+import { LeadersListBlockProps } from 'types/leaders'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -19,6 +20,7 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
+import LeadersListBlock from 'components/LeadersListBlock'
 import Milestones from 'components/Milestones'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
@@ -49,6 +51,7 @@ const DetailsCard = ({
   stats,
   summary,
   title,
+  leaders,
   topContributors,
   topics,
   type,
@@ -196,6 +199,15 @@ const DetailsCard = ({
               <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
+        )}
+        {leaders && (
+          <LeadersListBlock
+            label="Leaders"
+            leaders={leaders.reduce((acc, user) => {
+              acc[user.login] = ''
+              return acc
+            }, {} as LeadersListBlockProps)}
+          />
         )}
         {topContributors && (
           <TopContributorsList

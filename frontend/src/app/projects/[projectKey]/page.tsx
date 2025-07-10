@@ -103,6 +103,7 @@ const ProjectDetailsPage = () => {
       stats={projectStats}
       summary={project.summary}
       title={project.name}
+      leaders={project.leadersTemp}
       topContributors={topContributors}
       topics={project.topics}
       type="project"
