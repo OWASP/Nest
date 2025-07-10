@@ -4,10 +4,12 @@ import logging
 
 import requests
 import strawberry
+from django.contrib.auth import login, logout
 from github import Github
 
 from apps.github.models import User as GithubUser
 from apps.nest.graphql.nodes.user import AuthUserNode
+from apps.nest.graphql.permissions import IsAuthenticated
 from apps.nest.models import User
 
 logger = logging.getLogger(__name__)
@@ -25,7 +27,7 @@ class UserMutations:
     """GraphQL mutations related to user."""
 
     @strawberry.mutation
-    def github_auth(self, access_token: str) -> GitHubAuthResult:
+    def github_auth(self, info, access_token: str) -> GitHubAuthResult:
         """Authenticate via GitHub OAuth2."""
         try:
             github = Github(access_token)
@@ -49,8 +51,24 @@ class UserMutations:
                 username=gh_user.login,
             )
 
+            if auth_user:
+                auth_user.backend = "django.contrib.auth.backends.ModelBackend"
+                login(info.context.request, auth_user)
+                logger.info(f"User {auth_user.username} successfully logged into Django session.")
+
             return GitHubAuthResult(auth_user=auth_user)
 
         except requests.exceptions.RequestException as e:
             logger.warning("GitHub authentication failed: %s", e)
             return GitHubAuthResult(auth_user=None)
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    def logout_user(self, info) -> bool:
+        """Logs the current user out of their Django session."""
+        try:
+            logger.info(f"User {info.context.request.user.username} is logging out.")
+            logout(info.context.request)
+            return True
+        except Exception as e:
+            logger.error(f"Logout failed: {e}")
+            return False

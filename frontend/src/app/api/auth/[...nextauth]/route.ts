@@ -1,7 +1,7 @@
-import { gql } from '@apollo/client'
+// import { gql } from '@apollo/client'
 import NextAuth from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
-import { apolloClient } from 'server/apolloClient'
+// import { apolloClient } from 'server/apolloClient'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
@@ -28,29 +28,10 @@ const authOptions = {
   },
   callbacks: {
     async signIn({ account }) {
-      if (account?.provider === 'github' && account.access_token) {
-        try {
-          const { data } = await apolloClient.mutate({
-            mutation: gql`
-              mutation GitHubAuth($accessToken: String!) {
-                githubAuth(accessToken: $accessToken) {
-                  authUser {
-                    username
-                  }
-                }
-              }
-            `,
-            variables: {
-              accessToken: account.access_token,
-            },
-          })
-          if (!data?.githubAuth?.authUser) throw new Error('User sync failed')
-          return true
-        } catch (error) {
-          throw new Error('GitHub authentication failed' + error.message)
-        }
+      if (account?.provider === 'github') {
+        return true
       }
-      return true
+      return false
     },
 
     async jwt({ token, account }) {

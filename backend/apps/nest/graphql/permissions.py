@@ -1,0 +1,16 @@
+from typing import Any
+
+from strawberry.permission import BasePermission
+from strawberry.types import Info
+
+
+class IsAuthenticated(BasePermission):
+    """Permission class to check if the user is authenticated."""
+
+    message = "You must be logged in to perform this action."
+
+    def has_permission(self, source, info: Info, **kwargs) -> bool:
+        return info.context.request.user.is_authenticated
+
+    def on_unauthorized(self) -> Any | None:
+        raise Exception(self.message)

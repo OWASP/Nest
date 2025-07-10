@@ -11,10 +11,10 @@ from django.utils import timezone
 class APIKey(models.Model):
     """API key model."""
 
-    key_hash = models.CharField(max_length=64, unique=True, db_index=True)
+    hash = models.CharField(max_length=64, unique=True)
     key_suffix = models.CharField(max_length=4, blank=True)
     name = models.CharField(max_length=100, null=False, blank=False)
-    revoked = models.BooleanField(default=False)
+    is_revoked = models.BooleanField(default=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="api_keys", db_index=True
     )
@@ -22,9 +22,9 @@ class APIKey(models.Model):
     expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        db_table = "nest_api_keys"
+        verbose_name_plural = "APIKeys"
         ordering = ["-created_at"]
-        verbose_name = "API Key"
-        verbose_name_plural = "API Keys"
 
     @staticmethod
     def generate_raw_key():
@@ -42,7 +42,11 @@ class APIKey(models.Model):
         raw_key = cls.generate_raw_key()
         key_hash = cls.generate_hash_key(raw_key)
         instance = cls.objects.create(
-            key_hash=key_hash, key_suffix=raw_key[-4:], name=name, user=user, expires_at=expires_at
+            expires_at=expires_at,
+            hash=key_hash,
+            key_suffix=raw_key[-4:],
+            name=name,
+            user=user,
         )
         return instance, raw_key
 
@@ -51,7 +55,7 @@ class APIKey(models.Model):
         """Authenticate an API key using the raw key."""
         key_hash = cls.generate_hash_key(raw_key)
         try:
-            api_key = cls.objects.get(key_hash=key_hash)
+            api_key = cls.objects.get(hash=key_hash)
             if api_key.is_valid():
                 return api_key
         except cls.DoesNotExist:
@@ -63,4 +67,4 @@ class APIKey(models.Model):
 
     def __str__(self):
         """Human-readable representation of the API key."""
-        return f"{self.name} ({'revoked' if self.revoked else 'active'})"
+        return f"{self.name} ({'revoked' if self.is_revoked else 'active'})"

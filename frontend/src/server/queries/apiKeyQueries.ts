@@ -5,7 +5,7 @@ export const GET_API_KEYS = gql`
     apiKeys(includeRevoked: $includeRevoked) {
       id
       name
-      revoked
+      isRevoked
       createdAt
       expiresAt
       keySuffix
@@ -19,7 +19,7 @@ export const CREATE_API_KEY = gql`
       apiKey {
         id
         name
-        revoked
+        isRevoked
         createdAt
         expiresAt
         keySuffix

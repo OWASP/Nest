@@ -2,7 +2,7 @@
 
 import strawberry
 
-from .apikey import APIKeyMutations
+from .api_key import APIKeyMutations
 from .user import UserMutations
 
 

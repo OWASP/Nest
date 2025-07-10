@@ -6,7 +6,7 @@ export type CreateApiKeyResult = {
 export type ApiKey = {
   id: number
   name: string
-  revoked: boolean
+  isRevoked: boolean
   createdAt: string
   expiresAt: string
   keySuffix: string

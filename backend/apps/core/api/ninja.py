@@ -3,10 +3,10 @@
 from ninja.errors import HttpError
 from ninja.security import APIKeyHeader
 
-from apps.nest.models.apikey import APIKey
+from apps.nest.models.api_key import APIKey
 
 
-class APIKeyAuth(APIKeyHeader):
+class ApiKeyAuth(APIKeyHeader):
     """Custom API key authentication class for Ninja."""
 
     param_name = "X-API-Key"

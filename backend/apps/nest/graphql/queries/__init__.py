@@ -1,6 +1,6 @@
 import strawberry
 
-from apps.nest.graphql.queries.apikey import APIKeyQueries
+from apps.nest.graphql.queries.api_key import APIKeyQueries
 
 
 @strawberry.type
