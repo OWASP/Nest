@@ -1,16 +1,15 @@
 'use client'
 
 import { useQuery } from '@apollo/client'
-import { faFilter } from '@fortawesome/free-solid-svg-icons'
+import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Dropdown,
   DropdownItem,
   DropdownTrigger,
   DropdownMenu,
+  DropdownSection,
   Button,
-  Select,
-  SelectItem,
 } from '@heroui/react'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
@@ -52,16 +51,73 @@ const MetricsPage: FC = () => {
   if (isLoading) {
     return <LoadingSpinner />
   }
-  const selectOptions = [
-    { label: 'Score (High to Low)', key: 'score_DESC' },
-    { label: 'Score (Low to High)', key: 'score_ASC' },
-    { label: 'Stars (High to Low)', key: 'starsCount_DESC' },
-    { label: 'Stars (Low to High)', key: 'starsCount_ASC' },
-    { label: 'Forks (High to Low)', key: 'forksCount_DESC' },
-    { label: 'Forks (Low to High)', key: 'forksCount_ASC' },
-    { label: 'Contributors (High to Low)', key: 'contributorsCount_DESC' },
-    { label: 'Contributors (Low to High)', key: 'contributorsCount_ASC' },
+  const orderingItems = [
+    { label: 'Score (High to Low)', key: 'scoreDESC' },
+    { label: 'Score (Low to High)', key: 'scoreASC' },
+    { label: 'Stars (High to Low)', key: 'starsCountDESC' },
+    { label: 'Stars (Low to High)', key: 'starsCountASC' },
+    { label: 'Forks (High to Low)', key: 'forksCountDESC' },
+    { label: 'Forks (Low to High)', key: 'forksCountASC' },
+    { label: 'Contributors (High to Low)', key: 'contributorsCountDESC' },
+    { label: 'Contributors (Low to High)', key: 'contributorsCountASC' },
   ]
+  const filtersMapping = {
+    incubator: {
+      level: 'incubator',
+    },
+    lab: {
+      level: 'lab',
+    },
+    production: {
+      level: 'production',
+    },
+    flagship: {
+      level: 'flagship',
+    },
+    healthy: {
+      score: {
+        gte: 75,
+      },
+    },
+    warning: {
+      score: {
+        gte: 50,
+        lt: 75,
+      },
+    },
+    critical: {
+      score: {
+        lt: 50,
+      },
+    },
+    reset: {},
+  }
+  const orderingMapping = {
+    scoreDESC: {
+      scoreOrdering: { score: 'DESC' },
+    },
+    scoreASC: {
+      scoreOrdering: { score: 'ASC' },
+    },
+    starsCountDESC: {
+      scoreOrdering: { starsCount: 'DESC' },
+    },
+    starsCountASC: {
+      scoreOrdering: { starsCount: 'ASC' },
+    },
+    forksCountDESC: {
+      scoreOrdering: { forksCount: 'DESC' },
+    },
+    forksCountASC: {
+      scoreOrdering: { forksCount: 'ASC' },
+    },
+    contributorsCountDESC: {
+      scoreOrdering: { contributorsCount: 'DESC' },
+    },
+    contributorsCountASC: {
+      scoreOrdering: { contributorsCount: 'ASC' },
+    },
+  }
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
@@ -69,55 +125,66 @@ const MetricsPage: FC = () => {
         <div className="flex items-center space-x-2">
           <Dropdown>
             <DropdownTrigger>
-              <Button variant="solid" color="primary">
+              <Button variant="solid" color="success">
                 <FontAwesomeIcon icon={faFilter} className="mr-2" />
-                Filter by Level
+                Filters
               </Button>
             </DropdownTrigger>
             <DropdownMenu
+              selectionMode="single"
+              selectedKeys={Object.keys(filtersMapping).filter(
+                (key) => JSON.stringify(filtersMapping[key]) === JSON.stringify(filters)
+              )}
               onAction={async (key: string) => {
-                const newFilters = { ...filters, level: key }
-                setFilters(newFilters)
+                setFilters(filtersMapping[key])
                 await refetch({
-                  filters: newFilters,
+                  filters: filtersMapping[key],
                   pagination: { offset: 0, limit: PAGINATION_LIMIT },
                 })
               }}
             >
-              <DropdownItem key="incubator">Incubator</DropdownItem>
-              <DropdownItem key="lab">Lab</DropdownItem>
-              <DropdownItem key="production">Production</DropdownItem>
-              <DropdownItem key="flagship">Flagship</DropdownItem>
+              <DropdownSection title="Project Level">
+                <DropdownItem key="incubator">Incubator</DropdownItem>
+                <DropdownItem key="lab">Lab</DropdownItem>
+                <DropdownItem key="production">Production</DropdownItem>
+                <DropdownItem key="flagship">Flagship</DropdownItem>
+              </DropdownSection>
+              <DropdownSection title="Project Health">
+                <DropdownItem key="healthy">Healthy Projects</DropdownItem>
+                <DropdownItem key="warning">Projects Needing Attention</DropdownItem>
+                <DropdownItem key="critical">Unhealthy Projects</DropdownItem>
+              </DropdownSection>
+              <DropdownSection title="Reset Filters">
+                <DropdownItem key="reset">Reset All Filters</DropdownItem>
+              </DropdownSection>
             </DropdownMenu>
           </Dropdown>
-          <Select
-            label="Sort By"
-            placeholder="Select sorting option"
-            selectionMode="multiple"
-            className="w-64"
-            color="primary"
-          >
-            {selectOptions.map((option) => (
-              <SelectItem
-                key={option.key}
-                onPress={() => {
-                  const [key, order] = option.key.split('_')
-                  const newOrdering: HealthMetricsOrdering = {
-                    ...ordering,
-                  }
-                  newOrdering[`${key}Ordering`] = { [key]: order }
-                  setOrdering(newOrdering)
-                  refetch({
-                    filters,
-                    pagination: { offset: 0, limit: PAGINATION_LIMIT },
-                    ordering: Object.values(newOrdering),
-                  })
-                }}
-              >
-                {option.label}
-              </SelectItem>
-            ))}
-          </Select>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="solid" color="success">
+                <FontAwesomeIcon icon={faSort} className="mr-2" />
+                Sort By
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              selectionMode="single"
+              selectedKeys={Object.keys(orderingMapping).filter(
+                (key) => JSON.stringify(ordering) === JSON.stringify(orderingMapping[key])
+              )}
+              onAction={async (key: string) => {
+                setOrdering(orderingMapping[key])
+                await refetch({
+                  filters,
+                  pagination: { offset: 0, limit: PAGINATION_LIMIT },
+                  ordering: Object.values(orderingMapping[key]),
+                })
+              }}
+            >
+              {orderingItems.map((option) => (
+                <DropdownItem key={option.key}>{option.label}</DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </div>
       <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] p-4">
