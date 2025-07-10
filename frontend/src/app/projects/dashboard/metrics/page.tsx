@@ -27,6 +27,7 @@ const MetricsPage: FC = () => {
     error: graphQLRequestError,
     refetch,
     loading,
+    fetchMore,
   } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
     variables: {
       filters,
@@ -159,15 +160,6 @@ const MetricsPage: FC = () => {
   const getCurrentPage = () => {
     return Math.floor(pagination.offset / PAGINATION_LIMIT) + 1
   }
-  const handlePageChange = async (page: number) => {
-    const newOffset = (page - 1) * PAGINATION_LIMIT
-    setPagination({ offset: newOffset, limit: PAGINATION_LIMIT })
-    await refetch({
-      filters,
-      pagination: { offset: newOffset, limit: PAGINATION_LIMIT },
-      ordering: Object.values(ordering),
-    })
-  }
 
   return (
     <>
@@ -183,10 +175,14 @@ const MetricsPage: FC = () => {
               (key) => JSON.stringify(filtersMapping[key]) === JSON.stringify(filters)
             )}
             onAction={async (key: string) => {
+              // Because how apollo caches pagination, we need to reset the pagination.
+              const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
+              setPagination(newPagination)
               setFilters(filtersMapping[key])
               await refetch({
                 filters: filtersMapping[key],
-                pagination: { offset: 0, limit: PAGINATION_LIMIT },
+                pagination: newPagination,
+                ordering: Object.values(ordering),
               })
             }}
           />
@@ -200,10 +196,13 @@ const MetricsPage: FC = () => {
               (key) => JSON.stringify(ordering) === JSON.stringify(orderingMapping[key])
             )}
             onAction={async (key: string) => {
+              // Reset pagination to the first page when changing ordering
+              const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
+              setPagination(newPagination)
               setOrdering(orderingMapping[key])
               await refetch({
                 filters,
-                pagination: { offset: 0, limit: PAGINATION_LIMIT },
+                pagination: newPagination,
                 ordering: Object.values(orderingMapping[key]),
               })
             }}
@@ -236,7 +235,25 @@ const MetricsPage: FC = () => {
           initialPage={getCurrentPage()}
           page={getCurrentPage()}
           total={Math.ceil(metricsLength / PAGINATION_LIMIT)}
-          onChange={handlePageChange}
+          onChange={async (page) => {
+            const newOffset = (page - 1) * PAGINATION_LIMIT
+            const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
+            setPagination(newPagination)
+            await fetchMore({
+              variables: {
+                filters,
+                pagination: newPagination,
+                ordering: Object.values(ordering),
+              },
+              updateQuery: (prev, { fetchMoreResult }) => {
+                if (!fetchMoreResult) return prev
+                return {
+                  ...prev,
+                  projectHealthMetrics: fetchMoreResult.projectHealthMetrics,
+                }
+              },
+            })
+          }}
           showControls
           color="warning"
           className="mt-4"
