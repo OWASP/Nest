@@ -2,6 +2,7 @@
 
 import { useQuery } from '@apollo/client'
 import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons'
+import { Pagination } from '@heroui/react'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_METRICS_LIST } from 'server/queries/projectsHealthDashboardQueries'
@@ -16,6 +17,7 @@ const PAGINATION_LIMIT = 10
 const MetricsPage: FC = () => {
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [filters, setFilters] = useState<HealthMetricsFilter>({})
+  const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [ordering, setOrdering] = useState<HealthMetricsOrdering>({
     scoreOrdering: { score: 'DESC' },
   })
@@ -155,6 +157,20 @@ const MetricsPage: FC = () => {
       scoreOrdering: { contributorsCount: 'ASC' },
     },
   }
+
+  const getCurrentPage = () => {
+    return Math.floor(pagination.offset / PAGINATION_LIMIT) + 1
+  }
+  const handlePageChange = async (page: number) => {
+    const newOffset = (page - 1) * PAGINATION_LIMIT
+    setPagination({ offset: newOffset, limit: PAGINATION_LIMIT })
+    await refetch({
+      filters,
+      pagination: { offset: newOffset, limit: PAGINATION_LIMIT },
+      ordering: Object.values(ordering),
+    })
+  }
+
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
@@ -212,6 +228,17 @@ const MetricsPage: FC = () => {
         ) : (
           metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
         )}
+      </div>
+      <div className="mt-4 flex items-center justify-center">
+        <Pagination
+          initialPage={getCurrentPage()}
+          page={getCurrentPage()}
+          total={5}
+          onChange={handlePageChange}
+          showControls
+          color="warning"
+          className="mt-4"
+        />
       </div>
     </>
   )
