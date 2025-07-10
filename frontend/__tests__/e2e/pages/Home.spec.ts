@@ -59,7 +59,7 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
     await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('OWASP Juice Shop')).toBeVisible()
+    await expect(page.getByText('150 contributions')).toBeVisible()
   })
 
   test('should have recent issues', async ({ page }) => {

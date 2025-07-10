@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from django.db import models
-from django.db.models import F, Sum, Window
-from django.db.models.functions import Rank
+from django.db.models import Sum
 from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -165,17 +164,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         # Project contributors only for main/project/organization pages.
         if not (chapter or committee or repository):
-            queryset = (
-                queryset.filter(repository__project__isnull=False)
-                .annotate(
-                    rank=Window(
-                        expression=Rank(),
-                        order_by=F("contributions_count").desc(),
-                        partition_by=F("user__login"),
-                    )
-                )
-                .filter(rank=1)
-            )
+            queryset = queryset.filter(repository__project__isnull=False)
 
         # Aggregate total contributions for users.
         top_contributors = (
@@ -185,8 +174,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 "user__name",
             )
             .annotate(
-                project_name=F("repository__project__name"),
-                project_key=F("repository__project__key"),
                 total_contributions=Sum("contributions_count"),
             )
             .order_by("-total_contributions")[:limit]
@@ -198,10 +185,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 "contributions_count": tc["total_contributions"],
                 "login": tc["user__login"],
                 "name": tc["user__name"],
-                "project_key": tc["project_key"].replace("www-project-", "")
-                if tc.get("project_key")
-                else None,
-                "project_name": tc.get("project_name"),
             }
             for tc in top_contributors
         ]

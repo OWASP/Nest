@@ -1,6 +1,6 @@
 """GitHub user Algolia index configuration."""
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 from apps.common.index import IndexBase, register
 from apps.github.models.user import User
@@ -78,6 +78,5 @@ class UserIndex(IndexBase):
 
         """
         return User.objects.exclude(
-            is_bot=False,
-            login__in=User.get_non_indexable_logins(),
+            Q(is_bot=True) | Q(login__in=User.get_non_indexable_logins()),
         )

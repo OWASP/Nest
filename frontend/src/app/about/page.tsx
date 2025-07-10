@@ -127,7 +127,6 @@ const About = () => {
             icon={faUsers}
             contributors={topContributors}
             maxInitialDisplay={9}
-            type="contributor"
           />
         )}
 

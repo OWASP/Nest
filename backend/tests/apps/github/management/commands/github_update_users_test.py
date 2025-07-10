@@ -46,7 +46,7 @@ class TestGithubUpdateUsersCommand:
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_objects = MagicMock()
-        mock_rc_objects.filter.return_value.values.return_value.annotate.return_value = [
+        mock_rc_objects.exclude.return_value.values.return_value.annotate.return_value = [
             {"user_id": 1, "total_contributions": 10},
             {"user_id": 2, "total_contributions": 20},
             {"user_id": 3, "total_contributions": 30},
@@ -61,8 +61,8 @@ class TestGithubUpdateUsersCommand:
         mock_users_queryset.count.assert_called_once()
         mock_users_queryset.__getitem__.assert_called_once_with(slice(0, None))
 
-        mock_rc_objects.filter.return_value.values.assert_called_once_with("user_id")
-        mock_rc_objects.filter.return_value.values.return_value.annotate.assert_called_once()
+        mock_rc_objects.exclude.return_value.values.assert_called_once_with("user_id")
+        mock_rc_objects.exclude.return_value.values.return_value.annotate.assert_called_once()
 
         assert mock_print.call_count == 3
         mock_print.assert_any_call("1 of 3     User 1")
@@ -91,7 +91,7 @@ class TestGithubUpdateUsersCommand:
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
-        mock_rc_queryset.filter.return_value.values.return_value.annotate.return_value = [
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
             {"user_id": 2, "total_contributions": 20},
             {"user_id": 3, "total_contributions": 30},
         ]
@@ -132,7 +132,7 @@ class TestGithubUpdateUsersCommand:
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
-        mock_rc_queryset.filter.return_value.values.return_value.annotate.return_value = []
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = []
         mock_repository_contributor.objects = mock_rc_queryset
 
         with patch("builtins.print") as mock_print:
@@ -163,7 +163,7 @@ class TestGithubUpdateUsersCommand:
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
-        mock_rc_queryset.filter.return_value.values.return_value.annotate.return_value = [
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
             {"user_id": 1, "total_contributions": 15},
         ]
         mock_repository_contributor.objects = mock_rc_queryset
@@ -191,7 +191,7 @@ class TestGithubUpdateUsersCommand:
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
-        mock_rc_queryset.filter.return_value.values.return_value.annotate.return_value = []
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = []
         mock_repository_contributor.objects = mock_rc_queryset
 
         with patch("builtins.print") as mock_print:
@@ -218,7 +218,7 @@ class TestGithubUpdateUsersCommand:
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
-        mock_rc_queryset.filter.return_value.values.return_value.annotate.return_value = [
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
             {"user_id": 1, "total_contributions": 10},
             {"user_id": 2, "total_contributions": 20},
         ]

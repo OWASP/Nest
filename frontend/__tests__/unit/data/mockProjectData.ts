@@ -13,8 +13,6 @@ export const mockProjectData = {
           contributionsCount: 10,
           login: 'contributor1',
           name: 'Contributor 1',
-          projectKey: 'project1',
-          projectName: 'Project 1',
         },
       ],
       topics: ['Topic 1'],

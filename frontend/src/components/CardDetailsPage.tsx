@@ -202,7 +202,6 @@ const DetailsCard = ({
             icon={faUsers}
             contributors={topContributors}
             maxInitialDisplay={9}
-            type="contributor"
           />
         )}
         {(type === 'project' ||
