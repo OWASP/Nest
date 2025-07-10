@@ -19,11 +19,11 @@ const MetricsPage: FC = () => {
   const [ordering, setOrdering] = useState<HealthMetricsOrdering>({
     scoreOrdering: { score: 'DESC' },
   })
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const {
     data,
     error: graphQLRequestError,
     refetch,
+    loading,
   } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
     variables: {
       filters,
@@ -31,19 +31,20 @@ const MetricsPage: FC = () => {
       ordering: Object.values(ordering),
     },
   })
+
   useEffect(() => {
     if (data) {
       setMetrics(data.projectHealthMetrics)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [data, graphQLRequestError])
-  if (isLoading) {
+
+  if (loading) {
     return <LoadingSpinner />
   }
+
   const orderingSections: DropDownSectionProps[] = [
     {
       title: 'Score',
