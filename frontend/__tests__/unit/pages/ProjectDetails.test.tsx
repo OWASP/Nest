@@ -108,23 +108,24 @@ describe('ProjectDetailsPage', () => {
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
 
     const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 13')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 14')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
     })
 
     const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
   })
 
