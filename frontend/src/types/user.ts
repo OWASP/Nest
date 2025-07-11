@@ -8,25 +8,25 @@ export type RepositoryDetails = {
 }
 
 export type User<T = number> = {
-  createdAt: T
   avatarUrl: string
+  bio?: string
+  company?: string
+  contributionsCount: number
+  createdAt: T
+  email?: string
   followersCount: number
   followingCount: number
   issues?: Issue[]
+  issuesCount?: number
   key: string
+  location?: string
   login: string
+  name?: string
   publicRepositoriesCount: number
   releases?: Release[]
-  url: string
-  contributionsCount: number
-  issuesCount?: number
   releasesCount?: number
-  location?: string
-  company?: string
-  bio?: string
-  email?: string
-  name?: string
   topRepositories?: RepositoryCardProps[]
+  url: string
 }
 
 export type UserDetails = User<string>
