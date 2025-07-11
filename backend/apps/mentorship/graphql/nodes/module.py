@@ -47,6 +47,7 @@ class CreateModuleInput:
     experience_level: ExperienceLevelEnum
     mentor_logins: list[str] | None = None
     program_key: str
+    project_name: str | None = None
     project_id: strawberry.ID
     started_at: datetime | None = None
     tags: list[str] = strawberry.field(default_factory=list)
