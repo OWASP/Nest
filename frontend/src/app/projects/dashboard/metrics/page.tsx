@@ -140,22 +140,22 @@ const MetricsPage: FC = () => {
       scoreOrdering: { score: 'ASC' },
     },
     starsCountDESC: {
-      starsOrdering: { starsCount: 'DESC' },
+      starsCountOrdering: { starsCount: 'DESC' },
     },
     starsCountASC: {
-      starsOrdering: { starsCount: 'ASC' },
+      starsCountOrdering: { starsCount: 'ASC' },
     },
     forksCountDESC: {
-      forksOrdering: { forksCount: 'DESC' },
+      forksCountOrdering: { forksCount: 'DESC' },
     },
     forksCountASC: {
-      forksOrdering: { forksCount: 'ASC' },
+      forksCountOrdering: { forksCount: 'ASC' },
     },
     contributorsCountDESC: {
-      contributorsOrdering: { contributorsCount: 'DESC' },
+      contributorsCountOrdering: { contributorsCount: 'DESC' },
     },
     contributorsCountASC: {
-      contributorsOrdering: { contributorsCount: 'ASC' },
+      contributorsCountOrdering: { contributorsCount: 'ASC' },
     },
   }
 
