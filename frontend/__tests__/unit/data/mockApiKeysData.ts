@@ -17,6 +17,7 @@ export const mockApiKeys = {
       keySuffix: 'feh4',
     },
   ],
+  activeApiKeyCount: 2,
 }
 
 export const mockCreateApiKeyResult = {

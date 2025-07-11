@@ -10,12 +10,16 @@ export const GET_API_KEYS = gql`
       expiresAt
       keySuffix
     }
+    activeApiKeyCount
   }
 `
 
 export const CREATE_API_KEY = gql`
   mutation CreateApiKey($name: String!, $expiresAt: DateTime) {
     createApiKey(name: $name, expiresAt: $expiresAt) {
+      ok
+      code
+      message
       apiKey {
         id
         name

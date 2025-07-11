@@ -26,8 +26,11 @@ class RevokeAPIKeyResult:
 class CreateAPIKeyResult:
     """Result of creating an API key."""
 
-    api_key: APIKeyNode | None
-    raw_key: str | None
+    ok: bool
+    api_key: APIKeyNode | None = None
+    raw_key: str | None = None
+    code: str | None = None
+    message: str | None = None
 
 
 @strawberry.type
@@ -42,11 +45,28 @@ class APIKeyMutations:
         user = info.context.request.user
 
         try:
-            instance, raw_key = APIKey.create(user=user, name=name, expires_at=expires_at)
-            return CreateAPIKeyResult(api_key=instance, raw_key=raw_key)
+            result = APIKey.create(user=user, name=name, expires_at=expires_at)
+            if result is None:
+                return CreateAPIKeyResult(
+                    ok=False,
+                    code="LIMIT_REACHED",
+                    message="You can have at most 5 active API keys.",
+                )
+            instance, raw_key = result
+            return CreateAPIKeyResult(
+                ok=True,
+                api_key=instance,
+                raw_key=raw_key,
+                code="SUCCESS",
+                message="API key created successfully.",
+            )
         except IntegrityError as err:
             logger.warning("Error creating API key: %s", err)
-            return CreateAPIKeyResult(api_key=None, raw_key=None)
+            return CreateAPIKeyResult(
+                ok=False,
+                code="ERROR",
+                message="Something went wrong.",
+            )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def revoke_api_key(self, info, key_id: int) -> RevokeAPIKeyResult:

@@ -12,6 +12,12 @@ class APIKeyQueries:
     """GraphQL query class for retrieving API keys."""
 
     @strawberry.field(permission_classes=[IsAuthenticated])
+    def active_api_key_count(self, info) -> int:
+        """Return count of active API keys for user."""
+        user = info.context.request.user
+        return APIKey.active_count_for_user(user)
+
+    @strawberry.field(permission_classes=[IsAuthenticated])
     def api_keys(self, info, *, include_revoked: bool = False) -> list[APIKeyNode]:
         """Resolve API keys for the authenticated user.
 

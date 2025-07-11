@@ -5,7 +5,10 @@ import secrets
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
+
+MAX_ACTIVE_KEYS = 5
 
 
 class APIKey(models.Model):
@@ -39,6 +42,9 @@ class APIKey(models.Model):
     @classmethod
     def create(cls, user, name, expires_at=None):
         """Create a new API key instance."""
+        if cls.active_count_for_user(user) >= MAX_ACTIVE_KEYS:
+            return None
+
         raw_key = cls.generate_raw_key()
         key_hash = cls.generate_hash_key(raw_key)
         instance = cls.objects.create(
@@ -49,6 +55,19 @@ class APIKey(models.Model):
             user=user,
         )
         return instance, raw_key
+
+    @classmethod
+    def active_count_for_user(cls, user) -> int:
+        """Return active API keys for the user."""
+        now = timezone.now()
+        return (
+            cls.objects.filter(
+                user=user,
+                is_revoked=False,
+            )
+            .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
+            .count()
+        )
 
     @classmethod
     def authenticate(cls, raw_key: str):
