@@ -35,8 +35,17 @@ django-shell:
 
 dump-data:
 	@echo "Dumping Nest data"
-	@CMD="python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json
-	@gzip backend/data/nest.json
+	@CMD="python manage.py dumpdata \
+		github \
+		owasp \
+		slack.conversation \
+		slack.member \
+		slack.workspace \
+		--indent=4 \
+		--natural-foreign \
+		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
+	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/nest.json" $(MAKE) exec-backend-command
+	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
 
 enrich-data: \
 	github-enrich-issues \
