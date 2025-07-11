@@ -2,6 +2,7 @@
 import { useQuery, useMutation } from '@apollo/client'
 import { screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { mockApiKeys, mockCreateApiKeyResult } from '@unit/data/mockApiKeysData'
+import { format, addDays } from 'date-fns'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
@@ -15,7 +16,6 @@ jest.mock('@apollo/client', () => ({
 
 jest.mock('@heroui/modal', () => {
   const Stub = ({ children }: { children: React.ReactNode }) => <>{children}</>
-
   return {
     Modal: ({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) =>
       isOpen ? <div role="dialog">{children}</div> : null,
@@ -50,24 +50,26 @@ jest.mock('next/navigation', () => ({
 describe('ApiKeysPage Component', () => {
   const mockUseQuery = useQuery as jest.Mock
   const mockUseMutation = useMutation as jest.Mock
+  const mockRefetch = jest.fn()
+  const mockCreateMutation = jest.fn().mockResolvedValue(mockCreateApiKeyResult)
+  const mockRevokeMutation = jest
+    .fn()
+    .mockResolvedValue({ data: { revokeApiKey: { success: true } } })
 
   beforeEach(() => {
     mockUseQuery.mockReturnValue({
       data: mockApiKeys,
       loading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: mockRefetch,
     })
 
     mockUseMutation.mockImplementation((mutation) => {
       if (mutation === CREATE_API_KEY) {
-        return [jest.fn().mockResolvedValue(mockCreateApiKeyResult), { loading: false }]
+        return [mockCreateMutation, { loading: false }]
       }
       if (mutation === REVOKE_API_KEY) {
-        return [
-          jest.fn().mockResolvedValue({ data: { revokeApiKey: { success: true } } }),
-          { loading: false },
-        ]
+        return [mockRevokeMutation, { loading: false }]
       }
       return [jest.fn(), { loading: false }]
     })
@@ -78,15 +80,17 @@ describe('ApiKeysPage Component', () => {
   })
 
   test('renders loading skeleton initially', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    mockUseQuery.mockReturnValue({
       data: null,
       loading: true,
       error: null,
-      refetch: jest.fn(),
+      refetch: mockRefetch,
     })
+
     render(<ApiKeysPage />)
-    expect(screen.getByText('API Key Management')).toBeInTheDocument()
-    expect(screen.getAllByTestId('mock-icon')).toHaveLength(2)
+
+    expect(screen.queryByText('API Key Management')).not.toBeInTheDocument()
+
     const skeletonElements = document.querySelectorAll('.animate-pulse')
     expect(skeletonElements.length).toBeGreaterThan(0)
   })
@@ -100,7 +104,7 @@ describe('ApiKeysPage Component', () => {
       data: activeKeys,
       loading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: mockRefetch,
     })
 
     render(<ApiKeysPage />)
@@ -119,7 +123,7 @@ describe('ApiKeysPage Component', () => {
       data: { apiKeys: [] },
       loading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: mockRefetch,
     })
 
     render(<ApiKeysPage />)
@@ -134,80 +138,64 @@ describe('ApiKeysPage Component', () => {
     mockUseQuery.mockReturnValue({
       data: null,
       loading: false,
-      error: { message: errorMessage },
-      refetch: jest.fn(),
+      error: new Error(errorMessage),
+      refetch: mockRefetch,
     })
 
     render(<ApiKeysPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(`Error: ${errorMessage}`)).toBeInTheDocument()
+      expect(screen.getByText('Error loading API keys')).toBeInTheDocument()
     })
   })
 
   test('allows a user to create a new API key', async () => {
-    const mockCreateFn = jest.fn()
-    const mockRefetch = jest.fn()
-
-    mockUseQuery.mockReturnValue({
-      data: { apiKeys: [] },
-      loading: false,
-      error: null,
-      refetch: mockRefetch,
-    })
-
-    mockUseMutation.mockImplementation((mutation) => {
-      if (mutation === CREATE_API_KEY) {
-        return [
-          (variables) => {
-            mockCreateFn(variables)
-            return Promise.resolve(mockCreateApiKeyResult)
-          },
-          { loading: false },
-        ]
-      }
-      return [jest.fn(), { loading: false }]
-    })
     render(<ApiKeysPage />)
-    fireEvent.click(screen.getByText('Create New Key'))
+    fireEvent.click(screen.getByText(/Create New Key/))
+
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
+
     const nameInput = screen.getByLabelText('API Key Name')
     fireEvent.change(nameInput, { target: { value: 'Test New Key' } })
     fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
 
     await waitFor(() => {
-      expect(mockCreateFn).toHaveBeenCalledWith({
-        variables: { name: 'Test New Key' },
+      const expectedExpiry = addDays(new Date(), 30)
+      const expectedVariables = {
+        name: 'Test New Key',
+        expiresAt: new Date(format(expectedExpiry, 'yyyy-MM-dd')),
+      }
+
+      expect(mockCreateMutation).toHaveBeenCalledWith({
+        variables: expect.objectContaining({
+          name: expectedVariables.name,
+          expiresAt: expect.any(Date),
+        }),
       })
     })
   })
 
   test('handles API key creation with expiry date', async () => {
-    const mockCreateFn = jest.fn()
-
-    mockUseMutation.mockImplementation((mutation) => {
-      if (mutation === CREATE_API_KEY) {
-        return [mockCreateFn, { loading: false }]
-      }
-      return [jest.fn(), { loading: false }]
-    })
     render(<ApiKeysPage />)
-    fireEvent.click(screen.getByText('Create New Key'))
+    fireEvent.click(screen.getByText(/Create New Key/))
+
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
+
     fireEvent.change(screen.getByLabelText('API Key Name'), {
       target: { value: 'Test Key with Expiry' },
     })
-    const expiryInput = screen.getByLabelText('Expiration Date (Optional)')
+    const expiryInput = screen.getByLabelText('Expiration Date')
     fireEvent.change(expiryInput, {
       target: { value: '2025-12-31' },
     })
     fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
+
     await waitFor(() => {
-      expect(mockCreateFn).toHaveBeenCalledWith({
+      expect(mockCreateMutation).toHaveBeenCalledWith({
         variables: {
           name: 'Test Key with Expiry',
           expiresAt: new Date('2025-12-31'),
@@ -217,8 +205,6 @@ describe('ApiKeysPage Component', () => {
   })
 
   test('fetches and displays revoked keys when checkbox is checked', async () => {
-    const mockRefetch = jest.fn()
-
     mockUseQuery.mockReturnValue({
       data: { apiKeys: mockApiKeys.apiKeys.filter((key) => !key.isRevoked) },
       loading: false,
@@ -227,17 +213,21 @@ describe('ApiKeysPage Component', () => {
     })
 
     render(<ApiKeysPage />)
+
     await waitFor(() => {
       expect(screen.queryByText('revoked key')).not.toBeInTheDocument()
     })
+
     const checkbox = screen.getByLabelText('Show revoked keys')
     fireEvent.click(checkbox)
-    expect(mockUseQuery).toHaveBeenCalledWith(
-      GET_API_KEYS,
-      expect.objectContaining({
-        variables: { includeRevoked: true },
-      })
-    )
+    await waitFor(() => {
+      expect(mockUseQuery).toHaveBeenLastCalledWith(
+        GET_API_KEYS,
+        expect.objectContaining({
+          variables: { includeRevoked: true },
+        })
+      )
+    })
   })
 
   test('displays API key usage information', async () => {
@@ -250,63 +240,24 @@ describe('ApiKeysPage Component', () => {
     })
   })
 
-  test('handles API key creation', async () => {
-    const mockCreateFn = jest.fn().mockResolvedValue(mockCreateApiKeyResult)
-    const mockRefetch = jest.fn()
-
-    mockUseQuery.mockReturnValue({
-      data: { apiKeys: [] },
-      loading: false,
-      error: null,
-      refetch: mockRefetch,
-    })
-
-    mockUseMutation.mockImplementation((mutation) => {
-      if (mutation === CREATE_API_KEY) {
-        return [
-          (variables) => {
-            mockCreateFn(variables)
-            return Promise.resolve(mockCreateApiKeyResult)
-          },
-          { loading: false },
-        ]
-      }
-      return [jest.fn(), { loading: false }]
-    })
-
-    render(<ApiKeysPage />)
-    fireEvent.click(screen.getByText('Create New Key'))
-    await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeInTheDocument()
-    })
-    const nameInput = screen.getByLabelText('API Key Name')
-    fireEvent.change(nameInput, { target: { value: 'Test Key' } })
-    fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
-    await waitFor(() => {
-      expect(mockCreateFn).toHaveBeenCalledWith({
-        variables: { name: 'Test Key' },
-      })
-    })
-  })
-
   test('handles API key revocation', async () => {
-    const mockRevokeFn = jest.fn().mockRejectedValue(new Error('Revocation failed'))
-    mockUseMutation.mockImplementation((mutation) => {
-      if (mutation === REVOKE_API_KEY) {
-        return [mockRevokeFn, { loading: false }]
-      }
-      return [jest.fn(), { loading: false }]
-    })
-
     render(<ApiKeysPage />)
     const keyNameCell = await screen.findByText('mock key 1')
     const row = keyNameCell.closest('tr')
-    const revokeButton = within(row).getByRole('button')
+    expect(row).not.toBeNull()
+    const revokeButton = within(row!).getByRole('button')
     fireEvent.click(revokeButton)
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByText('Revoke API Key')).toBeInTheDocument()
     expect(
       within(dialog).getByText(/Are you sure you want to revoke the key named/)
     ).toBeInTheDocument()
+    const confirmRevokeButton = within(dialog).getByRole('button', { name: /Revoke Key/i })
+    fireEvent.click(confirmRevokeButton)
+    await waitFor(() => {
+      expect(mockRevokeMutation).toHaveBeenCalledWith({
+        variables: { keyId: 1 }, //
+      })
+    })
   })
 })

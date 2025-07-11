@@ -31,6 +31,6 @@ class ApiKeyAuth(APIKeyHeader):
             if api_key.is_valid():
                 return api_key
         except APIKey.DoesNotExist as err:
-            raise HttpError(401, "Invalid or expired API key") from err
+            raise HttpError(401, "Invalid API key") from err
 
-        raise HttpError(401, "API key revoked or expired")
+        raise HttpError(401, "Invalid API key")
