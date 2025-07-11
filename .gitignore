@@ -19,7 +19,9 @@ __pycache__
 .vscode
 venv/
 *.code-workspace
+*.key
 *.log
+*.pem
 backend/.venv
 backend/data/backup*
 backend/staticfiles

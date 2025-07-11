@@ -49,7 +49,10 @@ class LeaderAdminMixin:
     """Admin mixin for entities that can have leaders."""
 
     actions = ("approve_suggested_leaders",)
-    filter_horizontal = ("suggested_leaders",)
+    filter_horizontal = (
+        "leaders",
+        "suggested_leaders",
+    )
 
     def approve_suggested_leaders(self, request, queryset):
         """Approve suggested leaders for selected entities."""
@@ -66,10 +69,8 @@ class LeaderAdminMixin:
 
 
 class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
-    autocomplete_fields = (
-        "leaders",
-        "owasp_repository",
-    )
+    autocomplete_fields = ("owasp_repository",)
+    filter_horizontal = LeaderAdminMixin.filter_horizontal
     list_display = (
         "name",
         "created_at",
@@ -92,6 +93,7 @@ class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin
         "leaders",
         "owasp_repository",
     )
+    filter_horizontal = LeaderAdminMixin.filter_horizontal
     search_fields = ("name",)
 
 
@@ -122,12 +124,12 @@ class PostAdmin(admin.ModelAdmin):
 
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     autocomplete_fields = (
-        "leaders",
         "organizations",
         "owasp_repository",
         "owners",
         "repositories",
     )
+    filter_horizontal = LeaderAdminMixin.filter_horizontal
     list_display = (
         "custom_field_name",
         "created_at",

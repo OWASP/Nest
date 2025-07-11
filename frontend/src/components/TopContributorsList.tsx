@@ -8,7 +8,7 @@ import { useState } from 'react'
 import type { Contributor } from 'types/contributor'
 import { capitalize } from 'utils/capitalize'
 import { pluralize } from 'utils/pluralize'
-import { getMemberUrl, getProjectUrl } from 'utils/urlFormatter'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
@@ -16,13 +16,11 @@ const TopContributorsList = ({
   contributors,
   label = 'Top Contributors',
   maxInitialDisplay = 6,
-  type,
   icon,
 }: {
   contributors: Contributor[]
   label?: string
   maxInitialDisplay?: number
-  type: string
   icon?: IconProp
 }) => {
   const [showAllContributors, setShowAllContributors] = useState(false)
@@ -36,7 +34,6 @@ const TopContributorsList = ({
   if (contributors.length === 0) {
     return
   }
-  const isContributor = type === 'contributor'
 
   return (
     <SecondaryCard
@@ -68,20 +65,9 @@ const TopContributorsList = ({
               </div>
               <div className="ml-0.5 w-full">
                 <div className="mt-2 flex flex-shrink-0 items-center text-sm text-gray-600 dark:text-gray-400">
-                  {isContributor ? (
-                    <span className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {' '}
-                      {item.contributionsCount} {pluralize(item.contributionsCount, 'contribution')}
-                    </span>
-                  ) : (
-                    <Link
-                      className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
-                      href={getProjectUrl(item?.projectKey)}
-                    >
-                      {' '}
-                      {item.projectName}
-                    </Link>
-                  )}
+                  <span className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 dark:text-gray-400">
+                    {item.contributionsCount} {pluralize(item.contributionsCount, 'contribution')}
+                  </span>
                 </div>
               </div>
             </div>
