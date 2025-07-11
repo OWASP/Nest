@@ -59,19 +59,16 @@ export const mockOrganizationDetailsData = {
   },
   topContributors: [
     {
-      contributionsCount: 100,
       login: 'user1',
       name: 'User One',
       avatarUrl: 'https://avatars.githubusercontent.com/u/11111?v=4',
     },
     {
-      contributionsCount: 80,
       login: 'user2',
       name: 'User Two',
       avatarUrl: 'https://avatars.githubusercontent.com/u/22222?v=4',
     },
     {
-      contributionsCount: 60,
       login: 'user3',
       name: 'User Three',
       avatarUrl: 'https://avatars.githubusercontent.com/u/33333?v=4',

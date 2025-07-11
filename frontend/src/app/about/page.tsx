@@ -124,10 +124,9 @@ const About = () => {
 
         {topContributors && (
           <TopContributorsList
-            icon={faUsers}
             contributors={topContributors}
-            maxInitialDisplay={9}
-            type="contributor"
+            icon={faUsers}
+            maxInitialDisplay={12}
           />
         )}
 

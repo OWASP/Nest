@@ -66,7 +66,6 @@ export const GET_REPOSITORY_DATA = gql`
     }
     topContributors(organization: $organizationKey, repository: $repositoryKey) {
       avatarUrl
-      contributionsCount
       login
       name
     }

@@ -70,7 +70,6 @@ export const mockGraphQLData = {
     {
       name: 'OWASP Foundation',
       login: 'OWASPFoundation',
-      contributionsCount: 27952,
       avatarUrl: 'https://avatars.githubusercontent.com/u/7461777?v=4',
     },
   ],
@@ -168,7 +167,6 @@ export const mockAlgoliaData = {
       topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/u/58754211?v=4',
-          contributionsCount: 286,
           login: 'isanori-sakanashi-owasp',
           name: 'Isanori Sakanashi',
         },

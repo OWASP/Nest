@@ -10,11 +10,8 @@ export const mockProjectData = {
       topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar1.png',
-          contributionsCount: 10,
           login: 'contributor1',
           name: 'Contributor 1',
-          projectKey: 'project1',
-          projectName: 'Project 1',
         },
       ],
       topics: ['Topic 1'],

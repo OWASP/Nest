@@ -14,7 +14,7 @@ services:
       - nest-cache-network
       - nest-db-network
     volumes:
-      - ./data:/home/owasp/data
+      - ./backend/data:/home/owasp/data
 
   staging-nest-cache:
     container_name: staging-nest-cache

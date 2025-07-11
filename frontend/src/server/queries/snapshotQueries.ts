@@ -25,7 +25,6 @@ export const GET_SNAPSHOT_DETAILS = gql`
         repositoriesCount
         topContributors {
           avatarUrl
-          contributionsCount
           login
           name
         }
@@ -39,7 +38,6 @@ export const GET_SNAPSHOT_DETAILS = gql`
         summary
         topContributors {
           avatarUrl
-          contributionsCount
           login
           name
         }
