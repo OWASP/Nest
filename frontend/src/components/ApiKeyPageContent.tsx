@@ -241,7 +241,7 @@ const ApiKeyPageContent: FC<ApiKeyPageContentProps> = ({ isGitHubAuthEnabled }) 
                     <tr
                       key={key.id}
                       className={`border-b border-gray-200 dark:border-gray-700 ${
-                        key.revoked ? 'bg-gray-50 dark:bg-gray-800/30' : ''
+                        key.isRevoked ? 'bg-gray-50 dark:bg-gray-800/30' : ''
                       }`}
                     >
                       <td className="py-3">{key.name}</td>
@@ -253,16 +253,16 @@ const ApiKeyPageContent: FC<ApiKeyPageContentProps> = ({ isGitHubAuthEnabled }) 
                       <td className="py-3">
                         <span
                           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                            key.revoked
+                            key.isRevoked
                               ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
                               : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
                           }`}
                         >
-                          {key.revoked ? 'Revoked' : 'Active'}
+                          {key.isRevoked ? 'Revoked' : 'Active'}
                         </span>
                       </td>
                       <td className="py-3 text-right">
-                        {!key.revoked && (
+                        {!key.isRevoked && (
                           <Button
                             variant="light"
                             size="sm"
