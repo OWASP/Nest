@@ -31,6 +31,10 @@ export const CREATE_API_KEY = gql`
 
 export const REVOKE_API_KEY = gql`
   mutation RevokeApiKey($keyId: Int!) {
-    revokeApiKey(keyId: $keyId)
+    revokeApiKey(keyId: $keyId) {
+      ok
+      code
+      message
+    }
   }
 `

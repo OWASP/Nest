@@ -32,6 +32,6 @@ const createApolloClient = () => {
     link: authLink.concat(httpLink),
   })
 }
-const apolloClientPromise = createApolloClient()
+const apolloClient = createApolloClient()
 
-export default apolloClientPromise
+export default apolloClient

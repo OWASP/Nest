@@ -2,7 +2,11 @@ import { gql } from '@apollo/client'
 
 export const LOGOUT_DJANGO_MUTATION = gql`
   mutation LogoutDjango {
-    logoutUser
+    logoutUser {
+      ok
+      code
+      message
+    }
   }
 `
 
