@@ -9,6 +9,94 @@ from django.apps import apps
 from apps.common.utils import convert_to_camel_case
 
 
+class DisableIndexing:
+    """Context manager to temporarily disable Algolia indexing."""
+
+    def __init__(self, app_names: tuple[str, ...] | None = None):
+        """Initialize the context manager.
+
+        Args:
+            app_names: Optional tuple of app names to disable indexing for.
+                      Defaults to ("github", "owasp") if None.
+
+        """
+        self.app_names = app_names or ("github", "owasp")
+
+    def __enter__(self):
+        """Disable indexing when entering the context."""
+        self.unregister_indexes()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Re-enable indexing when exiting the context."""
+        self.register_indexes()
+
+    def register_indexes(self) -> None:
+        """Register indexes.
+
+        Args:
+            app_names (tuple): A tuple of app names to register indexes for.
+
+        """
+        for app_name in self.app_names:
+            for model in apps.get_app_config(app_name).get_models():
+                with contextlib.suppress(RegistrationError):
+                    register(model)
+
+    def unregister_indexes(self) -> None:
+        """Unregister indexes.
+
+        Args:
+            app_names (tuple): A tuple of app names to unregister indexes for.
+
+        """
+        for app_name in self.app_names:
+            for model in apps.get_app_config(app_name).get_models():
+                with contextlib.suppress(RegistrationError):
+                    unregister(model)
+
+
+def deep_camelize(obj) -> dict | list:
+    """Deep camelize.
+
+    Args:
+        obj: The object to camelize.
+
+    Returns:
+        The camelize object.
+
+    """
+    if isinstance(obj, dict):
+        return {
+            convert_to_camel_case(key.removeprefix("idx_")): deep_camelize(value)
+            for key, value in obj.items()
+        }
+    if isinstance(obj, list):
+        return [deep_camelize(item) for item in obj]
+    return obj
+
+
+def disable_indexing(app_names: tuple[str, ...] | None = None) -> DisableIndexing:
+    """Create a DisableIndexing context manager.
+
+    Args:
+        app_names: Optional tuple of app names to disable indexing for.
+                  Defaults to ("github", "owasp") if None.
+
+    Returns:
+        A DisableIndexing context manager instance.
+
+    Usage:
+        with disable_indexing():
+            # Perform operations without automatic indexing
+            sync_repositories()
+            update_entities()
+        # Indexing is automatically re-enabled here
+
+    """
+    return DisableIndexing(app_names)
+
+
 def get_params_for_index(index_name: str) -> dict:
     """Return search parameters based on the index name.
 
@@ -135,49 +223,3 @@ def get_params_for_index(index_name: str) -> dict:
             params["attributesToRetrieve"] = []
 
     return params
-
-
-def register_indexes(app_names: tuple[str, ...] = ("github", "owasp")) -> None:
-    """Register indexes.
-
-    Args:
-        app_names (tuple): A tuple of app names to register indexes for.
-
-    """
-    for app_name in app_names:
-        for model in apps.get_app_config(app_name).get_models():
-            with contextlib.suppress(RegistrationError):
-                register(model)
-
-
-def unregister_indexes(app_names: tuple[str, ...] = ("github", "owasp")) -> None:
-    """Unregister indexes.
-
-    Args:
-        app_names (tuple): A tuple of app names to unregister indexes for.
-
-    """
-    for app_name in app_names:
-        for model in apps.get_app_config(app_name).get_models():
-            with contextlib.suppress(RegistrationError):
-                unregister(model)
-
-
-def deep_camelize(obj) -> dict | list:
-    """Deep camelize.
-
-    Args:
-        obj: The object to camelize.
-
-    Returns:
-        The camelize object.
-
-    """
-    if isinstance(obj, dict):
-        return {
-            convert_to_camel_case(key.removeprefix("idx_")): deep_camelize(value)
-            for key, value in obj.items()
-        }
-    if isinstance(obj, list):
-        return [deep_camelize(item) for item in obj]
-    return obj
