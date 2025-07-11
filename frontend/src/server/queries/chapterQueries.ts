@@ -19,7 +19,6 @@ export const GET_CHAPTER_DATA = gql`
     }
     topContributors(chapter: $key) {
       avatarUrl
-      contributionsCount
       login
       name
     }

@@ -80,19 +80,16 @@ export const mockHomeData = {
         name: 'Contributor 1',
         login: 'contributor_1',
         avatarUrl: 'https://avatars.githubusercontent.com/u/3531020?v=4',
-        contributionsCount: 150,
       },
       {
         name: 'Contributor 2',
         login: 'contributor_2',
         avatarUrl: 'https://avatars.githubusercontent.com/u/862914?v=4',
-        contributionsCount: 181,
       },
       {
         name: 'Contributor 3',
         login: 'contributor_3',
         avatarUrl: 'https://avatars.githubusercontent.com/u/103866?v=4',
-        contributionsCount: 12,
       },
     ],
     recentIssues: [
