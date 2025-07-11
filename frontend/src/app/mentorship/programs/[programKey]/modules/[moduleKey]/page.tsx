@@ -15,6 +15,7 @@ import { getSimpleDuration } from 'components/ModuleCard'
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams()
   const [module, setModule] = useState<Module | null>(null)
+  const [admins, setAdmins] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const { data, error } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
@@ -27,6 +28,7 @@ const ModuleDetailsPage = () => {
   useEffect(() => {
     if (data?.getModule) {
       setModule(data.getModule)
+      setAdmins(data.program.admins)
       setIsLoading(false)
     } else if (error) {
       handleAppError(error)
@@ -60,6 +62,7 @@ const ModuleDetailsPage = () => {
     <DetailsCard
       details={moduleDetails}
       title={module.name}
+      admins={admins}
       tags={module.tags}
       domains={module.domains}
       summary={module.description}

@@ -1,6 +1,11 @@
 'use client'
 
+import { useApolloClient } from '@apollo/client'
+import clsx from 'clsx'
+import debounce from 'lodash/debounce'
 import type React from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { SEARCH_PROJECTS } from 'server/queries/projectQueries'
 
 interface ModuleFormProps {
   formData: {
@@ -12,6 +17,7 @@ interface ModuleFormProps {
     domains: string
     tags: string
     projectId: string
+    projectName: string
     mentorLogins: string
   }
   setFormData: React.Dispatch<React.SetStateAction<ModuleFormProps['formData']>>
@@ -179,18 +185,16 @@ const ModuleForm = ({
                   />
                 </div>
                 <div>
-                  <label htmlFor="projectId" className="mb-2 block text-sm font-medium">
-                    Project ID
-                  </label>
-                  <input
-                    id="projectId"
-                    type="text"
-                    name="projectId"
+                  <ProjectSelector
                     value={formData.projectId}
-                    onChange={handleInputChange}
-                    placeholder="Project UUID"
-                    required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    defaultName={formData.projectName}
+                    onProjectChange={(id, name) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        projectId: id ?? '',
+                        projectName: name,
+                      }))
+                    }
                   />
                 </div>
                 {isEdit && (
@@ -223,8 +227,8 @@ const ModuleForm = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] px-4 py-2 text-[#0D6EFD] hover:bg-[#0D6EFD] hover:text-white dark:text-sky-600 dark:hover:bg-sky-100"
+                  disabled={loading || !formData.projectId}
+                  className="flex items-center justify-center gap-2 rounded-md border border-sky-600 px-4 py-2 text-sky-600 hover:bg-sky-600 hover:text-white disabled:cursor-not-allowed disabled:border-gray-400 disabled:bg-gray-200 disabled:text-gray-500 dark:disabled:bg-gray-700"
                 >
                   {loading ? 'Saving...' : submitText}
                 </button>
@@ -238,3 +242,102 @@ const ModuleForm = ({
 }
 
 export default ModuleForm
+
+type ProjectSelectorProps = {
+  value: string
+  defaultName: string
+  onProjectChange: (id: string | null, name: string) => void
+}
+
+const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelectorProps) => {
+  const client = useApolloClient()
+  const [searchText, setSearchText] = useState(defaultName || '')
+  const [suggestions, setSuggestions] = useState<{ id: string; name: string }[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchSuggestions = useCallback(
+    debounce(async (query: string) => {
+      if (!query) return setSuggestions([])
+      try {
+        const { data } = await client.query({
+          query: SEARCH_PROJECTS,
+          variables: { query },
+        })
+        setSuggestions(data.searchProjects.slice(0, 5))
+        setShowSuggestions(true)
+      } catch (err) {
+        throw new Error('Error fetching suggestions:', err)
+      }
+    }, 300),
+    [client]
+  )
+
+  useEffect(() => {
+    fetchSuggestions(searchText)
+    return () => fetchSuggestions.cancel()
+  }, [searchText, fetchSuggestions])
+
+  const handleSelect = (id: string, name: string) => {
+    setError(null)
+    setSearchText(name)
+    setSuggestions([])
+    setShowSuggestions(false)
+    onProjectChange(id, name)
+  }
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      setShowSuggestions(false)
+      if (searchText && !value) {
+        setError('Project not found. Please select a valid project from the list.')
+      }
+    }, 200)
+  }
+
+  return (
+    <div className="relative">
+      <label htmlFor="projectSelector" className="mb-2 block text-sm font-medium">
+        Project Name *
+      </label>
+      <input
+        id="projectSelector"
+        type="text"
+        placeholder="Start typing project name..."
+        value={searchText}
+        required
+        onChange={(e) => {
+          const newText = e.target.value
+          setSearchText(newText)
+          setError(null)
+          if (value) {
+            onProjectChange(null, newText)
+          }
+        }}
+        onBlur={handleBlur}
+        className={clsx(
+          'w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200',
+          {
+            'border-red-500 focus:border-red-500': error,
+          }
+        )}
+      />
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-300 bg-white shadow-lg dark:bg-gray-700">
+          {suggestions.map((project) => (
+            <button
+              key={project.id}
+              type="button"
+              onClick={() => handleSelect(project.id, project.name)}
+              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+            >
+              {project.name}
+            </button>
+          ))}
+        </div>
+      )}
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    </div>
+  )
+}

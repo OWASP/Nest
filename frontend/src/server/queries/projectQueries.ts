@@ -138,3 +138,12 @@ export const GET_TOP_CONTRIBUTORS = gql`
     }
   }
 `
+
+export const SEARCH_PROJECTS = gql`
+  query SearchProjectNames($query: String!) {
+    searchProjects(query: $query) {
+      id
+      name
+    }
+  }
+`

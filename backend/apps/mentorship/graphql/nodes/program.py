@@ -4,7 +4,10 @@ from datetime import datetime
 
 import strawberry
 
-from apps.mentorship.graphql.nodes.enum import ExperienceLevelEnum, ProgramStatusEnum
+from apps.mentorship.graphql.nodes.enum import (
+    ExperienceLevelEnum,
+    ProgramStatusEnum,
+)
 from apps.mentorship.graphql.nodes.mentor import MentorNode
 
 
@@ -25,8 +28,8 @@ class ProgramNode:
     tags: list[str] | None = None
 
     @strawberry.field
-    def admins(self) -> list["MentorNode"] | None:
-        """Resolver to get the list of program administrators."""
+    def admins(self) -> list[MentorNode] | None:
+        """Get the list of program administrators."""
         return self.admins.all()
 
 

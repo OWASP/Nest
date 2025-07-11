@@ -2,18 +2,19 @@
 
 import { useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
+import { useUserRoles } from 'hooks/useUserRoles'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import type React from 'react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+
 import { CREATE_PROGRAM } from 'server/queries/programsQueries'
-import { SessionWithRole } from 'types/program'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
 
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
+  const { roles, isLoadingRoles } = useUserRoles()
   const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
 
   const [formData, setFormData] = useState({
@@ -29,8 +30,9 @@ const CreateProgramPage = () => {
   })
 
   useEffect(() => {
-    if (status === 'loading') return
-    const isMentor = (session as SessionWithRole)?.user?.roles.includes('mentor');
+    if (status === 'loading' || isLoadingRoles) return
+
+    const isMentor = roles.includes('mentor')
     if (!session || !isMentor) {
       addToast({
         title: 'Access Denied',
@@ -41,9 +43,8 @@ const CreateProgramPage = () => {
         shouldShowTimeoutProgress: true,
       })
       router.push('/mentorship/programs')
-      return
     }
-  }, [session, status, router])
+  }, [session, status, roles, isLoadingRoles, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,7 +92,9 @@ const CreateProgramPage = () => {
     }
   }
 
-  if (status === 'loading' || !session) return <LoadingSpinner />
+  if (status === 'loading' || isLoadingRoles || !session) {
+    return <LoadingSpinner />
+  }
 
   return (
     <ProgramForm

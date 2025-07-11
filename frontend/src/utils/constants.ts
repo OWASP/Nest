@@ -18,7 +18,7 @@ export const headerLinks: Link[] = [
   },
   {
     text: 'Program',
-    href: '/mentorship/programs'
+    href: '/mentorship/programs',
   },
   {
     text: 'Projects',

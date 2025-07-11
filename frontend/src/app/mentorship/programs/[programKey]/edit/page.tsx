@@ -122,7 +122,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/mentorship/programs/${programKey}`)
+      router.push(`/mentorship/programs`)
     } catch (err) {
       addToast({
         title: 'Update Failed',

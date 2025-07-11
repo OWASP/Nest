@@ -18,35 +18,32 @@ class ModuleQuery:
     @strawberry.field
     def modules_by_program(self, program_key: str) -> list[ModuleNode]:
         """Get all modules by program Key. Returns an empty list if program is not found."""
-        modules = (
+        return (
             Module.objects.filter(program__key=program_key)
             .select_related("program", "project")
             .prefetch_related("mentors__github_user")
             .order_by("started_at")
         )
-        return modules
 
     @strawberry.field
     def modules_by_project(self, project_key: str) -> list[ModuleNode]:
         """Get all modules by project Key. Returns an empty list if project is not found."""
-        modules = (
+        return (
             Module.objects.filter(project__key=project_key)
             .select_related("program", "project")
             .prefetch_related("mentors__github_user")
             .order_by("started_at")
         )
-        return modules
 
     @strawberry.field
     def get_module(self, module_key: str) -> ModuleNode:
         """Get a single module by its key. Raises an error if not found."""
         try:
-            module = (
+            return (
                 Module.objects.select_related("program", "project")
                 .prefetch_related("mentors__github_user")
                 .get(key=module_key)
             )
-            return module
         except Module.DoesNotExist as err:
             msg = f"Module with key '{module_key}' not found."
             logger.warning(msg, exc_info=True)

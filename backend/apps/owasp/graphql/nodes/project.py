@@ -21,6 +21,7 @@ RECENT_PULL_REQUESTS_LIMIT = 5
 @strawberry_django.type(
     Project,
     fields=[
+        "id",
         "contributors_count",
         "created_at",
         "forks_count",

@@ -38,6 +38,7 @@ const CreateModulePage = () => {
     domains: '',
     tags: '',
     projectId: '',
+    projectName: '',
     mentorLogins: '',
   })
 
@@ -93,6 +94,7 @@ const CreateModulePage = () => {
           .filter(Boolean),
         programKey: programKey,
         projectId: formData.projectId,
+        projectName: formData.projectName,
         mentorLogins: formData.mentorLogins
           .split(',')
           .map((login) => login.trim())
@@ -109,8 +111,8 @@ const CreateModulePage = () => {
         timeout: 3000,
       })
 
-      router.push(`/mentorship/programs/${programKey}`)
-    } catch (err: any) {
+      router.push(`/mentorship/programs`)
+    } catch (err) {
       addToast({
         title: 'Creation Failed',
         description: err.message || 'Something went wrong while creating the module.',

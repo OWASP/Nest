@@ -1,74 +1,27 @@
-"""Nest GraphQL utils."""
+"""Utils."""
 
-import logging
+from __future__ import annotations
 
-from django.core.exceptions import PermissionDenied
-from github import Github, GithubException
+from typing import TYPE_CHECKING
 
-from apps.github.models import User as GithubUser
+from django.core.exceptions import ObjectDoesNotExist
+
 from apps.nest.models import User as NestUser
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from apps.github.models import User as GithubUser
 
 
-def get_authenticated_user(request) -> NestUser:
-    """Get authenticated user from request."""
-    auth_header = request.headers.get("authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        msg = "Missing or invalid Authorization header."
-        logger.warning("Authentication failed: %s", msg)
-        raise PermissionDenied(msg)
+def get_user_entities_by_github_username(
+    username: str,
+) -> tuple[GithubUser, NestUser] | None:
+    """Get the GithubUser and NestUser for a given GitHub username.
 
-    access_token = auth_header.removeprefix("Bearer ").strip()
+    Returns a (GithubUser, NestUser) tuple, or None if not found.
+    """
     try:
-        github = Github(access_token)
-        gh_user = github.get_user()
-        login = gh_user.login
-    except GithubException as err:
-        msg = "GitHub token is invalid or expired."
-        logger.warning("Authentication failed: %s", msg, exc_info=True)
-        raise PermissionDenied(msg) from err
+        nest_user = NestUser.objects.select_related("github_user").get(github_user__login=username)
+    except ObjectDoesNotExist:
+        return None
 
-    try:
-        github_user = GithubUser.objects.get(login__iexact=login.lower())
-    except GithubUser.DoesNotExist as err:
-        msg = "No GithubUser found matching this login or name."
-        logger.warning("Authentication failed for GitHub login '%s': %s", login, msg)
-        raise PermissionDenied(msg) from err
-
-    try:
-        user = NestUser.objects.get(github_user=github_user)
-    except NestUser.DoesNotExist as err:
-        msg = "No linked Nest user found for this GitHub account."
-        logger.warning("Authentication failed for GitHub user '%s': %s", github_user.login, msg)
-        raise PermissionDenied(msg) from err
-
-    return user
-
-
-def get_authenticated_user_by_token(access_token: str) -> NestUser:
-    """Get authenticated user from request."""
-    try:
-        github = Github(access_token)
-        gh_user = github.get_user()
-        login = gh_user.login
-    except GithubException as err:
-        msg = "GitHub token is invalid or expired."
-        logger.warning("Authentication failed: %s", msg, exc_info=True)
-        raise PermissionDenied(msg) from err
-
-    try:
-        github_user = GithubUser.objects.get(login__iexact=login.lower())
-    except GithubUser.DoesNotExist as err:
-        msg = "No GithubUser found matching this login or name."
-        logger.warning("Authentication failed for GitHub login '%s': %s", login, msg)
-        raise PermissionDenied(msg) from err
-
-    try:
-        user = NestUser.objects.get(github_user=github_user)
-    except NestUser.DoesNotExist as err:
-        msg = "No linked Nest user found for this GitHub account."
-        logger.warning("Authentication failed for GitHub user '%s': %s", github_user.login, msg)
-        raise PermissionDenied(msg) from err
-
-    return user
+    return nest_user.github_user, nest_user

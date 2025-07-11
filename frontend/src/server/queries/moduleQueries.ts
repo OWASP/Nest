@@ -11,6 +11,7 @@ export const GET_MODULES_BY_PROGRAM = gql`
       startedAt
       endedAt
       projectId
+      projectName
       mentors {
         id
         githubUser {
@@ -104,6 +105,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
       description
       tags
       projectId
+      projectName
       domains
       experienceLevel
       startedAt

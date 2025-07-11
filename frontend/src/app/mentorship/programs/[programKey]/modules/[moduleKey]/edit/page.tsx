@@ -25,6 +25,7 @@ const EditModulePage = () => {
     endedAt: string
     domains: string
     tags: string
+    projectName: string
     projectId: string
     mentorLogins: string
   }
@@ -84,6 +85,7 @@ const EditModulePage = () => {
         startedAt: formatDateForInput(m.startedAt),
         endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
+        projectName: m.projectName,
         tags: (m.tags || []).join(', '),
         projectId: m.projectId || '',
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
@@ -111,6 +113,7 @@ const EditModulePage = () => {
           .split(',')
           .map((t: string) => t.trim())
           .filter(Boolean),
+        projectName: formData.projectName,
         projectId: formData.projectId,
         mentorLogins: formData.mentorLogins
           .split(',')

@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from '@apollo/client'
 
 export const APPLY_AS_MENTEE = gql`
   mutation ApplyAsMentee {
@@ -10,7 +10,7 @@ export const APPLY_AS_MENTEE = gql`
       }
     }
   }
-`;
+`
 
 export const APPLY_AS_MENTOR = gql`
   mutation ApplyAsMentor {
@@ -18,8 +18,8 @@ export const APPLY_AS_MENTOR = gql`
       success
       message
       user {
-    username
+        username
       }
     }
   }
-`;
+`

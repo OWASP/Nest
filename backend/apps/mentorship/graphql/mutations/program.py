@@ -14,7 +14,8 @@ from apps.mentorship.graphql.nodes.program import (
     UpdateProgramInput,
 )
 from apps.mentorship.models import Mentor, Program
-from apps.mentorship.utils.user import get_authenticated_user
+from apps.mentorship.utils.user import get_user_entities_by_github_username
+from apps.nest.graphql.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +24,19 @@ logger = logging.getLogger(__name__)
 class ProgramMutation:
     """GraphQL mutations related to program."""
 
-    @strawberry.mutation
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
-        request = info.context.request
-        user = get_authenticated_user(request)
+        username = info.context.request.user
+        user_entities = get_user_entities_by_github_username(username)
+
+        if not user_entities:
+            # FIX: Use a specific Django exception and assign the message to a variable.
+            msg = "Logic error: Authenticated user not found in the database."
+            raise ObjectDoesNotExist(msg)
+
+        github_user, user = user_entities
         mentor, created = Mentor.objects.get_or_create(
             nest_user=user, defaults={"github_user": user.github_user}
         )
@@ -43,7 +51,7 @@ class ProgramMutation:
                 input_data.name,
                 msg,
             )
-            raise strawberry.GraphQLError(msg)
+            raise ValidationError(msg)
 
         program = Program.objects.create(
             name=input_data.name,
@@ -69,11 +77,17 @@ class ProgramMutation:
 
         return program
 
-    @strawberry.mutation
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
     def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
-        request = info.context.request
-        user = get_authenticated_user(request)
+        username = info.context.request.user
+        user_entities = get_user_entities_by_github_username(username)
+
+        if not user_entities:
+            msg = "Logic error: Authenticated user not found in the database."
+            raise ObjectDoesNotExist(msg)
+
+        github_user, user = user_entities
 
         try:
             program = Program.objects.get(key=input_data.key)
@@ -112,7 +126,6 @@ class ProgramMutation:
             raise ValidationError(msg)
 
         simple_fields = {
-            "key": slugify(input_data.name),
             "name": input_data.name,
             "description": input_data.description,
             "mentees_limit": input_data.mentees_limit,
@@ -125,6 +138,9 @@ class ProgramMutation:
         for field, value in simple_fields.items():
             if value is not None:
                 setattr(program, field, value)
+
+        if input_data.name is not None:
+            program.key = slugify(input_data.name)
 
         if input_data.experience_levels is not None:
             program.experience_levels = [lvl.value for lvl in input_data.experience_levels]

@@ -26,9 +26,14 @@ class ModuleNode:
     tags: list[str] | None = None
 
     @strawberry.field
-    def mentors(self) -> list["MentorNode"]:
-        """Resolver to get the list of mentors for this module."""
+    def mentors(self) -> list[MentorNode]:
+        """Get the list of mentors for this module."""
         return self.mentors.all()
+
+    @strawberry.field
+    def project_name(self) -> str | None:
+        """Get the project name for this module."""
+        return self.project.name if self.project else None
 
 
 @strawberry.input
@@ -59,5 +64,6 @@ class UpdateModuleInput:
     experience_level: ExperienceLevelEnum | None = None
     mentor_logins: list[str] | None = None
     project_id: strawberry.ID | None = None
+    project_name: str | None = None
     started_at: datetime | None = None
     tags: list[str] = strawberry.field(default_factory=list)

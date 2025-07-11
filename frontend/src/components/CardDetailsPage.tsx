@@ -107,16 +107,19 @@ const DetailsCard = ({
                 </div>
               )}
 
-            {type === 'module' && (
-              <button
-                className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
-                onClick={() => {
-                  router.push(`${window.location.pathname}/edit`)
-                }}
-              >
-                Edit Module
-              </button>
-            )}
+            {type === 'module' &&
+              admins?.some(
+                (admin) => admin.login === ((data as SessionWithRole)?.user?.login as string)
+              ) && (
+                <button
+                  className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                  onClick={() => {
+                    router.push(`${window.location.pathname}/edit`)
+                  }}
+                >
+                  Edit Module
+                </button>
+              )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
               <Link href="#issues-trend">
                 <div
@@ -201,24 +204,24 @@ const DetailsCard = ({
             type === 'committee' ||
             type === 'user' ||
             type === 'organization') && (
-              <SecondaryCard
-                icon={faChartPie}
-                title={<AnchorTitle title="Statistics" />}
-                className="md:col-span-2"
-              >
-                {stats.map((stat, index) => (
-                  <div key={index}>
-                    <InfoBlock
-                      className="pb-1"
-                      icon={stat.icon}
-                      pluralizedName={stat.pluralizedName}
-                      unit={stat.unit}
-                      value={stat.value}
-                    />
-                  </div>
-                ))}
-              </SecondaryCard>
-            )}
+            <SecondaryCard
+              icon={faChartPie}
+              title={<AnchorTitle title="Statistics" />}
+              className="md:col-span-2"
+            >
+              {stats.map((stat, index) => (
+                <div key={index}>
+                  <InfoBlock
+                    className="pb-1"
+                    icon={stat.icon}
+                    pluralizedName={stat.pluralizedName}
+                    unit={stat.unit}
+                    value={stat.value}
+                  />
+                </div>
+              ))}
+            </SecondaryCard>
+          )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
@@ -275,7 +278,7 @@ const DetailsCard = ({
             type="contributor"
           />
         )}
-        {admins && admins.length > 0 && (
+        {admins && admins.length > 0 && type === 'program' && (
           <TopContributorsList
             icon={faUsers}
             contributors={admins}
@@ -297,31 +300,31 @@ const DetailsCard = ({
           type === 'repository' ||
           type === 'user' ||
           type === 'organization') && (
-            <div className="grid-cols-2 gap-4 lg:grid">
-              <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-              {type === 'user' ||
-                type === 'organization' ||
-                type === 'repository' ||
-                type === 'project' ? (
-                <Milestones data={recentMilestones} showAvatar={showAvatar} />
-              ) : (
-                <RecentReleases
-                  data={recentReleases}
-                  showAvatar={showAvatar}
-                  showSingleColumn={true}
-                />
-              )}
-            </div>
-          )}
+          <div className="grid-cols-2 gap-4 lg:grid">
+            <RecentIssues data={recentIssues} showAvatar={showAvatar} />
+            {type === 'user' ||
+            type === 'organization' ||
+            type === 'repository' ||
+            type === 'project' ? (
+              <Milestones data={recentMilestones} showAvatar={showAvatar} />
+            ) : (
+              <RecentReleases
+                data={recentReleases}
+                showAvatar={showAvatar}
+                showSingleColumn={true}
+              />
+            )}
+          </div>
+        )}
         {(type === 'project' ||
           type === 'repository' ||
           type === 'organization' ||
           type === 'user') && (
-            <div className="grid-cols-2 gap-4 lg:grid">
-              <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
-              <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
-            </div>
-          )}
+          <div className="grid-cols-2 gap-4 lg:grid">
+            <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
+            <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
+          </div>
+        )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
